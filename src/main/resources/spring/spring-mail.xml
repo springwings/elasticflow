@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:hdp="http://www.springframework.org/schema/hadoop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	    http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+	    http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx
+	    http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/util
+	    http://www.springframework.org/schema/util/spring-util.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/hadoop
+		http://www.springframework.org/schema/hadoop/spring-hadoop-2.0.xsd"> 
+ 
+    <bean id="mailConfigBean" class="org.springframework.beans.factory.config.PropertiesFactoryBean">  
+        <property name="ignoreResourceNotFound" value="true" />
+        <property name="locations">  
+            <list>  
+                <value>#{systemProperties['config']}/mailConfig.properties</value>  
+            </list>  
+        </property>
+    </bean> 
+  
+    <bean id="javaMailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">  
+       <property name="host"  value="#{mailConfigBean['mail.host']}" />  
+       <property name="port" value="#{mailConfigBean['mail.port']}" /> 
+       <property name="protocol" value="#{mailConfigBean['mail.protocol']}" />   
+       <property name="username" value="#{mailConfigBean['mail.username']}" />
+       <property name="password" value="#{mailConfigBean['mail.password']}" />  
+       <property name="defaultEncoding" value="#{mailConfigBean['mail.defaultEncoding']}" />
+       <property name="javaMailProperties">
+           <props>    
+               <prop key="mail.smtp.auth" >false</prop>
+               <prop key="mail.smtps.auth">false</prop>  
+               <prop key="mail.smtp.socketFactory.port" >25</prop>
+               <prop key="mail.smtp.socketFactory.fallback" >false</prop>
+               <prop key="mail.debug" >true</prop> 
+               <prop key="mail.transport.protocol">${mail.transport.protocol}</prop>
+          </props>  
+       </property>   
+   </bean>   
+     
+   <bean id="mailTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+	   <property name="corePoolSize" value="10"/>
+	   <property name="maxPoolSize" value="30"/>
+   </bean> 
+    
+   <bean id="emailModel" class="org.elasticflow.util.email.EmailModel">  
+	   <constructor-arg type="String" index="0"  value="#{mailConfigBean['mail.From']}" />
+	   <constructor-arg type="String" index="1"  value="#{mailConfigBean['mail.Address']}" />
+	   <constructor-arg type="String" index="2"  value="#{mailConfigBean['mail.Bcc']}" />
+	   <constructor-arg type="String" index="3"  value="#{mailConfigBean['mail.Cc']}" />
+	   <constructor-arg type="String" index="4"  value="#{mailConfigBean['mail.Subject']}" />
+	   <constructor-arg type="String" index="5"  value="#{mailConfigBean['mail.Content']}" />
+   </bean> 
+
+   
+   <bean id="javaxEmailBean" class="org.elasticflow.util.email.EmailConfig">  
+   <constructor-arg type="String" index="0"  value="#{mailConfigBean['mail.host']}" />
+	   <constructor-arg type="String" index="1"  value="#{mailConfigBean['mail.From']}" />
+	   <constructor-arg type="String" index="2"  value="#{mailConfigBean['mail.FromName']}" />
+	   <constructor-arg type="String" index="3"  value="#{mailConfigBean['mail.Address']}" />
+	   <constructor-arg type="String" index="4"  value="#{mailConfigBean['mail.Cc']}" />
+	   <constructor-arg type="String" index="5"  value="#{mailConfigBean['mail.username']}" />
+	   <constructor-arg type="String" index="6"  value="#{mailConfigBean['mail.password']}" />
+	   <constructor-arg type="String" index="7"  value="#{mailConfigBean['mail.Subject']}" />
+	   <constructor-arg type="String" index="8"  value="#{mailConfigBean['mail.Content']}" />
+   </bean> 
+   <bean id="mailService" class="org.elasticflow.util.email.MailServiceImpl">
+	   <constructor-arg type="boolean" index="0"  value="#{mailConfigBean['mail.sendModel.syncMode']}" />
+	   <property name="syncMode" value="#{mailConfigBean['mail.sendModel.syncMode']}"  />
+   </bean>  
+</beans>
