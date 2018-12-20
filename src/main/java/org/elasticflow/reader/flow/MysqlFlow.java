@@ -84,12 +84,8 @@ public class MysqlFlow extends ReaderFlowSocket{
 		sql = " select id from (" + sql
 				+ ") FN_FPG_END where MOD(FN_ROW_ID, "+pageSize+") = 0";
 		sql = sql
-				.replace("#{TABLE}", param.get("table"))
-				.replace("#{table}", param.get("table"))
-				.replace("#{ALIAS}", param.get("alias"))
-				.replace("#{alias}", param.get("alias"))
 				.replace("#{COLUMN}", param.get("column"))
-				.replace("#{column}", param.get("column"))
+				.replace("#{column}", param.get(GlobalParam.READER_SCAN_KEY))
 				.replace(GlobalParam._start_time, param.get(GlobalParam._start_time))
 				.replace(GlobalParam._end_time, param.get(GlobalParam._end_time))
 				.replace("#{start}", "0")

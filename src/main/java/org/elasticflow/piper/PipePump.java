@@ -5,10 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
@@ -27,6 +25,8 @@ import org.elasticflow.util.FNException;
 import org.elasticflow.util.SqlUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.yarn.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
  
 /**
  * PipePump is the energy of the flow pipes 
@@ -96,9 +96,8 @@ public final class PipePump extends Instruction {
  
 			HashMap<String, String> param = new HashMap<String, String>();
 			param.put("table", noSqlParam.getMainTable());
-			param.put("column", noSqlParam.getKeyColumn());
-			param.put("startTime", "0");
-			param.put(GlobalParam._incrementField, noSqlParam.getIncrementField());
+			param.put(GlobalParam._ScanField, noSqlParam.getScanField());
+			param.put("startTime", "0"); 
 			ConcurrentLinkedDeque<String> pageList = getReader().getPageSplit(param,getInstanceConfig().getPipeParams().getReadPageSize());
 			if (pageList.size() > 0) {
 				log.info(Common.formatLog("start","start " + desc, destName, storeId, "", 0, "", "0", 0, 
@@ -116,7 +115,7 @@ public final class PipePump extends Instruction {
 					pageParams.put(GlobalParam._start, startId);
 					pageParams.put(GlobalParam._end, endId);
 					pageParams.put(GlobalParam._start_time, "0");
-					pageParams.put(GlobalParam._incrementField, noSqlParam.getIncrementField());
+					pageParams.put(GlobalParam._ScanField, noSqlParam.getScanField());
 					rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, desc, destName, storeId, "",
 							getReader().getPageData(pageParams, getInstanceConfig().getWriteFields(), this.readHandler,getInstanceConfig().getPipeParams().getReadPageSize()),
 							",process:" + processPos + "/" + pageList.size(), false, false); 
@@ -166,10 +165,8 @@ public final class PipePump extends Instruction {
 				String.valueOf(L2seqs.size()));
 		for (String L2seq:L2seqs) {  
 			try { 
-				HashMap<String, String> param = new HashMap<String, String>();
-				param.put("table", sqlParam.getMainTable());
-				param.put("alias", sqlParam.getMainAlias());
-				param.put("column", sqlParam.getKeyColumn());
+				HashMap<String, String> param = new HashMap<String, String>(); 
+				param.put(GlobalParam._ScanField, sqlParam.getScanField());
 				param.put(GlobalParam._start_time, isFull?Common.getFullStartInfo(instance, L1seq):GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(L2seq));
 				param.put(GlobalParam._end_time, "");
 				param.put(GlobalParam._seq, L2seq);
@@ -268,8 +265,8 @@ public final class PipePump extends Instruction {
 		String startId = "0";  
 		
 		boolean isUpdate = getInstanceConfig().getPipeParams().getWriteType().equals("increment") ? true : false;
-		String incrementField = sqlParam.getIncrementField();
-		String keyColumn = sqlParam.getKeyColumn();
+		String scanField = sqlParam.getScanField();
+		String keyField = sqlParam.getKeyField();
 		String dataBoundary;
 		while(!pageList.isEmpty()){
 			dataBoundary = pageList.poll();
@@ -279,14 +276,14 @@ public final class PipePump extends Instruction {
 			String sql = SqlUtil.fillParam(originalSql,
 					SqlUtil.getScanParam(L2seq, startId, dataBoundary,
 							param.get(GlobalParam._start_time), param.get(GlobalParam._end_time),
-							incrementField)); 
+							scanField)); 
 			if (Common.checkFlowStatus(instance, L1seq, job_type, STATUS.Termination)) {
 				break;
 			} else {
 				DataPage pagedata; 
 				if (getInstanceConfig().openCompute()) { 
 					getReader().lock.lock();
-					pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchDataSet", false, sql, incrementField, keyColumn,
+					pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchDataSet", false, sql, scanField, keyField,
 							getInstanceConfig().getComputeFields(),getReader(),this.readHandler);  
 					getReader().freeJobPage();
 					getReader().lock.unlock();
@@ -299,7 +296,7 @@ public final class PipePump extends Instruction {
 					} 
 				} else { 
 					getReader().lock.lock();
-					pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchDataSet", false, sql, incrementField, keyColumn,
+					pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchDataSet", false, sql, scanField, keyField,
 							getInstanceConfig().getWriteFields(),getReader(),this.readHandler);  
 					getReader().freeJobPage();
 					getReader().lock.unlock();
@@ -337,8 +334,8 @@ public final class PipePump extends Instruction {
 		String startId = "0"; 
 		final AtomicInteger total;   
 		
-		String incrementField;
-		String keyColumn;
+		String scanField;
+		String keyField;
 		String instance;
 		ConcurrentLinkedDeque<String> pageList;
 		JOB_TYPE job_type;
@@ -350,8 +347,8 @@ public final class PipePump extends Instruction {
 		String storeId;  
 		
 		public Pump(CountDownLatch synThreads,String instance,String mainName,String L1seq,String L2seq,JOB_TYPE job_type,String storeId,String originalSql,ConcurrentLinkedDeque<String> pageList,HashMap<String, String> param,SQLParam sqlParam,String writeTo,AtomicInteger total) {
-			incrementField = sqlParam.getIncrementField();
-			keyColumn = sqlParam.getKeyColumn();
+			scanField = sqlParam.getScanField();
+			keyField = sqlParam.getKeyField();
 			this.pageList = pageList;
 			this.instance = instance;
 			this.job_type = job_type;
@@ -385,7 +382,7 @@ public final class PipePump extends Instruction {
 				String sql = SqlUtil.fillParam(originalSql,
 						SqlUtil.getScanParam(L2seq, startId, dataBoundary,
 								param.get(GlobalParam._start_time), param.get(GlobalParam._end_time),
-								incrementField)); 
+								scanField)); 
 				if (Common.checkFlowStatus(instance, L1seq, job_type, STATUS.Termination)) {
 					Resource.ThreadPools.cleanWaitJob(getId());
 					Common.LOG.warn(instance + " " + job_type.name() + " job has been Terminated!");
@@ -394,7 +391,7 @@ public final class PipePump extends Instruction {
 					DataPage pagedata; 
 					if (getInstanceConfig().openCompute()) { 
 						getReader().lock.lock();
-						pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchDataSet", false, sql, incrementField, keyColumn,
+						pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchDataSet", false, sql, scanField, keyField,
 								getInstanceConfig().getComputeFields(),getReader(),readHandler);  
 						getReader().freeJobPage();
 						getReader().lock.unlock();
@@ -409,7 +406,7 @@ public final class PipePump extends Instruction {
 						} 
 					} else { 
 						getReader().lock.lock();
-						pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchDataSet", false, sql, incrementField, keyColumn,
+						pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchDataSet", false, sql, scanField, keyField,
 								getInstanceConfig().getWriteFields(),getReader(),readHandler);  
 						getReader().freeJobPage();
 						getReader().lock.unlock();
@@ -437,6 +434,18 @@ public final class PipePump extends Instruction {
 			} 
 			synThreads.countDown(); 
 		}
+		
+	}
+	
+	public class tasks extends RecursiveTask<Integer>{
+ 
+		private static final long serialVersionUID = -607427644538793287L;
+
+		@Override
+		protected Integer compute() {
+			int total=0;
+			return total;
+		} 
 		
 	}
 }

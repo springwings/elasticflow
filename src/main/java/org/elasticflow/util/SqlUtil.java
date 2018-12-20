@@ -24,10 +24,10 @@ public final class SqlUtil {
 	 * @param endKey
 	 * @param start_time
 	 * @param end_time
-	 * @param incrementField
+	 * @param scanField
 	 * @return
 	 */
-	public static HashMap<String, String> getScanParam(String L2seq,String startKey,String endKey,String start_time,String end_time,String incrementField){
+	public static HashMap<String, String> getScanParam(String L2seq,String startKey,String endKey,String start_time,String end_time,String scanField){
 		HashMap<String, String> sqlParams = new HashMap<>();
 		if (L2seq != null && L2seq.length() > 0)
 			sqlParams.put(GlobalParam._seq, L2seq);
@@ -35,7 +35,7 @@ public final class SqlUtil {
 		sqlParams.put(GlobalParam._end, endKey);
 		sqlParams.put(GlobalParam._start_time, start_time);
 		sqlParams.put(GlobalParam._end_time, end_time);
-		sqlParams.put(GlobalParam._incrementField, incrementField); 
+		sqlParams.put(GlobalParam._ScanField, scanField); 
 		return sqlParams;
 	}
 	
