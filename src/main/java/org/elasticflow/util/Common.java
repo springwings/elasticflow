@@ -67,13 +67,17 @@ public final class Common {
 		else
 			return false;
 	}
-
+	
+	public static void getXmlParam(Object Obj,Node param, Class<?> c) throws Exception {
+		Element element = (Element) param; 
+		setConfigObj(Obj,c,element.getElementsByTagName("name").item(0).getTextContent(),element.getElementsByTagName("value").item(0).getTextContent()); 
+	}
+	
 	public static Object getXmlObj(Node param, Class<?> c) throws Exception {
-		Element element = (Element) param;
+		Element element = (Element) param; 
 		Constructor<?> cons = c.getConstructor();
-		Object o = cons.newInstance();
-
-		Field[] fields = c.getDeclaredFields();
+		Object o = cons.newInstance(); 
+		Field[] fields = c.getDeclaredFields(); 
 		for (int f = 0; f < fields.length; f++) {
 			Field field = fields[f];
 			String value = null;

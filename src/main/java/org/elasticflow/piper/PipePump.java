@@ -92,11 +92,12 @@ public final class PipePump extends Instruction {
 		String desc = "increment";
 		String destName = Common.getMainName(instanceName, L1seq);
 		try {
-			NoSQLParam noSqlParam = (NoSQLParam) getInstanceConfig().getReadParams();
+			NoSQLParam scanParam = (NoSQLParam) getInstanceConfig().getReadParams();
  
 			HashMap<String, String> param = new HashMap<String, String>();
-			param.put("table", noSqlParam.getMainTable());
-			param.put(GlobalParam._ScanField, noSqlParam.getScanField());
+			param.put("table", scanParam.getMainTable());
+			param.put(GlobalParam.READER_SCAN_KEY, scanParam.getScanField());
+			param.put(GlobalParam.READER_PAGE_KEY, scanParam.getPageField());
 			param.put("startTime", "0"); 
 			ConcurrentLinkedDeque<String> pageList = getReader().getPageSplit(param,getInstanceConfig().getPipeParams().getReadPageSize());
 			if (pageList.size() > 0) {
@@ -115,7 +116,7 @@ public final class PipePump extends Instruction {
 					pageParams.put(GlobalParam._start, startId);
 					pageParams.put(GlobalParam._end, endId);
 					pageParams.put(GlobalParam._start_time, "0");
-					pageParams.put(GlobalParam._ScanField, noSqlParam.getScanField());
+					pageParams.put(GlobalParam._scan_field, scanParam.getScanField());
 					rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, desc, destName, storeId, "",
 							getReader().getPageData(pageParams, getInstanceConfig().getWriteFields(), this.readHandler,getInstanceConfig().getPipeParams().getReadPageSize()),
 							",process:" + processPos + "/" + pageList.size(), false, false); 
@@ -154,9 +155,9 @@ public final class PipePump extends Instruction {
 		} else {
 			job_type = JOB_TYPE.INCREMENT;
 		}
-		SQLParam sqlParam = (SQLParam) getInstanceConfig().getReadParams();
-		List<String> L2seqs = sqlParam.getSeq().size() > 0 ? sqlParam.getSeq() : Arrays.asList("");
-		String originalSql = sqlParam.getSql();
+		SQLParam scanParam = (SQLParam) getInstanceConfig().getReadParams();
+		List<String> L2seqs = scanParam.getSeq().size() > 0 ? scanParam.getSeq() : Arrays.asList("");
+		String originalSql = scanParam.getSql();
 		 
 		if (!Resource.FLOW_INFOS.containsKey(instance, job_type.name())) {
 			Resource.FLOW_INFOS.set(instance, job_type.name(), new HashMap<String, String>());
@@ -165,14 +166,15 @@ public final class PipePump extends Instruction {
 				String.valueOf(L2seqs.size()));
 		for (String L2seq:L2seqs) {  
 			try { 
-				HashMap<String, String> param = new HashMap<String, String>(); 
-				param.put(GlobalParam._ScanField, sqlParam.getScanField());
+				HashMap<String, String> param = new HashMap<String, String>();   
+				param.put(GlobalParam.READER_SCAN_KEY, scanParam.getScanField());
+				param.put(GlobalParam.READER_PAGE_KEY, scanParam.getPageField());
 				param.put(GlobalParam._start_time, isFull?Common.getFullStartInfo(instance, L1seq):GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(L2seq));
-				param.put(GlobalParam._end_time, "");
+				param.put(GlobalParam._end_time, scanParam.getCurrentStamp());
 				param.put(GlobalParam._seq, L2seq);
 				param.put("originalSql", originalSql);
-				param.put("pageSql", sqlParam.getPageScan());
-				param.put("keyColumnType", sqlParam.getKeyColumnType());
+				param.put("pageSql", scanParam.getPageScan());
+				param.put("keyColumnType", scanParam.getKeyFieldType());
 
 				if (this.readHandler != null)
 					this.readHandler.handlePage("", param);
@@ -194,10 +196,10 @@ public final class PipePump extends Instruction {
 						AtomicInteger total = new AtomicInteger(0); 
 						if(getInstanceConfig().getPipeParams().isMultiThread()) {
 							final CountDownLatch synThreads = new CountDownLatch(estimateThreads(pageList.size()));
-							Resource.ThreadPools.submitJobPage(new Pump(synThreads,instance,mainName,L1seq,L2seq,job_type,storeId,originalSql,pageList,param,sqlParam,writeTo,total));
+							Resource.ThreadPools.submitJobPage(new Pump(synThreads,instance,mainName,L1seq,L2seq,job_type,storeId,originalSql,pageList,param,scanParam,writeTo,total));
 							synThreads.await();
 						}else {
-							singleThread(instance,mainName,L1seq,L2seq,job_type,storeId,originalSql,pageList,param,sqlParam,writeTo,total);
+							singleThread(instance,mainName,L1seq,L2seq,job_type,storeId,originalSql,pageList,param,scanParam,writeTo,total);
 						} 
 						log.info(Common.formatLog("complete", "Complete " + job_type.name(), mainName, storeId, L2seq, total.get(),
 								"", GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(L2seq), Common.getNow() - start, "")); 
@@ -259,14 +261,14 @@ public final class PipePump extends Instruction {
 	 * @param pageList
 	 * @throws FNException 
 	 */
-	private void singleThread(String instance,String mainName,String L1seq,String L2seq,JOB_TYPE job_type,String storeId,String originalSql,ConcurrentLinkedDeque<String> pageList,HashMap<String, String> param,SQLParam sqlParam,String writeTo,AtomicInteger total) throws FNException { 
+	private void singleThread(String instance,String mainName,String L1seq,String L2seq,JOB_TYPE job_type,String storeId,String originalSql,ConcurrentLinkedDeque<String> pageList,HashMap<String, String> param,SQLParam scanParam,String writeTo,AtomicInteger total) throws FNException { 
 		ReaderState rState = null;
 		int processPos = 0;
 		String startId = "0";  
 		
 		boolean isUpdate = getInstanceConfig().getPipeParams().getWriteType().equals("increment") ? true : false;
-		String scanField = sqlParam.getScanField();
-		String keyField = sqlParam.getKeyField();
+		String scanField = scanParam.getScanField();
+		String keyField = scanParam.getKeyField();
 		String dataBoundary;
 		while(!pageList.isEmpty()){
 			dataBoundary = pageList.poll();
@@ -346,9 +348,9 @@ public final class PipePump extends Instruction {
 		String writeTo;
 		String storeId;  
 		
-		public Pump(CountDownLatch synThreads,String instance,String mainName,String L1seq,String L2seq,JOB_TYPE job_type,String storeId,String originalSql,ConcurrentLinkedDeque<String> pageList,HashMap<String, String> param,SQLParam sqlParam,String writeTo,AtomicInteger total) {
-			scanField = sqlParam.getScanField();
-			keyField = sqlParam.getKeyField();
+		public Pump(CountDownLatch synThreads,String instance,String mainName,String L1seq,String L2seq,JOB_TYPE job_type,String storeId,String originalSql,ConcurrentLinkedDeque<String> pageList,HashMap<String, String> param,SQLParam scanParam,String writeTo,AtomicInteger total) {
+			scanField = scanParam.getScanField();
+			keyField = scanParam.getKeyField();
 			this.pageList = pageList;
 			this.instance = instance;
 			this.job_type = job_type;

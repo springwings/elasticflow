@@ -124,15 +124,17 @@ public final class GlobalParam {
 	}    
 
 	//reader parameters
-	public static final String _start = "#{start}";
-	public static final String _end = "#{end}"; 
+	public static final String _start = "#{page_start}";
+	public static final String _end = "#{page_end}"; 
 	public static final String _seq = "#{seq}"; 
 	public static final int READ_PAGE_SIZE = 10000; 
-	public static final String _ScanField = "#{ScanField}";
+	public static final String _scan_field = "#{scan_field}";
+	public static final String _page_field = "#{page_field}";
 	public static final String _start_time =  "#{start_time}"; 
 	public static final String _end_time =  "#{end_time}";  
 	public static final String READER_KEY = "KeyField";
-	public static final String READER_SCAN_KEY = "ScanField";
+	public static final String READER_PAGE_KEY = "_PAGE_FIELD";
+	public static final String READER_SCAN_KEY = "_SCAN_FIELD";
 	public static final String READER_LAST_STAMP = "lastUpdateTime";
 	public static final String READER_STATUS = "_reader_status"; 
 	

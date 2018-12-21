@@ -86,9 +86,8 @@ public final class Run {
 		if (initInstance) {
 			ZKUtil.setData(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP + "/configs",
 					JSON.toJSONString(GlobalParam.StartConfig));
-			Resource.nodeConfig = NodeConfig.getInstance(GlobalParam.StartConfig.getProperty("instances"),
-					GlobalParam.StartConfig.getProperty("pond"), GlobalParam.StartConfig.getProperty("instructions"));
-			Resource.nodeConfig.init();
+			Resource.nodeConfig = NodeConfig.getInstance(GlobalParam.StartConfig.getProperty("pond"), GlobalParam.StartConfig.getProperty("instructions"));
+			Resource.nodeConfig.init(GlobalParam.StartConfig.getProperty("instances"),GlobalParam.SERVICE_LEVEL);
 			Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 			for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {
 				InstanceConfig instanceConfig = entry.getValue();

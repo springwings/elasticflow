@@ -27,12 +27,7 @@ public class SQLParam extends ScanParam{
 	public void setPageScan(String pageScan) {
 		this.pageScan = pageScan;
 	} 
-	public String getKeyColumnType() {
-		return keyColumnType;
-	}
-	public void setKeyColumnType(String keyColumnType) {
-		this.keyColumnType = keyColumnType;
-	}
+
 	public String getHandler() {
 		return handler;
 	}

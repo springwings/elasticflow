@@ -118,75 +118,60 @@ public class PipeParam {
 
 	public boolean isMaster() {
 		return isMaster;
-	} 
+	}  
 	
-	public static void setKeyValue(PipeParam PP,String k,String v){ 
-		switch (k.toLowerCase()) {
-		case "writeto":
-			PP.writeTo = v;
-			break;
-		case "writerpoolsharealias":
-			PP.writerPoolShareAlias = Boolean.valueOf(v);
-			break;
-		case "readerpoolsharealias":
-			PP.readerPoolShareAlias = Boolean.valueOf(v);
-			break;
-		case "searchersharealias":
-			PP.searcherShareAlias = Boolean.valueOf(v);
-			break;
-		case "readfrom":
-			PP.readFrom = v;
-			break;
-		case "readpagesize":
-			PP.readPageSize = Integer.valueOf(v);
-			break;	
-		case "modelfrom":
-			PP.modelFrom = v;
-			break;
-		case "deltacron":
-			PP.deltaCron = v;
-			break;
-		case "fullcron":
-			PP.fullCron = v;
-			break;
-		case "optimizecron":
-			PP.optimizeCron = v;
-			break; 
-		case "searchfrom":
-			PP.searchFrom = v;
-			break;
-		case "searcherhandler":
-			PP.searcherHandler = v;
-			break;
-		case "readhandler":
-			PP.readHandler = v;
-			break;
-		case "writehandler":
-			PP.writeHandler = v;
-			break;
-		case "instancename":
-			PP.instanceName = v;
-			break;
-		case "nextjob":
-			PP.nextJob = v.replace(",", " ").trim().split(" "); 
-			break;
-		case "ismaster":
-			if(v.length()>0 && v.toLowerCase().equals("true"))
-				PP.isMaster = true;
-			break;
-		case "writetype":
-			if(v.length()>0 && (v.equals("full") || v.equals("increment")))
-				PP.writeType = v;
-			break;
-		case "writemechanism":
-			if(!v.toLowerCase().equals("ab")) {
-				PP.writeMechanism = Mechanism.Time;
-			}
-			break;
-		case "multithread":
-			if(v.length()>0 && (v.equals("true")))
-				PP.multiThread = true;
-			break;
-		}
+	public void setReadPageSize(int readPageSize) {
+		this.readPageSize = Integer.valueOf(readPageSize);
 	}
+	public void setModelFrom(String modelFrom) {
+		this.modelFrom = modelFrom;
+	}
+	public void setWriteHandler(String writeHandler) {
+		this.writeHandler = writeHandler;
+	}
+	public void setWriterPoolShareAlias(String writerPoolShareAlias) {
+		this.writerPoolShareAlias = Boolean.valueOf(writerPoolShareAlias);
+	}
+	public void setSearchFrom(String searchFrom) {
+		this.searchFrom = searchFrom;
+	}
+	public void setSearcherHandler(String searcherHandler) {
+		this.searcherHandler = searcherHandler;
+	}
+	public void setSearcherShareAlias(String searcherShareAlias) {
+		this.searcherShareAlias = Boolean.valueOf(searcherShareAlias);
+	}
+	public void setReadFrom(String readFrom) {
+		this.readFrom = readFrom;
+	}
+	public void setReadHandler(String readHandler) {
+		this.readHandler = readHandler;
+	}
+	public void setReaderPoolShareAlias(String readerPoolShareAlias) { 
+		this.readerPoolShareAlias = Boolean.valueOf(readerPoolShareAlias);
+	}
+	public void setInstanceName(String instanceName) {
+		this.instanceName = instanceName;
+	}
+	public void setNextJob(String nextJob) {
+		this.nextJob = nextJob.replace(",", " ").trim().split(" ");
+	}
+	public void setMaster(String isMaster) {
+		if(isMaster.length()>0 && isMaster.toLowerCase().equals("true"))
+			this.isMaster = true;
+	}
+	public void setWriteType(String writeType) {
+		if(writeType.length()>0 && (writeType.equals("full") || writeType.equals("increment")))
+			this.writeType = writeType;
+		
+	}
+	public void setWriteMechanism(String writeMechanism) {
+		if(!writeMechanism.toLowerCase().equals("ab")) {
+			this.writeMechanism = Mechanism.Time;
+		} 
+	}
+	public void setMultiThread(String multiThread) {
+		if(multiThread.length()>0 && (multiThread.equals("true")))
+			this.multiThread = true; 
+	} 
 }

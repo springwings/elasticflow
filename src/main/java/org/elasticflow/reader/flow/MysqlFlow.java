@@ -73,23 +73,21 @@ public class MysqlFlow extends ReaderFlowSocket{
 	public ConcurrentLinkedDeque<String> getPageSplit(final HashMap<String, String> param,int pageSize) {
 		String sql;
 		if(param.get("pageSql")!=null){
-			sql = " select #{COLUMN} as id,(@a:=@a+1) AS FN_ROW_ID from ("
+			sql = " select "+GlobalParam._page_field+" as id,(@a:=@a+1) AS FN_ROW_ID from ("
 					+ param.get("pageSql")
-					+ ") FN_FPG_MAIN join (SELECT @a := -1) FN_FPG_ROW order by #{COLUMN} desc";
+					+ ") FN_FPG_MAIN join (SELECT @a := -1) FN_FPG_ROW order by "+GlobalParam._page_field+" desc";
 		}else{
-			sql = " select #{COLUMN} as id,(@a:=@a+1) AS FN_ROW_ID from ("
+			sql = " select "+GlobalParam._page_field+" as id,(@a:=@a+1) AS FN_ROW_ID from ("
 					+ param.get("originalSql")
-					+ ") FN_FPG_MAIN join (SELECT @a := -1) FN_FPG_ROW order by #{COLUMN} desc"; 
+					+ ") FN_FPG_MAIN join (SELECT @a := -1) FN_FPG_ROW order by "+GlobalParam._page_field+" desc"; 
 		}
 		sql = " select id from (" + sql
 				+ ") FN_FPG_END where MOD(FN_ROW_ID, "+pageSize+") = 0";
-		sql = sql
-				.replace("#{COLUMN}", param.get("column"))
-				.replace("#{column}", param.get(GlobalParam.READER_SCAN_KEY))
+		sql = sql 
+				.replace(GlobalParam._scan_field, param.get(GlobalParam.READER_SCAN_KEY))
+				.replace(GlobalParam._page_field, param.get(GlobalParam.READER_PAGE_KEY))
 				.replace(GlobalParam._start_time, param.get(GlobalParam._start_time))
-				.replace(GlobalParam._end_time, param.get(GlobalParam._end_time))
-				.replace("#{start}", "0")
-				.replace("#{START}", "0");
+				.replace(GlobalParam._end_time, param.get(GlobalParam._end_time));
 		if (param.get(GlobalParam._seq) != null && param.get(GlobalParam._seq).length() > 0)
 			sql = sql.replace(GlobalParam._seq, param.get(GlobalParam._seq)); 
 		 
@@ -151,7 +149,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 	private void getAllData(ResultSet rs,Map<String, RiverField> transParam) {  
 		this.dataUnit.clear();
 		String dataBoundary = null;
-		String updateFieldValue=null;
+		String LAST_STAMP=null;
 		try {  
 			ResultSetMetaData metaData = rs.getMetaData();
 			int columncount = metaData.getColumnCount(); 
@@ -165,7 +163,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 						dataBoundary = v;
 					}
 					if(k.equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))){
-						updateFieldValue = v;
+						LAST_STAMP = v;
 					}
 					u.addFieldValue(k, v, transParam);
 				}
@@ -176,10 +174,10 @@ public class MysqlFlow extends ReaderFlowSocket{
 			this.dataPage.put(GlobalParam.READER_STATUS,false);
 			log.error("get page data SQLException,", e);
 		}
-		if (updateFieldValue==null){ 
+		if (LAST_STAMP==null){ 
 			this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis()); 
 		}else{
-			this.dataPage.put(GlobalParam.READER_LAST_STAMP, updateFieldValue); 
+			this.dataPage.put(GlobalParam.READER_LAST_STAMP, LAST_STAMP); 
 		}
 		this.dataPage.putDataBoundary(dataBoundary);
 		this.dataPage.putData(this.dataUnit);

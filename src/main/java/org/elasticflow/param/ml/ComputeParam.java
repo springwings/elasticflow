@@ -10,6 +10,7 @@ public class ComputeParam {
 	private String features;
 	private String value;
 	private String algorithm; 
+	private String preprocessing;
 	private double learn_rate = 0.1;
 	private double threshold = 0.001;
 
@@ -33,23 +34,32 @@ public class ComputeParam {
 		return threshold;
 	} 
 	
-	public static void setKeyValue(ComputeParam cp,String k, String v) {
-		switch (k.toLowerCase()) {
-			case "features":
-				cp.features = v;
-				break;
-			case "value":
-				cp.value = v;
-				break;
-			case "algorithm":
-				cp.algorithm = v;
-				break; 
-			case "learn_rate":
-				cp.learn_rate = Double.parseDouble(v);
-				break; 
-			case "threshold":
-				cp.threshold = Double.parseDouble(v);
-				break; 
-		}
+	public void setFeatures(String features) {
+		this.features = features;
 	}
+
+	public void setValue(String value) {
+		this.value = value;
+	}
+
+	public void setAlgorithm(String algorithm) {
+		this.algorithm = algorithm;
+	}
+
+	public void setLearn_rate(String learn_rate) {
+		this.learn_rate = Double.parseDouble(learn_rate);
+	}
+
+	public void setThreshold(String threshold) {
+		this.threshold = Double.parseDouble(threshold);
+	}
+
+	public String getPreprocessing() {
+		return preprocessing;
+	}
+
+	public void setPreprocessing(String preprocessing) {
+		this.preprocessing = preprocessing;
+	} 
+ 
 }

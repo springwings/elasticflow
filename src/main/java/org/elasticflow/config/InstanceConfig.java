@@ -26,6 +26,7 @@ import org.elasticflow.param.warehouse.SQLParam;
 import org.elasticflow.param.warehouse.ScanParam;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.ZKUtil;
+import org.elasticflow.yarn.Resource;
 
 /**
  * instance configs loading 
@@ -199,7 +200,7 @@ public class InstanceConfig {
 				
 				params = (Element) dataflow.getElementsByTagName("TransParam").item(0); 
 				if (params!=null) {
-					parseNode(params.getElementsByTagName("param"), "pipeParam", BasicParam.class);
+					parseNode(params.getElementsByTagName("param"), "pipeParam", PipeParam.class);
 				}else{
 					Common.LOG.error(this.filename+" config setting not correct");
 					return;
@@ -207,19 +208,20 @@ public class InstanceConfig {
 				
 				params = (Element) dataflow.getElementsByTagName("ReadParam").item(0);
 				if(params!=null) {
-					parseNode(params.getElementsByTagName("sql"), "readParamSql",
-						SQLParam.class); 
-					parseNode(params.getElementsByTagName("nosql"), "readParamNoSql",
-						NoSQLParam.class);
-					params = (Element) params.getElementsByTagName("pageScan").item(0);
-					if(params!=null) {
-						readParams.setPageScan(params.getTextContent().trim());
+					if(Resource.nodeConfig.getSqlWarehouse().containsKey(pipeParams.getReadFrom())) {
+						readParams = new SQLParam();
+						parseNode(params.getElementsByTagName("param"), "readParam",
+								SQLParam.class);  
+					}else {
+						readParams = new NoSQLParam();
+						parseNode(params.getElementsByTagName("param"), "readParam",
+								NoSQLParam.class);
 					}  
 				} 
 				
 				params = (Element) dataflow.getElementsByTagName("ComputeParam").item(0);   
 				if (params!=null) {
-					parseNode(params.getElementsByTagName("param"), "computeParam", BasicParam.class);
+					parseNode(params.getElementsByTagName("param"), "computeParam", ComputeParam.class);
 					params = (Element) params.getElementsByTagName("fields").item(0);
 					paramlist = params.getElementsByTagName("field");
 					parseNode(paramlist, "computeFields", RiverField.class); 
@@ -256,43 +258,34 @@ public class InstanceConfig {
 		if (paramlist != null && paramlist.getLength() > 0) {
 			for (int i = 0; i < paramlist.getLength(); i++) {
 				Node param = paramlist.item(i);
-				if (param.getNodeType() == Node.ELEMENT_NODE) {
-					Object o = Common.getXmlObj(param, c);
+				if (param.getNodeType() == Node.ELEMENT_NODE) { 
 					switch (type) {
 					case "writeFields":
-						RiverField wf = (RiverField) o;
+						RiverField wf = (RiverField) Common.getXmlObj(param, c);
 						writeFields.put(wf.getName(), wf);
 						break;
 					case "computeFields":
-						RiverField cf = (RiverField) o;
+						RiverField cf = (RiverField) Common.getXmlObj(param, c);
 						computeFields.put(cf.getName(), cf);
 						break;
 					case "computeParam":
-						BasicParam cbp = (BasicParam) o; 
-						ComputeParam.setKeyValue(computeParams,cbp.getName(), cbp.getValue());
+						Common.getXmlParam(computeParams, param, c); 
 						break;
 					case "writerParam":
-						BasicParam wpp = (BasicParam) o; 
+						BasicParam wpp = (BasicParam) Common.getXmlObj(param, c); 
 						WriterParam.setKeyValue(writerParams,wpp.getName(), wpp.getValue());
 						break;
 					case "pipeParam":
-						BasicParam pbp = (BasicParam) o;
-						PipeParam.setKeyValue(pipeParams,pbp.getName(), pbp.getValue());
-						break;
-					case "readParamNoSql":
-						readParams = (NoSQLParam) o;
-						break;
-					case "readParamSql":
-						readParams = (SQLParam) o; 
+						Common.getXmlParam(pipeParams, param, c);  
+						break; 
+					case "readParam": 
+						Common.getXmlParam(readParams, param, c);
 						break; 
 					case "MessageParam":
-						messageParam = (MessageParam) o;
-						break;
-					case "MessageSql":
-						messageParam.setSqlParam((SQLParam) o);
-						break;
+						messageParam = (MessageParam) Common.getXmlObj(param, c);
+						break; 
 					case "SearchParam":
-						SearcherParam v  = (SearcherParam) o;
+						SearcherParam v  = (SearcherParam) Common.getXmlObj(param, c);
 						searcherParams.put(v.getName(), v);
 						break;   
 					}

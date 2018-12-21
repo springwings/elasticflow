@@ -35,7 +35,7 @@ public final class SqlUtil {
 		sqlParams.put(GlobalParam._end, endKey);
 		sqlParams.put(GlobalParam._start_time, start_time);
 		sqlParams.put(GlobalParam._end_time, end_time);
-		sqlParams.put(GlobalParam._ScanField, scanField); 
+		sqlParams.put(GlobalParam._scan_field, scanField); 
 		return sqlParams;
 	}
 	

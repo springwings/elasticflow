@@ -72,7 +72,7 @@ public class HbaseFlow extends ReaderFlowSocket {
 			SingleColumnValueFilter range = new SingleColumnValueFilter(
 					Bytes.toBytes(this.connectParams.get("columnFamily")
 							.toString()), Bytes.toBytes(param
-							.get(GlobalParam._ScanField)),
+							.get(GlobalParam._scan_field)),
 					CompareFilter.CompareOp.GREATER_OR_EQUAL,
 					new BinaryComparator(Bytes.toBytes(param.get("startTime"))));
 			range.setLatestVersionOnly(true);
@@ -146,7 +146,7 @@ public class HbaseFlow extends ReaderFlowSocket {
 			SingleColumnValueFilter range = new SingleColumnValueFilter(
 					Bytes.toBytes(this.connectParams.get("columnFamily")
 							.toString()), Bytes.toBytes(param
-							.get(GlobalParam._ScanField)),
+							.get(GlobalParam._scan_field)),
 					CompareFilter.CompareOp.GREATER_OR_EQUAL,
 					new BinaryComparator(Bytes.toBytes(param.get("startTime"))));
 			range.setLatestVersionOnly(true);
@@ -159,7 +159,7 @@ public class HbaseFlow extends ReaderFlowSocket {
 					.toString()));
 			scan.addColumn(Bytes.toBytes(this.connectParams.get("columnFamily")
 					.toString()), Bytes.toBytes(param
-					.get(GlobalParam._ScanField)));
+					.get(GlobalParam._scan_field)));
 			scan.addColumn(Bytes.toBytes(this.connectParams.get("columnFamily")
 					.toString()), Bytes.toBytes(param.get("column")));
 			ResultScanner resultScanner = table.getScanner(scan);
