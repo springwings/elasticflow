@@ -37,7 +37,7 @@ public class Dl4j {
 	
 	public static DataPage train(Context context, SampleSets samples, Map<String, RiverField> transParam) {
 		double learningRate = context.getInstanceConfig().getComputeParams().getLearn_rate();
-		double th = context.getInstanceConfig().getComputeParams().getThreshold();
+		//double th = context.getInstanceConfig().getComputeParams().getThreshold();
 		DataPage DP = new DataPage();
 		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(seed)

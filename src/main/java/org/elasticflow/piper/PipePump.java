@@ -38,7 +38,7 @@ public final class PipePump extends Instruction {
 
 	private final static Logger log = LoggerFactory.getLogger("PipePump");
 	/** defined custom read flow socket */
-	private Handler readHandler;
+	Handler readHandler;
 
 	public static PipePump getInstance(ReaderFlowSocket reader, WriterFlowSocket writer,
 			InstanceConfig instanceConfig) {
@@ -179,34 +179,33 @@ public final class PipePump extends Instruction {
 				if (this.readHandler != null)
 					this.readHandler.handlePage("", param);
 				// control repeat with time job
-				do { 
-					Resource.FLOW_INFOS.get(instance, job_type.name()).put(instance + L2seq, "start count page..."); 
-					getReader().lock.lock();
-					ConcurrentLinkedDeque<String> pageList = getReader().getPageSplit(param,getInstanceConfig().getPipeParams().getReadPageSize());
-					getReader().lock.unlock();
-					if (pageList == null)
-						throw new FNException("read data get page split exception!");
-					if (pageList.isEmpty()) {
-						log.info(Common.formatLog("start","Complete " + job_type.name(), mainName, storeId, L2seq,0, "",
-								GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(L2seq), 0, " no data!")); 
-					} else {
-						log.info(Common.formatLog("start","Start " + job_type.name(), mainName, storeId, L2seq,0, "",
-								GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(L2seq), 0,",totalpage:" + pageList.size()));
-						long start = Common.getNow();
-						AtomicInteger total = new AtomicInteger(0); 
-						if(getInstanceConfig().getPipeParams().isMultiThread()) {
-							final CountDownLatch synThreads = new CountDownLatch(estimateThreads(pageList.size()));
-							Resource.ThreadPools.submitJobPage(new Pump(synThreads,instance,mainName,L1seq,L2seq,job_type,storeId,originalSql,pageList,param,scanParam,writeTo,total));
-							synThreads.await();
-						}else {
-							singleThread(instance,mainName,L1seq,L2seq,job_type,storeId,originalSql,pageList,param,scanParam,writeTo,total);
-						} 
-						log.info(Common.formatLog("complete", "Complete " + job_type.name(), mainName, storeId, L2seq, total.get(),
-								"", GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(L2seq), Common.getNow() - start, "")); 
-						if(Common.checkFlowStatus(instance, L1seq, job_type, STATUS.Termination))
-							throw new FNException(instance + " " + job_type.name() + " job has been Terminated!");
-					}
-				} while (param.get(GlobalParam._end_time).length() > 0 && this.readHandler.loopScan(param));
+				Resource.FLOW_INFOS.get(instance, job_type.name()).put(instance + L2seq, "start count page..."); 
+				getReader().lock.lock();
+				ConcurrentLinkedDeque<String> pageList = getReader().getPageSplit(param,getInstanceConfig().getPipeParams().getReadPageSize());
+				getReader().lock.unlock();
+				if (pageList == null)
+					throw new FNException("read data get page split exception!");
+				int pageNum = pageList.size();
+				if (pageNum==0) {
+					log.info(Common.formatLog("start","Complete " + job_type.name(), mainName, storeId, L2seq,0, "",
+							GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(L2seq), 0, " no data!")); 
+				} else {
+					log.info(Common.formatLog("start","Start " + job_type.name(), mainName, storeId, L2seq,0, "",
+							GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(L2seq), 0,",totalpage:" + pageNum));
+					long start = Common.getNow();
+					AtomicInteger total = new AtomicInteger(0); 
+					if(getInstanceConfig().getPipeParams().isMultiThread()) {
+						final CountDownLatch synThreads = new CountDownLatch(estimateThreads(pageNum));
+						Resource.ThreadPools.submitJobPage(new Pump(synThreads,instance,mainName,L1seq,L2seq,job_type,storeId,originalSql,pageList,param,scanParam,writeTo,total));
+						synThreads.await();
+					}else {
+						singleThread(instance,mainName,L1seq,L2seq,job_type,storeId,originalSql,pageList,param,scanParam,writeTo,total);
+					} 
+					log.info(Common.formatLog("complete", "Complete " + job_type.name(), mainName, storeId, L2seq, total.get(),
+							"", GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(L2seq), Common.getNow() - start, "")); 
+					if(Common.checkFlowStatus(instance, L1seq, job_type, STATUS.Termination))
+						throw new FNException(instance + " " + job_type.name() + " job has been Terminated!");
+				} 
 
 			} catch (Exception e) {
 				if (isFull && !masterControl) {
@@ -270,6 +269,7 @@ public final class PipePump extends Instruction {
 		String scanField = scanParam.getScanField();
 		String keyField = scanParam.getKeyField();
 		String dataBoundary;
+		int pageNum = pageList.size();
 		while(!pageList.isEmpty()){
 			dataBoundary = pageList.poll();
 			processPos++;
@@ -290,9 +290,9 @@ public final class PipePump extends Instruction {
 					getReader().freeJobPage();
 					getReader().lock.unlock();
 					pagedata = (DataPage) CPU.RUN(getID(), "ML", "computeDataSet", false, getID(), job_type.name(), writeTo, pagedata); 
-					if(processPos==pageList.size()) {
+					if(processPos==pageNum) {
 						rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, job_type.name(), writeTo, storeId, L2seq, pagedata,
-								",process:" + processPos + "/" + pageList.size(), isUpdate, false);  
+								",process:" + processPos + "/" + pageNum, isUpdate, false);  
 					}else {
 						continue; 
 					} 
@@ -303,7 +303,7 @@ public final class PipePump extends Instruction {
 					getReader().freeJobPage();
 					getReader().lock.unlock();
 					rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, job_type.name(), writeTo, storeId, L2seq, pagedata,
-							",process:" + processPos + "/" + pageList.size(), isUpdate, false);  
+							",process:" + processPos + "/" + pageNum, isUpdate, false);  
 				} 
 				if (rState.isStatus() == false)
 					throw new FNException("writeDataSet data exception!");
@@ -311,7 +311,7 @@ public final class PipePump extends Instruction {
 				startId = dataBoundary;
 			}
 			
-			if (rState.getReaderScanStamp().compareTo(GlobalParam.SCAN_POSITION.get(instance).getL2SeqPos(L2seq)) > 0) {
+			if ((this.readHandler==null || !this.readHandler.loopScan(param)) && rState.getReaderScanStamp().compareTo(GlobalParam.SCAN_POSITION.get(instance).getL2SeqPos(L2seq)) > 0) {
 				GlobalParam.SCAN_POSITION.get(instance).updateL2SeqPos(L2seq, rState.getReaderScanStamp());
 			}
 			if (job_type==JOB_TYPE.INCREMENT) { 
@@ -380,7 +380,7 @@ public final class PipePump extends Instruction {
 				dataBoundary = pageList.poll();
 				processPos.incrementAndGet();
 				Resource.FLOW_INFOS.get(instance, job_type.name()).put(instance + L2seq,
-						processPos + "/" + pageList.size()); 
+						processPos + "/" + this.pageSize); 
 				String sql = SqlUtil.fillParam(originalSql,
 						SqlUtil.getScanParam(L2seq, startId, dataBoundary,
 								param.get(GlobalParam._start_time), param.get(GlobalParam._end_time),
@@ -399,9 +399,9 @@ public final class PipePump extends Instruction {
 						getReader().lock.unlock();
 						pagedata = (DataPage) CPU.RUN(getID(), "ML", "computeDataSet", false, getID(), job_type.name(), writeTo, pagedata); 
 						synchronized (processPos) {
-							if(processPos.get() == pageSize) {
+							if(processPos.get() == this.pageSize) {
 								rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, job_type.name(), writeTo, storeId, L2seq, pagedata,
-										",process:" + processPos + "/" + pageSize, isUpdate, false);  
+										",process:" + processPos + "/" + this.pageSize, isUpdate, false);  
 							}else {
 								continue; 
 							} 
@@ -427,7 +427,7 @@ public final class PipePump extends Instruction {
 					startId = dataBoundary;
 				}
 				
-				if (rState.getReaderScanStamp().compareTo(GlobalParam.SCAN_POSITION.get(instance).getL2SeqPos(L2seq)) > 0) {
+				if ((readHandler==null || !readHandler.loopScan(param)) && rState.getReaderScanStamp().compareTo(GlobalParam.SCAN_POSITION.get(instance).getL2SeqPos(L2seq)) > 0) {
 					GlobalParam.SCAN_POSITION.get(instance).updateL2SeqPos(L2seq, rState.getReaderScanStamp());
 				}
 				if (job_type==JOB_TYPE.INCREMENT) { 

@@ -1,8 +1,6 @@
 package org.elasticflow.reader.handler;
 
-import java.util.HashMap;
-
-public class DJDBCHandler implements Handler {
+public class DJDBCHandler extends Handler {
 
 	@Override
 	public <T> T handlePage(Object... args) {
@@ -15,12 +13,5 @@ public class DJDBCHandler implements Handler {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public boolean loopScan(HashMap<String, String> params) {
-		// TODO Auto-generated method stub
-		return false;
-	} 
-	
-	
+  
 }

@@ -54,7 +54,7 @@ public abstract class ScanParam {
 
 	public String getPageField() {
 		if(pageField==null)
-			pageField = scanField;
+			pageField = keyField;
 		return pageField;
 	}
 

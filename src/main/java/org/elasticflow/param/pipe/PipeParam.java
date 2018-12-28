@@ -58,7 +58,7 @@ public class PipeParam {
 	public boolean isMultiThread() {
 		return multiThread;
 	} 
-	public String getReadHandler() {
+	public String getReadHandler() { 
 		return readHandler;
 	}
 	public String getWriteHandler() {
