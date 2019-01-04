@@ -42,11 +42,7 @@ public abstract class ScanParam {
 
 	public void setScanField(String scanField) {
 		this.scanField = scanField;
-	}
-	
-	public String getScanFieldType() {
-		return scanFieldType;
-	}
+	} 
 
 	public void setScanFieldType(String scanFieldType) {
 		this.scanFieldType = scanFieldType;
