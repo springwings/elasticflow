@@ -21,8 +21,7 @@ public abstract class FnConnectionSocket<T>{
 	public abstract boolean status();
 	
 	public abstract boolean free();
-	
-  
+	  
 	public void init(HashMap<String, Object> ConnectParams) {
 		this.connectParams = ConnectParams; 
 	}
@@ -34,4 +33,8 @@ public abstract class FnConnectionSocket<T>{
 	public void setShare(boolean share) {
 		this.isShare = share;
 	}  
+	
+	public HashMap<String, Object> getConnectParams(){
+		return this.connectParams;
+	}
 }

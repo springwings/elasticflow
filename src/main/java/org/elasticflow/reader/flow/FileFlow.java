@@ -1,5 +1,7 @@
 package org.elasticflow.reader.flow;
 
+import java.io.FileReader;
+import java.io.LineNumberReader;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,7 +9,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.elasticflow.config.GlobalParam;
 import org.elasticflow.field.RiverField;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.reader.ReaderFlowSocket;
@@ -51,20 +53,24 @@ public class FileFlow extends ReaderFlowSocket {
 
 	@Override
 	public ConcurrentLinkedDeque<String> getPageSplit(HashMap<String, String> param, int pageSize) {
-		ConcurrentLinkedDeque<String> dt = new ConcurrentLinkedDeque<>();
-		PREPARE(false, false);
-		if (!ISLINK())
-			return dt;
+		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>(); 
 		boolean releaseConn = false;
-		try {
-
+		try { 
+			LineNumberReader lnr = new LineNumberReader(new FileReader(String.valueOf(GETSOCKET().getConnectParams().get("path"))));
+			lnr.skip(Long.MAX_VALUE);
+	        int lineNo = lnr.getLineNumber() + 1;
+	        lnr.close();
+	        for(int pos=0;lineNo-pos>GlobalParam.READ_PAGE_SIZE;pos+=GlobalParam.READ_PAGE_SIZE) {
+	        	page.push(String.valueOf(pos));
+	        }
+	        page.push(String.valueOf(lineNo));
 		} catch (Exception e) {
 			releaseConn = true;
 			log.error("getPageSplit Exception", e);
 		} finally {
 			REALEASE(false, releaseConn);
 		}
-		return dt;
+		return page;
 	}
 
 }
