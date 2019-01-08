@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @date 2018-10-26 09:25
  */
-public class ZookeeperConnection extends FnConnectionSocket implements FnConnection<ZooKeeper> {
+public class ZookeeperConnection extends FnConnectionSocket<ZooKeeper> {
 
 	private final static int CONNECTION_TIMEOUT = 50000; 
 	
@@ -23,9 +23,9 @@ public class ZookeeperConnection extends FnConnectionSocket implements FnConnect
 	private final static Logger log = LoggerFactory
 			.getLogger("Zookeeper Socket");
 
-	public static FnConnection<?> getInstance(
+	public static FnConnectionSocket<?> getInstance(
 			HashMap<String, Object> ConnectParams) {
-		FnConnection<?> o = new ZookeeperConnection();
+		FnConnectionSocket<?> o = new ZookeeperConnection();
 		o.init(ConnectParams);
 		o.connect();
 		return o;

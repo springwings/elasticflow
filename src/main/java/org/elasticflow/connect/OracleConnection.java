@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @date 2018-10-26 09:25
  */
-public class OracleConnection extends FnConnectionSocket implements FnConnection<Connection>{
+public class OracleConnection extends FnConnectionSocket<Connection>{
 	 
 	private Connection conn = null;   
 	
@@ -28,8 +28,8 @@ public class OracleConnection extends FnConnectionSocket implements FnConnection
 		}
 	}
 	
-	public static FnConnection<?> getInstance(HashMap<String, Object> ConnectParams){
-		FnConnection<?> o = new OracleConnection();
+	public static FnConnectionSocket<?> getInstance(HashMap<String, Object> ConnectParams){
+		FnConnectionSocket<?> o = new OracleConnection();
 		o.init(ConnectParams); 
 		o.connect();
 		return o;

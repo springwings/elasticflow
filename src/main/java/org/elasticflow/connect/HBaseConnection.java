@@ -17,17 +17,16 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @date 2018-10-26 09:25
  */
-public class HBaseConnection extends FnConnectionSocket implements
-		FnConnection<Table> {
+public class HBaseConnection extends FnConnectionSocket<Table>{
 	private final static Logger log = LoggerFactory
 			.getLogger("HBase Socket");
 	private Configuration hbaseConfig;
 	private Connection Hconn;
 	private Table conn;
 
-	public static FnConnection<?> getInstance(
+	public static FnConnectionSocket<?> getInstance(
 			HashMap<String, Object> ConnectParams) {
-		FnConnection<?> o = new HBaseConnection();
+		FnConnectionSocket<?> o = new HBaseConnection();
 		o.init(ConnectParams);
 		o.connect();
 		return o;

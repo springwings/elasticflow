@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @date 2018-10-26 09:25
  */
-public class ESConnection extends FnConnectionSocket implements FnConnection<ESConnector> {
+public class ESConnection extends FnConnectionSocket<ESConnector> {
 
 	private Client conn;
 	private BulkProcessor bulkProcessor;
@@ -36,8 +36,8 @@ public class ESConnection extends FnConnectionSocket implements FnConnection<ESC
 
 	private final static Logger log = LoggerFactory.getLogger(ESConnection.class);
 
-	public static FnConnection<?> getInstance(HashMap<String, Object> ConnectParams) {
-		FnConnection<?> o = new ESConnection();
+	public static FnConnectionSocket<?> getInstance(HashMap<String, Object> ConnectParams) {
+		FnConnectionSocket<?> o = new ESConnection();
 		o.init(ConnectParams);
 		o.connect();
 		return o;

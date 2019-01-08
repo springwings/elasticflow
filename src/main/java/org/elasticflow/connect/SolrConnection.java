@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @date 2018-10-26 09:25
  */
-public class SolrConnection extends FnConnectionSocket implements FnConnection<CloudSolrClient> {
+public class SolrConnection extends FnConnectionSocket<CloudSolrClient> {
 
 	private final static int zkClientTimeout = 180000;
 	private final static int zkConnectTimeout = 60000;  
@@ -21,9 +21,9 @@ public class SolrConnection extends FnConnectionSocket implements FnConnection<C
 	private final static Logger log = LoggerFactory
 			.getLogger("Solr Socket");
 
-	public static FnConnection<?> getInstance(
+	public static FnConnectionSocket<?> getInstance(
 			HashMap<String, Object> ConnectParams) {
-		FnConnection<?> o = new SolrConnection();
+		FnConnectionSocket<?> o = new SolrConnection();
 		o.init(ConnectParams);
 		o.connect();
 		return o;

@@ -1,5 +1,6 @@
 package org.elasticflow.reader.flow;
 
+import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -19,49 +20,51 @@ import org.elasticflow.reader.handler.Handler;
  * @date 2018-11-22 09:33
  */
 public class FileFlow extends ReaderFlowSocket {
-	
+
 	private final static Logger log = LoggerFactory.getLogger(FileFlow.class);
-	
+
 	public static FileFlow getInstance(HashMap<String, Object> connectParams) {
 		FileFlow o = new FileFlow();
 		o.INIT(connectParams);
 		return o;
 	}
-	
 
 	@Override
 	public DataPage getPageData(HashMap<String, String> param, Map<String, RiverField> transParams, Handler handler,
 			int pageSize) {
-		PREPARE(false,false);
-		boolean releaseConn = false;
+		PREPARE(false, false);
 		try {
-			if(!ISLINK())
+			if (!ISLINK())
 				return this.dataPage;
+			RandomAccessFile rf = (RandomAccessFile) GETSOCKET().getConnection(false);
+			int n = 3;
+			while (n-- > 1) {
+				rf.readLine();
+			}
 		} catch (Exception e) {
-			releaseConn = true;
 			log.error("get dataPage Exception", e);
-		}finally{
-			REALEASE(false,releaseConn);
-		} 
+		} finally {
+			REALEASE(false, true);
+		}
 		return this.dataPage;
 	}
 
 	@Override
 	public ConcurrentLinkedDeque<String> getPageSplit(HashMap<String, String> param, int pageSize) {
-		ConcurrentLinkedDeque<String> dt = new ConcurrentLinkedDeque<>(); 
-		PREPARE(false,false);
-		if(!ISLINK())
-			return dt; 
+		ConcurrentLinkedDeque<String> dt = new ConcurrentLinkedDeque<>();
+		PREPARE(false, false);
+		if (!ISLINK())
+			return dt;
 		boolean releaseConn = false;
 		try {
-			
+
 		} catch (Exception e) {
 			releaseConn = true;
 			log.error("getPageSplit Exception", e);
-		}finally{ 
-			REALEASE(false,releaseConn);
+		} finally {
+			REALEASE(false, releaseConn);
 		}
 		return dt;
-	} 
+	}
 
 }

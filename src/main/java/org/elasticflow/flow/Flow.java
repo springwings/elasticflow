@@ -6,8 +6,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.elasticflow.connect.FnConnection;
-import org.elasticflow.connect.FnConnectionPool; 
+import org.elasticflow.connect.FnConnectionPool;
+import org.elasticflow.connect.FnConnectionSocket; 
 /**
  * data pipe flow model 
  * @author chengwen
@@ -16,7 +16,7 @@ import org.elasticflow.connect.FnConnectionPool;
  */
 public abstract class Flow {
 	
-	protected volatile FnConnection<?> FC;
+	protected volatile FnConnectionSocket<?> FC;
 	
 	protected String poolName;
 	
@@ -28,7 +28,7 @@ public abstract class Flow {
 	
 	public abstract void INIT(HashMap<String, Object> connectParams);
 	
-	public FnConnection<?> PREPARE(boolean isMonopoly,boolean canSharePipe) {  
+	public FnConnectionSocket<?> PREPARE(boolean isMonopoly,boolean canSharePipe) {  
 		if(isMonopoly) {
 			synchronized (this.FC) {
 				if(this.FC==null) 
@@ -62,7 +62,7 @@ public abstract class Flow {
 		} 
 	}   
 	
-	public FnConnection<?> GETSOCKET() {
+	public FnConnectionSocket<?> GETSOCKET() {
 		return this.FC;
 	}
 	

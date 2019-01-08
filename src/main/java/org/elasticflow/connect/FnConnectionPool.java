@@ -41,11 +41,11 @@ public final class FnConnectionPool {
 	 *            judge is support share connection to deal
 	 * @return
 	 */
-	public static FnConnection<?> getConn(HashMap<String, Object> params, String poolName, boolean canShareConn) {
+	public static FnConnectionSocket<?> getConn(HashMap<String, Object> params, String poolName, boolean canShareConn) {
 		return FnCPool.getConnection(params, poolName, canShareConn);
 	}
 
-	public static void freeConn(FnConnection<?> conn, String poolName, boolean releaseConn) {
+	public static void freeConn(FnConnectionSocket<?> conn, String poolName, boolean releaseConn) {
 		FnCPool.freeConnection(poolName, conn, releaseConn);
 	}
 
@@ -76,7 +76,7 @@ public final class FnConnectionPool {
 	/**
 	 * get connection from pool and waiting
 	 */
-	private FnConnection<?> getConnection(HashMap<String, Object> params, String poolName, boolean canShareConn) {
+	private FnConnectionSocket<?> getConnection(HashMap<String, Object> params, String poolName, boolean canShareConn) {
 		synchronized (this.pools) {
 			if (this.pools.get(poolName) == null) {
 				createPools(poolName, params);
@@ -93,7 +93,7 @@ public final class FnConnectionPool {
 		}
 	}
 
-	private void freeConnection(String poolName, FnConnection<?> conn, boolean releaseConn) {
+	private void freeConnection(String poolName, FnConnectionSocket<?> conn, boolean releaseConn) {
 		ConnectionPool pool = (ConnectionPool) this.pools.get(poolName);
 		if (pool != null) {
 			pool.freeConnection(conn, releaseConn);
@@ -117,8 +117,8 @@ public final class FnConnectionPool {
 		private final int maxConn;
 		private final String poolName;
 		private final HashMap<String, Object> params;
-		private ConcurrentLinkedQueue<FnConnection<?>> freeConnections = new ConcurrentLinkedQueue<FnConnection<?>>();
-		private FnConnection<?> shareConn;
+		private ConcurrentLinkedQueue<FnConnectionSocket<?>> freeConnections = new ConcurrentLinkedQueue<FnConnectionSocket<?>>();
+		private FnConnectionSocket<?> shareConn;
 
 		public ConnectionPool(int maxConn, String poolName, final HashMap<String, Object> params) {
 			super();
@@ -133,8 +133,8 @@ public final class FnConnectionPool {
 			this.shareConn.setShare(true);
 		}
 
-		public FnConnection<?> getConnection(long timeout, boolean canShareConn) {
-			FnConnection<?> conn = null;
+		public FnConnectionSocket<?> getConnection(long timeout, boolean canShareConn) {
+			FnConnectionSocket<?> conn = null;
 			int tryTime = 0;
 			while ((conn = getConnection()) == null) {
 				if (canShareConn && conn == null) {
@@ -165,7 +165,7 @@ public final class FnConnectionPool {
 		 */
 		public void releaseAll() {
 			synchronized(freeConnections) {
-				for (FnConnection<?> conn : freeConnections) {
+				for (FnConnectionSocket<?> conn : freeConnections) {
 					if (!conn.free()) {
 						log.warn("error close one connection in pool " + this.poolName);
 					}
@@ -183,7 +183,7 @@ public final class FnConnectionPool {
 		 *            free connection
 		 * 
 		 */
-		private void freeConnection(FnConnection<?> conn, boolean releaseConn) {
+		private void freeConnection(FnConnectionSocket<?> conn, boolean releaseConn) {
 			synchronized (this) {
 				if (conn.isShare()) {
 					if (releaseConn) {
@@ -200,9 +200,9 @@ public final class FnConnectionPool {
 			}
 		}
 
-		private FnConnection<?> getConnection() {
+		private FnConnectionSocket<?> getConnection() {
 			synchronized (this) {
-				FnConnection<?> conn = null;
+				FnConnectionSocket<?> conn = null;
 				if (!freeConnections.isEmpty()) {
 					conn = freeConnections.poll();
 					while (conn.status() == false && !freeConnections.isEmpty()) {
@@ -222,8 +222,8 @@ public final class FnConnectionPool {
 			return null;
 		}
 
-		private FnConnection<?> newConnection() {
-			FnConnection<?> conn = null;
+		private FnConnectionSocket<?> newConnection() {
+			FnConnectionSocket<?> conn = null;
 			if (params != null) {
 				switch ((DATA_TYPE) params.get("type")) {
 				case ORACLE:
@@ -243,6 +243,9 @@ public final class FnConnectionPool {
 					break;
 				case ZOOKEEPER:
 					conn = ZookeeperConnection.getInstance(params);
+					break;
+				case FILE:
+					conn = FileConnection.getInstance(params);
 					break;
 				default:
 					log.error("Connection Type Not Support!");
