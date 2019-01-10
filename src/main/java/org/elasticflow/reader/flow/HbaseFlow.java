@@ -18,15 +18,16 @@ import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.field.RiverField;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
+import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.handler.Handler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -35,28 +36,26 @@ import org.elasticflow.reader.handler.Handler;
  * @date 2018-10-26 09:24
  */
 public class HbaseFlow extends ReaderFlowSocket { 
+ 
+	private String columnFamily;
 	 
 	private final static Logger log = LoggerFactory.getLogger(HbaseFlow.class); 
 
-	public static HbaseFlow getInstance(HashMap<String, Object> connectParams) {
+	public static HbaseFlow getInstance(ConnectParams connectParams) {
 		HbaseFlow o = new HbaseFlow();
 		o.INIT(connectParams);
 		return o;
 	}
-
-	@Override
-	public void INIT(HashMap<String, Object> connectParams) {
+ 
+	public void INIT(ConnectParams connectParams) {
 		this.connectParams = connectParams;
-		String tableColumnFamily = (String) this.connectParams
-				.get("defaultValue");
+		String tableColumnFamily = ((WarehouseNosqlParam) connectParams.getWhp()).getDefaultValue();
 		if (tableColumnFamily != null && tableColumnFamily.length() > 0) {
-			String[] strs = tableColumnFamily.split(":");
-			if (strs != null && strs.length > 0)
-				this.connectParams.put("tableName", strs[0]);
+			String[] strs = tableColumnFamily.split(":"); 
 			if (strs != null && strs.length > 1)
-				this.connectParams.put("columnFamily", strs[1]);
+				this.columnFamily = strs[1];
 		}
-		this.poolName = String.valueOf(connectParams.get("poolName")); 
+		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq()); 
 	}
  
 	@Override
@@ -70,8 +69,7 @@ public class HbaseFlow extends ReaderFlowSocket {
 			Scan scan = new Scan();
 			List<Filter> filters = new ArrayList<Filter>();
 			SingleColumnValueFilter range = new SingleColumnValueFilter(
-					Bytes.toBytes(this.connectParams.get("columnFamily")
-							.toString()), Bytes.toBytes(param
+					Bytes.toBytes(this.columnFamily), Bytes.toBytes(param
 							.get(GlobalParam._scan_field)),
 					CompareFilter.CompareOp.GREATER_OR_EQUAL,
 					new BinaryComparator(Bytes.toBytes(param.get("startTime"))));
@@ -83,8 +81,7 @@ public class HbaseFlow extends ReaderFlowSocket {
 			scan.setStartRow(Bytes.toBytes(param.get(GlobalParam._start)));
 			scan.setStopRow(Bytes.toBytes(param.get(GlobalParam._end)));
 			scan.setCaching(pageSize);
-			scan.addFamily(Bytes.toBytes(this.connectParams.get("columnFamily")
-					.toString()));
+			scan.addFamily(Bytes.toBytes(this.columnFamily));
 			ResultScanner resultScanner = table.getScanner(scan);
 			try {   
 				String dataBoundary = null;
@@ -144,8 +141,7 @@ public class HbaseFlow extends ReaderFlowSocket {
 			Table table = (Table) GETSOCKET().getConnection(true);
 			List<Filter> filters = new ArrayList<Filter>();
 			SingleColumnValueFilter range = new SingleColumnValueFilter(
-					Bytes.toBytes(this.connectParams.get("columnFamily")
-							.toString()), Bytes.toBytes(param
+					Bytes.toBytes(this.columnFamily), Bytes.toBytes(param
 							.get(GlobalParam._scan_field)),
 					CompareFilter.CompareOp.GREATER_OR_EQUAL,
 					new BinaryComparator(Bytes.toBytes(param.get("startTime"))));
@@ -155,13 +151,10 @@ public class HbaseFlow extends ReaderFlowSocket {
 			scan.setFilter(new FilterList(FilterList.Operator.MUST_PASS_ALL,
 					filters));
 			scan.setCaching(pageSize);
-			scan.addFamily(Bytes.toBytes(this.connectParams.get("columnFamily")
-					.toString()));
-			scan.addColumn(Bytes.toBytes(this.connectParams.get("columnFamily")
-					.toString()), Bytes.toBytes(param
+			scan.addFamily(Bytes.toBytes(this.columnFamily));
+			scan.addColumn(Bytes.toBytes(this.columnFamily), Bytes.toBytes(param
 					.get(GlobalParam._scan_field)));
-			scan.addColumn(Bytes.toBytes(this.connectParams.get("columnFamily")
-					.toString()), Bytes.toBytes(param.get("column")));
+			scan.addColumn(Bytes.toBytes(this.columnFamily), Bytes.toBytes(param.get("column")));
 			ResultScanner resultScanner = table.getScanner(scan);
 			for (Result r : resultScanner) {
 				if (i % pageSize == 0) {

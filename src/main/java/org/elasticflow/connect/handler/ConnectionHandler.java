@@ -1,6 +1,6 @@
 package org.elasticflow.connect.handler;
 
-import java.util.HashMap;
+import org.elasticflow.param.pipe.ConnectParams;
 
 /**
  * user defined connection pre-process function
@@ -8,6 +8,6 @@ import java.util.HashMap;
  * @version 1.0 
  */
 public interface ConnectionHandler {
-	void init(HashMap<String, Object> Params);
+	void init(ConnectParams Params);
 	public String getData();
 }

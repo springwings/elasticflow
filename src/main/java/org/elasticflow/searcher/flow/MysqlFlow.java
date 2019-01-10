@@ -1,9 +1,8 @@
 package org.elasticflow.searcher.flow;
 
-import java.util.HashMap;
-
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherResult;
+import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.searcher.SearcherFlowSocket;
 import org.elasticflow.searcher.handler.Handler;
 import org.elasticflow.util.FNException;
@@ -16,7 +15,7 @@ import org.elasticflow.util.FNException;
  */
 public class MysqlFlow extends SearcherFlowSocket{
 
-	public static MysqlFlow getInstance(HashMap<String, Object> connectParams) {
+	public static MysqlFlow getInstance(ConnectParams connectParams) {
 		return null;
 	}
 

@@ -1,8 +1,8 @@
 package org.elasticflow.connect;
 
-import java.util.HashMap;
-
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
+import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,26 +15,24 @@ import org.slf4j.LoggerFactory;
 public class SolrConnection extends FnConnectionSocket<CloudSolrClient> {
 
 	private final static int zkClientTimeout = 180000;
-	private final static int zkConnectTimeout = 60000;  
-	private CloudSolrClient conn = null; 
+	private final static int zkConnectTimeout = 60000;
+	private CloudSolrClient conn = null;
 
-	private final static Logger log = LoggerFactory
-			.getLogger("Solr Socket");
+	private final static Logger log = LoggerFactory.getLogger("Solr Socket");
 
-	public static FnConnectionSocket<?> getInstance(
-			HashMap<String, Object> ConnectParams) {
+	public static FnConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
 		FnConnectionSocket<?> o = new SolrConnection();
 		o.init(ConnectParams);
 		o.connect();
 		return o;
-	} 
+	}
 
 	@Override
 	public boolean connect() {
-		if (this.connectParams.get("ip") != null) {
+		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
+		if (wnp.getPath() != null) {
 			if (!status()) {
-				this.conn = new CloudSolrClient(
-						(String) this.connectParams.get("ip"));
+				this.conn = new CloudSolrClient(wnp.getPath());
 				this.conn.setZkClientTimeout(zkClientTimeout);
 				this.conn.setZkConnectTimeout(zkConnectTimeout);
 			}
@@ -46,12 +44,12 @@ public class SolrConnection extends FnConnectionSocket<CloudSolrClient> {
 
 	@Override
 	public CloudSolrClient getConnection(boolean searcher) {
-		int tryTime=0;
+		int tryTime = 0;
 		try {
-			while(tryTime<5 && !connect()){ 
+			while (tryTime < 5 && !connect()) {
 				tryTime++;
-				Thread.sleep(2000); 
-			} 
+				Thread.sleep(2000);
+			}
 		} catch (Exception e) {
 			log.error("try to get Connection Exception,", e);
 		}
@@ -60,9 +58,9 @@ public class SolrConnection extends FnConnectionSocket<CloudSolrClient> {
 
 	@Override
 	public boolean status() {
-		if (this.conn == null ) {
+		if (this.conn == null) {
 			return false;
-		} 
+		}
 		return true;
 	}
 
@@ -77,6 +75,6 @@ public class SolrConnection extends FnConnectionSocket<CloudSolrClient> {
 			return false;
 		}
 		return true;
-	} 
+	}
 
 }

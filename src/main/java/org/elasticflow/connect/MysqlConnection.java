@@ -2,8 +2,9 @@ package org.elasticflow.connect;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.HashMap;
 
+import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.param.warehouse.WarehouseSqlParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,59 +14,58 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @date 2018-10-26 09:25
  */
-public class MysqlConnection extends FnConnectionSocket<Connection>{ 
-	
-	private Connection conn = null;  
-	
-	private final static Logger log = LoggerFactory
-			.getLogger("Mysql Socket");
-	
-	static{
-		 try {
+public class MysqlConnection extends FnConnectionSocket<Connection> {
+
+	private Connection conn = null;
+
+	private final static Logger log = LoggerFactory.getLogger("Mysql Socket");
+
+	static {
+		try {
 			Class.forName("com.mysql.jdbc.Driver");
 		} catch (Exception e) {
-			log.error("MysqlConnection Exception,",e);
+			log.error("MysqlConnection Exception,", e);
 		}
 	}
-	
-	public static FnConnectionSocket<?> getInstance(HashMap<String, Object> ConnectParams){
+
+	public static FnConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
 		FnConnectionSocket<?> o = new MysqlConnection();
-		o.init(ConnectParams); 
+		o.init(ConnectParams);
 		o.connect();
 		return o;
 	}
-	 
 
 	@Override
 	public boolean connect() {
 		try {
 			if (!status()) {
+				WarehouseSqlParam wsp = (WarehouseSqlParam) this.connectParams.getWhp();
 				this.conn = DriverManager.getConnection(getConnectionUrl(),
-						this.connectParams.get("user").toString(), this.connectParams.get("password").toString());
-				log.info("build connect to the Database " + this.connectParams.get("host")
-						+ this.connectParams.get("port") + this.connectParams.get("dbname"));
+						wsp.getUser(),
+						wsp.getPassword());
+				log.info("build connect to " + getConnectionUrl());
 			}
 			return true;
 		} catch (Exception e) {
-			log.error(this.connectParams.get("host")+" connect Exception,", e);
+			log.error(((WarehouseSqlParam) this.connectParams.getWhp()).getHost() + " connect Exception,", e);
 			return false;
 		}
 	}
 
 	@Override
 	public Connection getConnection(boolean searcher) {
-		int tryTime=0;
+		int tryTime = 0;
 		try {
-			while(tryTime<5 && !connect()){ 
+			while (tryTime < 5 && !connect()) {
 				tryTime++;
-				Thread.sleep(2000); 
-			} 
+				Thread.sleep(2000);
+			}
 		} catch (Exception e) {
 			log.error("try to get Connection Exception,", e);
 		}
 		return this.conn;
 	}
-	
+
 	@Override
 	public boolean free() {
 		try {
@@ -78,21 +78,23 @@ public class MysqlConnection extends FnConnectionSocket<Connection>{
 		}
 		return true;
 	}
-	
+
 	@Override
-	public boolean status(){
+	public boolean status() {
 		try {
-			if(this.conn != null && !this.conn.isClosed()){
+			if (this.conn != null && !this.conn.isClosed()) {
 				return true;
-			} 
-		} catch (Exception e) { 
+			}
+		} catch (Exception e) {
 			log.error("get status Exception,", e);
-		} 
+		}
 		return false;
 	}
- 
+
 	private String getConnectionUrl() {
-		return "jdbc:mysql://" + this.connectParams.get("host") + ":" + this.connectParams.get("port") + "/" + this.connectParams.get("dbname")
+		return "jdbc:mysql://" + ((WarehouseSqlParam) this.connectParams.getWhp()).getHost() + ":"
+				+ ((WarehouseSqlParam) this.connectParams.getWhp()).getPort() + "/"
+				+ ((WarehouseSqlParam) this.connectParams.getWhp()).getDbname(this.connectParams.getL1Seq())
 				+ "?autoReconnect=true&failOverReadOnly=false";
-	}  
+	}
 }

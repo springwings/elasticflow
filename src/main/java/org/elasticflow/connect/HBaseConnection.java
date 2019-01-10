@@ -1,13 +1,13 @@
 package org.elasticflow.connect;
 
-import java.util.HashMap;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Connection;
-import org.apache.hadoop.hbase.client.ConnectionFactory; 
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Table;
+import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,19 +24,18 @@ public class HBaseConnection extends FnConnectionSocket<Table>{
 	private Connection Hconn;
 	private Table conn;
 
-	public static FnConnectionSocket<?> getInstance(
-			HashMap<String, Object> ConnectParams) {
+	public static FnConnectionSocket<?> getInstance(ConnectParams connectParams) {
 		FnConnectionSocket<?> o = new HBaseConnection();
-		o.init(ConnectParams);
+		o.init(connectParams);
 		o.connect();
 		return o;
 	}
 
 	@Override
-	public void init(HashMap<String, Object> ConnectParams) {
-		this.connectParams = ConnectParams;
+	public void init(ConnectParams connectParams) {
+		this.connectParams = connectParams;
 		this.hbaseConfig = HBaseConfiguration.create();
-		String ipString = (String) this.connectParams.get("ip");
+		String ipString = ((WarehouseNosqlParam) connectParams.getWhp()).getPath();
 		if (ipString != null && ipString.length() > 0) {
 			String[] ips = ipString.split(",");
 			StringBuilder ipStr = new StringBuilder();
@@ -109,9 +108,12 @@ public class HBaseConnection extends FnConnectionSocket<Table>{
 		if (!status()) {
 			try {
 				this.Hconn = ConnectionFactory.createConnection(this.hbaseConfig);
-				this.conn = this.Hconn.getTable(
-						TableName.valueOf(String.valueOf(this.connectParams
-								.get("tableName")))); 
+				String tableColumnFamily = ((WarehouseNosqlParam) connectParams.getWhp()).getDefaultValue();
+				if (tableColumnFamily != null && tableColumnFamily.length() > 0) {
+					String[] strs = tableColumnFamily.split(":"); 
+					this.conn = this.Hconn.getTable(
+							TableName.valueOf(strs[0])); 
+				} 
 			} catch (Exception e) {
 				log.error("HBase connect Exception,", e);
 				return false;

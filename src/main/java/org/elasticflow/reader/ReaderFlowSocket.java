@@ -13,6 +13,7 @@ import org.elasticflow.field.RiverField;
 import org.elasticflow.flow.Flow;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
+import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.handler.Handler;
 
 /**
@@ -31,9 +32,9 @@ public abstract class ReaderFlowSocket extends Flow{
 	public final Lock lock = new ReentrantLock();   
 	
 	@Override
-	public void INIT(final HashMap<String, Object> connectParams) {
-		this.connectParams = connectParams;
-		this.poolName = String.valueOf(connectParams.get("poolName")); 
+	public void INIT(ConnectParams connectParams) {
+		this.connectParams = connectParams; 
+		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq()); 
 	} 
 	 
 	public abstract DataPage getPageData(final HashMap<String, String> param,final Map<String, RiverField> transParams,Handler handler,int pageSize);

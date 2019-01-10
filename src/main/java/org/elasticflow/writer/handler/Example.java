@@ -1,7 +1,6 @@
 package org.elasticflow.writer.handler;
 
-import java.util.HashMap;
-
+import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.writer.flow.SolrFlow;
 
 /**
@@ -12,7 +11,7 @@ import org.elasticflow.writer.flow.SolrFlow;
  */
 public class Example extends SolrFlow{
  
-	public static Example getInstance(HashMap<String, Object> connectParams) {
+	public static Example getInstance(ConnectParams connectParams) {
 		Example o = new Example();
 		o.INIT(connectParams);
 		return o;

@@ -1,7 +1,5 @@
 package org.elasticflow.param.warehouse;
 
-import java.util.HashMap;
-
 import org.elasticflow.config.GlobalParam.DATA_TYPE;
 
 /**
@@ -15,7 +13,7 @@ public class WarehouseNosqlParam implements WarehouseParam{
 	private DATA_TYPE type = DATA_TYPE.UNKNOWN;
 	private String name;
 	private String alias;
-	private String ip;
+	private String path;
 	private String defaultValue;
 	private String handler;
 	private String[] L1seq = {};
@@ -25,24 +23,32 @@ public class WarehouseNosqlParam implements WarehouseParam{
 	}
 	
 	public void setType(String type) {
-		if (type.equalsIgnoreCase("SOLR"))
+		switch (type.toUpperCase()) {
+		case "SOLR":
 			this.type = DATA_TYPE.SOLR;
-		else if (type.equalsIgnoreCase("ES"))
+			break;
+		case "ES":
 			this.type = DATA_TYPE.ES;
-		else if (type.equalsIgnoreCase("HBASE"))
+			break;
+		case "HBASE":
 			this.type = DATA_TYPE.HBASE;
+			break;
+		case "FILE":
+			this.type = DATA_TYPE.FILE;
+			break;
+		} 
 	}
-	public String getName() {
-		return name;
+	public String getName(String seq) {
+		return (seq != null) ? this.name.replace("#{seq}", seq) : this.name;
 	}
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getIp() {
-		return ip;
+	public String getPath() {
+		return path;
 	}
-	public void setIp(String ip) {
-		this.ip = ip;
+	public void setPath(String path) {
+		this.path = path;
 	}
 	@Override
 	public String getHandler() {
@@ -77,19 +83,13 @@ public class WarehouseNosqlParam implements WarehouseParam{
 
 	@Override
 	public String getPoolName(String seq) { 
-		return ((seq != null) ? this.alias.replace("#{seq}", seq):this.alias)+"_"+this.type+"_"+this.ip;
+		return ((seq != null) ? this.alias.replace("#{seq}", seq):this.alias)+"_"+this.type+"_"+this.path;
 	}
 
 	@Override
-	public HashMap<String, Object> getConnectParams(String seq) {
-		HashMap<String, Object> connectParams = new HashMap<String, Object>();
-		String name = (seq != null) ? getName().replace("#{seq}", seq) : getName();
-		connectParams.put("alias", getAlias());
-		connectParams.put("defaultValue", getDefaultValue()); 
-		connectParams.put("ip", getIp());
-		connectParams.put("name", name); 
-		connectParams.put("type", getType()); 
-		connectParams.put("poolName", getPoolName(seq));
-		return connectParams;
-	}	 
+	public int getMaxConn() {
+		// TODO Auto-generated method stub
+		return 0;
+	} 
+ 
 }

@@ -9,15 +9,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.field.RiverField;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
+import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.handler.Handler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -29,7 +29,7 @@ public class OracleFlow extends ReaderFlowSocket{
   
 	private final static Logger log = LoggerFactory.getLogger(OracleFlow.class);
 
-	public static OracleFlow getInstance(final HashMap<String, Object> connectParams) {
+	public static OracleFlow getInstance(final ConnectParams connectParams) {
 		OracleFlow o = new OracleFlow();
 		o.INIT(connectParams);
 		return o;

@@ -1,14 +1,12 @@
 package org.elasticflow.searcher;
 
-import java.util.HashMap;
-
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.flow.Socket;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
-import org.elasticflow.param.warehouse.WarehouseParam;
+import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.searcher.flow.ESFlow;
 import org.elasticflow.searcher.flow.MysqlFlow;
 import org.elasticflow.searcher.flow.SolrFlow;
+import org.elasticflow.util.Common;
 
 /**
  * 
@@ -31,44 +29,25 @@ public class SearcherSocketFactory implements Socket<SearcherFlowSocket>{
 	 */
 	@Override
 	public SearcherFlowSocket getSocket(Object... args) {
-		WarehouseParam param = (WarehouseParam) args[0];
+		ConnectParams param = (ConnectParams) args[0];
 		InstanceConfig instanceConfig = (InstanceConfig) args[1];
 		String L1seq = (String) args[2];
-		if (param instanceof WarehouseNosqlParam) {
-			return getNosqlFlowSocket(param, instanceConfig, L1seq);
-		} else {
-			return getSqlFlowSocket(param, instanceConfig, L1seq);
-		}
+		return getFlowSocket(param, instanceConfig, L1seq);
 	} 
 
-	private static SearcherFlowSocket getNosqlFlowSocket(WarehouseParam params, InstanceConfig instanceConfig, String L1seq) {
-		HashMap<String, Object> connectParams = params.getConnectParams(L1seq);
-		connectParams.put("instanceConfig", instanceConfig);
-		connectParams.put("handler", params.getHandler()); 
-		SearcherFlowSocket searcher = null;
-		switch (params.getType()) {
+	private static SearcherFlowSocket getFlowSocket(ConnectParams connectParams, InstanceConfig instanceConfig, String L1seq) {
+		connectParams.setInstanceConfig(instanceConfig);
+		switch (connectParams.getWhp().getType()) {
 		case ES:
-			searcher = ESFlow.getInstance(connectParams);
-			break;
+			return ESFlow.getInstance(connectParams); 
 		case SOLR:
-			searcher = SolrFlow.getInstance(connectParams);
-			break;
-		default:
-			break;
-		}
-		return searcher;
-	}
-
-	private static SearcherFlowSocket getSqlFlowSocket(WarehouseParam params, InstanceConfig instanceConfig, String L1seq) {
-		HashMap<String, Object> connectParams = params.getConnectParams(L1seq);
-		SearcherFlowSocket searcher = null;
-		switch (params.getType()) {
+			return SolrFlow.getInstance(connectParams); 
 		case MYSQL:
-			searcher = MysqlFlow.getInstance(connectParams);
-			break;
+			return MysqlFlow.getInstance(connectParams); 
 		default:
-			break;
-		}
-		return searcher;
-	} 
+			Common.LOG.error("WriterFlowSocket Connect Type "+connectParams.getWhp().getType()+" Not Support!");
+			return null;
+		} 
+	}
+ 
 }

@@ -21,7 +21,7 @@ public class IK {
 	 public static TokenStream participle(String contents) {
 		 TokenStream result = null;
 		 try {
-			 result=analyzer.tokenStream("contents",  new StringReader(contents));
+			 result = analyzer.tokenStream("contents",  new StringReader(contents));
 		 }catch (Exception e) {
 			Common.LOG.error("IK TokenStream Exception ",e);
 		 } 

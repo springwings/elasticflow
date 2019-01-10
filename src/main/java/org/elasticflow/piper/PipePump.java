@@ -59,12 +59,50 @@ public final class PipePump extends Instruction {
 		}
 	}
 
-	public void run(String instanceName, String storeId, String L1seq, boolean isFull, boolean masterControl)
+	public void run(String instance, String storeId, String L1seq, boolean isFull, boolean masterControl)
 			throws FNException {
-		if (getInstanceConfig().getReadParams().isSqlType()) {
-			sqlFlow(instanceName, storeId, L1seq, isFull, masterControl);
+		JOB_TYPE job_type;
+		String mainName = Common.getMainName(instance, L1seq);
+		String writeTo = masterControl ? getInstanceConfig().getPipeParams().getInstanceName() : mainName;
+		if (isFull) {
+			job_type = JOB_TYPE.FULL;
 		} else {
-			noSqlFlow(instanceName, storeId, L1seq, isFull, masterControl);
+			job_type = JOB_TYPE.INCREMENT;
+		}
+		List<String> L2seqs = getInstanceConfig().getReadParams().getSeq().size() > 0
+				? getInstanceConfig().getReadParams().getSeq()
+				: Arrays.asList("");
+		if (!Resource.FLOW_INFOS.containsKey(instance, job_type.name())) {
+			Resource.FLOW_INFOS.set(instance, job_type.name(), new HashMap<String, String>());
+		}
+		Resource.FLOW_INFOS.get(instance, job_type.name()).put(instance + " seqs nums", String.valueOf(L2seqs.size()));
+
+		if (getInstanceConfig().getReadParams().isSqlType()) {
+			sqlFlow(instance, mainName, job_type, isFull, storeId, L1seq, L2seqs, writeTo, masterControl);
+		} else {
+			noSqlFlow(instance, mainName, job_type, isFull, storeId, L1seq, L2seqs, writeTo, masterControl);
+		}
+		Resource.FLOW_INFOS.get(instance, job_type.name()).clear();
+		if (isFull) {
+			if (masterControl) {
+				String _dest = getInstanceConfig().getPipeParams().getInstanceName();
+				synchronized (Resource.FLOW_INFOS.get(_dest, GlobalParam.FLOWINFO.MASTER.name())) {
+					String remainJobs = Resource.FLOW_INFOS.get(_dest, GlobalParam.FLOWINFO.MASTER.name())
+							.get(GlobalParam.FLOWINFO.FULL_JOBS.name());
+					remainJobs = remainJobs.replace(mainName, "").trim();
+					Resource.FLOW_INFOS.get(_dest, GlobalParam.FLOWINFO.MASTER.name())
+							.put(GlobalParam.FLOWINFO.FULL_JOBS.name(), remainJobs);
+					if (remainJobs.length() == 0) {
+						String _storeId = Resource.FLOW_INFOS.get(_dest, GlobalParam.FLOWINFO.MASTER.name())
+								.get(GlobalParam.FLOWINFO.FULL_STOREID.name());
+						PipePump ts = Resource.SOCKET_CENTER.getPipePump(_dest, null, false,
+								GlobalParam.FLOW_TAG._DEFAULT.name());
+						CPU.RUN(ts.getID(), "Pond", "switchInstance", true, instance, L1seq, _storeId);
+					}
+				}
+			} else {
+				CPU.RUN(getID(), "Pond", "switchInstance", true, instance, L1seq, storeId);
+			}
 		}
 	}
 
@@ -90,85 +128,56 @@ public final class PipePump extends Instruction {
 	 * @param masterControl
 	 * @throws FNException
 	 */
-	private void noSqlFlow(String instanceName, String storeId, String L1seq, boolean isFullIndex,
-			boolean masterControl) throws FNException {
-		String desc = "increment";
-		String destName = Common.getMainName(instanceName, L1seq);
-		try {
-			NoSQLParam scanParam = (NoSQLParam) getInstanceConfig().getReadParams();
+	private void noSqlFlow(String instance, String mainName, JOB_TYPE job_type, boolean isFull, String storeId,
+			String L1seq, List<String> L2seqs, String writeTo, boolean masterControl) throws FNException {
 
-			HashMap<String, String> param = new HashMap<String, String>();
-			param.put("table", scanParam.getMainTable());
-			param.put(GlobalParam.READER_SCAN_KEY, scanParam.getScanField());
-			param.put(GlobalParam.READER_PAGE_KEY, scanParam.getPageField());
-			param.put("startTime", "0");
-			ConcurrentLinkedDeque<String> pageList = getReader().getPageSplit(param,
-					getInstanceConfig().getPipeParams().getReadPageSize());
-			if (pageList.size() > 0) {
-				log.info(Common.formatLog("start", "start " + desc, destName, storeId, "", 0, "", "0", 0,
-						",totalpage:" + pageList.size()));
-				int processPos = 0;
-				String startId = "";
-				String endId = "";
-				int total = 0;
-				ReaderState rState;
-				long start = Common.getNow();
-				for (String page : pageList) {
-					processPos++;
-					endId = page;
-					HashMap<String, String> pageParams = new HashMap<String, String>();
-					pageParams.put(GlobalParam._start, startId);
-					pageParams.put(GlobalParam._end, endId);
-					pageParams.put(GlobalParam._start_time, "0");
-					pageParams.put(GlobalParam._scan_field, scanParam.getScanField());
-					rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, desc, destName, storeId, "",
-							getReader().getPageData(pageParams, getInstanceConfig().getWriteFields(), this.readHandler,
-									getInstanceConfig().getPipeParams().getReadPageSize()),
-							",process:" + processPos + "/" + pageList.size(), false, false);
-
-					total += rState.getCount();
-					startId = endId;
-				}
-				log.info(Common.formatLog("complete", "complete " + desc, destName, storeId, "", total, "", "0",
-						Common.getNow() - start, ""));
-			}
-		} catch (Exception e) {
-
-		}
-	}
-
-	/**
-	 * do Sql resource data Write
-	 * 
-	 * @param storeId
-	 * @param lastTime     get sql data filter with scan last timestamp
-	 * @param lastBatchId
-	 * @param L1seq        for series data source sequence
-	 * @param instanceName data source main tag name
-	 * @return String last update value
-	 */
-	private void sqlFlow(String instance, String storeId, String L1seq, boolean isFull, boolean masterControl)
-			throws FNException {
-		JOB_TYPE job_type;
-		String mainName = Common.getMainName(instance, L1seq);
-		String writeTo = masterControl ? getInstanceConfig().getPipeParams().getInstanceName() : mainName;
-		if (isFull) {
-			job_type = JOB_TYPE.FULL;
-		} else {
-			job_type = JOB_TYPE.INCREMENT;
-		}
-		SQLParam scanParam = (SQLParam) getInstanceConfig().getReadParams();
-		List<String> L2seqs = scanParam.getSeq().size() > 0 ? scanParam.getSeq() : Arrays.asList("");
-		String originalSql = scanParam.getSql();
-
-		if (!Resource.FLOW_INFOS.containsKey(instance, job_type.name())) {
-			Resource.FLOW_INFOS.set(instance, job_type.name(), new HashMap<String, String>());
-		}
-		Resource.FLOW_INFOS.get(instance, job_type.name()).put(instance + " seqs nums", String.valueOf(L2seqs.size()));
+		NoSQLParam scanParam = (NoSQLParam) getInstanceConfig().getReadParams();
 		HashMap<String, String> param = new HashMap<String, String>();
 		for (String L2seq : L2seqs) {
 			try { 
-				getPageParam(param,isFull,instance,L1seq,L2seq,mainName,scanParam); 
+				getPageParam(param,isFull,instance,L1seq,L2seq,mainName,scanParam);
+				Resource.FLOW_INFOS.get(instance, job_type.name()).put(instance + L2seq, "start count page...");
+				getReader().lock.lock();
+				ConcurrentLinkedDeque<String> pageList = getReader().getPageSplit(param,
+						getInstanceConfig().getPipeParams().getReadPageSize());
+				getReader().lock.unlock();
+				if (pageList == null)
+					throw new FNException("read data get page split exception!");
+				int pageNum = pageList.size();
+				if (pageNum == 0) {
+					log.info(Common.formatLog("start", "Complete " + job_type.name(), mainName, storeId, L2seq, 0, "",
+							GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(L2seq), 0, " no data!"));
+				} else {
+					
+				} 
+			} catch (Exception e) {
+
+			}
+		} 
+	}
+
+	/**
+	 * do Sql resource data job
+	 * 
+	 * @param instance
+	 * @param mainName
+	 * @param job_type
+	 * @param isFull
+	 * @param storeId
+	 * @param L1seq
+	 * @param L2seqs
+	 * @param writeTo
+	 * @param masterControl
+	 * @throws FNException
+	 */
+	private void sqlFlow(String instance, String mainName, JOB_TYPE job_type, boolean isFull, String storeId,
+			String L1seq, List<String> L2seqs, String writeTo, boolean masterControl) throws FNException {
+		SQLParam scanParam = (SQLParam) getInstanceConfig().getReadParams();
+		String originalSql = scanParam.getSql();
+		HashMap<String, String> param = new HashMap<String, String>();
+		for (String L2seq : L2seqs) {
+			try {
+				getPageParam(param, isFull, instance, L1seq, L2seq, mainName, scanParam);
 				Resource.FLOW_INFOS.get(instance, job_type.name()).put(instance + L2seq, "start count page...");
 				getReader().lock.lock();
 				ConcurrentLinkedDeque<String> pageList = getReader().getPageSplit(param,
@@ -224,32 +233,11 @@ public final class PipePump extends Instruction {
 				}
 			}
 		}
-
-		Resource.FLOW_INFOS.get(instance, job_type.name()).clear();
-		if (isFull) {
-			if (masterControl) {
-				String _dest = getInstanceConfig().getPipeParams().getInstanceName();
-				synchronized (Resource.FLOW_INFOS.get(_dest, GlobalParam.FLOWINFO.MASTER.name())) {
-					String remainJobs = Resource.FLOW_INFOS.get(_dest, GlobalParam.FLOWINFO.MASTER.name())
-							.get(GlobalParam.FLOWINFO.FULL_JOBS.name());
-					remainJobs = remainJobs.replace(mainName, "").trim();
-					Resource.FLOW_INFOS.get(_dest, GlobalParam.FLOWINFO.MASTER.name())
-							.put(GlobalParam.FLOWINFO.FULL_JOBS.name(), remainJobs);
-					if (remainJobs.length() == 0) {
-						String _storeId = Resource.FLOW_INFOS.get(_dest, GlobalParam.FLOWINFO.MASTER.name())
-								.get(GlobalParam.FLOWINFO.FULL_STOREID.name());
-						PipePump ts = Resource.SOCKET_CENTER.getPipePump(_dest, null, false,
-								GlobalParam.FLOW_TAG._DEFAULT.name());
-						CPU.RUN(ts.getID(), "Pond", "switchInstance", true, instance, L1seq, _storeId);
-					}
-				}
-			} else {
-				CPU.RUN(getID(), "Pond", "switchInstance", true, instance, L1seq, storeId);
-			}
-		}
 	}
 
-	/** control repeat with time job
+	/**
+	 * control repeat with time job
+	 * 
 	 * @param param
 	 * @param isFull
 	 * @param instance
@@ -260,22 +248,23 @@ public final class PipePump extends Instruction {
 	 */
 	private void getPageParam(HashMap<String, String> param, boolean isFull, String instance, String L1seq,
 			String L2seq, String mainName, final ScanParam scanParam) {
-		if (scanParam instanceof SQLParam) {
-			param.put(GlobalParam.READER_SCAN_KEY, scanParam.getScanField());
-			param.put(GlobalParam.READER_PAGE_KEY, scanParam.getPageField());
-			param.put(GlobalParam._start_time, isFull ? Common.getFullStartInfo(instance, L1seq)
-					: GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(L2seq));
-			param.put(GlobalParam._end_time, scanParam.getCurrentStamp());
-			param.put(GlobalParam._seq, L2seq);
+		param.put(GlobalParam.READER_SCAN_KEY, scanParam.getScanField());
+		param.put(GlobalParam.READER_PAGE_KEY, scanParam.getPageField());
+		param.put(GlobalParam._start_time, isFull ? Common.getFullStartInfo(instance, L1seq)
+				: GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(L2seq));
+		param.put(GlobalParam._end_time, scanParam.getCurrentStamp());
+		param.put(GlobalParam._seq, L2seq);
+		param.put("keyColumnType", scanParam.getKeyFieldType());
+		
+		if (scanParam instanceof SQLParam) { 
 			param.put("originalSql", ((SQLParam) scanParam).getSql());
-			param.put("pageSql", ((SQLParam) scanParam).getPageScan());
-			param.put("keyColumnType", scanParam.getKeyFieldType());
-
-			if (this.readHandler != null)
-				this.readHandler.handlePage("", param);
+			param.put("pageSql", ((SQLParam) scanParam).getPageScan());  
 		} else {
-
-		}
+			 
+		} 
+		
+		if (this.readHandler != null)
+			this.readHandler.handlePage("", param);
 	}
 
 	/**

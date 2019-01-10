@@ -9,15 +9,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.field.RiverField;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
+import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.handler.Handler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -29,7 +29,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 
 	private final static Logger log = LoggerFactory.getLogger(MysqlFlow.class);  
 
-	public static MysqlFlow getInstance(final HashMap<String, Object> connectParams) {
+	public static MysqlFlow getInstance(final ConnectParams connectParams) {
 		MysqlFlow o = new MysqlFlow();
 		o.INIT(connectParams);
 		return o;

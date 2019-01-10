@@ -1,8 +1,9 @@
 package org.elasticflow.connect;
 
 import java.net.InetAddress;
-import java.util.HashMap;
 
+import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -36,7 +37,7 @@ public class ESConnection extends FnConnectionSocket<ESConnector> {
 
 	private final static Logger log = LoggerFactory.getLogger(ESConnection.class);
 
-	public static FnConnectionSocket<?> getInstance(HashMap<String, Object> ConnectParams) {
+	public static FnConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
 		FnConnectionSocket<?> o = new ESConnection();
 		o.init(ConnectParams);
 		o.connect();
@@ -45,14 +46,14 @@ public class ESConnection extends FnConnectionSocket<ESConnector> {
 
 	@Override
 	public boolean connect() {
-		if (this.connectParams.get("ip") != null) {
+		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
+		if (wnp.getPath() != null) {
 			if (!status()) {
 				Settings settings = Settings.builder()
 				        .put("client.transport.sniff", true)
-				        .put("cluster.name", String.valueOf(this.connectParams.get("name"))).build(); 
-				this.conn = new PreBuiltTransportClient(settings);
-				String Ips = (String) this.connectParams.get("ip");
-				for (String ip : Ips.split(",")) {
+				        .put("cluster.name", wnp.getName(this.connectParams.getL1Seq())).build(); 
+				this.conn = new PreBuiltTransportClient(settings); 
+				for (String ip : wnp.getPath().split(",")) {
 					try {
 						((TransportClient) this.conn)
 								.addTransportAddress(new TransportAddress(InetAddress.getByName(ip), 9300));

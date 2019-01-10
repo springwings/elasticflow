@@ -1,7 +1,5 @@
 package org.elasticflow.param.warehouse;
 
-import java.util.HashMap;
-
 import org.elasticflow.config.GlobalParam.DATA_TYPE;
 
 /**
@@ -21,5 +19,5 @@ public interface WarehouseParam {
 	
 	public String getPoolName(String seq);
 	
-	public HashMap<String, Object> getConnectParams(String seq);	
+	public int getMaxConn();	
 }

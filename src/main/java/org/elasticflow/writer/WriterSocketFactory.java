@@ -1,12 +1,9 @@
 package org.elasticflow.writer;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 
 import org.elasticflow.flow.Socket;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
-import org.elasticflow.param.warehouse.WarehouseParam;
-import org.elasticflow.param.warehouse.WarehouseSqlParam;
+import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 import org.elasticflow.writer.flow.ESFlow;
 import org.elasticflow.writer.flow.HBaseFlow;
@@ -29,59 +26,35 @@ public class WriterSocketFactory implements Socket<WriterFlowSocket>{
  
 	@Override
 	public WriterFlowSocket getSocket(Object... args) {
-		WarehouseParam param = (WarehouseParam) args[0];
+		ConnectParams param = (ConnectParams) args[0];
 		String L1seq = (String) args[1];
 		String handler = (String) args[2];
-		if(param instanceof WarehouseNosqlParam) {
-			return getNoSqlFlow(param,L1seq,handler);
-		}else {
-			return getSqlFlow(param,L1seq,handler);
-		} 
+		return getFlowSocket(param,L1seq,handler); 
 	} 
  
 	
-	private static WriterFlowSocket getSqlFlow(WarehouseParam param,String L1seq,String handler) {
-		WriterFlowSocket writer = null;  
-		WarehouseSqlParam params = (WarehouseSqlParam) param;
-		HashMap<String, Object> connectParams = params.getConnectParams(L1seq);
-		switch (params.getType()) {
-		case MYSQL: 
-			writer = MysqlFlow.getInstance(connectParams);
-			break; 
-		default:
-			break;
-		}
-		return writer;
-	}
-	
-	private static WriterFlowSocket getNoSqlFlow(WarehouseParam param,String L1seq,String handler) {
-		WriterFlowSocket writer = null;  
-		WarehouseNosqlParam params = (WarehouseNosqlParam) param;
-		HashMap<String, Object> connectParams = params.getConnectParams(L1seq);
+	private static WriterFlowSocket getFlowSocket(ConnectParams connectParams,String L1seq,String handler) { 
 		if(handler!=null) {
 			try {
 				Class<?> clz = Class.forName("org.elasticflow.writer.handler."+handler);
-				Method m = clz.getMethod("getInstance",HashMap.class);
-				writer = (WriterFlowSocket) m.invoke(null,connectParams);
+				Method m = clz.getMethod("getInstance",ConnectParams.class);
+				return (WriterFlowSocket) m.invoke(null,connectParams);
 			}catch (Exception e) {
 				Common.LOG.error("getNoSqlFlow Exception!",e);
-			} 
-			return writer;
+			}  
 		}
-		switch (params.getType()) {
+		switch (connectParams.getWhp().getType()) {
 			case ES:
-				writer = ESFlow.getInstance(connectParams);
-				break;
+				return ESFlow.getInstance(connectParams);
 			case SOLR:
-				writer = SolrFlow.getInstance(connectParams);
-				break;
+				return SolrFlow.getInstance(connectParams); 
 			case HBASE:
-				writer = HBaseFlow.getInstance(connectParams);
-				break;
+				return HBaseFlow.getInstance(connectParams); 
+			case MYSQL: 
+				return MysqlFlow.getInstance(connectParams); 
 			default:
-				Common.LOG.error("WriterFlowSocket getWriter Type Not Support!");
-				break; 
-		} 
-		return writer;
+				Common.LOG.error("WriterFlowSocket Connect Type "+connectParams.getWhp().getType()+" Not Support!");
+				return null;
+		}  
 	} 
 }

@@ -1,6 +1,5 @@
 package org.elasticflow.connect;
 
-import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -8,11 +7,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.concurrent.ThreadSafe;
 
+import org.elasticflow.config.GlobalParam;
+import org.elasticflow.param.pipe.ConnectParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.GlobalParam.DATA_TYPE;
 
 /**
  * all source connection manager
@@ -41,7 +39,7 @@ public final class FnConnectionPool {
 	 *            judge is support share connection to deal
 	 * @return
 	 */
-	public static FnConnectionSocket<?> getConn(HashMap<String, Object> params, String poolName, boolean canShareConn) {
+	public static FnConnectionSocket<?> getConn(ConnectParams params, String poolName, boolean canShareConn) {
 		return FnCPool.getConnection(params, poolName, canShareConn);
 	}
 
@@ -76,7 +74,7 @@ public final class FnConnectionPool {
 	/**
 	 * get connection from pool and waiting
 	 */
-	private FnConnectionSocket<?> getConnection(HashMap<String, Object> params, String poolName, boolean canShareConn) {
+	private FnConnectionSocket<?> getConnection(ConnectParams params, String poolName, boolean canShareConn) {
 		synchronized (this.pools) {
 			if (this.pools.get(poolName) == null) {
 				createPools(poolName, params);
@@ -100,7 +98,7 @@ public final class FnConnectionPool {
 		}
 	}
 
-	private void createPools(String poolName, HashMap<String, Object> params) {
+	private void createPools(String poolName, ConnectParams params) {
 		ConnectionPool pool = new ConnectionPool(GlobalParam.POOL_SIZE, poolName, params);
 		this.pools.put(poolName, pool);
 		log.info("success create pool " + poolName);
@@ -116,14 +114,14 @@ public final class FnConnectionPool {
 		private AtomicInteger activeNum = new AtomicInteger(0);
 		private final int maxConn;
 		private final String poolName;
-		private final HashMap<String, Object> params;
+		private final ConnectParams params; 
 		private ConcurrentLinkedQueue<FnConnectionSocket<?>> freeConnections = new ConcurrentLinkedQueue<FnConnectionSocket<?>>();
 		private FnConnectionSocket<?> shareConn;
 
-		public ConnectionPool(int maxConn, String poolName, final HashMap<String, Object> params) {
+		public ConnectionPool(int maxConn, String poolName, final ConnectParams params) {
 			super();
-			if (params.containsKey("maxConn")) {
-				this.maxConn = Integer.parseInt(String.valueOf(params.get("maxConn")));
+			if (params.getWhp().getMaxConn()>0) {
+				this.maxConn = params.getWhp().getMaxConn();
 			} else {
 				this.maxConn = maxConn;
 			}
@@ -225,7 +223,7 @@ public final class FnConnectionPool {
 		private FnConnectionSocket<?> newConnection() {
 			FnConnectionSocket<?> conn = null;
 			if (params != null) {
-				switch ((DATA_TYPE) params.get("type")) {
+				switch (params.getWhp().getType()) {
 				case ORACLE:
 					conn = OracleConnection.getInstance(params);
 					break;

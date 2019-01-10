@@ -3,28 +3,27 @@ package org.elasticflow.writer.flow;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.config.GlobalParam.Mechanism;
+import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.RiverField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
+import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.FNException;
 import org.elasticflow.util.SqlUtil;
 import org.elasticflow.writer.WriterFlowSocket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MysqlFlow extends WriterFlowSocket {
 
 	private final static Logger log = LoggerFactory.getLogger("MysqlFlow");
 
-	public static MysqlFlow getInstance(HashMap<String, Object> connectParams) {
+	public static MysqlFlow getInstance(ConnectParams connectParams) {
 		MysqlFlow o = new MysqlFlow();
 		o.INIT(connectParams);
 		return o;

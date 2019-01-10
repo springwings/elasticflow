@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.response.FacetField;
@@ -17,18 +16,18 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.util.NamedList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connect.handler.ConnectionHandler;
 import org.elasticflow.field.RiverField;
 import org.elasticflow.model.searcher.ResponseDataUnit;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherResult;
+import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.searcher.SearcherFlowSocket;
 import org.elasticflow.searcher.handler.Handler;
 import org.elasticflow.util.FNException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -44,21 +43,20 @@ public class SolrFlow extends SearcherFlowSocket {
 
 	private final static Logger log = LoggerFactory.getLogger(SolrFlow.class);
 
-	public static SolrFlow getInstance(HashMap<String, Object> connectParams) {
+	public static SolrFlow getInstance(ConnectParams connectParams) {
 		SolrFlow o = new SolrFlow();
 		o.INIT(connectParams);
 		return o;
 	}
 	
 	@Override
-	public void INIT(HashMap<String, Object> connectParams) {
+	public void INIT(ConnectParams connectParams) {
 		this.connectParams = connectParams;
-		this.poolName = String.valueOf(connectParams.get("poolName"));
-		this.instanceConfig = (InstanceConfig) this.connectParams.get("instanceConfig");
-		this.analyzer = (Analyzer) this.connectParams.get("analyzer");
-		if(this.connectParams.get("handler")!=null){ 
+		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq());
+		this.instanceConfig = connectParams.getInstanceConfig(); 
+		if(connectParams.getWhp().getHandler()!=null){ 
 			try {
-				this.handler = (ConnectionHandler)Class.forName((String) this.connectParams.get("handler")).newInstance();
+				this.handler = (ConnectionHandler)Class.forName(connectParams.getWhp().getHandler()).newInstance();
 				this.handler.init(connectParams);
 			} catch (Exception e) {
 				log.error("Init handler Exception",e);
@@ -118,7 +116,7 @@ public class SolrFlow extends SearcherFlowSocket {
 			}  
 		}
 		if(this.collectionName==null || this.collectionName=="")
-				this.collectionName = String.valueOf(this.connectParams.get("defaultValue"));
+				this.collectionName = ((WarehouseNosqlParam) this.connectParams.getWhp()).getDefaultValue();
 		return this.collectionName;
 	} 
 	

@@ -1,13 +1,12 @@
 package org.elasticflow.flow;
 
-import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.elasticflow.connect.FnConnectionPool;
-import org.elasticflow.connect.FnConnectionSocket; 
+import org.elasticflow.connect.FnConnectionSocket;
+import org.elasticflow.param.pipe.ConnectParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory; 
 /**
  * data pipe flow model 
  * @author chengwen
@@ -18,15 +17,15 @@ public abstract class Flow {
 	
 	protected volatile FnConnectionSocket<?> FC;
 	
-	protected String poolName;
+	protected String poolName; 
 	
-	protected volatile HashMap<String, Object> connectParams;
+	protected ConnectParams connectParams;
 	
 	protected AtomicInteger retainer = new AtomicInteger(0);
 	
 	private final static Logger log = LoggerFactory.getLogger(Flow.class);
 	
-	public abstract void INIT(HashMap<String, Object> connectParams);
+	public abstract void INIT(ConnectParams connectParams);
 	
 	public FnConnectionSocket<?> PREPARE(boolean isMonopoly,boolean canSharePipe) {  
 		if(isMonopoly) {

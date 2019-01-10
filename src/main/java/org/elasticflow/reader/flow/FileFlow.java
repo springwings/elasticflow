@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.field.RiverField;
 import org.elasticflow.model.reader.DataPage;
+import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.handler.Handler;
 
@@ -25,7 +27,7 @@ public class FileFlow extends ReaderFlowSocket {
 
 	private final static Logger log = LoggerFactory.getLogger(FileFlow.class);
 
-	public static FileFlow getInstance(HashMap<String, Object> connectParams) {
+	public static FileFlow getInstance(ConnectParams connectParams) {
 		FileFlow o = new FileFlow();
 		o.INIT(connectParams);
 		return o;
@@ -56,7 +58,8 @@ public class FileFlow extends ReaderFlowSocket {
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>(); 
 		boolean releaseConn = false;
 		try { 
-			LineNumberReader lnr = new LineNumberReader(new FileReader(String.valueOf(GETSOCKET().getConnectParams().get("path"))));
+			LineNumberReader lnr = new LineNumberReader(
+					new FileReader(((WarehouseNosqlParam) GETSOCKET().getConnectParams().getWhp()).getPath()));
 			lnr.skip(Long.MAX_VALUE);
 	        int lineNo = lnr.getLineNumber() + 1;
 	        lnr.close();

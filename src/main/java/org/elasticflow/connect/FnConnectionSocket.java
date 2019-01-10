@@ -1,6 +1,6 @@
 package org.elasticflow.connect; 
 
-import java.util.HashMap;
+import org.elasticflow.param.pipe.ConnectParams;
 
 /** 
  * @author chengwen
@@ -10,7 +10,7 @@ import java.util.HashMap;
  */
 public abstract class FnConnectionSocket<T>{
 	
-	protected volatile HashMap<String, Object> connectParams = null;
+	protected volatile ConnectParams connectParams;
 	
 	private boolean isShare = false; 
 	
@@ -22,7 +22,7 @@ public abstract class FnConnectionSocket<T>{
 	
 	public abstract boolean free();
 	  
-	public void init(HashMap<String, Object> ConnectParams) {
+	public void init(ConnectParams ConnectParams) {
 		this.connectParams = ConnectParams; 
 	}
  
@@ -34,7 +34,7 @@ public abstract class FnConnectionSocket<T>{
 		this.isShare = share;
 	}  
 	
-	public HashMap<String, Object> getConnectParams(){
+	public ConnectParams getConnectParams(){
 		return this.connectParams;
 	}
 }

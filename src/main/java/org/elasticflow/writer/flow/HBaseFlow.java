@@ -1,6 +1,5 @@
 package org.elasticflow.writer.flow;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,15 +10,16 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.RiverField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
+import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.util.FNException;
 import org.elasticflow.writer.WriterFlowSocket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * HBase flow Writer Manager
@@ -30,26 +30,25 @@ import org.elasticflow.writer.WriterFlowSocket;
 public class HBaseFlow extends WriterFlowSocket { 
 	 
 	private List<Put> data = new CopyOnWriteArrayList<Put>();   
+	private String columnFamily;
 	private final static Logger log = LoggerFactory.getLogger("HBaseFlow"); 
 	
-	public static HBaseFlow getInstance(HashMap<String, Object> connectParams) {
+	public static HBaseFlow getInstance(ConnectParams connectParams) {
 		HBaseFlow o = new HBaseFlow();
 		o.INIT(connectParams);
 		return o;
 	}
 	
 	@Override
-	public void INIT(HashMap<String, Object> connectParams) {
+	public void INIT(ConnectParams connectParams) {
 		this.connectParams = connectParams;  
-		String tableColumnFamily = (String) this.connectParams.get("defaultValue");
+		String tableColumnFamily = ((WarehouseNosqlParam) connectParams.getWhp()).getDefaultValue();
 		if (tableColumnFamily != null && tableColumnFamily.length() > 0) {
-			String[] strs = tableColumnFamily.split(":");
-			if (strs != null && strs.length > 0)
-				this.connectParams.put("tableName", strs[0]);
+			String[] strs = tableColumnFamily.split(":"); 
 			if (strs != null && strs.length > 1)
-				this.connectParams.put("columnFamily", strs[1]);
+				this.columnFamily = strs[1];
 		}
-		this.poolName = String.valueOf(connectParams.get("poolName"));
+		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq());
 	} 
 	
 	
@@ -85,7 +84,7 @@ public class HBaseFlow extends WriterFlowSocket {
 				transParam = transParams.get(field.toUpperCase());
 			if (transParam == null)
 				continue; 
-			put.addColumn(Bytes.toBytes((String)connectParams.get("columnFamily")), Bytes.toBytes(transParam.getAlias()),
+			put.addColumn(Bytes.toBytes(this.columnFamily), Bytes.toBytes(transParam.getAlias()),
 					Bytes.toBytes(value));  
 		} 
 		synchronized (data) {

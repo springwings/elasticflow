@@ -1,7 +1,5 @@
 package org.elasticflow.param.warehouse;
 
-import java.util.HashMap;
-
 import org.elasticflow.config.GlobalParam.DATA_TYPE;
 
 /**
@@ -48,8 +46,8 @@ public class WarehouseSqlParam implements WarehouseParam{
 	public void setHandler(String handler) {
 		this.handler = handler;
 	}
-	public String getDbname() {
-		return dbname;
+	public String getDbname(String seq) {
+		return (seq != null) ? this.dbname.replace("#{seq}", seq) : this.dbname; 
 	}
 	public void setDbname(String db) {
 		this.dbname = db;
@@ -101,16 +99,8 @@ public class WarehouseSqlParam implements WarehouseParam{
 		return this.alias+"_"+this.type+"_"+this.host+"_"+((seq != null) ? this.dbname.replace("#{seq}", seq):this.dbname);
 	}
 	@Override
-	public HashMap<String, Object> getConnectParams(String seq) {
-		HashMap<String, Object> connectParams = new HashMap<String, Object>();
-		String dbname = (seq != null) ? getDbname().replace("#{seq}", seq) : getDbname();
-		connectParams.put("host", getHost());
-		connectParams.put("port", String.valueOf(getPort()));
-		connectParams.put("dbname", dbname);
-		connectParams.put("user", getUser());
-		connectParams.put("password", getPassword()); 
-		connectParams.put("type", getType());
-		connectParams.put("poolName", getPoolName(seq));
-		return connectParams;
-	}	 
+	public int getMaxConn() { 
+		return 0;
+	}
+	  
 }

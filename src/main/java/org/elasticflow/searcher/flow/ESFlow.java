@@ -1,10 +1,18 @@
 package org.elasticflow.searcher.flow;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.elasticflow.connect.ESConnector;
+import org.elasticflow.field.RiverField;
+import org.elasticflow.model.searcher.ResponseDataUnit;
+import org.elasticflow.model.searcher.SearcherModel;
+import org.elasticflow.model.searcher.SearcherResult;
+import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.searcher.SearcherFlowSocket;
+import org.elasticflow.searcher.handler.Handler;
+import org.elasticflow.util.FNException;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -17,14 +25,6 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 
 import com.alibaba.fastjson.JSON;
-import org.elasticflow.connect.ESConnector;
-import org.elasticflow.field.RiverField;
-import org.elasticflow.model.searcher.ResponseDataUnit;
-import org.elasticflow.model.searcher.SearcherModel;
-import org.elasticflow.model.searcher.SearcherResult;
-import org.elasticflow.searcher.SearcherFlowSocket;
-import org.elasticflow.searcher.handler.Handler;
-import org.elasticflow.util.FNException;
 
 /**
  * 
@@ -34,7 +34,7 @@ import org.elasticflow.util.FNException;
  */
 public final class ESFlow extends SearcherFlowSocket {  
 	 
-	public static ESFlow getInstance(HashMap<String, Object> connectParams) {
+	public static ESFlow getInstance(ConnectParams connectParams) {
 		ESFlow o = new ESFlow();
 		o.INIT(connectParams);
 		return o;

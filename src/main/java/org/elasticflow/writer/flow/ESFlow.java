@@ -39,6 +39,7 @@ import org.elasticflow.connect.ESConnector;
 import org.elasticflow.field.RiverField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
+import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.FNException;
 import org.elasticflow.writer.WriterFlowSocket;
@@ -58,7 +59,7 @@ public class ESFlow extends WriterFlowSocket {
  
 	private final static Logger log = LoggerFactory.getLogger("ESFlow");
 
-	public static ESFlow getInstance(HashMap<String, Object> connectParams) {
+	public static ESFlow getInstance(ConnectParams connectParams) {
 		ESFlow o = new ESFlow();
 		o.INIT(connectParams);
 		return o;

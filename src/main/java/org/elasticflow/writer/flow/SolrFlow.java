@@ -37,6 +37,7 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.RiverField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
+import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.FNException;
 import org.elasticflow.writer.WriterFlowSocket;
@@ -60,16 +61,16 @@ public class SolrFlow extends WriterFlowSocket{
 	
 	private final static Logger log = LoggerFactory.getLogger("SolrFlow");  
 	
-	public static SolrFlow getInstance(HashMap<String, Object> connectParams) {
+	public static SolrFlow getInstance(ConnectParams connectParams) {
 		SolrFlow o = new SolrFlow();
 		o.INIT(connectParams);
 		return o;
 	}
 	
 	@Override
-	public void INIT(HashMap<String, Object> connectParams) {
+	public void INIT(ConnectParams connectParams) {
 		this.connectParams = connectParams; 
-		this.poolName = String.valueOf(connectParams.get("poolName")); 
+		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq());
 		this.isBatch = GlobalParam.WRITE_BATCH;
 	}
  
