@@ -2,19 +2,17 @@ package org.elasticflow.reader;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.elasticflow.field.RiverField;
 import org.elasticflow.flow.Flow;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.reader.handler.Handler;
+import org.elasticflow.task.JobPage;
 
 /**
  * 
@@ -37,7 +35,7 @@ public abstract class ReaderFlowSocket extends Flow{
 		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq()); 
 	} 
 	 
-	public abstract DataPage getPageData(final HashMap<String, String> param,final Map<String, RiverField> transParams,Handler handler,int pageSize);
+	public abstract DataPage getPageData(final JobPage JP,int pageSize);
 
 	public abstract ConcurrentLinkedDeque<String> getPageSplit(final HashMap<String, String> param,int pageSize);
 	

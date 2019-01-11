@@ -21,6 +21,7 @@ import org.elasticflow.param.warehouse.SQLParam;
 import org.elasticflow.param.warehouse.ScanParam;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.handler.Handler;
+import org.elasticflow.task.JobPage;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.FNException;
 import org.elasticflow.util.SqlUtil;
@@ -148,7 +149,7 @@ public final class PipePump extends Instruction {
 					log.info(Common.formatLog("start", "Complete " + job_type.name(), mainName, storeId, L2seq, 0, "",
 							GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(L2seq), 0, " no data!"));
 				} else {
-					
+					long start = Common.getNow();
 				} 
 			} catch (Exception e) {
 
@@ -294,14 +295,13 @@ public final class PipePump extends Instruction {
 					param.get(GlobalParam._start_time), param.get(GlobalParam._end_time), scanField));
 			if (Common.checkFlowStatus(instance, L1seq, job_type, STATUS.Termination)) {
 				break;
-			} else {
-				DataPage pagedata;
-				if (getInstanceConfig().openCompute()) {
-					getReader().lock.lock();
-					pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchDataSet", false, sql, scanField, keyField,
-							getInstanceConfig().getComputeFields(), getReader(), this.readHandler);
-					getReader().freeJobPage();
-					getReader().lock.unlock();
+			} else { 
+				getReader().lock.lock();
+				DataPage pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchPage", false, JobPage.getInstance(keyField, scanField, startId, dataBoundary, this.readHandler, getInstanceConfig().getWriteFields(), sql),
+						 getReader());
+				getReader().freeJobPage();
+				getReader().lock.unlock();
+				if (getInstanceConfig().openCompute()) { 
 					pagedata = (DataPage) CPU.RUN(getID(), "ML", "computeDataSet", false, getID(), job_type.name(),
 							writeTo, pagedata);
 					if (processPos == pageNum) {
@@ -310,12 +310,7 @@ public final class PipePump extends Instruction {
 					} else {
 						continue;
 					}
-				} else {
-					getReader().lock.lock();
-					pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchDataSet", false, sql, scanField, keyField,
-							getInstanceConfig().getWriteFields(), getReader(), this.readHandler);
-					getReader().freeJobPage();
-					getReader().lock.unlock();
+				} else { 
 					rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, job_type.name(), writeTo,
 							storeId, L2seq, pagedata, ",process:" + processPos + "/" + pageNum, isUpdate, false);
 				}
@@ -404,14 +399,13 @@ public final class PipePump extends Instruction {
 					Resource.ThreadPools.cleanWaitJob(getId());
 					Common.LOG.warn(instance + " " + job_type.name() + " job has been Terminated!");
 					break;
-				} else {
-					DataPage pagedata;
-					if (getInstanceConfig().openCompute()) {
-						getReader().lock.lock();
-						pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchDataSet", false, sql, scanField, keyField,
-								getInstanceConfig().getComputeFields(), getReader(), readHandler);
-						getReader().freeJobPage();
-						getReader().lock.unlock();
+				} else { 
+					getReader().lock.lock();
+					DataPage pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchPage", false,JobPage.getInstance(keyField, scanField, startId, dataBoundary, readHandler, getInstanceConfig().getWriteFields(), sql) , 
+							getInstanceConfig().getWriteFields(), getReader());
+					getReader().freeJobPage();
+					getReader().lock.unlock();
+					if (getInstanceConfig().openCompute()) { 
 						pagedata = (DataPage) CPU.RUN(getID(), "ML", "computeDataSet", false, getID(), job_type.name(),
 								writeTo, pagedata);
 						synchronized (processPos) {
@@ -423,12 +417,7 @@ public final class PipePump extends Instruction {
 								continue;
 							}
 						}
-					} else {
-						getReader().lock.lock();
-						pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchDataSet", false, sql, scanField, keyField,
-								getInstanceConfig().getWriteFields(), getReader(), readHandler);
-						getReader().freeJobPage();
-						getReader().lock.unlock();
+					} else { 
 						try {
 							rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, job_type.name(),
 									writeTo, storeId, L2seq, pagedata, ",process:" + processPos + "/" + pageSize,

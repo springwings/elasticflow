@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 
 import org.elasticflow.flow.Socket;
 import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.reader.flow.FileFlow;
 import org.elasticflow.reader.flow.HbaseFlow;
 import org.elasticflow.reader.flow.MysqlFlow;
 import org.elasticflow.reader.flow.OracleFlow;
@@ -50,6 +51,7 @@ public final class ReaderFlowSocketFactory implements Socket<ReaderFlowSocket> {
 		case HBASE:
 			return HbaseFlow.getInstance(connectParams);
 		case FILE: 
+			return FileFlow.getInstance(connectParams);
 		default:
 			Common.LOG.error("WriterFlowSocket Connect Type "+connectParams.getWhp().getType()+" Not Support!");
 			return null;

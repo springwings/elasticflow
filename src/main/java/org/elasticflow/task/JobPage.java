@@ -1,83 +1,78 @@
 package org.elasticflow.task;
 
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
-import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.field.RiverField;
+import org.elasticflow.reader.handler.Handler;
 
 /**
+ * JobPage define Task Page Segment
  * 
  * @author chengwen
- * @version 1.0
+ * @version 2.0
  * @date 2018-11-08 16:49
  */
-public class JobPage {
-	private long id;
-	private String instance;
-	public CountDownLatch leftPage;
-	private JOB_TYPE job_type;
-	private String L2seq;
-	private String sql;
-	private String incrementField;
-	private String keyColumn;
+public final class JobPage {
+
+	private String readerScanKey;
+	private String readerKey;
+	private String start;
+	private String end;
+	private Handler readHandler;
 	private Map<String, RiverField> transField;
-	private long timeStamp = System.currentTimeMillis();
- 
-	public long getId() {
-		return id;
+	private String additional;
+
+	public static JobPage getInstance(String readerKey, String readerScanKey, String start, String end,
+			Handler readHandler, Map<String, RiverField> transField, String additional) {
+		JobPage o = new JobPage();
+		o.readerKey = readerKey;
+		o.readerScanKey = readerScanKey;
+		o.start = start;
+		o.end = end;
+		o.readHandler = readHandler;
+		o.transField = transField;
+		o.additional = additional;
+		return o;
 	}
 
-	public void setId(long id) {
-		this.id = id;
+	public String getReaderScanKey() {
+		return readerScanKey;
 	}
 
-	public String getInstance() {
-		return instance;
+	public void setReaderScanKey(String readerScanKey) {
+		this.readerScanKey = readerScanKey;
 	}
 
-	public void setInstance(String instance) {
-		this.instance = instance;
+	public String getReaderKey() {
+		return readerKey;
 	}
 
-	public JOB_TYPE getJob_type() {
-		return job_type;
+	public void setReaderKey(String readerKey) {
+		this.readerKey = readerKey;
 	}
 
-	public void setJob_type(JOB_TYPE job_type) {
-		this.job_type = job_type;
+	public String getStart() {
+		return start;
 	}
 
-	public String getL2seq() {
-		return L2seq;
+	public void setStart(String start) {
+		this.start = start;
 	}
 
-	public void setL2seq(String L2seq) {
-		this.L2seq = L2seq;
+	public String getEnd() {
+		return end;
 	}
 
-	public String getSql() {
-		return sql;
+	public void setEnd(String end) {
+		this.end = end;
 	}
 
-	public void setSql(String sql) {
-		this.sql = sql;
+	public Handler getReadHandler() {
+		return readHandler;
 	}
 
-	public String getIncrementField() {
-		return incrementField;
-	}
-
-	public void setIncrementField(String incrementField) {
-		this.incrementField = incrementField;
-	}
-
-	public String getKeyColumn() {
-		return keyColumn;
-	}
-
-	public void setKeyColumn(String keyColumn) {
-		this.keyColumn = keyColumn;
+	public void setReadHandler(Handler readHandler) {
+		this.readHandler = readHandler;
 	}
 
 	public Map<String, RiverField> getTransField() {
@@ -88,7 +83,11 @@ public class JobPage {
 		this.transField = transField;
 	}
 
-	public long getTimeStamp() {
-		return timeStamp;
+	public String getAdditional() {
+		return additional;
+	}
+
+	public void setAdditional(String additional) {
+		this.additional = additional;
 	}
 }

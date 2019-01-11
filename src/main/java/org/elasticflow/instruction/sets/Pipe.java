@@ -1,22 +1,16 @@
 package org.elasticflow.instruction.sets;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.elasticflow.config.GlobalParam;
-import org.elasticflow.field.RiverField;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.ReaderState;
 import org.elasticflow.reader.ReaderFlowSocket;
-import org.elasticflow.reader.handler.Handler;
 import org.elasticflow.reader.util.DataSetReader;
+import org.elasticflow.task.JobPage;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.FNException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -50,23 +44,16 @@ public class Pipe extends Instruction {
 	
 	/**
 	 * @param args
-	 *            parameter order is: String sql, String incrementField, String keyColumn,
-			Map<String, RiverField> transField,ReaderFlowSocket RFS,Handler readHandler
+	 *            parameter order is: JobPage JP,ReaderFlowSocket RFS
 	 */
-	public static DataPage fetchDataSet(Context context, Object[] args) { 
-		if (!isValid(6, args)) {
-			log.error("fetchDataSet parameter not match!");
+	public static DataPage fetchPage(Context context, Object[] args) { 
+		if (!isValid(2, args)) {
+			log.error("fetchPage parameter not match!");
 			return null;
 		}
-		HashMap<String, String> params = new HashMap<>();
-		params.put("sql", String.valueOf(args[0]));
-		params.put(GlobalParam.READER_SCAN_KEY, String.valueOf(args[1]));
-		params.put(GlobalParam.READER_KEY, String.valueOf(args[2])); 
-		@SuppressWarnings("unchecked")
-		Map<String, RiverField> transField =  (Map<String, RiverField>) args[3];
-		ReaderFlowSocket RFS = (ReaderFlowSocket) args[4];
-		org.elasticflow.reader.handler.Handler readHandler = (Handler) args[5];
-		DataPage tmp = (DataPage) RFS.getPageData(params,transField, readHandler,context.getInstanceConfig().getPipeParams().getReadPageSize());
+		JobPage JP = (JobPage) args[0]; 
+		ReaderFlowSocket RFS = (ReaderFlowSocket) args[1]; 
+		DataPage tmp = (DataPage) RFS.getPageData(JP,context.getInstanceConfig().getPipeParams().getReadPageSize());
 		return (DataPage) tmp.clone();
 	} 
 

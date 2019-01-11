@@ -4,18 +4,16 @@ import java.io.FileReader;
 import java.io.LineNumberReader;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.field.RiverField;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.reader.ReaderFlowSocket;
-import org.elasticflow.reader.handler.Handler;
+import org.elasticflow.task.JobPage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -34,8 +32,7 @@ public class FileFlow extends ReaderFlowSocket {
 	}
 
 	@Override
-	public DataPage getPageData(HashMap<String, String> param, Map<String, RiverField> transParams, Handler handler,
-			int pageSize) {
+	public DataPage getPageData(final JobPage JP,int pageSize) {
 		PREPARE(false, false);
 		try {
 			if (!ISLINK())
@@ -57,6 +54,9 @@ public class FileFlow extends ReaderFlowSocket {
 	public ConcurrentLinkedDeque<String> getPageSplit(HashMap<String, String> param, int pageSize) {
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>(); 
 		boolean releaseConn = false;
+		PREPARE(false, false);
+		if (!ISLINK())
+			return page;
 		try { 
 			LineNumberReader lnr = new LineNumberReader(
 					new FileReader(((WarehouseNosqlParam) GETSOCKET().getConnectParams().getWhp()).getPath()));

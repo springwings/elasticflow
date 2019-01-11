@@ -3,7 +3,6 @@ package org.elasticflow.reader.flow;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.apache.hadoop.hbase.Cell;
@@ -19,13 +18,12 @@ import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.field.RiverField;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.reader.ReaderFlowSocket;
-import org.elasticflow.reader.handler.Handler;
+import org.elasticflow.task.JobPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +57,7 @@ public class HbaseFlow extends ReaderFlowSocket {
 	}
  
 	@Override
-	public DataPage getPageData(HashMap<String, String> param,Map<String, RiverField> transParams,Handler handler,int pageSize) { 
+	public DataPage getPageData(final JobPage JP,int pageSize) { 
 		PREPARE(false,false);
 		boolean releaseConn = false;
 		try {
@@ -69,28 +67,27 @@ public class HbaseFlow extends ReaderFlowSocket {
 			Scan scan = new Scan();
 			List<Filter> filters = new ArrayList<Filter>();
 			SingleColumnValueFilter range = new SingleColumnValueFilter(
-					Bytes.toBytes(this.columnFamily), Bytes.toBytes(param
-							.get(GlobalParam._scan_field)),
+					Bytes.toBytes(this.columnFamily), Bytes.toBytes(JP.getReaderScanKey()),
 					CompareFilter.CompareOp.GREATER_OR_EQUAL,
-					new BinaryComparator(Bytes.toBytes(param.get("startTime"))));
+					new BinaryComparator(Bytes.toBytes(JP.getStart())));
 			range.setLatestVersionOnly(true);
 			range.setFilterIfMissing(true);
 			filters.add(range);
 			scan.setFilter(new FilterList(FilterList.Operator.MUST_PASS_ALL,
 					filters));
-			scan.setStartRow(Bytes.toBytes(param.get(GlobalParam._start)));
-			scan.setStopRow(Bytes.toBytes(param.get(GlobalParam._end)));
+			scan.setStartRow(Bytes.toBytes(JP.getStart()));
+			scan.setStopRow(Bytes.toBytes(JP.getEnd()));
 			scan.setCaching(pageSize);
 			scan.addFamily(Bytes.toBytes(this.columnFamily));
 			ResultScanner resultScanner = table.getScanner(scan);
 			try {   
 				String dataBoundary = null;
 				String updateFieldValue=null; 
-				this.dataPage.put(GlobalParam.READER_KEY, param.get(GlobalParam.READER_KEY));
-				this.dataPage.put(GlobalParam.READER_SCAN_KEY, param.get(GlobalParam.READER_SCAN_KEY)); 
+				this.dataPage.put(GlobalParam.READER_KEY, JP.getReaderKey());
+				this.dataPage.put(GlobalParam.READER_SCAN_KEY, JP.getReaderScanKey()); 
 				for (Result r : resultScanner) { 
 					PipeDataUnit u = PipeDataUnit.getInstance();
-					if(handler==null){
+					if(JP.getReadHandler()==null){
 						for (Cell cell : r.rawCells()) {
 							String k = new String(CellUtil.cloneQualifier(cell));
 							String v = new String(CellUtil.cloneValue(cell), "UTF-8"); 
@@ -101,10 +98,10 @@ public class HbaseFlow extends ReaderFlowSocket {
 							if(k.equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))){
 								updateFieldValue = v;
 							}
-							u.addFieldValue(k, v, transParams);
+							u.addFieldValue(k, v, JP.getTransField());
 						} 
 					}else{
-						handler.handleData(r,u);
+						JP.getReadHandler().handleData(r,u);
 					} 
 					this.dataUnit.add(u);
 				} 

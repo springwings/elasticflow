@@ -1,10 +1,5 @@
 package org.elasticflow.computer;
 
-import java.util.HashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.ml.Algorithm;
 import org.elasticflow.model.ResponseState;
@@ -14,7 +9,10 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.util.DataSetReader;
-import org.elasticflow.util.Common; 
+import org.elasticflow.task.JobPage;
+import org.elasticflow.util.Common;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory; 
 
 /**
  * provide compute service
@@ -45,11 +43,12 @@ public class Computer {
 		ResponseState response = ResponseState.getInstance();
 		response.setInstance(instanceName); 
 		if(model==null) {
-			log.info("start loading model...");
-			HashMap<String, String> params = new HashMap<>(); 
-			String table = Common.getStoreName(instanceName, Common.getStoreId(instanceName,"",true));
-			params.put("sql", "select model,remark from "+table); 
-			DataPage dp = readerFlowSocket.getPageData(params, instanceConfig.getWriteFields(), null,instanceConfig.getPipeParams().getReadPageSize());
+			log.info("start loading model..."); 
+			String table = Common.getStoreName(instanceName, Common.getStoreId(instanceName,"",true)); 
+			JobPage JP = new JobPage();
+			JP.setAdditional("select model,remark from "+table);
+			JP.setTransField(instanceConfig.getWriteFields());
+			DataPage dp = readerFlowSocket.getPageData(JP,instanceConfig.getPipeParams().getReadPageSize());
 			DataSetReader DSReader = new DataSetReader();
 			DSReader.init(dp);
 			while (DSReader.nextLine()) {

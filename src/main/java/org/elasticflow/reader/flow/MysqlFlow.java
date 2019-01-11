@@ -15,7 +15,7 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
-import org.elasticflow.reader.handler.Handler;
+import org.elasticflow.task.JobPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,21 +36,21 @@ public class MysqlFlow extends ReaderFlowSocket{
 	}  
  
 	@Override
-	public DataPage getPageData(final HashMap<String, String> param,final Map<String, RiverField> transParams,Handler handler,int pageSize) {  
+	public DataPage getPageData(final JobPage JP,int pageSize) {  
 		boolean releaseConn = false;
 		PREPARE(false,false); 
 		if(!ISLINK())
 			return this.dataPage; 
 		Connection conn = (Connection) GETSOCKET().getConnection(false); 
-		try (PreparedStatement statement = conn.prepareStatement(param.get("sql"));){ 
+		try (PreparedStatement statement = conn.prepareStatement(JP.getAdditional());){ 
 			statement.setFetchSize(pageSize); 
 			try(ResultSet rs = statement.executeQuery();){				
-				this.dataPage.put(GlobalParam.READER_KEY, param.get(GlobalParam.READER_KEY));
-				this.dataPage.put(GlobalParam.READER_SCAN_KEY, param.get(GlobalParam.READER_SCAN_KEY));
-				if(handler==null){
-					getAllData(rs,transParams); 
+				this.dataPage.put(GlobalParam.READER_KEY, JP.getReaderKey());
+				this.dataPage.put(GlobalParam.READER_SCAN_KEY, JP.getReaderScanKey());
+				if(JP.getReadHandler()==null){
+					getAllData(rs,JP.getTransField()); 
 				}else{
-					handler.handleData(this,rs,transParams);
+					JP.getReadHandler().handleData(this,rs,JP.getTransField());
 				} 
 			} catch (Exception e) {
 				this.dataPage.put(GlobalParam.READER_STATUS,false);
@@ -58,7 +58,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 			} 
 		} catch (SQLException e){
 			this.dataPage.put(GlobalParam.READER_STATUS,false);
-			log.error(param.get("sql") + " get dataPage SQLException", e);
+			log.error(JP.getAdditional() + " get dataPage SQLException", e);
 		} catch (Exception e) { 
 			releaseConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS,false);
