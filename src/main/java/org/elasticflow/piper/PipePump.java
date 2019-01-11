@@ -75,12 +75,8 @@ public final class PipePump extends Instruction {
 			Resource.FLOW_INFOS.set(instance, job_type.name(), new HashMap<String, String>());
 		}
 		Resource.FLOW_INFOS.get(instance, job_type.name()).put(instance + " seqs nums", String.valueOf(L2seqs.size()));
-
-		if (getInstanceConfig().getReadParams().isNoSql()) {
-			noSqlFlow(instance, mainName, job_type, isFull, storeId, L1seq, L2seqs, writeTo, masterControl); 
-		} else {
-			sqlFlow(instance, mainName, job_type, isFull, storeId, L1seq, L2seqs, writeTo, masterControl);
-		}
+		Task task = Task.getInstance(instance, L1seq, job_type, getInstanceConfig().getReadParams(), null, this.readHandler);
+		processFlow(task, mainName, storeId, L2seqs, writeTo, masterControl); 
 		Resource.FLOW_INFOS.get(instance, job_type.name()).clear();
 		if (isFull) {
 			if (masterControl) {
@@ -115,65 +111,23 @@ public final class PipePump extends Instruction {
 
 	public WriterFlowSocket getWriter() {
 		return CPU.getContext(getID()).getWriter();
-	}
+	} 
 
 	/**
-	 * write to not db platform
-	 * 
-	 * @param instanceName
-	 * @param storeId
-	 * @param L1seq
-	 * @param isFullIndex
-	 * @param masterControl
-	 * @throws FNException
-	 */
-	private void noSqlFlow(String instance, String mainName, JOB_TYPE job_type, boolean isFull, String storeId,
-			String L1seq, List<String> L2seqs, String writeTo, boolean masterControl) throws FNException { 
-		Task task = Task.getInstance(instance, L1seq, job_type, getInstanceConfig().getReadParams(), null, this.readHandler); 
-		for (String L2seq : L2seqs) {
-			try {
-				task.setL2seq(L2seq);  
-				Resource.FLOW_INFOS.get(instance, job_type.name()).put(instance + L2seq, "start count page...");
-				getReader().lock.lock();
-				ConcurrentLinkedDeque<String> pageList = getReader().getPageSplit(task,
-						getInstanceConfig().getPipeParams().getReadPageSize());
-				getReader().lock.unlock();
-				if (pageList == null)
-					throw new FNException("read data get page split exception!");
-				int pageNum = pageList.size();
-				if (pageNum == 0) {
-					log.info(Common.formatLog("start", "Complete " + job_type.name(), mainName, storeId, L2seq, 0, "",
-							GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(L2seq), 0, " no data!"));
-				} else {
-					long start = Common.getNow();
-				}
-			} catch (Exception e) {
-
-			}
-		}
-	}
-
-	/**
-	 * do Sql resource data job
-	 * 
-	 * @param instance
+	 * process resource data Flow 
+	 * @param task
 	 * @param mainName
-	 * @param job_type
-	 * @param isFull
 	 * @param storeId
-	 * @param L1seq
 	 * @param L2seqs
 	 * @param writeTo
 	 * @param masterControl
 	 * @throws FNException
 	 */
-	private void sqlFlow(String instance, String mainName, JOB_TYPE job_type, boolean isFull, String storeId,
-			String L1seq, List<String> L2seqs, String writeTo, boolean masterControl) throws FNException { 
-		Task task = Task.getInstance(instance, L1seq, job_type, getInstanceConfig().getReadParams(), null, this.readHandler);
+	private void processFlow(Task task, String mainName, String storeId, List<String> L2seqs, String writeTo, boolean masterControl) throws FNException {  
 		for (String L2seq : L2seqs) {
 			try {
 				task.setL2seq(L2seq); 
-				Resource.FLOW_INFOS.get(instance, job_type.name()).put(instance + L2seq, "start count page...");
+				Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name()).put(task.getInstance() + L2seq, "start count page...");
 				getReader().lock.lock();
 				ConcurrentLinkedDeque<String> pageList = getReader().getPageSplit(task,
 						getInstanceConfig().getPipeParams().getReadPageSize());
@@ -183,7 +137,7 @@ public final class PipePump extends Instruction {
 				processListsPages(task, writeTo, pageList,storeId);
 
 			} catch (Exception e) {
-				if (isFull && !masterControl) {
+				if (task.getJobType().equals(JOB_TYPE.FULL) && !masterControl) {
 					for (int t = 0; t < 5; t++) {
 						getWriter().PREPARE(false, false);
 						if (getWriter().ISLINK()) {
@@ -199,9 +153,9 @@ public final class PipePump extends Instruction {
 				if (e.getMessage() != null && e.getMessage().equals("storeId not found")) {
 					throw new FNException("storeId not found");
 				} else {
-					log.error("[" + job_type.name() + " " + mainName + L2seq + "_" + storeId + " ERROR]", e);
+					log.error("[" + task.getJobType().name() + " " + mainName + L2seq + "_" + storeId + " ERROR]", e);
 					Resource.mailSender.sendHtmlMailBySynchronizationMode(" [Rivers] " + GlobalParam.run_environment,
-							"Job " + mainName + " " + job_type.name() + " Has stopped!");
+							"Job " + mainName + " " + task.getJobType().name() + " Has stopped!");
 				}
 			}
 		}
