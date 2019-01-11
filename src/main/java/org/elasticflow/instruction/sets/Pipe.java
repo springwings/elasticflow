@@ -2,11 +2,11 @@ package org.elasticflow.instruction.sets;
 
 import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
+import org.elasticflow.model.Page;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.ReaderState;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.util.DataSetReader;
-import org.elasticflow.task.JobPage;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.FNException;
 import org.slf4j.Logger;
@@ -44,16 +44,16 @@ public class Pipe extends Instruction {
 	
 	/**
 	 * @param args
-	 *            parameter order is: JobPage JP,ReaderFlowSocket RFS
+	 *            parameter order is: Page page,ReaderFlowSocket RFS
 	 */
 	public static DataPage fetchPage(Context context, Object[] args) { 
 		if (!isValid(2, args)) {
 			log.error("fetchPage parameter not match!");
 			return null;
 		}
-		JobPage JP = (JobPage) args[0]; 
+		Page page = (Page) args[0]; 
 		ReaderFlowSocket RFS = (ReaderFlowSocket) args[1]; 
-		DataPage tmp = (DataPage) RFS.getPageData(JP,context.getInstanceConfig().getPipeParams().getReadPageSize());
+		DataPage tmp = (DataPage) RFS.getPageData(page,context.getInstanceConfig().getPipeParams().getReadPageSize());
 		return (DataPage) tmp.clone();
 	} 
 

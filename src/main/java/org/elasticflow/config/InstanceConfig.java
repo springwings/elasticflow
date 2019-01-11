@@ -2,16 +2,11 @@ package org.elasticflow.config;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.HashMap; 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
 import org.elasticflow.field.RiverField;
@@ -21,12 +16,14 @@ import org.elasticflow.param.end.SearcherParam;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.ml.ComputeParam;
 import org.elasticflow.param.pipe.PipeParam;
-import org.elasticflow.param.warehouse.NoSQLParam;
-import org.elasticflow.param.warehouse.SQLParam;
 import org.elasticflow.param.warehouse.ScanParam;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.ZKUtil;
 import org.elasticflow.yarn.Resource;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * instance configs loading 
@@ -208,14 +205,15 @@ public class InstanceConfig {
 				
 				params = (Element) dataflow.getElementsByTagName("ReadParam").item(0);
 				if(params!=null) {
-					if(Resource.nodeConfig.getSqlWarehouse().containsKey(pipeParams.getReadFrom())) {
-						readParams = new SQLParam();
+					readParams = new ScanParam();
+					if(Resource.nodeConfig.getSqlWarehouse().containsKey(pipeParams.getReadFrom())) { 
+						readParams.setNoSql(false);
 						parseNode(params.getElementsByTagName("param"), "readParam",
-								SQLParam.class);  
-					}else {
-						readParams = new NoSQLParam();
+								ScanParam.class);  
+					}else { 
+						readParams.setNoSql(true);
 						parseNode(params.getElementsByTagName("param"), "readParam",
-								NoSQLParam.class);
+								ScanParam.class);
 					}  
 				} 
 				

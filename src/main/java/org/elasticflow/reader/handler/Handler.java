@@ -1,6 +1,6 @@
 package org.elasticflow.reader.handler;
 
-import java.util.HashMap;
+import org.elasticflow.model.Task;
 
 
 /**
@@ -15,7 +15,7 @@ public abstract class Handler{
 	
 	public abstract <T>T handleData(Object... args);
 	
-	public boolean loopScan(HashMap<String, String> params) {
+	public boolean loopScan(Task task) {
 		return false;
 	}
 }

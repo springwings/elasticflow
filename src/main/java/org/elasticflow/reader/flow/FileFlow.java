@@ -3,15 +3,15 @@ package org.elasticflow.reader.flow;
 import java.io.FileReader;
 import java.io.LineNumberReader;
 import java.io.RandomAccessFile;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.model.Page;
+import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.reader.ReaderFlowSocket;
-import org.elasticflow.task.JobPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public class FileFlow extends ReaderFlowSocket {
 	}
 
 	@Override
-	public DataPage getPageData(final JobPage JP,int pageSize) {
+	public DataPage getPageData(final Page page,int pageSize) {
 		PREPARE(false, false);
 		try {
 			if (!ISLINK())
@@ -51,7 +51,7 @@ public class FileFlow extends ReaderFlowSocket {
 	}
 
 	@Override
-	public ConcurrentLinkedDeque<String> getPageSplit(HashMap<String, String> param, int pageSize) {
+	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) {
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>(); 
 		boolean releaseConn = false;
 		PREPARE(false, false);

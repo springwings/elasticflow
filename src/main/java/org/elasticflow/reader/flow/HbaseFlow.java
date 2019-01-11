@@ -1,7 +1,6 @@
 package org.elasticflow.reader.flow;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -18,12 +17,13 @@ import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.model.Page;
+import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.reader.ReaderFlowSocket;
-import org.elasticflow.task.JobPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +57,7 @@ public class HbaseFlow extends ReaderFlowSocket {
 	}
  
 	@Override
-	public DataPage getPageData(final JobPage JP,int pageSize) { 
+	public DataPage getPageData(final Page page,int pageSize) { 
 		PREPARE(false,false);
 		boolean releaseConn = false;
 		try {
@@ -67,27 +67,27 @@ public class HbaseFlow extends ReaderFlowSocket {
 			Scan scan = new Scan();
 			List<Filter> filters = new ArrayList<Filter>();
 			SingleColumnValueFilter range = new SingleColumnValueFilter(
-					Bytes.toBytes(this.columnFamily), Bytes.toBytes(JP.getReaderScanKey()),
+					Bytes.toBytes(this.columnFamily), Bytes.toBytes(page.getReaderScanKey()),
 					CompareFilter.CompareOp.GREATER_OR_EQUAL,
-					new BinaryComparator(Bytes.toBytes(JP.getStart())));
+					new BinaryComparator(Bytes.toBytes(page.getStart())));
 			range.setLatestVersionOnly(true);
 			range.setFilterIfMissing(true);
 			filters.add(range);
 			scan.setFilter(new FilterList(FilterList.Operator.MUST_PASS_ALL,
 					filters));
-			scan.setStartRow(Bytes.toBytes(JP.getStart()));
-			scan.setStopRow(Bytes.toBytes(JP.getEnd()));
+			scan.setStartRow(Bytes.toBytes(page.getStart()));
+			scan.setStopRow(Bytes.toBytes(page.getEnd()));
 			scan.setCaching(pageSize);
 			scan.addFamily(Bytes.toBytes(this.columnFamily));
 			ResultScanner resultScanner = table.getScanner(scan);
 			try {   
 				String dataBoundary = null;
 				String updateFieldValue=null; 
-				this.dataPage.put(GlobalParam.READER_KEY, JP.getReaderKey());
-				this.dataPage.put(GlobalParam.READER_SCAN_KEY, JP.getReaderScanKey()); 
+				this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
+				this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey()); 
 				for (Result r : resultScanner) { 
 					PipeDataUnit u = PipeDataUnit.getInstance();
-					if(JP.getReadHandler()==null){
+					if(page.getReadHandler()==null){
 						for (Cell cell : r.rawCells()) {
 							String k = new String(CellUtil.cloneQualifier(cell));
 							String v = new String(CellUtil.cloneValue(cell), "UTF-8"); 
@@ -98,10 +98,10 @@ public class HbaseFlow extends ReaderFlowSocket {
 							if(k.equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))){
 								updateFieldValue = v;
 							}
-							u.addFieldValue(k, v, JP.getTransField());
+							u.addFieldValue(k, v, page.getTransField());
 						} 
 					}else{
-						JP.getReadHandler().handleData(r,u);
+						page.getReadHandler().handleData(r,u);
 					} 
 					this.dataUnit.add(u);
 				} 
@@ -126,7 +126,7 @@ public class HbaseFlow extends ReaderFlowSocket {
 	}
 
 	@Override
-	public ConcurrentLinkedDeque<String> getPageSplit(HashMap<String, String> param,int pageSize) {
+	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) {
 		int i = 0;
 		ConcurrentLinkedDeque<String> dt = new ConcurrentLinkedDeque<>(); 
 		PREPARE(false,false);
@@ -138,10 +138,9 @@ public class HbaseFlow extends ReaderFlowSocket {
 			Table table = (Table) GETSOCKET().getConnection(true);
 			List<Filter> filters = new ArrayList<Filter>();
 			SingleColumnValueFilter range = new SingleColumnValueFilter(
-					Bytes.toBytes(this.columnFamily), Bytes.toBytes(param
-							.get(GlobalParam._scan_field)),
+					Bytes.toBytes(this.columnFamily), Bytes.toBytes(task.getScanParam().getScanField()),
 					CompareFilter.CompareOp.GREATER_OR_EQUAL,
-					new BinaryComparator(Bytes.toBytes(param.get("startTime"))));
+					new BinaryComparator(Bytes.toBytes(task.getStartTime())));
 			range.setLatestVersionOnly(true);
 			range.setFilterIfMissing(true);
 			filters.add(range);
@@ -149,10 +148,8 @@ public class HbaseFlow extends ReaderFlowSocket {
 					filters));
 			scan.setCaching(pageSize);
 			scan.addFamily(Bytes.toBytes(this.columnFamily));
-			scan.addColumn(Bytes.toBytes(this.columnFamily), Bytes.toBytes(param
-					.get(GlobalParam._scan_field)));
-			scan.addColumn(Bytes.toBytes(this.columnFamily), Bytes.toBytes(param.get("column")));
-			ResultScanner resultScanner = table.getScanner(scan);
+			scan.addColumn(Bytes.toBytes(this.columnFamily), Bytes.toBytes(task.getScanParam().getScanField()));
+ 			ResultScanner resultScanner = table.getScanner(scan);
 			for (Result r : resultScanner) {
 				if (i % pageSize == 0) {
 					dt.add(Bytes.toString(r.getRow()));

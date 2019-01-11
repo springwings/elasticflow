@@ -2,6 +2,7 @@ package org.elasticflow.computer;
 
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.ml.Algorithm;
+import org.elasticflow.model.Page;
 import org.elasticflow.model.ResponseState;
 import org.elasticflow.model.RiverRequest;
 import org.elasticflow.model.computer.SamplePoint;
@@ -9,7 +10,6 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.util.DataSetReader;
-import org.elasticflow.task.JobPage;
 import org.elasticflow.util.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory; 
@@ -45,7 +45,7 @@ public class Computer {
 		if(model==null) {
 			log.info("start loading model..."); 
 			String table = Common.getStoreName(instanceName, Common.getStoreId(instanceName,"",true)); 
-			JobPage JP = new JobPage();
+			Page JP = new Page();
 			JP.setAdditional("select model,remark from "+table);
 			JP.setTransField(instanceConfig.getWriteFields());
 			DataPage dp = readerFlowSocket.getPageData(JP,instanceConfig.getPipeParams().getReadPageSize());

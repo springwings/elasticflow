@@ -1,4 +1,4 @@
-package org.elasticflow.task;
+package org.elasticflow.model;
 
 import java.util.Map;
 
@@ -12,7 +12,7 @@ import org.elasticflow.reader.handler.Handler;
  * @version 2.0
  * @date 2018-11-08 16:49
  */
-public final class JobPage {
+public final class Page {
 
 	private String readerScanKey;
 	private String readerKey;
@@ -22,9 +22,9 @@ public final class JobPage {
 	private Map<String, RiverField> transField;
 	private String additional;
 
-	public static JobPage getInstance(String readerKey, String readerScanKey, String start, String end,
+	public static Page getInstance(String readerKey, String readerScanKey, String start, String end,
 			Handler readHandler, Map<String, RiverField> transField, String additional) {
-		JobPage o = new JobPage();
+		Page o = new Page();
 		o.readerKey = readerKey;
 		o.readerScanKey = readerScanKey;
 		o.start = start;

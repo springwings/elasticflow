@@ -5,17 +5,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.field.RiverField;
+import org.elasticflow.model.Page;
+import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
-import org.elasticflow.task.JobPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,21 +36,21 @@ public class MysqlFlow extends ReaderFlowSocket{
 	}  
  
 	@Override
-	public DataPage getPageData(final JobPage JP,int pageSize) {  
+	public DataPage getPageData(final Page page,int pageSize) {  
 		boolean releaseConn = false;
 		PREPARE(false,false); 
 		if(!ISLINK())
 			return this.dataPage; 
 		Connection conn = (Connection) GETSOCKET().getConnection(false); 
-		try (PreparedStatement statement = conn.prepareStatement(JP.getAdditional());){ 
+		try (PreparedStatement statement = conn.prepareStatement(page.getAdditional());){ 
 			statement.setFetchSize(pageSize); 
 			try(ResultSet rs = statement.executeQuery();){				
-				this.dataPage.put(GlobalParam.READER_KEY, JP.getReaderKey());
-				this.dataPage.put(GlobalParam.READER_SCAN_KEY, JP.getReaderScanKey());
-				if(JP.getReadHandler()==null){
-					getAllData(rs,JP.getTransField()); 
+				this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
+				this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
+				if(page.getReadHandler()==null){
+					getAllData(rs,page.getTransField()); 
 				}else{
-					JP.getReadHandler().handleData(this,rs,JP.getTransField());
+					page.getReadHandler().handleData(this,rs,page.getTransField());
 				} 
 			} catch (Exception e) {
 				this.dataPage.put(GlobalParam.READER_STATUS,false);
@@ -58,7 +58,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 			} 
 		} catch (SQLException e){
 			this.dataPage.put(GlobalParam.READER_STATUS,false);
-			log.error(JP.getAdditional() + " get dataPage SQLException", e);
+			log.error(page.getAdditional() + " get dataPage SQLException", e);
 		} catch (Exception e) { 
 			releaseConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS,false);
@@ -70,26 +70,26 @@ public class MysqlFlow extends ReaderFlowSocket{
 	} 
 	
 	@Override
-	public ConcurrentLinkedDeque<String> getPageSplit(final HashMap<String, String> param,int pageSize) {
+	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) {
 		String sql;
-		if(param.get("pageSql")!=null){
+		if(task.getScanParam().getPageScanDSL()!=null){
 			sql = " select "+GlobalParam._page_field+" as id,(@a:=@a+1) AS FN_ROW_ID from ("
-					+ param.get("pageSql")
+					+ task.getScanParam().getPageScanDSL()
 					+ ") FN_FPG_MAIN join (SELECT @a := -1) FN_FPG_ROW order by "+GlobalParam._page_field+" desc";
 		}else{
 			sql = " select "+GlobalParam._page_field+" as id,(@a:=@a+1) AS FN_ROW_ID from ("
-					+ param.get("originalSql")
+					+ task.getScanParam().getDataScanDSL()
 					+ ") FN_FPG_MAIN join (SELECT @a := -1) FN_FPG_ROW order by "+GlobalParam._page_field+" desc"; 
 		}
 		sql = " select id from (" + sql
 				+ ") FN_FPG_END where MOD(FN_ROW_ID, "+pageSize+") = 0";
 		sql = sql 
-				.replace(GlobalParam._scan_field, param.get(GlobalParam.READER_SCAN_KEY))
-				.replace(GlobalParam._page_field, param.get(GlobalParam.READER_PAGE_KEY))
-				.replace(GlobalParam._start_time, param.get(GlobalParam._start_time))
-				.replace(GlobalParam._end_time, param.get(GlobalParam._end_time));
-		if (param.get(GlobalParam._seq) != null && param.get(GlobalParam._seq).length() > 0)
-			sql = sql.replace(GlobalParam._seq, param.get(GlobalParam._seq)); 
+				.replace(GlobalParam._scan_field, task.getScanParam().getScanField())
+				.replace(GlobalParam._page_field, task.getScanParam().getPageField())
+				.replace(GlobalParam._start_time, task.getStartTime())
+				.replace(GlobalParam._end_time, task.getEndTime());
+		if (task.getL2seq() != null && task.getL2seq().length() > 0)
+			sql = sql.replace(GlobalParam._seq, task.getL2seq()); 
 		 
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
 		PREPARE(false,false); 
@@ -101,9 +101,9 @@ public class MysqlFlow extends ReaderFlowSocket{
 		boolean releaseConn = false;
 		try {
 			boolean autoSelect = true; 
-			if(param.get("keyColumnType") != null){
+			if(task.getScanParam().getKeyFieldType() != null){
 				autoSelect = false;
-				if(param.get("keyColumnType").equals("int")){
+				if(task.getScanParam().getKeyFieldType().equals("int")){
 					statement = conn.prepareStatement(sql.replace("#{end}", Long.MAX_VALUE + "").replace(
 							"#{END}", Long.MAX_VALUE + ""));
 				}else{

@@ -13,7 +13,7 @@ import org.elasticflow.util.Common;
  * @version 2.0
  * @date 2018-12-20 16:33
  */
-public abstract class ScanParam {
+public class ScanParam {
 
 	protected String keyField;
 	/** value= int or string */
@@ -22,11 +22,22 @@ public abstract class ScanParam {
 	/**(data|time):(data配置y-m-d格式，time配置second|millisecond)*/
 	protected String scanFieldType="time:second";
 	protected String pageField;
-	protected String pageScan;
+	protected String pageScanDSL;
+	private String dataScanDSL;
+	private String handler;
+	private boolean isNoSql = false;
 	/** defined series scan location */
 	protected List<String> L2seqs = new ArrayList<String>();
 
-	public abstract boolean isSqlType();
+	public String getDataScanDSL() {
+		return dataScanDSL;
+	}
+	public void setDataScanDSL(String dataScanDSL) {
+		this.dataScanDSL = dataScanDSL.trim();
+		if(this.dataScanDSL.length()>1 && this.dataScanDSL.substring(this.dataScanDSL.length()-1).equals(";")){
+			this.dataScanDSL = this.dataScanDSL.substring(0,this.dataScanDSL.length()-1);
+		}
+	}  
 
 	public String getKeyField() {
 		return keyField;
@@ -57,9 +68,13 @@ public abstract class ScanParam {
 	public void setPageField(String pageField) {
 		this.pageField = pageField;
 	}
+	
+	public String getPageScanDSL() {
+		return pageScanDSL;
+	} 
 
-	public void setPageScan(String pageScan) {
-		this.pageScan = pageScan;
+	public void setPageScanDSL(String pageScanDSL) {
+		this.pageScanDSL = pageScanDSL;
 	}
 
 	public List<String> getSeq() {
@@ -77,6 +92,22 @@ public abstract class ScanParam {
 	public void setKeyFieldType(String keyFieldType) {
 		this.keyFieldType = keyFieldType;
 	}
+	
+	public String getHandler() {
+		return handler;
+	}
+	
+	public void setHandler(String handler) {
+		this.handler = handler;
+	}  
+	
+	public boolean isNoSql() {
+		return isNoSql;
+	}
+	public void setNoSql(boolean isNoSql) {
+		this.isNoSql = isNoSql;
+	}
+	
 	/**
 	 * get current time
 	 * @return
