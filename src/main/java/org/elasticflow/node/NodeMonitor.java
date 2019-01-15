@@ -35,6 +35,7 @@ import org.elasticflow.param.warehouse.WarehouseSqlParam;
 import org.elasticflow.reader.service.HttpReaderService;
 import org.elasticflow.searcher.service.SearcherService;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFLoader;
 import org.elasticflow.util.NodeUtil;
 import org.elasticflow.util.SystemInfoUtil;
 import org.elasticflow.writer.WriterFlowSocket;
@@ -276,9 +277,9 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void loadHandler(Request rq) {
-		if(rq.getParameter("path") != null) {
+		if(rq.getParameter("path") != null && rq.getParameter("name")!=null) {
 			try {
-				ClassLoader.getSystemClassLoader().loadClass(rq.getParameter("path")+".class"); 
+				new EFLoader(rq.getParameter("path")).loadClass(rq.getParameter("name"));
 				setResponse(1, "Load Handler success!");
 			}catch (Exception e) {
 				setResponse(0, "Load Handler Exception " + e.getMessage());

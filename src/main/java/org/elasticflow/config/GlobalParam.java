@@ -31,7 +31,7 @@ public final class GlobalParam {
 	public static boolean WRITE_BATCH = false;
 	/**#1 searcher service  2 writer service 4 http reader service 8 instruction service 16 compute service*/
 	public static int SERVICE_LEVEL;
-	
+	/**store zookeeper data path*/
 	public static String CONFIG_PATH;
 	
 	public static String INSTANCE_PATH;
@@ -44,6 +44,7 @@ public final class GlobalParam {
 	
 	public static Properties StartConfig; 
 	
+	/**configure file local path*/
 	public static final String configPath = System.getProperty("config");
 	
 	
