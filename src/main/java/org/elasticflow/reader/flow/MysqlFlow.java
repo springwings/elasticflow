@@ -16,6 +16,7 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
+import org.elasticflow.util.FNException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,7 +147,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 		return page;
 	} 
 	
-	private void getAllData(ResultSet rs,Map<String, RiverField> transParam) {  
+	private void getAllData(ResultSet rs,Map<String, RiverField> transParam) throws FNException {  
 		this.dataUnit.clear();
 		String dataBoundary = null;
 		String LAST_STAMP=null;
@@ -170,9 +171,8 @@ public class MysqlFlow extends ReaderFlowSocket{
 				this.dataUnit.add(u);
 			}
 			rs.close();
-		} catch (SQLException e) {
-			this.dataPage.put(GlobalParam.READER_STATUS,false);
-			log.error("get page data SQLException,", e);
+		} catch (Exception e) {
+			throw new FNException(e.getMessage());
 		}
 		if (LAST_STAMP==null){ 
 			this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis()); 

@@ -22,7 +22,7 @@ import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.handler.Handler;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.FNException;
-import org.elasticflow.util.SqlUtil;
+import org.elasticflow.util.PipeNorms;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
@@ -151,7 +151,7 @@ public final class PipePump extends Instruction {
 					}
 				}
 				if (e.getMessage() != null && e.getMessage().equals("storeId not found")) {
-					throw new FNException("storeId not found");
+					throw new FNException("storeId not found"); 
 				} else {
 					log.error("[" + task.getJobType().name() + " " + mainName + L2seq + "_" + storeId + " ERROR]", e);
 					Resource.mailSender.sendHtmlMailBySynchronizationMode(" [Rivers] " + GlobalParam.run_environment,
@@ -185,7 +185,7 @@ public final class PipePump extends Instruction {
 			log.info(Common.formatLog("complete", "Complete " + task.getJobType().name(), mainName, storeId, task.getL2seq(), total.get(),
 					"", GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(task.getL2seq()), Common.getNow() - start, ""));
 			if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination))
-				throw new FNException(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
+				throw new FNException(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!"); 
 		}
 	} 
 	
@@ -211,7 +211,7 @@ public final class PipePump extends Instruction {
 			processPos++;
 			Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name()).put(task.getInstance() + task.getL2seq(),
 					processPos + "/" + pageList.size());
-			String sql = SqlUtil.fillParam(task.getScanParam().getDataScanDSL(), SqlUtil.getScanParam(task.getL2seq(), startId, dataBoundary,
+			String dataScanDSL = PipeNorms.fillParam(task.getScanParam().getDataScanDSL(), PipeNorms.getScanParam(task.getL2seq(), startId, dataBoundary,
 					task.getStartTime(), task.getEndTime(), scanField));
 			if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination)) {
 				break;
@@ -219,7 +219,7 @@ public final class PipePump extends Instruction {
 				getReader().lock.lock();
 				DataPage pagedata = (DataPage) CPU.RUN(
 						getID(), "Pipe", "fetchPage", false, Page.getInstance(keyField, scanField, startId,
-								dataBoundary, this.readHandler, getInstanceConfig().getWriteFields(), sql),
+								dataBoundary, this.readHandler, getInstanceConfig().getWriteFields(), dataScanDSL),
 						getReader());
 				getReader().freeJobPage();
 				getReader().lock.unlock();
@@ -307,7 +307,7 @@ public final class PipePump extends Instruction {
 				processPos.incrementAndGet();
 				Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name()).put(task.getInstance() + task.getL2seq(),
 						processPos + "/" + this.pageSize);
-				String sql = SqlUtil.fillParam(task.getScanParam().getDataScanDSL(), SqlUtil.getScanParam(task.getL2seq(), startId, dataBoundary,
+				String dataScanDSL = PipeNorms.fillParam(task.getScanParam().getDataScanDSL(), PipeNorms.getScanParam(task.getL2seq(), startId, dataBoundary,
 						task.getStartTime(), task.getEndTime(), task.getScanParam().getScanField()));
 				if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination)) {
 					Resource.ThreadPools.cleanWaitJob(getId());
@@ -317,7 +317,7 @@ public final class PipePump extends Instruction {
 					getReader().lock.lock();
 					DataPage pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchPage", false,
 							Page.getInstance(task.getScanParam().getKeyField(), task.getScanParam().getScanField(), startId, dataBoundary, readHandler,
-									getInstanceConfig().getWriteFields(), sql),
+									getInstanceConfig().getWriteFields(), dataScanDSL),
 							getInstanceConfig().getWriteFields(), getReader());
 					getReader().freeJobPage();
 					getReader().lock.unlock();

@@ -53,16 +53,14 @@ public class OracleFlow extends ReaderFlowSocket{
 				}else{
 					page.getReadHandler().handleData(this,rs,page.getTransField());
 				} 
+				this.dataPage.put(GlobalParam.READER_STATUS,true);
 			} catch (Exception e) {
-				this.dataPage.put(GlobalParam.READER_STATUS,false);
 				log.error("get data Page Exception", e);
 			} 
 		} catch (SQLException e){
-			this.dataPage.put(GlobalParam.READER_STATUS,false);
 			log.error(page.getAdditional() + " get dataPage SQLException", e);
 		} catch (Exception e) { 
 			releaseConn = true;
-			this.dataPage.put(GlobalParam.READER_STATUS,false);
 			log.error("get dataPage Exception so free connection,details ", e);
 		}finally{
 			REALEASE(false,releaseConn);

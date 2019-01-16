@@ -20,7 +20,7 @@ public class FNException extends Exception{
 		Ignore,Dispose,Termination,Stop;
 	}
 	
-	private ELEVEL e_level;
+	private ELEVEL e_level; 
 	
 	public FNException(String msg){
 		super(msg); 

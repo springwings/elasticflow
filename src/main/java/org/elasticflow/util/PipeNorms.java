@@ -9,13 +9,15 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.field.RiverField;
 import org.elasticflow.model.reader.PipeDataUnit;
 
+
 /**
  * 
  * @author chengwen
- * @version 1.0
+ * @version 4.x
  * @date 2018-11-02 13:53
+ * @modify 2019-01-16 13:54
  */
-public final class SqlUtil {
+public final class PipeNorms {
 	
 	/**
 	 * 
@@ -28,21 +30,21 @@ public final class SqlUtil {
 	 * @return
 	 */
 	public static HashMap<String, String> getScanParam(String L2seq,String startKey,String endKey,String start_time,String end_time,String scanField){
-		HashMap<String, String> sqlParams = new HashMap<>();
+		HashMap<String, String> params = new HashMap<>();
 		if (L2seq != null && L2seq.length() > 0)
-			sqlParams.put(GlobalParam._seq, L2seq);
-		sqlParams.put(GlobalParam._start, startKey);
-		sqlParams.put(GlobalParam._end, endKey);
-		sqlParams.put(GlobalParam._start_time, start_time);
-		sqlParams.put(GlobalParam._end_time, end_time);
-		sqlParams.put(GlobalParam._scan_field, scanField); 
-		return sqlParams;
+			params.put(GlobalParam._seq, L2seq);
+		params.put(GlobalParam._start, startKey);
+		params.put(GlobalParam._end, endKey);
+		params.put(GlobalParam._start_time, start_time);
+		params.put(GlobalParam._end_time, end_time);
+		params.put(GlobalParam._scan_field, scanField); 
+		return params;
 	}
 	
 	/**
 	 * replace sql with params
 	 * 
-	 * @param sql
+	 * @param scanDSL
 	 * @param seq
 	 * @param startId
 	 * @param maxId
@@ -50,15 +52,17 @@ public final class SqlUtil {
 	 * @param updateTime
 	 * @return
 	 */
-	public static String fillParam(String originalSql, HashMap<String, String> params) {
-		String res = originalSql;
-		Iterator<String> entries = params.keySet().iterator();
-		while (entries.hasNext()) {
-			String k = entries.next();
-			if (k.indexOf("#{") > -1)
-				res = res.replace(k, params.get(k));
-		}
-		return res;
+	public static String fillParam(String scanDSL, HashMap<String, String> params) {
+		if(scanDSL!=null) {
+			Iterator<String> entries = params.keySet().iterator();
+			while (entries.hasNext()) {
+				String k = entries.next();
+				if (k.indexOf("#{") > -1)
+					scanDSL = scanDSL.replace(k, params.get(k));
+			}
+			return scanDSL;
+		} 
+		return null;
 	} 
  
 	public static String getWriteSql(String table,PipeDataUnit unit,Map<String, RiverField> transParams) {

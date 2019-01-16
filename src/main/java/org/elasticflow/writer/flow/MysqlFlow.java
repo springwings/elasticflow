@@ -14,7 +14,7 @@ import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.FNException;
-import org.elasticflow.util.SqlUtil;
+import org.elasticflow.util.PipeNorms;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ public class MysqlFlow extends WriterFlowSocket {
 			if (!ISLINK())
 				return;
 			Connection conn = (Connection) GETSOCKET().getConnection(false);
-			try (PreparedStatement statement = conn.prepareStatement(SqlUtil.getWriteSql(table, unit, transParams));) {
+			try (PreparedStatement statement = conn.prepareStatement(PipeNorms.getWriteSql(table, unit, transParams));) {
 				statement.execute();
 			} catch (Exception e) {
 				log.error("PreparedStatement Exception", e);

@@ -133,7 +133,7 @@ public class HttpReaderService {
 								response.getWriter().println("{\"status\":0,\"info\":\"写入失败!参数错误，instance:" + instance
 										+ ",seq:" + seq + "\"}");
 								try {
-									throw new FNException("写入参数错误，instance:" + instance + ",seq:" + seq);
+									throw new FNException("写入参数错误，instance:" + instance + ",seq:" + seq);  
 								} catch (FNException fe) {
 									e.printStackTrace();
 								}

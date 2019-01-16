@@ -9,6 +9,7 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.model.Page;
 import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
+import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.reader.ReaderFlowSocket;
@@ -38,10 +39,14 @@ public class FileFlow extends ReaderFlowSocket {
 			if (!ISLINK())
 				return this.dataPage;
 			RandomAccessFile rf = (RandomAccessFile) GETSOCKET().getConnection(false);
+			this.dataUnit.clear();
 			int n = 3;
 			while (n-- > 1) {
-				rf.readLine();
+				PipeDataUnit u = PipeDataUnit.getInstance();
+				u.addFieldValue("id",rf.readLine(), page.getTransField());
+				this.dataUnit.add(u);
 			}
+			this.dataPage.put(GlobalParam.READER_STATUS,true);
 		} catch (Exception e) {
 			log.error("get dataPage Exception", e);
 		} finally {
