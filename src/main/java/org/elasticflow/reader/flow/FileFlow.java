@@ -38,14 +38,21 @@ public class FileFlow extends ReaderFlowSocket {
 		try {
 			if (!ISLINK())
 				return this.dataPage;
-			RandomAccessFile rf = (RandomAccessFile) GETSOCKET().getConnection(false);
-			this.dataUnit.clear();
-			int n = 3;
-			while (n-- > 1) {
-				PipeDataUnit u = PipeDataUnit.getInstance();
-				u.addFieldValue("id",rf.readLine(), page.getTransField());
-				this.dataUnit.add(u);
+			RandomAccessFile rf = (RandomAccessFile) GETSOCKET().getConnection(false); 
+			int start = Integer.parseInt(page.getStart());
+			int pos = 0;
+			while (pos++ > 1) {
+				if(pos<start) {
+					rf.readLine();
+				}else {
+					PipeDataUnit u = PipeDataUnit.getInstance();
+					u.addFieldValue("id",rf.readLine(), page.getTransField());
+					this.dataUnit.add(u);
+					if(pos>start+pageSize)
+						break;
+				} 
 			}
+			this.dataPage.putData(this.dataUnit);
 			this.dataPage.put(GlobalParam.READER_STATUS,true);
 		} catch (Exception e) {
 			log.error("get dataPage Exception", e);

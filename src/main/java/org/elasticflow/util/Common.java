@@ -401,7 +401,7 @@ public final class Common {
 		case "complete":
 			str.append(" docs:" + total);
 			str.append(" position:" + update);
-			str.append(" useTime:" + useTimeFormat + "}");
+			str.append(" useTime:" + useTimeFormat);
 			break;
 		case "start": 
 			str.append(" position:" + update);

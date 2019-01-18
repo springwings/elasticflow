@@ -146,8 +146,7 @@ public class OracleFlow extends ReaderFlowSocket{
 	} 
 	 
 
-	private void getAllData(ResultSet rs,Map<String, RiverField> transParam) {  
-		this.dataUnit.clear();
+	private void getAllData(ResultSet rs,Map<String, RiverField> transParam) {   
 		String dataBoundary = null;
 		String LAST_STAMP = null;
 		try {  

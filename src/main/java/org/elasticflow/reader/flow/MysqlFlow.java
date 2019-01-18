@@ -147,8 +147,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 		return page;
 	} 
 	
-	private void getAllData(ResultSet rs,Map<String, RiverField> transParam) throws FNException {  
-		this.dataUnit.clear();
+	private void getAllData(ResultSet rs,Map<String, RiverField> transParam) throws FNException {   
 		String dataBoundary = null;
 		String LAST_STAMP=null;
 		try {  

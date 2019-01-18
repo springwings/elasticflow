@@ -22,15 +22,21 @@ public class SampleSets {
 	
 	public void addPoint(PipeDataUnit PD,ComputeParam computeParam) {
 		if(iterator<this.datas.length) { 
-			int i=0;
-			String[] feature_fields = computeParam.getFeatures().split(",");
-			this.datas[iterator] = new SamplePoint(feature_fields.length); 
-			for(String field:feature_fields) {
-				this.datas[iterator].features[i] = Double.valueOf(String.valueOf(PD.getData().get(field))); 
-			}
-			this.datas[iterator].value = Double.valueOf(String.valueOf(PD.getData().get(computeParam.getValue()))); 
+			this.datas[iterator] = genericPoint(PD,computeParam); 
 			iterator++;
 		}
+	}
+	
+	public static SamplePoint genericPoint(PipeDataUnit PD,ComputeParam computeParam) {
+		int i=0;
+		String[] feature_fields = computeParam.getFeatures().split(",");
+		SamplePoint sp = new SamplePoint(feature_fields.length);
+		for(String field:feature_fields) {
+			sp.features[i] = Double.valueOf(String.valueOf(PD.getData().get(field))); 
+			i++;
+		}
+		sp.value = Double.valueOf(String.valueOf(PD.getData().get(computeParam.getValue()))); 
+		return sp;
 	}
 	
 	public int samplesNums() {

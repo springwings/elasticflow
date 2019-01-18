@@ -13,6 +13,8 @@ public class ComputeParam {
 	private String preprocessing;
 	private double learn_rate = 0.1;
 	private double threshold = 0.001;
+	/**flow|batch,Flow Computing and Batch Computing*/
+	private String computeModel="batch";
 
 	public String getFeatures() {
 		return features;
@@ -60,6 +62,14 @@ public class ComputeParam {
 
 	public void setPreprocessing(String preprocessing) {
 		this.preprocessing = preprocessing;
+	}
+
+	public String getComputeModel() {
+		return computeModel;
+	}
+
+	public void setComputeModel(String computeModel) {
+		this.computeModel = computeModel.toLowerCase();
 	} 
  
 }
