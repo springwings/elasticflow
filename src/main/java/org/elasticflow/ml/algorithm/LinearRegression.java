@@ -17,7 +17,27 @@ import org.elasticflow.model.reader.PipeDataUnit;
  * @date 2018-11-13 09:21
  */
 public class LinearRegression extends Regression {
-
+	
+	/**
+	 * flow train
+	 * @param context
+	 * @param point
+	 * @param transParam
+	 * @return
+	 */
+	public static DataPage train(Context context, SamplePoint point, Map<String, RiverField> transParam) {
+		 
+		return null; 
+	}
+	
+	
+	/**
+	 * batch train
+	 * @param context
+	 * @param samples
+	 * @param transParam
+	 * @return
+	 */
 	public static DataPage train(Context context, SampleSets samples, Map<String, RiverField> transParam) {
 		LinearRegression LR = new LinearRegression();
 		double[] para = new double[samples.getData()[0].feathures_num];

@@ -25,7 +25,7 @@ public class Track extends Instruction {
 	public static boolean cpuPrepare(Context context, Object[] args) {
 		if (context != null)
 			return true;
-		String seq = null;
+		String L1seq = null;
 		String instance;
 		String id;
 		if (args.length == 2) {
@@ -33,7 +33,7 @@ public class Track extends Instruction {
 			id = (String) args[1];
 		} else if (args.length == 3) {
 			instance = (String) args[0];
-			seq = (String) args[1];
+			L1seq = (String) args[1];
 			id = (String) args[2];
 		} else {
 			return false;
@@ -41,10 +41,15 @@ public class Track extends Instruction {
 		CPU.prepare(id, Resource.nodeConfig.getInstanceConfigs().get(instance),
 				Resource.SOCKET_CENTER.getWriterSocket(
 						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getWriteTo(), instance,
-						seq, ""),
+						L1seq, ""),
 				Resource.SOCKET_CENTER.getReaderSocket(
 						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadFrom(), instance,
-						seq, ""));
+						L1seq, ""),
+				(Resource.nodeConfig.getInstanceConfigs().get(instance).getComputeParams().getComputeModel()
+						.equals("flow")
+								? Resource.SOCKET_CENTER.getReaderSocket(Resource.nodeConfig.getInstanceConfigs().get(instance)
+										.getPipeParams().getWriteTo(), instance, L1seq, "")
+								: null));
 		return true;
 
 	}

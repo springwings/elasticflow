@@ -18,7 +18,7 @@ import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.writer.WriterSocketFactory;
 import org.elasticflow.yarn.Resource;
 
-/** 
+/**
  * data-flow router reader searcher computer and writer control center L1seq
  * only support for reader to read series data source and create one or more
  * instance in writer searcherMap and computerMap for data to user data transfer
@@ -41,11 +41,10 @@ public final class SocketCenter {
 	private Map<String, SearcherFlowSocket> searcherSocketMap = new ConcurrentHashMap<>();
 
 	/**
-	 * get Writer auto look for sql and nosql maps to get socket each writer has
-	 * sperate flow
 	 * 
+	 * build read to write end pipe socket
 	 * @param L1seq        for series data source sequence
-	 * @param instanceName data source main tag name
+	 * @param instance data source main tag name
 	 * @param needClear    for reset resource
 	 * @param tag          Marking resource
 	 */
@@ -57,6 +56,11 @@ public final class SocketCenter {
 						getReaderSocket(
 								Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadFrom(),
 								instance, L1seq, tag),
+						(Resource.nodeConfig.getInstanceConfigs().get(instance).getComputeParams().getComputeModel()
+								.equals("flow")
+										? getReaderSocket(Resource.nodeConfig.getInstanceConfigs().get(instance)
+												.getPipeParams().getWriteTo(), instance, L1seq, tag)
+										: null),
 						getWriterSocket(
 								Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getWriteTo(),
 								instance, L1seq, tag),
@@ -133,9 +137,11 @@ public final class SocketCenter {
 			if (!readerSocketMap.containsKey(tags)) {
 				WarehouseParam whp = getWHP(resourceName);
 				if (whp == null)
-					return null;  
-				readerSocketMap.put(tags, ReaderFlowSocketFactory.getInstance(ConnectParams.getInstance(whp, L1seq,
-						Resource.nodeConfig.getInstanceConfigs().get(instance), null), L1seq,
+					return null;
+				readerSocketMap.put(tags, ReaderFlowSocketFactory.getInstance(
+						ConnectParams.getInstance(whp, L1seq, Resource.nodeConfig.getInstanceConfigs().get(instance),
+								null),
+						L1seq,
 						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadHandler()));
 			}
 			return readerSocketMap.get(tags);
@@ -156,9 +162,11 @@ public final class SocketCenter {
 			if (!writerSocketMap.containsKey(tags)) {
 				WarehouseParam whp = getWHP(resourceName);
 				if (whp == null)
-					return null; 
-				writerSocketMap.put(tags, WriterSocketFactory.getInstance(ConnectParams.getInstance(whp, L1seq,
-						Resource.nodeConfig.getInstanceConfigs().get(instance), null), L1seq,
+					return null;
+				writerSocketMap.put(tags, WriterSocketFactory.getInstance(
+						ConnectParams.getInstance(whp, L1seq, Resource.nodeConfig.getInstanceConfigs().get(instance),
+								null),
+						L1seq,
 						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getWriteHandler()));
 			}
 			return writerSocketMap.get(tags);

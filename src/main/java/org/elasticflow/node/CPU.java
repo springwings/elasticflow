@@ -20,8 +20,8 @@ public class CPU {
 	
 	static volatile HashMap<String, Context> Contexts = new HashMap<>();
 	
-	public static void prepare(String runId,InstanceConfig instanceConfig,WriterFlowSocket writer,ReaderFlowSocket reader) { 
-		Contexts.put(runId, Context.initContext(instanceConfig, writer,reader));
+	public static void prepare(String runId,InstanceConfig instanceConfig,WriterFlowSocket writer,ReaderFlowSocket reader,ReaderFlowSocket extReader) { 
+		Contexts.put(runId, Context.initContext(instanceConfig, writer,reader,extReader));
 	}
 	
 	public static Context getContext(String runId) {

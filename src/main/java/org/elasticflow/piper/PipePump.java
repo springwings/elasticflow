@@ -41,13 +41,13 @@ public final class PipePump extends Instruction {
 	/** defined custom read flow socket */
 	Handler readHandler;
 
-	public static PipePump getInstance(ReaderFlowSocket reader, WriterFlowSocket writer,
+	public static PipePump getInstance(ReaderFlowSocket reader, ReaderFlowSocket extReader, WriterFlowSocket writer,
 			InstanceConfig instanceConfig) {
-		return new PipePump(reader, writer, instanceConfig);
+		return new PipePump(reader,extReader,writer, instanceConfig);
 	}
 
-	private PipePump(ReaderFlowSocket reader, WriterFlowSocket writer, InstanceConfig instanceConfig) {
-		CPU.prepare(getID(), instanceConfig, writer, reader);
+	private PipePump(ReaderFlowSocket reader,ReaderFlowSocket extReader, WriterFlowSocket writer, InstanceConfig instanceConfig) {
+		CPU.prepare(getID(), instanceConfig, writer, reader,extReader);
 		try {
 			if (instanceConfig.getPipeParams().getReadHandler() != null) {
 				this.readHandler = (Handler) Class.forName(instanceConfig.getPipeParams().getReadHandler())
