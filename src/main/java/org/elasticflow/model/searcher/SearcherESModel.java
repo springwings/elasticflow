@@ -21,7 +21,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.RiverRequest;
-import org.elasticflow.searcher.flow.ESQueryBuilder;
+import org.elasticflow.searcher.parser.ESQueryParser;
 import org.elasticflow.util.SearchParamUtil;
 
 /**
@@ -36,8 +36,7 @@ public class SearcherESModel implements SearcherModel<QueryBuilder,SortBuilder<?
 	private int start = 0;
 	private int count = 5;
 	Map<String,List<String[]>> facetSearchParams;
-	List<AggregationBuilder> facetsConfig = new ArrayList<AggregationBuilder>();
-	private Map<String, QueryBuilder> attrQueryMap = new HashMap<String, QueryBuilder>(); 
+	List<AggregationBuilder> facetsConfig = new ArrayList<AggregationBuilder>(); 
 	private boolean showQueryInfo = false;
 	private boolean needCorpfuncCnt = false;
 	private boolean cacheRequest = true;
@@ -54,25 +53,19 @@ public class SearcherESModel implements SearcherModel<QueryBuilder,SortBuilder<?
 		eq.setFacetSearchParams(SearchParamUtil.getFacetParams(request, instanceConfig));
 		if(request.getParam("facet_ext")!=null){
 			eq.setFacet_ext(request.getParams().get("facet_ext"));
-		} 
-		Map<String, QueryBuilder> attrQueryMap = new HashMap<String, QueryBuilder>();
-		BoolQueryBuilder query = ESQueryBuilder.buildBooleanQuery(request,
-				instanceConfig, attrQueryMap);
-		eq.setQuery(query);
-		eq.setAttrQueryMap(attrQueryMap);
+		}  
+		BoolQueryBuilder query = ESQueryParser.parseRequest(request,instanceConfig);
+		eq.setQuery(query); 
 		return eq;
 	}
  
 	
 	@Override
 	public QueryBuilder getQuery() {
-		if (query != null && attrQueryMap.size() > 0)
+		if (query != null)
 		{			
 			BoolQueryBuilder bQuery = QueryBuilders.boolQuery();
-			bQuery.must(query);
-			for(QueryBuilder q : attrQueryMap.values()){
-				bQuery.must(q);
-			}
+			bQuery.must(query); 
 			return bQuery;
 		}
 		return query;
@@ -139,15 +132,7 @@ public class SearcherESModel implements SearcherModel<QueryBuilder,SortBuilder<?
 		}
 		return facetsConfig;
 	} 
-	
-	@Override
-	public Map<String, QueryBuilder> getAttrQueryMap() {
-		return attrQueryMap;
-	}
-
-	public void setAttrQueryMap(Map<String, QueryBuilder> attrQueryMap) {
-		this.attrQueryMap = attrQueryMap;
-	} 
+ 
 	
 	@Override
 	public boolean isShowQueryInfo() {
@@ -190,25 +175,7 @@ public class SearcherESModel implements SearcherModel<QueryBuilder,SortBuilder<?
 	public void setCacheRequest(boolean cacheRequest) {
 		this.cacheRequest = cacheRequest;
 	}
-
-	@Override
-	public Map<String, QueryBuilder> getEveryAttrQueriesMap() {
-		Map<String, QueryBuilder> retMap = new HashMap<String, QueryBuilder>();
-		if (query != null && attrQueryMap.size() > 0){
-			for(Map.Entry<String, QueryBuilder> e : attrQueryMap.entrySet()){
-				BoolQueryBuilder bQuery = QueryBuilders.boolQuery();
-				bQuery.must(query);
-				for(String key : attrQueryMap.keySet()){
-					if (e.getKey().equals(key))
-						continue;
-					bQuery.must(attrQueryMap.get(key));
-				}
-				retMap.put(e.getKey(), bQuery);
-				
-			}
-		}
-		return retMap;
-	}
+ 
 
 	@Override
 	public String getFl() {

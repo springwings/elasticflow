@@ -42,11 +42,7 @@ public interface SearcherModel<T1, T2, T3> {
 	
 	public boolean isShowQueryInfo();
 	
-	public List<T2> getSortinfo();
-
-	public Map<String, T1> getAttrQueryMap();
-
-	public Map<String, T1> getEveryAttrQueriesMap();
+	public List<T2> getSortinfo();  
 
 	public List<T3> getFacetsConfig(); 
 

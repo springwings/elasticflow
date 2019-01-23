@@ -1,4 +1,4 @@
-package org.elasticflow.searcher.flow;
+package org.elasticflow.searcher.parser;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -22,10 +22,9 @@ import org.elasticflow.util.Common;
  * @version 2.0
  * @date 2018-10-26 09:24
  */
-public class SolrQueryBuilder {
+public class SolrQueryParser implements QueryParser{
 
-	public static SolrQuery queryBuilder(RiverRequest request, InstanceConfig prs,
-			Map<String, String> attrQueryMap) {
+	public static SolrQuery parseRequest(RiverRequest request, InstanceConfig prs) {
 		SolrQuery sq = new SolrQuery();
 		StringBuilder qu = new StringBuilder();
 		Map<String, String> paramMap = request.getParams();

@@ -1,15 +1,13 @@
 package org.elasticflow.model.searcher;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrQuery;
-
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.RiverRequest;
-import org.elasticflow.searcher.flow.SolrQueryBuilder;
+import org.elasticflow.searcher.parser.SolrQueryParser;
 
 /**
  * 
@@ -28,14 +26,12 @@ public class SearcherSolrModel implements SearcherModel<SolrQuery, String, Strin
 	private String requesthandler="select";
 	
 	Map<String, List<String[]>> facetSearchParams;
-	List<String> facetsConfig = new ArrayList<String>();
-	private Map<String, SolrQuery> attrQueryMap = new HashMap<String, SolrQuery>(); 
+	List<String> facetsConfig = new ArrayList<String>(); 
 	private List<String> sortinfo;
 	
 	public static SearcherSolrModel getInstance(RiverRequest request, InstanceConfig instanceConfig) {
 		SearcherSolrModel sq = new SearcherSolrModel(); 
-		sq.setQuery(SolrQueryBuilder.queryBuilder(request, instanceConfig,
-				 new HashMap<String, String>()));
+		sq.setQuery(SolrQueryParser.parseRequest(request, instanceConfig));
 		return sq;
 	}
  
@@ -93,18 +89,7 @@ public class SearcherSolrModel implements SearcherModel<SolrQuery, String, Strin
 	public void setShowQueryInfo(boolean isshow) {
 		this.showQueryInfo = isshow;
 	}
-
-	@Override
-	public Map<String, SolrQuery> getAttrQueryMap() { 
-		return this.attrQueryMap;
-	}
-
-	@Override
-	public Map<String, SolrQuery> getEveryAttrQueriesMap() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+ 
 	@Override
 	public List<String> getFacetsConfig() {
 		// TODO Auto-generated method stub

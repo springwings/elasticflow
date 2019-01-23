@@ -1,4 +1,4 @@
-package org.elasticflow.searcher.flow;
+package org.elasticflow.searcher.parser;
 
 import java.lang.reflect.Method;
 import java.util.Iterator;
@@ -35,16 +35,15 @@ import org.elasticflow.util.Common;
  * @version 2.0
  * @date 2018-10-26 09:23
  */
-public class ESQueryBuilder {
+public class ESQueryParser implements QueryParser{
 
-	private final static Logger log = LoggerFactory.getLogger(ESQueryBuilder.class);
+	private final static Logger log = LoggerFactory.getLogger(ESQueryParser.class);
 
 	static public QueryBuilder EmptyQuery() {
 		return QueryBuilders.termQuery("EMPTY", "0x000");
 	}
 
-	static public BoolQueryBuilder buildBooleanQuery(RiverRequest request, InstanceConfig instanceConfig,
-		 Map<String, QueryBuilder> attrQueryMap) {
+	static public BoolQueryBuilder parseRequest(RiverRequest request, InstanceConfig instanceConfig) {
 		BoolQueryBuilder bquery = QueryBuilders.boolQuery();
 		try {
 			Map<String, String> paramMap = request.getParams();
