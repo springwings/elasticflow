@@ -113,6 +113,7 @@ public class HbaseFlow extends ReaderFlowSocket {
 				this.dataPage.putDataBoundary(dataBoundary);
 				this.dataPage.putData(this.dataUnit);
 			} catch (Exception e) {
+				releaseConn = true;
 				this.dataPage.put(GlobalParam.READER_LAST_STAMP, -1);
 				log.error("SqlReader init Exception", e);
 			} 

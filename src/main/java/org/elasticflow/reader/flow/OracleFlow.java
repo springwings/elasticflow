@@ -58,6 +58,7 @@ public class OracleFlow extends ReaderFlowSocket{
 				log.error("get data Page Exception", e);
 			} 
 		} catch (SQLException e){
+			releaseConn = true;
 			log.error(page.getAdditional() + " get dataPage SQLException", e);
 		} catch (Exception e) { 
 			releaseConn = true;
