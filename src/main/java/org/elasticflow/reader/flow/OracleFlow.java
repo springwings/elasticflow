@@ -57,8 +57,7 @@ public class OracleFlow extends ReaderFlowSocket{
 			} catch (Exception e) {
 				log.error("get data Page Exception", e);
 			} 
-		} catch (SQLException e){
-			releaseConn = true;
+		} catch (SQLException e){ 
 			log.error(page.getAdditional() + " get dataPage SQLException", e);
 		} catch (Exception e) { 
 			releaseConn = true;
@@ -139,6 +138,7 @@ public class OracleFlow extends ReaderFlowSocket{
 				statement.close();
 				rs.close();
 			} catch (Exception e) {
+				releaseConn = true;
 				log.error("close connection resource Exception", e);
 			} 
 			REALEASE(false,releaseConn);  

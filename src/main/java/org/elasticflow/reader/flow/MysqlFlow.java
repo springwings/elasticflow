@@ -57,8 +57,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 				this.dataPage.put(GlobalParam.READER_STATUS,false);
 				log.error("get data Page Exception", e);
 			} 
-		} catch (SQLException e){
-			releaseConn = true;
+		} catch (SQLException e){ 
 			this.dataPage.put(GlobalParam.READER_STATUS,false);
 			log.error(page.getAdditional() + " get dataPage SQLException", e);
 		} catch (Exception e) { 
@@ -141,6 +140,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 				statement.close();
 				rs.close();
 			} catch (Exception e) {
+				releaseConn = true;
 				log.error("close connection resource Exception", e);
 			} 
 			REALEASE(false,releaseConn);  
