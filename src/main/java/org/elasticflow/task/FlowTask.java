@@ -2,17 +2,18 @@ package org.elasticflow.task;
 
 import java.util.HashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.node.CPU;
+import org.elasticflow.piper.Breaker;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.FNException;
+import org.elasticflow.util.FNException.ETYPE;
 import org.elasticflow.yarn.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
  
 /**
  * schedule task description,to manage task job
@@ -26,6 +27,7 @@ public class FlowTask {
 	private boolean masterControl = false;
 	private String instance;
 	private PipePump transDataFlow;
+	private Breaker breaker;
 	/**
 	 * seq for scan series datas
 	 */
@@ -47,6 +49,8 @@ public class FlowTask {
 		this.L1seq = L1seq;
 		if (transDataFlow.getInstanceConfig().getPipeParams().getInstanceName() != null)
 			masterControl = true;
+		breaker = new Breaker();
+		breaker.init();
 	}
 
 	/**
@@ -62,7 +66,7 @@ public class FlowTask {
 	 * slave instance full job
 	 */
 	public void runFull() {
-		if (Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running)) {
+		if (!breaker.isOn() && Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running)) {
 			try {
 				GlobalParam.SCAN_POSITION.get(Common.getMainName(instance, L1seq)).keepCurrentPos();
 				String storeId;
@@ -83,10 +87,13 @@ public class FlowTask {
 					Common.saveTaskInfo(instance, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
 				} 
 			} catch (Exception e) {
+				breaker.log();
 				log.error(instance + " Full Exception", e);
 			} finally {
 				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready);
 			}
+		} else {
+			log.info(instance + " Current full flow flow has been breaked!");
 		}
 	}
 
@@ -116,6 +123,8 @@ public class FlowTask {
 			} finally {
 				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready);
 			}
+		} else {
+			log.info(instance + " Current Master Full flow has been breaked!");
 		}
 	}
 
@@ -137,7 +146,7 @@ public class FlowTask {
 				recompute = false;
 			}
 		} else {
-			log.info(instance + " flow have been closed!startIncrement flow failed!");
+			log.info(instance + " Current Master Increment flow has been breaked!");
 		}
 	}
 
@@ -145,7 +154,7 @@ public class FlowTask {
 	 * slave instance increment job
 	 */
 	public void runIncrement() {  
-		if (Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running)) {
+		if (!breaker.isOn() && Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running)) {
 			String storeId;
 			if (masterControl) {
 				storeId = Resource.FLOW_INFOS.get(transDataFlow.getInstanceConfig().getPipeParams().getInstanceName(),
@@ -158,13 +167,15 @@ public class FlowTask {
 			try {
 				transDataFlow.run(instance, storeId, L1seq, false, masterControl); 
 			} catch (FNException e) {
-				if (!masterControl && e.getMessage().equals("storeId not found")) {
+				if (!masterControl && e.getErrorType()==ETYPE.WRITE_POS_NOT_FOUND) {
 					storeId = Common.getStoreId(instance, L1seq, transDataFlow, true, true);
 					try {
 						transDataFlow.run(instance, storeId,L1seq, false, masterControl);
 					} catch (FNException ex) {
 						log.error(instance + " Increment Exception", ex);
 					}
+				}else {
+					breaker.log();
 				}
 				log.error(instance + " IncrementJob Exception", e);
 			} finally {
@@ -172,7 +183,7 @@ public class FlowTask {
 				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready); 
 			}
 		} else {
-			log.info(instance + " flow have been closed!Current Start Increment flow failed!");
+			log.info(instance + " Current Increment flow has been breaked!");
 		}
 	}
 

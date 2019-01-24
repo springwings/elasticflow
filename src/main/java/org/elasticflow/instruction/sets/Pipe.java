@@ -9,6 +9,7 @@ import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.FNException;
+import org.elasticflow.util.FNException.ETYPE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,9 +103,9 @@ public class Pipe extends Instruction {
 				rstate.setCount(num);
 				log.info(Common.formatLog("onepage"," -- " + id + " onepage ", instance, storeId, L2seq, num,
 						DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));
-			} catch (Exception e) {
-				if (e.getMessage().equals("storeId not found")) {
-					throw new FNException("storeId not found");
+			} catch (FNException e) {
+				if (e.getErrorType().equals(ETYPE.WRITE_POS_NOT_FOUND)) {
+					throw e;
 				} else {
 					freeConn = true;
 				}

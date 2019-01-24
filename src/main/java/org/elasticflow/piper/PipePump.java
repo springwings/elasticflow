@@ -22,6 +22,8 @@ import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.handler.Handler;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.FNException;
+import org.elasticflow.util.FNException.ELEVEL;
+import org.elasticflow.util.FNException.ETYPE;
 import org.elasticflow.util.PipeNorms;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.yarn.Resource;
@@ -133,10 +135,10 @@ public final class PipePump extends Instruction {
 						getInstanceConfig().getPipeParams().getReadPageSize());
 				getReader().lock.unlock();
 				if (pageList == null)
-					throw new FNException("read data get page split exception!");
+					throw new FNException("read data get page split exception!",ELEVEL.Termination);
 				processListsPages(task, writeTo, pageList,storeId);
 
-			} catch (Exception e) {
+			} catch (FNException e) {
 				if (task.getJobType().equals(JOB_TYPE.FULL) && !masterControl) {
 					for (int t = 0; t < 5; t++) {
 						getWriter().PREPARE(false, false);
@@ -150,8 +152,8 @@ public final class PipePump extends Instruction {
 						}
 					}
 				}
-				if (e.getMessage() != null && e.getMessage().equals("storeId not found")) {
-					throw new FNException("storeId not found"); 
+				if (e.getErrorType().equals(ETYPE.WRITE_POS_NOT_FOUND)) {
+					throw e; 
 				} else {
 					log.error("[" + task.getJobType().name() + " " + mainName + L2seq + "_" + storeId + " ERROR]", e);
 					Resource.mailSender.sendHtmlMailBySynchronizationMode(" [Rivers] " + GlobalParam.run_environment,
@@ -162,7 +164,7 @@ public final class PipePump extends Instruction {
 	}
 
 	private void processListsPages(Task task, String writeTo, ConcurrentLinkedDeque<String> pageList,
-			String storeId) throws Exception {
+			String storeId) throws FNException {
 		String mainName = Common.getMainName(task.getInstance(), task.getL1seq());
 		int pageNum = pageList.size();
 		if (pageNum == 0) {
@@ -185,7 +187,11 @@ public final class PipePump extends Instruction {
 			if (getInstanceConfig().getPipeParams().isMultiThread()) {
 				final CountDownLatch synThreads = new CountDownLatch(estimateThreads(pageNum));
 				Resource.ThreadPools.submitJobPage(new Pump(synThreads, task, storeId, pageList, writeTo,computeModel,total));
-				synThreads.await();
+				try {
+					synThreads.await();
+				} catch (Exception e) {
+					throw new FNException(e);
+				}
 			} else {
 				singleThread(task, storeId, pageList, writeTo,computeModel,total);
 			}

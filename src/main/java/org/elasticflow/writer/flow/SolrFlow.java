@@ -40,6 +40,8 @@ import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.FNException;
+import org.elasticflow.util.FNException.ELEVEL;
+import org.elasticflow.util.FNException.ETYPE;
 import org.elasticflow.writer.WriterFlowSocket;
 
 /**
@@ -213,7 +215,7 @@ public class SolrFlow extends WriterFlowSocket{
 					getSolrConn().commit(true, true, true);
 				} catch (Exception e) {
 					if (e.getMessage().contains("Collection not found")) {
-						throw new FNException("storeId not found");
+						throw new FNException("storeId not found",ELEVEL.Dispose,ETYPE.WRITE_POS_NOT_FOUND);
 					} else {
 						throw new FNException(e.getMessage());
 					}

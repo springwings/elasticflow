@@ -6,37 +6,51 @@ package org.elasticflow.util;
  * @version 1.0
  * @date 2018-11-07 14:12
  */
-public class FNException extends Exception{ 
-	
-	private static final long serialVersionUID = 1L; 
-	
+public class FNException extends Exception {
+
+	private static final long serialVersionUID = 1L;
+
 	/**
-	 * Ignore continue running with warnning
-	 * Dispose need to fix and continue
-	 * Termination stop thread
-	 * Stop stop program
+	 * Ignore continue running with warnning Dispose need to fix and continue
+	 * Termination stop thread Stop stop program
 	 */
-	public static enum ELEVEL {  
-		Ignore,Dispose,Termination,Stop;
+	public static enum ELEVEL {
+		Ignore, Dispose, Termination, Stop;
 	}
-	
-	private ELEVEL e_level; 
-	
-	public FNException(String msg){
-		super(msg); 
-	} 
-	
-	public FNException(String msg,ELEVEL level){ 
-		super(msg); 
-		e_level = level;
-	} 
-	
+
+	public static enum ETYPE {
+		WRITE_POS_NOT_FOUND;
+	}
+
+	private ELEVEL e_level;
+
+	private ETYPE e_type;
+
+	public FNException(String msg) {
+		super(msg);
+		e_level = ELEVEL.Ignore;
+	}
+
+	public FNException(String msg, ELEVEL etype) {
+		super(msg);
+		e_level = etype;
+	}
+
+	public FNException(String msg, ELEVEL elevel, ETYPE etype) {
+		super(msg);
+		e_level = elevel;
+		e_type = etype;
+	}
+
 	public ELEVEL getErrorLevel() {
 		return e_level;
 	}
-	 
-	
-	public FNException(Exception e){
-		super(e); 
+
+	public ETYPE getErrorType() {
+		return e_type;
+	}
+
+	public FNException(Exception e) {
+		super(e);
 	}
 }
