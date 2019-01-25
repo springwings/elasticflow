@@ -19,6 +19,10 @@ public class Breaker {
 
 	private int failTimes;
 	
+	private int failSpan = 3000;
+	
+	private int recheckSpan = 60000;
+	
 	public void init() {
 		this.failTimes = 0;
 		this.earlyFail = 0;
@@ -33,14 +37,14 @@ public class Breaker {
 
 	public boolean isOn() {
 		long current = System.currentTimeMillis();
-		if (this.failTimes > 2 && current - earlyFail > 3000 ) {
+		if (this.failTimes > 2 && current - earlyFail > failSpan ) {
 			this.failTimes = 0;
 			this.earlyFail = 0;
 			this.checkFail = current;
 			return true;
 		}
 		
-		if (current - checkFail < 60000)
+		if (current - checkFail < recheckSpan)
 			return true;
 		
 		return false;
