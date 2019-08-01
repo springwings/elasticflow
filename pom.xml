@@ -77,11 +77,6 @@
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.9</version>
-		</dependency>
-		<dependency>
-			<groupId>com.oracle.ojdbc6</groupId>
-			<artifactId>ojdbc6</artifactId>
-			<version>11.2.0.4</version>
 		</dependency> 
 		<dependency>
     		<groupId>com.alibaba</groupId>
@@ -401,9 +396,9 @@
 
 		<dependency>
 			<groupId>jdk.tools</groupId>
-			<artifactId>jdk.tools</artifactId>
-			<version>1.8</version>
-			<scope>system</scope>
+            <artifactId>jdk.tools</artifactId>
+            <version>1.8</version>
+            <scope>system</scope> 
 			<systemPath>${JAVA_HOME}/lib/tools.jar</systemPath>
 		</dependency>
 
@@ -413,21 +408,7 @@
 			<version>2.4</version>
 		</dependency>
 		
-		<dependency>
-			<groupId>org.deeplearning4j</groupId>
-			<artifactId>deeplearning4j-core</artifactId>
-			<version>${dl4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.nd4j</groupId>
-			<artifactId>nd4j-native-platform</artifactId>
-			<version>${dl4j.version}</version>
-		</dependency>
-		<dependency>
-   			<groupId>org.datavec</groupId>
-   			<artifactId>datavec-api</artifactId>
-    		<version>${dl4j.version}</version>
-		</dependency>
+	 
 	</dependencies>
 	<build>
 		<finalName>elasticflow</finalName>
