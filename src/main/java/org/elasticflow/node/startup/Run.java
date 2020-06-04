@@ -26,6 +26,7 @@ import org.elasticflow.service.FNMonitor;
 import org.elasticflow.task.FlowTask;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.FNIoc;
+import org.elasticflow.util.NodeStorer;
 import org.elasticflow.util.NodeUtil;
 import org.elasticflow.util.ZKUtil;
 import org.elasticflow.util.email.FNEmailSender;
@@ -84,8 +85,7 @@ public final class Run {
 		Resource.nodeMonitor = nodeMonitor; 
 		
 		if (initInstance) {
-			ZKUtil.setData(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP + "/configs",
-					JSON.toJSONString(GlobalParam.StartConfig));
+			NodeStorer.setData(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP + "/configs", JSON.toJSONString(GlobalParam.StartConfig)); 
 			Resource.nodeConfig = NodeConfig.getInstance(GlobalParam.StartConfig.getProperty("pond"), GlobalParam.StartConfig.getProperty("instructions"));
 			Resource.nodeConfig.init(GlobalParam.StartConfig.getProperty("instances"),GlobalParam.SERVICE_LEVEL);
 			Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
@@ -122,7 +122,7 @@ public final class Run {
 		try {
 			GlobalParam.StartConfig = new Properties();
 			if (fromZk) {
-				JSONObject _JO = (JSONObject) JSON.parse(ZKUtil.getData(path, false));
+				JSONObject _JO = (JSONObject) JSON.parse(NodeStorer.getData(path, false));
 				for (Map.Entry<String, Object> row : _JO.entrySet()) {
 					GlobalParam.StartConfig.setProperty(row.getKey(), String.valueOf(row.getValue()));
 				}
@@ -146,7 +146,7 @@ public final class Run {
 
 	private void start() {
 		loadGlobalConfig(this.startConfigPath, false);
-		ReportStatus.nodeConfigs();
+		ReportStatus.nodeConfigs(false);
 		if (!GlobalParam.StartConfig.containsKey("node_type"))
 			GlobalParam.StartConfig.setProperty("node_type", NODE_TYPE.slave.name());
 		if (GlobalParam.StartConfig.get("node_type").equals(NODE_TYPE.backup.name())) {

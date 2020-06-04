@@ -7,7 +7,7 @@ import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.ZKUtil;
+import org.elasticflow.util.NodeStorer;
 import org.elasticflow.yarn.Resource;
 
 /**
@@ -41,7 +41,7 @@ public class TaskControl extends Instruction{
 			}else {
 				saveInfo = String.valueOf(start + days*3600*24*ride);
 			}
-			ZKUtil.setData(Common.getTaskStorePath(context.getInstanceConfig().getName(), L1seq,GlobalParam.JOB_FULLINFO_PATH),saveInfo);
+			NodeStorer.setData(Common.getTaskStorePath(context.getInstanceConfig().getName(), L1seq,GlobalParam.JOB_FULLINFO_PATH),saveInfo);
 		} 
 	}
 	

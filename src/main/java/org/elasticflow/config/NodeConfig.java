@@ -19,7 +19,7 @@ import org.elasticflow.param.pipe.InstructionParam;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.param.warehouse.WarehouseSqlParam;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.ZKUtil;
+import org.elasticflow.util.NodeStorer;
 
 /**
  * node configs center,manage flows config and sql/nosql dataflows configs
@@ -143,7 +143,7 @@ public class NodeConfig {
 	private void parseInstructionsFile(String src) {
 		InputStream in = null;
 		try {
-			byte[] bt = ZKUtil.getData(src, false);
+			byte[] bt = NodeStorer.getData(src, false);
 			if (bt.length <= 0)
 				return;
 			in = new ByteArrayInputStream(bt, 0, bt.length);
@@ -171,17 +171,20 @@ public class NodeConfig {
 	private void parsePondFile(String src) {
 		InputStream in = null;
 		try {
-			byte[] bt = ZKUtil.getData(src, false);
+			byte[] bt = NodeStorer.getData(src, false);
 			if (bt.length <= 0)
 				return;
 			in = new ByteArrayInputStream(bt, 0, bt.length);
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			Document doc = db.parse(in);
+			NodeList paramlist;
 
 			Element NoSql = (Element) doc.getElementsByTagName("NoSql").item(0);
-			NodeList paramlist = NoSql.getElementsByTagName("socket");
-			parseNode(paramlist, WarehouseNosqlParam.class);
+			if(NoSql != null) {
+				paramlist = NoSql.getElementsByTagName("socket");
+				parseNode(paramlist, WarehouseNosqlParam.class);
+			}
 
 			Element Sql = (Element) doc.getElementsByTagName("Sql").item(0);
 			paramlist = Sql.getElementsByTagName("socket");
@@ -194,7 +197,7 @@ public class NodeConfig {
 				if (null != in) {
 					in.close();
 				}
-			} catch (Exception e) {
+			} catch (Exception e) { 
 				Common.LOG.error("parse (" + src + ") error,", e);
 			}
 		}
@@ -204,7 +207,7 @@ public class NodeConfig {
 		if (paramlist != null && paramlist.getLength() > 0) {
 			for (int i = 0; i < paramlist.getLength(); i++) {
 				Node param = paramlist.item(i);
-				if (param.getNodeType() == Node.ELEMENT_NODE) {
+				if (param.getNodeType() == Node.ELEMENT_NODE) { 
 					Object o = Common.getXmlObj(param, c);
 					if (c == WarehouseNosqlParam.class) {
 						addSource(RESOURCE_TYPE.NOSQL, o);

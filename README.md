@@ -1,8 +1,5 @@
 # ElasticFlow
-elasticflow for build computing flow ，support jobs like Deeplearning,ML,DataTrasfer,Data Searcher platform,etc
-
-
-目前支持将流接入deeplearning4j，可支持tensorflow等深度学习框架。
+elasticflow for build computing flow ，support jobs like ML,DataTrasfer,Data Searcher platform,etc
 
 ![image](https://github.com/fnOpenSource/rivers/blob/master/architecture.jpg)
 

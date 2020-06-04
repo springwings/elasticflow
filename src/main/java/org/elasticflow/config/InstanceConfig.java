@@ -18,7 +18,7 @@ import org.elasticflow.param.ml.ComputeParam;
 import org.elasticflow.param.pipe.PipeParam;
 import org.elasticflow.param.warehouse.ScanParam;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.ZKUtil;
+import org.elasticflow.util.NodeStorer;
 import org.elasticflow.yarn.Resource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -60,7 +60,7 @@ public class InstanceConfig {
 		this.messageParam = new MessageParam();
 		this.computeParams = new ComputeParam();
 		this.writerParams = new WriterParam();
-		loadConfigFromZk();
+		loadInstanceConfig();
 		Common.LOG.info(filename + " config loaded");
 	}
 
@@ -159,10 +159,10 @@ public class InstanceConfig {
 		this.status = status;
 	}
 
-	private void loadConfigFromZk() {
+	private void loadInstanceConfig() {
 		InputStream in;
 		try {
-			byte[] bt = ZKUtil.getData(this.filename,false);
+			byte[] bt = NodeStorer.getData(this.filename,false);
 			if (bt.length <= 0)
 				return;
 			in = new ByteArrayInputStream(bt, 0, bt.length);
@@ -171,7 +171,7 @@ public class InstanceConfig {
 		} catch (Exception e) {
 			in = null;
 			setStatus(false);
-			Common.LOG.error("loadConfigFromZk error,",e);
+			Common.LOG.error("load Instance Config error,",e);
 		}
 	}
 	

@@ -20,7 +20,7 @@ public final class NodeUtil {
 			Resource.FLOW_STATUS.set(instance, L1seq,GlobalParam.JOB_TYPE.FULL.name(), new AtomicInteger(1));
 			Resource.FLOW_STATUS.set(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(), new AtomicInteger(1)); 
 			String path = Common.getTaskStorePath(instance, L1seq,GlobalParam.JOB_INCREMENTINFO_PATH);
-			byte[] b = ZKUtil.getData(path, true);
+			byte[] b = NodeStorer.getData(path, true);
 			if (b != null && b.length > 0) {
 				String str = new String(b);
 				GlobalParam.SCAN_POSITION.put(Common.getMainName(instance, L1seq), new ScanPosition(str,instance,L1seq));  
