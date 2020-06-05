@@ -42,6 +42,8 @@ import org.elasticsearch.index.reindex.UpdateByQueryRequestBuilder;
 import org.elasticsearch.script.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.sf.json.JSONArray;
  
 /**
  * ElasticSearch Writer Manager
@@ -129,6 +131,8 @@ public class ESFlow extends WriterFlowSocket {
 					}else if (transParam.getSeparator() != null) {
 						String[] vs = value.split(transParam.getSeparator());
 						cbuilder.array(transParam.getAlias(), vs);
+					}else if (transParam.getIndextype().equals("nested")) { 
+						cbuilder.array(transParam.getAlias(),JSONArray.fromObject(value));	
 					} else 
 						cbuilder.field(transParam.getAlias(), value);
 				} else {

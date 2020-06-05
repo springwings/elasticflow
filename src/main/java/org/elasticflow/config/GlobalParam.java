@@ -17,6 +17,8 @@ public final class GlobalParam {
 	
 	public static String VERSION;
 	
+	public static final String PROJ = "ElasticFlow";
+	
 	public static enum STATUS {  
 		Blank(0),Ready(1),Running(2),Termination(4),Stop(8);
 		private int v;

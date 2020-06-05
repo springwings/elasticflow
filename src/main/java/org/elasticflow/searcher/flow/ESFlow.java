@@ -123,7 +123,7 @@ public final class ESFlow extends SearcherFlowSocket {
 			List<String> returnFields, String instance, int start, int count,
 			List<SortBuilder<?>> sortFields,
 			List<AggregationBuilder> facetBuilders,SearcherModel<?, ?, ?> fq,SearcherResult res) {
-		SearchRequestBuilder request = conn.prepareSearch(instance).setPreference("_replica_first");
+		SearchRequestBuilder request = conn.prepareSearch(instance);
 		request.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
 		request.setQuery(qb);
 		request.setSize(count);
