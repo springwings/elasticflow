@@ -2,7 +2,7 @@ package org.elasticflow.correspond;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.NodeStorer;
+import org.elasticflow.util.ConfigStorer;
  
 /**
  * report node machine status with heartBeat and correspond job status
@@ -16,31 +16,30 @@ public final class ReportStatus {
 		 
 	}
 	
-	public static void nodeConfigs(boolean useZk){
+	public static void nodeConfigs(){
 		try {
-			NodeStorer.setUseType(useZk);
-			if (NodeStorer.exists(GlobalParam.CONFIG_PATH)==false) {
+			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH)==false) {
 				String path = "";
 				for (String str : GlobalParam.CONFIG_PATH.split("/")) {
 					path += "/" + str;
-					NodeStorer.createPath(path,false);
+					ConfigStorer.createPath(path,false);
 				} 
 			}
-			if (NodeStorer.exists(GlobalParam.CONFIG_PATH+"/INSTANCES")==false)
-				NodeStorer.createPath(GlobalParam.CONFIG_PATH+"/INSTANCES",false);
-			if (NodeStorer.exists(GlobalParam.CONFIG_PATH+"/instructions.xml")==false)
-				NodeStorer.createPath(GlobalParam.CONFIG_PATH+"/instructions.xml",true);
-			if (NodeStorer.exists(GlobalParam.CONFIG_PATH+"/resource.xml")==false) 
-				NodeStorer.createPath(GlobalParam.CONFIG_PATH+"/resource.xml",true);
+			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH+"/INSTANCES")==false)
+				ConfigStorer.createPath(GlobalParam.CONFIG_PATH+"/INSTANCES",false);
+			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH+"/instructions.xml")==false)
+				ConfigStorer.createPath(GlobalParam.CONFIG_PATH+"/instructions.xml",true);
+			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH+"/resource.xml")==false) 
+				ConfigStorer.createPath(GlobalParam.CONFIG_PATH+"/resource.xml",true);
 			
-			if (NodeStorer.exists(GlobalParam.CONFIG_PATH + "/RIVER_NODES")==false) {
-				NodeStorer.createPath(GlobalParam.CONFIG_PATH + "/RIVER_NODES",false);
+			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH + "/RIVER_NODES")==false) {
+				ConfigStorer.createPath(GlobalParam.CONFIG_PATH + "/RIVER_NODES",false);
 			}
-			if (NodeStorer.exists(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP)==false) {
-				NodeStorer.createPath(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP,false);
+			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP)==false) {
+				ConfigStorer.createPath(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP,false);
 			}
-			if (NodeStorer.exists(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP + "/configs")==false) {
-				NodeStorer.createPath(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP + "/configs",true);
+			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP + "/configs")==false) {
+				ConfigStorer.createPath(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP + "/configs",true);
 			}
 		} catch (Exception e) {
 			Common.LOG.error("environmentCheck Exception", e);

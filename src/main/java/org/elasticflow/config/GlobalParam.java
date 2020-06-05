@@ -34,6 +34,9 @@ public final class GlobalParam {
 	/**store zookeeper data path*/
 	public static String CONFIG_PATH;
 	
+	/**use zookeeper to store config contents***/
+	public static boolean USE_ZK;
+	
 	public static String INSTANCE_PATH;
 	
 	public static String IP; 

@@ -105,14 +105,14 @@ public class MysqlFlow extends ReaderFlowSocket{
 			if(task.getScanParam().getKeyFieldType() != null){
 				autoSelect = false;
 				if(task.getScanParam().getKeyFieldType().equals("int")){
-					statement = conn.prepareStatement(sql.replace("#{end}", Long.MAX_VALUE + "").replace(
-							"#{END}", Long.MAX_VALUE + ""));
+					statement = conn.prepareStatement(sql.replace(GlobalParam._end, String.valueOf(Long.MAX_VALUE)).replace(
+							GlobalParam._start, "0"));
 				}else{
-					statement = conn.prepareStatement(sql.replace("#{end}", "~").replace("#{END}", "~")); 
+					statement = conn.prepareStatement(sql.replace(GlobalParam._end, "~").replace(GlobalParam._start, "0")); 
 				}
 			}else{
-				statement = conn.prepareStatement(sql.replace("#{end}", Long.MAX_VALUE + "").replace(
-						"#{END}", Long.MAX_VALUE + ""));
+				statement = conn.prepareStatement(sql.replace(GlobalParam._end, String.valueOf(Long.MAX_VALUE)).replace(
+						GlobalParam._start,""));
 			} 
 			statement.setFetchSize(pageSize);
 			rs = statement.executeQuery(); 
@@ -122,7 +122,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 			if (autoSelect && page.size() == 0) {
 				statement.close();
 				rs.close();
-				statement = conn.prepareStatement(sql.replace("#{end}", "~").replace("#{END}", "~")); 
+				statement = conn.prepareStatement(sql.replace(GlobalParam._end, "~")); 
 				rs = statement.executeQuery();  
 				while (rs.next()) {
 					page.push(rs.getString("id"));

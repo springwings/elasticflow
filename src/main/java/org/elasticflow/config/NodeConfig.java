@@ -19,7 +19,7 @@ import org.elasticflow.param.pipe.InstructionParam;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.param.warehouse.WarehouseSqlParam;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.NodeStorer;
+import org.elasticflow.util.ConfigStorer;
 
 /**
  * node configs center,manage flows config and sql/nosql dataflows configs
@@ -143,7 +143,7 @@ public class NodeConfig {
 	private void parseInstructionsFile(String src) {
 		InputStream in = null;
 		try {
-			byte[] bt = NodeStorer.getData(src, false);
+			byte[] bt = ConfigStorer.getData(src, false);
 			if (bt.length <= 0)
 				return;
 			in = new ByteArrayInputStream(bt, 0, bt.length);
@@ -171,7 +171,7 @@ public class NodeConfig {
 	private void parsePondFile(String src) {
 		InputStream in = null;
 		try {
-			byte[] bt = NodeStorer.getData(src, false);
+			byte[] bt = ConfigStorer.getData(src, false);
 			if (bt.length <= 0)
 				return;
 			in = new ByteArrayInputStream(bt, 0, bt.length);

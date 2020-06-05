@@ -18,7 +18,7 @@ import org.elasticflow.param.ml.ComputeParam;
 import org.elasticflow.param.pipe.PipeParam;
 import org.elasticflow.param.warehouse.ScanParam;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.NodeStorer;
+import org.elasticflow.util.ConfigStorer;
 import org.elasticflow.yarn.Resource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -38,6 +38,7 @@ public class InstanceConfig {
 	private boolean status = true;
 	private String name;
 	private volatile Map<String, RiverField> writeFields;
+	private volatile Map<String, String> externConfigs;
 	private volatile Map<String, RiverField> computeFields;
 	private volatile Map<String,SearcherParam> searcherParams;
 	private volatile WriterParam writerParams;
@@ -57,6 +58,7 @@ public class InstanceConfig {
 		this.writeFields = new HashMap<>();
 		this.computeFields = new HashMap<>();
 		this.searcherParams = new HashMap<>();
+		this.externConfigs = new HashMap<>();
 		this.messageParam = new MessageParam();
 		this.computeParams = new ComputeParam();
 		this.writerParams = new WriterParam();
@@ -105,7 +107,10 @@ public class InstanceConfig {
 		return messageParam;
 	} 
 	 
-
+	public Map<String, String> getExternConfigs() {
+		return externConfigs;
+	} 
+	
 	public Map<String, RiverField> getWriteFields() {
 		return writeFields;
 	}
@@ -162,7 +167,7 @@ public class InstanceConfig {
 	private void loadInstanceConfig() {
 		InputStream in;
 		try {
-			byte[] bt = NodeStorer.getData(this.filename,false);
+			byte[] bt = ConfigStorer.getData(this.filename,false);
 			if (bt.length <= 0)
 				return;
 			in = new ByteArrayInputStream(bt, 0, bt.length);
@@ -215,6 +220,12 @@ public class InstanceConfig {
 						parseNode(params.getElementsByTagName("param"), "readParam",
 								ScanParam.class);
 					}  
+				} 
+				
+				params = (Element) dataflow.getElementsByTagName("ExternConfig").item(0);
+				if(params!=null) { 
+					parseNode(params.getElementsByTagName("param"), "common",
+							String.class);
 				} 
 				
 				params = (Element) dataflow.getElementsByTagName("ComputeParam").item(0);   
@@ -275,6 +286,9 @@ public class InstanceConfig {
 						break;
 					case "pipeParam":
 						Common.getXmlParam(pipeParams, param, c);  
+						break; 
+					case "common": 
+						Common.getXmlParam(externConfigs, param, c);
 						break; 
 					case "readParam": 
 						Common.getXmlParam(readParams, param, c);

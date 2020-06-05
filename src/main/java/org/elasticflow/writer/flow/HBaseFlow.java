@@ -121,7 +121,7 @@ public class HBaseFlow extends WriterFlowSocket {
 	}
  
 	@Override
-	public boolean create(String instantcName, String batchId, Map<String, RiverField> transParams) {
+	public boolean create(String instantcName, String batchId, InstanceConfig instanceConfig) {
 		return true;
 	}
 

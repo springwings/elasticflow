@@ -9,29 +9,6 @@ import java.util.TimeZone;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
-import org.elasticsearch.action.admin.indices.alias.exists.AliasesExistResponse;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
-import org.elasticsearch.action.admin.indices.forcemerge.ForceMergeRequest;
-import org.elasticsearch.action.admin.indices.forcemerge.ForceMergeResponse;
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
-import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
-import org.elasticsearch.action.index.IndexRequestBuilder;
-import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.reindex.UpdateByQueryAction;
-import org.elasticsearch.index.reindex.UpdateByQueryRequestBuilder;
-import org.elasticsearch.script.Script;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.Mechanism;
 import org.elasticflow.config.InstanceConfig;
@@ -45,6 +22,26 @@ import org.elasticflow.util.FNException;
 import org.elasticflow.util.FNException.ELEVEL;
 import org.elasticflow.util.FNException.ETYPE;
 import org.elasticflow.writer.WriterFlowSocket;
+import org.elasticsearch.action.admin.indices.alias.exists.AliasesExistResponse;
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
+import org.elasticsearch.action.admin.indices.forcemerge.ForceMergeRequest;
+import org.elasticsearch.action.admin.indices.forcemerge.ForceMergeResponse;
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
+import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
+import org.elasticsearch.action.index.IndexRequestBuilder;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.UpdateByQueryAction;
+import org.elasticsearch.index.reindex.UpdateByQueryRequestBuilder;
+import org.elasticsearch.script.Script;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
  
 /**
  * ElasticSearch Writer Manager
@@ -100,8 +97,8 @@ public class ESFlow extends WriterFlowSocket {
 			sf.append("ctx._source."+transParam.getAlias()+" = "+value+","); 
 		} 
 		script = new Script(sf.append(GlobalParam.DEFAULT_FIELD+" = "+unit.getUpdateTime()).toString()); 
-		try { 
-			UpdateByQueryRequestBuilder _UR = UpdateByQueryAction.INSTANCE.newRequestBuilder(getESC().getClient());
+		try {  
+			UpdateByQueryRequestBuilder _UR = new UpdateByQueryRequestBuilder(getESC().getClient(), UpdateByQueryAction.INSTANCE);
 			_UR.source(instance).script(script).filter(QueryBuilders.termQuery(writerParam.getWriteKey(),unit.getKeyColumnVal())).execute().get();
 		} catch (Exception e) {
 			throw new FNException(e);
@@ -146,6 +143,7 @@ public class ESFlow extends WriterFlowSocket {
 			
 			String id = unit.getKeyColumnVal();
 			if (isUpdate) {
+				@SuppressWarnings("deprecation")
 				UpdateRequest _UR = new UpdateRequest(instance, alias, id);
 				_UR.doc(cbuilder).upsert(cbuilder);
 				if (routing.length() > 0)
@@ -195,23 +193,25 @@ public class ESFlow extends WriterFlowSocket {
 	} 
 	
 	@Override
-	public boolean create(String instance, String storeId, Map<String, RiverField> transParams) {
+	public boolean create(String instance, String storeId, InstanceConfig instanceConfig) {
 		String name = Common.getStoreName(instance, storeId);
 		String type = instance;
 		try {
 			log.info("create Instance " + name + ":" + type); 
-			IndicesExistsResponse indicesExistsResponse = getESC().getClient().admin().indices()
-					.exists(new IndicesExistsRequest(name)).actionGet();
-			if (!indicesExistsResponse.isExists()) {
-				CreateIndexResponse createIndexResponse = getESC().getClient().admin().indices()
-						.create(new CreateIndexRequest(name)).actionGet();
+			IndicesExistsResponse indicesExistsResponse = getESC().getClient().admin().indices().exists(
+					new IndicesExistsRequest(name)).actionGet();
+			if (!indicesExistsResponse.isExists()) { 
+				CreateIndexResponse createIndexResponse = getESC().getClient().admin().indices().prepareCreate(name).
+						setSettings(Settings.builder() 
+					    .put("index.number_of_shards", Integer.parseInt(instanceConfig.getExternConfigs().get("number_of_shards")))
+					    .put("index.number_of_replicas", Integer.parseInt(instanceConfig.getExternConfigs().get("number_of_replicas")))).get(); 
 				log.info("create new Instance " + name + " response isAcknowledged:"
 						+ createIndexResponse.isAcknowledged());
 			}
 
 			PutMappingRequest mappingRequest = new PutMappingRequest(name).type(type);
-			mappingRequest.source(getSettingMap(transParams));
-			PutMappingResponse response = getESC().getClient().admin().indices().putMapping(mappingRequest).actionGet();
+			mappingRequest.source(getSettingMap(instanceConfig.getWriteFields()));
+			AcknowledgedResponse response = getESC().getClient().admin().indices().putMapping(mappingRequest).actionGet();
 			log.info("setting response isAcknowledged:" + response.isAcknowledged());
 			return true;
 		} catch (Exception e) {
@@ -255,7 +255,7 @@ public class ESFlow extends WriterFlowSocket {
 				log.info("Instance " + name + " didn't exist.");
 			} else {
 				DeleteIndexRequest deleteRequest = new DeleteIndexRequest(name);
-				DeleteIndexResponse deleteResponse = getESC().getClient().admin().indices().delete(deleteRequest)
+				AcknowledgedResponse deleteResponse = getESC().getClient().admin().indices().delete(deleteRequest)
 						.actionGet();
 				if (deleteResponse.isAcknowledged()) {
 					log.info("Instance " + name + " removed ");
@@ -280,7 +280,7 @@ public class ESFlow extends WriterFlowSocket {
 		String name = Common.getStoreName(instanceName, storeId);
 		try {
 			log.info("trying to setting Alias " + aliasName + " to index " + name);
-			IndicesAliasesResponse response = getESC().getClient().admin().indices().prepareAliases().addAlias(name,
+			AcknowledgedResponse response = getESC().getClient().admin().indices().prepareAliases().addAlias(name,
 					aliasName).execute().actionGet();
 			if (response.isAcknowledged()) {
 				log.info("alias " + aliasName + " setted to " + name);
@@ -300,9 +300,7 @@ public class ESFlow extends WriterFlowSocket {
 				if (p.getName() == null)
 					continue;
 				map.put("type", p.getIndextype()); // type is must
-				if (p.getStored().toLowerCase().equals("false")) {
-					map.put("store", false);
-				}else {
+				if (p.getStored().toLowerCase().equals("true")) {
 					map.put("store", true);
 				}
 				if(p.getDsl()!=null) {
@@ -328,10 +326,10 @@ public class ESFlow extends WriterFlowSocket {
 		}   
 		Map<String, Object> _source_map = new HashMap<String, Object>();
 		_source_map.put("enabled", "true");
-		root_map.put("_source", _source_map);
-		Map<String, Object> _all_map = new HashMap<String, Object>();
-		_all_map.put("enabled", "false");
-		root_map.put("_all", _all_map);
+		root_map.put("_source", _source_map); 
+//		Map<String, Object> _all_map = new HashMap<String, Object>();
+//		_all_map.put("enabled", "false");
+//		root_map.put("_all", _all_map);
 		return root_map;
 	}
     
@@ -372,7 +370,7 @@ public class ESFlow extends WriterFlowSocket {
 			}
 
 			if ((select.equals("a") && !a) || (select.equals("b") && !b)) {
-				this.create(mainName, select, instanceConfig.getWriteFields());
+				this.create(mainName, select, instanceConfig);
 			}
 
 			if ((select.equals("a") && !a) || (select.equals("b") && !b)

@@ -6,6 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.model.RiverRequest;
+import org.elasticflow.searcher.parser.ESQueryParser;
+import org.elasticflow.util.SearchParamUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -14,15 +19,9 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.TopHitsAggregationBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-
-import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.model.RiverRequest;
-import org.elasticflow.searcher.parser.ESQueryParser;
-import org.elasticflow.util.SearchParamUtil;
 
 /**
  * 

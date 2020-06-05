@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -98,13 +99,19 @@ public final class Common {
 		return o;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static void setConfigObj(Object Obj,Class<?> c,String fieldName,String value) throws Exception {
-		if (value != null && value.length() > 0) {
-			String setMethodName = "set" + fieldName.substring(0, 1).toUpperCase()
-					+ fieldName.substring(1);
-			Method setMethod = c.getMethod(setMethodName, new Class[] { String.class });
-			setMethod.invoke(Obj, new Object[] { value });
+		if (Obj instanceof HashMap) {
+			((HashMap<String,String>) Obj).put(fieldName, value);
+		}else {
+			if (value != null && value.length() > 0) {
+				String setMethodName = "set" + fieldName.substring(0, 1).toUpperCase()
+						+ fieldName.substring(1);
+				Method setMethod = c.getMethod(setMethodName, new Class[] { String.class });
+				setMethod.invoke(Obj, new Object[] { value });
+			}
 		}
+		
 	}
 
 	public static List<String> getKeywords(String queryStr) {
@@ -212,7 +219,7 @@ public final class Common {
 	public static void saveTaskInfo(String instance, String L1seq,String storeId,String location) {
 		String instanceName = getMainName(instance, L1seq);
 		GlobalParam.SCAN_POSITION.get(instanceName).updateStoreId(storeId);
-		NodeStorer.setData(getTaskStorePath(instanceName, L1seq,location),
+		ConfigStorer.setData(getTaskStorePath(instanceName, L1seq,location),
 				GlobalParam.SCAN_POSITION.get(instanceName).getString());
 	} 
 
@@ -259,7 +266,7 @@ public final class Common {
 	public static String getFullStartInfo(String instance, String L1seq) {
 		String info = "0";
 		String path = Common.getTaskStorePath(instance, L1seq,GlobalParam.JOB_FULLINFO_PATH);
-		byte[] b = NodeStorer.getData(path,true); 
+		byte[] b = ConfigStorer.getData(path,true); 
 		if (b != null && b.length > 0) {
 			String str = new String(b); 
 			if (str.length() > 1) {
@@ -280,7 +287,7 @@ public final class Common {
 		synchronized (GlobalParam.SCAN_POSITION) {
 			if(!GlobalParam.SCAN_POSITION.containsKey(mainName)) {
 				String path = Common.getTaskStorePath(mainName, L1seq,GlobalParam.JOB_INCREMENTINFO_PATH);
-				byte[] b = NodeStorer.getData(path,true);
+				byte[] b = ConfigStorer.getData(path,true);
 				if (b != null && b.length > 0) {
 					String str = new String(b); 
 					GlobalParam.SCAN_POSITION.put(mainName, new ScanPosition(str,instance,storeId));  
@@ -334,7 +341,7 @@ public final class Common {
 		String instanceName = getMainName(instance, L1seq);
 		if(reload) {
 			String path = Common.getTaskStorePath(instance, L1seq,GlobalParam.JOB_INCREMENTINFO_PATH);
-			byte[] b = NodeStorer.getData(path, true);
+			byte[] b = ConfigStorer.getData(path, true);
 			if (b != null && b.length > 0) {
 				String str = new String(b);
 				GlobalParam.SCAN_POSITION.put(instanceName, new ScanPosition(str,instance,L1seq));  

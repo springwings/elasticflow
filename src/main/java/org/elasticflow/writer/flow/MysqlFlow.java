@@ -66,14 +66,14 @@ public class MysqlFlow extends WriterFlowSocket {
 	}
 
 	@Override
-	public boolean create(String instance, String storeId, Map<String, RiverField> transParams) {
+	public boolean create(String instance, String storeId, InstanceConfig instanceConfig) {
 		String name = Common.getStoreName(instance, storeId);
 		String type = instance; 
 		PREPARE(false, false);
 		if (!ISLINK())
 			return false;
 		Connection conn = (Connection) GETSOCKET().getConnection(false);
-		try (PreparedStatement statement = conn.prepareStatement(getTableSql(name, transParams));) {
+		try (PreparedStatement statement = conn.prepareStatement(getTableSql(name, instanceConfig.getWriteFields()));) {
 			log.info("create Instance " + name + ":" + type);
 			statement.execute();
 			return true;

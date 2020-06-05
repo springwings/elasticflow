@@ -78,13 +78,13 @@ public class SolrFlow extends WriterFlowSocket{
  
 	 
 	@Override
-	public boolean create(String instantcName, String storeId, Map<String, RiverField> transParams) {
+	public boolean create(String instantcName, String storeId, InstanceConfig instanceConfig) {
 		String name = Common.getStoreName(instantcName, storeId); 
 		try {
 			log.info("create index " + name); 
 			String zkHost = getSolrConn().getZkHost();
 			moveFile2ZookeeperDest((GlobalParam.configPath+"/"+srcDir).replace("file:", ""), zkDir+"/"+instantcName, zkHost);
-			getSchemaFile(transParams, instantcName, storeId, zkHost); 
+			getSchemaFile(instanceConfig.getWriteFields(), instantcName, storeId, zkHost); 
 			CollectionAdminRequest.Create create = new CollectionAdminRequest.Create();
 			create.setConfigName(instantcName);
 			create.setCollectionName(name);
@@ -260,7 +260,7 @@ public class SolrFlow extends WriterFlowSocket{
 				select = "b"; 
 			}else{
 				select = "a"; 
-				create(mainName,select, instanceConfig.getWriteFields());
+				create(mainName,select, instanceConfig);
 				setAlias(mainName, select, instanceConfig.getAlias());
 			}   
 		}else{
@@ -268,7 +268,7 @@ public class SolrFlow extends WriterFlowSocket{
 			if(this.existsCollection(b)){ 
 				select =  "a";
 			}
-			create(mainName,select, instanceConfig.getWriteFields());
+			create(mainName,select, instanceConfig);
 		} 
 		return select;
 	}

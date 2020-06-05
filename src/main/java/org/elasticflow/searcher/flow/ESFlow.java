@@ -90,7 +90,7 @@ public final class ESFlow extends SearcherFlowSocket {
 	
 	private void addResult(SearcherResult res,SearchResponse response,SearcherModel<?, ?, ?> fq,List<String> returnFields) {
 		SearchHits searchHits = response.getHits();
-		res.setTotalHit((int) searchHits.getTotalHits());  
+		res.setTotalHit(searchHits.getTotalHits().value);  
 		SearchHit[] hits = searchHits.getHits();  
 		 
 		for (SearchHit h:hits) {

@@ -12,7 +12,7 @@ import java.util.List;
 public class SearcherResult {
 	private float useTime;
 	private String callDateTime; 
-	private int totalHit;
+	private long totalHit;
 	private List<ResponseDataUnit> unitSet;
 	private Object facetInfo=null;   
 	private Object queryDetail = null;
@@ -46,11 +46,11 @@ public class SearcherResult {
 		this.callDateTime = callDateTime;
 	}
 
-	public int getTotalHit() {
+	public long getTotalHit() {
 		return totalHit;
 	}
 
-	public void setTotalHit(int totalHit) {
+	public void setTotalHit(long totalHit) {
 		this.totalHit = totalHit;
 	}
 

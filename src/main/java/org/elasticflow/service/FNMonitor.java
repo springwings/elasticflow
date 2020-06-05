@@ -46,10 +46,9 @@ public class FNMonitor {
 					: HttpConnection.getCurrentConnection().getRequest();
 
 			String dataTo = rq.getPathInfo().substring(1);
-
 			switch (dataTo) {  
 			case "search.doaction":{
-				if(rq.getParameter("ac") !=null && rq.getParameter("code")!=null && rq.getParameter("code").equals(MD5Util.SaltMd5(rq.getParameter("ac")))){
+				if(rq.getParameter("ac") !=null){
 					Resource.nodeMonitor.ac(rq);
 					response.getWriter().println(Resource.nodeMonitor.getResponse()); 
 					Resource.nodeMonitor.setResponse(0, "");

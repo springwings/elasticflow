@@ -36,10 +36,10 @@ public class Pond extends Instruction {
 				String mainName = String.valueOf(args[0]); 
 				String storeId = String.valueOf(args[1]);  
 				if(context.getInstanceConfig().getPipeParams().getWriteMechanism()==Mechanism.AB) {
-					state = context.getWriter().create(mainName, storeId, context.getInstanceConfig().getWriteFields());    
+					state = context.getWriter().create(mainName, storeId, context.getInstanceConfig());    
 				}else {
 					context.getWriter().removeInstance(mainName, storeId);
-					state = context.getWriter().create(mainName, storeId, context.getInstanceConfig().getWriteFields());    
+					state = context.getWriter().create(mainName, storeId, context.getInstanceConfig());    
 				} 
 			}catch (Exception e) {
 				log.error("Create Store Position Exception",e);

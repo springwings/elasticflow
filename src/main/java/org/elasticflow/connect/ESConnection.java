@@ -51,7 +51,7 @@ public class ESConnection extends FnConnectionSocket<ESConnector> {
 			if (!status()) {
 				Settings settings = Settings.builder()
 				        .put("client.transport.sniff", true)
-				        .put("cluster.name", wnp.getName(this.connectParams.getL1Seq())).build(); 
+				        .put("cluster.name", wnp.getDefaultValue()).build(); 
 				this.conn = new PreBuiltTransportClient(settings); 
 				for (String ip : wnp.getPath().split(",")) {
 					try {

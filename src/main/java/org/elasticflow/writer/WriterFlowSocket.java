@@ -32,7 +32,7 @@ public abstract class WriterFlowSocket extends Flow{
 		this.isBatch = GlobalParam.WRITE_BATCH; 
 	}   
 	
-	public abstract boolean create(String instance, String storeId, Map<String,RiverField> transParams);
+	public abstract boolean create(String instance, String storeId, InstanceConfig instanceConfig);
 	
 	public abstract String getNewStoreId(String mainName,boolean isIncrement,InstanceConfig instanceConfig);
 
