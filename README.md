@@ -3,7 +3,6 @@ elasticflow for build computing flow ，support jobs like ML,DataTrasfer,Data Se
 
 ![image](https://github.com/fnOpenSource/rivers/blob/master/architecture.jpg)
 
-![image](https://github.com/springwings/files/blob/master/flow.jpg)
 
 # ElasticFlow用来解决什么?
 
