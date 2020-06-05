@@ -1,7 +1,7 @@
 # ElasticFlow
 elasticflow for build computing flow ，support jobs like ML,DataTrasfer,Data Searcher platform,etc
 
-![image](https://github.com/fnOpenSource/rivers/blob/master/architecture.jpg)
+![image](https://github.com/springwings/elasticflow/blob/master/architecture.jpg)
 
 
 # ElasticFlow用来解决什么?
