@@ -26,7 +26,7 @@ $ version 4.x
 
 $ Java>=1.8
 
-$ ES=6.3.1 
+$ ES=7.x
 
 ==>>[详细文档参照wiki](https://github.com/springwings/elasticflow/wiki)  
 
