@@ -34,6 +34,7 @@ public class ResponseState {
 		rs.response.put("env", GlobalParam.run_environment);
 		rs.response.put("instance",null);
 		rs.response.put("duration",null);
+		rs.response.put("system",GlobalParam.PROJ);
 		return rs;
 	}
 	
