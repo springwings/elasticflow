@@ -2,12 +2,19 @@ package org.elasticflow.searcher.parser;
 
 import java.lang.reflect.Method;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.lucene.search.BooleanClause.Occur;
+import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.QUERY_TYPE;
+import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.field.RiverField;
+import org.elasticflow.field.handler.LongRange;
+import org.elasticflow.model.RiverRequest;
+import org.elasticflow.param.end.SearcherParam;
+import org.elasticflow.util.Common;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.DisMaxQueryBuilder;
@@ -19,15 +26,6 @@ import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.script.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.GlobalParam.QUERY_TYPE;
-import org.elasticflow.field.RiverField;
-import org.elasticflow.field.handler.LongRange;
-import org.elasticflow.model.RiverRequest;
-import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.param.end.SearcherParam;
-import org.elasticflow.util.Common;
 
 /**
  * 
@@ -181,18 +179,15 @@ public class ESQueryParser implements QueryParser{
 
 	static private QueryBuilder fieldParserQuery(String field, String queryStr, int fuzzy,
 			ESSimpleQuery ESSimpleQuery) {
-		List<String> terms = Common.getKeywords(queryStr);
-		for (String term : terms) {
-			if (fuzzy > 0) {
-				FuzzyQueryBuilder fzQuery = QueryBuilders.fuzzyQuery(field, term);
-				fzQuery.fuzziness(Fuzziness.TWO);
-				fzQuery.maxExpansions(fuzzy);
-				ESSimpleQuery.add(
-						new BoolQueryBuilder().should(fzQuery).should(QueryBuilders.termQuery(field, term).boost(1.2f)),
-						"must");
-			} else {
-				ESSimpleQuery.add(QueryBuilders.termQuery(field, term), "must");
-			}
+		if (fuzzy > 0) {
+			FuzzyQueryBuilder fzQuery = QueryBuilders.fuzzyQuery(field, queryStr);
+			fzQuery.fuzziness(Fuzziness.TWO);
+			fzQuery.maxExpansions(fuzzy);
+			ESSimpleQuery.add(
+					new BoolQueryBuilder().should(fzQuery).should(QueryBuilders.termQuery(field, queryStr).boost(1.2f)),
+					"must");
+		} else {
+			ESSimpleQuery.add(QueryBuilders.termQuery(field, queryStr), "must");
 		}
 		return ESSimpleQuery.getQuery();
 	}
@@ -213,28 +208,25 @@ public class ESQueryParser implements QueryParser{
 
 		String[] word_vals = value.split(",");
 		for (String word : word_vals) {
-			BoolQueryBuilder subquery2 = null;
-			List<String> vals = Common.getKeywords(word);
-
-			for (String val : vals) {
-				DisMaxQueryBuilder parsedDisMaxQuery = null;
-				for (String key2 : keys) {
-					RiverField _tp = instanceConfig.getWriteField(key2);
-					QueryBuilder query = buildSingleQuery(_tp.getAlias(),
-							_tp.getAnalyzer()!="" ? word : val, _tp,
-							instanceConfig.getSearcherParam(key2), request, paramKey, fuzzy);
-					if (query != null) {
-						if (parsedDisMaxQuery == null)
-							parsedDisMaxQuery = QueryBuilders.disMaxQuery()
-									.tieBreaker(GlobalParam.DISJUNCTION_QUERY_WEIGHT);
-						parsedDisMaxQuery.add(query);
-					}
+			BoolQueryBuilder subquery2 = null; 
+			String val = word;
+			DisMaxQueryBuilder parsedDisMaxQuery = null;
+			for (String key2 : keys) {
+				RiverField _tp = instanceConfig.getWriteField(key2);
+				QueryBuilder query = buildSingleQuery(_tp.getAlias(),
+						_tp.getAnalyzer()!="" ? word : val, _tp,
+						instanceConfig.getSearcherParam(key2), request, paramKey, fuzzy);
+				if (query != null) {
+					if (parsedDisMaxQuery == null)
+						parsedDisMaxQuery = QueryBuilders.disMaxQuery()
+								.tieBreaker(GlobalParam.DISJUNCTION_QUERY_WEIGHT);
+					parsedDisMaxQuery.add(query);
 				}
-				if (parsedDisMaxQuery != null) {
-					if (subquery2 == null)
-						subquery2 = QueryBuilders.boolQuery();
-					subquery2.must(parsedDisMaxQuery);
-				}
+			}
+			if (parsedDisMaxQuery != null) {
+				if (subquery2 == null)
+					subquery2 = QueryBuilders.boolQuery();
+				subquery2.must(parsedDisMaxQuery);
 			}
 
 			if (subquery2 != null) {

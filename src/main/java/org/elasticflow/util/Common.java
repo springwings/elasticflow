@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.time.FastDateFormat;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.KEY_PARAM;
@@ -112,24 +110,6 @@ public final class Common {
 			}
 		}
 		
-	}
-
-	public static List<String> getKeywords(String queryStr) {
-		List<String> ret = new ArrayList<String>(); 
-		try {
-			TokenStream tokenStream = IK.participle(queryStr);
-			tokenStream.addAttribute(CharTermAttribute.class); 
-			tokenStream.reset();
-			while (tokenStream.incrementToken()) {
-				String text = tokenStream.getAttribute(CharTermAttribute.class).toString();
-				ret.add(text);
-			}
-			tokenStream.end();
-			tokenStream.close(); 
-		} catch (Exception e) {
-			ret.add(queryStr);
-		}
-		return ret;
 	}
  
 	public static long getNow() {
