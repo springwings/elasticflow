@@ -1,0 +1,74 @@
+package org.elasticflow.util;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+
+import org.elasticflow.config.GlobalParam;
+
+public class ConfigStorer {
+
+	public static boolean exists(String path) {
+		try {
+			if (GlobalParam.USE_ZK) {
+				return ZKUtil.getZk().exists(path, false) == null ? false : true;
+			} else {
+				File file = new File(path);
+				return file.exists();
+			}
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	public static void createPath(String path,boolean isFile) {
+		try {
+			if (GlobalParam.USE_ZK) {
+				ZKUtil.createPath(path, true);
+			} else {
+				File fd = new File(path);
+				if(isFile) {
+					fd.createNewFile();
+				}else {
+					fd.mkdirs();
+				}
+			}
+		} catch (Exception e) {
+			Common.LOG.error("environmentCheck Exception", e);
+		}
+	}
+
+	public static void setData(String path, String data) {
+		try {
+			if (GlobalParam.USE_ZK) {
+				ZKUtil.setData(path,data);
+			} else {
+				try (FileWriter fw = new FileWriter(path);) {
+					fw.write(data);
+				} catch (Exception e) {
+					throw e;
+				}
+			}
+		} catch (Exception e) {
+			Common.LOG.error("write data Exception", e);
+		}
+	}
+	
+	public static byte[] getData(String path,boolean create) {
+		if (GlobalParam.USE_ZK) {
+			return ZKUtil.getData(path,create);
+		} else {
+			try (FileInputStream fi = new FileInputStream(path);) {
+				File f = new File(path);
+	            int length = (int) f.length();
+	            byte[] data = new byte[length];
+	            fi.read(data);
+		        return data;
+			} catch (Exception e) {
+				Common.LOG.error("read data Exception", e);
+				return null;
+			}
+		}
+	}
+
+}
