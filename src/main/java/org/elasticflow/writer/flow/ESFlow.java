@@ -3,6 +3,7 @@ package org.elasticflow.writer.flow;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
@@ -44,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
  
 /**
  * ElasticSearch Writer Manager
@@ -294,6 +296,18 @@ public class ESFlow extends WriterFlowSocket {
 		}
 	} 
 	
+	private Map<String,Object> JsonToMap(JSONObject j){
+	    Map<String,Object> map = new HashMap<>();
+	    Iterator<String> iterator = j.keys();
+	    while(iterator.hasNext())
+	    {
+	        String key = (String)iterator.next();
+	        Object value = j.get(key);
+	        map.put(key, value);
+	    }
+	    return map;
+	}
+	
 	private Map<String, Object> getSettingMap(Map<String, RiverField> transParams) {
 		Map<String, Object> settingMap = new HashMap<String, Object>();
 		Map<String, Object> root_map = new HashMap<String, Object>();
@@ -308,10 +322,7 @@ public class ESFlow extends WriterFlowSocket {
 					map.put("store", true);
 				}
 				if(p.getDsl()!=null) {
-					for(String r:p.getDsl().split(",")) {
-						String[] _dsl = r.split(":");
-						map.put(_dsl[0], _dsl[1]);
-					}
+					map.putAll(JsonToMap(JSONObject.fromObject(p.getDsl())));
 				}
 				if (p.getIndexed().toLowerCase().equals("true")) { 
 					if (p.getAnalyzer().length()>0) {
