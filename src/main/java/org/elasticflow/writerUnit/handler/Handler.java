@@ -2,7 +2,7 @@ package org.elasticflow.writerUnit.handler;
 
 import java.util.Map;
 
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 
 /**
@@ -12,5 +12,5 @@ import org.elasticflow.model.reader.PipeDataUnit;
  * @version 1.0 
  */
 public interface Handler { 
-	void handle(PipeDataUnit u,Object obj,Map<String, RiverField> transParams); 
+	void handle(PipeDataUnit u,Object obj,Map<String, EFField> transParams); 
 }

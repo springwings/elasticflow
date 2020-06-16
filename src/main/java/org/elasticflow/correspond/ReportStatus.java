@@ -32,14 +32,14 @@ public final class ReportStatus {
 			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH+"/resource.xml")==false) 
 				ConfigStorer.createPath(GlobalParam.CONFIG_PATH+"/resource.xml",true);
 			
-			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH + "/RIVER_NODES")==false) {
-				ConfigStorer.createPath(GlobalParam.CONFIG_PATH + "/RIVER_NODES",false);
+			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES")==false) {
+				ConfigStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES",false);
 			}
-			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP)==false) {
-				ConfigStorer.createPath(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP,false);
+			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP)==false) {
+				ConfigStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP,false);
 			}
-			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP + "/configs")==false) {
-				ConfigStorer.createPath(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP + "/configs",true);
+			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP + "/configs")==false) {
+				ConfigStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP + "/configs",true);
 			}
 		} catch (Exception e) {
 			Common.LOG.error("environmentCheck Exception", e);

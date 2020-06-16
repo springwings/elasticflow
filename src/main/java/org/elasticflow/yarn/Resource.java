@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.config.NodeConfig;
-import org.elasticflow.model.RiverState;
+import org.elasticflow.model.EFState;
 import org.elasticflow.node.FlowCenter;
 import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.node.SocketCenter;
@@ -30,11 +30,11 @@ public final class Resource {
 	
 	public static NodeConfig nodeConfig;
 	
-	public static Run RIVERS;
+	public static Run EFLOWS;
 	
-	public final static RiverState<AtomicInteger> FLOW_STATUS = new RiverState<>();
+	public final static EFState<AtomicInteger> FLOW_STATUS = new EFState<>();
 	/**FLOW_INFOS store current flow running state information*/
-	public final static RiverState<HashMap<String,String>> FLOW_INFOS = new RiverState<HashMap<String,String>>();
+	public final static EFState<HashMap<String,String>> FLOW_INFOS = new EFState<HashMap<String,String>>();
 
 	public static HashMap<String, FlowTask> tasks; 
 	

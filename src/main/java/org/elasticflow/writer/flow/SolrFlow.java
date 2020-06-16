@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.Mechanism;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
@@ -100,7 +100,7 @@ public class SolrFlow extends WriterFlowSocket{
 	} 
 	
 	@Override
-	public void write(WriterParam writerParam,PipeDataUnit unit,Map<String, RiverField> writeParamMap, String instantcName, String storeId,boolean isUpdate) throws FNException { 
+	public void write(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> writeParamMap, String instantcName, String storeId,boolean isUpdate) throws FNException { 
 		String name = Common.getStoreName(instantcName,storeId);
 		if (unit.getData().size() == 0){
 			log.warn("Empty IndexUnit for " + name );
@@ -115,7 +115,7 @@ public class SolrFlow extends WriterFlowSocket{
 			if (r.getValue() == null)
 				continue;
 			String value = String.valueOf(r.getValue());
-			RiverField transParam = writeParamMap.get(field);
+			EFField transParam = writeParamMap.get(field);
 			if (transParam == null)
 				continue;
 			
@@ -278,7 +278,7 @@ public class SolrFlow extends WriterFlowSocket{
 		return String.valueOf(current/(1000*3600*24)*(1000*3600*24)-TimeZone.getDefault().getRawOffset()); 
 	}
  
-	private void getSchemaFile(Map<String,RiverField> paramMap,String instantcName, String storeId,String zkHost) {
+	private void getSchemaFile(Map<String,EFField> paramMap,String instantcName, String storeId,String zkHost) {
 		BufferedReader head_reader = null;
 		BufferedReader tail_reader = null;  
 		String destPath = zkDir+"/"+instantcName+"/schema.xml";
@@ -311,8 +311,8 @@ public class SolrFlow extends WriterFlowSocket{
 			
 			StringBuilder field = new StringBuilder();
 			String firstFiled = null;
-			for (Map.Entry<String, RiverField> e : paramMap.entrySet()) {
-				RiverField tp = e.getValue();
+			for (Map.Entry<String, EFField> e : paramMap.entrySet()) {
+				EFField tp = e.getValue();
 				field.delete(0, field.length());
 				if (tp.getName() == null)
 					continue;

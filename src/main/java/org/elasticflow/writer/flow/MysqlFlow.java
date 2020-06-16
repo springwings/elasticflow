@@ -8,7 +8,7 @@ import java.util.TimeZone;
 
 import org.elasticflow.config.GlobalParam.Mechanism;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
@@ -30,7 +30,7 @@ public class MysqlFlow extends WriterFlowSocket {
 	}
 
 	@Override
-	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, RiverField> transParams, String instance,
+	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams, String instance,
 			String storeId, boolean isUpdate) throws FNException {
 		String table = Common.getStoreName(instance, storeId);
 		boolean releaseConn = false;
@@ -149,11 +149,11 @@ public class MysqlFlow extends WriterFlowSocket {
 		return String.valueOf(current/(1000*3600*24)*(1000*3600*24)-TimeZone.getDefault().getRawOffset()); 
 	}
 	
-	private String getTableSql(String instance, Map<String, RiverField> transParams) {
+	private String getTableSql(String instance, Map<String, EFField> transParams) {
 		StringBuilder sf = new StringBuilder();
 		sf.append("create table " + instance + " (");
-		for (Map.Entry<String, RiverField> e : transParams.entrySet()) {
-			RiverField p = e.getValue();
+		for (Map.Entry<String, EFField> e : transParams.entrySet()) {
+			EFField p = e.getValue();
 			if (p.getName() == null)
 				continue;
 			sf.append(p.getAlias());

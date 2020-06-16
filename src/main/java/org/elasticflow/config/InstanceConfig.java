@@ -9,7 +9,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.param.BasicParam;
 import org.elasticflow.param.end.MessageParam;
 import org.elasticflow.param.end.SearcherParam;
@@ -37,9 +37,9 @@ public class InstanceConfig {
 	private String alias = "";
 	private boolean status = true;
 	private String name;
-	private volatile Map<String, RiverField> writeFields;
+	private volatile Map<String, EFField> writeFields;
 	private volatile Map<String, String> externConfigs;
-	private volatile Map<String, RiverField> computeFields;
+	private volatile Map<String, EFField> computeFields;
 	private volatile Map<String,SearcherParam> searcherParams;
 	private volatile WriterParam writerParams;
 	private volatile PipeParam pipeParams;
@@ -79,7 +79,7 @@ public class InstanceConfig {
 		}
 	}
 
-	public RiverField getWriteField(String key) {
+	public EFField getWriteField(String key) {
 		return writeFields.get(key);
 	} 
 	
@@ -111,11 +111,11 @@ public class InstanceConfig {
 		return externConfigs;
 	} 
 	
-	public Map<String, RiverField> getWriteFields() {
+	public Map<String, EFField> getWriteFields() {
 		return writeFields;
 	}
 	
-	public Map<String, RiverField> getComputeFields() {
+	public Map<String, EFField> getComputeFields() {
 		return computeFields;
 	}
  
@@ -233,7 +233,7 @@ public class InstanceConfig {
 					parseNode(params.getElementsByTagName("param"), "computeParam", ComputeParam.class);
 					params = (Element) params.getElementsByTagName("fields").item(0);
 					paramlist = params.getElementsByTagName("field");
-					parseNode(paramlist, "computeFields", RiverField.class); 
+					parseNode(paramlist, "computeFields", EFField.class); 
 				}
 				
 				params = (Element) dataflow.getElementsByTagName("WriteParam").item(0);   
@@ -245,7 +245,7 @@ public class InstanceConfig {
 					}
 					params = (Element) params.getElementsByTagName("fields").item(0);
 					paramlist = params.getElementsByTagName("field");
-					parseNode(paramlist, "writeFields", RiverField.class); 
+					parseNode(paramlist, "writeFields", EFField.class); 
 				}
 				
 				params = (Element) dataflow.getElementsByTagName("SearchParam").item(0);   
@@ -270,11 +270,11 @@ public class InstanceConfig {
 				if (param.getNodeType() == Node.ELEMENT_NODE) { 
 					switch (type) {
 					case "writeFields":
-						RiverField wf = (RiverField) Common.getXmlObj(param, c);
+						EFField wf = (EFField) Common.getXmlObj(param, c);
 						writeFields.put(wf.getName(), wf);
 						break;
 					case "computeFields":
-						RiverField cf = (RiverField) Common.getXmlObj(param, c);
+						EFField cf = (EFField) Common.getXmlObj(param, c);
 						computeFields.put(cf.getName(), cf);
 						break;
 					case "computeParam":

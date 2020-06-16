@@ -4,7 +4,7 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.ml.Algorithm;
 import org.elasticflow.model.Page;
 import org.elasticflow.model.ResponseState;
-import org.elasticflow.model.RiverRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.computer.SamplePoint;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
@@ -39,7 +39,7 @@ public class Computer {
 		this.readerFlowSocket = readerFlowSocket;
 	}
 	
-	public ResponseState startCompute(RiverRequest rq) {
+	public ResponseState startCompute(EFRequest rq) {
 		ResponseState response = ResponseState.getInstance();
 		response.setInstance(instanceName); 
 		if(model==null) {

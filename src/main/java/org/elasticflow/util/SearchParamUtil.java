@@ -14,9 +14,9 @@ import org.elasticsearch.search.sort.SortOrder;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.KEY_PARAM;
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.model.RiverRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.param.end.SearcherParam; 
 
@@ -28,7 +28,7 @@ import org.elasticflow.param.end.SearcherParam;
  */
 public class SearchParamUtil {
 
-	public static void normalParam(RiverRequest request, SearcherModel<?, ?, ?> fq,InstanceConfig instanceConfig) {
+	public static void normalParam(EFRequest request, SearcherModel<?, ?, ?> fq,InstanceConfig instanceConfig) {
 		Object o = request.get(GlobalParam.KEY_PARAM.start.toString(),
 				instanceConfig.getSearcherParam(KEY_PARAM.start.toString()),"java.lang.Integer");
 		int start = 0;
@@ -60,7 +60,7 @@ public class SearchParamUtil {
 			fq.setRequestHandler(request.getParam(GlobalParam.PARAM_REQUEST_HANDLER));
 	}
 	
-	public static List<SortBuilder<?>> getSortField(RiverRequest request, InstanceConfig instanceConfig) {  
+	public static List<SortBuilder<?>> getSortField(EFRequest request, InstanceConfig instanceConfig) {  
 		String sortstrs = request.getParam(KEY_PARAM.sort.toString());
 		List<SortBuilder<?>> sortList = new ArrayList<SortBuilder<?>>();
 		boolean useScore = false;
@@ -93,7 +93,7 @@ public class SearchParamUtil {
 					sortList.add(SortBuilders.scriptSort(new Script("random()"), ScriptSortType.NUMBER)); 
 					break; 
 				default:
-					RiverField checked; 
+					EFField checked; 
 					SearcherParam sp;
 					if(instanceConfig.getWriteField(fieldname)!=null && instanceConfig.getWriteField(fieldname).getIndextype().equals("geo_point")) {
 						String _tmp = request.getParam(fieldname);
@@ -131,7 +131,7 @@ public class SearchParamUtil {
 	 * @param prs
 	 * @return
 	 */
-		public static Map<String,List<String[]>> getFacetParams(RiverRequest rq,
+		public static Map<String,List<String[]>> getFacetParams(EFRequest rq,
 				InstanceConfig prs) {
 			Map<String,List<String[]>> res = new LinkedHashMap<String,List<String[]>>();
 			if(rq.getParam("facet")!=null){

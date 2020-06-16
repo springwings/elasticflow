@@ -1,4 +1,4 @@
 #!/bin/bash
-ps aux | grep java |grep river | awk '{print $2}' | xargs kill -15
-ps aux | grep java |grep river | awk '{print $2}'
+ps aux | grep java |grep ElasticFlow | awk '{print $2}' | xargs kill -15
+ps aux | grep java |grep ElasticFlow | awk '{print $2}'
 

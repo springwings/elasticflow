@@ -10,9 +10,9 @@ import org.apache.lucene.search.BooleanClause.Occur;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.QUERY_TYPE;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.field.handler.LongRange;
-import org.elasticflow.model.RiverRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.param.end.SearcherParam;
 import org.elasticflow.util.Common;
 import org.elasticsearch.common.unit.Fuzziness;
@@ -41,7 +41,7 @@ public class ESQueryParser implements QueryParser{
 		return QueryBuilders.termQuery("EMPTY", "0x000");
 	}
 
-	static public BoolQueryBuilder parseRequest(RiverRequest request, InstanceConfig instanceConfig) {
+	static public BoolQueryBuilder parseRequest(EFRequest request, InstanceConfig instanceConfig) {
 		BoolQueryBuilder bquery = QueryBuilders.boolQuery();
 		try {
 			Map<String, String> paramMap = request.getParams();
@@ -101,7 +101,7 @@ public class ESQueryParser implements QueryParser{
 					occur = Occur.MUST_NOT;
 				}
 
-				RiverField tp = instanceConfig.getWriteField(key);
+				EFField tp = instanceConfig.getWriteField(key);
 				SearcherParam sp = instanceConfig.getSearcherParam(key);
 				if ((tp == null && sp == null) || Common.isDefaultParam(key)) {
 					continue;
@@ -127,7 +127,7 @@ public class ESQueryParser implements QueryParser{
 		return bquery;
 	}
 
-	static private void QueryBoost(QueryBuilder query, RiverField tp, RiverRequest request) throws Exception {
+	static private void QueryBoost(QueryBuilder query, EFField tp, EFRequest request) throws Exception {
 		float boostValue = tp.getBoost();
 
 		Method m = query.getClass().getMethod("boost", new Class[] { float.class });
@@ -136,8 +136,8 @@ public class ESQueryParser implements QueryParser{
 		m.invoke(query, boostValue);
 	}
 
-	static private QueryBuilder buildSingleQuery(String key, String value, RiverField tp, SearcherParam sp,
-			RiverRequest request, String paramKey, int fuzzy) throws Exception {
+	static private QueryBuilder buildSingleQuery(String key, String value, EFField tp, SearcherParam sp,
+			EFRequest request, String paramKey, int fuzzy) throws Exception {
 		if (value == null || (tp.getDefaultvalue() == null && value.length() <= 0) || tp == null)
 			return null;
 		boolean not_analyzed = tp.getAnalyzer().length()>0 ? false : true;
@@ -193,7 +193,7 @@ public class ESQueryParser implements QueryParser{
 	}
 
 	static private QueryBuilder buildMultiQuery(String multifield, String value, InstanceConfig instanceConfig,
-			RiverRequest request, String paramKey, int fuzzy) throws Exception {
+			EFRequest request, String paramKey, int fuzzy) throws Exception {
 		DisMaxQueryBuilder bquery = null;
 		String[] keys = multifield.split(",");
 
@@ -201,7 +201,7 @@ public class ESQueryParser implements QueryParser{
 			return null;
 
 		if (keys.length == 1) {
-			RiverField tp = instanceConfig.getWriteField(keys[0]);
+			EFField tp = instanceConfig.getWriteField(keys[0]);
 			return buildSingleQuery(tp.getAlias(), value, tp, instanceConfig.getSearcherParam(keys[0]), request,
 					paramKey, fuzzy);
 		}
@@ -212,7 +212,7 @@ public class ESQueryParser implements QueryParser{
 			String val = word;
 			DisMaxQueryBuilder parsedDisMaxQuery = null;
 			for (String key2 : keys) {
-				RiverField _tp = instanceConfig.getWriteField(key2);
+				EFField _tp = instanceConfig.getWriteField(key2);
 				QueryBuilder query = buildSingleQuery(_tp.getAlias(),
 						_tp.getAnalyzer()!="" ? word : val, _tp,
 						instanceConfig.getSearcherParam(key2), request, paramKey, fuzzy);

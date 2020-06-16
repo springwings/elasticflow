@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.model.searcher.SearcherESModel;
@@ -71,7 +71,7 @@ public class HttpReaderService {
 		public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) {
 			response.setContentType("application/json;charset=utf8");
 			response.setStatus(HttpServletResponse.SC_OK);
-			response.setHeader("PowerBy", "rivers");  
+			response.setHeader("PowerBy", GlobalParam.PROJ);  
 			Request rq = (request instanceof Request) ? (Request) request
 					: HttpConnection.getCurrentConnection().getRequest();
 
@@ -219,7 +219,7 @@ public class HttpReaderService {
 		}
 
 		private DataPage getPageData(Object data, String keycolumn, String updatecolumn,
-				Map<String, RiverField> transParams) {
+				Map<String, EFField> transParams) {
 			DataPage DP = new DataPage();
 			LinkedList<PipeDataUnit> datas = new LinkedList<PipeDataUnit>();
 			DP.put(GlobalParam.READER_KEY, keycolumn);

@@ -2,7 +2,7 @@ package org.elasticflow.model;
 
 import java.util.Map;
 
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.reader.handler.Handler;
 
 /**
@@ -19,11 +19,11 @@ public final class Page {
 	private String start;
 	private String end;
 	private Handler readHandler;
-	private Map<String, RiverField> transField;
+	private Map<String, EFField> transField;
 	private String additional;
 
 	public static Page getInstance(String readerKey, String readerScanKey, String start, String end,
-			Handler readHandler, Map<String, RiverField> transField, String additional) {
+			Handler readHandler, Map<String, EFField> transField, String additional) {
 		Page o = new Page();
 		o.readerKey = readerKey;
 		o.readerScanKey = readerScanKey;
@@ -75,11 +75,11 @@ public final class Page {
 		this.readHandler = readHandler;
 	}
 
-	public Map<String, RiverField> getTransField() {
+	public Map<String, EFField> getTransField() {
 		return transField;
 	}
 
-	public void setTransField(Map<String, RiverField> transField) {
+	public void setTransField(Map<String, EFField> transField) {
 		this.transField = transField;
 	}
 

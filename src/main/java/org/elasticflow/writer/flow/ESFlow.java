@@ -14,7 +14,7 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.Mechanism;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connect.ESConnector;
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
@@ -69,7 +69,7 @@ public class ESFlow extends WriterFlowSocket {
 	} 
 
 	@Override
-	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, RiverField> transParams, String instance,
+	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams, String instance,
 			String storeId, boolean isUpdate) throws FNException { 
 		String name = Common.getStoreName(instance, storeId);
 		String type = instance;
@@ -84,7 +84,7 @@ public class ESFlow extends WriterFlowSocket {
 		} 
 	}
 	
-	private void updateByScan(WriterParam writerParam,PipeDataUnit unit, Map<String, RiverField> transParams, String instance,String alias,
+	private void updateByScan(WriterParam writerParam,PipeDataUnit unit, Map<String, EFField> transParams, String instance,String alias,
 			String storeId, boolean isUpdate) throws FNException{  
 		Script script = null;
 		StringBuilder sf = new StringBuilder();
@@ -92,7 +92,7 @@ public class ESFlow extends WriterFlowSocket {
 			String field = r.getKey();
 			if (r.getValue() == null)
 				continue;
-			RiverField transParam = transParams.get(field);
+			EFField transParam = transParams.get(field);
 			if (transParam == null)
 				transParam = transParams.get(field.toLowerCase());
 			if (transParam == null)
@@ -109,7 +109,7 @@ public class ESFlow extends WriterFlowSocket {
 		} 
 	}
 	
-	private void updateByKey(PipeDataUnit unit, Map<String, RiverField> transParams, String instance,String alias,
+	private void updateByKey(PipeDataUnit unit, Map<String, EFField> transParams, String instance,String alias,
 			String storeId, boolean isUpdate) throws FNException{
 		try { 
 			XContentBuilder cbuilder = jsonBuilder().startObject();
@@ -119,7 +119,7 @@ public class ESFlow extends WriterFlowSocket {
 				if (r.getValue() == null)
 					continue;
 				String value = String.valueOf(r.getValue());
-				RiverField transParam = transParams.get(field);
+				EFField transParam = transParams.get(field);
 				if (transParam == null)
 					transParam = transParams.get(field.toLowerCase());
 				if (transParam == null)
@@ -308,13 +308,13 @@ public class ESFlow extends WriterFlowSocket {
 	    return map;
 	}
 	
-	private Map<String, Object> getSettingMap(Map<String, RiverField> transParams) {
+	private Map<String, Object> getSettingMap(Map<String, EFField> transParams) {
 		Map<String, Object> settingMap = new HashMap<String, Object>();
 		Map<String, Object> root_map = new HashMap<String, Object>();
 		try { 
-			for (Map.Entry<String, RiverField> e : transParams.entrySet()) {
+			for (Map.Entry<String, EFField> e : transParams.entrySet()) {
 				Map<String, Object> map = new HashMap<String, Object>();
-				RiverField p = e.getValue();
+				EFField p = e.getValue();
 				if (p.getName() == null)
 					continue;
 				map.put("type", p.getIndextype()); // type is must

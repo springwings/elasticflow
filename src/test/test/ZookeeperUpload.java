@@ -146,7 +146,7 @@ public class ZookeeperUpload {
 	}
 
 	public static void runBatch(String zkhost, String add, String listProj) {
-		String zkpath = "/rivers/config/INSTANCES";
+		String zkpath = "/EF/config/INSTANCES";
 		for (String s : listProj.split(",")) {
 			if (s.length() > 1) {
 				moveFile2Zookeeper(add + s, zkpath, zkhost);

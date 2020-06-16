@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 
 
@@ -65,7 +65,7 @@ public final class PipeNorms {
 		return null;
 	} 
  
-	public static String getWriteSql(String table,PipeDataUnit unit,Map<String, RiverField> transParams) {
+	public static String getWriteSql(String table,PipeDataUnit unit,Map<String, EFField> transParams) {
 		String sql = "INSERT INTO " + table;
 		StringBuilder values = new StringBuilder();
 		StringBuilder columns = new StringBuilder();
@@ -74,7 +74,7 @@ public final class PipeNorms {
 			if (r.getValue() == null)
 				continue;
 			String value = String.valueOf(r.getValue());
-			RiverField transParam = transParams.get(field);
+			EFField transParam = transParams.get(field);
 			if (transParam == null)
 				transParam = transParams.get(field.toLowerCase());
 			if (transParam == null)

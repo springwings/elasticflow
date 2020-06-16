@@ -6,7 +6,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.flow.Flow;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
@@ -36,7 +36,7 @@ public abstract class WriterFlowSocket extends Flow{
 	
 	public abstract String getNewStoreId(String mainName,boolean isIncrement,InstanceConfig instanceConfig);
 
-	public abstract void write(WriterParam writerParam,PipeDataUnit unit,Map<String, RiverField> transParams,String instance, String storeId,boolean isUpdate) throws FNException;
+	public abstract void write(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> transParams,String instance, String storeId,boolean isUpdate) throws FNException;
 
 	public abstract void delete(String instance, String storeId,String keyColumn,String keyVal) throws FNException;
   

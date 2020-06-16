@@ -36,7 +36,7 @@
 	<bean id="HttpReaderService" class="org.elasticflow.reader.service.HttpReaderService"/> 
 	<bean id="SearcherService" class="org.elasticflow.searcher.service.SearcherService"/> 
 	<bean id="ComputerService" class="org.elasticflow.computer.service.ComputerService"/>  
-	<bean id="RIVERS" class="org.elasticflow.node.startup.Run">  
+	<bean id="EFLOWS" class="org.elasticflow.node.startup.Run">  
 		<constructor-arg type="String" index="0" value="#{systemProperties['config']}/config.properties"/>
 	</bean>
 </beans>

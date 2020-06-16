@@ -8,7 +8,7 @@ import org.elasticflow.writerUnit.handler.Handler;
  * @version 1.0
  * @date 2018-11-20 09:48
  */
-public class RiverField { 
+public class EFField { 
 	/**read name*/
 	private String name;
 	/**write name*/

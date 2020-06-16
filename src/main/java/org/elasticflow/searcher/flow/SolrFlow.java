@@ -17,7 +17,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.util.NamedList;
 import org.elasticflow.connect.handler.ConnectionHandler;
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.model.searcher.ResponseDataUnit;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherResult;
@@ -207,7 +207,7 @@ public class SolrFlow extends SearcherFlowSocket {
 		if (fq.getFl().length() > 0) {
 			fl = fq.getFl(); 
 		} else { 
-			for (Map.Entry<String, RiverField> e : instanceConfig
+			for (Map.Entry<String, EFField> e : instanceConfig
 					.getWriteFields().entrySet()) {
 				if (e.getValue().getStored().equalsIgnoreCase("true"))
 					fl += "," + e.getKey();

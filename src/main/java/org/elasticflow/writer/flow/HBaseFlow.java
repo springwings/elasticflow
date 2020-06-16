@@ -11,7 +11,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
@@ -58,7 +58,7 @@ public class HBaseFlow extends WriterFlowSocket {
 
 	 
 	@Override
-	public void write(WriterParam writerParam,PipeDataUnit unit,Map<String, RiverField> transParams, String instantcName, String storeId,boolean isUpdate) throws FNException { 
+	public void write(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> transParams, String instantcName, String storeId,boolean isUpdate) throws FNException { 
 		if (unit.getData().size() == 0){
 			log.info("Empty IndexUnit for " + instantcName + " " + storeId);
 			return;
@@ -77,7 +77,7 @@ public class HBaseFlow extends WriterFlowSocket {
 			if (value == null)
 				continue;
 			
-			RiverField transParam = transParams.get(field);
+			EFField transParam = transParams.get(field);
 			if (transParam == null)
 				transParam = transParams.get(field.toLowerCase());
 			if (transParam == null)

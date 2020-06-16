@@ -3,7 +3,7 @@ package org.elasticflow.ml.algorithm;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.ml.common.MathFunction;
 import org.elasticflow.model.computer.SamplePoint;
@@ -19,7 +19,7 @@ import org.elasticflow.model.reader.PipeDataUnit;
  */
 public class LogisticRegression extends Regression {
 
-	public static DataPage train(Context context,SampleSets samples,Map<String, RiverField> transParam) {
+	public static DataPage train(Context context,SampleSets samples,Map<String, EFField> transParam) {
 		LogisticRegression lr = new LogisticRegression();
 		double[] para = new double[samples.getData()[0].feathures_num];
 		double rate = context.getInstanceConfig().getComputeParams().getLearn_rate();

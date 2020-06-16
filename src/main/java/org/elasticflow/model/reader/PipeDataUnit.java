@@ -3,7 +3,7 @@ package org.elasticflow.model.reader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.util.Common;
 
 /**
@@ -25,8 +25,8 @@ public class PipeDataUnit implements Cloneable{
 		this.SYSTEM_UPDATE_TIME = System.currentTimeMillis();
 	}
 	
-	public boolean addFieldValue(String k,Object v,Map<String, RiverField> transParams){
-		RiverField param = transParams.get(k);
+	public boolean addFieldValue(String k,Object v,Map<String, EFField> transParams){
+		EFField param = transParams.get(k);
 		if (param != null){
 			if (param.getHandler()!=null){
 				param.getHandler().handle(this, v,transParams); 

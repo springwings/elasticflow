@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.elasticflow.connect.ESConnector;
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.model.searcher.ResponseDataUnit;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherResult;
@@ -66,8 +66,8 @@ public final class ESFlow extends SearcherFlowSocket {
 					returnFields.add(s);
 				}
 			} else {
-				Map<String, RiverField> tmpFields = instanceConfig.getWriteFields();
-				for (Map.Entry<String, RiverField> e : tmpFields.entrySet()) {
+				Map<String, EFField> tmpFields = instanceConfig.getWriteFields();
+				for (Map.Entry<String, EFField> e : tmpFields.entrySet()) {
 					if (e.getValue().getStored().equalsIgnoreCase("true"))
 						returnFields.add(e.getKey());
 				}
@@ -98,7 +98,7 @@ public final class ESFlow extends SearcherFlowSocket {
 			ResponseDataUnit u = ResponseDataUnit.getInstance();
 			for (Map.Entry<String, DocumentField> e : fieldMap.entrySet()) {
 				String name = e.getKey();
-				RiverField param = instanceConfig.getWriteFields().get(name);
+				EFField param = instanceConfig.getWriteFields().get(name);
 				DocumentField v = e.getValue();  
 				if (param!=null && param.getSeparator() != null) { 
 					u.addObject(name, v.getValues());

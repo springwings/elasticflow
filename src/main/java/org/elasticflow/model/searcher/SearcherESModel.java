@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.model.RiverRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.searcher.parser.ESQueryParser;
 import org.elasticflow.util.SearchParamUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -46,7 +46,7 @@ public class SearcherESModel implements SearcherModel<QueryBuilder,SortBuilder<?
 	private String facet_ext="";
 	private String requesthandler="";
 	
-	public static SearcherESModel getInstance(RiverRequest request, InstanceConfig instanceConfig) {
+	public static SearcherESModel getInstance(EFRequest request, InstanceConfig instanceConfig) {
 		SearcherESModel eq = new SearcherESModel(); 
 		eq.setSorts(SearchParamUtil.getSortField(request, instanceConfig));
 		eq.setFacetSearchParams(SearchParamUtil.getFacetParams(request, instanceConfig));

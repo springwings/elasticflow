@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.model.RiverRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.ResponseState;
 import org.elasticflow.model.searcher.ResponseDataUnit;
 import org.elasticflow.model.searcher.SearcherESModel;
@@ -51,7 +51,7 @@ public class Searcher {
 		}
 	}
 
-	public ResponseState startSearch(RiverRequest rq) {
+	public ResponseState startSearch(EFRequest rq) {
 		ResponseState response = ResponseState.getInstance();
 		response.setInstance(instanceName);
 		/** check validation */

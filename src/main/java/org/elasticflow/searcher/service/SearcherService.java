@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.ResponseState;
-import org.elasticflow.model.RiverRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.node.SocketCenter;
 import org.elasticflow.service.FNService;
 import org.elasticflow.service.HttpService;
@@ -54,7 +54,7 @@ public class SearcherService{
 		return true;
 	} 
 	
-	public ResponseState process(RiverRequest request) throws InstantiationException, IllegalAccessException, ClassNotFoundException { 
+	public ResponseState process(EFRequest request) throws InstantiationException, IllegalAccessException, ClassNotFoundException { 
 		long startTime = System.currentTimeMillis();
 		ResponseState response = null; 
 		String pipe = request.getPipe(); 
@@ -80,9 +80,9 @@ public class SearcherService{
 
 			response.setContentType("application/json;charset=utf8");
 			response.setStatus(HttpServletResponse.SC_OK);
-			response.setHeader("PowerBy", "rivers"); 
+			response.setHeader("PowerBy", GlobalParam.PROJ); 
 			rq.setHandled(true);
-			RiverRequest _request = Common.getRequest(rq);
+			EFRequest _request = Common.getRequest(rq);
 
 			if (Resource.nodeConfig.getSearchConfigs().containsKey(
 					_request.getPipe())) {

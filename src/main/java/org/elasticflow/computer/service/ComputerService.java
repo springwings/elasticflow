@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.ResponseState;
-import org.elasticflow.model.RiverRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.node.SocketCenter;
 import org.elasticflow.service.FNService;
 import org.elasticflow.service.HttpService;
@@ -54,7 +54,7 @@ public class ComputerService {
 		} 
 		return true;
 	}
-	public ResponseState process(RiverRequest request) { 
+	public ResponseState process(EFRequest request) { 
 		long startTime = System.currentTimeMillis();
 		ResponseState response = null; 
 		String pipe = request.getPipe(); 
@@ -80,9 +80,9 @@ public class ComputerService {
 
 			response.setContentType("application/json;charset=utf8");
 			response.setStatus(HttpServletResponse.SC_OK);
-			response.setHeader("PowerBy", "rivers"); 
+			response.setHeader("PowerBy", GlobalParam.PROJ); 
 			rq.setHandled(true);
-			RiverRequest RR = Common.getRequest(rq);
+			EFRequest RR = Common.getRequest(rq);
 			if (Resource.nodeConfig.getSearchConfigs().containsKey(
 					RR.getPipe())) {
 				ResponseState rps = null;

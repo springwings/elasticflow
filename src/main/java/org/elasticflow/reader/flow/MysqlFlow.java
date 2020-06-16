@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.model.Page;
 import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
@@ -148,7 +148,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 		return page;
 	} 
 	
-	private void getAllData(ResultSet rs,Map<String, RiverField> transParam) throws FNException {   
+	private void getAllData(ResultSet rs,Map<String, EFField> transParam) throws FNException {   
 		String dataBoundary = null;
 		String LAST_STAMP=null;
 		try {  

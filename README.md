@@ -7,7 +7,7 @@ elasticflow for build computing flow ，support jobs like ML,DataTrasfer,Data Se
 # ElasticFlow用来解决什么?
 
 数据中台作为其核心问题之一就是数据逻辑分层，那么我们要如何实现由一个数据层的数据引导入下一层呢？
-Rivers就是为解决该问题而生。
+ElasticFlow就是为解决该问题而生。
 
 
 

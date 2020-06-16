@@ -85,7 +85,7 @@ public final class Run {
 		Resource.nodeMonitor = nodeMonitor; 
 		
 		if (initInstance) {
-			ConfigStorer.setData(GlobalParam.CONFIG_PATH + "/RIVER_NODES/" + GlobalParam.IP + "/configs", JSON.toJSONString(GlobalParam.StartConfig)); 
+			ConfigStorer.setData(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP + "/configs", JSON.toJSONString(GlobalParam.StartConfig)); 
 			Resource.nodeConfig = NodeConfig.getInstance(GlobalParam.StartConfig.getProperty("pond"), GlobalParam.StartConfig.getProperty("instructions"));
 			Resource.nodeConfig.init(GlobalParam.StartConfig.getProperty("instances"),GlobalParam.SERVICE_LEVEL);
 			Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
@@ -162,8 +162,8 @@ public final class Run {
 	} 
 
 	public static void main(String[] args) throws Exception {
-		Resource.RIVERS = (Run) FNIoc.getBean("RIVERS");
-		Resource.RIVERS.start();
+		Resource.EFLOWS = (Run) FNIoc.getBean("EFLOWS");
+		Resource.EFLOWS.start();
 	}
 
 }

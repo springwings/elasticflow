@@ -18,9 +18,9 @@ import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.KEY_PARAM;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.field.RiverField;
+import org.elasticflow.field.EFField;
 import org.elasticflow.model.InstructionTree;
-import org.elasticflow.model.RiverRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.node.CPU;
 import org.elasticflow.param.warehouse.WarehouseParam;
@@ -456,7 +456,7 @@ public final class Common {
 		return false;
 	} 
 	
-	public static Object parseFieldValue(String v, RiverField fd) throws Exception {
+	public static Object parseFieldValue(String v, EFField fd) throws Exception {
 		if (fd == null)
 			return null; 
 		if (v==null) {
@@ -468,12 +468,12 @@ public final class Common {
 	}
 	
 	/**
-	 * jetty request convert to RiverRequest
+	 * jetty request convert to EFLOWSRequest
 	 * @param input
 	 * @return
 	 */
-	public static RiverRequest getRequest(Request input) {
-		RiverRequest rr = RiverRequest.getInstance(); 
+	public static EFRequest getRequest(Request input) {
+		EFRequest rr = EFRequest.getInstance(); 
 		Request rq = (Request) input;
 		String path = rq.getPathInfo();
 		String pipe = path.substring(1); 
