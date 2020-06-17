@@ -27,8 +27,8 @@ public class ScanPosition {
 			this.instance = instance;
 			this.storeId = storeId;
 		}else {
-			instance = tmp[0];
-			storeId = tmp[1];
+			this.instance = tmp[0];
+			this.storeId = tmp[1];
 			String[] L2seqs = tmp[2].split(JOB_SEQ_SPERATOR);
 			String[] row;
 			for(String seq:L2seqs) {

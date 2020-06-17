@@ -473,14 +473,14 @@ public final class NodeMonitor {
 							sb.append(", ");
 							sb.append(update);
 						}
-						fullstate.append(seq + ":" + Common.getFullStartInfo(instance, seq) + "; ");
+						fullstate.append(seq+ ":" + Common.getFullStartInfo(instance, seq) + "; ");
 					}
 					JO.put("增量存储状态",sb);  
 					JO.put("全量存储状态",fullstate);  
 				} else {
 					String strs = GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null)).getPositionString(); 
 					StringBuilder stateStr = new StringBuilder();
-					if (strs.split(",").length > 1) {
+					if (strs.split(",").length > 0) {
 						for (String tm : strs.split(",")) {
 							String[] dstr = tm.split(":");
 							if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
@@ -821,7 +821,7 @@ public final class NodeMonitor {
 		String[] seqs = getInstanceL1seqs(instance);
 		StringBuilder sb = new StringBuilder();
 		for (String seq : seqs) {
-			sb.append(seq + ":");
+			sb.append(seq.length()==0?"MAIN ":seq + ":");
 			if (Common.checkFlowStatus(instance, seq, type, STATUS.Stop))
 				sb.append("Stop,");
 			if (Common.checkFlowStatus(instance, seq, type, STATUS.Ready))
