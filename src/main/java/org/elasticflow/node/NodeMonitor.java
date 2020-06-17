@@ -335,7 +335,7 @@ public final class NodeMonitor {
 
 	public void getStatus(Request rq) {
 		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
-		HashMap<String, Object> dt = new HashMap<String, Object>();
+		JSONObject dt = new JSONObject();
 		dt.put("NODE_TYPE", GlobalParam.StartConfig.getProperty("node_type"));
 		dt.put("WRITE_BATCH", GlobalParam.WRITE_BATCH);
 		dt.put("SERVICE_LEVEL", service_level);
@@ -396,13 +396,13 @@ public final class NodeMonitor {
 
 	public void getInstanceInfo(Request rq) {
 		if (Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance"))) {
-			String instance = rq.getParameter("instance"); 
-			StringBuilder sb = new StringBuilder();
+			String instance = rq.getParameter("instance");  
+			JSONObject JO = new JSONObject();
 			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
 			if (Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
 				String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom())
 						.getPoolName(null);
-				sb.append(",[DataFrom Pool Status] " + FnConnectionPool.getStatus(poolname));
+				JO.put("DataFrom Pool Status", FnConnectionPool.getStatus(poolname)); 
 			} else if (Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
 				WarehouseSqlParam ws = Resource.nodeConfig.getSqlWarehouse()
 						.get(config.getPipeParams().getReadFrom());
@@ -411,41 +411,41 @@ public final class NodeMonitor {
 					for (String seq : ws.getL1seq()) {
 						poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom())
 								.getPoolName(seq);
-						sb.append(",[Seq(" + seq + ") Reader Pool Status] " + FnConnectionPool.getStatus(poolname));
+						JO.put("Seq(" + seq + ") Reader Pool Status", FnConnectionPool.getStatus(poolname));  
 					}
 				} else {
 					poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom())
 							.getPoolName(null);
-					sb.append(",[Reader Pool Status] " + FnConnectionPool.getStatus(poolname));
+					JO.put("Reader Pool Status", FnConnectionPool.getStatus(poolname));  
 				}
 			}
 
 			if (Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
 				String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getWriteTo())
 						.getPoolName(null);
-				sb.append(",[Writer Pool Status] " + FnConnectionPool.getStatus(poolname));
+				JO.put("Writer Pool Status", FnConnectionPool.getStatus(poolname));   
 			} else if (Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
 				String poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getWriteTo())
 						.getPoolName(null);
-				sb.append(",[Writer Pool Status] " + FnConnectionPool.getStatus(poolname));
+				JO.put("Writer Pool Status", FnConnectionPool.getStatus(poolname));    
 			}
 
 			if ((GlobalParam.SERVICE_LEVEL & 1) > 0) {
 				String searchFrom = config.getPipeParams().getSearchFrom();
-				String searcher_info;
+				String searcherInfo = "";
 				if (config.getPipeParams().getWriteTo() != null
 						&& config.getPipeParams().getWriteTo().equals(searchFrom)) {
-					searcher_info = ",[Searcher Pool (Share With Writer) Status] ";
+					searcherInfo = "Searcher Pool (Share With Writer) Status";
 				} else {
-					searcher_info = ",[Searcher Pool Status] ";
+					searcherInfo = "Searcher Pool Status";
 				}
 
 				if (Resource.nodeConfig.getNoSqlWarehouse().get(searchFrom) != null) {
 					String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(searchFrom).getPoolName(null);
-					sb.append(searcher_info + FnConnectionPool.getStatus(poolname));
+					JO.put(searcherInfo, FnConnectionPool.getStatus(poolname));  
 				} else {
 					String poolname = Resource.nodeConfig.getSqlWarehouse().get(searchFrom).getPoolName(null);
-					sb.append(searcher_info + FnConnectionPool.getStatus(poolname));
+					JO.put(searcherInfo, FnConnectionPool.getStatus(poolname)); 
 				}
 			}
 
@@ -453,7 +453,7 @@ public final class NodeMonitor {
 				WarehouseSqlParam wsp = Resource.nodeConfig.getSqlWarehouse()
 						.get(config.getPipeParams().getReadFrom());
 				if (wsp.getL1seq().length > 0) {
-					sb.append(",[增量存储状态]");
+					StringBuilder sb = new StringBuilder();
 					StringBuilder fullstate = new StringBuilder();
 					for (String seq : wsp.getL1seq()) {
 						String strs = GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, seq)).getPositionString();
@@ -475,9 +475,8 @@ public final class NodeMonitor {
 						}
 						fullstate.append(seq + ":" + Common.getFullStartInfo(instance, seq) + "; ");
 					}
-					sb.append(",[全量存储状态]");
-					sb.append(fullstate);
-
+					JO.put("增量存储状态",sb);  
+					JO.put("全量存储状态",fullstate);  
 				} else {
 					String strs = GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null)).getPositionString(); 
 					StringBuilder stateStr = new StringBuilder();
@@ -494,29 +493,26 @@ public final class NodeMonitor {
 							stateStr.append(", ");
 						}
 					}
-					sb.append(",[增量存储状态] " + GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null)).getStoreId() + ":" + stateStr.toString());
-					sb.append(",[全量存储状态] ");
-					sb.append(Common.getFullStartInfo(instance, null));
+					JO.put("增量存储状态",GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null)).getStoreId() + ":" + stateStr.toString()); 
+					JO.put("全量存储状态",Common.getFullStartInfo(instance, null)); 
 				}
 				if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.FULL.name())
 						|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()).size() == 0) {
-					sb.append(",[全量运行状态] " + "full:null");
+					JO.put("全量运行状态","full:null");   
 				} else {
-					sb.append(",[全量运行状态] " + "full:" + Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()));
+					JO.put("全量运行状态","full:" + Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()));  
 				}
 				if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.INCREMENT.name())
 						|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()).size() == 0) {
-					sb.append(",[增量运行状态] " + "increment:null");
+					JO.put("增量运行状态","increment:null");    
 				} else {
-					sb.append(",[增量运行状态] " + "increment:"
-							+ Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()));
+					JO.put("增量运行状态","increment:"
+							+ Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()));   
 				}
-				sb.append(",[增量线程状态] ");
-				sb.append(threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
-				sb.append(",[全量线程状态] ");
-				sb.append(threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
+				JO.put("增量线程状态",threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));  
+				JO.put("全量线程状态",threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));   
 			}
-			setResponse(1, sb.toString());
+			setResponse(1, JO);
 		} else {
 			setResponse(0, "instance not exits!");
 		}
