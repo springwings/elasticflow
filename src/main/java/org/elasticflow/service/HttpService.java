@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @date 2018-10-26 09:23
  */
-public class HttpService implements FNService {
+public class HttpService implements EFService {
 
 	private HashMap<String, Object> serviceParams;
 
@@ -25,8 +25,8 @@ public class HttpService implements FNService {
 	private final static Logger log = LoggerFactory
 			.getLogger(HttpService.class);
 
-	public static FNService getInstance(HashMap<String, Object> serviceParams){
-		FNService s = new HttpService();
+	public static EFService getInstance(HashMap<String, Object> serviceParams){
+		EFService s = new HttpService();
 		s.init(serviceParams);
 		return s;
 	}

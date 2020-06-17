@@ -22,7 +22,7 @@ import org.elasticflow.node.RecoverMonitor;
 import org.elasticflow.node.SocketCenter;
 import org.elasticflow.reader.service.HttpReaderService;
 import org.elasticflow.searcher.service.SearcherService;
-import org.elasticflow.service.FNMonitor;
+import org.elasticflow.service.EFMonitor;
 import org.elasticflow.task.FlowTask;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.FNIoc;
@@ -115,7 +115,7 @@ public final class Run {
 		if ((GlobalParam.SERVICE_LEVEL & 8) > 0)
 			Resource.FlOW_CENTER.startInstructionsJob();
 		
-		new FNMonitor().start();
+		new EFMonitor().start();
 	}
 
 	public void loadGlobalConfig(String path, boolean fromZk) {

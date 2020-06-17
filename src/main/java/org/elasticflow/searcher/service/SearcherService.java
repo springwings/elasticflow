@@ -18,7 +18,7 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.ResponseState;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.node.SocketCenter;
-import org.elasticflow.service.FNService;
+import org.elasticflow.service.EFService;
 import org.elasticflow.service.HttpService;
 import org.elasticflow.util.Common;
 import org.elasticflow.yarn.Resource;
@@ -33,7 +33,7 @@ public class SearcherService{
 	@Autowired
 	private SocketCenter SocketCenter;    
  
-	private FNService FS;
+	private EFService FS;
 	 
 	public boolean start() {
 		HashMap<String, Object> serviceParams = new HashMap<String, Object>();

@@ -18,7 +18,7 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.ResponseState;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.node.SocketCenter;
-import org.elasticflow.service.FNService;
+import org.elasticflow.service.EFService;
 import org.elasticflow.service.HttpService;
 import org.elasticflow.util.Common;
 import org.elasticflow.yarn.Resource;
@@ -31,7 +31,7 @@ import org.elasticflow.yarn.Resource;
  */
 public class ComputerService {
 	
-	private FNService FS;
+	private EFService FS;
 	
 	@Autowired
 	private SocketCenter SocketCenter;    

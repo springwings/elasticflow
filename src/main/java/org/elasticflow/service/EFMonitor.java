@@ -22,7 +22,7 @@ import org.elasticflow.yarn.Resource;
  * @version 4.0
  * @date 2018-10-26 09:13
  */
-public class FNMonitor {  
+public class EFMonitor {  
 	
 	public void start() {
 		HashMap<String, Object> serviceParams = new HashMap<String, Object>();

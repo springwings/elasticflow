@@ -24,7 +24,7 @@ import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.node.CPU;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.piper.PipePump;
-import org.elasticflow.service.FNService;
+import org.elasticflow.service.EFService;
 import org.elasticflow.service.HttpService;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.FNException;
@@ -44,7 +44,7 @@ public class HttpReaderService {
  
 	private final static Logger log = LoggerFactory.getLogger(HttpReaderService.class);  
 
-	private FNService FS;
+	private EFService FS;
 
 	public boolean start() {
 		HashMap<String, Object> serviceParams = new HashMap<String, Object>();

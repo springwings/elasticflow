@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.Mechanism;
 import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
@@ -528,35 +529,37 @@ public final class NodeMonitor {
 	 */
 	public void getInstances(Request rq) {
 		Map<String, InstanceConfig> nodes = Resource.nodeConfig.getInstanceConfigs();
-		HashMap<String, List<String>> rs = new HashMap<String, List<String>>();
+		HashMap<String, List<JSONObject>> rs = new HashMap<String, List<JSONObject>>(); 
 		for (Map.Entry<String, InstanceConfig> entry : nodes.entrySet()) {
 			InstanceConfig config = entry.getValue();
-			StringBuilder sb = new StringBuilder();
-			sb.append(entry.getKey() + ":[Alias]" + config.getAlias());
-			sb.append(":[OptimizeCron]" + config.getPipeParams().getOptimizeCron());
-			sb.append(":[DeltaCron]" + config.getPipeParams().getDeltaCron());
+			JSONObject instance = new JSONObject();
+			instance.put("instance",entry.getKey());
+			instance.put("Alias", config.getAlias());
+			instance.put("OptimizeCron", config.getPipeParams().getOptimizeCron());
+			instance.put("DeltaCron", config.getPipeParams().getDeltaCron()); 
 			if (config.getPipeParams().getFullCron() == null && config.getPipeParams().getReadFrom() != null
 					&& config.getPipeParams().getWriteTo() != null) {
-				sb.append(":[FullCron] 0 0 0 1 1 ? 2099");
+				instance.put("FullCron", "0 0 0 1 1 ? 2099");  
 			} else {
-				sb.append(":[FullCron]" + config.getPipeParams().getFullCron());
+				instance.put("FullCron", config.getPipeParams().getFullCron());
 			}
-			sb.append(":[SearchFrom]" + config.getPipeParams().getSearchFrom());
-			sb.append(":[ReadFrom]" + config.getPipeParams().getReadFrom());
-			sb.append(":[WriteTo]" + config.getPipeParams().getWriteTo());
-			sb.append(":[openTrans]" + config.openTrans());
-			sb.append(":[IsMaster]" + config.getPipeParams().isMaster() + ",");
-			sb.append(":[InstanceType]" + config.getInstanceType() + ",");
-			if (rs.containsKey(config.getAlias())) {
-				rs.get(config.getAlias()).add(sb.toString());
+			instance.put("SearchFrom", config.getPipeParams().getSearchFrom());
+			instance.put("ReadFrom", config.getPipeParams().getReadFrom());
+			instance.put("WriteTo", config.getPipeParams().getWriteTo());
+			instance.put("openTrans", config.openTrans());
+			instance.put("IsMaster", config.getPipeParams().isMaster());
+			instance.put("InstanceType", this.getInstanceType(config.getInstanceType()));
+		 
+			if (rs.containsKey(config.getAlias())) { 
+				rs.get(config.getAlias()).add(instance);
 				rs.put(config.getAlias(), rs.get(config.getAlias()));
 			} else {
-				ArrayList<String> tmp = new ArrayList<String>();
-				tmp.add(sb.toString());
+				ArrayList<JSONObject> tmp = new ArrayList<JSONObject>();
+				tmp.add(instance);
 				rs.put(config.getAlias(), tmp);
 			}
 		}
-		setResponse(1, JSON.toJSONString(rs));
+		setResponse(1, rs);
 	} 
 
 	public void runCode(Request rq) {
@@ -757,6 +760,19 @@ public final class NodeMonitor {
 		} catch (Exception e) {
 			setResponse(0, e.getMessage());
 		}
+	}
+	
+	private String getInstanceType(int type) {
+		if (type>0) {
+			String res = "";
+			if((type&INSTANCE_TYPE.Trans.getVal())>0)
+				res += INSTANCE_TYPE.Trans.name()+",";
+			if((type&INSTANCE_TYPE.WithCompute.getVal())>0)
+				res += INSTANCE_TYPE.WithCompute.name();
+			return res;
+		}else {
+			return INSTANCE_TYPE.Blank.name();
+		} 
 	}
 
 	/**
