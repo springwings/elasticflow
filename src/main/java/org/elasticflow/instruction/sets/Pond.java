@@ -75,6 +75,18 @@ public class Pond extends Instruction {
 			}
 		}
 	}
+	
+	/**
+	 * is a empty method
+	 */
+	public static void deleteByQuery(Context context, Object[] args) { 
+		if (!isValid(1, args)) {
+			log.error("deleteByQuery parameter not match!");
+			return;
+		}
+		 
+	}
+
 
 	/**
 	 * @param args
