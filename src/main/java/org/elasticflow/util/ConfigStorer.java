@@ -2,6 +2,7 @@ package org.elasticflow.util;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 
 import org.elasticflow.config.GlobalParam;
@@ -64,6 +65,17 @@ public class ConfigStorer {
 	            byte[] data = new byte[length];
 	            fi.read(data);
 		        return data;
+			}catch (FileNotFoundException e1) {
+				try {
+					if(create) { 
+						File f = new File(path);
+						f.createNewFile();
+					}
+					return "".getBytes();
+				}catch(Exception e2) {
+					Common.LOG.error("create file Exception", e2);
+					return null;
+				}
 			} catch (Exception e) {
 				Common.LOG.error("read data Exception", e);
 				return null;

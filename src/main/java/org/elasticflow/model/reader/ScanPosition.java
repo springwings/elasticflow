@@ -47,6 +47,9 @@ public class ScanPosition {
 		L2seqPos.put(k, v);
 	} 
 	
+	/**
+	 * Store temporary full scan start location 
+	 */
 	public void keepCurrentPos() {
 		keep = getPositionString();
 	}
