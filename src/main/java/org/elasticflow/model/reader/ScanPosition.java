@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * store Level-2-seqs relate information
+ * store Level-2-seqs relative information like table level
  * @author chengwen
  * @version 1.0
  * @date 2018-11-26 13:43
@@ -19,7 +19,7 @@ public class ScanPosition {
 	private String JOB_STATE_SPERATOR = ":";
 	private String JOB_SEQ_SPERATOR = ",";
 	private String INFO_SPERATOR = "#";
-	private String keep;
+	private String keep="";
 	
 	public ScanPosition(String info,String instance,String storeId) {
 		String[] tmp = info.split(INFO_SPERATOR);

@@ -67,8 +67,7 @@ public class FlowTask {
 	 */
 	public void runFull() {
 		if (!breaker.isOn() && Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running)) {
-			try {
-				GlobalParam.SCAN_POSITION.get(Common.getMainName(instance, L1seq)).keepCurrentPos();
+			try { 
 				String storeId;
 				if (masterControl) {
 					storeId = Resource.FLOW_INFOS
@@ -81,6 +80,7 @@ public class FlowTask {
 							Common.getMainName(instance, L1seq), storeId);
 				}
 				if(storeId!=null) {
+					GlobalParam.SCAN_POSITION.get(Common.getMainName(instance, L1seq)).keepCurrentPos();
 					transDataFlow.run(instance, storeId, L1seq, true,
 							masterControl);
 					GlobalParam.SCAN_POSITION.get(Common.getMainName(instance, L1seq)).recoverKeep(); 
@@ -93,7 +93,7 @@ public class FlowTask {
 				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready);
 			}
 		} else {
-			log.info(instance + " Current full flow flow has been breaked!");
+			log.info(instance + " current start full computational task has been breaked!");
 		}
 	}
 
