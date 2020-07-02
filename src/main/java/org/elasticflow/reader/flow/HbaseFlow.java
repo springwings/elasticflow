@@ -92,7 +92,7 @@ public class HbaseFlow extends ReaderFlowSocket {
 							String k = new String(CellUtil.cloneQualifier(cell));
 							String v = new String(CellUtil.cloneValue(cell), "UTF-8"); 
 							if(k.equals(this.dataPage.get(GlobalParam.READER_KEY))){
-								u.setKeyColumnVal(v);
+								u.setReaderKeyVal(v);
 								dataBoundary = v;
 							}
 							if(k.equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))){

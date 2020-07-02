@@ -241,7 +241,7 @@ public class InstanceConfig {
 					parseNode(params.getElementsByTagName("param"), "writerParam", BasicParam.class);
 					if(writerParams.getWriteKey()==null) {
 						WriterParam.setKeyValue(writerParams,"writekey",readParams.getKeyField());
-						WriterParam.setKeyValue(writerParams,"keytype","unique");
+						WriterParam.setKeyValue(writerParams,"keytype","unique"); 
 					}
 					params = (Element) params.getElementsByTagName("fields").item(0);
 					paramlist = params.getElementsByTagName("field");

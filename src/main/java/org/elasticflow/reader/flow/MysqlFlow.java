@@ -160,7 +160,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 					String v = rs.getString(i);
 					String k = metaData.getColumnLabel(i);
 					if(k.equals(this.dataPage.get(GlobalParam.READER_KEY))){
-						u.setKeyColumnVal(v);
+						u.setReaderKeyVal(v);
 						dataBoundary = v;
 					}
 					if(k.equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))){

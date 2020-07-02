@@ -74,6 +74,8 @@ public class WarehouseSqlParam implements WarehouseParam{
 			this.type = DATA_TYPE.ORACLE;
 		else if (type.equalsIgnoreCase("HIVE"))
 			this.type = DATA_TYPE.HIVE;
+		else if (type.equalsIgnoreCase("NEO4J"))
+			this.type = DATA_TYPE.NEO4J;
 	}
 	
 	public String getAlias() {

@@ -245,6 +245,9 @@ public final class FnConnectionPool {
 				case FILE:
 					conn = FileConnection.getInstance(params);
 					break;
+				case NEO4J:
+					conn = Neo4jConnection.getInstance(params);
+					break;
 				default:
 					log.error("Connection Type Not Support!");
 					break;

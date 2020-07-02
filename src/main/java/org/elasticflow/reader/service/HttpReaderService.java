@@ -235,7 +235,7 @@ public class HttpReaderService {
 				Set<Entry<String, String>> itr = jo.entrySet();
 				for (Entry<String, String> k : itr) {
 					if (k.getKey().equals(DP.get(keycolumn))) {
-						u.setKeyColumnVal(k.getValue());
+						u.setReaderKeyVal(k.getValue());
 						dataBoundary = String.valueOf(k.getValue());
 					}
 					if (k.getKey().equals(updatecolumn)) {

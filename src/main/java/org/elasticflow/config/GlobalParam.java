@@ -80,7 +80,7 @@ public final class GlobalParam {
 		start, count, sort, facet, detail, facet_count,group,fl
 	}  
 	public static enum DATA_TYPE{
-		MYSQL, ORACLE, HIVE, ES, SOLR, HBASE,ZOOKEEPER,UNKNOWN,H2,FILE
+		MYSQL, ORACLE, HIVE, ES, SOLR, HBASE,ZOOKEEPER,UNKNOWN,H2,FILE,NEO4J
 	}  
 	public static enum FLOW_TAG {
 		_DEFAULT,_MOP

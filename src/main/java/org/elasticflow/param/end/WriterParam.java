@@ -8,8 +8,13 @@ package org.elasticflow.param.end;
  */
 public class WriterParam {
 	private String writeKey;
-	/**scan,scan update,unique key update record*/
+	/**keyType:scan|unique
+		scan,scan update batch record
+		unique key update single record
+	*/
 	private String keyType;
+	/**user define field,pass custom value**/
+	private String DSL;
 
 	public String getWriteKey() {
 		return writeKey;
@@ -17,6 +22,10 @@ public class WriterParam {
 
 	public String getKeyType() {
 		return keyType;
+	}
+	
+	public String getDSL() {
+		return DSL;
 	}
 
 	public static void setKeyValue(WriterParam wp, String k, String v) {
@@ -26,6 +35,9 @@ public class WriterParam {
 			break;
 		case "keytype":
 			wp.keyType = v;
+			break;
+		case "dsl":
+			wp.DSL = v;
 			break;
 		}
 	}

@@ -103,7 +103,7 @@ public class ESFlow extends WriterFlowSocket {
 		script = new Script(sf.append(GlobalParam.DEFAULT_FIELD+" = "+unit.getUpdateTime()).toString()); 
 		try {  
 			UpdateByQueryRequestBuilder _UR = new UpdateByQueryRequestBuilder(getESC().getClient(), UpdateByQueryAction.INSTANCE);
-			_UR.source(instance).script(script).filter(QueryBuilders.termQuery(writerParam.getWriteKey(),unit.getKeyColumnVal())).execute().get();
+			_UR.source(instance).script(script).filter(QueryBuilders.termQuery(writerParam.getWriteKey(),unit.getReaderKeyVal())).execute().get();
 		} catch (Exception e) {
 			throw new FNException(e);
 		} 
@@ -147,7 +147,7 @@ public class ESFlow extends WriterFlowSocket {
 			cbuilder.field(GlobalParam.DEFAULT_FIELD, unit.getUpdateTime());
 			cbuilder.endObject();
 			
-			String id = unit.getKeyColumnVal();
+			String id = unit.getReaderKeyVal();
 			if (isUpdate) {
 				@SuppressWarnings("deprecation")
 				UpdateRequest _UR = new UpdateRequest(instance, alias, id);

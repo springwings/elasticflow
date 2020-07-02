@@ -63,7 +63,7 @@ public class HBaseFlow extends WriterFlowSocket {
 			log.info("Empty IndexUnit for " + instantcName + " " + storeId);
 			return;
 		}  
-		String id = unit.getKeyColumnVal(); 
+		String id = unit.getReaderKeyVal(); 
 		Put put = new Put(Bytes.toBytes(id));
 		
 		for(Entry<String, Object> r:unit.getData().entrySet()){

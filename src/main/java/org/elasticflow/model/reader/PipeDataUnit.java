@@ -13,7 +13,7 @@ import org.elasticflow.util.Common;
  * @date 2018-07-22 09:08
  */
 public class PipeDataUnit implements Cloneable{  
-	public String key_column_val;
+	public String reader_key_val;
 	private HashMap<String,Object> data;  
 	private long SYSTEM_UPDATE_TIME; 
 	
@@ -40,16 +40,16 @@ public class PipeDataUnit implements Cloneable{
 		}
 	}
 	
-	public void setKeyColumnVal(Object key_column_val){
-		this.key_column_val = String.valueOf(key_column_val);
+	public void setReaderKeyVal(Object reader_key_val){
+		this.reader_key_val = String.valueOf(reader_key_val);
 	}
  
 	public HashMap<String,Object> getData() {
 		return data;
 	}
 	
-	public String getKeyColumnVal() {
-		return key_column_val;
+	public String getReaderKeyVal() {
+		return reader_key_val;
 	}
  
 	public long getUpdateTime(){
