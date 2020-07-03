@@ -99,6 +99,8 @@ public class Neo4jFlow extends WriterFlowSocket {
 	}
 	
 	private String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) { 
+		if (isIncrement)
+			return "a";
 		Connection conn = (Connection) GETSOCKET().getConnection(false);
 		try (PreparedStatement statement = conn.prepareStatement("match(n) return n limit 1");) {
 			ResultSet rs = statement.executeQuery();
