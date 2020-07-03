@@ -136,7 +136,7 @@ public class FlowTask {
 			try {
 				String storeId = Common.getStoreId(instance, L1seq, transDataFlow, true, recompute); 
 				String destination = instance;
-				if(writeInSamePosition) 
+				if(writeInSamePosition)
 					destination = transDataFlow.getInstanceConfig().getPipeParams().getInstanceName();
 				
 				if (!Resource.FLOW_INFOS.containsKey(destination, GlobalParam.FLOWINFO.MASTER.name())) 

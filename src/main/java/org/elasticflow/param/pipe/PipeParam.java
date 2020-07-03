@@ -30,6 +30,7 @@ public class PipeParam {
 	private boolean isMaster = false;
 	/** control each slave instance run in Concurrent mode or not **/
 	private boolean async = false;
+	/** slave node deep control by master **/
 	private boolean isMasterControl = false;
 	/**data write into type,full create new record,increment update part of data*/
 	private String writeType="full";
