@@ -61,11 +61,11 @@ public final class PipePump extends Instruction {
 		}
 	}
 
-	public void run(String instance, String storeId, String L1seq, boolean isFull, boolean masterControl)
+	public void run(String instance, String storeId, String L1seq, boolean isFull, boolean writeInSamePosition)
 			throws FNException {
 		JOB_TYPE job_type;
 		String mainName = Common.getMainName(instance, L1seq);
-		String writeTo = masterControl ? getInstanceConfig().getPipeParams().getInstanceName() : mainName;
+		String writeTo = writeInSamePosition ? getInstanceConfig().getPipeParams().getInstanceName() : mainName;
 		if (isFull) {
 			job_type = JOB_TYPE.FULL;
 		} else {
@@ -80,23 +80,19 @@ public final class PipePump extends Instruction {
 		Resource.FLOW_INFOS.get(instance, job_type.name()).put(instance + " seqs nums", String.valueOf(L2seqs.size()));
 		Task task = Task.getInstance(instance, L1seq, job_type, getInstanceConfig().getReadParams(), null,
 				this.readHandler);
-		processFlow(task, mainName, storeId, L2seqs, writeTo, masterControl);
+		processFlow(task, mainName, storeId, L2seqs, writeTo, writeInSamePosition);
 		Resource.FLOW_INFOS.get(instance, job_type.name()).clear();
 		if (isFull) {
-			if (masterControl) {
-				String _dest = getInstanceConfig().getPipeParams().getInstanceName();
-				synchronized (Resource.FLOW_INFOS.get(_dest, GlobalParam.FLOWINFO.MASTER.name())) {
-					String remainJobs = Resource.FLOW_INFOS.get(_dest, GlobalParam.FLOWINFO.MASTER.name())
+			if (writeInSamePosition) {
+				String destination = getInstanceConfig().getPipeParams().getInstanceName();
+				synchronized (Resource.FLOW_INFOS.get(destination, GlobalParam.FLOWINFO.MASTER.name())) {
+					String remainJobs = Resource.FLOW_INFOS.get(destination, GlobalParam.FLOWINFO.MASTER.name())
 							.get(GlobalParam.FLOWINFO.FULL_JOBS.name());
 					remainJobs = remainJobs.replace(mainName, "").trim();
-					Resource.FLOW_INFOS.get(_dest, GlobalParam.FLOWINFO.MASTER.name())
+					Resource.FLOW_INFOS.get(destination, GlobalParam.FLOWINFO.MASTER.name())
 							.put(GlobalParam.FLOWINFO.FULL_JOBS.name(), remainJobs);
 					if (remainJobs.length() == 0) {
-						String _storeId = Resource.FLOW_INFOS.get(_dest, GlobalParam.FLOWINFO.MASTER.name())
-								.get(GlobalParam.FLOWINFO.FULL_STOREID.name());
-						PipePump ts = Resource.SOCKET_CENTER.getPipePump(_dest, null, false,
-								GlobalParam.FLOW_TAG._DEFAULT.name());
-						CPU.RUN(ts.getID(), "Pond", "switchInstance", true, instance, L1seq, _storeId);
+						CPU.RUN(getID(), "Pond", "switchInstance", true, instance, L1seq, storeId);
 					}
 				}
 			} else {
@@ -129,7 +125,7 @@ public final class PipePump extends Instruction {
 	 * @throws FNException
 	 */
 	private void processFlow(Task task, String mainName, String storeId, List<String> L2seqs, String writeTo,
-			boolean masterControl) throws FNException {
+			boolean writeInSamePosition) throws FNException {
 		for (String L2seq : L2seqs) {
 			try {
 				task.setL2seq(L2seq);
@@ -144,7 +140,7 @@ public final class PipePump extends Instruction {
 				processListsPages(task, writeTo, pageList, storeId);
 
 			} catch (FNException e) {
-				if (task.getJobType().equals(JOB_TYPE.FULL) && !masterControl) {
+				if (task.getJobType().equals(JOB_TYPE.FULL) && !writeInSamePosition) {
 					for (int t = 0; t < 5; t++) {
 						getWriter().PREPARE(false, false);
 						if (getWriter().ISLINK()) {

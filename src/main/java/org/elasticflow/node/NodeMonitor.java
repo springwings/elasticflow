@@ -575,7 +575,7 @@ public final class NodeMonitor {
 			if (Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance"))
 					&& Resource.nodeConfig.getInstanceConfigs().get(rq.getParameter("instance")).openTrans()) {
 				boolean state = Resource.FlOW_CENTER.runInstanceNow(rq.getParameter("instance"),
-						rq.getParameter("jobtype"));
+						rq.getParameter("jobtype"),true);
 				if (state) {
 					setResponse(1, "Writer " + rq.getParameter("instance") + " job has been started now!");
 				} else {

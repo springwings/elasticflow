@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 public class FlowTask {
 
 	private boolean recompute = true;
-	private boolean masterControl = false;
+	private boolean writeInSamePosition = false;
 	private String instance;
 	private PipePump transDataFlow;
 	private Breaker breaker;
@@ -48,7 +48,7 @@ public class FlowTask {
 		this.transDataFlow = transDataFlow;
 		this.L1seq = L1seq;
 		if (transDataFlow.getInstanceConfig().getPipeParams().getInstanceName() != null)
-			masterControl = true;
+			writeInSamePosition = true;//c write in same position
 		breaker = new Breaker();
 		breaker.init();
 	}
@@ -69,7 +69,7 @@ public class FlowTask {
 		if (!breaker.isOn() && Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running)) {
 			try { 
 				String storeId;
-				if (masterControl) {
+				if (writeInSamePosition) {
 					storeId = Resource.FLOW_INFOS
 							.get(transDataFlow.getInstanceConfig().getPipeParams().getInstanceName(),
 									GlobalParam.FLOWINFO.MASTER.name())
@@ -82,7 +82,7 @@ public class FlowTask {
 				if(storeId!=null) {
 					GlobalParam.SCAN_POSITION.get(Common.getMainName(instance, L1seq)).keepCurrentPos();
 					transDataFlow.run(instance, storeId, L1seq, true,
-							masterControl);
+							writeInSamePosition);
 					GlobalParam.SCAN_POSITION.get(Common.getMainName(instance, L1seq)).recoverKeep(); 
 					Common.saveTaskInfo(instance, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
 				} 
@@ -100,23 +100,26 @@ public class FlowTask {
 	public void runMasterFull() {
 		if (Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running)) {
 			try {
-				String storeId = Common.getStoreId(instance, L1seq, transDataFlow, false, false);
-				if (!Resource.FLOW_INFOS.containsKey(instance, GlobalParam.FLOWINFO.MASTER.name())) {
-					Resource.FLOW_INFOS.set(instance, GlobalParam.FLOWINFO.MASTER.name(),
-							new HashMap<String, String>());
-				}
-				Resource.FLOW_INFOS.get(instance, GlobalParam.FLOWINFO.MASTER.name())
-						.put(GlobalParam.FLOWINFO.FULL_STOREID.name(), storeId);
+				String storeId = Common.getStoreId(instance, L1seq, transDataFlow, false, false); 
+				String destination = instance;
+				if(writeInSamePosition) 
+					destination = transDataFlow.getInstanceConfig().getPipeParams().getInstanceName(); 
+				
+				if (!Resource.FLOW_INFOS.containsKey(destination, GlobalParam.FLOWINFO.MASTER.name())) 
+					Resource.FLOW_INFOS.set(destination, GlobalParam.FLOWINFO.MASTER.name(),
+						new HashMap<String, String>());
+				Resource.FLOW_INFOS.get(destination, 
+						GlobalParam.FLOWINFO.MASTER.name()).put(GlobalParam.FLOWINFO.FULL_STOREID.name(), storeId);
 
 				CPU.RUN(transDataFlow.getID(), "Pond", "createStorePosition", true,
 						Common.getMainName(instance, L1seq), storeId);
 
-				Resource.FLOW_INFOS.get(instance, GlobalParam.FLOWINFO.MASTER.name()).put(
+				Resource.FLOW_INFOS.get(destination, GlobalParam.FLOWINFO.MASTER.name()).put(
 						GlobalParam.FLOWINFO.FULL_JOBS.name(),
 						getNextJobs(transDataFlow.getInstanceConfig().getPipeParams().getNextJob()));
-
-				for (String slave : transDataFlow.getInstanceConfig().getPipeParams().getNextJob()) {
-					Resource.FlOW_CENTER.runInstanceNow(slave, "full");
+				
+				for (String slave : transDataFlow.getInstanceConfig().getPipeParams().getNextJob()) { 
+					Resource.FlOW_CENTER.runInstanceNow(slave, "full",transDataFlow.getInstanceConfig().getPipeParams().isAsync());
 				}
 			} catch (Exception e) {
 				log.error(instance + " Full Exception", e);
@@ -130,16 +133,20 @@ public class FlowTask {
 
 	public void runMasterIncrement() {
 		if (Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running)) {
-			String storeId = Common.getStoreId(instance, L1seq, transDataFlow, true, recompute);
-			if (!Resource.FLOW_INFOS.containsKey(instance, GlobalParam.FLOWINFO.MASTER.name())) {
-				Resource.FLOW_INFOS.set(instance, GlobalParam.FLOWINFO.MASTER.name(),
-						new HashMap<String, String>());
-			}
-			Resource.FLOW_INFOS.get(instance, GlobalParam.FLOWINFO.MASTER.name())
-					.put(GlobalParam.FLOWINFO.INCRE_STOREID.name(), storeId);
 			try {
+				String storeId = Common.getStoreId(instance, L1seq, transDataFlow, true, recompute); 
+				String destination = instance;
+				if(writeInSamePosition) 
+					destination = transDataFlow.getInstanceConfig().getPipeParams().getInstanceName();
+				
+				if (!Resource.FLOW_INFOS.containsKey(destination, GlobalParam.FLOWINFO.MASTER.name())) 
+					Resource.FLOW_INFOS.set(destination, GlobalParam.FLOWINFO.MASTER.name(),
+						new HashMap<String, String>());
+				Resource.FLOW_INFOS.get(destination, 
+						GlobalParam.FLOWINFO.MASTER.name()).put(GlobalParam.FLOWINFO.INCRE_STOREID.name(), storeId);
+				
 				for (String slave : transDataFlow.getInstanceConfig().getPipeParams().getNextJob()) {
-					Resource.FlOW_CENTER.runInstanceNow(slave, "increment");
+					Resource.FlOW_CENTER.runInstanceNow(slave, "increment",transDataFlow.getInstanceConfig().getPipeParams().isAsync());
 				}
 			} finally {
 				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready);  
@@ -156,7 +163,7 @@ public class FlowTask {
 	public void runIncrement() {  
 		if (!breaker.isOn() && Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running)) {
 			String storeId;
-			if (masterControl) {
+			if (writeInSamePosition) {
 				storeId = Resource.FLOW_INFOS.get(transDataFlow.getInstanceConfig().getPipeParams().getInstanceName(),
 						GlobalParam.FLOWINFO.MASTER.name()).get(GlobalParam.FLOWINFO.INCRE_STOREID.name());
 				Common.setAndGetScanInfo(instance, L1seq, storeId);
@@ -165,12 +172,12 @@ public class FlowTask {
 			}
  
 			try {
-				transDataFlow.run(instance, storeId, L1seq, false, masterControl); 
+				transDataFlow.run(instance, storeId, L1seq, false, writeInSamePosition); 
 			} catch (FNException e) {
-				if (!masterControl && e.getErrorType()==ETYPE.WRITE_POS_NOT_FOUND) {
+				if (!writeInSamePosition && e.getErrorType()==ETYPE.WRITE_POS_NOT_FOUND) {
 					storeId = Common.getStoreId(instance, L1seq, transDataFlow, true, true);
 					try {
-						transDataFlow.run(instance, storeId,L1seq, false, masterControl);
+						transDataFlow.run(instance, storeId,L1seq, false, writeInSamePosition);
 					} catch (FNException ex) {
 						log.error(instance + " Increment Exception", ex);
 					}

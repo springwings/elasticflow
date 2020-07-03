@@ -49,8 +49,15 @@ public class FlowCenter{
 			createInstructionScheduleJob(entry.getValue(),InstructionTask.createTask(entry.getKey()));
 		}
 	}
- 
-	public boolean runInstanceNow(String instance,String type){
+	
+	/**
+	 * 
+	 * @param instance
+	 * @param type
+	 * @param asyn control job in master is running in asynchronous or not?
+	 * @return
+	 */
+	public boolean runInstanceNow(String instance,String type,boolean asyn){ 
 		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instance); 
 		boolean state = true; 
 		try {
@@ -64,9 +71,19 @@ public class FlowCenter{
 				if(GlobalParam.JOB_TYPE.FULL.name().equals(type.toUpperCase())) {
 					if (Common.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready))
 						state = jobAction(Common.getMainName(instance, L1seq), GlobalParam.JOB_TYPE.FULL.name(), "run") && state;
+						if(state && !asyn) {
+							Thread.sleep(1000);//waiting to start job
+							while(Common.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready)==false)
+								Thread.sleep(1000);
+						} 
 				}else {
 					if (Common.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready))
 						state = jobAction(Common.getMainName(instance, L1seq), GlobalParam.JOB_TYPE.INCREMENT.name(), "run") && state;
+						if(state && asyn) {
+							Thread.sleep(1000);//waiting to start job
+							while(Common.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready)==false)
+								Thread.sleep(1000);
+						} 
 				}
 				
 			}

@@ -56,10 +56,11 @@ public class Neo4jFlow extends WriterFlowSocket {
 				return;
 			Connection conn = (Connection) GETSOCKET().getConnection(false);
 			try (PreparedStatement statement = conn.prepareStatement(
-					this.getWriteSQL(writerParam, unit, transParams));) {
+					getWriteSQL(writerParam, unit, transParams));) {
 				statement.execute();
 			} catch (Exception e) {
 				log.error("PreparedStatement Exception", e);
+				log.info(getWriteSQL(writerParam, unit, transParams));
 			}
 		} catch (Exception e) {
 			log.error("write Exception", e);
@@ -77,14 +78,12 @@ public class Neo4jFlow extends WriterFlowSocket {
 
 	@Override
 	public void removeInstance(String instance, String storeId) {
-		// TODO Auto-generated method stub
-		
+		log.info("no need to remove Instance."); 
 	}
 
 	@Override
 	public void setAlias(String instance, String storeId, String aliasName) {
-		// TODO Auto-generated method stub
-		
+		log.info("no need to set Alias."); 
 	}
 
 	@Override
@@ -106,6 +105,7 @@ public class Neo4jFlow extends WriterFlowSocket {
 			if (rs.next()) {
 				try (PreparedStatement statement2 = conn.prepareStatement("match (n) detach delete n");){
 					statement2.execute();
+					log.info("success clean instance.");
 				} 
 			} 
 		} catch (Exception e) {
@@ -118,7 +118,7 @@ public class Neo4jFlow extends WriterFlowSocket {
 		long current=System.currentTimeMillis(); 
 		return String.valueOf(current/(1000*3600*24)*(1000*3600*24)-TimeZone.getDefault().getRawOffset()); 
 	} 
-	
+	 
 	private String getWriteSQL(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> transParams) { 
 		String tmp = writerParam.getDSL(); 
 		for (Entry<String, Object> r : unit.getData().entrySet()) {
@@ -128,7 +128,7 @@ public class Neo4jFlow extends WriterFlowSocket {
 				transParam = transParams.get(field.toLowerCase());
 			if (transParam == null)
 				continue;
-			if(transParam.getIndextype().equals("condition")) {
+			if(writerParam.getDslParse().equals("condition") && transParam.getIndextype().equals("condition")) {
 				JSONObject sql = JSON.parseObject(tmp);
 				tmp = sql.getString(String.valueOf(r.getValue()));
 			}else {

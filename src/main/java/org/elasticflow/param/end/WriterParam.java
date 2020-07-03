@@ -15,6 +15,8 @@ public class WriterParam {
 	private String keyType;
 	/**user define field,pass custom value**/
 	private String DSL;
+	/** dsl parse method  normal/condition**/
+	private String dslParse = "normal";
 
 	public String getWriteKey() {
 		return writeKey;
@@ -28,6 +30,10 @@ public class WriterParam {
 		return DSL;
 	}
 
+	public String getDslParse() {
+		return dslParse;
+	}
+
 	public static void setKeyValue(WriterParam wp, String k, String v) {
 		switch (k.toLowerCase()) {
 		case "writekey":
@@ -38,6 +44,9 @@ public class WriterParam {
 			break;
 		case "dsl":
 			wp.DSL = v;
+			break;
+		case "dslparse":
+			wp.dslParse = v;
 			break;
 		}
 	}

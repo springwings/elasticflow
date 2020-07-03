@@ -20,7 +20,7 @@ public final class GlobalParam {
 	public static final String PROJ = "ElasticFlow";
 	
 	public static enum STATUS {  
-		Blank(0),Ready(1),Running(2),Termination(4),Stop(8);
+		Blank(0),Ready(1),Running(2),Termination(4),Stop(8),Waiting(16);
 		private int v;
 		private STATUS(int val) {   
 		    this.v = val;  

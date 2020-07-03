@@ -28,6 +28,9 @@ public class PipeParam {
 	private String[] nextJob;
 	/** default is slave pipe,if is master will only manage pipe with no detail transfer job! */
 	private boolean isMaster = false;
+	/** control each slave instance run in Concurrent mode or not **/
+	private boolean async = false;
+	private boolean isMasterControl = false;
 	/**data write into type,full create new record,increment update part of data*/
 	private String writeType="full";
 	private Mechanism writeMechanism = Mechanism.AB;
@@ -111,6 +114,10 @@ public class PipeParam {
 	public boolean isReaderPoolShareAlias() {
 		return readerPoolShareAlias;
 	} 
+	
+	public boolean isMasterControl() {
+		return isMasterControl;
+	}
 
 	public boolean isSearcherShareAlias() {
 		return searcherShareAlias;
@@ -119,6 +126,10 @@ public class PipeParam {
 	public boolean isMaster() {
 		return isMaster;
 	}  
+	
+	public boolean isAsync() {
+		return async;
+	}
 	
 	public void setReadPageSize(int readPageSize) {
 		this.readPageSize = Integer.valueOf(readPageSize);
@@ -156,10 +167,21 @@ public class PipeParam {
 	public void setNextJob(String nextJob) {
 		this.nextJob = nextJob.replace(",", " ").trim().split(" ");
 	}
-	public void setMaster(String isMaster) {
+	public void setIsMaster(String isMaster) {
 		if(isMaster.length()>0 && isMaster.toLowerCase().equals("true"))
 			this.isMaster = true;
 	}
+	
+	public void setAsync(String async) {
+		if(async.length()>0 && async.toLowerCase().equals("true"))
+			this.async = true;
+	}
+	
+	public void setIsMasterControl(String isMasterControl) { 
+		if(isMasterControl.length()>0 && isMasterControl.toLowerCase().equals("true"))
+			this.isMasterControl = true;
+	}
+	
 	public void setWriteType(String writeType) {
 		if(writeType.length()>0 && (writeType.equals("full") || writeType.equals("increment")))
 			this.writeType = writeType;
