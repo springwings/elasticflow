@@ -78,7 +78,7 @@ public class NodeConfig {
 			if (strs.length == 2) {
 				instanceType = Integer.parseInt(strs[1]);
 			}
-			String filename = GlobalParam.INSTANCE_PATH + "/" + name + "/" + name + ".xml";
+			String filename = GlobalParam.INSTANCE_PATH + "/" + name + "/task.xml";
 			InstanceConfig nconfig;
 			if (this.instanceConfigs.containsKey(name)) {
 				nconfig = this.instanceConfigs.get(name);
