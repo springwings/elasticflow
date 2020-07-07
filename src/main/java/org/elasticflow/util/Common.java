@@ -1,5 +1,8 @@
 package org.elasticflow.util;
 
+import java.io.StringWriter;
+import org.dom4j.io.XMLWriter;
+import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -13,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.time.FastDateFormat;
+import org.dom4j.io.OutputFormat;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.KEY_PARAM;
@@ -70,6 +74,20 @@ public final class Common {
 		Element element = (Element) param; 
 		setConfigObj(Obj,c,element.getElementsByTagName("name").item(0).getTextContent(),element.getElementsByTagName("value").item(0).getTextContent()); 
 	}
+	
+	public static String formatXml(Object xmlContent) {
+        try { 
+        	OutputFormat formater = OutputFormat.createPrettyPrint(); 
+            formater.setEncoding("utf-8"); 
+            StringWriter out = new StringWriter(); 
+            XMLWriter writer = new XMLWriter(out, formater); 
+            writer.write(xmlContent); 
+            writer.close(); 
+            return out.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+	} 
 	
 	public static Object getXmlObj(Node param, Class<?> c) throws Exception {
 		Element element = (Element) param; 

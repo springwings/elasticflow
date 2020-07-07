@@ -180,13 +180,13 @@ public class NodeConfig {
 			Document doc = db.parse(in);
 			NodeList paramlist;
 
-			Element NoSql = (Element) doc.getElementsByTagName("NoSql").item(0);
+			Element NoSql = (Element) doc.getElementsByTagName(RESOURCE_TYPE.NOSQL.name()).item(0);
 			if(NoSql != null) {
 				paramlist = NoSql.getElementsByTagName("socket");
 				parseNode(paramlist, WarehouseNosqlParam.class);
 			}
 
-			Element Sql = (Element) doc.getElementsByTagName("Sql").item(0);
+			Element Sql = (Element) doc.getElementsByTagName(RESOURCE_TYPE.SQL.name()).item(0);
 			paramlist = Sql.getElementsByTagName("socket");
 			parseNode(paramlist, WarehouseSqlParam.class);
 
