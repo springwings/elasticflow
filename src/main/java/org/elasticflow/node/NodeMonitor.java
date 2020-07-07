@@ -91,11 +91,11 @@ public final class NodeMonitor {
 			add("startHttpReaderServiceService");
 			add("stopHttpReaderServiceService");
 			add("restartNode");
-			add("loadHandler");
+			add("loadHandler"); 
 			// instance manage
 			add("resetInstanceState");
 			add("getInstanceSeqs");
-			add("reloadConfig");
+			add("reloadInstanceConfig");
 			add("runNow");
 			add("addInstance");
 			add("stopInstance");
@@ -243,12 +243,17 @@ public final class NodeMonitor {
 			setResponse(0, "Parameter not match!");
 		}
 	}
-
+	
+	/**
+	 * get node start run configure parameters.
+	 * @param rq
+	 */
 	public void getNodeConfig(Request rq) {
 		setResponse(1, GlobalParam.StartConfig);
 	}
 
 	/**
+	 * set node start configure parameters,will auto write into file.
 	 * @param k    property key
 	 * @param v    property value
 	 * @param type action type,set/remove
@@ -270,7 +275,11 @@ public final class NodeMonitor {
 			setResponse(0, "Config parameters k v or type not exists!");
 		}
 	}
-
+	
+	/**
+	 * restart node
+	 * @param rq
+	 */
 	public void restartNode(Request rq) {
 		Thread thread = new Thread(new Runnable() {
 			@Override
@@ -283,7 +292,8 @@ public final class NodeMonitor {
 	}
 
 	/**
-	 * only support no dependency handler org.elasticflow.writerUnit.handler
+	 * Loading Java handler classes in real time 
+	 * only support no dependency handler like org.elasticflow.writerUnit.handler
 	 * org.elasticflow.reader.handler org.elasticflow.searcher.handler
 	 * 
 	 * @param rq
@@ -301,7 +311,11 @@ public final class NodeMonitor {
 		}
 
 	}
-
+	
+	/**
+	 * stop node http reader pipe service
+	 * @param rq
+	 */
 	public void stopHttpReaderServiceService(Request rq) {
 		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
 		if ((service_level & 4) > 0) {
@@ -313,7 +327,11 @@ public final class NodeMonitor {
 			setResponse(1, "Stop Searcher Service Failed!");
 		}
 	}
-
+	
+	/**
+	 * start node http reader pipe service
+	 * @param rq
+	 */
 	public void startHttpReaderServiceService(Request rq) {
 		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
 		if ((service_level & 4) == 0) {
@@ -322,7 +340,11 @@ public final class NodeMonitor {
 		}
 		setResponse(0, "Start Searcher Service Successed!");
 	}
-
+	
+	/**
+	 * stop node searcher service
+	 * @param rq
+	 */
 	public void stopSearcherService(Request rq) {
 		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
 		if ((service_level & 1) > 0) {
@@ -334,7 +356,11 @@ public final class NodeMonitor {
 			setResponse(1, "Stop Searcher Service Failed!");
 		}
 	}
-
+	
+	/**
+	 * open node searcher service
+	 * @param rq
+	 */
 	public void startSearcherService(Request rq) {
 		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
 		if ((service_level & 1) == 0) {
@@ -344,6 +370,10 @@ public final class NodeMonitor {
 		setResponse(0, "Start Searcher Service Successed!");
 	}
 
+	/**
+	 * get node environmental state.
+	 * @param rq
+	 */
 	public void getStatus(Request rq) {
 		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
 		JSONObject dt = new JSONObject();
@@ -362,6 +392,10 @@ public final class NodeMonitor {
 		setResponse(1, dt);
 	}
 
+	/**
+	 * Data source level delimited sequence
+	 * @param rq
+	 */
 	public void getInstanceSeqs(Request rq) {
 		if (rq.getParameter("instance").length() > 1) {
 			try {
@@ -380,7 +414,11 @@ public final class NodeMonitor {
 			setResponse(0, "Parameter not match!");
 		}
 	}
-
+	
+	/**
+	 * reset Instance full and increment running state 
+	 * @param rq
+	 */
 	public void resetInstanceState(Request rq) {
 		if (rq.getParameter("instance").length() > 1) {
 			try {
@@ -404,7 +442,11 @@ public final class NodeMonitor {
 			setResponse(0, "Parameter not match!");
 		}
 	}
-
+	
+	/**
+	 * get instance detail informations.
+	 * @param rq
+	 */
 	public void getInstanceInfo(Request rq) {
 		if (Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance"))) {
 			String instance = rq.getParameter("instance");
@@ -571,7 +613,11 @@ public final class NodeMonitor {
 		}
 		setResponse(1, rs);
 	}
-
+	
+	/**
+	 * run ElasticFlow CPU instruction program.
+	 * @param rq
+	 */
 	public void runCode(Request rq) {
 		if (rq.getParameter("script") != null && rq.getParameter("script").contains("Track.cpuFree")) {
 			ArrayList<InstructionTree> Instructions = Common.compileCodes(rq.getParameter("script"), CPU.getUUID());
@@ -583,7 +629,11 @@ public final class NodeMonitor {
 			setResponse(0, "script not set or script grammer is not correct!");
 		}
 	}
-
+	
+	/**
+	 * Perform the instance task immediately  
+	 * @param rq
+	 */
 	public void runNow(Request rq) {
 		if (rq.getParameter("instance") != null && rq.getParameter("jobtype") != null) {
 			if (Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance"))
@@ -613,7 +663,11 @@ public final class NodeMonitor {
 			setResponse(0, "Writer " + rq.getParameter("instance") + " remove error,instance parameter not set!");
 		}
 	}
-
+	
+	/**
+	 * stop instance job.
+	 * @param rq
+	 */
 	public void stopInstance(Request rq) {
 		if (rq.getParameter("instance").length() > 1) {
 			if (rq.getParameter("type").toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
@@ -626,7 +680,11 @@ public final class NodeMonitor {
 			setResponse(0, "Writer " + rq.getParameter("instance") + " stop error,index parameter not set!");
 		}
 	}
-
+	
+	/**
+	 * resume instance job.
+	 * @param rq
+	 */
 	public void resumeInstance(Request rq) {
 		if (rq.getParameter("instance").length() > 1) {
 			if (rq.getParameter("type").toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
@@ -639,8 +697,13 @@ public final class NodeMonitor {
 			setResponse(0, "Writer " + rq.getParameter("instance") + " resume error,index parameter not set!");
 		}
 	}
-
-	public void reloadConfig(Request rq) {
+	
+	/**
+	 * reload instance configure,auto rebuild instance in memory
+	 * @param rq instance=xx&reset=true|false 
+	 * reset true will recreate the instance in java from instance configure.
+	 */
+	public void reloadInstanceConfig(Request rq) {
 		if (rq.getParameter("instance").length() > 1) {
 			controlThreadState(rq.getParameter("instance"), STATUS.Stop, true);
 			int type = Resource.nodeConfig.getInstanceConfigs().get(rq.getParameter("instance")).getInstanceType();
@@ -651,12 +714,12 @@ public final class NodeMonitor {
 				if (!Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance")))
 					setResponse(0, rq.getParameter("instance") + " not exists!");
 			}
+			Resource.FLOW_INFOS.remove(rq.getParameter("instance"), JOB_TYPE.FULL.name());
+			Resource.FLOW_INFOS.remove(rq.getParameter("instance"), JOB_TYPE.INCREMENT.name());
 			if (rq.getParameter("reset") != null && rq.getParameter("reset").equals("true")
 					&& rq.getParameter("instance").length() > 2) {
 				Resource.nodeConfig.loadConfig(instanceConfig, true);
 			} else {
-				Resource.FLOW_INFOS.remove(rq.getParameter("instance"), JOB_TYPE.FULL.name());
-				Resource.FLOW_INFOS.remove(rq.getParameter("instance"), JOB_TYPE.INCREMENT.name());
 				String alias = Resource.nodeConfig.getInstanceConfigs().get(rq.getParameter("instance")).getAlias();
 				Resource.nodeConfig.getSearchConfigs().remove(alias);
 				Resource.nodeConfig.loadConfig(instanceConfig, false);
@@ -671,7 +734,7 @@ public final class NodeMonitor {
 	}
 
 	/**
-	 * 
+	 * add instance into system and add to configure also.
 	 * @param rq instance parameter example,instanceName:1
 	 */
 	public void addInstance(Request rq) {
@@ -747,7 +810,7 @@ public final class NodeMonitor {
 		} else {
 			setResponse(0, "Parameter not match!");
 		}
-	}
+	} 
 	
 	private boolean updateResourceXml(String resourcetype,JSONObject resourceData,boolean isDel) {  
         try {
@@ -809,7 +872,11 @@ public final class NodeMonitor {
 		} 
         return true;
     }
-
+	
+	/**
+	 * remove instance from system, stop all jobs and save to configure file.
+	 * @param instance
+	 */
 	private void removeInstance(String instance) {
 		controlThreadState(instance, STATUS.Stop, true);
 		if (Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType() > 0) {
