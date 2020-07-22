@@ -36,6 +36,6 @@ public class MD5Util {
 	}
 	
 	public static void main(String[] args) {
-		System.out.println(SaltMd5("doc"));
+		System.out.println(SaltMd5("addResource"));
 	}
 }
