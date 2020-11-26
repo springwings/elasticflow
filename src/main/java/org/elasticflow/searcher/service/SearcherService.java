@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.model.ResponseState;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.node.SocketCenter;
@@ -82,20 +83,22 @@ public class SearcherService{
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.setHeader("PowerBy", GlobalParam.PROJ); 
 			rq.setHandled(true);
-			EFRequest _request = Common.getRequest(rq);
-
+			EFRequest RR = Common.getRequest(rq);
+			ResponseState rps = ResponseState.getInstance();
+			rps.setRequest(RR.getParams());
 			if (Resource.nodeConfig.getSearchConfigs().containsKey(
-					_request.getPipe())) {
-				ResponseState rps = null;
+					RR.getPipe())) {
 				try {
-					rps = process(_request);
-				} catch (Exception e) {
-					Common.LOG.error("httpHandle error,",e);
-				}
-				if (rps != null)
+					rps = process(RR);
 					response.getWriter().println(rps.getResponse(true));
+				} catch (Exception e) {
+					Common.LOG.error("Searcher http handler error,",e);
+					rps.setStatus("Searcher http handler error!", RESPONSE_STATUS.CodeException);
+					response.getWriter().println(rps.getResponse(true));
+				}
 			} else {
-				response.getWriter().println("The Alias is Not Exists OR Not Start Up!");
+				rps.setStatus("The Alias is Not Exists OR Not Start Up!", RESPONSE_STATUS.ParameterErr);
+				response.getWriter().println(rps.getResponse(true));
 			}
 			
 			response.getWriter().flush();

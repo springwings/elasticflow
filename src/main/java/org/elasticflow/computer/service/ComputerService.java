@@ -14,6 +14,7 @@ import org.mortbay.jetty.handler.AbstractHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.ResponseState;
 import org.elasticflow.model.EFRequest;
@@ -83,18 +84,21 @@ public class ComputerService {
 			response.setHeader("PowerBy", GlobalParam.PROJ); 
 			rq.setHandled(true);
 			EFRequest RR = Common.getRequest(rq);
+			ResponseState rps = ResponseState.getInstance();
+			rps.setRequest(RR.getParams());
 			if (Resource.nodeConfig.getSearchConfigs().containsKey(
 					RR.getPipe())) {
-				ResponseState rps = null;
 				try {
 					rps = process(RR);
-				} catch (Exception e) {
-					Common.LOG.error("httpHandle error,",e);
-				}
-				if (rps != null)
 					response.getWriter().println(rps.getResponse(true));
+				} catch (Exception e) {
+					Common.LOG.error("Computer http handler error,",e);
+					rps.setStatus("Computer http handler error!", RESPONSE_STATUS.CodeException);
+					response.getWriter().println(rps.getResponse(true));
+				}
 			} else {
-				response.getWriter().println("The Computer Service not exists or not Start Up!");
+				rps.setStatus("The Computer Service not exists or not Start Up!", RESPONSE_STATUS.CodeException);
+				response.getWriter().println(rps.getResponse(true));
 			}
 			response.getWriter().flush();
 			response.getWriter().close();

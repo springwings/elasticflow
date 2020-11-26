@@ -29,7 +29,7 @@ import org.elasticflow.util.FNIoc;
 import org.elasticflow.util.ConfigStorer;
 import org.elasticflow.util.NodeUtil;
 import org.elasticflow.util.ZKUtil;
-import org.elasticflow.util.email.FNEmailSender;
+import org.elasticflow.util.email.EFEmailSender;
 import org.elasticflow.yarn.Resource;
 
 /**
@@ -54,9 +54,12 @@ public final class Run {
 
 	@Value("#{nodeSystemInfo['version']}")
 	private String version;
+	
+	@Value("#{nodeSystemInfo['debug']}")
+	private boolean debug;
 
 	@Autowired
-	private FNEmailSender mailSender;
+	private EFEmailSender mailSender;
 
 	@Autowired
 	NodeMonitor nodeMonitor;
@@ -72,8 +75,9 @@ public final class Run {
 	}
 
 	public void init(boolean initInstance) {
-		GlobalParam.run_environment = String.valueOf(GlobalParam.StartConfig.get("run_environment"));
+		GlobalParam.RUN_ENV = String.valueOf(GlobalParam.StartConfig.get("run_environment"));
 		GlobalParam.VERSION = version;
+		GlobalParam.DEBUG = debug;
 		GlobalParam.POOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("pool_size"));
 		GlobalParam.WRITE_BATCH = GlobalParam.StartConfig.getProperty("write_batch").equals("false") ? false : true;
 		GlobalParam.SERVICE_LEVEL = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());

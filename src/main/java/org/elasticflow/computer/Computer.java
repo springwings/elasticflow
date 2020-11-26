@@ -56,7 +56,7 @@ public class Computer {
 				model = pd.getData().get("model");
 				usage = String.valueOf(pd.getData().get("remark"));
 			} 
-			log.info("computer model ready to complete!");
+			log.info("computer model is ready!");
 			try {
 				Class<?> clz = Class.forName("org.elasticflow.ml.algorithm."+instanceConfig.getComputeParams().getAlgorithm()); 
 				algorithm = (Algorithm) clz.newInstance();

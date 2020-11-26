@@ -11,7 +11,7 @@ import java.util.TimeZone;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.GlobalParam.Mechanism;
+import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connect.ESConnector;
 import org.elasticflow.field.EFField;
@@ -274,7 +274,7 @@ public class ESFlow extends WriterFlowSocket {
 
 	@Override
 	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) { 
-		if(instanceConfig.getPipeParams().getWriteMechanism()==Mechanism.AB) {
+		if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.AB) {
 			return abMechanism(mainName,isIncrement,instanceConfig);
 		}else {
 			return timeMechanism(mainName,isIncrement,instanceConfig);

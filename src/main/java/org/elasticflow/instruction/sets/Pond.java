@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.GlobalParam.Mechanism;
+import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
@@ -35,7 +35,7 @@ public class Pond extends Instruction {
 			try { 
 				String mainName = String.valueOf(args[0]); 
 				String storeId = String.valueOf(args[1]);  
-				if(context.getInstanceConfig().getPipeParams().getWriteMechanism()==Mechanism.AB) {
+				if(context.getInstanceConfig().getPipeParams().getWriteMechanism()==MECHANISM.AB) {
 					state = context.getWriter().create(mainName, storeId, context.getInstanceConfig());    
 				}else {
 					context.getWriter().removeInstance(mainName, storeId);
@@ -141,7 +141,7 @@ public class Pond extends Instruction {
 		context.getWriter().PREPARE(false, false);  
 		if (context.getWriter().ISLINK()) {
 			try {
-				if(context.getInstanceConfig().getPipeParams().getWriteMechanism()==Mechanism.AB) {
+				if(context.getInstanceConfig().getPipeParams().getWriteMechanism()==MECHANISM.AB) {
 					if (storeId.equals("a")) {
 						context.getWriter().optimize(mainName, "a");
 						removeId = "b";

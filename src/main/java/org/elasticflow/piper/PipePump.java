@@ -157,7 +157,7 @@ public final class PipePump extends Instruction {
 					throw e;
 				} else {
 					log.error("[" + task.getJobType().name() + " " + mainName + L2seq + "_" + storeId + " ERROR]", e);
-					Resource.mailSender.sendHtmlMailBySynchronizationMode(" [EFLOWS] " + GlobalParam.run_environment,
+					Resource.mailSender.sendHtmlMailBySynchronizationMode(" [EFLOWS] " + GlobalParam.RUN_ENV,
 							"Job " + mainName + " " + task.getJobType().name() + " Has stopped!");
 				}
 			}

@@ -1,6 +1,7 @@
 package org.elasticflow.config;
 
 import java.net.InetAddress;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,12 +14,18 @@ import org.elasticflow.util.Common;
  */
 public final class GlobalParam {
 	
-	public static String run_environment;
+	public static long SYS_START_TIME = System.currentTimeMillis();
+	
+	public static boolean DEBUG;
+	
+	/**system Runtime Environment*/
+	public static String RUN_ENV; 
 	
 	public static String VERSION;
 	
 	public static final String PROJ = "ElasticFlow";
 	
+	/**Task Running status define*/
 	public static enum STATUS {  
 		Blank(0),Ready(1),Running(2),Termination(4),Stop(8),Waiting(16);
 		private int v;
@@ -29,6 +36,31 @@ public final class GlobalParam {
 	        return v;  
 	    } 
 	} 
+	/**External API call feedback Response status define*/
+	public static enum RESPONSE_STATUS {  
+		Success(0),DataErr(100),CodeException(200),ParameterErr(300),Unknown(400),ExternErr(500);
+		private int v;
+		private static HashMap<Integer,String> MSG = new HashMap<Integer,String>() {
+			private static final long serialVersionUID = -3931502298193106809L;
+			{
+		        put(0, "success");
+		        put(100, "Runtime data error！");
+		        put(200, "System Code Running Exception!");
+		        put(300, "Parameter data exception!");
+		        put(400, "Unknown exception!");
+		        put(500, "External run exception!");
+		    }
+		};
+		private RESPONSE_STATUS(int val) {   
+		    this.v = val;  
+		}
+		public int getVal() {  
+	        return v;  
+	    } 
+		public String getMsg() {
+			return MSG.get(this.v);
+		}
+	}
 	
 	public static boolean WRITE_BATCH = false;
 	/**#1 searcher service  2 writer service 4 http reader service 8 instruction service 16 compute service*/
@@ -62,8 +94,8 @@ public final class GlobalParam {
 		NOSQL,SQL,INSTRUCTION
 	};
 	 
-	//writer parameters
-	public static enum Mechanism{
+	/**writer parameters Mechanism*/
+	public static enum MECHANISM{
 		AB,Time
 	};
 	public static enum INSTANCE_TYPE {  

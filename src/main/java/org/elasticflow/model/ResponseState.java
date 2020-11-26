@@ -1,12 +1,13 @@
 package org.elasticflow.model;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.alibaba.fastjson.JSON;
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.InstanceConfig;
+
+import com.alibaba.fastjson.JSON;
 
 /**
  * 
@@ -15,9 +16,8 @@ import org.elasticflow.config.InstanceConfig;
  * @date 2018-11-05 13:53
  */
 public class ResponseState {
-
-	protected Map<String, String> params = new HashMap<>();
-	protected Map<String, String> parsedParams = new HashMap<>(); 
+	protected Map<String, String> parsedParams = new HashMap<>();
+	private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	protected Object payload = null;
 	private long startTime = 0;
 	private long endTime = 0;
@@ -27,38 +27,26 @@ public class ResponseState {
 
 	public static ResponseState getInstance() {
 		ResponseState rs = new ResponseState();
-		rs.response.put("request", rs.params);
+		rs.response.put("status", "100");
 		rs.response.put("info", "");
-		rs.response.put("err_no", "100");
-		rs.response.put("err_msg", "");
-		rs.response.put("env", GlobalParam.run_environment);
 		rs.response.put("instance",null);
-		rs.response.put("duration",null);
-		rs.response.put("system",GlobalParam.PROJ);
+		rs.response.put("useTime",null);
 		return rs;
 	}
 	
-	public void setInfo(String info) { 
-		response.put("info", info);
+	public void setStatus(String info,GlobalParam.RESPONSE_STATUS status) { 
+		response.put("info", info+" "+status.getMsg());
+		response.put("status",status.getVal());
 	}  
 	
-	public void setError_info(String err) {
-		if(err.length() > 0)
-			response.put("err_no", "500"); 
-		response.put("err_msg", err);
+	public void setInfo(String info) { 
+		response.put("info", info);
+		response.put("status",GlobalParam.RESPONSE_STATUS.Success.getVal());
 	}  
 
-	public Map<String, String> getParams() {
-		return params;
+	public void setRequest(Map<String, String> params) {
+		response.put("request", params); 
 	}
-
-	public void setParams(Map<String, String> params, InstanceConfig prs) {
-		if (prs != null) {
-			for (Map.Entry<String, String> entry : params.entrySet()) {
-				this.params.put(entry.getKey(), entry.getValue());
-			}
-		}
-	}   
 
 	public Object getPayload() {
 		return payload;
@@ -108,14 +96,17 @@ public class ResponseState {
 	private Map<String, Object> formatData() { 
 		Map<String, Object> rsp = new LinkedHashMap<String, Object>();  
 		response.put("instance", this.instance);
-		response.put("duration", String.valueOf(getDuration()) + "ms");
-		 
-		Map<String, String> paramsMap = new HashMap<String, String>();
-		paramsMap.putAll(params);
+		response.put("useTime", String.valueOf(getDuration()) + "ms");
 		if (payload != null) {
-			rsp.put("results", payload);
+			rsp.put("datas", payload);
 		}
 		response.put("response", rsp);
+		response.put("createTime",SDF.format(System.currentTimeMillis()));
+		response.put("__SOURCE",GlobalParam.PROJ);
+		response.put("__VERSION",GlobalParam.VERSION);
+		response.put("__ENV", GlobalParam.RUN_ENV); 
+		response.put("__IS_DEBUG", GlobalParam.DEBUG); 
+		response.put("__SYS_START_TIME",SDF.format(GlobalParam.SYS_START_TIME));
 		return response;
 	}  
 }

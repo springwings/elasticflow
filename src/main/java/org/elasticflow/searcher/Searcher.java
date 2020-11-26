@@ -5,9 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.ResponseState;
@@ -18,6 +16,8 @@ import org.elasticflow.model.searcher.SearcherResult;
 import org.elasticflow.model.searcher.SearcherSolrModel;
 import org.elasticflow.searcher.handler.Handler;
 import org.elasticflow.util.SearchParamUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * provide search service
@@ -54,18 +54,17 @@ public class Searcher {
 	public ResponseState startSearch(EFRequest rq) {
 		ResponseState response = ResponseState.getInstance();
 		response.setInstance(instanceName);
+		response.setRequest(rq.getParams());
 		/** check validation */
 		if (!rq.isValid()) {
-			response.setError_info("handle is null!");
+			response.setStatus("EFRequest is null!", RESPONSE_STATUS.ParameterErr);
 			return response;
 		}
 
 		if (this.searcherFlowSocket == null) {
-			response.setError_info("searcher is null!");
-			response.setParams(rq.getParams(), null);
+			response.setStatus("searcher is null!",RESPONSE_STATUS.CodeException);
 			return response;
 		}
-		response.setParams(rq.getParams(), instanceConfig); 
 		SearcherModel<?, ?, ?> searcherModel = null;
 		switch (this.searcherFlowSocket.getType()) {
 		case ES:
@@ -77,17 +76,17 @@ public class Searcher {
 			SearchParamUtil.normalParam(rq, searcherModel,instanceConfig);
 			break; 
 		default:
-			response.setError_info("Not Support Searcher Type!");
+			response.setStatus("Not Support Searcher Type!",RESPONSE_STATUS.ParameterErr);
 			return response; 
 		}  
 		try {
 			if(rq.hasErrors()) {
-				response.setError_info(rq.getErrors());
+				response.setStatus(rq.getErrors(),RESPONSE_STATUS.CodeException);
 			}else {
 				response.setPayload(formatResult(this.searcherFlowSocket.Search(searcherModel, instanceName,handler)));
 			} 
 		} catch (Exception e) {
-			response.setError_info("search parameter may be error!");
+			response.setStatus("search parameter may be error!",RESPONSE_STATUS.ParameterErr);
 			log.error(rq.getPipe()+" FNResponse Exception,", e);
 		}
 		return response;

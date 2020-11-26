@@ -22,7 +22,7 @@ import org.dom4j.io.SAXReader;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
-import org.elasticflow.config.GlobalParam.Mechanism;
+import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
@@ -74,7 +74,7 @@ public final class NodeMonitor {
 
 	private String response;
 
-	private SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private HashSet<String> actions = new HashSet<String>() {
 		private static final long serialVersionUID = -8313429841889556616L;
@@ -776,7 +776,7 @@ public final class NodeMonitor {
 			for (Map.Entry<String, InstanceConfig> ents : configMap.entrySet()) {
 				String instance = ents.getKey();
 				InstanceConfig instanceConfig = ents.getValue();
-				if (instanceConfig.getPipeParams().getWriteMechanism() != Mechanism.AB) {
+				if (instanceConfig.getPipeParams().getWriteMechanism() != MECHANISM.AB) {
 					setResponse(1, "delete " + _instance + " Success!");
 					return;
 				}

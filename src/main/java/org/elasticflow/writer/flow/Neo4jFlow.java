@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 
-import org.elasticflow.config.GlobalParam.Mechanism;
+import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
@@ -39,7 +39,7 @@ public class Neo4jFlow extends WriterFlowSocket {
 
 	@Override
 	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
-		if(instanceConfig.getPipeParams().getWriteMechanism()==Mechanism.AB) {
+		if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.AB) {
 			return abMechanism(mainName,isIncrement,instanceConfig);
 		}else {
 			return timeMechanism(mainName,isIncrement,instanceConfig);

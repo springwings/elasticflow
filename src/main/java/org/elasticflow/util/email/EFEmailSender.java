@@ -22,8 +22,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 
 @Component
-public class FNEmailSender extends WebApplicationObjectSupport {
-	private static Logger log = LoggerFactory.getLogger(FNEmailSender.class);
+public class EFEmailSender extends WebApplicationObjectSupport {
+	private static Logger log = LoggerFactory.getLogger(EFEmailSender.class);
 	private ExecutorService mailTaskExecutor = Executors.newFixedThreadPool(5);
 
 	public void sendHtmltMailByAsynchronousMode(final String subject,

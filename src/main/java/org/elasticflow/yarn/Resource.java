@@ -10,7 +10,7 @@ import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.node.SocketCenter;
 import org.elasticflow.node.startup.Run;
 import org.elasticflow.task.FlowTask;
-import org.elasticflow.util.email.FNEmailSender;
+import org.elasticflow.util.email.EFEmailSender;
 
 /**
  * Statistics current node resources
@@ -26,7 +26,7 @@ public final class Resource {
 	
 	public static NodeMonitor nodeMonitor; 
 	
-	public static FNEmailSender mailSender; 
+	public static EFEmailSender mailSender; 
 	
 	public static NodeConfig nodeConfig;
 	

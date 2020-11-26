@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.GlobalParam.Mechanism;
+import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
@@ -242,7 +242,7 @@ public class SolrFlow extends WriterFlowSocket{
 
 	@Override
 	public String getNewStoreId(String mainName,boolean isIncrement,final InstanceConfig instanceConfig) {  
-		if(instanceConfig.getPipeParams().getWriteMechanism()==Mechanism.AB) {
+		if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.AB) {
 			return abMechanism(mainName,isIncrement,instanceConfig);
 		}else {
 			return timeMechanism(mainName,isIncrement,instanceConfig);

@@ -1,7 +1,7 @@
 package org.elasticflow.param.pipe;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.GlobalParam.Mechanism;
+import org.elasticflow.config.GlobalParam.MECHANISM;
 
 /**
  * data-flow trans parameters
@@ -34,7 +34,7 @@ public class PipeParam {
 	private boolean isMasterControl = false;
 	/**data write into type,full create new record,increment update part of data*/
 	private String writeType="full";
-	private Mechanism writeMechanism = Mechanism.AB;
+	private MECHANISM writeMechanism = MECHANISM.AB;
 	private boolean multiThread = false;
 	
 	 
@@ -47,7 +47,7 @@ public class PipeParam {
 	public String getModelFrom() {
 		return modelFrom;
 	}
-	public Mechanism getWriteMechanism() {
+	public MECHANISM getWriteMechanism() {
 		return writeMechanism;
 	}
 	public void setWriteTo(String writeTo) {
@@ -190,7 +190,7 @@ public class PipeParam {
 	}
 	public void setWriteMechanism(String writeMechanism) {
 		if(!writeMechanism.toLowerCase().equals("ab")) {
-			this.writeMechanism = Mechanism.Time;
+			this.writeMechanism = MECHANISM.Time;
 		} 
 	}
 	public void setMultiThread(String multiThread) {
