@@ -381,13 +381,6 @@
 				<configuration>
 					<transformers>
 						<transformer
-							implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-							<mainClass>org.elasticflow.node.startup.Run</mainClass>
-							<manifestEntries>
-								<Class-Path>. config/lib/fnsearch-analysis-ik-1.9.3.jar</Class-Path>
-							</manifestEntries>
-						</transformer>
-						<transformer
 							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 							<resource>META-INF/spring.handlers</resource>
 						</transformer>
@@ -418,6 +411,5 @@
 		<spring.version>4.0.4.RELEASE</spring.version>
 		<jackson.version>2.1.4</jackson.version>
 		<org.slf4j-version>1.6.1</org.slf4j-version>
-		<dl4j.version>0.9.1</dl4j.version>
 	</properties>
 </project>
