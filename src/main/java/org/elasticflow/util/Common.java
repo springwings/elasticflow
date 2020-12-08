@@ -1,8 +1,6 @@
 package org.elasticflow.util;
 
 import java.io.StringWriter;
-import org.dom4j.io.XMLWriter;
-import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -17,14 +15,15 @@ import java.util.Set;
 
 import org.apache.commons.lang.time.FastDateFormat;
 import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.KEY_PARAM;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
-import org.elasticflow.model.InstructionTree;
 import org.elasticflow.model.EFRequest;
+import org.elasticflow.model.InstructionTree;
 import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.node.CPU;
 import org.elasticflow.param.warehouse.WarehouseParam;
