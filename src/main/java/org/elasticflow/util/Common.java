@@ -24,6 +24,7 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.InstructionTree;
+import org.elasticflow.model.NMRequest;
 import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.node.CPU;
 import org.elasticflow.param.warehouse.WarehouseParam;
@@ -495,6 +496,25 @@ public final class Common {
 		String path = rq.getPathInfo();
 		String pipe = path.substring(1); 
 		rr.setPipe(pipe);  
+		@SuppressWarnings("unchecked")
+		Iterator<Map.Entry<String,String>> iter = rq.getParameterMap().entrySet().iterator();
+		while (iter.hasNext()) { 
+			Map.Entry<String,String> entry = iter.next();
+			String key = (String) entry.getKey();
+			String value = rq.getParameter(key);
+			rr.addParam(key, value);
+		}
+		return rr;
+	}
+	
+	/**
+	 * jetty request convert to Node Monitor Request
+	 * @param input
+	 * @return
+	 */
+	public static NMRequest getNMRequest(Request input) {
+		NMRequest rr = NMRequest.getInstance(); 
+		Request rq = (Request) input; 
 		@SuppressWarnings("unchecked")
 		Iterator<Map.Entry<String,String>> iter = rq.getParameterMap().entrySet().iterator();
 		while (iter.hasNext()) { 

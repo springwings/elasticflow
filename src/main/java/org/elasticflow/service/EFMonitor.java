@@ -12,6 +12,10 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
+import org.elasticflow.model.EFRequest;
+import org.elasticflow.model.ResponseState;
+import org.elasticflow.util.Common;
 import org.elasticflow.util.MD5Util;
 import org.elasticflow.yarn.Resource;
 
@@ -43,22 +47,30 @@ public class EFMonitor {
 			response.setStatus(HttpServletResponse.SC_OK);
 
 			Request rq = (request instanceof Request) ? (Request) request
-					: HttpConnection.getCurrentConnection().getRequest();
-
+					: HttpConnection.getCurrentConnection().getRequest(); 
 			String dataTo = rq.getPathInfo().substring(1);
+			EFRequest RR = Common.getRequest(rq);
+			ResponseState rps = ResponseState.getInstance();
+			rps.setRequest(RR.getParams());
 			switch (dataTo) {  
-			case "search.doaction":{
+			case "efm.doaction":{
 				if(rq.getParameter("ac") !=null  && rq.getParameter("code")!=null && rq.getParameter("code").equals(MD5Util.SaltMd5(rq.getParameter("ac")))){
 					Resource.nodeMonitor.ac(rq);
 					response.getWriter().println(Resource.nodeMonitor.getResponse()); 
 					Resource.nodeMonitor.setResponse(0, "");
-				}else{
-					response.getWriter().println("{\"status\":0,\"info\":\"Action failed!parameter ac or code error!\"}");
+				}else{  
+					rps.setStatus("Action failed!parameter ac or code error!", RESPONSE_STATUS.ParameterErr);
+					response.getWriter().println(rps.getResponse(true));
 				}
 			}
 				break;   
-			case "_version":
-				response.getWriter().println(GlobalParam.VERSION);
+			case "_version": 
+				rps.setInfo(GlobalParam.VERSION); 
+				response.getWriter().println(rps.getResponse(true));
+				break;
+			default:
+				rps.setStatus("action parameter error!", RESPONSE_STATUS.ParameterErr);
+				response.getWriter().println(rps.getResponse(true));
 				break;
 			}
 			response.getWriter().flush();
