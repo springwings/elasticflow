@@ -1,5 +1,7 @@
 package org.elasticflow.util;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -19,12 +21,14 @@ import org.dom4j.io.XMLWriter;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.KEY_PARAM;
+import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.model.NMRequest;
+import org.elasticflow.model.ResponseState;
 import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.node.CPU;
 import org.elasticflow.param.warehouse.WarehouseParam;
@@ -35,7 +39,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList; 
+import org.w3c.dom.NodeList;
+
+import net.sf.json.JSONObject; 
 
 /**
  * 
@@ -483,6 +489,43 @@ public final class Common {
 		Class<?> c = Class.forName(fd.getParamtype());  
 		Method method = c.getMethod("valueOf", String.class);
 		return method.invoke(c,String.valueOf(v));
+	}
+	
+	public static EFRequest getEFRequest(Request rq,ResponseState rps) {
+		EFRequest RR = null;
+		String ctype = rq.getHeader("Content-type"); 
+		if(ctype!=null && ctype.contentEquals("application/json")) {
+			try (BufferedReader _br = new BufferedReader(new InputStreamReader(rq.getInputStream(), "UTF-8"));) {
+				String line = null;
+				StringBuilder sb = new StringBuilder();
+				while ((line = _br.readLine()) != null) {
+					sb.append(line);
+				}
+				RR = Common.getRequest(sb.toString()); 
+				RR.setPipe(rq.getPathInfo().substring(1)); 
+			} catch (Exception e) {
+				rps.setStatus(e.getMessage(), RESPONSE_STATUS.ParameterErr); 
+			} 
+		}else {
+			RR = Common.getRequest(rq);
+		}
+		return RR;
+	}
+	
+	/**
+	 * json request convert to EFLOWSRequest
+	 * @param input
+	 * @return
+	 */
+	public static EFRequest getRequest(String jsonInput) {
+		EFRequest rr = EFRequest.getInstance(); 
+		JSONObject jsonObject = JSONObject.fromObject(jsonInput);
+		Iterator<?> iter = jsonObject.entrySet().iterator();
+        while (iter.hasNext()) {
+            Map.Entry entry = (Map.Entry) iter.next();
+            rr.addParam(entry.getKey().toString(), entry.getValue()); 
+        } 
+        return rr;
 	}
 	
 	/**

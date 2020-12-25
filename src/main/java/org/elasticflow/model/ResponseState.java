@@ -45,7 +45,7 @@ public class ResponseState {
 		response.put("status",GlobalParam.RESPONSE_STATUS.Success.getVal());
 	}  
 
-	public void setRequest(Map<String, String> params) {
+	public void setRequest(Map<String, Object> params) {
 		response.put("request", params); 
 	}
 

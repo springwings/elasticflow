@@ -118,7 +118,7 @@ public class ESFlow extends WriterFlowSocket {
 				String field = r.getKey();
 				if (r.getValue() == null)
 					continue;
-				String value = String.valueOf(r.getValue());
+				Object value = r.getValue();
 				EFField transParam = transParams.get(field);
 				if (transParam == null)
 					transParam = transParams.get(field.toLowerCase());
@@ -127,11 +127,11 @@ public class ESFlow extends WriterFlowSocket {
 				
 				if (transParam.getAnalyzer().length()==0) {
 					if(transParam.getIndextype().equalsIgnoreCase("geo_point")) {
-						String[] vs = value.split(transParam.getSeparator());
+						String[] vs = String.valueOf(value).split(transParam.getSeparator());
 						if(vs.length==2)
 							cbuilder.latlon(field, Double.parseDouble(vs[0]), Double.parseDouble(vs[1]));
 					}else if (transParam.getSeparator() != null) {
-						String[] vs = value.split(transParam.getSeparator());
+						String[] vs = String.valueOf(value).split(transParam.getSeparator());
 						cbuilder.array(transParam.getAlias(), vs);
 					}else if (transParam.getIndextype().equals("nested")) { 
 						cbuilder.array(transParam.getAlias(),JSONArray.fromObject(value));	

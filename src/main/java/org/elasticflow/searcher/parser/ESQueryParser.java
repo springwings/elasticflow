@@ -1,6 +1,7 @@
 package org.elasticflow.searcher.parser;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,7 +24,9 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.ScriptScoreQueryBuilder;
 import org.elasticsearch.script.Script;
+import org.elasticsearch.script.ScriptType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,53 +47,53 @@ public class ESQueryParser implements QueryParser{
 	static public BoolQueryBuilder parseRequest(EFRequest request, InstanceConfig instanceConfig) {
 		BoolQueryBuilder bquery = QueryBuilders.boolQuery();
 		try {
-			Map<String, String> paramMap = request.getParams();
-			Set<Entry<String, String>> entries = paramMap.entrySet();
-			Iterator<Entry<String, String>> iter = entries.iterator();
+			Map<String, Object> paramMap = request.getParams();
+			Set<Entry<String, Object>> entries = paramMap.entrySet();
+			Iterator<Entry<String, Object>> iter = entries.iterator();
 			/** support fuzzy search */
 			int fuzzy = 0;
 			if (request.getParam(GlobalParam.PARAM_FUZZY) != null) {
-				fuzzy = Integer.parseInt(request.getParam(GlobalParam.PARAM_FUZZY));
+				fuzzy = Integer.parseInt((String) request.getParam(GlobalParam.PARAM_FUZZY));
 			}
 			while (iter.hasNext()) {
-				Entry<String, String> entry = iter.next();
+				Entry<String, Object> entry = iter.next();
 				String key = entry.getKey();
-				String value = entry.getValue();
+				Object value = entry.getValue();
 				Occur occur = Occur.MUST;
 				/** support script search */
 				if (key.equalsIgnoreCase(GlobalParam.PARAM_DEFINEDSEARCH)) {
-					if (value.indexOf(GlobalParam.PARAM_ANDSCRIPT) > -1) {
-						int pos1 = value.indexOf(GlobalParam.PARAM_ANDSCRIPT);
-						int pos2 = value.lastIndexOf(GlobalParam.PARAM_ANDSCRIPT);
+					if (String.valueOf(value).indexOf(GlobalParam.PARAM_ANDSCRIPT) > -1) {
+						int pos1 = String.valueOf(value).indexOf(GlobalParam.PARAM_ANDSCRIPT);
+						int pos2 = String.valueOf(value).lastIndexOf(GlobalParam.PARAM_ANDSCRIPT);
 						if (pos1 != pos2) {
 							BoolQueryBuilder bbtmp = QueryBuilders.boolQuery();
-							bbtmp.must(getScript(value.substring(pos1 + GlobalParam.PARAM_ANDSCRIPT.length(), pos2)));
+							bbtmp.must(getScript(String.valueOf(value).substring(pos1 + GlobalParam.PARAM_ANDSCRIPT.length(), pos2)));
 							String qsq = "";
 							if (pos1 > 0)
-								qsq += value.substring(0, pos1);
-							if (pos2 < value.length() - GlobalParam.PARAM_ANDSCRIPT.length())
-								qsq += value.substring(pos2 + GlobalParam.PARAM_ANDSCRIPT.length());
+								qsq += String.valueOf(value).substring(0, pos1);
+							if (pos2 < String.valueOf(value).length() - GlobalParam.PARAM_ANDSCRIPT.length())
+								qsq += String.valueOf(value).substring(pos2 + GlobalParam.PARAM_ANDSCRIPT.length());
 							if (qsq.length() > 1)
 								bbtmp.must(QueryBuilders.queryStringQuery(qsq));
 							bquery.must(bbtmp);
 						}
-					} else if (value.indexOf(GlobalParam.PARAM_ORSCRIPT) > -1) {
-						int pos1 = value.indexOf(GlobalParam.PARAM_ORSCRIPT);
-						int pos2 = value.lastIndexOf(GlobalParam.PARAM_ORSCRIPT);
+					} else if (String.valueOf(value).indexOf(GlobalParam.PARAM_ORSCRIPT) > -1) {
+						int pos1 = String.valueOf(value).indexOf(GlobalParam.PARAM_ORSCRIPT);
+						int pos2 = String.valueOf(value).lastIndexOf(GlobalParam.PARAM_ORSCRIPT);
 						if (pos1 != pos2) {
 							BoolQueryBuilder bbtmp = QueryBuilders.boolQuery();
-							bbtmp.should(getScript(value.substring(pos1 + GlobalParam.PARAM_ORSCRIPT.length(), pos2)));
+							bbtmp.should(getScript(String.valueOf(value).substring(pos1 + GlobalParam.PARAM_ORSCRIPT.length(), pos2)));
 							String qsq = "";
 							if (pos1 > 0)
-								qsq += value.substring(0, pos1);
-							if (pos2 < value.length() - GlobalParam.PARAM_ORSCRIPT.length())
-								qsq += value.substring(pos2 + GlobalParam.PARAM_ORSCRIPT.length());
+								qsq += String.valueOf(value).substring(0, pos1);
+							if (pos2 < String.valueOf(value).length() - GlobalParam.PARAM_ORSCRIPT.length())
+								qsq += String.valueOf(value).substring(pos2 + GlobalParam.PARAM_ORSCRIPT.length());
 							if (qsq.length() > 1)
 								bbtmp.should(QueryBuilders.queryStringQuery(qsq));
 							bquery.must(bbtmp);
 						}
 					} else {
-						QueryStringQueryBuilder _q = QueryBuilders.queryStringQuery(value);
+						QueryStringQueryBuilder _q = QueryBuilders.queryStringQuery(String.valueOf(value));
 						bquery.must(_q);
 					}
 					continue;
@@ -108,10 +111,18 @@ public class ESQueryParser implements QueryParser{
 				}
 				QueryBuilder query = null;
 				if (sp != null && sp.getFields() != null && sp.getFields().length() > 0)
-					query = buildMultiQuery(sp.getFields(), value, instanceConfig, request, key, fuzzy);
-				else
-					query = buildSingleQuery(tp.getAlias(), value, tp, sp, request, key, fuzzy);
-
+					query = buildMultiQuery(sp.getFields(), String.valueOf(value), instanceConfig, request, key, fuzzy);
+				else if(tp.getIndextype().contentEquals("dense_vector")) {
+					Map<String, Object> _params = new HashMap<>();
+					_params.put("query_vector", value);
+					Script script = new Script(
+					        ScriptType.INLINE,
+					        "painless",
+					        "(cosineSimilarity(params.query_vector, doc['"+key+"']) + 1.0)", _params); 
+					bquery.must(QueryBuilders.scriptScoreQuery(QueryBuilders.matchAllQuery(), script));
+				}else {
+					query = buildSingleQuery(tp.getAlias(), String.valueOf(value), tp, sp, request, key, fuzzy); 
+				}
 				if (occur == Occur.MUST_NOT && query != null) {
 					bquery.mustNot(query);
 					continue;

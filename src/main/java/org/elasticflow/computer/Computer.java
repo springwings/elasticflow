@@ -66,7 +66,7 @@ public class Computer {
 			} 
 		}   
 		if(rq.getParam("data")!=null) {
-			String[] dt = rq.getParam("data").split(",");
+			String[] dt = String.valueOf(rq.getParam("data")).split(",");
 			SamplePoint point = new SamplePoint(dt.length);
 			for(int i=0;i<dt.length;i++) {
 				point.features[i] = Double.valueOf(dt[i]);

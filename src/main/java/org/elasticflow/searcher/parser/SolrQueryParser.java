@@ -27,14 +27,14 @@ public class SolrQueryParser implements QueryParser{
 	public static SolrQuery parseRequest(EFRequest request, InstanceConfig prs) {
 		SolrQuery sq = new SolrQuery();
 		StringBuilder qu = new StringBuilder();
-		Map<String, String> paramMap = request.getParams();
-		Set<Entry<String, String>> entries = paramMap.entrySet();
-		Iterator<Entry<String, String>> iter = entries.iterator();
+		Map<String, Object> paramMap = request.getParams();
+		Set<Entry<String, Object>> entries = paramMap.entrySet();
+		Iterator<Entry<String, Object>> iter = entries.iterator();
 		boolean start = true;
 		while (iter.hasNext()) {
-			Entry<String, String> entry = iter.next();
+			Entry<String, Object> entry = iter.next();
 			String k = entry.getKey();
-			String v = entry.getValue();
+			String v = String.valueOf(entry.getValue());
 
 			if (Common.isDefaultParam(k)) {
 				switch (k) {
@@ -84,7 +84,7 @@ public class SolrQueryParser implements QueryParser{
 		return sq;
 	} 
 	
-	static String buildMultiQuery(String v,String combineSearch,Map<String, String> paramMap){ 
+	static String buildMultiQuery(String v,String combineSearch,Map<String, Object> paramMap){ 
 		StringBuilder sb = new StringBuilder();
 		for(String k:combineSearch.split(",")){
 			sb.append(buildSingleQuery(k,v));

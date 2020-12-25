@@ -1,5 +1,7 @@
 package org.elasticflow.reader.service;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -16,7 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.field.EFField;
+import org.elasticflow.model.EFRequest;
+import org.elasticflow.model.ResponseState;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.model.searcher.SearcherESModel;
@@ -41,8 +46,8 @@ import net.sf.json.JSONObject;
  * @version 1.0
  */
 public class HttpReaderService {
- 
-	private final static Logger log = LoggerFactory.getLogger(HttpReaderService.class);  
+
+	private final static Logger log = LoggerFactory.getLogger(HttpReaderService.class);
 
 	private EFService FS;
 
@@ -71,146 +76,148 @@ public class HttpReaderService {
 		public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) {
 			response.setContentType("application/json;charset=utf8");
 			response.setStatus(HttpServletResponse.SC_OK);
-			response.setHeader("PowerBy", GlobalParam.PROJ);  
+			response.setHeader("PowerBy", GlobalParam.PROJ);
 			Request rq = (request instanceof Request) ? (Request) request
 					: HttpConnection.getCurrentConnection().getRequest();
 
-			String dataTo = rq.getPathInfo().substring(1);
-			try {
-				if (dataTo.length() < 1) {
-					response.getWriter().println("{\"status\":0,\"info\":\"The write destination is empty!\"}");
-					response.getWriter().flush();
-					response.getWriter().close();
-					return;
+			try (BufferedReader _br = new BufferedReader(new InputStreamReader(rq.getInputStream(), "UTF-8"));) {
+				String line = null;
+				StringBuilder sb = new StringBuilder();
+				while ((line = _br.readLine()) != null) {
+					sb.append(line);
 				}
-				if (rq.getParameterMap().get("ac") != null && rq.getParameterMap().get("code") != null
-						&& rq.getParameter("code").equals(MD5Util.SaltMd5(dataTo))) {
-					switch (rq.getParameter("ac")) {
+				EFRequest RR = Common.getRequest(sb.toString());
+				ResponseState rps = ResponseState.getInstance();
+				rps.setRequest(RR.getParams()); 
+				RR.setPipe(rq.getPathInfo().substring(1)); 
+				if (RR.getPipe().length() < 1) {
+					rps.setStatus("The writer destination is empty!", RESPONSE_STATUS.ParameterErr);
+				} else if (RR.getParam("ac") != null && RR.getParam("code") != null
+						&& RR.getParam("code").equals(MD5Util.SaltMd5(RR.getPipe()))) {
+					String ac = (String) RR.getParam("ac");
+					switch (ac) {
 					case "add":
-						if (rq.getParameterMap().get("data") != null && rq.getParameterMap().get("instance") != null
-								&& rq.getParameterMap().get("type") != null && rq.getParameterMap().get("seq") != null
-								&& rq.getParameterMap().get("keycolumn") != null
-								&& rq.getParameterMap().get("updatecolumn") != null) {
-							String instance = rq.getParameter("instance");
-							String seq = rq.getParameter("seq");
-							String keycolumn = rq.getParameter("keycolumn");
-							String updatecolumn = rq.getParameter("updatecolumn");
+						if (RR.getParam("data") != null && RR.getParam("instance") != null
+								&& RR.getParam("type") != null && RR.getParam("keycolumn") != null
+								&& RR.getParam("updatecolumn") != null) {
+							String instance = (String) RR.getParam("instance");
+							String seq = (String) RR.getParam("seq");
+							String keycolumn = (String) RR.getParam("keycolumn");
+							String updatecolumn = (String) RR.getParam("updatecolumn");
 							boolean monopoly = false;
-							if (rq.getParameterMap().get("fn_is_monopoly") != null
-									&& rq.getParameter("fn_is_monopoly").equals("true"))
+							if (RR.getParam("fn_is_monopoly") != null && RR.getParam("fn_is_monopoly").equals("true"))
 								monopoly = true;
-							
-							PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instance, seq, false,monopoly?GlobalParam.FLOW_TAG._MOP.name():GlobalParam.FLOW_TAG._DEFAULT.name());
-							if (pipePump == null || !pipePump.getInstanceConfig().getAlias().equals(dataTo)) {
-								response.getWriter().println("{\"status\":0,\"info\":\"Writer get Error,Instance not exits!\"}");
+
+							PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instance, seq, false,
+									monopoly ? GlobalParam.FLOW_TAG._MOP.name() : GlobalParam.FLOW_TAG._DEFAULT.name());
+							if (pipePump == null || !pipePump.getInstanceConfig().getAlias().equals(RR.getPipe())) {
+								rps.setStatus("Writer get Error,Instance not exits!", RESPONSE_STATUS.DataErr);
 								break;
 							}
 							String storeid;
-							if (rq.getParameter("type").equals("full") && rq.getParameterMap().get("storeid") != null) {
-								storeid = rq.getParameter("storeid");
+							if (RR.getParam("type").equals("full") && RR.getParam("storeid") != null) {
+								storeid = (String) RR.getParam("storeid");
 							} else {
 								storeid = Common.getStoreId(instance, seq, pipePump, true, false);
 							}
-							boolean isUpdate = false; 
-							
-							if (rq.getParameterMap().get("fn_is_update") != null
-									&& rq.getParameter("fn_is_update").equals("true"))
-								isUpdate = true;  
-							
+							boolean isUpdate = false;
+
+							if (RR.getParam("fn_is_update") != null && RR.getParam("fn_is_update").equals("true"))
+								isUpdate = true;
+
 							try {
 								String writeTo = pipePump.getInstanceConfig().getPipeParams().getInstanceName();
-								if(writeTo==null) {
+								if (writeTo == null) {
 									writeTo = Common.getMainName(instance, seq);
-								}
-								CPU.RUN(pipePump.getID(), "Pipe", "writeDataSet", false, "HTTP PUT",
-										writeTo,
-										storeid, "", getPageData(rq.getParameter("data"), keycolumn, updatecolumn,
+								} 
+								CPU.RUN(pipePump.getID(), "Pipe", "writeDataSet", false, "HTTP PUT", writeTo, storeid,
+										"", this.getPageData(RR.getParam("data"), keycolumn, updatecolumn,
 												pipePump.getInstanceConfig().getWriteFields()),
-										"", isUpdate,monopoly); 
-								response.getWriter().println("{\"status\":1,\"info\":\"success\"}");
+										"", isUpdate, monopoly);
 							} catch (Exception e) {
-								Common.LOG.error("Http Write Exception,",e);
-								response.getWriter().println("{\"status\":0,\"info\":\"写入失败!参数错误，instance:" + instance
-										+ ",seq:" + seq + "\"}");
+								Common.LOG.error("Http Write Exception,", e);
+								rps.setStatus("Write failure data error!", RESPONSE_STATUS.DataErr);
 								try {
-									throw new FNException("写入参数错误，instance:" + instance + ",seq:" + seq);  
+									throw new FNException("写入参数错误，instance:" + instance + ",seq:" + seq);
 								} catch (FNException fe) {
 									e.printStackTrace();
 								}
 							}
 						} else {
-							response.getWriter().println("{\"status\":0,\"info\":\"参数没有全部设置!\"}");
+							rps.setStatus("parameters Not all set!", RESPONSE_STATUS.ParameterErr);
 						}
 						break;
 					case "get_new_storeid":
-						if (rq.getParameterMap().get("instance") != null && rq.getParameterMap().get("seq") != null) {
-							PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(rq.getParameter("instance"),
-									rq.getParameter("seq"), false,"");
-							String storeid = Common.getStoreId(rq.getParameter("instance"), rq.getParameter("seq"),
-									pipePump, false, false);
-							CPU.RUN(pipePump.getID(), "Pond", "createStorePosition",true,rq.getParameter("instance"), storeid);   
-							response.getWriter()
-									.println("{\"status\":1,\"info\":\"success\",\"storeid\":\"" + storeid + "\"}");
+						if (RR.getParam("instance") != null && RR.getParam("seq") != null) {
+							PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(String.valueOf(RR.getParam("instance")),
+									String.valueOf(RR.getParam("seq")), false, "");
+							String storeid = Common.getStoreId(String.valueOf(RR.getParam("instance")), String.valueOf(RR.getParam("seq")), pipePump,
+									false, false);
+							CPU.RUN(pipePump.getID(), "Pond", "createStorePosition", true, RR.getParam("instance"),
+									storeid);
 						} else {
-							response.getWriter().println("{\"status\":0,\"info\":\"创建新索引ID失败!\"}");
+							rps.setStatus("Failed to create new index ID!", RESPONSE_STATUS.ExternErr);
 						}
 						break;
 					case "switch":
-						if (rq.getParameterMap().get("instance") != null
-								&& rq.getParameterMap().get("seq") != null) {
+						if (RR.getParam("instance") != null && RR.getParam("seq") != null) {
 							String storeid;
-							String instance = rq.getParameter("instance");
-							String seq = rq.getParameter("seq");
-							PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instance, seq, false,GlobalParam.FLOW_TAG._DEFAULT.name());
-							if(rq.getParameterMap().get("storeid")!=null) {
-								storeid = rq.getParameter("storeid");
-							}else {
-								storeid = Common.getStoreId(instance, seq,
-										pipePump, false, false);
-								CPU.RUN(pipePump.getID(), "Pond", "createStorePosition",true,instance, storeid);    
-							} 
-							CPU.RUN(pipePump.getID(), "Pond", "switchInstance",true, instance,seq,storeid);
-							pipePump.run(instance, storeid, seq, true,pipePump.getInstanceConfig().getPipeParams().getInstanceName()==null?false:true);
-							response.getWriter().println("{\"status\":1,\"info\":\"success\"}");
+							String instance = (String) RR.getParam("instance");
+							String seq = (String) RR.getParam("seq");
+							PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instance, seq, false,
+									GlobalParam.FLOW_TAG._DEFAULT.name());
+							if (RR.getParam("storeid") != null) {
+								storeid = (String) RR.getParam("storeid");
+							} else {
+								storeid = Common.getStoreId(instance, seq, pipePump, false, false);
+								CPU.RUN(pipePump.getID(), "Pond", "createStorePosition", true, instance, storeid);
+							}
+							CPU.RUN(pipePump.getID(), "Pond", "switchInstance", true, instance, seq, storeid);
+							pipePump.run(instance, storeid, seq, true,
+									pipePump.getInstanceConfig().getPipeParams().getInstanceName() == null ? false
+											: true);
 						} else {
-							response.getWriter().println("{\"status\":0,\"info\":\"切换索引失败!\"}");
+							rps.setStatus("Failed to switch index!", RESPONSE_STATUS.ExternErr);
 						}
 						break;
 					case "delete":
-						if (rq.getParameterMap().get("instance") != null
-								&& rq.getParameterMap().get("seq") != null && rq.getParameterMap().get("search_dsl") != null) { 
-							SearcherModel<?, ?, ?> query=null;
-							String instance = rq.getParameter("instance");
-							String seq = rq.getParameter("seq");
-							PipePump transFlow = Resource.SOCKET_CENTER.getPipePump(instance, seq, false,GlobalParam.FLOW_TAG._DEFAULT.name()); 
+						if (RR.getParam("instance") != null && RR.getParam("seq") != null
+								&& RR.getParam("search_dsl") != null) {
+							SearcherModel<?, ?, ?> query = null;
+							String instance = (String) RR.getParam("instance");
+							String seq = (String) RR.getParam("seq");
+							PipePump transFlow = Resource.SOCKET_CENTER.getPipePump(instance, seq, false,
+									GlobalParam.FLOW_TAG._DEFAULT.name());
 							if (transFlow == null) {
-								response.getWriter().println("{\"status\":0,\"info\":\"Writer get Error,Instance and seq Error!\"}");
+								rps.setStatus("Writer get Error,Instance and seq Error!", RESPONSE_STATUS.DataErr);
 								break;
 							}
-							String storeid = Common.getStoreId(instance,seq, transFlow, true, true);
-							WarehouseParam param = Resource.SOCKET_CENTER.getWHP(transFlow.getInstanceConfig().getPipeParams().getWriteTo());
+							String storeid = Common.getStoreId(instance, seq, transFlow, true, true);
+							WarehouseParam param = Resource.SOCKET_CENTER
+									.getWHP(transFlow.getInstanceConfig().getPipeParams().getWriteTo());
 							switch (param.getType()) {
 							case ES:
-								query = SearcherESModel.getInstance(Common.getRequest(rq),transFlow.getInstanceConfig());
-								break; 
+								query = SearcherESModel.getInstance(Common.getRequest(rq),
+										transFlow.getInstanceConfig());
+								break;
 							default:
 								break;
 							}
-							CPU.RUN(transFlow.getID(), "Pond", "deleteByQuery",true, query, instance, storeid);							 
-							response.getWriter().println("{\"status\":1,\"info\":\"success\"}");
+							CPU.RUN(transFlow.getID(), "Pond", "deleteByQuery", true, query, instance, storeid);
 						} else {
-							response.getWriter().println("{\"status\":0,\"info\":\"instance,seq,search_dsl not set!\"}");
+							rps.setStatus("instance,seq,search_dsl not set!", RESPONSE_STATUS.ParameterErr);
 						}
 						break;
 
 					default:
-						response.getWriter().println("{\"status\":0,\"info\":\"action not exists!\"}");
+						rps.setStatus("action not exists!", RESPONSE_STATUS.ParameterErr);
 						break;
 					}
 
 				} else {
-					response.getWriter().println("{\"status\":0,\"info\":\"code is empty OR code not match!\"}");
+					rps.setStatus("code, ac is empty OR code not match!", RESPONSE_STATUS.ParameterErr);
 				}
+				response.getWriter().println(rps.getResponse(true));
 				response.getWriter().flush();
 				response.getWriter().close();
 			} catch (Exception e) {
@@ -250,10 +257,9 @@ public class HttpReaderService {
 			} else {
 				DP.put(GlobalParam.READER_LAST_STAMP, updateFieldValue);
 			}
-			DP.putDataBoundary(dataBoundary); 
+			DP.putDataBoundary(dataBoundary);
 			DP.putData(datas);
 			return DP;
 		}
 	}
-
 }

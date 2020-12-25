@@ -119,7 +119,11 @@ public final class NodeMonitor {
 	 */
 	public void setResponse(RESPONSE_STATUS status, Object info) { 
 		this.response_status = status;
-		this.response_info = JSON.toJSONString(info);
+		if(info instanceof String) {
+			this.response_info = String.valueOf(info);
+		}else {
+			this.response_info = JSON.toJSONString(info);
+		} 
 	}
 
 	public void ac(Request rq,ResponseState RS) {

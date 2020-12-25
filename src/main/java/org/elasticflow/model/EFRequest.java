@@ -18,7 +18,7 @@ public class EFRequest {
 	private String pipe = null;
 	private String detail = null;
 	private String originalKeyword = null; 
-	private Map<String, String> params = new HashMap<String, String>(); 
+	private Map<String, Object> params = new HashMap<String, Object>(); 
 	private ArrayList<String> errors = new ArrayList<String>(); 
 
 	public static EFRequest getInstance() {
@@ -63,11 +63,11 @@ public class EFRequest {
 		return this.pipe != null && this.pipe.length() > 0;
 	}
 
-	public boolean addParam(String key, String value) {
-		if (key != null && key.length() > 0 && value != null && value.length() > 0){
+	public boolean addParam(String key, Object value) {
+		if (key != null && key.length() > 0 && value != null && String.valueOf(value).length() > 0){
 			params.put(key, value);
 			if (key.equals(GlobalParam.PARAM_KEYWORD))
-				this.originalKeyword = value;
+				this.originalKeyword = String.valueOf(value);
 		} 
 		return true;
 	}
@@ -80,18 +80,18 @@ public class EFRequest {
 		this.originalKeyword = originalKeyword;
 	}
 
-	public String getParam(String key) {
+	public Object getParam(String key) {
 		return this.params.get(key);
 	}
 
-	public Map<String, String> getParams() {
+	public Map<String, Object> getParams() {
 		return this.params;
 	}  
 
 	public Object get(String key, SearcherParam sp,String type) {
 		if (sp == null)
 			return null;
-		String v;
+		Object v;
 		if (params.containsKey(key)) {
 			v = params.get(key);
 		}else{

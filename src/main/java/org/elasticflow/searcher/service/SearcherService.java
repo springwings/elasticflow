@@ -1,6 +1,8 @@
 package org.elasticflow.searcher.service;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,29 +80,32 @@ public class SearcherService{
 				ServletException {
 			Request rq = (request instanceof Request) ? (Request) request
 					: HttpConnection.getCurrentConnection().getRequest();
-
+			
 			response.setContentType("application/json;charset=utf8");
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.setHeader("PowerBy", GlobalParam.PROJ); 
 			rq.setHandled(true);
-			EFRequest RR = Common.getRequest(rq);
-			ResponseState rps = ResponseState.getInstance();
-			rps.setRequest(RR.getParams());
-			if (Resource.nodeConfig.getSearchConfigs().containsKey(
-					RR.getPipe())) {
-				try {
-					rps = process(RR);
-					response.getWriter().println(rps.getResponse(true));
-				} catch (Exception e) {
-					Common.LOG.error("Searcher http handler error,",e);
-					rps.setStatus("Searcher http handler error!", RESPONSE_STATUS.CodeException);
-					response.getWriter().println(rps.getResponse(true));
-				}
-			} else {
-				rps.setStatus("The Alias is Not Exists OR Not Start Up!", RESPONSE_STATUS.ParameterErr);
-				response.getWriter().println(rps.getResponse(true));
-			}
-			
+			ResponseState rps = ResponseState.getInstance(); 
+			try {
+				EFRequest RR = Common.getEFRequest(rq, rps);
+				if(RR!=null) {
+					rps.setRequest(RR.getParams()); 
+					if (Resource.nodeConfig.getSearchConfigs().containsKey(
+							RR.getPipe())) {
+						try {
+							rps = process(RR); 
+						} catch (Exception e) {
+							Common.LOG.error("Searcher http handler error,",e);
+							rps.setStatus("Searcher http handler error!", RESPONSE_STATUS.CodeException); 
+						}
+					} else {
+						rps.setStatus("The Alias is Not Exists OR Not Start Up!", RESPONSE_STATUS.ParameterErr); 
+					}
+				} 
+			} catch (Exception e) {
+				rps.setStatus(e.getMessage(), RESPONSE_STATUS.ParameterErr); 
+			} 
+			response.getWriter().println(rps.getResponse(true));
 			response.getWriter().flush();
 			response.getWriter().close();
 		}

@@ -51,7 +51,7 @@ public class SearcherESModel implements SearcherModel<QueryBuilder,SortBuilder<?
 		eq.setSorts(SearchParamUtil.getSortField(request, instanceConfig));
 		eq.setFacetSearchParams(SearchParamUtil.getFacetParams(request, instanceConfig));
 		if(request.getParam("facet_ext")!=null){
-			eq.setFacet_ext(request.getParams().get("facet_ext"));
+			eq.setFacet_ext((String) request.getParams().get("facet_ext"));
 		}  
 		BoolQueryBuilder query = ESQueryParser.parseRequest(request,instanceConfig);
 		eq.setQuery(query); 

@@ -53,15 +53,15 @@ public class SearchParamUtil {
 		if (request.getParams().containsKey(GlobalParam.PARAM_SHOWQUERY))
 			fq.setShowQueryInfo(true);
 		if (request.getParams().containsKey(GlobalParam.PARAM_FL))
-			fq.setFl(request.getParam(GlobalParam.PARAM_FL));
+			fq.setFl((String) request.getParam(GlobalParam.PARAM_FL));
 		if (request.getParams().containsKey(GlobalParam.PARAM_FQ))
-			fq.setFq(request.getParam(GlobalParam.PARAM_FQ));
+			fq.setFq((String) request.getParam(GlobalParam.PARAM_FQ));
 		if (request.getParams().containsKey(GlobalParam.PARAM_REQUEST_HANDLER))
-			fq.setRequestHandler(request.getParam(GlobalParam.PARAM_REQUEST_HANDLER));
+			fq.setRequestHandler((String) request.getParam(GlobalParam.PARAM_REQUEST_HANDLER));
 	}
 	
 	public static List<SortBuilder<?>> getSortField(EFRequest request, InstanceConfig instanceConfig) {  
-		String sortstrs = request.getParam(KEY_PARAM.sort.toString());
+		String sortstrs = (String) request.getParam(KEY_PARAM.sort.toString());
 		List<SortBuilder<?>> sortList = new ArrayList<SortBuilder<?>>();
 		boolean useScore = false;
 		if (sortstrs != null && sortstrs.length() > 0) { 
@@ -96,7 +96,7 @@ public class SearchParamUtil {
 					EFField checked; 
 					SearcherParam sp;
 					if(instanceConfig.getWriteField(fieldname)!=null && instanceConfig.getWriteField(fieldname).getIndextype().equals("geo_point")) {
-						String _tmp = request.getParam(fieldname);
+						String _tmp = (String) request.getParam(fieldname);
 						String[] _geo = _tmp.split(":"); 
 						sortList.add(SortBuilders.geoDistanceSort(fieldname,new GeoPoint(Double.parseDouble(_geo[0]), Double.parseDouble(_geo[0]))).order(reverse ? SortOrder.DESC : SortOrder.ASC));
 						break;
@@ -135,7 +135,7 @@ public class SearchParamUtil {
 				InstanceConfig prs) {
 			Map<String,List<String[]>> res = new LinkedHashMap<String,List<String[]>>();
 			if(rq.getParam("facet")!=null){
-				for(String pair:rq.getParams().get("facet").split("#")){
+				for(String pair:((String) rq.getParams().get("facet")).split("#")){
 					String[] tmp = pair.split(",");
 					List<String[]> son = new ArrayList<>();
 					for(String str:tmp) {
