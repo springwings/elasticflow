@@ -24,10 +24,12 @@ import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
+import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connect.FnConnectionPool;
 import org.elasticflow.model.InstructionTree;
+import org.elasticflow.model.ResponseState;
 import org.elasticflow.param.pipe.InstructionParam;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.param.warehouse.WarehouseParam;
@@ -72,7 +74,9 @@ public final class NodeMonitor {
 	@Autowired
 	private HttpReaderService HttpReaderService;
 
-	private String response;
+	private RESPONSE_STATUS response_status;
+	
+	private String response_info;
 
 	private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -106,33 +110,29 @@ public final class NodeMonitor {
 			add("runCode");
 		}
 	};
-
-	public String getResponse() {
-		return this.response;
-	}
+ 
 
 	/**
 	 * 
 	 * @param status 0 faild 1 success
 	 * @param info   response information
 	 */
-	public void setResponse(int status, Object info) {
-		HashMap<String, Object> rs = new HashMap<String, Object>();
-		rs.put("status", status);
-		rs.put("info", info);
-		this.response = JSON.toJSONString(rs);
+	public void setResponse(RESPONSE_STATUS status, Object info) { 
+		this.response_status = status;
+		this.response_info = JSON.toJSONString(info);
 	}
 
-	public void ac(Request rq) {
+	public void ac(Request rq,ResponseState RS) {
 		try {
 			if (this.actions.contains(rq.getParameter("ac"))) {
 				Method m = NodeMonitor.class.getMethod(rq.getParameter("ac"), Request.class);
 				m.invoke(this, rq);
+				RS.setStatus(this.response_info, this.response_status);
 			} else {
-				setResponse(0, "Actions Not Exists!");
+				RS.setStatus("Actions Not Exists!", RESPONSE_STATUS.ParameterErr);
 			}
 		} catch (Exception e) {
-			setResponse(0, "Actions Exception!" + e.getMessage());
+			RS.setStatus("Actions Exception!", RESPONSE_STATUS.CodeException);
 			Common.LOG.error("ac " + rq.getParameter("ac") + " Exception ", e);
 		}
 	}
@@ -197,7 +197,7 @@ public final class NodeMonitor {
 			jsonObject.put("name",name);
 			updateResourceXml(type.name(),jsonObject,true);
 		} else {
-			setResponse(0, "Parameter not match!");
+			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!");
 		}
 	} 
 
@@ -233,14 +233,14 @@ public final class NodeMonitor {
 				}
 				if (o != null) {
 					Resource.nodeConfig.addSource(type, o);
-					setResponse(1, "add Resource to node success!"); 
+					setResponse(RESPONSE_STATUS.Success, "add Resource to node success!"); 
 					updateResourceXml(type.name(), jsonObject,false);
 				}
 			} catch (Exception e) {
-				setResponse(0, "add Resource to node Exception " + e.getMessage());
+				setResponse(RESPONSE_STATUS.CodeException, "add Resource to node Exception " + e.getMessage());
 			}
 		} else {
-			setResponse(0, "Parameter not match!");
+			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!");
 		}
 	}
 	
@@ -249,7 +249,7 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void getNodeConfig(Request rq) {
-		setResponse(1, GlobalParam.StartConfig);
+		setResponse(RESPONSE_STATUS.Success, GlobalParam.StartConfig);
 	}
 
 	/**
@@ -267,12 +267,12 @@ public final class NodeMonitor {
 			}
 			try {
 				saveNodeConfig();
-				setResponse(1, "Config set success!");
+				setResponse(RESPONSE_STATUS.Success, "Config set success!");
 			} catch (Exception e) {
-				setResponse(0, "Config save Exception " + e.getMessage());
+				setResponse(RESPONSE_STATUS.CodeException, "Config save Exception " + e.getMessage());
 			}
 		} else {
-			setResponse(0, "Config parameters k v or type not exists!");
+			setResponse(RESPONSE_STATUS.DataErr, "Config parameters k v or type not exists!");
 		}
 	}
 	
@@ -288,7 +288,7 @@ public final class NodeMonitor {
 			}
 		});
 		thread.start();
-		setResponse(0, "current node is in restarting...");
+		setResponse(RESPONSE_STATUS.CodeException, "current node is in restarting...");
 	}
 
 	/**
@@ -302,12 +302,12 @@ public final class NodeMonitor {
 		if (rq.getParameter("path") != null && rq.getParameter("name") != null) {
 			try {
 				new EFLoader(rq.getParameter("path")).loadClass(rq.getParameter("name"));
-				setResponse(1, "Load Handler success!");
+				setResponse(RESPONSE_STATUS.Success, "Load Handler success!");
 			} catch (Exception e) {
-				setResponse(0, "Load Handler Exception " + e.getMessage());
+				setResponse(RESPONSE_STATUS.CodeException, "Load Handler Exception " + e.getMessage());
 			}
 		} else {
-			setResponse(0, "Parameters path not exists!");
+			setResponse(RESPONSE_STATUS.CodeException, "Parameters path not exists!");
 		}
 
 	}
@@ -322,9 +322,9 @@ public final class NodeMonitor {
 			service_level -= 4;
 		}
 		if (HttpReaderService.close()) {
-			setResponse(0, "Stop Searcher Service Successed!");
+			setResponse(RESPONSE_STATUS.Success, "Stop Searcher Service Successed!");
 		} else {
-			setResponse(1, "Stop Searcher Service Failed!");
+			setResponse(RESPONSE_STATUS.CodeException, "Stop Searcher Service Failed!");
 		}
 	}
 	
@@ -338,7 +338,7 @@ public final class NodeMonitor {
 			service_level += 4;
 			HttpReaderService.start();
 		}
-		setResponse(0, "Start Searcher Service Successed!");
+		setResponse(RESPONSE_STATUS.Success, "Start Searcher Service Successed!");
 	}
 	
 	/**
@@ -351,9 +351,9 @@ public final class NodeMonitor {
 			service_level -= 1;
 		}
 		if (SearcherService.close()) {
-			setResponse(0, "Stop Searcher Service Successed!");
+			setResponse(RESPONSE_STATUS.Success, "Stop Searcher Service Successed!");
 		} else {
-			setResponse(1, "Stop Searcher Service Failed!");
+			setResponse(RESPONSE_STATUS.CodeException, "Stop Searcher Service Failed!");
 		}
 	}
 	
@@ -367,7 +367,7 @@ public final class NodeMonitor {
 			service_level += 1;
 			SearcherService.start();
 		}
-		setResponse(0, "Start Searcher Service Successed!");
+		setResponse(RESPONSE_STATUS.Success, "Start Searcher Service Successed!");
 	}
 
 	/**
@@ -389,7 +389,7 @@ public final class NodeMonitor {
 		} catch (Exception e) {
 			Common.LOG.error(" getStatus Exception ", e);
 		}
-		setResponse(1, dt);
+		setResponse(RESPONSE_STATUS.Success, dt);
 	}
 
 	/**
@@ -406,12 +406,12 @@ public final class NodeMonitor {
 				if (dataMap == null) {
 					dataMap = Resource.nodeConfig.getSqlWarehouse().get(instanceConfig.getPipeParams().getReadFrom());
 				}
-				setResponse(1, StringUtils.join(dataMap.getL1seq(), ","));
+				setResponse(RESPONSE_STATUS.Success, StringUtils.join(dataMap.getL1seq(), ","));
 			} catch (Exception e) {
-				setResponse(0, rq.getParameter("instance") + " not exists!");
+				setResponse(RESPONSE_STATUS.CodeException, rq.getParameter("instance") + " not exists!");
 			}
 		} else {
-			setResponse(0, "Parameter not match!");
+			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!");
 		}
 	}
 	
@@ -434,12 +434,12 @@ public final class NodeMonitor {
 					Common.saveTaskInfo(instance, L1seq, Common.getStoreId(instance, L1seq, false),
 							GlobalParam.JOB_INCREMENTINFO_PATH);
 				}
-				setResponse(1, rq.getParameter("instance") + " reset Success!");
+				setResponse(RESPONSE_STATUS.Success, rq.getParameter("instance") + " reset Success!");
 			} catch (Exception e) {
-				setResponse(0, rq.getParameter("instance") + " not exists!");
+				setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance") + " not exists!");
 			}
 		} else {
-			setResponse(0, "Parameter not match!");
+			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!");
 		}
 	}
 	
@@ -519,7 +519,7 @@ public final class NodeMonitor {
 							String[] dstr = str.split(":");
 							if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
 								update = dstr[0] + ":"
-										+ (this.SDF.format(
+										+ (SDF.format(
 												dstr[1].length() < 12 ? new Long(dstr[1] + "000") : new Long(dstr[1])))
 										+ " (" + dstr[1] + ")";
 							} else {
@@ -541,7 +541,7 @@ public final class NodeMonitor {
 							String[] dstr = tm.split(":");
 							if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
 								stateStr.append(dstr[0] + ":"
-										+ this.SDF.format(tm.length() < 12 ? new Long(tm + "000") : new Long(dstr[1])));
+										+ SDF.format(tm.length() < 12 ? new Long(tm + "000") : new Long(dstr[1])));
 								stateStr.append(" (").append(tm).append(")");
 							} else {
 								stateStr.append(tm);
@@ -568,9 +568,9 @@ public final class NodeMonitor {
 				JO.put("增量线程状态", threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
 				JO.put("全量线程状态", threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
 			}
-			setResponse(1, JO);
+			setResponse(RESPONSE_STATUS.Success, JO);
 		} else {
-			setResponse(0, "instance not exits!");
+			setResponse(RESPONSE_STATUS.DataErr, "instance not exits!");
 		}
 	}
 
@@ -611,7 +611,7 @@ public final class NodeMonitor {
 				rs.put(config.getAlias(), tmp);
 			}
 		}
-		setResponse(1, rs);
+		setResponse(RESPONSE_STATUS.Success, rs);
 	}
 	
 	/**
@@ -624,9 +624,9 @@ public final class NodeMonitor {
 			for (InstructionTree Instruction : Instructions) {
 				Instruction.depthRun(Instruction.getRoot());
 			}
-			setResponse(1, "code run success!");
+			setResponse(RESPONSE_STATUS.Success, "code run success!");
 		} else {
-			setResponse(0, "script not set or script grammer is not correct!");
+			setResponse(RESPONSE_STATUS.DataErr, "script not set or script grammer is not correct!");
 		}
 	}
 	
@@ -641,16 +641,16 @@ public final class NodeMonitor {
 				boolean state = Resource.FlOW_CENTER.runInstanceNow(rq.getParameter("instance"),
 						rq.getParameter("jobtype"), true);
 				if (state) {
-					setResponse(1, "Writer " + rq.getParameter("instance") + " job has been started now!");
+					setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job has been started now!");
 				} else {
-					setResponse(0, "Writer " + rq.getParameter("instance")
+					setResponse(RESPONSE_STATUS.DataErr, "Writer " + rq.getParameter("instance")
 							+ " job not exists or run failed or had been stated!");
 				}
 			} else {
-				setResponse(0, "Writer " + rq.getParameter("instance") + " job not open in this node!Run start faild!");
+				setResponse(RESPONSE_STATUS.DataErr, "Writer " + rq.getParameter("instance") + " job not open in this node!Run start faild!");
 			}
 		} else {
-			setResponse(0, "Writer " + rq.getParameter("instance")
+			setResponse(RESPONSE_STATUS.DataErr, "Writer " + rq.getParameter("instance")
 					+ " job started now error,instance and jobtype parameter not both set!");
 		}
 	}
@@ -658,9 +658,9 @@ public final class NodeMonitor {
 	public void removeInstance(Request rq) {
 		if (rq.getParameter("instance").length() > 1) {
 			removeInstance(rq.getParameter("instance"));
-			setResponse(1, "Writer " + rq.getParameter("instance") + " job have removed!");
+			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have removed!");
 		} else {
-			setResponse(0, "Writer " + rq.getParameter("instance") + " remove error,instance parameter not set!");
+			setResponse(RESPONSE_STATUS.DataErr, "Writer " + rq.getParameter("instance") + " remove error,instance parameter not set!");
 		}
 	}
 	
@@ -675,9 +675,9 @@ public final class NodeMonitor {
 			} else {
 				controlThreadState(rq.getParameter("instance"), STATUS.Stop, true);
 			}
-			setResponse(1, "Writer " + rq.getParameter("instance") + " job have stopped!");
+			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have stopped!");
 		} else {
-			setResponse(0, "Writer " + rq.getParameter("instance") + " stop error,index parameter not set!");
+			setResponse(RESPONSE_STATUS.DataErr, "Writer " + rq.getParameter("instance") + " stop error,index parameter not set!");
 		}
 	}
 	
@@ -692,9 +692,9 @@ public final class NodeMonitor {
 			} else {
 				controlThreadState(rq.getParameter("instance"), STATUS.Ready, true);
 			}
-			setResponse(1, "Writer " + rq.getParameter("instance") + " job have resumed!");
+			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have resumed!");
 		} else {
-			setResponse(0, "Writer " + rq.getParameter("instance") + " resume error,index parameter not set!");
+			setResponse(RESPONSE_STATUS.DataErr, "Writer " + rq.getParameter("instance") + " resume error,index parameter not set!");
 		}
 	}
 	
@@ -712,7 +712,7 @@ public final class NodeMonitor {
 				instanceConfig = rq.getParameter("instance") + ":" + type;
 			} else {
 				if (!Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance")))
-					setResponse(0, rq.getParameter("instance") + " not exists!");
+					setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance") + " not exists!");
 			}
 			Resource.FLOW_INFOS.remove(rq.getParameter("instance"), JOB_TYPE.FULL.name());
 			Resource.FLOW_INFOS.remove(rq.getParameter("instance"), JOB_TYPE.INCREMENT.name());
@@ -727,9 +727,9 @@ public final class NodeMonitor {
 			}
 			rebuildFlowGovern(instanceConfig);
 			controlThreadState(rq.getParameter("instance"), STATUS.Ready, true);
-			setResponse(1, rq.getParameter("instance") + " reload Config Success!");
+			setResponse(RESPONSE_STATUS.Success, rq.getParameter("instance") + " reload Config Success!");
 		} else {
-			setResponse(0, rq.getParameter("instance") + " not exists!");
+			setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance") + " not exists!");
 		}
 	}
 
@@ -753,12 +753,12 @@ public final class NodeMonitor {
 							","));
 			try {
 				saveNodeConfig();
-				setResponse(1, instanceName + " add to node " + GlobalParam.IP + " Success!");
+				setResponse(RESPONSE_STATUS.Success, instanceName + " add to node " + GlobalParam.IP + " Success!");
 			} catch (Exception e) {
-				setResponse(0, e.getMessage());
+				setResponse(RESPONSE_STATUS.CodeException, e.getMessage());
 			}
 		} else {
-			setResponse(0, "Parameter not match!");
+			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!");
 		}
 	}
 
@@ -777,7 +777,7 @@ public final class NodeMonitor {
 				String instance = ents.getKey();
 				InstanceConfig instanceConfig = ents.getValue();
 				if (instanceConfig.getPipeParams().getWriteMechanism() != MECHANISM.AB) {
-					setResponse(1, "delete " + _instance + " Success!");
+					setResponse(RESPONSE_STATUS.Success, "delete " + _instance + " Success!");
 					return;
 				}
 				if (instance.equals(_instance) || instanceConfig.getAlias().equals(_instance)) {
@@ -803,12 +803,12 @@ public final class NodeMonitor {
 				}
 			}
 			if (state) {
-				setResponse(1, "delete " + _instance + " Success!");
+				setResponse(RESPONSE_STATUS.Success, "delete " + _instance + " Success!");
 			} else {
-				setResponse(0, "delete " + _instance + " Failed!");
+				setResponse(RESPONSE_STATUS.CodeException, "delete " + _instance + " Failed!");
 			}
 		} else {
-			setResponse(0, "Parameter not match!");
+			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!");
 		}
 	} 
 	
@@ -867,7 +867,7 @@ public final class NodeMonitor {
             ConfigStorer.setData(pondPath, Common.formatXml(doc)); 
         } catch (Exception e) {
         	Common.LOG.error(e.getMessage());
-			setResponse(0, "save Resource Exception " + e.getMessage());
+			setResponse(RESPONSE_STATUS.CodeException, "save Resource Exception " + e.getMessage());
 			return false;
 		} 
         return true;
@@ -896,7 +896,7 @@ public final class NodeMonitor {
 		try {
 			saveNodeConfig();
 		} catch (Exception e) {
-			setResponse(0, e.getMessage());
+			setResponse(RESPONSE_STATUS.CodeException, e.getMessage());
 		}
 	}
 

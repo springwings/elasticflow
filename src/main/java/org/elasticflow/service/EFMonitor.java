@@ -55,24 +55,20 @@ public class EFMonitor {
 			switch (dataTo) {  
 			case "efm.doaction":{
 				if(rq.getParameter("ac") !=null  && rq.getParameter("code")!=null && rq.getParameter("code").equals(MD5Util.SaltMd5(rq.getParameter("ac")))){
-					Resource.nodeMonitor.ac(rq);
-					response.getWriter().println(Resource.nodeMonitor.getResponse()); 
-					Resource.nodeMonitor.setResponse(0, "");
+					Resource.nodeMonitor.ac(rq,rps); 
 				}else{  
-					rps.setStatus("Action failed!parameter ac or code error!", RESPONSE_STATUS.ParameterErr);
-					response.getWriter().println(rps.getResponse(true));
+					rps.setStatus("Action failed!parameter ac or code error!", RESPONSE_STATUS.ParameterErr); 
 				}
 			}
 				break;   
 			case "_version": 
-				rps.setInfo(GlobalParam.VERSION); 
-				response.getWriter().println(rps.getResponse(true));
+				rps.setInfo(GlobalParam.VERSION);  
 				break;
 			default:
-				rps.setStatus("action parameter error!", RESPONSE_STATUS.ParameterErr);
-				response.getWriter().println(rps.getResponse(true));
+				rps.setStatus("action parameter error!", RESPONSE_STATUS.ParameterErr); 
 				break;
 			}
+			response.getWriter().println(rps.getResponse(true));
 			response.getWriter().flush();
 			response.getWriter().close();
 		}

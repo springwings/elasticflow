@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 
 import com.alibaba.fastjson.JSON;
 
@@ -27,7 +28,7 @@ public class ResponseState {
 
 	public static ResponseState getInstance() {
 		ResponseState rs = new ResponseState();
-		rs.response.put("status", "100");
+		rs.response.put("status", RESPONSE_STATUS.Success);
 		rs.response.put("info", "");
 		rs.response.put("instance",null);
 		rs.response.put("useTime",null);
