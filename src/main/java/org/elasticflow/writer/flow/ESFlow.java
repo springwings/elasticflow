@@ -317,7 +317,7 @@ public class ESFlow extends WriterFlowSocket {
 				EFField p = e.getValue();
 				if (p.getName() == null)
 					continue;
-				map.put("type", p.getIndextype()); // type is must
+				map.put("type", p.getIndextype());
 				if (p.getStored().toLowerCase().equals("true")) {
 					map.put("store", true);
 				}
@@ -342,9 +342,6 @@ public class ESFlow extends WriterFlowSocket {
 		Map<String, Object> _source_map = new HashMap<String, Object>();
 		_source_map.put("enabled", "true");
 		root_map.put("_source", _source_map); 
-//		Map<String, Object> _all_map = new HashMap<String, Object>();
-//		_all_map.put("enabled", "false");
-//		root_map.put("_all", _all_map);
 		return root_map;
 	}
     

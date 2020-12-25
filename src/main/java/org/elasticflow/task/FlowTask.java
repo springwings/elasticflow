@@ -68,12 +68,13 @@ public class FlowTask {
 	public void runFull() {
 		if (!breaker.isOn() && Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running)) {
 			try { 
-				String storeId;
-				if (writeInSamePosition) {
+				String storeId=null;
+				if (writeInSamePosition && Resource.FLOW_INFOS.containsKey(transDataFlow.getInstanceConfig().getPipeParams().getInstanceName(),
+						GlobalParam.FLOWINFO.MASTER.name())) {
 					storeId = Resource.FLOW_INFOS
 							.get(transDataFlow.getInstanceConfig().getPipeParams().getInstanceName(),
 									GlobalParam.FLOWINFO.MASTER.name())
-							.get(GlobalParam.FLOWINFO.FULL_STOREID.name());
+							.get(GlobalParam.FLOWINFO.FULL_STOREID.name()); 
 				} else {
 					storeId = Common.getStoreId(instance, L1seq, transDataFlow, false, false);
 					CPU.RUN(transDataFlow.getID(), "Pond", "createStorePosition", true,
