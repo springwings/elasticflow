@@ -55,19 +55,14 @@ public class SearcherService{
 		return true;
 	} 
 	
-	public EFResponse process(EFRequest request) throws InstantiationException, IllegalAccessException, ClassNotFoundException { 
-		long startTime = System.currentTimeMillis();
-		EFResponse response = null; 
+	public EFResponse process(EFRequest request,EFResponse response) throws InstantiationException, IllegalAccessException, ClassNotFoundException { 
+		response.setStartTime(System.currentTimeMillis());
 		String pipe = request.getPipe(); 
 		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getSearchConfigs();
 		if (configMap.containsKey(pipe)) {  
-			response = SocketCenter.getSearcher(pipe,"","",false).startSearch(request);
-		} 
-		long endTime = System.currentTimeMillis();
-		if (response != null){
-			response.setStartTime(startTime);
-			response.setEndTime(endTime);
-		}  
+			SocketCenter.getSearcher(pipe,"","",false).startSearch(request,response);
+		}   
+		response.setEndTime(System.currentTimeMillis());  
 		return response;
 	}
 
@@ -91,7 +86,7 @@ public class SearcherService{
 					if (Resource.nodeConfig.getSearchConfigs().containsKey(
 							RR.getPipe())) {
 						try {
-							rps = process(RR); 
+							process(RR,rps); 
 						} catch (Exception e) {
 							Common.LOG.error("Searcher http handler error,",e);
 							rps.setStatus("Searcher http handler error!", RESPONSE_STATUS.CodeException); 

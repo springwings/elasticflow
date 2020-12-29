@@ -56,7 +56,7 @@ public final class GlobalParam {
 		    this.v = val;  
 		}
 		public int getVal() {  
-	        return v;  
+	        return this.v;  
 	    } 
 		public String getMsg() {
 			return MSG.get(this.v);

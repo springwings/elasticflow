@@ -51,19 +51,17 @@ public class Searcher {
 		}
 	}
 
-	public EFResponse startSearch(EFRequest rq) {
-		EFResponse response = EFResponse.getInstance();
+	public void startSearch(EFRequest rq,EFResponse response) {
 		response.setInstance(instanceName);
-		response.setRequest(rq.getParams());
 		/** check validation */
 		if (!rq.isValid()) {
-			response.setStatus("EFRequest is null!", RESPONSE_STATUS.ParameterErr);
-			return response;
+			response.setStatus("EFRequest is Valid!", RESPONSE_STATUS.ParameterErr);
+			return ;
 		}
 
 		if (this.searcherFlowSocket == null) {
-			response.setStatus("searcher is null!",RESPONSE_STATUS.CodeException);
-			return response;
+			response.setStatus("searcher Flow Socket is null!",RESPONSE_STATUS.CodeException);
+			return ;
 		}
 		SearcherModel<?, ?, ?> searcherModel = null;
 		switch (this.searcherFlowSocket.getType()) {
@@ -77,7 +75,7 @@ public class Searcher {
 			break; 
 		default:
 			response.setStatus("Not Support Searcher Type!",RESPONSE_STATUS.ParameterErr);
-			return response; 
+			return ; 
 		}  
 		try {
 			if(rq.hasErrors()) {
@@ -86,10 +84,9 @@ public class Searcher {
 				response.setPayload(formatResult(this.searcherFlowSocket.Search(searcherModel, instanceName,handler)));
 			} 
 		} catch (Exception e) {
-			response.setStatus("searcher parameter may be error!",RESPONSE_STATUS.ParameterErr);
+			response.setStatus("searcher parameters may be wrong!",RESPONSE_STATUS.ParameterErr);
 			log.error(rq.getPipe()+" searcher Response Exception,", e);
-		}
-		return response;
+		} 
 	}  
 	
 	private static Map<String, Object> formatResult(SearcherResult data) {
