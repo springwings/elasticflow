@@ -3,7 +3,7 @@ package org.elasticflow.connect.handler;
 import org.elasticflow.param.pipe.ConnectParams;
 
 /**
- * user defined connection pre-process function
+ * User defined function for connection preprocessing.
  * @author chengwen
  * @version 1.0 
  */

@@ -39,9 +39,9 @@ import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.FNException;
-import org.elasticflow.util.FNException.ELEVEL;
-import org.elasticflow.util.FNException.ETYPE;
+import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ELEVEL;
+import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.writer.WriterFlowSocket;
 
 /**
@@ -100,7 +100,7 @@ public class SolrFlow extends WriterFlowSocket{
 	} 
 	
 	@Override
-	public void write(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> writeParamMap, String instantcName, String storeId,boolean isUpdate) throws FNException { 
+	public void write(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> writeParamMap, String instantcName, String storeId,boolean isUpdate) throws EFException { 
 		String name = Common.getStoreName(instantcName,storeId);
 		if (unit.getData().size() == 0){
 			log.warn("Empty IndexUnit for " + name );
@@ -159,7 +159,7 @@ public class SolrFlow extends WriterFlowSocket{
 				getSolrConn().add(doc);
 				getSolrConn().commit();
 			}catch (Exception e) {
-				throw new FNException(e);
+				throw new EFException(e);
 			} 
 		}else{
 			synchronized (docs) {
@@ -169,7 +169,7 @@ public class SolrFlow extends WriterFlowSocket{
 	}
 	 
 	@Override
-	public void delete(String instance, String storeId,String keyColumn, String keyVal) throws FNException {  
+	public void delete(String instance, String storeId,String keyColumn, String keyVal) throws EFException {  
 	 
 	} 
 
@@ -207,7 +207,7 @@ public class SolrFlow extends WriterFlowSocket{
 	} 
 
 	@Override
-	public void flush() throws FNException { 
+	public void flush() throws EFException { 
 		if(this.isBatch){
 			synchronized (docs){
 				try { 
@@ -215,9 +215,9 @@ public class SolrFlow extends WriterFlowSocket{
 					getSolrConn().commit(true, true, true);
 				} catch (Exception e) {
 					if (e.getMessage().contains("Collection not found")) {
-						throw new FNException("storeId not found",ELEVEL.Dispose,ETYPE.WRITE_POS_NOT_FOUND);
+						throw new EFException("storeId not found",ELEVEL.Dispose,ETYPE.WRITE_POS_NOT_FOUND);
 					} else {
-						throw new FNException(e.getMessage());
+						throw new EFException(e.getMessage());
 					}
 				}
 				docs.clear();

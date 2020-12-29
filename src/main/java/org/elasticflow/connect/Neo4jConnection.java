@@ -8,14 +8,14 @@ import org.elasticflow.param.warehouse.WarehouseSqlParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Neo4jConnection extends FnConnectionSocket<Connection> {
+public class Neo4jConnection extends EFConnectionSocket<Connection> {
 
 	private Connection conn = null;
 
 	private final static Logger log = LoggerFactory.getLogger("Neo4j Socket");
 
-	public static FnConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
-		FnConnectionSocket<?> o = new Neo4jConnection();
+	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
+		EFConnectionSocket<?> o = new Neo4jConnection();
 		o.init(ConnectParams);
 		o.connect();
 		return o;

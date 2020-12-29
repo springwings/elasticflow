@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory; 
 
 /**
- * provide compute service
+ * Provide computing stream service
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:25

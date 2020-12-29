@@ -11,7 +11,7 @@ import org.elasticflow.flow.Flow;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.util.FNException;
+import org.elasticflow.util.EFException;
  
 /**
  * Flow into Pond Manage
@@ -36,9 +36,9 @@ public abstract class WriterFlowSocket extends Flow{
 	
 	public abstract String getNewStoreId(String mainName,boolean isIncrement,InstanceConfig instanceConfig);
 
-	public abstract void write(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> transParams,String instance, String storeId,boolean isUpdate) throws FNException;
+	public abstract void write(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> transParams,String instance, String storeId,boolean isUpdate) throws EFException;
 
-	public abstract void delete(String instance, String storeId,String keyColumn,String keyVal) throws FNException;
+	public abstract void delete(String instance, String storeId,String keyColumn,String keyVal) throws EFException;
   
 	public abstract void removeInstance(String instance, String storeId);
 	

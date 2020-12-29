@@ -17,7 +17,7 @@ import org.elasticflow.model.reader.PipeDataUnit;
  * @date 2018-11-02 13:53
  * @modify 2019-01-16 13:54
  */
-public final class PipeNorms {
+public final class PipeNormsUtil {
 	
 	/**
 	 * 

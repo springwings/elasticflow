@@ -3,6 +3,12 @@ package org.elasticflow.util.email;
 import java.io.Serializable;
 import java.util.Properties;
 
+/** 
+ * @author chengwen
+ * @version 1.2
+ * @date 2018-10-11 11:00
+ */
+
 public class EmailConfig implements Serializable {
 	private static final long serialVersionUID = -1490893105157071496L;
 	private String mailServerHost;

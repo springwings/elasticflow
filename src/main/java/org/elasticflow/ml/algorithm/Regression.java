@@ -9,6 +9,13 @@ import org.elasticflow.ml.Algorithm;
 import org.elasticflow.model.computer.SamplePoint;
 import org.elasticflow.model.computer.SampleSets;
 
+
+/**
+ * 
+ * @author chengwen
+ * @version 1.0
+ * @date 2018-05-22 09:08
+ */
 public abstract class Regression extends Algorithm{
 	
     double[] theta;  

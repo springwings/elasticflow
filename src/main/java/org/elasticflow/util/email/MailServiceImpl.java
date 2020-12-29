@@ -11,7 +11,12 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.util.StringUtils;
 
-public class MailServiceImpl  implements MailService {
+/**
+ * @author chengwen
+ * @version 1.2
+ * @date 2018-10-11 11:00
+ */
+public class MailServiceImpl implements MailService {
 
 	private static Logger log = LoggerFactory.getLogger(MailServiceImpl.class);
 
@@ -19,31 +24,29 @@ public class MailServiceImpl  implements MailService {
 	private JavaMailSender mailSender;
 	@Resource
 	private TaskExecutor mailTaskExecutor;
-	
+
 	@Autowired
 	private EmailModel emailModel;
- 
+
 	private boolean syncMode = true;
-	
+
 	private StringBuffer message = new StringBuffer();
-    
 
 	public MailServiceImpl() {
 
 	}
-	
+
 	public void sendMail() throws Exception {
 		this.init();
 	}
-	
-	public void sendMail(String subject, String content)
-			throws Exception {
+
+	public void sendMail(String subject, String content) throws Exception {
 		this.init();
 	}
 
 	public MailServiceImpl(boolean syncMode) {
 		this.syncMode = syncMode;
-	} 
+	}
 
 	public boolean isSyncMode() {
 		return syncMode;
@@ -59,9 +62,9 @@ public class MailServiceImpl  implements MailService {
 
 	public void setMessage(StringBuffer message) {
 		this.message = message;
-	} 
-	
-	private void init() throws Exception{
+	}
+
+	private void init() throws Exception {
 		if (this.emailModel == null) {
 			this.message.append("no receiver!");
 			return;
@@ -74,9 +77,9 @@ public class MailServiceImpl  implements MailService {
 			this.message.append("send sync Mode... ");
 		}
 	}
- 
+
 	/**
-	 * send Mail By Synchronization 
+	 * send Mail By Synchronization
 	 */
 	public void sendMailBySynchronizationMode() throws Exception {
 		MimeMessage mime = mailSender.createMimeMessage();
@@ -92,11 +95,11 @@ public class MailServiceImpl  implements MailService {
 		helper.setText(emailModel.getContent(), true);
 		mailSender.send(mime);
 	}
-/**
- * send Mail By asSynchronization 
- */
-	public void sendMailBySynchronizationMode(String subject, String content)
-			throws Exception {
+
+	/**
+	 * send Mail By asSynchronization
+	 */
+	public void sendMailBySynchronizationMode(String subject, String content) throws Exception {
 		MimeMessage mime = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(mime, true, "utf-8");
 		helper.setFrom(emailModel.getFrom());
@@ -125,9 +128,8 @@ public class MailServiceImpl  implements MailService {
 			}
 		});
 	}
-	
-	public void sendMailByAsynchronousMode(final String subject,
-			final String content) {
+
+	public void sendMailByAsynchronousMode(final String subject, final String content) {
 		mailTaskExecutor.execute(new Runnable() {
 			public void run() {
 				try {

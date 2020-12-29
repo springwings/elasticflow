@@ -19,9 +19,9 @@ import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.FNException;
-import org.elasticflow.util.FNException.ELEVEL;
-import org.elasticflow.util.FNException.ETYPE;
+import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ELEVEL;
+import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticsearch.action.admin.indices.alias.exists.AliasesExistResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -70,7 +70,7 @@ public class ESFlow extends WriterFlowSocket {
 
 	@Override
 	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams, String instance,
-			String storeId, boolean isUpdate) throws FNException { 
+			String storeId, boolean isUpdate) throws EFException { 
 		String name = Common.getStoreName(instance, storeId);
 		String type = instance;
 		if (unit==null || unit.getData().size() == 0) {
@@ -85,7 +85,7 @@ public class ESFlow extends WriterFlowSocket {
 	}
 	
 	private void updateByScan(WriterParam writerParam,PipeDataUnit unit, Map<String, EFField> transParams, String instance,String alias,
-			String storeId, boolean isUpdate) throws FNException{  
+			String storeId, boolean isUpdate) throws EFException{  
 		Script script = null;
 		StringBuilder sf = new StringBuilder();
 		for (Entry<String, Object> r : unit.getData().entrySet()) {
@@ -105,12 +105,12 @@ public class ESFlow extends WriterFlowSocket {
 			UpdateByQueryRequestBuilder _UR = new UpdateByQueryRequestBuilder(getESC().getClient(), UpdateByQueryAction.INSTANCE);
 			_UR.source(instance).script(script).filter(QueryBuilders.termQuery(writerParam.getWriteKey(),unit.getReaderKeyVal())).execute().get();
 		} catch (Exception e) {
-			throw new FNException(e);
+			throw new EFException(e);
 		} 
 	}
 	
 	private void updateByKey(PipeDataUnit unit, Map<String, EFField> transParams, String instance,String alias,
-			String storeId, boolean isUpdate) throws FNException{
+			String storeId, boolean isUpdate) throws EFException{
 		try { 
 			XContentBuilder cbuilder = jsonBuilder().startObject();
 			StringBuilder routing = new StringBuilder();
@@ -173,15 +173,15 @@ public class ESFlow extends WriterFlowSocket {
 		} catch (Exception e) {
 			log.error("write Exception", e); 
 			if (e.getMessage().contains("IndexNotFoundException")) {
-				throw new FNException("storeId not found",ELEVEL.Dispose,ETYPE.WRITE_POS_NOT_FOUND);
+				throw new EFException("storeId not found",ELEVEL.Dispose,ETYPE.WRITE_POS_NOT_FOUND);
 			} else {
-				throw new FNException(e);
+				throw new EFException(e);
 			}
 		}
 	} 
 
 	@Override
-	public void delete(String instance, String storeId,String keyColumn, String keyVal) throws FNException {
+	public void delete(String instance, String storeId,String keyColumn, String keyVal) throws EFException {
 		String name = Common.getStoreName(instance, storeId);
 		String type = instance;
 		getESC().getClient().prepareDelete(name, type, keyVal);
@@ -193,7 +193,7 @@ public class ESFlow extends WriterFlowSocket {
 			getESC().getBulkProcessor().flush();
 			if (getESC().getRunState() == false) {
 				getESC().setRunState(true);
-				throw new FNException("BulkProcessor Exception!Need Redo!");
+				throw new EFException("BulkProcessor Exception!Need Redo!");
 			}
 		}
 	} 

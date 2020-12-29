@@ -2,20 +2,20 @@ package org.elasticflow.flow;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.elasticflow.connect.FnConnectionPool;
-import org.elasticflow.connect.FnConnectionSocket;
+import org.elasticflow.connect.EFConnectionPool;
+import org.elasticflow.connect.EFConnectionSocket;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory; 
 /**
- * data pipe flow model 
+ * EF data pipe flow model 
  * @author chengwen
  * @version 2.0
  * @date 2018-10-31 10:52
  */
 public abstract class Flow {
 	
-	protected volatile FnConnectionSocket<?> FC;
+	protected volatile EFConnectionSocket<?> FC;
 	
 	protected String poolName; 
 	
@@ -27,17 +27,17 @@ public abstract class Flow {
 	
 	public abstract void INIT(ConnectParams connectParams);
 	
-	public FnConnectionSocket<?> PREPARE(boolean isMonopoly,boolean canSharePipe) {  
+	public EFConnectionSocket<?> PREPARE(boolean isMonopoly,boolean canSharePipe) {  
 		if(isMonopoly) {
 			synchronized (this.FC) {
 				if(this.FC==null) 
-					this.FC = FnConnectionPool.getConn(this.connectParams,
+					this.FC = EFConnectionPool.getConn(this.connectParams,
 							this.poolName,canSharePipe); 
 			} 
 		}else {
 			synchronized (this.retainer) {  
 				if(this.retainer.getAndIncrement()==0) {
-					this.FC = FnConnectionPool.getConn(this.connectParams,
+					this.FC = EFConnectionPool.getConn(this.connectParams,
 							this.poolName,canSharePipe);  
 				} 
 			} 
@@ -51,7 +51,7 @@ public abstract class Flow {
 				if(releaseConn)
 					retainer.set(0);
 				if(retainer.decrementAndGet()<=0){
-					FnConnectionPool.freeConn(this.FC, this.poolName,releaseConn);  
+					EFConnectionPool.freeConn(this.FC, this.poolName,releaseConn);  
 					this.FC = null;
 					retainer.set(0); 
 				}else{
@@ -61,7 +61,7 @@ public abstract class Flow {
 		} 
 	}   
 	
-	public FnConnectionSocket<?> GETSOCKET() {
+	public EFConnectionSocket<?> GETSOCKET() {
 		return this.FC;
 	}
 	
@@ -72,6 +72,6 @@ public abstract class Flow {
 	}  
 	
 	public void freeConnPool() {
-		FnConnectionPool.release(this.poolName);
+		EFConnectionPool.release(this.poolName);
 	}
 }

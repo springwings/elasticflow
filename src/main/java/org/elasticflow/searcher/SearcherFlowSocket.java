@@ -7,7 +7,7 @@ import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherResult;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.searcher.handler.Handler;
-import org.elasticflow.util.FNException;
+import org.elasticflow.util.EFException;
 
 /**
  * 
@@ -27,7 +27,7 @@ public abstract class SearcherFlowSocket extends Flow {
 	} 
 
 	public abstract SearcherResult Search(SearcherModel<?, ?, ?> query, String instance, Handler handler)
-			throws FNException; 
+			throws EFException; 
 
 	public DATA_TYPE getType() {
 		return connectParams.getWhp().getType();

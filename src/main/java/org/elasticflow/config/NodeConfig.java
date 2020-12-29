@@ -22,7 +22,8 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.ConfigStorer;
 
 /**
- * node configs center,manage flows config and sql/nosql dataflows configs
+ * The EF node configuration control center,
+ * manages the abstract flow and data source configuration.
  * 
  * @author chengwen
  * @version 4.1

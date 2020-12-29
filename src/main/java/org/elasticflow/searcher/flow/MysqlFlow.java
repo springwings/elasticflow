@@ -5,7 +5,7 @@ import org.elasticflow.model.searcher.SearcherResult;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.searcher.SearcherFlowSocket;
 import org.elasticflow.searcher.handler.Handler;
-import org.elasticflow.util.FNException;
+import org.elasticflow.util.EFException;
 
 /**
  * 
@@ -20,7 +20,7 @@ public class MysqlFlow extends SearcherFlowSocket{
 	}
 
 	@Override
-	public SearcherResult Search(SearcherModel<?, ?, ?> query, String instance, Handler handler) throws FNException {
+	public SearcherResult Search(SearcherModel<?, ?, ?> query, String instance, Handler handler) throws EFException {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -8,7 +8,7 @@ import org.elasticflow.param.pipe.ConnectParams;
  * @param <T>
  * @date 2018-10-24 13:53
  */
-public abstract class FnConnectionSocket<T>{
+public abstract class EFConnectionSocket<T>{
 	
 	protected volatile ConnectParams connectParams;
 	

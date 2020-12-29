@@ -4,24 +4,20 @@ import java.io.Serializable;
 
 import org.springframework.util.StringUtils;
 
-public class EmailModel implements Serializable{ 
-  
-	private static final long serialVersionUID = 1L;
- 
-	private String from;
- 
-	private String address; 
-	
-	private String bcc; 
-	
-	private String cc;
-
-	private String subject;
-
-	private String content;
-	
-	public EmailModel(){
-		
+/** 
+ * @author chengwen
+ * @version 1.2
+ * @date 2018-10-11 11:00
+ */ 
+public class EmailModel implements Serializable{   
+	private static final long serialVersionUID = -6208279516744390800L;
+	private String from; 
+	private String address;  
+	private String bcc;  
+	private String cc; 
+	private String subject; 
+	private String content; 
+	public EmailModel(){ 
 	}
 	
 	public EmailModel(String from,String address,String bcc,String cc,String subject,String content){

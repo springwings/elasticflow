@@ -16,7 +16,7 @@ import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
-import org.elasticflow.util.FNException;
+import org.elasticflow.util.EFException;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,7 @@ public class HBaseFlow extends WriterFlowSocket {
 
 	 
 	@Override
-	public void write(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> transParams, String instantcName, String storeId,boolean isUpdate) throws FNException { 
+	public void write(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> transParams, String instantcName, String storeId,boolean isUpdate) throws EFException { 
 		if (unit.getData().size() == 0){
 			log.info("Empty IndexUnit for " + instantcName + " " + storeId);
 			return;
@@ -93,7 +93,7 @@ public class HBaseFlow extends WriterFlowSocket {
 	} 
 
 	@Override
-	public void delete(String instance, String storeId,String keyColumn, String keyVal) throws FNException {
+	public void delete(String instance, String storeId,String keyColumn, String keyVal) throws EFException {
 		
 	}
 

@@ -6,7 +6,7 @@
 	<groupId>org.elasticflow</groupId>
 	<artifactId>elasticflow</artifactId>
 	<packaging>jar</packaging>
-	<version>4.1</version>
+	<version>5.0.1</version>
 	<name>elasticflow</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
@@ -409,7 +409,5 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<configPath>src/main/resources</configPath>
 		<spring.version>4.0.4.RELEASE</spring.version>
-		<jackson.version>2.1.4</jackson.version>
-		<org.slf4j-version>1.6.1</org.slf4j-version>
 	</properties>
 </project>

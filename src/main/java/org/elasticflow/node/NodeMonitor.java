@@ -27,7 +27,7 @@ import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.connect.FnConnectionPool;
+import org.elasticflow.connect.EFConnectionPool;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.param.pipe.InstructionParam;
@@ -173,10 +173,10 @@ public final class NodeMonitor {
 					seqs = wp.getL1seq();
 					if (seqs.length > 0) {
 						for (String seq : seqs) {
-							FnConnectionPool.release(wp.getPoolName(seq));
+							EFConnectionPool.release(wp.getPoolName(seq));
 						}
 					} else {
-						FnConnectionPool.release(wp.getPoolName(null));
+						EFConnectionPool.release(wp.getPoolName(null));
 					}
 					break;
 					
@@ -185,10 +185,10 @@ public final class NodeMonitor {
 					seqs = wp.getL1seq();
 					if (seqs.length > 0) {
 						for (String seq : seqs) {
-							FnConnectionPool.release(wp.getPoolName(seq));
+							EFConnectionPool.release(wp.getPoolName(seq));
 						}
 					} else {
-						FnConnectionPool.release(wp.getPoolName(null));
+						EFConnectionPool.release(wp.getPoolName(null));
 					}
 					break;
 					
@@ -459,7 +459,7 @@ public final class NodeMonitor {
 			if (Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
 				String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom())
 						.getPoolName(null);
-				JO.put("DataFrom Pool Status", FnConnectionPool.getStatus(poolname));
+				JO.put("DataFrom Pool Status", EFConnectionPool.getStatus(poolname));
 			} else if (Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
 				WarehouseSqlParam ws = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom());
 				String poolname = "";
@@ -467,23 +467,23 @@ public final class NodeMonitor {
 					for (String seq : ws.getL1seq()) {
 						poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom())
 								.getPoolName(seq);
-						JO.put("Seq(" + seq + ") Reader Pool Status", FnConnectionPool.getStatus(poolname));
+						JO.put("Seq(" + seq + ") Reader Pool Status", EFConnectionPool.getStatus(poolname));
 					}
 				} else {
 					poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom())
 							.getPoolName(null);
-					JO.put("Reader Pool Status", FnConnectionPool.getStatus(poolname));
+					JO.put("Reader Pool Status", EFConnectionPool.getStatus(poolname));
 				}
 			}
 
 			if (Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
 				String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getWriteTo())
 						.getPoolName(null);
-				JO.put("Writer Pool Status", FnConnectionPool.getStatus(poolname));
+				JO.put("Writer Pool Status", EFConnectionPool.getStatus(poolname));
 			} else if (Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
 				String poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getWriteTo())
 						.getPoolName(null);
-				JO.put("Writer Pool Status", FnConnectionPool.getStatus(poolname));
+				JO.put("Writer Pool Status", EFConnectionPool.getStatus(poolname));
 			}
 
 			if ((GlobalParam.SERVICE_LEVEL & 1) > 0) {
@@ -498,10 +498,10 @@ public final class NodeMonitor {
 
 				if (Resource.nodeConfig.getNoSqlWarehouse().get(searchFrom) != null) {
 					String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(searchFrom).getPoolName(null);
-					JO.put(searcherInfo, FnConnectionPool.getStatus(poolname));
+					JO.put(searcherInfo, EFConnectionPool.getStatus(poolname));
 				} else {
 					String poolname = Resource.nodeConfig.getSqlWarehouse().get(searchFrom).getPoolName(null);
-					JO.put(searcherInfo, FnConnectionPool.getStatus(poolname));
+					JO.put(searcherInfo, EFConnectionPool.getStatus(poolname));
 				}
 			}
 

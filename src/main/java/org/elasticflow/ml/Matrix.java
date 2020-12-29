@@ -2,6 +2,7 @@ package org.elasticflow.ml;
 
 /**
  * M * N Matrix,rows size * columns size
+ * 
  * @author chengwen
  * @version 1.0
  * @date 2018-10-25 15:08

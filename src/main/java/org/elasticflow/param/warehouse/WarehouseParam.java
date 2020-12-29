@@ -6,6 +6,7 @@ import org.elasticflow.config.GlobalParam.DATA_TYPE;
  * seq for series data position define
  * @author chengwen
  * @version 1.0 
+ * @date 2018-07-22 09:08
  */
 public interface WarehouseParam {
 	

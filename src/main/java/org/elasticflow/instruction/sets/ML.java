@@ -14,6 +14,12 @@ import org.elasticflow.node.CPU;
 import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.Common;
 
+/**
+ * 
+ * @author chengwen
+ * @version 1.0
+ * @date 2018-05-22 09:08
+ */
 public class ML extends Instruction {
 
 	private final static Logger log = LoggerFactory.getLogger("ML");

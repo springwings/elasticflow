@@ -4,7 +4,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 /**
- *  * get system info
+ * get system info
+ * 
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:14

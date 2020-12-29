@@ -72,15 +72,15 @@ public class OracleFlow extends ReaderFlowSocket{
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) {
 		String sql;
 		if(task.getScanParam().getPageScanDSL()!=null){
-			sql = " select "+GlobalParam._page_field+" as id,ROWNUM AS FN_ROW_ID from ("
+			sql = " select "+GlobalParam._page_field+" as id,ROWNUM AS EF_ROW_ID from ("
 					+ task.getScanParam().getPageScanDSL()
-					+ ") FN_FPG_MAIN  order by "+GlobalParam._page_field+" desc";
+					+ ") EF_FPG_MAIN  order by "+GlobalParam._page_field+" desc";
 		}else{
-			sql = " select "+GlobalParam._page_field+" as id,ROWNUM AS FN_ROW_ID from ("
+			sql = " select "+GlobalParam._page_field+" as id,ROWNUM AS EF_ROW_ID from ("
 					+ task.getScanParam().getDataScanDSL()
-					+ ") FN_FPG_MAIN  order by "+GlobalParam._page_field+" desc";
+					+ ") EF_FPG_MAIN  order by "+GlobalParam._page_field+" desc";
 		} 
-		sql = " select id from (" + sql + ") FN_FPG_END where MOD(FN_ROW_ID, "
+		sql = " select id from (" + sql + ") EF_FPG_END where MOD(EF_ROW_ID, "
 				+ pageSize + ") = 0";
 		sql = sql 
 				.replace(GlobalParam._scan_field, task.getScanParam().getScanField())

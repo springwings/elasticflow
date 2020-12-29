@@ -47,7 +47,7 @@ public class Searcher {
 				this.handler = (Handler) Class.forName(instanceConfig.getPipeParams().getSearcherHandler()).newInstance();
 			}
 		}catch(Exception e){
-			log.error("FNSearcher Handler Exception",e);
+			log.error("Searcher Handler Exception",e);
 		}
 	}
 
@@ -86,8 +86,8 @@ public class Searcher {
 				response.setPayload(formatResult(this.searcherFlowSocket.Search(searcherModel, instanceName,handler)));
 			} 
 		} catch (Exception e) {
-			response.setStatus("search parameter may be error!",RESPONSE_STATUS.ParameterErr);
-			log.error(rq.getPipe()+" FNResponse Exception,", e);
+			response.setStatus("searcher parameter may be error!",RESPONSE_STATUS.ParameterErr);
+			log.error(rq.getPipe()+" searcher Response Exception,", e);
 		}
 		return response;
 	}  

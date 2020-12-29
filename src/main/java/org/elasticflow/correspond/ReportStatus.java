@@ -5,7 +5,7 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.ConfigStorer;
  
 /**
- * report node machine status with heartBeat and correspond job status
+ * Report EF machine node status.
  * @author chengwen
  * @version 2.0
  * @date 2018-11-21 15:43

@@ -12,7 +12,7 @@ import org.elasticflow.model.searcher.SearcherResult;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.searcher.SearcherFlowSocket;
 import org.elasticflow.searcher.handler.Handler;
-import org.elasticflow.util.FNException;
+import org.elasticflow.util.EFException;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -44,7 +44,7 @@ public final class ESFlow extends SearcherFlowSocket {
 	@SuppressWarnings("unchecked")
 	@Override
 	public SearcherResult Search(SearcherModel<?, ?, ?> fq, String instance,Handler handler)
-			throws FNException {
+			throws EFException {
 		PREPARE(false, true);
 		boolean releaseConn = false;
 		SearcherResult res = new SearcherResult();

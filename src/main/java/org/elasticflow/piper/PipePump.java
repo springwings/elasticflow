@@ -21,10 +21,10 @@ import org.elasticflow.node.CPU;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.handler.Handler;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.FNException;
-import org.elasticflow.util.FNException.ELEVEL;
-import org.elasticflow.util.FNException.ETYPE;
-import org.elasticflow.util.PipeNorms;
+import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ELEVEL;
+import org.elasticflow.util.EFException.ETYPE;
+import org.elasticflow.util.PipeNormsUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
@@ -62,7 +62,7 @@ public final class PipePump extends Instruction {
 	}
 
 	public void run(String instance, String storeId, String L1seq, boolean isFull, boolean writeInSamePosition)
-			throws FNException {
+			throws EFException {
 		JOB_TYPE job_type;
 		String mainName = Common.getMainName(instance, L1seq);
 		String writeTo = writeInSamePosition ? getInstanceConfig().getPipeParams().getInstanceName() : mainName;
@@ -122,10 +122,10 @@ public final class PipePump extends Instruction {
 	 * @param L2seqs
 	 * @param writeTo
 	 * @param masterControl
-	 * @throws FNException
+	 * @throws EFException
 	 */
 	private void processFlow(Task task, String mainName, String storeId, List<String> L2seqs, String writeTo,
-			boolean writeInSamePosition) throws FNException {
+			boolean writeInSamePosition) throws EFException {
 		for (String L2seq : L2seqs) {
 			try {
 				task.setL2seq(L2seq);
@@ -136,10 +136,10 @@ public final class PipePump extends Instruction {
 						getInstanceConfig().getPipeParams().getReadPageSize());
 				getReader().lock.unlock();
 				if (pageList == null)
-					throw new FNException("read data get page split exception!", ELEVEL.Termination);
+					throw new EFException("read data get page split exception!", ELEVEL.Termination);
 				processListsPages(task, writeTo, pageList, storeId);
 
-			} catch (FNException e) {
+			} catch (EFException e) {
 				if (task.getJobType().equals(JOB_TYPE.FULL) && !writeInSamePosition) {
 					for (int t = 0; t < 5; t++) {
 						getWriter().PREPARE(false, false);
@@ -165,7 +165,7 @@ public final class PipePump extends Instruction {
 	}
 
 	private void processListsPages(Task task, String writeTo, ConcurrentLinkedDeque<String> pageList, String storeId)
-			throws FNException {
+			throws EFException {
 		String mainName = Common.getMainName(task.getInstance(), task.getL1seq());
 		int pageNum = pageList.size();
 		if (pageNum == 0) {
@@ -194,7 +194,7 @@ public final class PipePump extends Instruction {
 				try {
 					synThreads.await();
 				} catch (Exception e) {
-					throw new FNException(e);
+					throw new EFException(e);
 				}
 			} else {
 				singleThread(task, storeId, pageList, writeTo, computeModel, total);
@@ -203,7 +203,7 @@ public final class PipePump extends Instruction {
 					task.getL2seq(), total.get(), "",
 					GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(task.getL2seq()), Common.getNow() - start, ""));
 			if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination))
-				throw new FNException(
+				throw new EFException(
 						task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
 		}
 	}
@@ -212,10 +212,10 @@ public final class PipePump extends Instruction {
 	 * use single thread process task, it is a safe mode support recover mechanism
 	 * 
 	 * @param pageList
-	 * @throws FNException
+	 * @throws EFException
 	 */
 	private void singleThread(Task task, String storeId, ConcurrentLinkedDeque<String> pageList, String writeTo,
-			String computeModel, AtomicInteger total) throws FNException {
+			String computeModel, AtomicInteger total) throws EFException {
 		ReaderState rState = null;
 		int processPos = 0;
 		String startId = "0";
@@ -232,7 +232,7 @@ public final class PipePump extends Instruction {
 			processPos++;
 			Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name())
 					.put(task.getInstance() + task.getL2seq(), processPos + "/" + pageList.size());
-			String dataScanDSL = PipeNorms.fillParam(task.getScanParam().getDataScanDSL(), PipeNorms.getScanParam(
+			String dataScanDSL = PipeNormsUtil.fillParam(task.getScanParam().getDataScanDSL(), PipeNormsUtil.getScanParam(
 					task.getL2seq(), startId, dataBoundary, task.getStartTime(), task.getEndTime(), scanField));
 			if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination)) {
 				break;
@@ -260,7 +260,7 @@ public final class PipePump extends Instruction {
 							isUpdate, false);
 				}
 				if (rState.isStatus() == false)
-					throw new FNException("writeDataSet data exception!");
+					throw new EFException("writeDataSet data exception!");
 				total.getAndAdd(rState.getCount());
 				startId = dataBoundary;
 			}
@@ -334,8 +334,8 @@ public final class PipePump extends Instruction {
 				processPos.incrementAndGet();
 				Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name())
 						.put(task.getInstance() + task.getL2seq(), processPos + "/" + this.pageSize);
-				String dataScanDSL = PipeNorms.fillParam(task.getScanParam().getDataScanDSL(),
-						PipeNorms.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
+				String dataScanDSL = PipeNormsUtil.fillParam(task.getScanParam().getDataScanDSL(),
+						PipeNormsUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
 								task.getEndTime(), task.getScanParam().getScanField()));
 				if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(),
 						STATUS.Termination)) {

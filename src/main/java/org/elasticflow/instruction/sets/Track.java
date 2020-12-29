@@ -11,7 +11,7 @@ import org.elasticflow.node.CPU;
 import org.elasticflow.yarn.Resource;
 
 /**
- *  * runtime manage
+ * runtime info manage
  * @author chengwen
  * @version 2.1
  * @date 2018-11-02 16:47

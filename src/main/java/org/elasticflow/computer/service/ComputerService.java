@@ -25,7 +25,7 @@ import org.elasticflow.util.Common;
 import org.elasticflow.yarn.Resource;
 
 /**
- * 
+ * Provide computing REST service
  * @author chengwen
  * @version 1.0
  * @date 2018-10-31 14:46

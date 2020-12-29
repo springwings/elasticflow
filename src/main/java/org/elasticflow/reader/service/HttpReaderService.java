@@ -32,7 +32,7 @@ import org.elasticflow.piper.PipePump;
 import org.elasticflow.service.EFService;
 import org.elasticflow.service.HttpService;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.FNException;
+import org.elasticflow.util.EFException;
 import org.elasticflow.util.MD5Util;
 import org.elasticflow.yarn.Resource;
 
@@ -105,7 +105,7 @@ public class HttpReaderService {
 							String keycolumn = (String) RR.getParam("keycolumn");
 							String updatecolumn = (String) RR.getParam("updatecolumn");
 							boolean monopoly = false;
-							if (RR.getParam("fn_is_monopoly") != null && RR.getParam("fn_is_monopoly").equals("true"))
+							if (RR.getParam("ef_is_monopoly") != null && RR.getParam("ef_is_monopoly").equals("true"))
 								monopoly = true;
 
 							PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instance, seq, false,
@@ -122,7 +122,7 @@ public class HttpReaderService {
 							}
 							boolean isUpdate = false;
 
-							if (RR.getParam("fn_is_update") != null && RR.getParam("fn_is_update").equals("true"))
+							if (RR.getParam("ef_is_update") != null && RR.getParam("ef_is_update").equals("true"))
 								isUpdate = true;
 
 							try {
@@ -138,8 +138,8 @@ public class HttpReaderService {
 								Common.LOG.error("Http Write Exception,", e);
 								rps.setStatus("Write failure data error!", RESPONSE_STATUS.DataErr);
 								try {
-									throw new FNException("写入参数错误，instance:" + instance + ",seq:" + seq);
-								} catch (FNException fe) {
+									throw new EFException("写入参数错误，instance:" + instance + ",seq:" + seq);
+								} catch (EFException fe) {
 									e.printStackTrace();
 								}
 							}

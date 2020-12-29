@@ -21,6 +21,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 
+/** 
+ * @author chengwen
+ * @version 1.2
+ * @date 2018-10-11 11:00
+ */
+
 @Component
 public class EFEmailSender extends WebApplicationObjectSupport {
 	private static Logger log = LoggerFactory.getLogger(EFEmailSender.class);
@@ -88,10 +94,10 @@ public class EFEmailSender extends WebApplicationObjectSupport {
 
 	private boolean sendHtmlMail(EmailConfig mailInfo) {
 
-		MyAuthenticator authenticator = null;
+		EFAuthenticator authenticator = null;
 		Properties pro = mailInfo.getProperties();
 		if (mailInfo.isValidate()) {
-			authenticator = new MyAuthenticator(mailInfo.getUserName(),
+			authenticator = new EFAuthenticator(mailInfo.getUserName(),
 					mailInfo.getPassword());
 		}
 		Session sendMailSession = Session

@@ -13,7 +13,7 @@ import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.util.FNException;
+import org.elasticflow.util.EFException;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +48,7 @@ public class Neo4jFlow extends WriterFlowSocket {
 
 	@Override
 	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams, String instance,
-			String storeId, boolean isUpdate) throws FNException {
+			String storeId, boolean isUpdate) throws EFException {
 		boolean releaseConn = false;
 		try { 
 			PREPARE(false, false);
@@ -71,7 +71,7 @@ public class Neo4jFlow extends WriterFlowSocket {
 	}
 
 	@Override
-	public void delete(String instance, String storeId, String keyColumn, String keyVal) throws FNException {
+	public void delete(String instance, String storeId, String keyColumn, String keyVal) throws EFException {
 		// TODO Auto-generated method stub
 		
 	}

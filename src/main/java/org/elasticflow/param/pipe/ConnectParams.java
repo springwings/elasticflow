@@ -3,6 +3,12 @@ package org.elasticflow.param.pipe;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.param.warehouse.WarehouseParam;
 
+/**
+ * 
+ * @author chengwen
+ * @version 1.0
+ * @date 2018-05-22 09:08
+ */
 public class ConnectParams {
 	private String L1Seq; 
 	private Object plugin;

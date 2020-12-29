@@ -7,6 +7,13 @@ import java.io.FileWriter;
 
 import org.elasticflow.config.GlobalParam;
 
+/**
+ * Instance configuration storage control
+ * 
+ * @author chengwen
+ * @version 1.2
+ * @date 2018-10-11 11:00
+ */
 public class ConfigStorer {
 
 	public static boolean exists(String path) {

@@ -44,7 +44,7 @@ import org.w3c.dom.NodeList;
 import net.sf.json.JSONObject; 
 
 /**
- * Common Util Package
+ * Common Utils Package
  * @author chengwen
  * @version 1.2
  * @date 2018-10-11 11:00

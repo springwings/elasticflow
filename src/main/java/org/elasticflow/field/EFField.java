@@ -3,6 +3,7 @@ package org.elasticflow.field;
 import org.elasticflow.writerUnit.handler.Handler;
 
 /**
+ * Definition of data fields in data-flow 
  * 
  * @author chengwen
  * @version 1.0

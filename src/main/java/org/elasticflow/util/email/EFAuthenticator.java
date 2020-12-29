@@ -3,13 +3,18 @@ package org.elasticflow.util.email;
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
  
-public class MyAuthenticator extends Authenticator{
+/** 
+ * @author chengwen
+ * @version 1.2
+ * @date 2018-10-11 11:00
+ */ 
+public class EFAuthenticator extends Authenticator{
 	String userName=null;
 	String password=null;
 	 
-	public MyAuthenticator(){
+	public EFAuthenticator(){
 	}
-	public MyAuthenticator(String username, String password) { 
+	public EFAuthenticator(String username, String password) { 
 		this.userName = username; 
 		this.password = password; 
 	} 

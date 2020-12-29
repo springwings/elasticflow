@@ -8,8 +8,8 @@ import org.elasticflow.model.reader.ReaderState;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.FNException;
-import org.elasticflow.util.FNException.ETYPE;
+import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ETYPE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,7 +103,7 @@ public class Pipe extends Instruction {
 				rstate.setCount(num);
 				log.info(Common.formatLog("onepage"," -- " + id + " onepage ", instance, storeId, L2seq, num,
 						DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));
-			} catch (FNException e) {
+			} catch (EFException e) {
 				if (e.getErrorType().equals(ETYPE.WRITE_POS_NOT_FOUND)) {
 					throw e;
 				} else {

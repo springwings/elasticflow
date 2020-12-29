@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ * zookeeper utils
  * @author chengwen
  * @version 2.0
  * @date 2018-10-26 09:14

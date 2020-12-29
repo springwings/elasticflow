@@ -1,7 +1,7 @@
 package org.elasticflow.field.handler;
 
 import org.elasticflow.field.FieldHandler;
-import org.elasticflow.util.FNException;
+import org.elasticflow.util.EFException;
 
 /**
  * 
@@ -16,7 +16,7 @@ public class LongRange implements FieldHandler{
 	public final static String RangeSeperator = "_"; 
  
 	public static LongRange valueOf(String s)
-			throws FNException {
+			throws EFException {
 		LongRange ir = new LongRange();
 		ir.parse(s);
 		return ir;
@@ -28,9 +28,9 @@ public class LongRange implements FieldHandler{
 	} 
 	
 	@Override
-	public void parse(String s) throws FNException {  
+	public void parse(String s) throws EFException {  
 		if (s == null) {
-			throw new FNException("parse error with value is null!");
+			throw new EFException("parse error with value is null!");
 		} 
 		int seg = s.indexOf(RangeSeperator);
 		if (seg >= s.length()) {
@@ -52,7 +52,7 @@ public class LongRange implements FieldHandler{
 					this.setMax(max);
 				}
 			} catch (Exception e) {
-				throw new FNException(e);
+				throw new EFException(e);
 			}
 		} 
 	} 

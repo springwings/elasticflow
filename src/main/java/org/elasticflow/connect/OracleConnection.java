@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @date 2018-10-26 09:25
  */
-public class OracleConnection extends FnConnectionSocket<Connection> {
+public class OracleConnection extends EFConnectionSocket<Connection> {
 
 	private Connection conn = null;
 
@@ -28,8 +28,8 @@ public class OracleConnection extends FnConnectionSocket<Connection> {
 		}
 	}
 
-	public static FnConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
-		FnConnectionSocket<?> o = new OracleConnection();
+	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
+		EFConnectionSocket<?> o = new OracleConnection();
 		o.init(ConnectParams);
 		o.connect();
 		return o;

@@ -25,7 +25,7 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.searcher.SearcherFlowSocket;
 import org.elasticflow.searcher.handler.Handler;
-import org.elasticflow.util.FNException;
+import org.elasticflow.util.EFException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +65,7 @@ public class SolrFlow extends SearcherFlowSocket {
 	} 
 
 	@Override
-	public SearcherResult Search(SearcherModel<?, ?, ?> fq, String instance,Handler handler) throws FNException{
+	public SearcherResult Search(SearcherModel<?, ?, ?> fq, String instance,Handler handler) throws EFException{
 		SearcherResult res = new SearcherResult();
 		PREPARE(false, true);
 		boolean releaseConn = false;

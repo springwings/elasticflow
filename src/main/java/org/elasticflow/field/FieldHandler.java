@@ -1,6 +1,6 @@
 package org.elasticflow.field;
 
-import org.elasticflow.util.FNException;
+import org.elasticflow.util.EFException;
 
 /**
  * 
@@ -10,6 +10,6 @@ import org.elasticflow.util.FNException;
  */
 public interface FieldHandler{ 
 	
-	public void parse(String s) throws FNException;
+	public void parse(String s) throws EFException;
 	
 }

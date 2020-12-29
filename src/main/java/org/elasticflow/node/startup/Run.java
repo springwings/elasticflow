@@ -25,7 +25,7 @@ import org.elasticflow.searcher.service.SearcherService;
 import org.elasticflow.service.EFMonitor;
 import org.elasticflow.task.FlowTask;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.FNIoc;
+import org.elasticflow.util.EFLoc;
 import org.elasticflow.util.ConfigStorer;
 import org.elasticflow.util.NodeUtil;
 import org.elasticflow.util.ZKUtil;
@@ -166,7 +166,7 @@ public final class Run {
 	} 
 
 	public static void main(String[] args) throws Exception {
-		Resource.EFLOWS = (Run) FNIoc.getBean("EFLOWS");
+		Resource.EFLOWS = (Run) EFLoc.getBean("EFLOWS");
 		Resource.EFLOWS.start();
 	}
 

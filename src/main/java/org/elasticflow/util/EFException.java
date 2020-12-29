@@ -6,7 +6,7 @@ package org.elasticflow.util;
  * @version 1.0
  * @date 2018-11-07 14:12
  */
-public class FNException extends Exception {
+public class EFException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
@@ -26,17 +26,17 @@ public class FNException extends Exception {
 
 	private ETYPE e_type;
 
-	public FNException(String msg) {
+	public EFException(String msg) {
 		super(msg);
 		e_level = ELEVEL.Ignore;
 	}
 
-	public FNException(String msg, ELEVEL etype) {
+	public EFException(String msg, ELEVEL etype) {
 		super(msg);
 		e_level = etype;
 	}
 
-	public FNException(String msg, ELEVEL elevel, ETYPE etype) {
+	public EFException(String msg, ELEVEL elevel, ETYPE etype) {
 		super(msg);
 		e_level = elevel;
 		e_type = etype;
@@ -50,7 +50,7 @@ public class FNException extends Exception {
 		return e_type;
 	}
 
-	public FNException(Exception e) {
+	public EFException(Exception e) {
 		super(e);
 	}
 }

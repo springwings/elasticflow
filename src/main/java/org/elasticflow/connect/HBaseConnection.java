@@ -17,15 +17,15 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @date 2018-10-26 09:25
  */
-public class HBaseConnection extends FnConnectionSocket<Table>{
+public class HBaseConnection extends EFConnectionSocket<Table>{
 	private final static Logger log = LoggerFactory
 			.getLogger("HBase Socket");
 	private Configuration hbaseConfig;
 	private Connection Hconn;
 	private Table conn;
 
-	public static FnConnectionSocket<?> getInstance(ConnectParams connectParams) {
-		FnConnectionSocket<?> o = new HBaseConnection();
+	public static EFConnectionSocket<?> getInstance(ConnectParams connectParams) {
+		EFConnectionSocket<?> o = new HBaseConnection();
 		o.init(connectParams);
 		o.connect();
 		return o;

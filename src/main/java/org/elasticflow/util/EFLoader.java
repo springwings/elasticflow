@@ -8,7 +8,7 @@ import java.io.InputStream;
 import org.elasticflow.config.GlobalParam;
 
 /**
- * 
+ * Auto load class in runtime
  * @author chengwen
  * @version 1.0
  * @date 2019-01-15 11:07

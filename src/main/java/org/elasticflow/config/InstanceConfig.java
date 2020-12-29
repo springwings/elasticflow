@@ -26,7 +26,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * instance configs loading 
+ * instance Configuration model
  * @author chengwen
  * @version 3.1 
  * @date 2018-10-11 15:13

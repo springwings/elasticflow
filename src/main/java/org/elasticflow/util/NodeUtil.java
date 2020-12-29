@@ -7,6 +7,14 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.yarn.Resource;
 
+/**
+ * system running control
+ * @author chengwen
+ * @version 1.0
+ * @date 2019-01-15 11:07
+ * @modify 2019-01-15 11:07
+ */
+
 public final class NodeUtil {
 
 	/**

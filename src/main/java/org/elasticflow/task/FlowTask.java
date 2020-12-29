@@ -9,8 +9,8 @@ import org.elasticflow.node.CPU;
 import org.elasticflow.piper.Breaker;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.FNException;
-import org.elasticflow.util.FNException.ETYPE;
+import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,12 +174,12 @@ public class FlowTask {
  
 			try {
 				transDataFlow.run(instance, storeId, L1seq, false, writeInSamePosition); 
-			} catch (FNException e) {
+			} catch (EFException e) {
 				if (!writeInSamePosition && e.getErrorType()==ETYPE.WRITE_POS_NOT_FOUND) {
 					storeId = Common.getStoreId(instance, L1seq, transDataFlow, true, true);
 					try {
 						transDataFlow.run(instance, storeId,L1seq, false, writeInSamePosition);
-					} catch (FNException ex) {
+					} catch (EFException ex) {
 						log.error(instance + " Increment Exception", ex);
 					}
 				}else {

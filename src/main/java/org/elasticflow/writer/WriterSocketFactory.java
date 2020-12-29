@@ -12,9 +12,10 @@ import org.elasticflow.writer.flow.Neo4jFlow;
 import org.elasticflow.writer.flow.SolrFlow;
 
 /**
- * @param args getInstance function parameters:WarehouseParam param, String seq,String handler
+ * 
  * @author chengwen
- *  @version 1.0
+ * @version 4.0
+ * @date 2018-11-14 16:54
  */
 public class WriterSocketFactory implements Socket<WriterFlowSocket>{ 
 	
@@ -24,7 +25,10 @@ public class WriterSocketFactory implements Socket<WriterFlowSocket>{
 		return o.getSocket(args);
 	}
 	
- 
+	/**
+	 * args getInstance function parameters
+	 * WarehouseParam param, String seq,String handler
+	 */
 	@Override
 	public WriterFlowSocket getSocket(Object... args) {
 		ConnectParams param = (ConnectParams) args[0];

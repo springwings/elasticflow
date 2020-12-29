@@ -16,7 +16,7 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
-import org.elasticflow.util.FNException;
+import org.elasticflow.util.EFException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,16 +74,16 @@ public class MysqlFlow extends ReaderFlowSocket{
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) {
 		String sql;
 		if(task.getScanParam().getPageScanDSL()!=null){
-			sql = " select "+GlobalParam._page_field+" as id,(@a:=@a+1) AS FN_ROW_ID from ("
+			sql = " select "+GlobalParam._page_field+" as id,(@a:=@a+1) AS EF_ROW_ID from ("
 					+ task.getScanParam().getPageScanDSL()
-					+ ") FN_FPG_MAIN join (SELECT @a := -1) FN_FPG_ROW order by "+GlobalParam._page_field+" desc";
+					+ ") EF_FPG_MAIN join (SELECT @a := -1) EF_FPG_ROW order by "+GlobalParam._page_field+" desc";
 		}else{
-			sql = " select "+GlobalParam._page_field+" as id,(@a:=@a+1) AS FN_ROW_ID from ("
+			sql = " select "+GlobalParam._page_field+" as id,(@a:=@a+1) AS EF_ROW_ID from ("
 					+ task.getScanParam().getDataScanDSL()
-					+ ") FN_FPG_MAIN join (SELECT @a := -1) FN_FPG_ROW order by "+GlobalParam._page_field+" desc"; 
+					+ ") EF_FPG_MAIN join (SELECT @a := -1) EF_FPG_ROW order by "+GlobalParam._page_field+" desc"; 
 		}
 		sql = " select id from (" + sql
-				+ ") FN_FPG_END where MOD(FN_ROW_ID, "+pageSize+") = 0";
+				+ ") EF_FPG_END where MOD(EF_ROW_ID, "+pageSize+") = 0";
 		sql = sql 
 				.replace(GlobalParam._scan_field, task.getScanParam().getScanField())
 				.replace(GlobalParam._page_field, task.getScanParam().getPageField())
@@ -148,7 +148,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 		return page;
 	} 
 	
-	private void getAllData(ResultSet rs,Map<String, EFField> transParam) throws FNException {   
+	private void getAllData(ResultSet rs,Map<String, EFField> transParam) throws EFException {   
 		String dataBoundary = null;
 		String LAST_STAMP=null;
 		try {  
@@ -172,7 +172,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 			}
 			rs.close();
 		} catch (Exception e) {
-			throw new FNException(e.getMessage());
+			throw new EFException(e.getMessage());
 		}
 		if (LAST_STAMP==null){ 
 			this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis()); 

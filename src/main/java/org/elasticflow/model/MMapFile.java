@@ -1,4 +1,4 @@
-package org.elasticflow.util;
+package org.elasticflow.model;
 
 import java.nio.CharBuffer;
 import java.nio.MappedByteBuffer;

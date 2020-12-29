@@ -9,7 +9,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @version 2.0
  * @date 2018-10-26 09:19
  */
-public final class FNIoc {
+public final class EFLoc {
 	private static ApplicationContext ACT; 
 	
 	static {

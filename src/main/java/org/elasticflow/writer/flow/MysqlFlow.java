@@ -13,8 +13,8 @@ import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.FNException;
-import org.elasticflow.util.PipeNorms;
+import org.elasticflow.util.EFException;
+import org.elasticflow.util.PipeNormsUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public class MysqlFlow extends WriterFlowSocket {
 
 	@Override
 	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams, String instance,
-			String storeId, boolean isUpdate) throws FNException {
+			String storeId, boolean isUpdate) throws EFException {
 		String table = Common.getStoreName(instance, storeId);
 		boolean releaseConn = false;
 		try { 
@@ -39,7 +39,7 @@ public class MysqlFlow extends WriterFlowSocket {
 			if (!ISLINK())
 				return;
 			Connection conn = (Connection) GETSOCKET().getConnection(false);
-			try (PreparedStatement statement = conn.prepareStatement(PipeNorms.getWriteSql(table, unit, transParams));) {
+			try (PreparedStatement statement = conn.prepareStatement(PipeNormsUtil.getWriteSql(table, unit, transParams));) {
 				statement.execute();
 			} catch (Exception e) {
 				log.error("PreparedStatement Exception", e);
@@ -86,7 +86,7 @@ public class MysqlFlow extends WriterFlowSocket {
 	} 
 
 	@Override
-	public void delete(String instance, String storeId, String keyColumn, String keyVal) throws FNException {
+	public void delete(String instance, String storeId, String keyColumn, String keyVal) throws EFException {
 		// TODO Auto-generated method stub
 		
 	}
