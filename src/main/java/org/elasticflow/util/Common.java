@@ -28,7 +28,7 @@ import org.elasticflow.field.EFField;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.model.NMRequest;
-import org.elasticflow.model.ResponseState;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.node.CPU;
 import org.elasticflow.param.warehouse.WarehouseParam;
@@ -44,7 +44,7 @@ import org.w3c.dom.NodeList;
 import net.sf.json.JSONObject; 
 
 /**
- * 
+ * Common Util Package
  * @author chengwen
  * @version 1.2
  * @date 2018-10-11 11:00
@@ -491,7 +491,7 @@ public final class Common {
 		return method.invoke(c,String.valueOf(v));
 	}
 	
-	public static EFRequest getEFRequest(Request rq,ResponseState rps) {
+	public static EFRequest getEFRequest(Request rq,EFResponse rps) {
 		EFRequest RR = null;
 		String ctype = rq.getHeader("Content-type"); 
 		if(ctype!=null && ctype.contentEquals("application/json")) {
@@ -517,14 +517,15 @@ public final class Common {
 	 * @param input
 	 * @return
 	 */
+	@SuppressWarnings("rawtypes")
 	public static EFRequest getRequest(String jsonInput) {
 		EFRequest rr = EFRequest.getInstance(); 
 		JSONObject jsonObject = JSONObject.fromObject(jsonInput);
 		Iterator<?> iter = jsonObject.entrySet().iterator();
         while (iter.hasNext()) {
-            Map.Entry entry = (Map.Entry) iter.next();
+        	Map.Entry entry = (Map.Entry) iter.next(); 
             rr.addParam(entry.getKey().toString(), entry.getValue()); 
-        } 
+        }  
         return rr;
 	}
 	

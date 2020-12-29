@@ -8,7 +8,7 @@ import java.util.Map;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.EFRequest;
-import org.elasticflow.model.ResponseState;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.searcher.ResponseDataUnit;
 import org.elasticflow.model.searcher.SearcherESModel;
 import org.elasticflow.model.searcher.SearcherModel;
@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * provide search service
+ * @description ElasticFlow search service base model
  * @author chengwen
  * @version 2.0
  * @date 2018-11-01 17:01
@@ -51,8 +51,8 @@ public class Searcher {
 		}
 	}
 
-	public ResponseState startSearch(EFRequest rq) {
-		ResponseState response = ResponseState.getInstance();
+	public EFResponse startSearch(EFRequest rq) {
+		EFResponse response = EFResponse.getInstance();
 		response.setInstance(instanceName);
 		response.setRequest(rq.getParams());
 		/** check validation */

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
-* @description Node monitoring accepted parameters
+* ElasticFlow Node monitoring accepted parameters
 * @author chengwen
 * @version 1.0
 * @data 2020-12-24

@@ -1,8 +1,6 @@
 package org.elasticflow.searcher.service;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,26 +8,26 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.handler.AbstractHandler;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
-import org.elasticflow.model.ResponseState;
+import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.EFRequest;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.node.SocketCenter;
 import org.elasticflow.service.EFService;
 import org.elasticflow.service.HttpService;
 import org.elasticflow.util.Common;
 import org.elasticflow.yarn.Resource;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
+import org.mortbay.jetty.handler.AbstractHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * searcher open http port support service
+ * ElasticFlow searcher, support rest service
  * @author chengwen
- *
+ * @version 1.0
+ * @date 2018-07-22 09:08
  */
 public class SearcherService{
 	 
@@ -57,9 +55,9 @@ public class SearcherService{
 		return true;
 	} 
 	
-	public ResponseState process(EFRequest request) throws InstantiationException, IllegalAccessException, ClassNotFoundException { 
+	public EFResponse process(EFRequest request) throws InstantiationException, IllegalAccessException, ClassNotFoundException { 
 		long startTime = System.currentTimeMillis();
-		ResponseState response = null; 
+		EFResponse response = null; 
 		String pipe = request.getPipe(); 
 		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getSearchConfigs();
 		if (configMap.containsKey(pipe)) {  
@@ -85,7 +83,7 @@ public class SearcherService{
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.setHeader("PowerBy", GlobalParam.PROJ); 
 			rq.setHandled(true);
-			ResponseState rps = ResponseState.getInstance(); 
+			EFResponse rps = EFResponse.getInstance(); 
 			try {
 				EFRequest RR = Common.getEFRequest(rq, rps);
 				if(RR!=null) {

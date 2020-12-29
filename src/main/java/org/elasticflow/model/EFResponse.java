@@ -11,12 +11,12 @@ import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import com.alibaba.fastjson.JSON;
 
 /**
- * 
+ * ElasticFlow response model
  * @author chengwen
  * @version 2.0
  * @date 2018-11-05 13:53
  */
-public class ResponseState {
+public class EFResponse {
 	protected Map<String, String> parsedParams = new HashMap<>();
 	private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	protected Object payload = null;
@@ -26,8 +26,8 @@ public class ResponseState {
 	private String instance = ""; 
 	public Map<String, Object> response = new LinkedHashMap<>();
 
-	public static ResponseState getInstance() {
-		ResponseState rs = new ResponseState();
+	public static EFResponse getInstance() {
+		EFResponse rs = new EFResponse();
 		rs.response.put("status", RESPONSE_STATUS.Success);
 		rs.response.put("info", "");
 		rs.response.put("instance",null);

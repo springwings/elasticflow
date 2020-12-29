@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.model.ResponseState;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.node.SocketCenter;
 import org.elasticflow.service.EFService;
@@ -55,9 +55,9 @@ public class ComputerService {
 		} 
 		return true;
 	}
-	public ResponseState process(EFRequest request) { 
+	public EFResponse process(EFRequest request) { 
 		long startTime = System.currentTimeMillis();
-		ResponseState response = null; 
+		EFResponse response = null; 
 		String pipe = request.getPipe(); 
 		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 		if (configMap.containsKey(pipe)) { 
@@ -84,7 +84,7 @@ public class ComputerService {
 			response.setHeader("PowerBy", GlobalParam.PROJ); 
 			rq.setHandled(true);
 			EFRequest RR = Common.getRequest(rq);
-			ResponseState rps = ResponseState.getInstance();
+			EFResponse rps = EFResponse.getInstance();
 			rps.setRequest(RR.getParams());
 			if (Resource.nodeConfig.getSearchConfigs().containsKey(
 					RR.getPipe())) {

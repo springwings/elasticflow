@@ -24,7 +24,7 @@ import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
 /**
- * 
+ * @description
  * @author chengwen
  * @version 1.0
  * @date 2018-07-22 09:08

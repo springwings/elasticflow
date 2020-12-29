@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.elasticflow.node.CPU;
 
 /**
- * 
+ * Instruction data structure
  * @author chengwen
  * @version 1.0
  * @date 2018-06-22 09:08

@@ -3,7 +3,7 @@ package org.elasticflow.computer;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.ml.Algorithm;
 import org.elasticflow.model.Page;
-import org.elasticflow.model.ResponseState;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.computer.SamplePoint;
 import org.elasticflow.model.reader.DataPage;
@@ -39,8 +39,8 @@ public class Computer {
 		this.readerFlowSocket = readerFlowSocket;
 	}
 	
-	public ResponseState startCompute(EFRequest rq) {
-		ResponseState response = ResponseState.getInstance();
+	public EFResponse startCompute(EFRequest rq) {
+		EFResponse response = EFResponse.getInstance();
 		response.setInstance(instanceName); 
 		if(model==null) {
 			log.info("start loading model..."); 

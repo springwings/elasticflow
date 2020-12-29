@@ -11,6 +11,7 @@ import org.elasticflow.util.Common;
  * global node data store position  
  * @author chengwen
  * @version 1.0 
+ * @date 2018-07-22 09:08
  */
 public final class GlobalParam {
 	

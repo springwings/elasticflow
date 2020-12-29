@@ -29,7 +29,7 @@ import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connect.FnConnectionPool;
 import org.elasticflow.model.InstructionTree;
-import org.elasticflow.model.ResponseState;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.param.pipe.InstructionParam;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.param.warehouse.WarehouseParam;
@@ -126,7 +126,7 @@ public final class NodeMonitor {
 		} 
 	}
 
-	public void ac(Request rq,ResponseState RS) {
+	public void ac(Request rq,EFResponse RS) {
 		try {
 			if (this.actions.contains(rq.getParameter("ac"))) {
 				Method m = NodeMonitor.class.getMethod(rq.getParameter("ac"), Request.class);
