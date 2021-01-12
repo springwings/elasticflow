@@ -15,6 +15,8 @@ import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connect.ESConnector;
 import org.elasticflow.field.EFField;
+import org.elasticflow.field.FieldHandler;
+import org.elasticflow.field.handler.LongRangeType;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
@@ -135,7 +137,11 @@ public class ESFlow extends WriterFlowSocket {
 						cbuilder.array(transParam.getAlias(), vs);
 					}else if (transParam.getIndextype().equals("nested")) { 
 						cbuilder.array(transParam.getAlias(),JSONArray.fromObject(value));	
-					} else 
+					} else if(transParam.getParamtype().contains("org.elasticflow.field.handler")) {
+						FieldHandler<?> _v = (FieldHandler<?>)Common.parseFieldValue(String.valueOf(value), transParam);
+						cbuilder.field(transParam.getAlias(), 
+								_v.getVal());
+					}else
 						cbuilder.field(transParam.getAlias(), value);
 				} else {
 					cbuilder.field(transParam.getAlias(), value);

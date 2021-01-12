@@ -12,7 +12,7 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.QUERY_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
-import org.elasticflow.field.handler.LongRange;
+import org.elasticflow.field.handler.LongRangeType;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.param.end.SearcherParam;
 import org.elasticflow.util.Common;
@@ -162,9 +162,9 @@ public class ESQueryParser implements QueryParser{
 			QueryBuilder query = null;
 			if (!not_analyzed) {
 				query = fieldParserQuery(key, String.valueOf(v), fuzzy);
-			} else if (tp.getParamtype().equals("org.elasticflow.field.handler.LongRange")) {
+			} else if (tp.getParamtype().equals("org.elasticflow.field.handler.LongRangeType")) {
 				Object _v = Common.parseFieldValue(v, tp);
-				LongRange val = (LongRange) _v; 
+				LongRangeType val = (LongRangeType) _v; 
 				query = QueryBuilders.rangeQuery(key).from(val.getMin()).to(val.getMax())
 						.includeLower(sp == null ? true : sp.isIncludeLower())
 						.includeUpper(sp == null ? true : sp.isIncludeUpper());
