@@ -2,6 +2,7 @@ package org.elasticflow.writer.flow;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -16,7 +17,6 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connect.ESConnector;
 import org.elasticflow.field.EFField;
 import org.elasticflow.field.FieldHandler;
-import org.elasticflow.field.handler.LongRangeType;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
@@ -25,69 +25,72 @@ import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.writer.WriterFlowSocket;
-import org.elasticsearch.action.admin.indices.alias.exists.AliasesExistResponse;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
+import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
+import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest.AliasActions;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.forcemerge.ForceMergeRequest;
 import org.elasticsearch.action.admin.indices.forcemerge.ForceMergeResponse;
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
-import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
-import org.elasticsearch.action.index.IndexRequestBuilder;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.client.core.CountResponse;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.reindex.UpdateByQueryAction;
-import org.elasticsearch.index.reindex.UpdateByQueryRequestBuilder;
+import org.elasticsearch.index.reindex.UpdateByQueryRequest;
 import org.elasticsearch.script.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
- 
+
 /**
  * ElasticSearch Writer Manager
+ * 
  * @author chengwen
  * @version 2.0
  * @date 2018-10-30 14:02
  */
 @NotThreadSafe
 public class ESFlow extends WriterFlowSocket {
-	
+
 	protected ESConnector CONNS;
-	
-	private boolean reconn=false;
- 
+
+	private boolean reconn = false;
+
 	private final static Logger log = LoggerFactory.getLogger("ESFlow");
 
 	public static ESFlow getInstance(ConnectParams connectParams) {
 		ESFlow o = new ESFlow();
 		o.INIT(connectParams);
 		return o;
-	} 
+	}
 
 	@Override
 	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams, String instance,
-			String storeId, boolean isUpdate) throws EFException { 
+			String storeId, boolean isUpdate) throws EFException {
 		String name = Common.getStoreName(instance, storeId);
 		String type = instance;
-		if (unit==null || unit.getData().size() == 0) {
-			log.info(instance+" WriteUnit contain Dirty data!");
+		if (unit == null || unit.getData().size() == 0) {
+			log.info(instance + " WriteUnit contain Dirty data!");
 			return;
-		} 
-		if(writerParam.getKeyType().equals("scan")) {
-			this.updateByScan(writerParam,unit, transParams, name, type, storeId, isUpdate);
-		}else {
+		}
+		if (writerParam.getKeyType().equals("scan")) {
+			this.updateByScan(writerParam, unit, transParams, name, type, storeId, isUpdate);
+		} else {
 			this.updateByKey(unit, transParams, name, type, storeId, isUpdate);
-		} 
+		}
 	}
-	
-	private void updateByScan(WriterParam writerParam,PipeDataUnit unit, Map<String, EFField> transParams, String instance,String alias,
-			String storeId, boolean isUpdate) throws EFException{  
+
+	private void updateByScan(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams,
+			String instance, String alias, String storeId, boolean isUpdate) throws EFException {
 		Script script = null;
 		StringBuilder sf = new StringBuilder();
 		for (Entry<String, Object> r : unit.getData().entrySet()) {
@@ -100,20 +103,23 @@ public class ESFlow extends WriterFlowSocket {
 			if (transParam == null)
 				continue;
 			String value = String.valueOf(r.getValue());
-			sf.append("ctx._source."+transParam.getAlias()+" = "+value+","); 
-		} 
-		script = new Script(sf.append(GlobalParam.DEFAULT_FIELD+" = "+unit.getUpdateTime()).toString()); 
-		try {  
-			UpdateByQueryRequestBuilder _UR = new UpdateByQueryRequestBuilder(getESC().getClient(), UpdateByQueryAction.INSTANCE);
-			_UR.source(instance).script(script).filter(QueryBuilders.termQuery(writerParam.getWriteKey(),unit.getReaderKeyVal())).execute().get();
+			sf.append("ctx._source." + transParam.getAlias() + " = " + value + ",");
+		}
+		script = new Script(sf.append(GlobalParam.DEFAULT_FIELD + " = " + unit.getUpdateTime()).toString());
+		try {
+			UpdateByQueryRequest _UR = new UpdateByQueryRequest(instance);
+			_UR.setConflicts("proceed");
+			_UR.setScript(script).setQuery(QueryBuilders.termQuery(writerParam.getWriteKey(), unit.getReaderKeyVal()));
+			_UR.setRefresh(true);
+			getESC().getClient().updateByQuery(_UR, RequestOptions.DEFAULT);
 		} catch (Exception e) {
 			throw new EFException(e);
-		} 
+		}
 	}
-	
-	private void updateByKey(PipeDataUnit unit, Map<String, EFField> transParams, String instance,String alias,
-			String storeId, boolean isUpdate) throws EFException{
-		try { 
+
+	private void updateByKey(PipeDataUnit unit, Map<String, EFField> transParams, String instance, String alias,
+			String storeId, boolean isUpdate) throws EFException {
+		try {
 			XContentBuilder cbuilder = jsonBuilder().startObject();
 			StringBuilder routing = new StringBuilder();
 			for (Entry<String, Object> r : unit.getData().entrySet()) {
@@ -126,22 +132,22 @@ public class ESFlow extends WriterFlowSocket {
 					transParam = transParams.get(field.toLowerCase());
 				if (transParam == null)
 					continue;
-				
-				if (transParam.getAnalyzer().length()==0) {
-					if(transParam.getIndextype().equalsIgnoreCase("geo_point")) {
+
+				if (transParam.getAnalyzer().length() == 0) {
+					if (transParam.getIndextype().equalsIgnoreCase("geo_point")) {
 						String[] vs = String.valueOf(value).split(transParam.getSeparator());
-						if(vs.length==2)
+						if (vs.length == 2)
 							cbuilder.latlon(field, Double.parseDouble(vs[0]), Double.parseDouble(vs[1]));
-					}else if (transParam.getSeparator() != null) {
+					} else if (transParam.getSeparator() != null) {
 						String[] vs = String.valueOf(value).split(transParam.getSeparator());
 						cbuilder.array(transParam.getAlias(), vs);
-					}else if (transParam.getIndextype().equals("nested")) { 
-						cbuilder.array(transParam.getAlias(),JSONArray.fromObject(value));	
-					} else if(transParam.getParamtype().contains("org.elasticflow.field.handler")) {
-						FieldHandler<?> _v = (FieldHandler<?>)Common.parseFieldValue(String.valueOf(value), transParam);
-						cbuilder.field(transParam.getAlias(), 
-								_v.getVal());
-					}else
+					} else if (transParam.getIndextype().equals("nested")) {
+						cbuilder.array(transParam.getAlias(), JSONArray.fromObject(value));
+					} else if (transParam.getParamtype().contains("org.elasticflow.field.handler")) {
+						FieldHandler<?> _v = (FieldHandler<?>) Common.parseFieldValue(String.valueOf(value),
+								transParam);
+						cbuilder.field(transParam.getAlias(), _v.getVal());
+					} else
 						cbuilder.field(transParam.getAlias(), value);
 				} else {
 					cbuilder.field(transParam.getAlias(), value);
@@ -152,45 +158,47 @@ public class ESFlow extends WriterFlowSocket {
 			}
 			cbuilder.field(GlobalParam.DEFAULT_FIELD, unit.getUpdateTime());
 			cbuilder.endObject();
-			
+
 			String id = unit.getReaderKeyVal();
 			if (isUpdate) {
-				@SuppressWarnings("deprecation")
-				UpdateRequest _UR = new UpdateRequest(instance, alias, id);
+				UpdateRequest _UR = new UpdateRequest(instance, id);
 				_UR.doc(cbuilder).upsert(cbuilder);
 				if (routing.length() > 0)
 					_UR.routing(routing.toString());
 				if (this.isBatch) {
-					getESC().getBulkProcessor().add(_UR); 
+					getESC().getBulkProcessor().add(_UR);
 				} else {
-					getESC().getClient().update(_UR).get();
+					getESC().getClient().update(_UR, RequestOptions.DEFAULT);
 				}
 			} else {
-				IndexRequestBuilder _IB = getESC().getClient().prepareIndex(instance, alias, id);
-				_IB.setSource(cbuilder);
+				IndexRequest _IR = new IndexRequest(instance);
+				_IR.source(cbuilder);
 				if (routing.length() > 0)
-					_IB.setRouting(routing.toString());
-				if (this.isBatch) {  
-					getESC().getBulkProcessor().add(_IB.request()); 
+					_IR.routing(routing.toString());
+				if (this.isBatch) {
+					getESC().getBulkProcessor().add(_IR);
 				} else {
-					_IB.execute().actionGet();
+					getESC().getClient().index(_IR, RequestOptions.DEFAULT);
 				}
-			} 
+			}
 		} catch (Exception e) {
-			log.error("write Exception", e); 
+			log.error("write Exception", e);
 			if (e.getMessage().contains("IndexNotFoundException")) {
-				throw new EFException("storeId not found",ELEVEL.Dispose,ETYPE.WRITE_POS_NOT_FOUND);
+				throw new EFException("storeId not found", ELEVEL.Dispose, ETYPE.WRITE_POS_NOT_FOUND);
 			} else {
 				throw new EFException(e);
 			}
 		}
-	} 
+	}
 
 	@Override
-	public void delete(String instance, String storeId,String keyColumn, String keyVal) throws EFException {
+	public void delete(String instance, String storeId, String keyColumn, String keyVal) throws EFException {
 		String name = Common.getStoreName(instance, storeId);
-		String type = instance;
-		getESC().getClient().prepareDelete(name, type, keyVal);
+		try {
+			getESC().getClient().delete(new DeleteRequest(name, keyVal), RequestOptions.DEFAULT);
+		} catch (IOException e) {
+			throw new EFException(e);
+		}
 	}
 
 	@Override
@@ -202,33 +210,33 @@ public class ESFlow extends WriterFlowSocket {
 				throw new EFException("BulkProcessor Exception!Need Redo!");
 			}
 		}
-	} 
-	
+	}
+
 	@Override
 	public boolean create(String instance, String storeId, InstanceConfig instanceConfig) {
-		String name = Common.getStoreName(instance, storeId);
-		String type = instance;
+		String iName = Common.getStoreName(instance, storeId);
+		String alias = instance;
 		try {
-			log.info("create Instance " + name + ":" + type); 
-			IndicesExistsResponse indicesExistsResponse = getESC().getClient().admin().indices().exists(
-					new IndicesExistsRequest(name)).actionGet();
-			if (!indicesExistsResponse.isExists()) { 
-				CreateIndexResponse createIndexResponse = getESC().getClient().admin().indices().prepareCreate(name).
-						setSettings(Settings.builder() 
-					    .put("index.number_of_shards", Integer.parseInt(instanceConfig.getExternConfigs().get("number_of_shards")))
-					    .put("index.number_of_replicas", Integer.parseInt(instanceConfig.getExternConfigs().get("number_of_replicas")))).get(); 
-				log.info("create new Instance " + name + " response isAcknowledged:"
+			log.info("create Instance " + iName + ":" + alias);
+			boolean indicesExists = getESC().getClient().indices().exists(new GetIndexRequest(iName),
+					RequestOptions.DEFAULT);
+			if (!indicesExists) {
+				CreateIndexRequest _CIR = new CreateIndexRequest(iName);
+				_CIR.settings(Settings.builder()
+						.put("index.number_of_shards",
+								Integer.parseInt(instanceConfig.getExternConfigs().get("number_of_shards")))
+						.put("index.number_of_replicas",
+								Integer.parseInt(instanceConfig.getExternConfigs().get("number_of_replicas")))); 
+				_CIR.mapping(this.getSettingMap(instanceConfig.getWriteFields()));
+				CreateIndexResponse createIndexResponse = getESC().getClient().indices().create(_CIR,
+						RequestOptions.DEFAULT);
+				log.info("create new Instance " + iName + " response isAcknowledged:"
 						+ createIndexResponse.isAcknowledged());
 			}
-
-			PutMappingRequest mappingRequest = new PutMappingRequest(name).type(type);
-			mappingRequest.source(getSettingMap(instanceConfig.getWriteFields()));
-			AcknowledgedResponse response = getESC().getClient().admin().indices().putMapping(mappingRequest).actionGet();
-			log.info("setting response isAcknowledged:" + response.isAcknowledged());
 			return true;
 		} catch (Exception e) {
 			reconn = true;
-			log.error("setting Instance " + name + ":" + type + " failed.", e);
+			log.error("setting Instance " + iName + ":" + alias + " failed.", e);
 			return false;
 		}
 	}
@@ -241,8 +249,8 @@ public class ESFlow extends WriterFlowSocket {
 			request.maxNumSegments(2);
 			request.flush(true);
 			request.onlyExpungeDeletes(true);
+			ForceMergeResponse response = getESC().getClient().indices().forcemerge(request, RequestOptions.DEFAULT);
 
-			ForceMergeResponse response = getESC().getClient().admin().indices().forceMerge(request).actionGet();
 			int failed_cnt = response.getFailedShards();
 			if (failed_cnt > 0) {
 				log.warn("Instance " + name + " optimize getFailedShards " + failed_cnt);
@@ -258,66 +266,67 @@ public class ESFlow extends WriterFlowSocket {
 	public void removeInstance(String instance, String storeId) {
 		if (storeId == null || storeId.length() == 0)
 			storeId = "a";
-		String name = Common.getStoreName(instance, storeId);
+		String iName = Common.getStoreName(instance, storeId);
 		try {
-			log.info("trying to remove Instance " + name);
-			IndicesExistsResponse res = getESC().getClient().admin().indices().prepareExists(name).execute()
-					.actionGet();
-			if (!res.isExists()) {
-				log.info("Instance " + name + " didn't exist.");
+			log.info("trying to remove Instance " + iName);
+			GetIndexRequest _GIR = new GetIndexRequest(iName);
+			boolean exists = getESC().getClient().indices().exists(_GIR, RequestOptions.DEFAULT);
+			if (!exists) {
+				log.info("Instance " + iName + " didn't exist.");
 			} else {
-				DeleteIndexRequest deleteRequest = new DeleteIndexRequest(name);
-				AcknowledgedResponse deleteResponse = getESC().getClient().admin().indices().delete(deleteRequest)
-						.actionGet();
+				DeleteIndexRequest _DIR = new DeleteIndexRequest(iName);
+				AcknowledgedResponse deleteResponse = getESC().getClient().indices().delete(_DIR,
+						RequestOptions.DEFAULT);
 				if (deleteResponse.isAcknowledged()) {
-					log.info("Instance " + name + " removed ");
+					log.info("Instance " + iName + " removed ");
 				}
 			}
 		} catch (Exception e) {
-			log.error("remove Instance " + name + " Exception", e);
+			log.error("remove Instance " + iName + " Exception", e);
 		}
 	}
 
 	@Override
-	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) { 
-		if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.AB) {
-			return abMechanism(mainName,isIncrement,instanceConfig);
-		}else {
-			return timeMechanism(mainName,isIncrement,instanceConfig);
+	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
+		if (instanceConfig.getPipeParams().getWriteMechanism() == MECHANISM.AB) {
+			return abMechanism(mainName, isIncrement, instanceConfig);
+		} else {
+			return timeMechanism(mainName, isIncrement, instanceConfig);
 		}
-	} 
+	}
 
 	@Override
 	public void setAlias(String instanceName, String storeId, String aliasName) {
-		String name = Common.getStoreName(instanceName, storeId);
+		String iName = Common.getStoreName(instanceName, storeId);
 		try {
-			log.info("trying to setting Alias " + aliasName + " to index " + name);
-			AcknowledgedResponse response = getESC().getClient().admin().indices().prepareAliases().addAlias(name,
-					aliasName).execute().actionGet();
+			log.info("trying to setting Alias " + aliasName + " to index " + iName);
+			IndicesAliasesRequest _IAR = new IndicesAliasesRequest();
+			AliasActions aliasAction = new AliasActions(AliasActions.Type.ADD).index(iName).alias(aliasName);
+			_IAR.addAliasAction(aliasAction);
+			AcknowledgedResponse response = getESC().getClient().indices().updateAliases(_IAR, RequestOptions.DEFAULT);
 			if (response.isAcknowledged()) {
-				log.info("alias " + aliasName + " setted to " + name);
+				log.info("alias " + aliasName + " setted to " + iName);
 			}
 		} catch (Exception e) {
-			log.error("alias " + aliasName + " set to " + name + " Exception.", e);
+			log.error("alias " + aliasName + " set to " + iName + " Exception.", e);
 		}
-	} 
-	
-	private Map<String,Object> JsonToMap(JSONObject j){
-	    Map<String,Object> map = new HashMap<>();
-	    Iterator<String> iterator = j.keys();
-	    while(iterator.hasNext())
-	    {
-	        String key = (String)iterator.next();
-	        Object value = j.get(key);
-	        map.put(key, value);
-	    }
-	    return map;
 	}
-	
+
+	private Map<String, Object> JsonToMap(JSONObject j) {
+		Map<String, Object> map = new HashMap<>();
+		Iterator<?> iterator = j.keys();
+		while (iterator.hasNext()) {
+			String key = (String) iterator.next();
+			Object value = j.get(key);
+			map.put(key, value);
+		}
+		return map;
+	}
+
 	private Map<String, Object> getSettingMap(Map<String, EFField> transParams) {
 		Map<String, Object> settingMap = new HashMap<String, Object>();
 		Map<String, Object> root_map = new HashMap<String, Object>();
-		try { 
+		try {
 			for (Map.Entry<String, EFField> e : transParams.entrySet()) {
 				Map<String, Object> map = new HashMap<String, Object>();
 				EFField p = e.getValue();
@@ -327,121 +336,126 @@ public class ESFlow extends WriterFlowSocket {
 				if (p.getStored().toLowerCase().equals("true")) {
 					map.put("store", true);
 				}
-				if(p.getDsl()!=null) {
+				if (p.getDsl() != null) {
 					map.putAll(JsonToMap(JSONObject.fromObject(p.getDsl())));
 				}
-				if (p.getIndexed().toLowerCase().equals("true")) { 
-					if (p.getAnalyzer().length()>0) {
+				if (p.getIndexed().toLowerCase().equals("true")) {
+					if (p.getAnalyzer().length() > 0) {
 						map.put("analyzer", p.getAnalyzer());
 					}
-				} else {
-					//map.put("analyzed", false);
 				} 
 				settingMap.put(p.getAlias(), map);
 			}
-			settingMap.put(GlobalParam.DEFAULT_FIELD, new HashMap<String, Object>(){
-				private static final long serialVersionUID = 1L;{put("type", "long");}});
+			settingMap.put(GlobalParam.DEFAULT_FIELD, new HashMap<String, Object>() {
+				private static final long serialVersionUID = 1L;
+				{
+					put("type", "long");
+				}
+			});
 			root_map.put("properties", settingMap);
 		} catch (Exception e) {
-			log.error("getSettingMap Exception",e);
-		}   
-		Map<String, Object> _source_map = new HashMap<String, Object>();
-		_source_map.put("enabled", "true");
-		root_map.put("_source", _source_map); 
+			log.error("getSettingMap Exception", e);
+		}  
 		return root_map;
 	}
-    
+
 	private String timeMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
-		long current=System.currentTimeMillis(); 
-		return String.valueOf(current/(1000*3600*24)*(1000*3600*24)-TimeZone.getDefault().getRawOffset()); 
-	} 
- 
+		long current = System.currentTimeMillis();
+		return String.valueOf(current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset());
+	}
+
 	private String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
 		boolean a_alias = false;
 		boolean b_alias = false;
-		boolean a = getESC().getClient().admin().indices()
-				.exists(new IndicesExistsRequest(Common.getStoreName(mainName, "a"))).actionGet().isExists();
-		if (a)
-			a_alias = getIndexAlias(mainName, "a", instanceConfig.getAlias());
-		boolean b = getESC().getClient().admin().indices()
-				.exists(new IndicesExistsRequest(Common.getStoreName(mainName, "b"))).actionGet().isExists();
-		if (b)
-			b_alias = getIndexAlias(mainName, "b", instanceConfig.getAlias());
 		String select = "";
-		if (isIncrement) {
-			if (a && b) {
-				if (a_alias) {
-					if (b_alias) {
-						if (getDocumentNums(mainName, "a") > getDocumentNums(mainName, "b")) {  
-							select = "a";
-						} else {  
-							select = "b";
-						}
-					} else {
-						select = "a";
-					}
-				} else {
-					select = "b";
-				}
-			} else {
-				select = a ? "a" : (b ? "b" : "a");
-			}
-
-			if ((select.equals("a") && !a) || (select.equals("b") && !b)) {
-				this.create(mainName, select, instanceConfig);
-			}
-
-			if ((select.equals("a") && !a) || (select.equals("b") && !b)
-					|| !this.getIndexAlias(mainName, select, instanceConfig.getAlias())) {
-				setAlias(mainName, select, instanceConfig.getAlias());
-			}
-		} else {
-			if (a && b) {
-				if (a_alias) {
-					if (b_alias) {
-						if (getDocumentNums(mainName, "a") > getDocumentNums(mainName, "b")) {  
-							getESC().getClient().admin().indices()
-							.delete(new DeleteIndexRequest(Common.getStoreName(mainName, "b")));
-							select = "b";
-						} else {  
-							getESC().getClient().admin().indices()
-							.delete(new DeleteIndexRequest(Common.getStoreName(mainName, "a")));
+		try {
+			boolean a = getESC().getClient().indices().exists(new GetIndexRequest(Common.getStoreName(mainName, "a")),
+					RequestOptions.DEFAULT);
+			if (a)
+				a_alias = getIndexAlias(mainName, "a", instanceConfig.getAlias());
+			boolean b = getESC().getClient().indices().exists(new GetIndexRequest(Common.getStoreName(mainName, "b")),
+					RequestOptions.DEFAULT);
+			if (b)
+				b_alias = getIndexAlias(mainName, "b", instanceConfig.getAlias());
+			if (isIncrement) {
+				if (a && b) {
+					if (a_alias) {
+						if (b_alias) {
+							if (getDocumentNums(mainName, "a") > getDocumentNums(mainName, "b")) {
+								select = "a";
+							} else {
+								select = "b";
+							}
+						} else {
 							select = "a";
 						}
 					} else {
 						select = "b";
 					}
+				} else {
+					select = a ? "a" : (b ? "b" : "a");
 				}
-				select = "a";
+
+				if ((select.equals("a") && !a) || (select.equals("b") && !b)) {
+					this.create(mainName, select, instanceConfig);
+				}
+
+				if ((select.equals("a") && !a) || (select.equals("b") && !b)
+						|| !this.getIndexAlias(mainName, select, instanceConfig.getAlias())) {
+					setAlias(mainName, select, instanceConfig.getAlias());
+				}
 			} else {
-				select = "b";
-				if (b && b_alias) {
+				if (a && b) {
+					if (a_alias) {
+						if (b_alias) {
+							if (getDocumentNums(mainName, "a") > getDocumentNums(mainName, "b")) {
+								getESC().getClient().indices().delete(
+										new DeleteIndexRequest(Common.getStoreName(mainName, "b")),
+										RequestOptions.DEFAULT);
+								select = "b";
+							} else {
+								getESC().getClient().indices().delete(
+										new DeleteIndexRequest(Common.getStoreName(mainName, "a")),
+										RequestOptions.DEFAULT);
+								select = "a";
+							}
+						} else {
+							select = "b";
+						}
+					}
 					select = "a";
+				} else {
+					select = "b";
+					if (b && b_alias) {
+						select = "a";
+					}
 				}
 			}
+		} catch (Exception e) {
+			log.error("abMechanism Exception", e);
 		}
 		return select;
 	}
-	
-	private long getDocumentNums(String instance, String storeId) {
-		String name = Common.getStoreName(instance, storeId);
-		IndicesStatsResponse response = getESC().getClient().admin().indices().prepareStats(name).all().get();
-		long res = response.getPrimaries().getDocs().getCount();
-		return res;
+
+	private long getDocumentNums(String instance, String storeId) throws IOException {
+		String iName = Common.getStoreName(instance, storeId);
+		CountRequest countRequest = new CountRequest(iName);
+		CountResponse response = getESC().getClient().count(countRequest, RequestOptions.DEFAULT);
+		return response.getCount();
 	}
 
-	private boolean getIndexAlias(String instanceName, String storeId, String alias) {
-		String name = Common.getStoreName(instanceName, storeId);
-		AliasesExistResponse response = getESC().getClient().admin().indices().prepareAliasesExist(alias)
-				.setIndices(name).get();
-		return response.exists();
-	} 
-	
-	private synchronized ESConnector getESC() { 
-		if(this.CONNS==null || reconn) {
+	private boolean getIndexAlias(String instanceName, String storeId, String alias) throws IOException {
+		String iName = Common.getStoreName(instanceName, storeId);
+		GetIndexRequest request = new GetIndexRequest(iName);
+		boolean exists = getESC().getClient().indices().exists(request, RequestOptions.DEFAULT);
+		return exists;
+	}
+
+	private synchronized ESConnector getESC() {
+		if (this.CONNS == null || reconn) {
 			reconn = false;
-			this.CONNS = (ESConnector) GETSOCKET().getConnection(false); 
-		} 
+			this.CONNS = (ESConnector) GETSOCKET().getConnection(false);
+		}
 		return this.CONNS;
 	}
 }

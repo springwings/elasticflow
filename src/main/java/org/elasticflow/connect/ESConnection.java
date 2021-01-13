@@ -1,20 +1,17 @@
 package org.elasticflow.connect;
 
-import java.net.InetAddress;
-
+import org.apache.http.HttpHost;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ESConnection extends EFConnectionSocket<ESConnector> {
 
-	private Client conn;
+	private RestHighLevelClient conn;
 	private BulkProcessor bulkProcessor;
 	private ESConnector ESC = new ESConnector();
 
@@ -49,20 +46,18 @@ public class ESConnection extends EFConnectionSocket<ESConnector> {
 		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
 		if (wnp.getPath() != null) {
 			if (!status()) {
-				Settings settings = Settings.builder()
-				        .put("client.transport.sniff", true)
-				        .put("cluster.name", wnp.getDefaultValue()).build(); 
-				this.conn = new PreBuiltTransportClient(settings); 
-				for (String ip : wnp.getPath().split(",")) {
+				String[] hosts = wnp.getPath().split(",");
+				HttpHost[] httpHosts = new HttpHost[hosts.length];
+				for (int i = 0; i < hosts.length; i++) {
 					try {
-						((TransportClient) this.conn)
-								.addTransportAddress(new TransportAddress(InetAddress.getByName(ip), 9300));
+						httpHosts[i] = new HttpHost(hosts[i], 9200, "http");
 					} catch (Exception e) {
 						log.error("connect Exception", e);
 					}
 				}
+				this.conn = new RestHighLevelClient(RestClient.builder(httpHosts));
 				this.ESC.setClient(this.conn);
-			} 
+			}
 		} else {
 			return false;
 		}
@@ -76,7 +71,7 @@ public class ESConnection extends EFConnectionSocket<ESConnector> {
 			if (this.bulkProcessor == null) {
 				getBulkProcessor(this.conn);
 				this.ESC.setBulkProcessor(this.bulkProcessor);
-			} 
+			}
 		}
 		this.ESC.setRunState(true);
 		return this.ESC;
@@ -84,7 +79,7 @@ public class ESConnection extends EFConnectionSocket<ESConnector> {
 
 	@Override
 	public boolean status() {
-		if (this.conn == null || this.conn.admin() == null) {
+		if (this.conn == null) {
 			return false;
 		}
 		return true;
@@ -94,7 +89,7 @@ public class ESConnection extends EFConnectionSocket<ESConnector> {
 	public boolean free() {
 		try {
 			freeBP();
-			this.conn.close();  
+			this.conn.close();
 			this.ESC = null;
 			this.conn = null;
 			this.connectParams = null;
@@ -104,7 +99,7 @@ public class ESConnection extends EFConnectionSocket<ESConnector> {
 		}
 		return true;
 	}
-	
+
 	private void freeBP() {
 		if (this.bulkProcessor != null) {
 			this.bulkProcessor.flush();
@@ -113,30 +108,35 @@ public class ESConnection extends EFConnectionSocket<ESConnector> {
 		}
 	}
 
-	private void getBulkProcessor(Client _client) {
-		this.bulkProcessor = BulkProcessor.builder(_client, new BulkProcessor.Listener() {
-			@Override
-			public void beforeBulk(long executionId, BulkRequest request) {
-			}
+	private void getBulkProcessor(RestHighLevelClient _client) {
+		this.bulkProcessor = BulkProcessor
+				.builder((request, bulkListener) -> _client.bulkAsync(request, RequestOptions.DEFAULT, bulkListener),
+						new BulkProcessor.Listener() {
+							@Override
+							public void beforeBulk(long executionId, BulkRequest request) {
 
-			@Override
-			public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-				if (response.hasFailures()) {
-					log.error("BulkProcessor error," + response.buildFailureMessage());
-					ESC.setRunState(false);
-				}else {
-					ESC.setRunState(true);
-				}
-			}
+							}
 
-			@Override
-			public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-				if (failure != null) {
-					failure.printStackTrace();
-				}
-			}
-		}).setBulkActions(BULK_BUFFER).setBulkSize(new ByteSizeValue(BULK_SIZE, ByteSizeUnit.MB))
-				.setFlushInterval(TimeValue.timeValueSeconds(BULK_FLUSH_SECONDS))
-				.setConcurrentRequests(BULK_CONCURRENT).build(); 
+							@Override
+							public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
+								if (response.hasFailures()) {
+									log.error("BulkProcessor error," + response.buildFailureMessage());
+									ESC.setRunState(false);
+								} else {
+									ESC.setRunState(true);
+								}
+							}
+
+							@Override
+							public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
+								if (failure != null) {
+									failure.printStackTrace();
+								}
+							}
+						})
+				.setBulkActions(BULK_BUFFER).setBulkSize(new ByteSizeValue(BULK_SIZE, ByteSizeUnit.MB))
+				.setFlushInterval(TimeValue.timeValueSeconds(BULK_FLUSH_SECONDS)).setConcurrentRequests(BULK_CONCURRENT)
+				.build();
+
 	}
 }

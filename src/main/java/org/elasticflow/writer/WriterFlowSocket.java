@@ -32,12 +32,14 @@ public abstract class WriterFlowSocket extends Flow{
 		this.isBatch = GlobalParam.WRITE_BATCH; 
 	}   
 	
+	/**Create storage node*/
 	public abstract boolean create(String instance, String storeId, InstanceConfig instanceConfig);
 	
 	public abstract String getNewStoreId(String mainName,boolean isIncrement,InstanceConfig instanceConfig);
 
 	public abstract void write(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> transParams,String instance, String storeId,boolean isUpdate) throws EFException;
-
+	
+	/**Delete a single record through the key id*/ 
 	public abstract void delete(String instance, String storeId,String keyColumn,String keyVal) throws EFException;
   
 	public abstract void removeInstance(String instance, String storeId);

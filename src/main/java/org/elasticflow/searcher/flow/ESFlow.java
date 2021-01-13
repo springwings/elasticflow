@@ -1,5 +1,6 @@
 package org.elasticflow.searcher.flow;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,15 +14,16 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.searcher.SearcherFlowSocket;
 import org.elasticflow.searcher.handler.Handler;
 import org.elasticflow.util.EFException;
-import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.client.Client;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 
 import com.alibaba.fastjson.JSON;
@@ -52,7 +54,7 @@ public final class ESFlow extends SearcherFlowSocket {
 			return res;
 		try{ 
 			ESConnector ESC = (ESConnector) GETSOCKET().getConnection(true);
-			Client conn = ESC.getClient();
+			RestHighLevelClient conn = ESC.getClient();
 			int start = fq.getStart();
 			int count = fq.getCount(); 
 			List<SortBuilder<?>> sortFields = (List<SortBuilder<?>>) fq.getSortinfo();
@@ -81,7 +83,7 @@ public final class ESFlow extends SearcherFlowSocket {
 			} 
 		}catch(Exception e){ 
 			releaseConn = true;
-			throw e;
+			throw new EFException(e);
 		}finally{
 			REALEASE(false,releaseConn); 
 		} 
@@ -119,33 +121,32 @@ public final class ESFlow extends SearcherFlowSocket {
 		} 
 	}
 	 
-	private SearchResponse getSearchResponse(Client conn,QueryBuilder qb,
+	private SearchResponse getSearchResponse(RestHighLevelClient conn,QueryBuilder qb,
 			List<String> returnFields, String instance, int start, int count,
 			List<SortBuilder<?>> sortFields,
-			List<AggregationBuilder> facetBuilders,SearcherModel<?, ?, ?> fq,SearcherResult res) {
-		SearchRequestBuilder request = conn.prepareSearch(instance);
-		request.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
-		request.setQuery(qb);
-		request.setSize(count);
-		request.setFrom(start);
+			List<AggregationBuilder> facetBuilders,SearcherModel<?, ?, ?> fq,SearcherResult res) throws IOException {
+		SearchRequest searchRequest = new SearchRequest(instance); 
+		SearchSourceBuilder _SSB = new SearchSourceBuilder(); 
+		_SSB.query(qb);
+		_SSB.size(count);
+		_SSB.from(start);
 
 		if (sortFields != null)
 			for (SortBuilder<?> s : sortFields) {
-				request.addSort(s);
+				_SSB.sort(s);
 			}
  
 		if (facetBuilders != null)
 			for (AggregationBuilder facet : facetBuilders) {
-				request.addAggregation(facet);
-			} 
-		
-		request.storedFields(returnFields.toArray(new String[returnFields.size()])); 
-	 
+				_SSB.aggregation(facet);
+			}  
+		_SSB.storedFields(returnFields);  
 		if (fq.isShowQueryInfo()) { 
-			res.setQueryDetail(JSON.parse(request.toString()));
-			request.setExplain(true); 
+			res.setQueryDetail(JSON.parse(_SSB.toString()));
+			_SSB.explain(true); 
 		} 
-		SearchResponse response = request.execute().actionGet();
+		searchRequest.source(_SSB); 
+		SearchResponse response = conn.search(searchRequest, RequestOptions.DEFAULT); 
 		return response;
 	}
  

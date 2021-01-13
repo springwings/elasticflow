@@ -24,7 +24,6 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
-import org.elasticsearch.index.query.functionscore.ScriptScoreQueryBuilder;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
 import org.slf4j.Logger;
