@@ -4,7 +4,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * pipe end connect breaker control
- * 
+ * When a serious error occurs, temporarily interrupt the operation
  * @author chengwen
  * @version 1.0
  * @date 2019-01-24 10:55
@@ -13,13 +13,13 @@ import javax.annotation.concurrent.NotThreadSafe;
 @NotThreadSafe
 public class Breaker {
 
-	private long earlyFail;
+	private volatile long earlyFail;
 
-	private long checkFail;
+	private volatile long checkFail;
 
 	private int failTimes;
 	
-	private int failSpan = 3000;
+	private int failSpan = 300;
 	
 	private int recheckSpan = 60000;
 	

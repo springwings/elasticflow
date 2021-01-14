@@ -19,15 +19,15 @@ import org.elasticflow.util.Common;
  */
 public class ThreadPools {
 
-	private ArrayBlockingQueue<PipePump.Pump> waitJob = new ArrayBlockingQueue<>(GlobalParam.POOL_SIZE * 10);
+	private ArrayBlockingQueue<PipePump.PumpThread> waitJob = new ArrayBlockingQueue<>(GlobalParam.POOL_SIZE * 10);
 
 	private int maxThreadNums = GlobalParam.POOL_SIZE;
 
-	ThreadPoolExecutor cachedThreadPool = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
-            30L, TimeUnit.SECONDS,
+	ThreadPoolExecutor cachedThreadPool = new ThreadPoolExecutor(maxThreadNums, maxThreadNums,
+            1L, TimeUnit.SECONDS,
             new SynchronousQueue<Runnable>());
 
-	public void submitJobPage(PipePump.Pump jobPage) {
+	public void submitJobPage(PipePump.PumpThread jobPage) {
 		try {
 			waitJob.put(jobPage);
 		} catch (Exception e) {
@@ -36,8 +36,8 @@ public class ThreadPools {
 	}
 	
 	public void cleanWaitJob(String id) {
-		Iterator<PipePump.Pump> iter = waitJob.iterator();
-		PipePump.Pump job;
+		Iterator<PipePump.PumpThread> iter = waitJob.iterator();
+		PipePump.PumpThread job;
         while(iter.hasNext()) {
         	job = iter.next();
         	if(job.getId().equals(id))
@@ -49,10 +49,7 @@ public class ThreadPools {
 		new Thread(() -> {
 			try {
 				while(true) {
-					PipePump.Pump job = waitJob.take();
-					while(cachedThreadPool.getTaskCount()>=maxThreadNums) {
-						Thread.sleep(900);
-					} 
+					PipePump.PumpThread job = waitJob.take(); 
 					for(int i=0;i<job.needThreads();i++)
 						cachedThreadPool.execute(job);
 				}  

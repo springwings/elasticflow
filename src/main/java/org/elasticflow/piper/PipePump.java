@@ -130,13 +130,10 @@ public final class PipePump extends Instruction {
 			try {
 				task.setL2seq(L2seq);
 				Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name()).put(task.getInstance() + L2seq,
-						"start count page...");
-				getReader().lock.lock();
-				ConcurrentLinkedDeque<String> pageList = getReader().getPageSplit(task,
-						getInstanceConfig().getPipeParams().getReadPageSize());
-				getReader().lock.unlock();
+						"start count page..."); 
+				ConcurrentLinkedDeque<String> pageList = this.getPageLists(task);
 				if (pageList == null)
-					throw new EFException("read data get page split exception!", ELEVEL.Termination);
+					throw new EFException("Reader page split exception!", ELEVEL.Termination);
 				processListsPages(task, writeTo, pageList, storeId);
 
 			} catch (EFException e) {
@@ -174,8 +171,8 @@ public final class PipePump extends Instruction {
 					" no data!"));
 		} else {
 			log.info(Common.formatLog("start",
-					getInstanceConfig().getPipeParams().isMultiThread() ? "MultiThread"
-							: "SingleThread" + " Start " + task.getJobType().name(),
+					(getInstanceConfig().getPipeParams().isMultiThread() ? "MultiThread"
+							: "SingleThread") + " Start " + task.getJobType().name(),
 					mainName, storeId, task.getL1seq(), 0, "",
 					GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(task.getL2seq()), 0, ",totalpage:" + pageNum));
 
@@ -188,9 +185,9 @@ public final class PipePump extends Instruction {
 			long start = Common.getNow();
 			AtomicInteger total = new AtomicInteger(0);
 			if (getInstanceConfig().getPipeParams().isMultiThread()) {
-				final CountDownLatch synThreads = new CountDownLatch(estimateThreads(pageNum));
+				CountDownLatch synThreads = new CountDownLatch(estimateThreads(pageNum));
 				Resource.ThreadPools
-						.submitJobPage(new Pump(synThreads, task, storeId, pageList, writeTo, computeModel, total));
+				.submitJobPage(new PumpThread(synThreads, task, storeId, pageList, writeTo, computeModel, total)); 
 				try {
 					synThreads.await();
 				} catch (Exception e) {
@@ -237,13 +234,8 @@ public final class PipePump extends Instruction {
 			if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination)) {
 				break;
 			} else {
-				getReader().lock.lock();
-				DataPage pagedata = (DataPage) CPU.RUN(
-						getID(), "Pipe", "fetchPage", false, Page.getInstance(keyField, scanField, startId,
-								dataBoundary, this.readHandler, getInstanceConfig().getWriteFields(), dataScanDSL),
-						getReader());
-				getReader().freeJobPage();
-				getReader().lock.unlock();
+				DataPage pagedata = this.getPageData(Page.getInstance(keyField, scanField, startId,
+									dataBoundary, this.readHandler, getInstanceConfig().getWriteFields(), dataScanDSL)); 
 				if (getInstanceConfig().openCompute()) {
 					pagedata = (DataPage) CPU.RUN(getID(), "ML", computeModel, false, getID(), task.getJobType().name(),
 							writeTo, pagedata);
@@ -289,7 +281,7 @@ public final class PipePump extends Instruction {
 	 * @date 2019-01-11 10:45
 	 * @modify 2019-01-11 10:45
 	 */
-	public class Pump implements Runnable {
+	public class PumpThread implements Runnable {
 		long start = Common.getNow();
 		final int pageSize;
 		final String ID = CPU.getUUID();
@@ -306,7 +298,7 @@ public final class PipePump extends Instruction {
 		ConcurrentLinkedDeque<String> pageList;
 		boolean isUpdate = getInstanceConfig().getPipeParams().getWriteType().equals("increment") ? true : false;
 
-		public Pump(CountDownLatch synThreads, Task task, String storeId, ConcurrentLinkedDeque<String> pageList,
+		public PumpThread(CountDownLatch synThreads, Task task, String storeId, ConcurrentLinkedDeque<String> pageList,
 				String writeTo, String computeModel, AtomicInteger total) {
 			this.pageList = pageList;
 			this.writeTo = writeTo;
@@ -342,15 +334,10 @@ public final class PipePump extends Instruction {
 					Resource.ThreadPools.cleanWaitJob(getId());
 					Common.LOG.warn(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
 					break;
-				} else {
-					getReader().lock.lock();
-					DataPage pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchPage", false,
-							Page.getInstance(task.getScanParam().getKeyField(), task.getScanParam().getScanField(),
-									startId, dataBoundary, readHandler, getInstanceConfig().getWriteFields(),
-									dataScanDSL),
-							getReader());
-					getReader().freeJobPage();
-					getReader().lock.unlock();
+				} else { 
+					DataPage pagedata = getPageData(Page.getInstance(task.getScanParam().getKeyField(), task.getScanParam().getScanField(),
+										startId, dataBoundary, readHandler, getInstanceConfig().getWriteFields(),
+										dataScanDSL));  
 					if (getInstanceConfig().openCompute()) {
 						pagedata = (DataPage) CPU.RUN(getID(), "ML", computeModel, false, getID(),
 								task.getJobType().name(), writeTo, pagedata);
@@ -406,5 +393,36 @@ public final class PipePump extends Instruction {
 			return total;
 		}
 
+	}
+	
+	//thread safe get page list 
+	private ConcurrentLinkedDeque<String> getPageLists(Task task) {
+		ConcurrentLinkedDeque<String> pageList = null;
+		getReader().lock.lock();
+		try {
+			pageList = getReader().getPageSplit(task,
+				getInstanceConfig().getPipeParams().getReadPageSize());
+		} catch (Exception e) {
+			log.error("get Page lists Exception]", e);
+		}finally {
+			getReader().lock.unlock();
+		}
+		return pageList;
+	}
+	//thread safe get page data 
+	private DataPage getPageData(Page pager){
+		getReader().lock.lock();
+		DataPage pagedata=null;
+		try {
+			pagedata = (DataPage) CPU.RUN(
+					getID(), "Pipe", "fetchPage", false, pager,
+					getReader());
+			getReader().freeJobPage();
+		} catch (Exception e) {
+			log.error("get Page Data Exception]", e);
+		}finally {
+			getReader().lock.unlock();
+		} 
+		return pagedata;
 	}
 }

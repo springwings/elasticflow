@@ -409,16 +409,16 @@ public final class Common {
 		} 
 		switch (types) {
 		case "complete":
-			str.append(" docs:" + total);
-			str.append(" position:" + update);
+			str.append(" Docs:" + total);
+			str.append(" scanAt:" + update);
 			str.append(" useTime:" + useTimeFormat);
 			break;
 		case "start": 
-			str.append(" position:" + update);
+			str.append(" scanAt:" + update);
 			break;
 		default:
-			str.append(" docs:" + total+ (dataBoundary.length()<1 ? "" : " dataBoundary:" + dataBoundary)
-			+ " position:" + update + " useTime:"	+ useTimeFormat);
+			str.append(" Docs:" + total+ (total==0 || dataBoundary.length()<1 ? "" : " dataBoundary:" + dataBoundary)
+			+ " scanAt:" + update + " useTime:"	+ useTimeFormat);
 			break;
 		} 
 		return str.append(moreinfo).toString();
