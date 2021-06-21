@@ -3,6 +3,10 @@ package org.elasticflow.writer.flow;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -359,9 +363,27 @@ public class ESFlow extends WriterFlowSocket {
 		return root_map;
 	}
 
-	private String timeMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
+	/**
+	 * Get the time-stamp of 0 o'clock every day
+	 * Maintain expired instances
+	 * @param mainName
+	 * @param isIncrement
+	 * @param instanceConfig
+	 * @return time-stamp of second
+	 */
+	private String timeMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {		
+		LocalDateTime now = LocalDateTime.now();
+		now = now.minus(instanceConfig.getPipeParams().getKeepDay(), ChronoUnit.DAYS);		
+		now = LocalDateTime.of(now.toLocalDate(), LocalTime.MIN);		
+		String keepLastTime = String.valueOf(now.toEpochSecond(ZoneOffset.of("+8")));
+		String iName = Common.getStoreName(mainName, keepLastTime);
+		try {
+			this.removeInstance(mainName, keepLastTime);
+		} catch (Exception e) {
+			log.error("remove instance　"+iName+" Exception!", e);
+		}
 		long current = System.currentTimeMillis();
-		return String.valueOf(current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset());
+		return String.valueOf((current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset())/1000);
 	}
 
 	private String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {

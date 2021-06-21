@@ -35,6 +35,8 @@ public class PipeParam {
 	/**data write into type,full create new record,increment update part of data*/
 	private String writeType="full";
 	private MECHANISM writeMechanism = MECHANISM.AB;
+	/**if MECHANISM.Time,keepDay is used for keep max store data last days*/
+	private int keepDay = 30;
 	private boolean multiThread = false;
 	
 	 
@@ -92,6 +94,10 @@ public class PipeParam {
 	public void setOptimizeCron(String optimizeCron) {
 		this.optimizeCron = optimizeCron;
 	}  
+	
+	public int getKeepDay() {
+		return this.keepDay;
+	}
 	
 	public String getSearchFrom() {
 		if(this.searchFrom==null){
