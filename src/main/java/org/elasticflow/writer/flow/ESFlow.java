@@ -3,10 +3,8 @@ package org.elasticflow.writer.flow;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -291,7 +289,7 @@ public class ESFlow extends WriterFlowSocket {
 	}
 
 	@Override
-	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
+	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {		
 		if (instanceConfig.getPipeParams().getWriteMechanism() == MECHANISM.AB) {
 			return abMechanism(mainName, isIncrement, instanceConfig);
 		} else {
@@ -364,26 +362,37 @@ public class ESFlow extends WriterFlowSocket {
 	}
 
 	/**
-	 * Get the time-stamp of 0 o'clock every day
+	 * Get the time-stamp of 0 o'clock every day/month
 	 * Maintain expired instances
 	 * @param mainName
 	 * @param isIncrement
 	 * @param instanceConfig
 	 * @return time-stamp of second
 	 */
-	private String timeMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {		
-		LocalDateTime now = LocalDateTime.now();
-		now = now.minus(instanceConfig.getPipeParams().getKeepDay(), ChronoUnit.DAYS);		
-		now = LocalDateTime.of(now.toLocalDate(), LocalTime.MIN);		
-		String keepLastTime = String.valueOf(now.toEpochSecond(ZoneOffset.of("+8")));
+	private String timeMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {			
+		int[] timeSpan=instanceConfig.getPipeParams().getKeepNums();
+		String storeId;
+		long foward;
+		long current = System.currentTimeMillis();
+		LocalDate lnow = LocalDate.now();
+		if(timeSpan[0]==0) {
+			foward = lnow.minusDays(timeSpan[1]).atStartOfDay().toInstant(ZoneOffset.of("+8")).toEpochMilli();
+			storeId = String.valueOf((current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset())/1000);
+		}else {
+			Long startDay = Common.getMonthStartTime(current, "GMT+8:00");
+			storeId = String.valueOf(startDay/1000);			
+			LocalDate ldate = LocalDate.of(lnow.getYear(), lnow.getMonth(), 1);
+			foward = ldate.minusMonths(timeSpan[1]).atStartOfDay().toInstant(ZoneOffset.of("+8")).toEpochMilli();			
+		}
+		//remove out of range data		
+		String keepLastTime = String.valueOf(foward/1000);
 		String iName = Common.getStoreName(mainName, keepLastTime);
 		try {
 			this.removeInstance(mainName, keepLastTime);
 		} catch (Exception e) {
 			log.error("remove instance　"+iName+" Exception!", e);
-		}
-		long current = System.currentTimeMillis();
-		return String.valueOf((current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset())/1000);
+		}		
+		return storeId;
 	}
 
 	private String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {

@@ -214,6 +214,7 @@ public class FlowCenter{
 		}else if(instanceConfig.getPipeParams().getReadFrom()!= null && instanceConfig.getPipeParams().getWriteTo()!=null) { 
 			if(needclear)
 				jobAction(instance, GlobalParam.JOB_TYPE.FULL.name(), "remove");
+			//Add valid full tasks to prevent other program errors
 			JobModel _sj = new JobModel(
 					getJobName(instance,GlobalParam.JOB_TYPE.FULL.name()), not_run_cron,
 					"org.elasticflow.task.FlowTask", fullFun, task); 
@@ -244,6 +245,7 @@ public class FlowCenter{
 		}else if(instanceConfig.getPipeParams().getReadFrom()!= null && instanceConfig.getPipeParams().getWriteTo()!=null) {
 			if(needclear)
 				jobAction(instance, GlobalParam.JOB_TYPE.INCREMENT.name(), "remove");
+			//Add valid full tasks to prevent other program errors
 			JobModel _sj = new JobModel(
 					getJobName(instance,GlobalParam.JOB_TYPE.INCREMENT.name()),
 					not_run_cron, "org.elasticflow.task.FlowTask",

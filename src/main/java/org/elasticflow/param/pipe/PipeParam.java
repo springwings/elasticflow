@@ -35,8 +35,8 @@ public class PipeParam {
 	/**data write into type,full create new record,increment update part of data*/
 	private String writeType="full";
 	private MECHANISM writeMechanism = MECHANISM.AB;
-	/**if MECHANISM.Time,keepDay is used for keep max store data last days*/
-	private int keepDay = 30;
+	/**if MECHANISM.Time,keepNums is used for keep max store data instances*/
+	private String keepNums = "30d";
 	private boolean multiThread = false;
 	
 	 
@@ -88,6 +88,9 @@ public class PipeParam {
 	public void setFullCron(String fullCron) {
 		this.fullCron = fullCron;
 	} 
+	public void setKeepNums(String keepNums) {
+		this.keepNums = keepNums;
+	} 
 	public String getOptimizeCron() {
 		return optimizeCron;
 	}
@@ -95,8 +98,19 @@ public class PipeParam {
 		this.optimizeCron = optimizeCron;
 	}  
 	
-	public int getKeepDay() {
-		return this.keepDay;
+	/**
+	 * get keep type and data
+	 * @return int[],0 store type,1 store data
+	 */
+	public int[] getKeepNums() {
+		int[] dt = new int[2];
+		dt[1] = Integer.parseInt(this.keepNums.toLowerCase().substring(0, this.keepNums.length()-1));
+		if(this.keepNums.toLowerCase().endsWith("d")) {			
+			dt[0] = 0;
+		}else {
+			dt[0] = 1;
+		}
+		return dt;
 	}
 	
 	public String getSearchFrom() {
