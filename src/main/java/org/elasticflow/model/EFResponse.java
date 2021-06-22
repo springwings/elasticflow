@@ -31,12 +31,14 @@ public class EFResponse {
 		rs.response.put("status", RESPONSE_STATUS.Success.getVal());
 		rs.response.put("info", RESPONSE_STATUS.Success);
 		rs.response.put("instance",null);
+		rs.response.put("datas",null);
 		rs.response.put("useTime",null);
 		return rs;
 	}
 	
-	public void setStatus(String info,GlobalParam.RESPONSE_STATUS status) { 
-		response.put("info", info+" "+status.getMsg());
+	public void setStatus(Object info,GlobalParam.RESPONSE_STATUS status) { 
+		response.put("info", status.getMsg());
+		response.put("datas", info);
 		response.put("status",status.getVal());
 	}  
 	

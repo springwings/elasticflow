@@ -47,7 +47,7 @@ public final class GlobalParam {
 		        put(0, "success");
 		        put(100, "Runtime data error！");
 		        put(200, "System Code Running Exception!");
-		        put(300, "Parameter data exception!");
+		        put(300, "Parameter exception!");
 		        put(400, "Unknown exception!");
 		        put(500, "External run exception!");
 		    }
@@ -58,7 +58,7 @@ public final class GlobalParam {
 		public int getVal() {  
 	        return this.v;  
 	    } 
-		public String getMsg() {
+		public Object getMsg() {
 			return MSG.get(this.v);
 		}
 	}

@@ -76,7 +76,7 @@ public final class NodeMonitor {
 
 	private RESPONSE_STATUS response_status;
 	
-	private String response_info;
+	private Object response_info;
 
 	private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -119,11 +119,7 @@ public final class NodeMonitor {
 	 */
 	public void setResponse(RESPONSE_STATUS status, Object info) { 
 		this.response_status = status;
-		if(info instanceof String) {
-			this.response_info = String.valueOf(info);
-		}else {
-			this.response_info = JSON.toJSONString(info);
-		} 
+		this.response_info =info;
 	}
 
 	public void ac(Request rq,EFResponse RS) {

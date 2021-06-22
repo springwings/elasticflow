@@ -7,17 +7,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.handler.AbstractHandler;
-
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.MD5Util;
 import org.elasticflow.yarn.Resource;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
+import org.mortbay.jetty.handler.AbstractHandler;
 
 
 /**
@@ -54,10 +52,10 @@ public class EFMonitor {
 			rps.setRequest(RR.getParams());
 			switch (dataTo) {  
 			case "efm.doaction":{
-				if(rq.getParameter("ac") !=null  && rq.getParameter("code")!=null && rq.getParameter("code").equals(MD5Util.SaltMd5(rq.getParameter("ac")))){
+				if(rq.getParameter("ac") !=null){
 					Resource.nodeMonitor.ac(rq,rps); 
 				}else{  
-					rps.setStatus("Action failed!parameter ac or code error!", RESPONSE_STATUS.ParameterErr); 
+					rps.setStatus("action failed!parameter ac or code error!", RESPONSE_STATUS.ParameterErr); 
 				}
 			}
 				break;   
@@ -65,7 +63,7 @@ public class EFMonitor {
 				rps.setInfo(GlobalParam.VERSION);  
 				break;
 			default:
-				rps.setStatus("action parameter error!", RESPONSE_STATUS.ParameterErr); 
+				rps.setStatus("action rooter not exist!", RESPONSE_STATUS.ParameterErr); 
 				break;
 			}
 			response.getWriter().println(rps.getResponse(true));
