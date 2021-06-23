@@ -65,10 +65,12 @@ public final class PipeNormsUtil {
 		return null;
 	} 
  
-	public static String getWriteSql(String table,PipeDataUnit unit,Map<String, EFField> transParams) {
-		String sql = "INSERT INTO " + table;
+	public static String getWriteSql(String table,PipeDataUnit unit,Map<String, EFField> transParams) { 		
+		return getWriteSqlHead(table, unit, transParams) + getWriteSqlTailData(table, unit, transParams);
+	}
+	
+	public static String getWriteSqlTailData(String table,PipeDataUnit unit,Map<String, EFField> transParams) {		
 		StringBuilder values = new StringBuilder();
-		StringBuilder columns = new StringBuilder();
 		for (Entry<String, Object> r : unit.getData().entrySet()) {
 			String field = r.getKey();
 			if (r.getValue() == null)
@@ -80,10 +82,26 @@ public final class PipeNormsUtil {
 			if (transParam == null)
 				continue;
 			values.append("'" + value + "' ,");
+		}
+		
+		return "("+values.substring(0, values.length() - 1)+ ")";
+	}
+	
+	public static String getWriteSqlHead(String table,PipeDataUnit unit,Map<String, EFField> transParams) {
+		String sql = "INSERT INTO " + table;
+		StringBuilder columns = new StringBuilder();
+		for (Entry<String, Object> r : unit.getData().entrySet()) {
+			String field = r.getKey();
+			if (r.getValue() == null)
+				continue;
+			EFField transParam = transParams.get(field);
+			if (transParam == null)
+				transParam = transParams.get(field.toLowerCase());
+			if (transParam == null)
+				continue;
 			columns.append(transParam.getAlias() + " ,");
 		}
-		sql = sql + "(" + columns.substring(0, columns.length() - 1) + ") VALUES ("
-				+ values.substring(0, values.length() - 1) + ")";
+		sql = sql + "(" + columns.substring(0, columns.length() - 1) + ") VALUES ";
 		return sql;
 	}
 }

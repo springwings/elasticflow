@@ -4,8 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.elasticflow.config.GlobalParam.MECHANISM;
+import org.apache.hadoop.hdfs.server.namenode.status_jsp;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
@@ -21,6 +23,14 @@ import org.slf4j.LoggerFactory;
 public class MysqlFlow extends WriterFlowSocket {
 
 	private final static Logger log = LoggerFactory.getLogger("MysqlFlow");
+	
+	private final static int flushSize = 100;
+	
+	private final static int flushSecond = 3;
+		
+	private CopyOnWriteArrayList<String> sqlData = new CopyOnWriteArrayList<>();
+	
+	private long currentSec = Common.getNow();
 
 	public static MysqlFlow getInstance(ConnectParams connectParams) {
 		MysqlFlow o = new MysqlFlow();
@@ -35,15 +45,32 @@ public class MysqlFlow extends WriterFlowSocket {
 		try { 
 			if (!ISLINK())
 				return;
-			Connection conn = (Connection) GETSOCKET().getConnection(false);
-			try (PreparedStatement statement = conn.prepareStatement(PipeNormsUtil.getWriteSql(table, unit, transParams));) {
-				statement.execute();
-			} catch (Exception e) {
-				log.error("PreparedStatement Exception", e);
-			}
+			if(this.isBatch) {
+				sqlData.add(PipeNormsUtil.getWriteSqlTailData(table, unit, transParams));
+				if(currentSec-Common.getNow()>flushSecond || sqlData.size()>flushSize) {
+					StringBuffer sb = new StringBuffer();
+					for(String s:sqlData) {
+						sb.append(s+",");
+					}
+					sqlData.clear();
+					currentSec = Common.getNow();
+					this.insertDb(PipeNormsUtil.getWriteSqlHead(table, unit, transParams)+sb.substring(0, sb.length()-1));
+				}					
+			}else {
+				this.insertDb(PipeNormsUtil.getWriteSql(table, unit, transParams));
+			}			
 		} catch (Exception e) {
 			log.error("write Exception", e);
 		} 
+	}
+	
+	private void insertDb(String sql) {
+		Connection conn = (Connection) GETSOCKET().getConnection(false);
+		try (PreparedStatement statement = conn.prepareStatement(sql);) {
+			statement.execute();
+		} catch (Exception e) {
+			log.error("PreparedStatement Exception", e);
+		}
 	}
 
 	@Override
