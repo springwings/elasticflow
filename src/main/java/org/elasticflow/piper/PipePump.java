@@ -43,8 +43,8 @@ public final class PipePump extends Instruction {
 	/** defined custom read flow socket */
 	Handler readHandler;
 
-	public static PipePump getInstance(ReaderFlowSocket reader, ReaderFlowSocket extReader, List<WriterFlowSocket> writer,
-			InstanceConfig instanceConfig) {
+	public static PipePump getInstance(ReaderFlowSocket reader, ReaderFlowSocket extReader,
+			List<WriterFlowSocket> writer, InstanceConfig instanceConfig) {
 		return new PipePump(reader, extReader, writer, instanceConfig);
 	}
 
@@ -78,8 +78,7 @@ public final class PipePump extends Instruction {
 			Resource.FLOW_INFOS.set(instance, job_type.name(), new HashMap<String, String>());
 		}
 		Resource.FLOW_INFOS.get(instance, job_type.name()).put(instance + " seqs nums", String.valueOf(L2seqs.size()));
-		Task task = Task.getInstance(instance, L1seq, job_type, getInstanceConfig().getReadParams(), null,
-				this.readHandler);
+		Task task = Task.getInstance(instance, L1seq, job_type, getInstanceConfig(), null, this.readHandler);
 		processFlow(task, mainName, storeId, L2seqs, writeTo, writeInSamePosition);
 		Resource.FLOW_INFOS.get(instance, job_type.name()).clear();
 		if (isFull) {
@@ -119,7 +118,7 @@ public final class PipePump extends Instruction {
 	 * @param task
 	 * @param mainName
 	 * @param storeId
-	 * @param L2seqs example,L1 to database level,L2 to table level
+	 * @param L2seqs        example,L1 to database level,L2 to table level
 	 * @param writeTo
 	 * @param masterControl
 	 * @throws EFException
@@ -130,7 +129,7 @@ public final class PipePump extends Instruction {
 			try {
 				task.setL2seq(L2seq);
 				Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name()).put(task.getInstance() + L2seq,
-						"start count page..."); 
+						"start count page...");
 				ConcurrentLinkedDeque<String> pageList = this.getPageLists(task);
 				if (pageList == null)
 					throw new EFException("Reader page split exception!", ELEVEL.Termination);
@@ -166,15 +165,17 @@ public final class PipePump extends Instruction {
 		String mainName = Common.getMainName(task.getInstance(), task.getL1seq());
 		int pageNum = pageList.size();
 		if (pageNum == 0) {
-			log.info(Common.formatLog("start", "Complete " + task.getJobType().name(), mainName, storeId,
-					task.getL2seq(), 0, "", GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(task.getL2seq()), 0,
-					" no data!"));
+			if(task.getInstanceConfig().getPipeParams().getLogLevel()==0)
+				log.info(Common.formatLog("start", "Complete " + task.getJobType().name(), mainName, storeId,
+						task.getL2seq(), 0, "", GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(task.getL2seq()), 0,
+						" no data!"));
 		} else {
-			log.info(Common.formatLog("start",
-					(getInstanceConfig().getPipeParams().isMultiThread() ? "MultiThread"
-							: "SingleThread") + " Start " + task.getJobType().name(),
-					mainName, storeId, task.getL1seq(), 0, "",
-					GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(task.getL2seq()), 0, ",totalpage:" + pageNum));
+			if(task.getInstanceConfig().getPipeParams().getLogLevel()<2)
+				log.info(Common.formatLog("start",
+						(getInstanceConfig().getPipeParams().isMultiThread() ? "MultiThread" : "SingleThread") + " Start "
+								+ task.getJobType().name(),
+						mainName, storeId, task.getL1seq(), 0, "",
+						GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(task.getL2seq()), 0, ",totalpage:" + pageNum));
 
 			String computeModel;
 			if (getInstanceConfig().getComputeParams().getComputeModel() == "batch") {
@@ -186,8 +187,8 @@ public final class PipePump extends Instruction {
 			AtomicInteger total = new AtomicInteger(0);
 			if (getInstanceConfig().getPipeParams().isMultiThread()) {
 				CountDownLatch synThreads = new CountDownLatch(estimateThreads(pageNum));
-				Resource.ThreadPools
-				.submitJobPage(new PumpThread(synThreads, task, storeId, pageList, writeTo, computeModel, total)); 
+				Resource.ThreadPools.submitJobPage(
+						new PumpThread(synThreads, task, storeId, pageList, writeTo, computeModel, total));
 				try {
 					synThreads.await();
 				} catch (Exception e) {
@@ -196,9 +197,10 @@ public final class PipePump extends Instruction {
 			} else {
 				singleThread(task, storeId, pageList, writeTo, computeModel, total);
 			}
-			log.info(Common.formatLog("complete", "Complete " + task.getJobType().name(), mainName, storeId,
-					task.getL2seq(), total.get(), "",
-					GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(task.getL2seq()), Common.getNow() - start, ""));
+			if(task.getInstanceConfig().getPipeParams().getLogLevel()<2)
+				log.info(Common.formatLog("complete", "Complete " + task.getJobType().name(), mainName, storeId,
+						task.getL2seq(), total.get(), "",
+						GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(task.getL2seq()), Common.getNow() - start, ""));
 			if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination))
 				throw new EFException(
 						task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
@@ -229,13 +231,14 @@ public final class PipePump extends Instruction {
 			processPos++;
 			Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name())
 					.put(task.getInstance() + task.getL2seq(), processPos + "/" + pageList.size());
-			String dataScanDSL = PipeNormsUtil.fillParam(task.getScanParam().getDataScanDSL(), PipeNormsUtil.getScanParam(
-					task.getL2seq(), startId, dataBoundary, task.getStartTime(), task.getEndTime(), scanField));
+			String dataScanDSL = PipeNormsUtil.fillParam(task.getScanParam().getDataScanDSL(),
+					PipeNormsUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
+							task.getEndTime(), scanField));
 			if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination)) {
 				break;
 			} else {
-				DataPage pagedata = this.getPageData(Page.getInstance(keyField, scanField, startId,
-									dataBoundary, this.readHandler, getInstanceConfig().getWriteFields(), dataScanDSL)); 
+				DataPage pagedata = this.getPageData(Page.getInstance(keyField, scanField, startId, dataBoundary,
+						this.readHandler, getInstanceConfig().getWriteFields(), dataScanDSL));
 				if (getInstanceConfig().openCompute()) {
 					pagedata = (DataPage) CPU.RUN(getID(), "ML", computeModel, false, getID(), task.getJobType().name(),
 							writeTo, pagedata);
@@ -334,10 +337,10 @@ public final class PipePump extends Instruction {
 					Resource.ThreadPools.cleanWaitJob(getId());
 					Common.LOG.warn(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
 					break;
-				} else { 
-					DataPage pagedata = getPageData(Page.getInstance(task.getScanParam().getKeyField(), task.getScanParam().getScanField(),
-										startId, dataBoundary, readHandler, getInstanceConfig().getWriteFields(),
-										dataScanDSL));  
+				} else {
+					DataPage pagedata = getPageData(Page.getInstance(task.getScanParam().getKeyField(),
+							task.getScanParam().getScanField(), startId, dataBoundary, readHandler,
+							getInstanceConfig().getWriteFields(), dataScanDSL));
 					if (getInstanceConfig().openCompute()) {
 						pagedata = (DataPage) CPU.RUN(getID(), "ML", computeModel, false, getID(),
 								task.getJobType().name(), writeTo, pagedata);
@@ -394,35 +397,33 @@ public final class PipePump extends Instruction {
 		}
 
 	}
-	
-	//thread safe get page list 
+
+	// thread safe get page list
 	private ConcurrentLinkedDeque<String> getPageLists(Task task) {
 		ConcurrentLinkedDeque<String> pageList = null;
 		getReader().lock.lock();
 		try {
-			pageList = getReader().getPageSplit(task,
-				getInstanceConfig().getPipeParams().getReadPageSize());
+			pageList = getReader().getPageSplit(task, getInstanceConfig().getPipeParams().getReadPageSize());
 		} catch (Exception e) {
 			log.error("get Page lists Exception]", e);
-		}finally {
+		} finally {
 			getReader().lock.unlock();
 		}
 		return pageList;
 	}
-	//thread safe get page data 
-	private DataPage getPageData(Page pager){
+
+	// thread safe get page data
+	private DataPage getPageData(Page pager) {
 		getReader().lock.lock();
-		DataPage pagedata=null;
+		DataPage pagedata = null;
 		try {
-			pagedata = (DataPage) CPU.RUN(
-					getID(), "Pipe", "fetchPage", false, pager,
-					getReader());
+			pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchPage", false, pager, getReader());
 			getReader().freeJobPage();
 		} catch (Exception e) {
 			log.error("get Page Data Exception]", e);
-		}finally {
+		} finally {
 			getReader().lock.unlock();
-		} 
+		}
 		return pagedata;
 	}
 }

@@ -94,7 +94,8 @@ public class FlowTask {
 				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready);
 			}
 		} else {
-			log.info(instance + " current start full computational task has been breaked!");
+			if(transDataFlow.getInstanceConfig().getPipeParams().getLogLevel()==0)
+				log.info(instance + " current start full computational task has been breaked!");
 		}
 	}
 
@@ -128,7 +129,8 @@ public class FlowTask {
 				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready);
 			}
 		} else {
-			log.info(instance + " Current Master Full flow has been breaked!");
+			if(transDataFlow.getInstanceConfig().getPipeParams().getLogLevel()==0)
+				log.info(instance + " Current Master Full flow has been breaked!");
 		}
 	}
 
@@ -154,7 +156,8 @@ public class FlowTask {
 				recompute = false;
 			}
 		} else {
-			log.info(instance + " Current Master Increment flow has been breaked!");
+			if(transDataFlow.getInstanceConfig().getPipeParams().getLogLevel()==0)
+				log.info(instance + " Current Master Increment flow has been breaked!");
 		}
 	}
 
@@ -191,7 +194,8 @@ public class FlowTask {
 				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready); 
 			}
 		} else {
-			log.info(instance + " Current Increment flow has been breaked!");
+			if(transDataFlow.getInstanceConfig().getPipeParams().getLogLevel()==0)
+				log.info(instance + " Current Increment flow has been breaked!");
 		}
 	}
 

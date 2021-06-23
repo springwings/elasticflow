@@ -11,6 +11,7 @@ import org.elasticflow.config.GlobalParam.MECHANISM;
  */
 public class PipeParam { 
 	private int readPageSize = GlobalParam.READ_PAGE_SIZE;
+	private int logLevel = 0;
 	private String writeTo;
 	private String modelFrom;
 	private String writeHandler;
@@ -46,15 +47,16 @@ public class PipeParam {
 	public int getReadPageSize() {
 		return readPageSize;
 	}
+	public int getLogLevel() {
+		return logLevel;
+	}
 	public String getModelFrom() {
 		return modelFrom;
 	}
 	public MECHANISM getWriteMechanism() {
 		return writeMechanism;
 	}
-	public void setWriteTo(String writeTo) {
-		this.writeTo = writeTo;
-	}
+
 	public String getReadFrom() {
 		return readFrom;
 	}
@@ -97,6 +99,13 @@ public class PipeParam {
 	public void setOptimizeCron(String optimizeCron) {
 		this.optimizeCron = optimizeCron;
 	}  
+	
+	public void setLogLevel(String logLevel) {
+		this.logLevel = Integer.valueOf(logLevel);
+	}
+	public void setWriteTo(String writeTo) {
+		this.writeTo = writeTo;
+	}
 	
 	/**
 	 * get keep type and data

@@ -57,6 +57,7 @@ public final class Common {
 	
 	public final static Logger LOG = LoggerFactory.getLogger("Elasticflow");
 
+
 	private static Set<String> defaultParamSet = new HashSet<String>() {
 		private static final long serialVersionUID = 1L;
 		{
