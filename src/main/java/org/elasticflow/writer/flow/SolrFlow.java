@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TimeZone;
 import java.util.concurrent.CountDownLatch;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -28,9 +27,6 @@ import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.InstanceConfig;
@@ -43,6 +39,8 @@ import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.writer.WriterFlowSocket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * solr flow Writer Manager
@@ -272,12 +270,7 @@ public class SolrFlow extends WriterFlowSocket{
 		} 
 		return select;
 	}
-	
-	private String timeMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
-		long current=System.currentTimeMillis(); 
-		return String.valueOf(current/(1000*3600*24)*(1000*3600*24)-TimeZone.getDefault().getRawOffset()); 
-	}
- 
+
 	private void getSchemaFile(Map<String,EFField> paramMap,String instantcName, String storeId,String zkHost) {
 		BufferedReader head_reader = null;
 		BufferedReader tail_reader = null;  

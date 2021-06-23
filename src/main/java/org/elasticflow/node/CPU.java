@@ -2,6 +2,7 @@ package org.elasticflow.node;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import org.elasticflow.config.InstanceConfig;
@@ -20,7 +21,7 @@ public class CPU {
 	
 	static volatile HashMap<String, Context> Contexts = new HashMap<>();
 	
-	public static void prepare(String runId,InstanceConfig instanceConfig,WriterFlowSocket writer,ReaderFlowSocket reader,ReaderFlowSocket extReader) { 
+	public static void prepare(String runId,InstanceConfig instanceConfig,List<WriterFlowSocket> writer,ReaderFlowSocket reader,ReaderFlowSocket extReader) { 
 		Contexts.put(runId, Context.initContext(instanceConfig, writer,reader,extReader));
 	}
 	

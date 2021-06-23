@@ -43,12 +43,12 @@ public final class PipePump extends Instruction {
 	/** defined custom read flow socket */
 	Handler readHandler;
 
-	public static PipePump getInstance(ReaderFlowSocket reader, ReaderFlowSocket extReader, WriterFlowSocket writer,
+	public static PipePump getInstance(ReaderFlowSocket reader, ReaderFlowSocket extReader, List<WriterFlowSocket> writer,
 			InstanceConfig instanceConfig) {
 		return new PipePump(reader, extReader, writer, instanceConfig);
 	}
 
-	private PipePump(ReaderFlowSocket reader, ReaderFlowSocket extReader, WriterFlowSocket writer,
+	private PipePump(ReaderFlowSocket reader, ReaderFlowSocket extReader, List<WriterFlowSocket> writer,
 			InstanceConfig instanceConfig) {
 		CPU.prepare(getID(), instanceConfig, writer, reader, extReader);
 		try {
@@ -119,7 +119,7 @@ public final class PipePump extends Instruction {
 	 * @param task
 	 * @param mainName
 	 * @param storeId
-	 * @param L2seqs
+	 * @param L2seqs example,L1 to database level,L2 to table level
 	 * @param writeTo
 	 * @param masterControl
 	 * @throws EFException

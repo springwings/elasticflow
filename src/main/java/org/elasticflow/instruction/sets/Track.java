@@ -1,6 +1,8 @@
 package org.elasticflow.instruction.sets;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.node.CPU;
+import org.elasticflow.util.Common;
+import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.yarn.Resource;
 
 /**
@@ -38,10 +42,18 @@ public class Track extends Instruction {
 		} else {
 			return false;
 		}
+		
+		List<WriterFlowSocket> wfs = new ArrayList<>();
+		String[] writeDests = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
+				.getWriteTo().split(",");
+		if(writeDests.length<1)
+			Common.LOG.error("build write pipe socket error!Misconfiguration writer destination!");
+		for (String dest : writeDests) {
+			wfs.add(Resource.SOCKET_CENTER.getWriterSocket(dest, instance,L1seq, ""));
+		}
+		
 		CPU.prepare(id, Resource.nodeConfig.getInstanceConfigs().get(instance),
-				Resource.SOCKET_CENTER.getWriterSocket(
-						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getWriteTo(), instance,
-						L1seq, ""),
+				wfs,
 				Resource.SOCKET_CENTER.getReaderSocket(
 						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadFrom(), instance,
 						L1seq, ""),

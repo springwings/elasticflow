@@ -1,5 +1,7 @@
 package org.elasticflow.node;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,28 +45,34 @@ public final class SocketCenter {
 	/**
 	 * 
 	 * build read to write end pipe socket
-	 * @param L1seq        for series data source sequence
-	 * @param instance data source main tag name
-	 * @param needClear    for reset resource
-	 * @param tag          Marking resource
+	 * 
+	 * @param L1seq     for series data source sequence
+	 * @param instance  data source main tag name
+	 * @param needClear for reset resource
+	 * @param tag       Marking resource
 	 */
 	public PipePump getPipePump(String instance, String L1seq, boolean needClear, String tag) {
 		synchronized (pipePumpMap) {
 			String tags = Common.getResourceTag(instance, L1seq, tag, false);
 			if (!pipePumpMap.containsKey(tags) || needClear) {
-				PipePump transDataFlow = PipePump.getInstance(
-						getReaderSocket(
-								Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadFrom(),
-								instance, L1seq, tag),
-						(Resource.nodeConfig.getInstanceConfigs().get(instance).getComputeParams().getComputeModel()
-								.equals("flow")
-										? getReaderSocket(Resource.nodeConfig.getInstanceConfigs().get(instance)
-												.getPipeParams().getWriteTo(), instance, L1seq, tag)
-										: null),
-						getWriterSocket(
-								Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getWriteTo(),
-								instance, L1seq, tag),
-						Resource.nodeConfig.getInstanceConfigs().get(instance));
+				List<WriterFlowSocket> wfs = new ArrayList<>();
+				String[] writeDests = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
+						.getWriteTo().split(",");
+				if(writeDests.length<1)
+					Common.LOG.error("build write pipe socket error!Misconfiguration writer destination!");
+				for (String dest : writeDests) {
+					wfs.add(getWriterSocket(dest, instance, L1seq, tag));
+				}
+				PipePump transDataFlow = PipePump
+						.getInstance(
+								getReaderSocket(Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
+										.getReadFrom(), instance, L1seq, tag),
+								(Resource.nodeConfig.getInstanceConfigs().get(instance).getComputeParams()
+										.getComputeModel().equals("flow")
+												? getReaderSocket(Resource.nodeConfig.getInstanceConfigs().get(instance)
+														.getPipeParams().getWriteTo(), instance, L1seq, tag)
+												: null),
+								wfs, Resource.nodeConfig.getInstanceConfigs().get(instance));
 				pipePumpMap.put(tags, transDataFlow);
 			}
 			return pipePumpMap.get(tags);

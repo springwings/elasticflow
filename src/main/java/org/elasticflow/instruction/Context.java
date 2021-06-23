@@ -1,7 +1,10 @@
 package org.elasticflow.instruction;
 
+import java.util.List;
+
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.reader.ReaderFlowSocket;
+import org.elasticflow.util.EFWriterUtil;
 import org.elasticflow.writer.WriterFlowSocket;
  
 /**
@@ -15,14 +18,14 @@ public class Context {
 	
 	private InstanceConfig instanceConfig;
 	
-	private WriterFlowSocket writer;
+	private List<WriterFlowSocket> writer;
 	
 	private ReaderFlowSocket reader;
 	
 	/**extension reader for special requires like flow computing*/
 	private ReaderFlowSocket extReader;
 	
-	public static Context initContext(InstanceConfig instanceConfig,WriterFlowSocket writer,ReaderFlowSocket reader,ReaderFlowSocket extReader) {
+	public static Context initContext(InstanceConfig instanceConfig,List<WriterFlowSocket> writer,ReaderFlowSocket reader,ReaderFlowSocket extReader) {
 		Context c = new Context();
 		c.instanceConfig = instanceConfig;
 		c.writer = writer;
@@ -34,9 +37,9 @@ public class Context {
 	public InstanceConfig getInstanceConfig() {
 		return instanceConfig;
 	}
-
+	
 	public WriterFlowSocket getWriter() {
-		return writer;
+		return writer.get(EFWriterUtil.getSocket(this.instanceConfig,writer.size()));
 	}
 
 	public ReaderFlowSocket getReader() {

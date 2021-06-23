@@ -3,10 +3,7 @@ package org.elasticflow.writer.flow;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.Map;
-import java.util.TimeZone;
 
 import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.InstanceConfig;
@@ -35,9 +32,7 @@ public class MysqlFlow extends WriterFlowSocket {
 	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams, String instance,
 			String storeId, boolean isUpdate) throws EFException {
 		String table = Common.getStoreName(instance, storeId);
-		boolean releaseConn = false;
 		try { 
-			PREPARE(false, false);
 			if (!ISLINK())
 				return;
 			Connection conn = (Connection) GETSOCKET().getConnection(false);
@@ -48,9 +43,7 @@ public class MysqlFlow extends WriterFlowSocket {
 			}
 		} catch (Exception e) {
 			log.error("write Exception", e);
-		} finally {
-			REALEASE(false, releaseConn);
-		}
+		} 
 	}
 
 	@Override
@@ -146,39 +139,7 @@ public class MysqlFlow extends WriterFlowSocket {
 		return select;
 	}
 	
-	/**
-	 * Get the time-stamp of 0 o'clock every day/month
-	 * Maintain expired instances
-	 * @param mainName
-	 * @param isIncrement
-	 * @param instanceConfig
-	 * @return time-stamp of second
-	 */
-	private String timeMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
-		int[] timeSpan=instanceConfig.getPipeParams().getKeepNums();
-		String storeId;
-		long foward;
-		long current = System.currentTimeMillis();
-		LocalDate lnow = LocalDate.now();
-		if(timeSpan[0]==0) {
-			foward = lnow.minusDays(timeSpan[1]).atStartOfDay().toInstant(ZoneOffset.of("+8")).toEpochMilli();
-			storeId = String.valueOf((current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset())/1000);
-		}else {
-			Long startDay = Common.getMonthStartTime(current, "GMT+8:00");
-			storeId = String.valueOf(startDay/1000);			
-			LocalDate ldate = LocalDate.of(lnow.getYear(), lnow.getMonth(), 1);
-			foward = ldate.minusMonths(timeSpan[1]).atStartOfDay().toInstant(ZoneOffset.of("+8")).toEpochMilli();			
-		}
-		//remove out of range data		
-		String keepLastTime = String.valueOf(foward/1000);
-		String iName = Common.getStoreName(mainName, keepLastTime);
-		try {
-			this.removeInstance(mainName, keepLastTime);
-		} catch (Exception e) {
-			log.error("remove instance　"+iName+" Exception!", e);
-		}		
-		return storeId;
-	}
+	
 	
 	private String getTableSql(String instance, Map<String, EFField> transParams) {
 		StringBuilder sf = new StringBuilder();

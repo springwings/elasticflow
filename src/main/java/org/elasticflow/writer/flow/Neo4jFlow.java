@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TimeZone;
 
 import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.InstanceConfig;
@@ -116,11 +115,6 @@ public class Neo4jFlow extends WriterFlowSocket {
 		return "a";
 	}
 	
-	private String timeMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
-		long current=System.currentTimeMillis(); 
-		return String.valueOf(current/(1000*3600*24)*(1000*3600*24)-TimeZone.getDefault().getRawOffset()); 
-	} 
-	 
 	private String getWriteSQL(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> transParams) { 
 		String tmp = writerParam.getDSL(); 
 		for (Entry<String, Object> r : unit.getData().entrySet()) {
