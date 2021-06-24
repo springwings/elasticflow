@@ -22,7 +22,7 @@ ElasticFlow就是为解决该问题而生。
 综上任务都可以通过ElasticFlow，使用其可控的可计算流管道来实现。
 
 # Versions
-$ version 4.x
+$ version 5.x
 
 $ Java>=1.8
 
