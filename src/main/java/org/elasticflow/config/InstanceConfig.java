@@ -11,12 +11,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
 import org.elasticflow.field.EFField;
 import org.elasticflow.param.BasicParam;
-import org.elasticflow.param.end.MessageParam;
+import org.elasticflow.param.end.ReaderParam;
 import org.elasticflow.param.end.SearcherParam;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.ml.ComputeParam;
 import org.elasticflow.param.pipe.PipeParam;
-import org.elasticflow.param.warehouse.ScanParam;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.ConfigStorer;
 import org.elasticflow.yarn.Resource;
@@ -43,8 +42,7 @@ public class InstanceConfig {
 	private volatile Map<String,SearcherParam> searcherParams;
 	private volatile WriterParam writerParams;
 	private volatile PipeParam pipeParams;
-	private volatile ScanParam readParams;
-	private volatile MessageParam messageParam ; 
+	private volatile ReaderParam readParams;
 	private volatile ComputeParam computeParams;
 	private int instanceType = INSTANCE_TYPE.Blank.getVal();  
 
@@ -59,7 +57,6 @@ public class InstanceConfig {
 		this.computeFields = new HashMap<>();
 		this.searcherParams = new HashMap<>();
 		this.externConfigs = new HashMap<>();
-		this.messageParam = new MessageParam();
 		this.computeParams = new ComputeParam();
 		this.writerParams = new WriterParam();
 		loadInstanceConfig();
@@ -95,17 +92,13 @@ public class InstanceConfig {
 		return writerParams;
 	}
 	
-	public ScanParam getReadParams() {
+	public ReaderParam getReadParams() {
 		return readParams;
 	}
 	
 	public PipeParam getPipeParams() {
 		return pipeParams;
 	}
-
-	public MessageParam getMessageParam() {
-		return messageParam;
-	} 
 	 
 	public Map<String, String> getExternConfigs() {
 		return externConfigs;
@@ -210,15 +203,15 @@ public class InstanceConfig {
 				
 				params = (Element) dataflow.getElementsByTagName("ReadParam").item(0);
 				if(params!=null) {
-					readParams = new ScanParam();
+					readParams = new ReaderParam();
 					if(Resource.nodeConfig.getSqlWarehouse().containsKey(pipeParams.getReadFrom())) { 
 						readParams.setNoSql(false);
 						parseNode(params.getElementsByTagName("param"), "readParam",
-								ScanParam.class);  
+								ReaderParam.class);  
 					}else { 
 						readParams.setNoSql(true);
 						parseNode(params.getElementsByTagName("param"), "readParam",
-								ScanParam.class);
+								ReaderParam.class);
 					}  
 				} 
 				
@@ -292,9 +285,6 @@ public class InstanceConfig {
 						break; 
 					case "readParam": 
 						Common.getXmlParam(readParams, param, c);
-						break; 
-					case "MessageParam":
-						messageParam = (MessageParam) Common.getXmlObj(param, c);
 						break; 
 					case "SearchParam":
 						SearcherParam v  = (SearcherParam) Common.getXmlObj(param, c);

@@ -6,8 +6,6 @@ import java.sql.ResultSet;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.elasticflow.config.GlobalParam.MECHANISM;
-import org.apache.hadoop.hdfs.server.namenode.status_jsp;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
@@ -76,17 +74,8 @@ public class MysqlFlow extends WriterFlowSocket {
 	@Override
 	public void flush() throws Exception {
 
-	}
-
-	@Override
-	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
-		if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.AB) {
-			return abMechanism(mainName,isIncrement,instanceConfig);
-		}else {
-			return timeMechanism(mainName,isIncrement,instanceConfig);
-		} 
-	}
-
+	} 
+	
 	@Override
 	public boolean create(String instance, String storeId, InstanceConfig instanceConfig) {
 		String name = Common.getStoreName(instance, storeId);
@@ -104,7 +93,7 @@ public class MysqlFlow extends WriterFlowSocket {
 			return false;
 		} finally {
 			REALEASE(false, false);
-		}
+		}   
 	} 
 
 	@Override
@@ -142,7 +131,8 @@ public class MysqlFlow extends WriterFlowSocket {
 		
 	}
 	
-	private String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
+	@Override
+	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
 		String select = "b";
 		boolean releaseConn = false;
 		PREPARE(false, false);

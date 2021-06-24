@@ -28,7 +28,6 @@ import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
@@ -236,18 +235,9 @@ public class SolrFlow extends WriterFlowSocket{
 			log.error("index " + name + " optimize failed.",e); 
 		} 
 	} 
-	
 
-	@Override
-	public String getNewStoreId(String mainName,boolean isIncrement,final InstanceConfig instanceConfig) {  
-		if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.AB) {
-			return abMechanism(mainName,isIncrement,instanceConfig);
-		}else {
-			return timeMechanism(mainName,isIncrement,instanceConfig);
-		} 
-	} 
 	
-	private String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
+	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
 		String b = Common.getStoreName(mainName, "b");
 		String a = Common.getStoreName(mainName, "a");
 		String select="";  

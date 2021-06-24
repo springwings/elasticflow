@@ -1,3 +1,10 @@
+/*
+ * Copyright ElasticFlow B.V. and/or licensed to ElasticFlow B.V. under one
+ * or more contributor license agreements. Licensed under the ElasticFlow License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
+ * Side Public License, v 1.
+ */
 package org.elasticflow.node;
 
 import java.util.ArrayList;
@@ -48,13 +55,13 @@ public final class SocketCenter {
 	 * 
 	 * @param L1seq     for series data source sequence
 	 * @param instance  data source main tag name
-	 * @param needClear for reset resource
+	 * @param needReset for reset resource
 	 * @param tag       Marking resource
 	 */
-	public PipePump getPipePump(String instance, String L1seq, boolean needClear, String tag) {
+	public PipePump getPipePump(String instance, String L1seq, boolean needReset, String tag) {
 		synchronized (pipePumpMap) {
 			String tags = Common.getResourceTag(instance, L1seq, tag, false);
-			if (!pipePumpMap.containsKey(tags) || needClear) {
+			if (!pipePumpMap.containsKey(tags) || needReset) {
 				List<WriterFlowSocket> wfs = new ArrayList<>();
 				String[] writeDests = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
 						.getWriteTo().split(",");

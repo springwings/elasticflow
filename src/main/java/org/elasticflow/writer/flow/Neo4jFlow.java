@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
@@ -36,14 +35,6 @@ public class Neo4jFlow extends WriterFlowSocket {
 		return false;
 	}
 
-	@Override
-	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
-		if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.AB) {
-			return abMechanism(mainName,isIncrement,instanceConfig);
-		}else {
-			return timeMechanism(mainName,isIncrement,instanceConfig);
-		} 
-	}
 
 	@Override
 	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams, String instance,
@@ -97,7 +88,7 @@ public class Neo4jFlow extends WriterFlowSocket {
 		
 	}
 	
-	private String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) { 
+	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) { 
 		if (isIncrement)
 			return "a";
 		Connection conn = (Connection) GETSOCKET().getConnection(false);

@@ -2,8 +2,8 @@ package org.elasticflow.model;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
+import org.elasticflow.param.end.ReaderParam;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.param.warehouse.ScanParam;
 import org.elasticflow.reader.handler.Handler;
 import org.elasticflow.util.Common;
 
@@ -57,7 +57,7 @@ public final class Task {
 		this.L2seq = L2seq;
 	}
 
-	public ScanParam getScanParam() {
+	public ReaderParam getScanParam() {
 		return this.instanceConfig.getReadParams();
 	}
 

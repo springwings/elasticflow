@@ -1,3 +1,10 @@
+/*
+ * Copyright ElasticFlow B.V. and/or licensed to ElasticFlow B.V. under one
+ * or more contributor license agreements. Licensed under the ElasticFlow License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
+ * Side Public License, v 1.
+ */
 package org.elasticflow.instruction;
 
 import java.util.List;
@@ -36,10 +43,14 @@ public class Context {
 
 	public InstanceConfig getInstanceConfig() {
 		return instanceConfig;
-	}
+	} 
 	
 	public WriterFlowSocket getWriter() {
-		return writer.get(EFWriterUtil.getSocket(this.instanceConfig,writer.size()));
+		return writer.get(EFWriterUtil.getWriterSocketIndex(this.instanceConfig,writer.size(),0));
+	}
+	
+	public WriterFlowSocket getWriter(Long outTime) {
+		return writer.get(EFWriterUtil.getWriterSocketIndex(this.instanceConfig,writer.size(),outTime));
 	}
 
 	public ReaderFlowSocket getReader() {

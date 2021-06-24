@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connect.ESConnector;
 import org.elasticflow.field.EFField;
@@ -286,15 +285,6 @@ public class ESFlow extends WriterFlowSocket {
 	}
 
 	@Override
-	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {		
-		if (instanceConfig.getPipeParams().getWriteMechanism() == MECHANISM.AB) {
-			return abMechanism(mainName, isIncrement, instanceConfig);
-		} else {
-			return timeMechanism(mainName, isIncrement, instanceConfig);
-		}
-	}
-
-	@Override
 	public void setAlias(String instanceName, String storeId, String aliasName) {
 		String iName = Common.getStoreName(instanceName, storeId);
 		try {
@@ -358,7 +348,7 @@ public class ESFlow extends WriterFlowSocket {
 		return root_map;
 	}
 
-	private String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
+	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
 		boolean a_alias = false;
 		boolean b_alias = false;
 		String select = "";

@@ -130,5 +130,11 @@ public class HBaseFlow extends WriterFlowSocket {
 		// TODO Auto-generated method stub
 		return "a";
 	}
+
+	@Override
+	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
+		// TODO Auto-generated method stub
+		return null;
+	}
  
 }
