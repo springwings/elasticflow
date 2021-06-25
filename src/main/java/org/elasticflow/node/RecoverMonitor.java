@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.NodeUtil;
+import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.yarn.Resource;
 
 /**
@@ -57,7 +57,7 @@ public class RecoverMonitor {
 				try { 
 					client.connect(this.takeIp, 8617); 
 					Common.LOG.info("start restart and return Node "+this.takeIp);
-					NodeUtil.runShell(GlobalParam.StartConfig.getProperty("restart_shell"));
+					EFNodeUtil.runShell(GlobalParam.StartConfig.getProperty("restart_shell"));
 					return;
 				} catch (Exception e) { 
 					Thread.sleep(5000); 

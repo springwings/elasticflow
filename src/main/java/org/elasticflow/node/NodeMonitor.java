@@ -46,7 +46,7 @@ import org.elasticflow.searcher.service.SearcherService;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.ConfigStorer;
 import org.elasticflow.util.EFLoader;
-import org.elasticflow.util.NodeUtil;
+import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.SystemInfoUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.yarn.Resource;
@@ -291,7 +291,7 @@ public final class NodeMonitor {
 		Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				NodeUtil.runShell(GlobalParam.StartConfig.getProperty("restart_shell"));
+				EFNodeUtil.runShell(GlobalParam.StartConfig.getProperty("restart_shell"));
 			}
 		});
 		thread.start();
@@ -753,7 +753,7 @@ public final class NodeMonitor {
 				instanceName = tmp[0];
 			InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instanceName);
 			if (instanceConfig.checkStatus())
-				NodeUtil.initParams(instanceConfig);
+				EFNodeUtil.initParams(instanceConfig);
 			rebuildFlowGovern(rq.getParameter("instance"));
 			GlobalParam.StartConfig.setProperty("instances",
 					(GlobalParam.StartConfig.getProperty("instances") + "," + rq.getParameter("instance")).replace(",,",

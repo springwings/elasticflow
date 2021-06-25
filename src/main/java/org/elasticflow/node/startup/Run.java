@@ -34,7 +34,7 @@ import org.elasticflow.task.FlowTask;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFLoc;
 import org.elasticflow.util.ConfigStorer;
-import org.elasticflow.util.NodeUtil;
+import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.ZKUtil;
 import org.elasticflow.util.email.EFEmailSender;
 import org.elasticflow.yarn.Resource;
@@ -103,7 +103,7 @@ public final class Run {
 			for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {
 				InstanceConfig instanceConfig = entry.getValue();
 				if (instanceConfig.checkStatus())
-					NodeUtil.initParams(instanceConfig);
+					EFNodeUtil.initParams(instanceConfig);
 			}
 		}
 	}
