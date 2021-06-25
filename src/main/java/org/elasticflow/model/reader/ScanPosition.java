@@ -12,9 +12,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2018-11-26 13:43
  */
 public class ScanPosition {
-
+	
 	private String instance;
 	private String storeId;
+	/**L2seq Scan switch point location information which in Piper configuration file*/
 	private ConcurrentHashMap<String, String> L2seqPos = new ConcurrentHashMap<>();
 	private String JOB_STATE_SPERATOR = ":";
 	private String JOB_SEQ_SPERATOR = ",";
@@ -43,7 +44,7 @@ public class ScanPosition {
 		this.storeId = storeId;
 	}
 	
-	public void updateL2SeqPos(String k,String v) {
+	public void updateL2SeqPos(String k,String v) {		
 		L2seqPos.put(k, v);
 	} 
 	

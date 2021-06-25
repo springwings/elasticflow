@@ -542,22 +542,24 @@ public final class NodeMonitor {
 				} else {
 					String strs = GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null))
 							.getPositionString();
-					StringBuilder stateStr = new StringBuilder();
-					if (strs.split(",").length > 0) {
-						for (String tm : strs.split(",")) {
-							String[] dstr = tm.split(":");
-							if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
-								stateStr.append(dstr[0] + ":"
-										+ SDF.format(tm.length() < 12 ? new Long(tm + "000") : new Long(dstr[1])));
-								stateStr.append(" (").append(tm).append(")");
-							} else {
-								stateStr.append(tm);
+					if(strs.length()>0) {
+						StringBuilder stateStr = new StringBuilder();
+						if (strs.split(",").length > 0) {
+							for (String tm : strs.split(",")) {
+								String[] dstr = tm.split(":");
+								if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
+									stateStr.append(dstr[0] + ":"
+											+ SDF.format(tm.length() < 12 ? new Long(dstr[1] + "000") : new Long(dstr[1])));
+									stateStr.append(" (").append(tm).append(")");
+								} else {
+									stateStr.append(tm);
+								}
+								stateStr.append(", ");
 							}
-							stateStr.append(", ");
 						}
+						JO.put("增量存储状态", GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null)).getStoreId()
+								+ ":" + stateStr.toString());
 					}
-					JO.put("增量存储状态", GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null)).getStoreId()
-							+ ":" + stateStr.toString());
 					JO.put("全量存储状态", Common.getFullStartInfo(instance, null));
 				}
 				if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.FULL.name())
@@ -604,7 +606,7 @@ public final class NodeMonitor {
 			}
 			instance.put("SearchFrom", config.getPipeParams().getSearchFrom());
 			instance.put("ReadFrom", config.getPipeParams().getReadFrom());
-			instance.put("WriteTo", config.getPipeParams().getWriteTo());
+			instance.put("WriteTo", config.getPipeParams().getWriteTo().replace(",", ";"));
 			instance.put("openTrans", config.openTrans());
 			instance.put("IsMaster", config.getPipeParams().isMaster());
 			instance.put("InstanceType", this.getInstanceType(config.getInstanceType()));
