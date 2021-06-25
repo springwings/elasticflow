@@ -1,5 +1,6 @@
 package org.elasticflow.connect;
 
+import java.util.Arrays;
 import java.util.Properties;
 
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -39,6 +40,7 @@ public class KafkaConnection extends EFConnectionSocket<KafkaConsumer<String, St
 		        props.put("key.deserializer", StringDeserializer.class);
 		        props.put("value.deserializer", StringDeserializer.class);
 				this.conn = new KafkaConsumer<String, String>(props);
+				this.conn.subscribe(Arrays.asList("test".split(",")));
 			}
 		} else {
 			return false;

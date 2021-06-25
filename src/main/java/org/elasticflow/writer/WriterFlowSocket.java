@@ -51,7 +51,7 @@ public abstract class WriterFlowSocket extends Flow{
 		EFTuple<Long, Long> dTuple = EFWriterUtil.timeMechanism(instanceConfig);
 		String iName = Common.getStoreName(mainName, String.valueOf(dTuple.v2));
 		try {
-			//remove out of date instance function not support cross L1Seqs			
+			//remove out of date instance ,but this function not support cross L1Seqs destination		
 			PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(mainName,this.connectParams.getL1Seq(), 
 					false,GlobalParam.FLOW_TAG._DEFAULT.name());
 			pipePump.getWriter(dTuple.v2).removeInstance(mainName, String.valueOf(dTuple.v2));

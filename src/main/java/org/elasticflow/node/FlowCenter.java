@@ -41,7 +41,7 @@ public class FlowCenter{
 	private HashSet<String> cron_exists=new HashSet<String>();
 
 	/**
-	 * build read to flow flow
+	 * build reader-writer flow
 	 */
 	public void buildRWFlow() { 
 		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();

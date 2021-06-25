@@ -39,6 +39,7 @@ public class EFWriterUtil {
 	
 	/**
 	 * writer with time Mechanism store id 
+	 * It only supports load balancing etc. at the top level of the resource
 	 * @param instanceConfig
 	 * @return store id and need remove store-id
 	 */

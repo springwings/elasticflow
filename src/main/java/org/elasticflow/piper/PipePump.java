@@ -68,6 +68,15 @@ public final class PipePump extends Instruction {
 		}
 	}
 
+	/**
+	 * Job running entry
+	 * @param instance
+	 * @param storeId
+	 * @param L1seq
+	 * @param isFull
+	 * @param writeInSamePosition
+	 * @throws EFException
+	 */
 	public void run(String instance, String storeId, String L1seq, boolean isFull, boolean writeInSamePosition)
 			throws EFException {
 		JOB_TYPE job_type;

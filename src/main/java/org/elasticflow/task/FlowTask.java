@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 public class FlowTask {
 
 	private boolean recompute = true;
+	/**Used to control multiple tasks to write data to the same place*/
 	private boolean writeInSamePosition = false;
 	private String instance;
 	private PipePump transDataFlow;
@@ -55,7 +56,7 @@ public class FlowTask {
 		this.transDataFlow = transDataFlow;
 		this.L1seq = L1seq;
 		if (transDataFlow.getInstanceConfig().getPipeParams().getInstanceName() != null)
-			writeInSamePosition = true;//c write in same position
+			writeInSamePosition = true;
 		breaker = new Breaker();
 		breaker.init();
 	}
@@ -106,6 +107,9 @@ public class FlowTask {
 		}
 	}
 
+	/**
+	 * Primary virtual node full task running
+	 */
 	public void runMasterFull() {
 		if (Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running)) {
 			try {
@@ -140,7 +144,10 @@ public class FlowTask {
 				log.info(instance + " Current Master Full flow has been breaked!");
 		}
 	}
-
+	
+	/**
+	 * Primary virtual node Increment task running
+	 */
 	public void runMasterIncrement() {
 		if (Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running)) {
 			try {
