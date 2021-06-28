@@ -1,6 +1,6 @@
 package org.elasticflow.param.warehouse;
 
-import org.elasticflow.config.GlobalParam.DATA_TYPE;
+import org.elasticflow.config.GlobalParam.DATA_SOURCE_TYPE;
 
 /**
  * seq for series data position define
@@ -14,7 +14,7 @@ public interface WarehouseParam {
 	
 	public void setL1seq(String seqs);
 	
-	public DATA_TYPE getType();
+	public DATA_SOURCE_TYPE getType();
 	
 	public String getHandler(); 
 	

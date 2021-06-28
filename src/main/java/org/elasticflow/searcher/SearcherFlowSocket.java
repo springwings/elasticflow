@@ -1,6 +1,6 @@
 package org.elasticflow.searcher;
 
-import org.elasticflow.config.GlobalParam.DATA_TYPE;
+import org.elasticflow.config.GlobalParam.DATA_SOURCE_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.flow.Flow;
 import org.elasticflow.model.searcher.SearcherModel;
@@ -29,7 +29,7 @@ public abstract class SearcherFlowSocket extends Flow {
 	public abstract SearcherResult Search(SearcherModel<?, ?, ?> query, String instance, Handler handler)
 			throws EFException; 
 
-	public DATA_TYPE getType() {
+	public DATA_SOURCE_TYPE getType() {
 		return connectParams.getWhp().getType();
 	}
 

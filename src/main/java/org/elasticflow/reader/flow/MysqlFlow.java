@@ -63,7 +63,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 		} catch (Exception e) { 
 			releaseConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS,false);
-			log.error("get dataPage Exception so free connection,details ", e);
+			log.error("get Page Data Exception so free connection,details ", e);
 		}finally{
 			REALEASE(false,releaseConn);
 		} 

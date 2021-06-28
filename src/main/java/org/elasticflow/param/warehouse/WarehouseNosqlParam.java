@@ -1,6 +1,6 @@
 package org.elasticflow.param.warehouse;
 
-import org.elasticflow.config.GlobalParam.DATA_TYPE;
+import org.elasticflow.config.GlobalParam.DATA_SOURCE_TYPE;;
 
 /**
  * 
@@ -10,7 +10,7 @@ import org.elasticflow.config.GlobalParam.DATA_TYPE;
  */
 public class WarehouseNosqlParam implements WarehouseParam{
 	
-	private DATA_TYPE type = DATA_TYPE.UNKNOWN;
+	private DATA_SOURCE_TYPE type = DATA_SOURCE_TYPE.UNKNOWN;
 	private String name;
 	private String alias;
 	private String path;
@@ -18,23 +18,26 @@ public class WarehouseNosqlParam implements WarehouseParam{
 	private String handler;
 	private String[] L1seq = {};
 	
-	public DATA_TYPE getType() {
+	public DATA_SOURCE_TYPE getType() {
 		return type;
 	}
 	
 	public void setType(String type) {
 		switch (type.toUpperCase()) {
 		case "SOLR":
-			this.type = DATA_TYPE.SOLR;
+			this.type = DATA_SOURCE_TYPE.SOLR;
 			break;
 		case "ES":
-			this.type = DATA_TYPE.ES;
+			this.type = DATA_SOURCE_TYPE.ES;
 			break;
 		case "HBASE":
-			this.type = DATA_TYPE.HBASE;
+			this.type = DATA_SOURCE_TYPE.HBASE;
 			break;
 		case "FILE":
-			this.type = DATA_TYPE.FILE;
+			this.type = DATA_SOURCE_TYPE.FILE;
+			break;
+		case "KAFKA":
+			this.type = DATA_SOURCE_TYPE.KAFKA;
 			break;
 		} 
 	}

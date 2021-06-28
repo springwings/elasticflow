@@ -45,7 +45,7 @@ public class SearcherSocketFactory implements Socket<SearcherFlowSocket>{
 		case MYSQL:
 			return MysqlFlow.getInstance(connectParams); 
 		default:
-			Common.LOG.error("WriterFlowSocket Connect Type "+connectParams.getWhp().getType()+" Not Support!");
+			Common.LOG.error("SearcherSocket Connect Type "+connectParams.getWhp().getType()+" Not Support!");
 			return null;
 		} 
 	}

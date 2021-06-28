@@ -63,8 +63,7 @@ public final class Common {
 	public static FastDateFormat SDF = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
 	
 	public final static Logger LOG = LoggerFactory.getLogger("Elasticflow");
-
-
+ 
 	private static Set<String> defaultParamSet = new HashSet<String>() {
 		private static final long serialVersionUID = 1L;
 		{
@@ -78,7 +77,18 @@ public final class Common {
 			add(KEY_PARAM.detail.toString());
 		}
 	};
-
+	
+	/**
+	 * Convert the first letter to uppercase or lowercase
+	 * @param str
+	 * @return
+	 */
+	public static String changeFirstCase(String str){
+        char[] chars = str.toCharArray();
+        chars[0]^= 32;
+        return String.valueOf(chars);
+	}
+	
 	public static boolean isDefaultParam(String p) {
 		if (defaultParamSet.contains(p))
 			return true;

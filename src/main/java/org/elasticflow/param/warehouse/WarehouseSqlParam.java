@@ -1,6 +1,6 @@
 package org.elasticflow.param.warehouse;
 
-import org.elasticflow.config.GlobalParam.DATA_TYPE;
+import org.elasticflow.config.GlobalParam.DATA_SOURCE_TYPE;
 
 /**
  * 
@@ -17,7 +17,7 @@ public class WarehouseSqlParam implements WarehouseParam{
 	private String dbname = "";
 	private String user = "";
 	private String password = "";
-	private DATA_TYPE type = DATA_TYPE.UNKNOWN;
+	private DATA_SOURCE_TYPE type = DATA_SOURCE_TYPE.UNKNOWN;
 	private String[] L1seq = {};
 	private String handler;
 	
@@ -64,18 +64,18 @@ public class WarehouseSqlParam implements WarehouseParam{
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	public DATA_TYPE getType() {
+	public DATA_SOURCE_TYPE getType() {
 		return this.type;
 	}
 	public void setType(String type) {
 		if (type.equalsIgnoreCase("MYSQL"))
-			this.type = DATA_TYPE.MYSQL;
+			this.type = DATA_SOURCE_TYPE.MYSQL;
 		else if (type.equalsIgnoreCase("ORACLE"))
-			this.type = DATA_TYPE.ORACLE;
+			this.type = DATA_SOURCE_TYPE.ORACLE;
 		else if (type.equalsIgnoreCase("HIVE"))
-			this.type = DATA_TYPE.HIVE;
+			this.type = DATA_SOURCE_TYPE.HIVE;
 		else if (type.equalsIgnoreCase("NEO4J"))
-			this.type = DATA_TYPE.NEO4J;
+			this.type = DATA_SOURCE_TYPE.NEO4J;
 	}
 	
 	public String getAlias() {

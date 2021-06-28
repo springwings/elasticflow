@@ -1,5 +1,6 @@
 package org.elasticflow.connect;
 
+import java.lang.reflect.Method;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -9,6 +10,7 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.util.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -223,34 +225,12 @@ public final class EFConnectionPool {
 		private EFConnectionSocket<?> newConnection() {
 			EFConnectionSocket<?> conn = null;
 			if (params != null) {
-				switch (params.getWhp().getType()) {
-				case ORACLE:
-					conn = OracleConnection.getInstance(params);
-					break;
-				case MYSQL:
-					conn = MysqlConnection.getInstance(params);
-					break;
-				case SOLR:
-					conn = SolrConnection.getInstance(params);
-					break;
-				case ES:
-					conn = ESConnection.getInstance(params);
-					break;
-				case HBASE:
-					conn = HBaseConnection.getInstance(params);
-					break;
-				case ZOOKEEPER:
-					conn = ZookeeperConnection.getInstance(params);
-					break;
-				case FILE:
-					conn = FileConnection.getInstance(params);
-					break;
-				case NEO4J:
-					conn = Neo4jConnection.getInstance(params);
-					break;
-				default:
-					log.error("Connection Type Not Support!");
-					break;
+				try {
+					Class<?> clz = Class.forName("org.elasticflow.connect."+Common.changeFirstCase(params.getWhp().getType().name().toLowerCase())+"Connection"); 
+					Method m = clz.getMethod("getInstance", ConnectParams.class);  
+					conn = (EFConnectionSocket<?>) m.invoke(null,params);
+				}catch (Exception e) {
+					log.error("Connection Type Not Support!",e);
 				}
 			} else {
 				log.error("Parameter error can't create new " + this.poolName + " connection!");
