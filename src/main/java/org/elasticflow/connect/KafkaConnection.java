@@ -35,12 +35,17 @@ public class KafkaConnection extends EFConnectionSocket<KafkaConsumer<String, St
 		if (wnp.getPath() != null) {
 			if (!status()) { 
 				Properties props = new Properties();
-		        props.put("bootstrap.servers", wnp.getPath());
-		        props.put("group.id", wnp.getDefaultValue());
+				String[] tmps = wnp.getDefaultValue().split("#");
+		        props.put("bootstrap.servers", wnp.getPath());		        
+		        props.put("group.id", tmps[0]);
 		        props.put("key.deserializer", StringDeserializer.class);
 		        props.put("value.deserializer", StringDeserializer.class);
+		        if(tmps.length!=2) {
+		        	log.error("kafka group.id and topic setting wrong!");
+		        	return false;
+		        }		        	
 				this.conn = new KafkaConsumer<String, String>(props);
-				this.conn.subscribe(Arrays.asList("test".split(",")));
+				this.conn.subscribe(Arrays.asList(tmps[1].split(",")));
 			}
 		} else {
 			return false;

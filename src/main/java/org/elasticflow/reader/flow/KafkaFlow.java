@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.elasticflow.config.GlobalParam;
 import org.elasticflow.model.Page;
 import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
@@ -48,7 +47,6 @@ public class KafkaFlow extends ReaderFlowSocket{
 	            PipeDataUnit u = PipeDataUnit.getInstance();
 	            String v = record.value();
 				String k = record.key();
-				 
 	            u.addFieldValue(k, v, page.getTransField());
 	            this.dataUnit.add(u);
 	            count++;
