@@ -21,21 +21,21 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @date 2018-10-26 09:25
  */
-public class ESConnection extends EFConnectionSocket<ESConnector> {
+public class EsConnection extends EFConnectionSocket<EsConnector> {
 
 	private RestHighLevelClient conn;
 	private BulkProcessor bulkProcessor;
-	private ESConnector ESC = new ESConnector();
+	private EsConnector ESC = new EsConnector();
 
 	private final static int BULK_BUFFER = 1000;
 	private final static int BULK_SIZE = 30;
 	private final static int BULK_FLUSH_SECONDS = 3;
 	private final static int BULK_CONCURRENT = 1;
 
-	private final static Logger log = LoggerFactory.getLogger(ESConnection.class);
+	private final static Logger log = LoggerFactory.getLogger(EsConnection.class);
 
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
-		EFConnectionSocket<?> o = new ESConnection();
+		EFConnectionSocket<?> o = new EsConnection();
 		o.init(ConnectParams);
 		o.connect();
 		return o;
@@ -65,7 +65,7 @@ public class ESConnection extends EFConnectionSocket<ESConnector> {
 	}
 
 	@Override
-	public ESConnector getConnection(boolean searcher) {
+	public EsConnector getConnection(boolean searcher) {
 		connect();
 		if (!searcher) {
 			if (this.bulkProcessor == null) {

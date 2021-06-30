@@ -1,11 +1,14 @@
 package org.elasticflow.reader.flow;
 
 import java.time.Duration;
+import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.elasticflow.config.GlobalParam;
 import org.elasticflow.model.Page;
 import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
@@ -14,6 +17,9 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * 
@@ -43,19 +49,28 @@ public class KafkaFlow extends ReaderFlowSocket{
 		@SuppressWarnings("unchecked")
 		KafkaConsumer<String,String> conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(false); 
 		try{
+			String dataBoundary = null;
 			for (ConsumerRecord<String, String> record : records) {
 	            PipeDataUnit u = PipeDataUnit.getInstance();
-	            String v = record.value();
-				String k = record.key();
-	            u.addFieldValue(k, v, page.getTransField());
+	            String val = record.value();
+				String key = record.key();
+				JSONObject jsonObject = JSON.parseObject(val);
+				Set<Entry<String, Object>> itr = jsonObject.entrySet();
+				u.setReaderKeyVal(key);
+				dataBoundary = key;
+				for (Entry<String, Object> k : itr) {		 
+					u.addFieldValue(k.getKey(), k.getValue(), page.getTransField());
+				} 
 	            this.dataUnit.add(u);
 	            count++;
 	            conn.commitAsync();
 	            if(count>=pageSize)
 	            	break;
 	        }
+			this.dataPage.putDataBoundary(dataBoundary);
 		}catch (Exception e) {
 			releaseConn = true;
+			this.dataPage.put(GlobalParam.READER_STATUS,false);
 			log.error("get Page Data Exception so free connection,details ", e);
 		}finally{ 
 			REALEASE(false,releaseConn);  

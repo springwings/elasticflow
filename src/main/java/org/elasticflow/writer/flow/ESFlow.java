@@ -12,7 +12,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.connect.ESConnector;
+import org.elasticflow.connect.EsConnector;
 import org.elasticflow.field.EFField;
 import org.elasticflow.field.FieldHandler;
 import org.elasticflow.model.reader.PipeDataUnit;
@@ -59,7 +59,7 @@ import net.sf.json.JSONObject;
 @NotThreadSafe
 public class ESFlow extends WriterFlowSocket {
 
-	protected ESConnector CONNS;
+	protected EsConnector CONNS;
 
 	private boolean reconn = false;
 
@@ -435,10 +435,10 @@ public class ESFlow extends WriterFlowSocket {
 		return exists;
 	}
 
-	private synchronized ESConnector getESC() {
+	private synchronized EsConnector getESC() {
 		if (this.CONNS == null || reconn) {
 			reconn = false;
-			this.CONNS = (ESConnector) GETSOCKET().getConnection(false);
+			this.CONNS = (EsConnector) GETSOCKET().getConnection(false);
 		}
 		return this.CONNS;
 	}

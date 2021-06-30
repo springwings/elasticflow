@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @date 2018-10-26 09:25
  */
-public class HBaseConnection extends EFConnectionSocket<Table>{
+public class HbaseConnection extends EFConnectionSocket<Table>{
 	private final static Logger log = LoggerFactory
 			.getLogger("HBase Socket");
 	private Configuration hbaseConfig;
@@ -25,7 +25,7 @@ public class HBaseConnection extends EFConnectionSocket<Table>{
 	private Table conn;
 
 	public static EFConnectionSocket<?> getInstance(ConnectParams connectParams) {
-		EFConnectionSocket<?> o = new HBaseConnection();
+		EFConnectionSocket<?> o = new HbaseConnection();
 		o.init(connectParams);
 		o.connect();
 		return o;
