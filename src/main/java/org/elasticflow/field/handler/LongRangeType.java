@@ -41,8 +41,9 @@ public class LongRangeType implements FieldHandler<Long> {
 		if (seg >= s.length()) {
 			throw new NumberFormatException(s);
 		}
-		this.val = Long.valueOf(s);
+		
 		if (seg < 0) {
+			this.val = Long.valueOf(s);
 			this.max = this.val;
 			this.min = this.val;
 		} else {
@@ -55,6 +56,7 @@ public class LongRangeType implements FieldHandler<Long> {
 					String maxStr = s.substring(seg + 1);
 					this.max = Long.valueOf(maxStr);
 				}
+				this.val = this.min;
 			} catch (Exception e) {
 				throw new EFException(e);
 			}
