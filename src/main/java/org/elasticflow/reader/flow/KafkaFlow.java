@@ -32,7 +32,8 @@ import com.alibaba.fastjson.JSONObject;
  */
 @NotThreadSafe
 public class KafkaFlow extends ReaderFlowSocket {
-
+	
+	final int readms = 100;
 	ConsumerRecords<String, String> records;
 	int totalNum = 0;
 	AtomicInteger counts = new AtomicInteger(0);
@@ -45,11 +46,13 @@ public class KafkaFlow extends ReaderFlowSocket {
 		return o;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public DataPage getPageData(final Page page, int pageSize) {
 
 		if (this.records == null || this.totalNum <= this.counts.get()) {
 			this.totalNum = 0;
+			((KafkaConsumer<String, String>) GETSOCKET().getConnection(false)).commitAsync();
 			return this.dataPage;
 		}
 
@@ -106,7 +109,7 @@ public class KafkaFlow extends ReaderFlowSocket {
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
 		try {
 			while (true) {
-				this.records = conn.poll(Duration.ofMillis(100));
+				this.records = conn.poll(Duration.ofMillis(readms));
 				this.totalNum = this.records.count();
 				if (this.totalNum > 0) {
 					int pagenum = (int) Math.ceil(this.totalNum / pageSize);

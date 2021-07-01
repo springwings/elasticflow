@@ -5,6 +5,7 @@ import java.util.Properties;
 
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.elasticflow.config.GlobalParam;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.slf4j.Logger;
@@ -40,6 +41,8 @@ public class KafkaConnection extends EFConnectionSocket<KafkaConsumer<String, St
 		        props.put("group.id", tmps[0]);
 		        props.put("key.deserializer", StringDeserializer.class);
 		        props.put("value.deserializer", StringDeserializer.class);
+		        props.put("max.poll.records",GlobalParam.READ_PAGE_SIZE);
+		        props.put("max.partition.fetch.bytes", 1048576 * 10);
 		        if(tmps.length!=2) {
 		        	log.error("kafka group.id and topic setting wrong!");
 		        	return false;
