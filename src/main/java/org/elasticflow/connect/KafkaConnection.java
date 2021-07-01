@@ -22,6 +22,8 @@ public class KafkaConnection extends EFConnectionSocket<KafkaConsumer<String, St
 	private KafkaConsumer<String, String> conn = null;
 
 	private final static Logger log = LoggerFactory.getLogger("Kafka Socket");
+	
+	private final int MAX_FETCH_BYTES = 1048576 * 10; //1M * n
 
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
 		EFConnectionSocket<?> o = new KafkaConnection();
@@ -42,7 +44,7 @@ public class KafkaConnection extends EFConnectionSocket<KafkaConsumer<String, St
 		        props.put("key.deserializer", StringDeserializer.class);
 		        props.put("value.deserializer", StringDeserializer.class);
 		        props.put("max.poll.records",GlobalParam.READ_PAGE_SIZE);
-		        props.put("max.partition.fetch.bytes", 1048576 * 10);
+		        props.put("max.partition.fetch.bytes", MAX_FETCH_BYTES);
 		        if(tmps.length!=2) {
 		        	log.error("kafka group.id and topic setting wrong!");
 		        	return false;

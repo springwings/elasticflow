@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -35,8 +34,6 @@ public class KafkaFlow extends ReaderFlowSocket {
 	
 	final int readms = 100;
 	ConsumerRecords<String, String> records;
-	int totalNum = 0;
-	AtomicInteger counts = new AtomicInteger(0);
 
 	private final static Logger log = LoggerFactory.getLogger(KafkaFlow.class);
 
@@ -46,13 +43,10 @@ public class KafkaFlow extends ReaderFlowSocket {
 		return o;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public DataPage getPageData(final Page page, int pageSize) {
 
-		if (this.records == null || this.totalNum <= this.counts.get()) {
-			this.totalNum = 0;
-			((KafkaConsumer<String, String>) GETSOCKET().getConnection(false)).commitAsync();
+		if (this.records == null) {
 			return this.dataPage;
 		}
 
@@ -62,20 +56,22 @@ public class KafkaFlow extends ReaderFlowSocket {
 		try {
 			String dataBoundary = null;
 			String LAST_STAMP = null;
+			this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
+			this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
 			for (ConsumerRecord<String, String> record : records) {
 				count++;
-				if (count >= Integer.valueOf(page.getStart()) && count < Integer.valueOf(page.getEnd())) {
+				if (count >= Integer.valueOf(page.getStart()) && count < Integer.valueOf(page.getEnd())) {				
 					PipeDataUnit u = PipeDataUnit.getInstance();
 					String val = record.value();
-					String key = record.key();
 					JSONObject jsonObject = JSON.parseObject(val);
-					Set<Entry<String, Object>> itr = jsonObject.entrySet();
-					u.setReaderKeyVal(key);
-					dataBoundary = key;
+					Set<Entry<String, Object>> itr = jsonObject.entrySet();	
 					for (Entry<String, Object> k : itr) {
 						u.addFieldValue(k.getKey(), k.getValue(), page.getTransField());
 						if (k.getKey().equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))) {
 							LAST_STAMP = String.valueOf(k.getValue());
+						}else if(k.getKey().equals(this.dataPage.get(GlobalParam.READER_KEY))) {
+							u.setReaderKeyVal(k.getValue());
+							dataBoundary = String.valueOf(k.getValue());
 						}
 					}
 					this.dataUnit.add(u);
@@ -85,11 +81,9 @@ public class KafkaFlow extends ReaderFlowSocket {
 				this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis());
 			} else {
 				this.dataPage.put(GlobalParam.READER_LAST_STAMP, LAST_STAMP);
-			}
-			this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
-			this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
+			} 
 			this.dataPage.putData(this.dataUnit);
-			this.dataPage.putDataBoundary(dataBoundary);
+			this.dataPage.putDataBoundary(dataBoundary);			
 		} catch (Exception e) {
 			releaseConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS, false);
@@ -110,9 +104,9 @@ public class KafkaFlow extends ReaderFlowSocket {
 		try {
 			while (true) {
 				this.records = conn.poll(Duration.ofMillis(readms));
-				this.totalNum = this.records.count();
-				if (this.totalNum > 0) {
-					int pagenum = (int) Math.ceil(this.totalNum / pageSize);
+				int totalNum = this.records.count();
+				if (totalNum > 0) {
+					int pagenum = (int) Math.ceil(totalNum / pageSize);
 					int curentpage = 0;
 					while (true) {
 						curentpage++;
