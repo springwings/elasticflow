@@ -102,7 +102,7 @@ public class EFField {
 	}
 
 	public void setStored(String stored) {
-		this.stored = stored;
+		this.stored = stored.toLowerCase();
 	}
 
 	public String getSeparator() {
@@ -126,7 +126,7 @@ public class EFField {
 	}
 
 	public void setIndexed(String indexed) {
-		this.indexed = indexed;
+		this.indexed = indexed.toLowerCase();
 	}
 
 	public Handler getHandler() {
