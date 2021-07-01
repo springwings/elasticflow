@@ -64,12 +64,17 @@ public abstract class WriterFlowSocket extends Flow{
 			pipePump.getWriter(dTuple.v2).removeInstance(mainName, String.valueOf(dTuple.v2));
 		} catch (Exception e) {
 			Common.LOG.error("remove instance　"+iName+" Exception!", e);
-		}	
+		}	 		
+		if(this.storePositionExists(Common.getStoreName(mainName, String.valueOf(dTuple.v1)))==false) {
+			this.create(mainName, String.valueOf(dTuple.v1), instanceConfig);
+			if(isIncrement==true)
+				this.setAlias(mainName, String.valueOf(dTuple.v1), instanceConfig.getAlias());
+		}			
 		return String.valueOf(dTuple.v1);
 	}
 	
 	/**Create storage instance*/
-	public abstract boolean create(String instance, String storeId, InstanceConfig instanceConfig);
+	public abstract boolean create(String mainName, String storeId, InstanceConfig instanceConfig);
 	
 	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
 		if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.AB) {
@@ -78,6 +83,8 @@ public abstract class WriterFlowSocket extends Flow{
 			return timeMechanism(mainName,isIncrement,instanceConfig);
 		} 
 	}
+	
+	public abstract boolean storePositionExists(String storeName);
 	
 	/**write one row data **/
 	public abstract void write(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> transParams,String instance, String storeId,boolean isUpdate) throws EFException;

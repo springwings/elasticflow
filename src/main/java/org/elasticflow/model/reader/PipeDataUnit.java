@@ -36,7 +36,7 @@ public class PipeDataUnit implements Cloneable{
 		EFField param = transParams.get(k);
 		if (param != null){
 			if (param.getHandler()!=null){
-				param.getHandler().handle(this, v,transParams); 
+				param.getHandler().handle(this,param,v,transParams); 
 			}
 			else{ 
 				this.data.put(param.getAlias(),v);

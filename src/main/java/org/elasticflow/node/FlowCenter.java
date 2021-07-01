@@ -219,6 +219,7 @@ public class FlowCenter{
 					"org.elasticflow.task.FlowTask", fullFun, task); 
 			taskJobCenter.addJob(_sj); 
 		}else if(instanceConfig.getPipeParams().getReadFrom()!= null && instanceConfig.getPipeParams().getWriteTo()!=null) { 
+			instanceConfig.setHasFullJob(false);
 			if(needclear)
 				jobAction(instance, GlobalParam.JOB_TYPE.FULL.name(), "remove");
 			//Add valid full tasks to prevent other program errors

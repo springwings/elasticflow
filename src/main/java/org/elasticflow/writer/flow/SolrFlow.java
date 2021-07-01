@@ -242,9 +242,9 @@ public class SolrFlow extends WriterFlowSocket{
 		String a = Common.getStoreName(mainName, "a");
 		String select="";  
 		if(isIncrement){
-			if(this.existsCollection(a)){ 
+			if(this.storePositionExists(a)){ 
 				select = "a";
-			}else if(this.existsCollection(b)){
+			}else if(this.storePositionExists(b)){
 				select = "b"; 
 			}else{
 				select = "a"; 
@@ -253,7 +253,7 @@ public class SolrFlow extends WriterFlowSocket{
 			}   
 		}else{
 			select =  "b";
-			if(this.existsCollection(b)){ 
+			if(this.storePositionExists(b)){ 
 				select =  "a";
 			}
 			create(mainName,select, instanceConfig);
@@ -337,17 +337,7 @@ public class SolrFlow extends WriterFlowSocket{
 			}
 
 		}
-	}
-	
-	private boolean existsCollection(String collection){ 
-		SolrQuery qb = new SolrQuery();
-		try {
-			getSolrConn().query(collection, qb);
-			return true;
-		} catch (Exception e) {
-			return false;
-		} 
-	}  
+	} 
 	
 	private static void moveFile(String sourceAdd, ZooKeeper zk,Watcher watcher, String destinationAdd) { 
 		InputStream in = null;
@@ -464,6 +454,17 @@ public class SolrFlow extends WriterFlowSocket{
 			if(this.CONNS==null)
 				this.CONNS = (CloudSolrClient) GETSOCKET().getConnection(false);
 			return this.CONNS;
+		} 
+	}
+
+	@Override
+	public boolean storePositionExists(String storeName) {
+		SolrQuery qb = new SolrQuery();
+		try {
+			getSolrConn().query(storeName, qb);
+			return true;
+		} catch (Exception e) {
+			return false;
 		} 
 	}
 }

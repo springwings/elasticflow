@@ -213,11 +213,9 @@ public class ESFlow extends WriterFlowSocket {
 	@Override
 	public boolean create(String instance, String storeId, InstanceConfig instanceConfig) {
 		String iName = Common.getStoreName(instance, storeId);
-		String alias = instance;
 		try {
-			log.info("create Instance " + iName + ":" + alias);
-			boolean indicesExists = getESC().getClient().indices().exists(new GetIndexRequest(iName),
-					RequestOptions.DEFAULT);
+			log.info("create Instance " + iName);
+			boolean indicesExists = this.storePositionExists(iName);
 			if (!indicesExists) {
 				CreateIndexRequest _CIR = new CreateIndexRequest(iName);
 				_CIR.settings(Settings.builder()
@@ -234,7 +232,7 @@ public class ESFlow extends WriterFlowSocket {
 			return true;
 		} catch (Exception e) {
 			reconn = true;
-			log.error("setting Instance " + iName + ":" + alias + " failed.", e);
+			log.error("create Instance " + iName+" failed.", e);
 			return false;
 		}
 	}
@@ -353,12 +351,10 @@ public class ESFlow extends WriterFlowSocket {
 		boolean b_alias = false;
 		String select = "";
 		try {
-			boolean a = getESC().getClient().indices().exists(new GetIndexRequest(Common.getStoreName(mainName, "a")),
-					RequestOptions.DEFAULT);
+			boolean a = this.storePositionExists(Common.getStoreName(mainName, "a"));
 			if (a)
 				a_alias = getIndexAlias(mainName, "a", instanceConfig.getAlias());
-			boolean b = getESC().getClient().indices().exists(new GetIndexRequest(Common.getStoreName(mainName, "b")),
-					RequestOptions.DEFAULT);
+			boolean b = this.storePositionExists(Common.getStoreName(mainName, "b"));
 			if (b)
 				b_alias = getIndexAlias(mainName, "b", instanceConfig.getAlias());
 			if (isIncrement) {
@@ -441,5 +437,16 @@ public class ESFlow extends WriterFlowSocket {
 			this.CONNS = (EsConnector) GETSOCKET().getConnection(false);
 		}
 		return this.CONNS;
+	}
+
+	@Override
+	public boolean storePositionExists(String storeName) {
+		try {
+			return getESC().getClient().indices().exists(new GetIndexRequest(storeName),
+					RequestOptions.DEFAULT);
+		} catch (IOException e) {
+			log.error("store Position check IOException", e);
+		}
+		return false;
 	}
 }

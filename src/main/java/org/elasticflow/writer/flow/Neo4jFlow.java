@@ -125,4 +125,9 @@ public class Neo4jFlow extends WriterFlowSocket {
 		}
 		return tmp;
 	}
+
+	@Override
+	public boolean storePositionExists(String storeName) {
+		return true;
+	}
 }

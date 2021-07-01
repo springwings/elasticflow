@@ -44,7 +44,8 @@ public class InstanceConfig {
 	private volatile PipeParam pipeParams;
 	private volatile ReaderParam readParams;
 	private volatile ComputeParam computeParams;
-	private int instanceType = INSTANCE_TYPE.Blank.getVal();  
+	private int instanceType = INSTANCE_TYPE.Blank.getVal(); 
+	private boolean hasFullJob = true;
 
 	public InstanceConfig(String fileName, int instanceType) {
 		this.filename = fileName; 
@@ -69,52 +70,60 @@ public class InstanceConfig {
 	} 
 	
 	public boolean checkWriteField(String key, String value) {
-		if (!writeFields.containsKey(key)) {
+		if (!this.writeFields.containsKey(key)) {
 			return true;
 		} else {
-			return writeFields.get(key).isValid(value);
+			return this.writeFields.get(key).isValid(value);
 		}
 	}
 
 	public EFField getWriteField(String key) {
-		return writeFields.get(key);
+		return this.writeFields.get(key);
 	} 
 	
 	public SearcherParam getSearcherParam(String key) {
-		return searcherParams.get(key);
+		return this.searcherParams.get(key);
 	}
 	
 	public ComputeParam getComputeParams() {
-		return computeParams;
+		return this.computeParams;
 	}
 	
 	public WriterParam getWriterParams() {
-		return writerParams;
+		return this.writerParams;
 	}
 	
 	public ReaderParam getReadParams() {
-		return readParams;
+		return this.readParams;
 	}
 	
 	public PipeParam getPipeParams() {
-		return pipeParams;
+		return this.pipeParams;
 	}
 	 
 	public Map<String, String> getExternConfigs() {
-		return externConfigs;
+		return this.externConfigs;
 	} 
 	
 	public Map<String, EFField> getWriteFields() {
-		return writeFields;
+		return this.writeFields;
 	}
 	
 	public Map<String, EFField> getComputeFields() {
-		return computeFields;
+		return this.computeFields;
+	}
+	
+	public boolean getHasFullJob() {
+		return this.hasFullJob;
+	}
+	
+	public boolean setHasFullJob(boolean hasFullJob) {
+		return this.hasFullJob = hasFullJob;
 	}
  
 	public boolean openTrans() {
-		if((instanceType & INSTANCE_TYPE.Trans.getVal()) > 0){
-			if(pipeParams.getReadFrom()!=null && pipeParams.getWriteTo()!=null){
+		if((this.instanceType & INSTANCE_TYPE.Trans.getVal()) > 0){
+			if(this.pipeParams.getReadFrom()!=null && this.pipeParams.getWriteTo()!=null){
 				return true;
 			}
 		}
@@ -122,7 +131,7 @@ public class InstanceConfig {
 	}
 	
 	public boolean openCompute() {
-		if((instanceType & INSTANCE_TYPE.WithCompute.getVal()) > 0) {
+		if((this.instanceType & INSTANCE_TYPE.WithCompute.getVal()) > 0) {
 			return true;
 		}
 		return false;
@@ -150,7 +159,7 @@ public class InstanceConfig {
 	} 
  
 	public boolean checkStatus() {
-		return status;
+		return this.status;
 	}
 
 	public void setStatus(boolean status) {

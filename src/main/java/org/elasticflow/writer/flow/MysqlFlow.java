@@ -175,4 +175,19 @@ public class MysqlFlow extends WriterFlowSocket {
 		String tmp = sf.substring(0, sf.length() - 1);
 		return tmp + ");";
 	}
+
+	@Override
+	public boolean storePositionExists(String storeName) {
+		String checkdatabase="show databases like \""+storeName+"\"";
+		Connection conn = (Connection) GETSOCKET().getConnection(false);
+		try(PreparedStatement stat = conn.prepareStatement(checkdatabase);){
+			 ResultSet resultSet = stat.executeQuery();
+			 if (resultSet.next()) {
+				 return true;
+			 }
+		} catch (Exception e) {
+			log.error("store Position check Exception", e);
+		} 
+		return false;
+	}
 }

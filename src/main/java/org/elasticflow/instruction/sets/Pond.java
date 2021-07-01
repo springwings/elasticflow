@@ -42,12 +42,7 @@ public class Pond extends Instruction {
 			try { 
 				String mainName = String.valueOf(args[0]); 
 				String storeId = String.valueOf(args[1]);  
-				if(context.getInstanceConfig().getPipeParams().getWriteMechanism()==MECHANISM.AB) {
-					state = context.getWriter().create(mainName, storeId, context.getInstanceConfig());    
-				}else {
-					context.getWriter().removeInstance(mainName, storeId);
-					state = context.getWriter().create(mainName, storeId, context.getInstanceConfig());    
-				} 
+				state = context.getWriter().create(mainName, storeId, context.getInstanceConfig());    
 			}catch (Exception e) {
 				log.error("Create Store Position Exception",e);
 			}finally {
@@ -176,7 +171,7 @@ public class Pond extends Instruction {
 	 *            parameter order is: String mainName, boolean isIncrement 
 	 */
 	public static String getNewStoreId(Context context, Object[] args) {
-		String taskId = null;
+		String storeId = null;
 		if (!isValid(2, args)) {
 			log.error("getNewStoreId parameter not match!");
 			return null;
@@ -187,13 +182,13 @@ public class Pond extends Instruction {
 		boolean release = false;
 		if (context.getWriter().ISLINK()) {
 			try {
-				taskId = context.getWriter().getNewStoreId(mainName, isIncrement, context.getInstanceConfig());
+				storeId = context.getWriter().getNewStoreId(mainName, isIncrement, context.getInstanceConfig());
 			} catch (Exception e) {
 				release = true;
 			}finally {
 				context.getWriter().REALEASE(false,release);
 			}
 		}
-		return taskId;
+		return storeId;
 	}
 }

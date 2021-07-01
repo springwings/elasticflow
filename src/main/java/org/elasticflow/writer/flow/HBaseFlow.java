@@ -136,5 +136,10 @@ public class HBaseFlow extends WriterFlowSocket {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public boolean storePositionExists(String storeName) {
+		return true;
+	}
  
 }
