@@ -159,7 +159,7 @@ public class ESQueryParser implements QueryParser{
 		String[] values = value.split(",");
 		for (String v : values) {
 			QueryBuilder query = null;
-			if (!not_analyzed) {
+			if (!not_analyzed || fuzzy>0) {
 				query = fieldParserQuery(key, String.valueOf(v), fuzzy);
 			} else if (tp.getParamtype().equals("org.elasticflow.field.handler.LongRangeType")) {
 				Object _v = Common.parseFieldValue(v, tp);
