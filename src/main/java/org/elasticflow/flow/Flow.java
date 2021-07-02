@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Flow {
 	
-	protected volatile EFConnectionSocket<?> FC;
+	protected volatile EFConnectionSocket<?> EFConn;
 	
 	protected String poolName; 
 	
@@ -36,21 +36,19 @@ public abstract class Flow {
 	public abstract void INIT(ConnectParams connectParams);
 	
 	public EFConnectionSocket<?> PREPARE(boolean isMonopoly,boolean canSharePipe) {  
-		if(isMonopoly) {
-			synchronized (this.FC) {
-				if(this.FC==null) 
-					this.FC = EFConnectionPool.getConn(this.connectParams,
+		synchronized (this.retainer) {  
+			if(isMonopoly) {
+				if(this.EFConn==null) 
+					this.EFConn = EFConnectionPool.getConn(this.connectParams,
 							this.poolName,canSharePipe); 
-			} 
-		}else {
-			synchronized (this.retainer) {  
+			}else {
 				if(this.retainer.getAndIncrement()==0) {
-					this.FC = EFConnectionPool.getConn(this.connectParams,
+					this.EFConn = EFConnectionPool.getConn(this.connectParams,
 							this.poolName,canSharePipe);  
 				} 
-			} 
-		}  
-		return this.FC;
+			}
+		} 
+		return this.EFConn;
 	}
 	
 	public void REALEASE(boolean isMonopoly,boolean releaseConn) { 
@@ -59,22 +57,22 @@ public abstract class Flow {
 				if(releaseConn)
 					retainer.set(0);
 				if(retainer.decrementAndGet()<=0){
-					EFConnectionPool.freeConn(this.FC, this.poolName,releaseConn);  
-					this.FC = null;
+					EFConnectionPool.freeConn(this.EFConn, this.poolName,releaseConn);  
+					this.EFConn = null;
 					retainer.set(0); 
 				}else{
-					log.info(this.FC+" retainer is "+retainer.get());
+					log.info(this.EFConn+" retainer is "+retainer.get());
 				}
 			} 
 		} 
 	}   
 	
 	public EFConnectionSocket<?> GETSOCKET() {
-		return this.FC;
+		return this.EFConn;
 	}
 	
 	public boolean ISLINK() {
-		if(this.FC==null) 
+		if(this.EFConn==null) 
 			return false;
 		return true;
 	}  

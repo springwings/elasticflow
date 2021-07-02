@@ -66,7 +66,7 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 
 	@Override
 	public EsConnector getConnection(boolean searcher) {
-		connect();
+		connect(); 
 		if (!searcher) {
 			if (this.bulkProcessor == null) {
 				getBulkProcessor(this.conn);
