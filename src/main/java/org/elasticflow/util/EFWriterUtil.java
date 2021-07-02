@@ -31,7 +31,7 @@ public class EFWriterUtil {
 		}else { 
 			int[] timeSpan = instanceConfig.getPipeParams().getKeepNums();
 			LocalDate lnow;
-			if(outTime==0) {
+			if(outTime>0) {
 				lnow = Instant.ofEpochMilli(outTime*1000).atZone(ZoneOffset.ofHours(8)).toLocalDate();
 			}else {
 				lnow = LocalDate.now();

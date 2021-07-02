@@ -116,7 +116,7 @@ public class PipeParam {
 	
 	/**
 	 * get keep type and data
-	 * @return int[],0 store type,1 store data
+	 * @return int[],0 store type (0 day 1 month),1 store data
 	 */
 	public int[] getKeepNums() {
 		int[] dt = new int[2];

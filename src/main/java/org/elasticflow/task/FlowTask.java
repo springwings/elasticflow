@@ -207,7 +207,7 @@ public class FlowTask {
 				}
 				log.error(instance + " IncrementJob Exception", e);
 			} finally {
-				recompute = this.checkReCompute();
+				recompute = this.checkReCompute(storeId);
 				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready); 
 			}
 		} else {
@@ -222,11 +222,10 @@ public class FlowTask {
 	 * needs to be switched under the time write mechanism
 	 * @return
 	 */
-	private boolean checkReCompute() {
+	private boolean checkReCompute(String storeId) {
 		if(transDataFlow.getInstanceConfig().getPipeParams().getWriteMechanism()==MECHANISM.Time) {
 			EFTuple<Long, Long> dTuple = EFWriterUtil.timeMechanism(transDataFlow.getInstanceConfig());
-			String currentstoreId = Common.getStoreId(instance, L1seq, transDataFlow, false, false);
-			if(!String.valueOf(dTuple.v1).equals(currentstoreId)) {
+			if(!String.valueOf(dTuple.v1).equals(storeId)) {
 				return true;
 			}
 		}
