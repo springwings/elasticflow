@@ -10,6 +10,7 @@ package org.elasticflow.task;
 import java.util.HashMap;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.node.CPU;
@@ -17,6 +18,8 @@ import org.elasticflow.piper.Breaker;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFTuple;
+import org.elasticflow.util.EFWriterUtil;
 import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
@@ -70,6 +73,7 @@ public class FlowTask {
 				Common.getStoreId(instance, L1seq, transDataFlow, true, false));
 	}
 
+	
 	/**
 	 * slave instance full job
 	 */
@@ -187,8 +191,7 @@ public class FlowTask {
 				Common.setAndGetScanInfo(instance, L1seq, storeId);
 			} else {
 				storeId = Common.getStoreId(instance, L1seq, transDataFlow, true, recompute);
-			}
- 
+			} 
 			try {
 				transDataFlow.run(instance, storeId, L1seq, false, writeInSamePosition); 
 			} catch (EFException e) {
@@ -204,7 +207,7 @@ public class FlowTask {
 				}
 				log.error(instance + " IncrementJob Exception", e);
 			} finally {
-				recompute = false;
+				recompute = this.checkReCompute();
 				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready); 
 			}
 		} else {
@@ -212,7 +215,24 @@ public class FlowTask {
 				log.info(instance + " Current Increment flow has been breaked!");
 		}
 	}
-
+	
+	
+	/**
+	 * It is mainly used to verify whether the new write position 
+	 * needs to be switched under the time write mechanism
+	 * @return
+	 */
+	private boolean checkReCompute() {
+		if(transDataFlow.getInstanceConfig().getPipeParams().getWriteMechanism()==MECHANISM.Time) {
+			EFTuple<Long, Long> dTuple = EFWriterUtil.timeMechanism(transDataFlow.getInstanceConfig());
+			String currentstoreId = Common.getStoreId(instance, L1seq, transDataFlow, false, false);
+			if(!String.valueOf(dTuple.v1).equals(currentstoreId)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private static String getNextJobs(String[] nextJobs) {
 		StringBuilder sf = new StringBuilder();
 		for (String job : nextJobs) {

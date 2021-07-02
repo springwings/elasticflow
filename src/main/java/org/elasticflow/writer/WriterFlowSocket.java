@@ -46,6 +46,14 @@ public abstract class WriterFlowSocket extends Flow{
 		this.isBatch = GlobalParam.WRITE_BATCH; 
 	}   
 	
+	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
+		if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.AB) {
+			return abMechanism(mainName,isIncrement,instanceConfig);
+		}else {
+			return timeMechanism(mainName,isIncrement,instanceConfig);
+		} 
+	}
+	
 	/**
 	 * Get the time-stamp of 0 o'clock every day/month
 	 * Maintain expired instances
@@ -75,14 +83,6 @@ public abstract class WriterFlowSocket extends Flow{
 	
 	/**Create storage instance*/
 	public abstract boolean create(String mainName, String storeId, InstanceConfig instanceConfig);
-	
-	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
-		if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.AB) {
-			return abMechanism(mainName,isIncrement,instanceConfig);
-		}else {
-			return timeMechanism(mainName,isIncrement,instanceConfig);
-		} 
-	}
 	
 	public abstract boolean storePositionExists(String storeName);
 	
