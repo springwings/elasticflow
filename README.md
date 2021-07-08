@@ -40,6 +40,7 @@ $ Java>=1.8
 	Solr 5.5.0
 	Hbase 1.2.1
 
+# Document
 ==>>[详细文档参照wiki](https://github.com/springwings/elasticflow/wiki)  
 
 # Changes
