@@ -27,18 +27,18 @@ $ Java>=1.8
 
 
 # Reader Support
-Hbase 1.2.1
-Kafka 2.1.1
-Mysql
-Oracle
+	Hbase 1.2.1
+	Kafka 2.1.1
+	Mysql
+	Oracle
 
 # Writer Support
-ElasticSearch 7.x
-Mysql
-Neo4j 3.5.1
-Vearch
-Solr 5.5.0
-Hbase 1.2.1
+	ElasticSearch 7.x
+	Mysql
+	Neo4j 3.5.1
+	Vearch
+	Solr 5.5.0
+	Hbase 1.2.1
 
 ==>>[详细文档参照wiki](https://github.com/springwings/elasticflow/wiki)  
 
