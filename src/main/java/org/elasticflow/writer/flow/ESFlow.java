@@ -130,23 +130,21 @@ public class ESFlow extends WriterFlowSocket {
 					transParam = transParams.get(field.toLowerCase());
 				if (transParam == null)
 					continue;
-
+				
 				if (transParam.getAnalyzer().length() == 0) {
 					if (transParam.getIndextype().equalsIgnoreCase("geo_point")) {
 						String[] vs = String.valueOf(value).split(transParam.getSeparator());
 						if (vs.length == 2)
-							cbuilder.latlon(field, Double.parseDouble(vs[0]), Double.parseDouble(vs[1]));
-					} else if (transParam.getSeparator() != null) {
-						String[] vs = String.valueOf(value).split(transParam.getSeparator());
-						cbuilder.array(transParam.getAlias(), vs);
+							cbuilder.latlon(field, Double.parseDouble(vs[0]), Double.parseDouble(vs[1]));					
 					} else if (transParam.getIndextype().equals("nested")) {
 						cbuilder.array(transParam.getAlias(), JSONArray.fromObject(value));
 					} else if (transParam.getParamtype().contains("org.elasticflow.field.handler")) {
 						FieldHandler<?> _v = (FieldHandler<?>) Common.parseFieldValue(String.valueOf(value),
 								transParam);
 						cbuilder.field(transParam.getAlias(), _v.getVal());
-					} else
-						cbuilder.field(transParam.getAlias(), value);
+					} else {
+						cbuilder.field(transParam.getAlias(), Common.parseFieldValue(value,transParam));		
+					}						
 				} else {
 					cbuilder.field(transParam.getAlias(), value);
 				}

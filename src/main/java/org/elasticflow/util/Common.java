@@ -511,6 +511,29 @@ public final class Common {
 		return method.invoke(c,String.valueOf(v));
 	}
 	
+	public static Object parseFieldValue(Object v, EFField fd) throws Exception {
+		if (fd == null)
+			return null; 
+		if (v==null) {
+			v = fd.getDefaultvalue();
+		} 
+		Class<?> c = Class.forName(fd.getParamtype());		
+		if (fd.getSeparator() != null) {
+			String[] vs = String.valueOf(v).split(fd.getSeparator());
+			if(!fd.getParamtype().equals("java.lang.String")) {
+				Object[] _vs = new Object[vs.length];
+				Method method = c.getMethod("valueOf", String.class);
+				for(int j=0;j<vs.length;j++) 
+					_vs[j] = method.invoke(c,vs[j]); 
+				return _vs;
+			}
+			return vs;
+		 }else {
+			 Method method = c.getMethod("valueOf", Object.class);
+			 return method.invoke(c,v);
+		 }
+	}
+	
 	public static EFRequest getEFRequest(Request rq,EFResponse rps) {
 		EFRequest RR = null;
 		String ctype = rq.getHeader("Content-type"); 
