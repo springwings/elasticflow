@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -16,6 +18,7 @@ import org.elasticflow.util.EFException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.minidev.json.JSONValue;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -99,10 +102,10 @@ public class VearchConnector {
 		}
 	}
 	
-	public void writeBatch(String table,String datas) throws Exception {
-		HttpPost rooter_post = new HttpPost(this.method + this.path + ":" + this.ROOTER_PORT+"/"+this.dbName+"/"+table+"/_bulk");
+	public void writeSingle(String table,JSONObject datas) throws Exception {
+		HttpPost rooter_post = new HttpPost(this.method + this.path + ":" + this.ROOTER_PORT+"/"+this.dbName+"/"+table);
 		rooter_post.addHeader("Content-Type", "application/json;charset=UTF-8");
-		StringEntity stringEntity = new StringEntity(datas, "UTF-8");
+		StringEntity stringEntity = new StringEntity(datas.toString(), "UTF-8");
         stringEntity.setContentEncoding("UTF-8");
         rooter_post.setEntity(stringEntity); 
         CloseableHttpResponse response = this.httpClient.execute(rooter_post);
@@ -110,13 +113,36 @@ public class VearchConnector {
 		if(Integer.valueOf(String.valueOf(jr.get("status")))==200)
 			return;
 		else {
-			throw new EFException("write Batch Exception,"+jr.get("error"));
+			throw new EFException("write data Exception,"+jr.get("error"));
 		}
+	}
+	
+	public void writeBatch(String table,CopyOnWriteArrayList<Object> datas) throws Exception {
+		HttpPost rooter_post = new HttpPost(this.method + this.path + ":" + this.ROOTER_PORT+"/"+this.dbName+"/"+table+"/_bulk");
+		rooter_post.addHeader("Content-Type", "application/json;charset=UTF-8");
+		StringBuffer sb = new StringBuffer(); 
+		int i = 0;
+		while(i<datas.size()) {
+			sb.append("\n"+String.valueOf(datas.get(i))+"\n");
+			sb.append(datas.get(i+1).toString());
+			i+=2;
+		}
+		StringEntity params = new StringEntity(sb.toString().trim());
+		params.setContentEncoding("UTF-8");
+        rooter_post.setEntity(params); 
+        HttpResponse response = this.httpClient.execute(rooter_post);
+        BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent())); 
+        Object jr =  JSONValue.parse(rd); 
+        JSONArray ja = JSONArray.fromObject(jr);
+        for(int j=0;j<ja.size();j++) {
+        	JSONObject jo = JSONObject.fromObject(ja.get(j));
+        	if(Integer.valueOf(String.valueOf(jo.get("status")))!=200)
+        		throw new EFException("write data Exception,"+jo.get("error"));
+        }
 	}
 
 	public boolean close() {
 		return true;
-
 	}
 
 	private String getContent(CloseableHttpResponse response) throws IOException {

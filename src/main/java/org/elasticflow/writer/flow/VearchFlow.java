@@ -2,7 +2,7 @@ package org.elasticflow.writer.flow;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connect.VearchConnector;
@@ -32,10 +32,8 @@ public class VearchFlow extends WriterFlowSocket {
 	
 	protected long currentSec = Common.getNow(); 
 	
-	protected StringBuffer DATAS = new StringBuffer();
-	
-	private volatile AtomicInteger count = new AtomicInteger(0);
-	
+	protected CopyOnWriteArrayList<Object> DATAS = new CopyOnWriteArrayList<Object>();
+	 	
 	private final static Logger log = LoggerFactory.getLogger("VearchFlow");
 	
 	public static VearchFlow getInstance(ConnectParams connectParams) {
@@ -78,9 +76,7 @@ public class VearchFlow extends WriterFlowSocket {
 		try {
 			if (!ISLINK())
 				return;
-			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(false);
-			StringBuffer sb = new StringBuffer();
-			sb.append("\\n{\"index\": {\"_id\": \""+unit.getReaderKeyVal()+"\"}}\\n");
+			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(false);	
 			JSONObject row = new JSONObject();
 			for (Entry<String, Object> r : unit.getData().entrySet()) {
 				String field = r.getKey();
@@ -95,15 +91,19 @@ public class VearchFlow extends WriterFlowSocket {
 				}else {
 					row.put(transParam.getAlias(), Common.parseFieldValue(value,transParam));
 				}			
-			}
-			sb.append(row.toString());			
-			if (this.isBatch) { 	
-				this.DATAS.append(sb);				
-				if (this.count.incrementAndGet()>flushSize || Common.getNow()-currentSec > flushSecond) {
-					conn.writeBatch(table, this.DATAS.toString().substring(2));
-					currentSec = Common.getNow();
+			} 
+			if (this.isBatch) {
+				this.DATAS.add("{\"index\": {\"_id\": \""+unit.getReaderKeyVal()+"\"}}");				
+				this.DATAS.add(row);
+				if (this.DATAS.size()>flushSize || Common.getNow()-currentSec > flushSecond) {
+					synchronized (this.DATAS) {
+						conn.writeBatch(table, this.DATAS);
+						currentSec = Common.getNow();
+						this.DATAS.clear();
+					}
 				}				
-			} else {				
+			} else {	
+				conn.writeSingle(table, row);
 			}
 		} catch (Exception e) {
 			log.error("write Exception", e);
