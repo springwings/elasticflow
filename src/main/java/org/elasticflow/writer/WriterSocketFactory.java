@@ -17,6 +17,7 @@ import org.elasticflow.writer.flow.HBaseFlow;
 import org.elasticflow.writer.flow.MysqlFlow;
 import org.elasticflow.writer.flow.Neo4jFlow;
 import org.elasticflow.writer.flow.SolrFlow;
+import org.elasticflow.writer.flow.VearchFlow;
 
 /**
  * 
@@ -66,6 +67,8 @@ public class WriterSocketFactory implements Socket<WriterFlowSocket>{
 				return MysqlFlow.getInstance(connectParams); 
 			case NEO4J:
 				return Neo4jFlow.getInstance(connectParams); 
+			case VEARCH:
+				return VearchFlow.getInstance(connectParams); 
 			default:
 				Common.LOG.error("WriterFlowSocket Connect Type "+connectParams.getWhp().getType()+" Not Support!");
 				return null;

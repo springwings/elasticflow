@@ -18,13 +18,19 @@ import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Mysql flow Writer Manager
+ * @author chengwen
+ * @version 1.0 
+ */
+
 public class MysqlFlow extends WriterFlowSocket {
 
 	private final static Logger log = LoggerFactory.getLogger("MysqlFlow");
 
-	private final static int flushSize = 100;
+	final static int flushSize = 100;
 
-	private final static int flushSecond = 3;
+	final static int flushSecond = 3;
 
 	private CopyOnWriteArrayList<String> sqlData = new CopyOnWriteArrayList<>();
 
@@ -78,9 +84,9 @@ public class MysqlFlow extends WriterFlowSocket {
 	}
 
 	@Override
-	public boolean create(String instance, String storeId, InstanceConfig instanceConfig) {
-		String name = Common.getStoreName(instance, storeId);
-		String type = instance;
+	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) {
+		String name = Common.getStoreName(mainName, storeId);
+		String type = mainName;
 		PREPARE(false, false);
 		if (!ISLINK())
 			return false;

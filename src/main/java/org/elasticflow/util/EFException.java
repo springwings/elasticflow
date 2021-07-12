@@ -29,8 +29,8 @@ public class EFException extends Exception {
 	public EFException(String msg) {
 		super(msg);
 		e_level = ELEVEL.Ignore;
-	}
-
+	} 
+	
 	public EFException(String msg, ELEVEL etype) {
 		super(msg);
 		e_level = etype;

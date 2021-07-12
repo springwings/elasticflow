@@ -62,7 +62,11 @@ public class LongRangeType implements FieldHandler<Long> {
 			}
 		}
 	}
-
+	
+	public String valueOf(Object val) {
+		return String.valueOf(val);
+	}
+	
 	public boolean isValid() {
 		return max.compareTo(min) >= 0;
 	}

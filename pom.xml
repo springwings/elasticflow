@@ -137,22 +137,7 @@
 			<artifactId>mail</artifactId>
 			<version>1.4</version>
 		</dependency>
-		<dependency>
-            <groupId>ai.djl</groupId>
-            <artifactId>api</artifactId>
-            <version>0.11.0</version>
-        </dependency>
-        <dependency>
-            <groupId>ai.djl.pytorch</groupId>
-            <artifactId>pytorch-engine</artifactId>
-            <version>0.11.0</version>
-        </dependency>
-		<dependency>
-		    <groupId>ai.djl.pytorch</groupId>
-		    <artifactId>pytorch-native-auto</artifactId>
-		    <version>1.8.1</version>
-		    <scope>runtime</scope>
-		</dependency> 
+	 
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka-clients</artifactId>

@@ -39,6 +39,9 @@ public class WarehouseNosqlParam implements WarehouseParam{
 		case "KAFKA":
 			this.type = DATA_SOURCE_TYPE.KAFKA;
 			break;
+		case "VEARCH":
+			this.type = DATA_SOURCE_TYPE.VEARCH;
+			break;
 		} 
 	}
 	public String getName(String seq) {
