@@ -36,6 +36,8 @@ public class VearchFlow extends WriterFlowSocket {
 	 	
 	private final static Logger log = LoggerFactory.getLogger("VearchFlow");
 	
+	private String curTable;
+	
 	public static VearchFlow getInstance(ConnectParams connectParams) {
 		VearchFlow o = new VearchFlow();
 		o.INIT(connectParams);
@@ -93,6 +95,7 @@ public class VearchFlow extends WriterFlowSocket {
 				}			
 			} 
 			if (this.isBatch) {
+				this.curTable = table;
 				this.DATAS.add("{\"index\": {\"_id\": \""+unit.getReaderKeyVal()+"\"}}");				
 				this.DATAS.add(row);
 				if (this.DATAS.size()>flushSize || Common.getNow()-currentSec > flushSecond) {
@@ -136,8 +139,16 @@ public class VearchFlow extends WriterFlowSocket {
 
 	@Override
 	public void flush() throws Exception {
-		// TODO Auto-generated method stub
-		
+		if (this.isBatch) {
+			synchronized (this.DATAS) {
+				if(this.DATAS.size()>0) {
+					VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(false);	
+					conn.writeBatch(this.curTable, this.DATAS);
+					currentSec = Common.getNow();
+					this.DATAS.clear();
+				}				
+			}
+		}		
 	}
 
 	@Override
