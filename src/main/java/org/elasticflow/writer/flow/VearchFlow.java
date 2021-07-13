@@ -118,8 +118,13 @@ public class VearchFlow extends WriterFlowSocket {
 
 	@Override
 	public void delete(String instance, String storeId, String keyColumn, String keyVal) throws EFException {
-		// TODO Auto-generated method stub
-		
+		String name = Common.getStoreName(instance, storeId);
+		try {
+			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(false);	
+			conn.deleteSpace(name);
+		} catch (Exception e) {
+			throw new EFException(e);
+		} 
 	}
 
 	@Override
@@ -141,7 +146,7 @@ public class VearchFlow extends WriterFlowSocket {
 
 	@Override
 	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
-		// TODO Auto-generated method stub
+		log.error("abMechanism not support!");
 		return null;
 	}
 

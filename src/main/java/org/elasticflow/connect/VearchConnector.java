@@ -73,6 +73,7 @@ public class VearchConnector {
 		}
         return false;
 	}
+ 
 	
 	public boolean checkSpaceExists(String table) {
 		HttpGet master_get = new HttpGet(this.method + this.path + ":" + this.MASTER_PORT+"/list/space?db="+this.dbName);
