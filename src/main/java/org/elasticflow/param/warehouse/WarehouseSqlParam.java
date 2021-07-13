@@ -1,16 +1,25 @@
+/*
+ * Copyright ElasticFlow B.V. and/or licensed to ElasticFlow B.V. under one
+ * or more contributor license agreements. Licensed under the ElasticFlow License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
+ * Side Public License, v 1.
+ */
 package org.elasticflow.param.warehouse;
 
 import org.elasticflow.config.GlobalParam.DATA_SOURCE_TYPE;
 
 /**
- * 
+ * Configuration parameters model of SQL database
  * @author chengwen
  * @version 1.0
  * @date 2018-03-22 09:08
  */
 public class WarehouseSqlParam implements WarehouseParam{
 	
+	/**It is instance name such as an table name**/
 	private String name = "";
+	/**Used to identify linked resources**/
 	private String alias;
 	private String host = "";
 	private int port;

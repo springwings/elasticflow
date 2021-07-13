@@ -121,8 +121,19 @@ public class VearchFlow extends WriterFlowSocket {
 
 	@Override
 	public void removeInstance(String instance, String storeId) {
-		// TODO Auto-generated method stub
-		
+		String name = Common.getStoreName(instance, storeId);
+		PREPARE(false, false);
+		if (!ISLINK())
+			return;
+		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(false);	
+		try {
+			conn.deleteSpace(name);
+			log.info("Remove Instance " + name + " success!");
+		} catch (Exception e) {
+			log.error("Remove Instancee " + name + " failed!", e);
+		} finally {
+			REALEASE(false, false);
+		}
 	}
 
 	@Override

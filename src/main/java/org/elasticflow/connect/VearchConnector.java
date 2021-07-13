@@ -8,6 +8,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -51,31 +52,21 @@ public class VearchConnector {
 		this.dbObject.put("name", this.dbName);
 	}
 
-	private void createDbifNotExists(){
-		CloseableHttpResponse response;
-		try {
-			response = this.httpClient
-					.execute(new HttpGet(this.method + this.path + ":" + this.MASTER_PORT + listDb));
+	public boolean deleteSpace(String space) {
+		HttpDelete master_delete = new HttpDelete(this.method + this.path + ":" + this.MASTER_PORT+"/space/"+this.dbName+"/"+space);
+		master_delete.addHeader("Content-Type", "application/json;charset=UTF-8");
+        try {
+        	CloseableHttpResponse response = this.httpClient.execute(master_delete);
 			JSONObject jr = JSONObject.fromObject(this.getContent(response));
-			JSONArray jsonArr = JSONArray.fromObject(jr.get("data"));
-			@SuppressWarnings("unchecked")
-			Iterator<Object> it = jsonArr.iterator();
-			while (it.hasNext()) {
-				JSONObject jsonObj = (JSONObject) it.next();
-				if (jsonObj.get("name").equals(this.dbName)) {
-					return;
-				}
+			if(Integer.valueOf(String.valueOf(jr.get("code")))==200) {
+				return true;
+			}else {
+				log.error("delete Space Exception,"+jr.get("msg"));
 			}
-			HttpPut master_post = new HttpPut(this.method + this.path + ":" + this.MASTER_PORT+createDb);
-			master_post.addHeader("Content-Type", "application/json;charset=UTF-8");
-			StringEntity stringEntity = new StringEntity(this.dbObject.toString(), "UTF-8");
-	        stringEntity.setContentEncoding("UTF-8");
-	        master_post.setEntity(stringEntity);
-	        this.httpClient.execute(master_post);
-		} catch (IOException e) { 
-			log.error("createSpace Exception",e);
-			return;
+		} catch (Exception e) { 
+			log.error("delete Space Exception",e);
 		}
+        return false;
 	}
 
 	public boolean createSpace(JSONObject tableMeta) throws EFException {
@@ -145,6 +136,33 @@ public class VearchConnector {
 		return true;
 	}
 
+	private void createDbifNotExists(){
+		CloseableHttpResponse response;
+		try {
+			response = this.httpClient
+					.execute(new HttpGet(this.method + this.path + ":" + this.MASTER_PORT + listDb));
+			JSONObject jr = JSONObject.fromObject(this.getContent(response));
+			JSONArray jsonArr = JSONArray.fromObject(jr.get("data"));
+			@SuppressWarnings("unchecked")
+			Iterator<Object> it = jsonArr.iterator();
+			while (it.hasNext()) {
+				JSONObject jsonObj = (JSONObject) it.next();
+				if (jsonObj.get("name").equals(this.dbName)) {
+					return;
+				}
+			}
+			HttpPut master_post = new HttpPut(this.method + this.path + ":" + this.MASTER_PORT+createDb);
+			master_post.addHeader("Content-Type", "application/json;charset=UTF-8");
+			StringEntity stringEntity = new StringEntity(this.dbObject.toString(), "UTF-8");
+	        stringEntity.setContentEncoding("UTF-8");
+	        master_post.setEntity(stringEntity);
+	        this.httpClient.execute(master_post);
+		} catch (IOException e) { 
+			log.error("createSpace Exception",e);
+			return;
+		}
+	}
+	
 	private String getContent(CloseableHttpResponse response) throws IOException {
 		StringBuffer result = new StringBuffer();
 		try (BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))) {
@@ -155,4 +173,8 @@ public class VearchConnector {
 		}
 		return result.toString();
 	} 
+	public static void main(String[] args) {
+		VearchConnector vConnector = new VearchConnector("192.168.6.156", "vehicle");
+		vConnector.deleteSpace("vehicle_vec_1626019200");
+	}
 }

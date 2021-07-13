@@ -63,7 +63,7 @@ public class LongRangeType implements FieldHandler<Long> {
 		}
 	}
 	
-	public String valueOf(Object val) {
+	public static String valueOf(Object val) {
 		return String.valueOf(val);
 	}
 	
