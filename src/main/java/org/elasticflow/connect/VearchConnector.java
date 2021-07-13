@@ -22,7 +22,12 @@ import org.slf4j.LoggerFactory;
 import net.minidev.json.JSONValue;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-
+/**
+ * Vector retrieval system vearch Writer Manager
+ * @author chengwen
+ * @version 1.0
+ * @date 2021-07-12 14:02
+ */
 public class VearchConnector {
 
 	final String MASTER_PORT = "8817";
@@ -67,6 +72,24 @@ public class VearchConnector {
 			log.error("delete Space Exception",e);
 		}
         return false;
+	}
+	
+	public boolean checkSpaceExists(String table) {
+		HttpGet master_get = new HttpGet(this.method + this.path + ":" + this.MASTER_PORT+"/list/space?db="+this.dbName);
+		try {
+        	CloseableHttpResponse response = this.httpClient.execute(master_get);
+			JSONObject jr = JSONObject.fromObject(this.getContent(response));
+			if(Integer.valueOf(String.valueOf(jr.get("code")))==200){
+				JSONArray jArray = jr.getJSONArray("data");
+				for(int i=0;i<jArray.size();i++) {
+		            if(jArray.getJSONObject(i).get("name").equals(table))
+		            	return true;
+		        }
+			}
+		} catch (Exception e) { 
+			log.error("check Space Exists Exception",e);
+		}
+		return false;
 	}
 
 	public boolean createSpace(JSONObject tableMeta) throws EFException {
@@ -175,6 +198,6 @@ public class VearchConnector {
 	} 
 	public static void main(String[] args) {
 		VearchConnector vConnector = new VearchConnector("192.168.6.156", "vehicle");
-		vConnector.deleteSpace("vehicle_vec_1626019200");
+		System.out.println(vConnector.checkSpaceExists("vehicle_vec_1626105600"));
 	}
 }

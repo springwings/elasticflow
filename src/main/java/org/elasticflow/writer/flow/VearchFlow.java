@@ -51,24 +51,27 @@ public class VearchFlow extends WriterFlowSocket {
 		PREPARE(false, false);
 		if (!ISLINK())
 			return false;
-		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(false);
-		try {
-			log.info("create Instance " + name + ":" + type);
-			conn.createSpace(this.getTableMeta(name,instanceConfig));
-			return true;
-		} catch (Exception e) {
-			log.error("create Instance " + name + ":" + type + " failed!", e);
-			return false;
-		} finally {
-			REALEASE(false, false);
+		if(!this.storePositionExists(name)) {
+			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(false);
+			try {
+				log.info("create Instance " + name + ":" + type);
+				conn.createSpace(this.getTableMeta(name,instanceConfig));
+				return true;
+			} catch (Exception e) {
+				log.error("create Instance " + name + ":" + type + " failed!", e);
+				return false;
+			} finally {
+				REALEASE(false, false);
+			}
 		}
+		return true;
 	}
 
 
 	@Override
-	public boolean storePositionExists(String storeName) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean storePositionExists(String storeName) {		
+		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(false);
+		return conn.checkSpaceExists(storeName);
 	}
 
 	@Override

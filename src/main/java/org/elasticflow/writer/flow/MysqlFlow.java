@@ -90,17 +90,20 @@ public class MysqlFlow extends WriterFlowSocket {
 		PREPARE(false, false);
 		if (!ISLINK())
 			return false;
-		Connection conn = (Connection) GETSOCKET().getConnection(false);
-		try (PreparedStatement statement = conn.prepareStatement(this.getTableSql(name, instanceConfig));) {
-			log.info("create Instance " + name + ":" + type);
-			statement.execute();
-			return true;
-		} catch (Exception e) {
-			log.error("create Instance " + name + ":" + type + " failed!", e);
-			return false;
-		} finally {
-			REALEASE(false, false);
+		if(!this.storePositionExists(name)) {
+			Connection conn = (Connection) GETSOCKET().getConnection(false);
+			try (PreparedStatement statement = conn.prepareStatement(this.getTableSql(name, instanceConfig));) {
+				log.info("create Instance " + name + ":" + type);
+				statement.execute();
+				return true;
+			} catch (Exception e) {
+				log.error("create Instance " + name + ":" + type + " failed!", e);
+				return false;
+			} finally {
+				REALEASE(false, false);
+			}
 		}
+		return true;
 	}
 
 	@Override

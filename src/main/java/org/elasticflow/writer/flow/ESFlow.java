@@ -213,8 +213,7 @@ public class ESFlow extends WriterFlowSocket {
 		String iName = Common.getStoreName(instance, storeId);
 		try {
 			log.info("create Instance " + iName);
-			boolean indicesExists = this.storePositionExists(iName);
-			if (!indicesExists) {
+			if (!this.storePositionExists(iName)) {
 				CreateIndexRequest _CIR = new CreateIndexRequest(iName);
 				_CIR.settings(Settings.builder()
 						.put("index.number_of_shards",
