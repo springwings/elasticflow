@@ -61,7 +61,11 @@ public class Pipe extends Instruction {
 		}
 		Page page = (Page) args[0]; 
 		ReaderFlowSocket RFS = (ReaderFlowSocket) args[1]; 
-		DataPage tmp = (DataPage) RFS.getPageData(page,context.getInstanceConfig().getPipeParams().getReadPageSize());
+		long start = System.currentTimeMillis();
+		DataPage tmp = (DataPage) RFS.getPageData(page,context.getInstanceConfig().getPipeParams().getReadPageSize());	
+		RFS.setLoad(tmp.getData().size()*1000/(start-RFS.lastGetPageTime));		
+		RFS.lastGetPageTime = start;
+		RFS.setPerformance((long) (tmp.getData().size()*1000/(System.currentTimeMillis()-start+0.0001)));
 		return (DataPage) tmp.clone();
 	} 
 

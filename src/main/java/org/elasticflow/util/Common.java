@@ -488,7 +488,7 @@ public final class Common {
 				Resource.FLOW_STATUS.get(instance, L1seq, type).set(setState.getVal()); 
 				return true;
 			} else {
-				LOG.info(instance + " " + type + " not in state "+needState.name()+"!");
+				LOG.info(instance + " " + type + " not in "+needState.name()+" state!");
 				return false;
 			}
 		}

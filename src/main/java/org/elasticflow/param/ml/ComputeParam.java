@@ -14,35 +14,55 @@ package org.elasticflow.param.ml;
  * @date 2018-07-22 09:08
  */
 public class ComputeParam {
+	
 	private String features;
 	private String value;
-	private String algorithm; 
+	private String algorithm;
 	private String preprocessing;
+	private String postprocessing;
 	private double learn_rate = 0.1;
 	private double threshold = 0.001;
-	/**flow|batch,Flow Computing and Batch Computing*/
-	private String computeModel="batch";
+	/** flow|batch,Streaming calculation or batch calculation */
+	private String computeType = "batch";
+	/** train,test,predict **/
+	private String stage = "train";
 
 	public String getFeatures() {
 		return features;
-	} 
+	}
 
 	public String getValue() {
 		return value;
-	} 
-	
+	}
+
 	public String getAlgorithm() {
 		return algorithm;
-	}  
-	
+	}
+
+	public String getStage() {
+		return stage;
+	}
+
 	public double getLearn_rate() {
 		return learn_rate;
-	} 
+	}
 
 	public double getThreshold() {
 		return threshold;
-	} 
-	
+	}
+
+	public String getPreprocessing() {
+		return preprocessing;
+	}
+
+	public String getPostprocessing() {
+		return postprocessing;
+	}
+
+	public String getComputeType() {
+		return computeType;
+	}
+
 	public void setFeatures(String features) {
 		this.features = features;
 	}
@@ -63,20 +83,20 @@ public class ComputeParam {
 		this.threshold = Double.parseDouble(threshold);
 	}
 
-	public String getPreprocessing() {
-		return preprocessing;
+	public void setStage(String stage) {
+		this.stage = stage;
 	}
 
 	public void setPreprocessing(String preprocessing) {
 		this.preprocessing = preprocessing;
 	}
 
-	public String getComputeModel() {
-		return computeModel;
+	public void setPostprocessing(String postprocessing) {
+		this.postprocessing = postprocessing;
 	}
 
-	public void setComputeModel(String computeModel) {
-		this.computeModel = computeModel.toLowerCase();
-	} 
- 
+	public void setComputeType(String computeType) {
+		this.computeType = computeType.toLowerCase();
+	}
+
 }

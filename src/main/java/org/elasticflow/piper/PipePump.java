@@ -198,7 +198,7 @@ public final class PipePump extends Instruction {
 						GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(task.getL2seq()), 0, ",totalpage:" + pageNum));
 
 			String computeModel;
-			if (getInstanceConfig().getComputeParams().getComputeModel() == "batch") {
+			if (getInstanceConfig().getComputeParams().getComputeType() == "batch") {
 				computeModel = "batchCompute";
 			} else {
 				computeModel = "flowCompute";

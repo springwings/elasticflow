@@ -35,12 +35,13 @@ import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connect.EFConnectionPool;
-import org.elasticflow.model.InstructionTree;
 import org.elasticflow.model.EFResponse;
+import org.elasticflow.model.InstructionTree;
 import org.elasticflow.param.pipe.InstructionParam;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.param.warehouse.WarehouseSqlParam;
+import org.elasticflow.piper.PipePump;
 import org.elasticflow.reader.service.HttpReaderService;
 import org.elasticflow.searcher.service.SearcherService;
 import org.elasticflow.util.Common;
@@ -462,7 +463,7 @@ public final class NodeMonitor {
 			if (Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
 				String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom())
 						.getPoolName(null);
-				JO.put("DataFrom Pool Status", EFConnectionPool.getStatus(poolname));
+				JO.put("Reader Pool Status", EFConnectionPool.getStatus(poolname));
 			} else if (Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
 				WarehouseSqlParam ws = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom());
 				String poolname = "";
@@ -476,6 +477,17 @@ public final class NodeMonitor {
 					poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom())
 							.getPoolName(null);
 					JO.put("Reader Pool Status", EFConnectionPool.getStatus(poolname));
+				}
+			}
+			
+			String[] L1seqs = Common.getL1seqs(config,true);  
+			for (String seq : L1seqs) {
+				PipePump transDataFlow = Resource.SOCKET_CENTER.getPipePump(config.getName(), seq, false,GlobalParam.FLOW_TAG._DEFAULT.name());				if(seq=="") {
+					JO.put("Reader Load ", transDataFlow.getReader().getLoad());
+					JO.put("Reader Performance ", transDataFlow.getReader().getPerformance());
+				}else {
+					JO.put("Seq(" + seq + ") Reader Load ", transDataFlow.getReader().getLoad());
+					JO.put("Seq(" + seq + ") Reader Performance ", transDataFlow.getReader().getPerformance());
 				}
 			}
 
@@ -509,7 +521,10 @@ public final class NodeMonitor {
 			}
 
 			if (config.openTrans()) {
-				WarehouseSqlParam wsp = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom());
+				WarehouseParam wsp = null;;
+				wsp = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom());
+				if(wsp==null)
+					wsp = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom());
 				if (wsp.getL1seq().length > 0) {
 					StringBuilder sb = new StringBuilder();
 					StringBuilder fullstate = new StringBuilder();

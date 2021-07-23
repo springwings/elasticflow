@@ -64,7 +64,7 @@ public class Track extends Instruction {
 				Resource.SOCKET_CENTER.getReaderSocket(
 						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadFrom(), instance,
 						L1seq, ""),
-				(Resource.nodeConfig.getInstanceConfigs().get(instance).getComputeParams().getComputeModel()
+				(Resource.nodeConfig.getInstanceConfigs().get(instance).getComputeParams().getComputeType()
 						.equals("flow")
 								? Resource.SOCKET_CENTER.getReaderSocket(Resource.nodeConfig.getInstanceConfigs().get(instance)
 										.getPipeParams().getWriteTo(), instance, L1seq, "")

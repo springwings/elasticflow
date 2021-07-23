@@ -27,6 +27,14 @@ public abstract class Flow {
 	
 	protected String poolName; 
 	
+	/** Average load of scheduled tasks,the amount of data processed per second**/
+	protected long LOAD;
+	
+	/**Transient performance,the amount of data processed per second**/
+	protected long PERFORMANCE;
+	
+	public long lastGetPageTime = System.currentTimeMillis();
+	
 	protected ConnectParams connectParams;
 	
 	protected AtomicInteger retainer = new AtomicInteger(0);
@@ -76,6 +84,22 @@ public abstract class Flow {
 			return false;
 		return true;
 	}  
+	
+	public long getLoad() {
+		return this.LOAD;
+	}
+	
+	public long getPerformance() {
+		return this.PERFORMANCE;
+	}
+	
+	public void setLoad(long load) {
+		this.LOAD = load;;
+	}
+	
+	public void setPerformance(long performance) {
+		this.PERFORMANCE = performance;
+	}
 	
 	public void freeConnPool() {
 		EFConnectionPool.release(this.poolName);

@@ -75,7 +75,7 @@ public final class SocketCenter {
 								getReaderSocket(Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
 										.getReadFrom(), instance, L1seq, tag),
 								(Resource.nodeConfig.getInstanceConfigs().get(instance).getComputeParams()
-										.getComputeModel().equals("flow")
+										.getComputeType().equals("flow")
 												? getReaderSocket(Resource.nodeConfig.getInstanceConfigs().get(instance)
 														.getPipeParams().getWriteTo(), instance, L1seq, tag)
 												: null),
