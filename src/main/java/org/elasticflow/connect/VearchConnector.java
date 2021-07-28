@@ -30,11 +30,9 @@ import net.sf.json.JSONObject;
  */
 public class VearchConnector {
 
-	final String MASTER_PORT = "8817";
+	final String MASTER;
 
-	final String ROOTER_PORT = "9001";
-
-	protected String path;
+	final String ROOTER;
 
 	protected String dbName;
 
@@ -50,15 +48,16 @@ public class VearchConnector {
 	
 	private final static Logger log = LoggerFactory.getLogger(VearchConnector.class);
 	
-	public VearchConnector(String path, String dbName) {
-		this.path = path;
+	public VearchConnector(String master, String rooter,String dbName) {
+		this.MASTER = master;
+		this.ROOTER = rooter;
 		this.dbName = dbName; 
 		this.dbObject = new JSONObject();
 		this.dbObject.put("name", this.dbName);
 	}
 
 	public boolean deleteSpace(String space) {
-		HttpDelete master_delete = new HttpDelete(this.method + this.path + ":" + this.MASTER_PORT+"/space/"+this.dbName+"/"+space);
+		HttpDelete master_delete = new HttpDelete(this.method +this.MASTER+"/space/"+this.dbName+"/"+space);
 		master_delete.addHeader("Content-Type", "application/json;charset=UTF-8");
         try {
         	CloseableHttpResponse response = this.httpClient.execute(master_delete);
@@ -76,7 +75,7 @@ public class VearchConnector {
  
 	
 	public boolean checkSpaceExists(String table) {
-		HttpGet master_get = new HttpGet(this.method + this.path + ":" + this.MASTER_PORT+"/list/space?db="+this.dbName);
+		HttpGet master_get = new HttpGet(this.method + this.MASTER+"/list/space?db="+this.dbName);
 		try {
         	CloseableHttpResponse response = this.httpClient.execute(master_get);
 			JSONObject jr = JSONObject.fromObject(this.getContent(response));
@@ -95,7 +94,7 @@ public class VearchConnector {
 
 	public boolean createSpace(JSONObject tableMeta) throws EFException {
 		this.createDbifNotExists();
-		HttpPut master_post = new HttpPut(this.method + this.path + ":" + this.MASTER_PORT+"/space/"+this.dbName+"/_create");
+		HttpPut master_post = new HttpPut(this.method + this.MASTER+"/space/"+this.dbName+"/_create");
 		master_post.addHeader("Content-Type", "application/json;charset=UTF-8");
 		StringEntity stringEntity = new StringEntity(tableMeta.toString(), "UTF-8");
         stringEntity.setContentEncoding("UTF-8");
@@ -118,7 +117,7 @@ public class VearchConnector {
 	}
 	
 	public void writeSingle(String table,JSONObject datas) throws Exception {
-		HttpPost rooter_post = new HttpPost(this.method + this.path + ":" + this.ROOTER_PORT+"/"+this.dbName+"/"+table);
+		HttpPost rooter_post = new HttpPost(this.method +this.ROOTER+"/"+this.dbName+"/"+table);
 		rooter_post.addHeader("Content-Type", "application/json;charset=UTF-8");
 		StringEntity stringEntity = new StringEntity(datas.toString(), "UTF-8");
         stringEntity.setContentEncoding("UTF-8");
@@ -133,7 +132,7 @@ public class VearchConnector {
 	}
 	
 	public void writeBatch(String table,CopyOnWriteArrayList<Object> datas) throws Exception {
-		HttpPost rooter_post = new HttpPost(this.method + this.path + ":" + this.ROOTER_PORT+"/"+this.dbName+"/"+table+"/_bulk");
+		HttpPost rooter_post = new HttpPost(this.method + this.ROOTER+"/"+this.dbName+"/"+table+"/_bulk");
 		rooter_post.addHeader("Content-Type", "application/json;charset=UTF-8");
 		StringBuffer sb = new StringBuffer(); 
 		int i = 0;
@@ -164,7 +163,7 @@ public class VearchConnector {
 		CloseableHttpResponse response;
 		try {
 			response = this.httpClient
-					.execute(new HttpGet(this.method + this.path + ":" + this.MASTER_PORT + listDb));
+					.execute(new HttpGet(this.method +this.MASTER + listDb));
 			JSONObject jr = JSONObject.fromObject(this.getContent(response));
 			JSONArray jsonArr = JSONArray.fromObject(jr.get("data"));
 			@SuppressWarnings("unchecked")
@@ -175,7 +174,7 @@ public class VearchConnector {
 					return;
 				}
 			}
-			HttpPut master_post = new HttpPut(this.method + this.path + ":" + this.MASTER_PORT+createDb);
+			HttpPut master_post = new HttpPut(this.method + this.MASTER+createDb);
 			master_post.addHeader("Content-Type", "application/json;charset=UTF-8");
 			StringEntity stringEntity = new StringEntity(this.dbObject.toString(), "UTF-8");
 	        stringEntity.setContentEncoding("UTF-8");
@@ -196,9 +195,5 @@ public class VearchConnector {
 			}
 		}
 		return result.toString();
-	} 
-	public static void main(String[] args) {
-		VearchConnector vConnector = new VearchConnector("192.168.6.156", "vehicle");
-		System.out.println(vConnector.checkSpaceExists("vehicle_vec_1626105600"));
 	}
 }

@@ -28,8 +28,9 @@ public class VearchConnection extends EFConnectionSocket<VearchConnector> {
 	public boolean connect() {
 		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
 		if (wnp.getPath() != null) {
-			if (!status()) { 				
-				this.conn = new VearchConnector(wnp.getPath(),wnp.getDefaultValue());
+			if (!status()) { 
+				String[] paths = wnp.getPath().split("#");
+				this.conn = new VearchConnector(paths[0],paths[1],wnp.getDefaultValue());
 			}
 		} else {
 			return false;
