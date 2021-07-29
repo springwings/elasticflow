@@ -15,21 +15,18 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.handler.AbstractHandler;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.model.EFResponse;
-import org.elasticflow.model.EFRequest;
-import org.elasticflow.node.SocketCenter;
+import org.elasticflow.model.EFSearchRequest;
+import org.elasticflow.model.EFSearchResponse;
 import org.elasticflow.service.EFService;
 import org.elasticflow.service.HttpService;
 import org.elasticflow.util.Common;
 import org.elasticflow.yarn.Resource;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
+import org.mortbay.jetty.handler.AbstractHandler;
 
 /**
  * Provide computing REST service
@@ -40,9 +37,6 @@ import org.elasticflow.yarn.Resource;
 public class ComputerService {
 	
 	private EFService FS;
-	
-	@Autowired
-	private SocketCenter SocketCenter;    
 	
 	
 	public boolean start() {
@@ -62,19 +56,17 @@ public class ComputerService {
 		} 
 		return true;
 	}
-	public EFResponse process(EFRequest request) { 
+	public EFSearchResponse process(EFSearchRequest request) { 
 		long startTime = System.currentTimeMillis();
-		EFResponse response = null; 
+		EFSearchResponse response = new EFSearchResponse(); 
 		String pipe = request.getPipe(); 
 		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 		if (configMap.containsKey(pipe)) { 
-			response = SocketCenter.getComputer(pipe,"","",false).startCompute(request);
+			
 		} 
 		long endTime = System.currentTimeMillis();
-		if (response != null){
-			response.setStartTime(startTime); 
-			response.setEndTime(endTime);
-		}
+		response.setStartTime(startTime); 
+		response.setEndTime(endTime);
 		return response;
 	}
 	
@@ -90,8 +82,8 @@ public class ComputerService {
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.setHeader("PowerBy", GlobalParam.PROJ); 
 			rq.setHandled(true);
-			EFRequest RR = Common.getRequest(rq);
-			EFResponse rps = EFResponse.getInstance();
+			EFSearchRequest RR = Common.getRequest(rq);
+			EFSearchResponse rps = EFSearchResponse.getInstance();
 			rps.setRequest(RR.getParams());
 			if (Resource.nodeConfig.getSearchConfigs().containsKey(
 					RR.getPipe())) {

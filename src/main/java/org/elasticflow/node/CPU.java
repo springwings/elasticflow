@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.reader.ReaderFlowSocket;
@@ -28,8 +29,9 @@ public class CPU {
 	
 	static volatile HashMap<String, Context> Contexts = new HashMap<>();
 	
-	public static void prepare(String runId,InstanceConfig instanceConfig,List<WriterFlowSocket> writer,ReaderFlowSocket reader,ReaderFlowSocket extReader) { 
-		Contexts.put(runId, Context.initContext(instanceConfig, writer,reader,extReader));
+	public static void prepare(String runId,InstanceConfig instanceConfig,List<WriterFlowSocket> writer,
+			ReaderFlowSocket reader,ComputerFlowSocket computer) { 
+		Contexts.put(runId, Context.initContext(instanceConfig, writer,reader,computer));
 	}
 	
 	public static Context getContext(String runId) {

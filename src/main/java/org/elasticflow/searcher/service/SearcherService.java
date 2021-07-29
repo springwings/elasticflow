@@ -18,8 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.model.EFRequest;
-import org.elasticflow.model.EFResponse;
+import org.elasticflow.model.EFSearchRequest;
+import org.elasticflow.model.EFSearchResponse;
 import org.elasticflow.node.SocketCenter;
 import org.elasticflow.service.EFService;
 import org.elasticflow.service.HttpService;
@@ -62,7 +62,7 @@ public class SearcherService{
 		return true;
 	} 
 	
-	public EFResponse process(EFRequest request,EFResponse response) throws InstantiationException, IllegalAccessException, ClassNotFoundException { 
+	public EFSearchResponse process(EFSearchRequest request,EFSearchResponse response) throws InstantiationException, IllegalAccessException, ClassNotFoundException { 
 		response.setStartTime(System.currentTimeMillis());
 		String pipe = request.getPipe(); 
 		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getSearchConfigs();
@@ -85,9 +85,9 @@ public class SearcherService{
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.setHeader("PowerBy", GlobalParam.PROJ); 
 			rq.setHandled(true);
-			EFResponse rps = EFResponse.getInstance(); 
+			EFSearchResponse rps = EFSearchResponse.getInstance(); 
 			try {
-				EFRequest RR = Common.getEFRequest(rq, rps);
+				EFSearchRequest RR = Common.getEFRequest(rq, rps);
 				if(RR!=null) {
 					rps.setRequest(RR.getParams()); 
 					if (Resource.nodeConfig.getSearchConfigs().containsKey(

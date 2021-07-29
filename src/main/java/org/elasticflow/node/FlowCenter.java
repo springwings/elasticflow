@@ -141,7 +141,7 @@ public class FlowCenter{
 					continue; 
 				if(!Resource.tasks.containsKey(Common.getMainName(instanceName, L1seq)) || needClear){
 					Resource.tasks.put(Common.getMainName(instanceName, L1seq), FlowTask.createTask(instanceName,
-							Resource.SOCKET_CENTER.getPipePump(instanceName, L1seq,needClear,GlobalParam.FLOW_TAG._DEFAULT.name()), L1seq));
+					Resource.SOCKET_CENTER.getPipePump(instanceName, L1seq,needClear,GlobalParam.FLOW_TAG._DEFAULT.name()), L1seq));
 				}  
 				createFlowScheduleJob(Common.getMainName(instanceName, L1seq), Resource.tasks.get(Common.getMainName(instanceName, L1seq)),
 						instanceConfig,needClear);

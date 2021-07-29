@@ -7,9 +7,40 @@
  */
 package org.elasticflow.computer;
 
+import java.util.LinkedList;
+import java.util.Map;
+
+import org.elasticflow.field.EFField;
 import org.elasticflow.flow.Flow;
+import org.elasticflow.instruction.Context;
+import org.elasticflow.model.computer.SamplePoint;
+import org.elasticflow.model.reader.DataPage;
+import org.elasticflow.model.reader.PipeDataUnit;
+import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.reader.util.DataSetReader;
 
-public abstract class ComputerFlowSocket extends Flow {
-
+public abstract class ComputerFlowSocket extends Flow { 
+	
+	protected DataPage dataPage = new DataPage(); 
+	
+	protected LinkedList<PipeDataUnit> dataUnit = new LinkedList<>(); 
+	
+	@Override
+	public void INIT(ConnectParams connectParams) {
+		this.connectParams = connectParams; 
+	} 
+	
+	abstract public boolean loadModel(Object datas);
+	
+	abstract public DataPage train(Context context, DataSetReader DSR, Map<String, EFField> transParam);
+	 
+    /**
+     * predicte the value of sample s
+     * @param s : prediction sample
+     * @return : predicted value
+     */ 
+	abstract public Object predict(SamplePoint point);
+	
+	abstract public DataPage predict(Context context,DataSetReader DSR);
 	 
 }

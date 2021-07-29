@@ -2,12 +2,11 @@ package org.elasticflow.ml.algorithm;
 
 import java.util.ArrayList;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.elasticflow.ml.Algorithm;
+import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.model.computer.SamplePoint;
 import org.elasticflow.model.computer.SampleSets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -16,7 +15,7 @@ import org.elasticflow.model.computer.SampleSets;
  * @version 1.0
  * @date 2018-05-22 09:08
  */
-public abstract class Regression extends Algorithm{
+public abstract class Regression extends ComputerFlowSocket{
 	
     double[] theta;  
     int featureSize; 

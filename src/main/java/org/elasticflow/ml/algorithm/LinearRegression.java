@@ -9,6 +9,8 @@ import org.elasticflow.model.computer.SamplePoint;
 import org.elasticflow.model.computer.SampleSets;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
+import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.reader.util.DataSetReader;
 
 /**
  * 
@@ -17,20 +19,13 @@ import org.elasticflow.model.reader.PipeDataUnit;
  * @date 2018-11-13 09:21
  */
 public class LinearRegression extends Regression {
-	
-	/**
-	 * flow train
-	 * @param context
-	 * @param point
-	 * @param transParam
-	 * @return
-	 */
-	public static DataPage train(Context context, SamplePoint point, Map<String, EFField> transParam) {
-		 
-		return null; 
+	 
+	public static LinearRegression getInstance(final ConnectParams connectParams) {
+		LinearRegression o = new LinearRegression();
+		o.INIT(connectParams);
+		return o;
 	}
-	
-	
+  
 	/**
 	 * batch train
 	 * @param context
@@ -38,8 +33,13 @@ public class LinearRegression extends Regression {
 	 * @param transParam
 	 * @return
 	 */
-	public static DataPage train(Context context, SampleSets samples, Map<String, EFField> transParam) {
+	@Override
+	public DataPage train(Context context, DataSetReader DSR, Map<String, EFField> transParam) {
 		LinearRegression LR = new LinearRegression();
+		SampleSets samples = SampleSets.getInstance(DSR.getDataNums()); 
+		while (DSR.nextLine()) {
+			samples.addPoint(DSR.getLineData(), context.getInstanceConfig().getComputeParams());
+		}
 		double[] para = new double[samples.getData()[0].feathures_num];
 		double rate = context.getInstanceConfig().getComputeParams().getLearn_rate();
 		double th = context.getInstanceConfig().getComputeParams().getThreshold();
@@ -108,6 +108,18 @@ public class LinearRegression extends Regression {
 			sum += d;
 		}
 		return sum;
+	}
+
+	@Override
+	public DataPage predict(Context context,DataSetReader point) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void INIT(ConnectParams connectParams) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

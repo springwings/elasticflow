@@ -7,6 +7,8 @@
  */
 package org.elasticflow.param.ml;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * 
  * @author chengwen
@@ -15,9 +17,20 @@ package org.elasticflow.param.ml;
  */
 public class ComputeParam {
 	
+	/**The characteristic fields are separated by ","**/
 	private String features;
 	private String value;
 	private String algorithm;
+	private String[] api;
+	/**reader and request fields map*/
+	private JSONObject apiRequest;
+	/**writer and response fields map*/
+	private JSONObject apiResponse;
+	protected String keyField;
+	/** value= int or string */
+	protected String keyFieldType;
+	protected String scanField;
+	
 	private String preprocessing;
 	private String postprocessing;
 	private double learn_rate = 0.1;
@@ -26,7 +39,32 @@ public class ComputeParam {
 	private String computeType = "batch";
 	/** train,test,predict **/
 	private String stage = "train";
+	
+	
+	public String getKeyField() {
+		return keyField;
+	}
 
+	public void setKeyField(String keyField) {
+		this.keyField = keyField;
+	}
+
+	public String getScanField() {
+		return scanField;
+	}
+
+	public void setScanField(String scanField) {
+		this.scanField = scanField;
+	} 
+	
+	public String getKeyFieldType() {
+		return keyFieldType;
+	}
+
+	public void setKeyFieldType(String keyFieldType) {
+		this.keyFieldType = keyFieldType;
+	}
+	
 	public String getFeatures() {
 		return features;
 	}
@@ -84,7 +122,7 @@ public class ComputeParam {
 	}
 
 	public void setStage(String stage) {
-		this.stage = stage;
+		this.stage = stage.trim().toUpperCase();
 	}
 
 	public void setPreprocessing(String preprocessing) {
@@ -97,6 +135,36 @@ public class ComputeParam {
 
 	public void setComputeType(String computeType) {
 		this.computeType = computeType.toLowerCase();
+	}
+
+	public String[] getApi() {
+		return api;
+	}
+
+	public void setApi(String api) {
+		if(api!=null) {
+			this.api = api.split(",");
+		}		
+	}
+
+	public JSONObject getApiRequest() {
+		return apiRequest;
+	}
+
+	public void setApiRequest(String apiRequest) {
+		if(apiRequest!=null) {
+			this.apiRequest = JSONObject.parseObject(apiRequest);
+		}		
+	}
+
+	public JSONObject getApiResponse() {
+		return apiResponse;
+	}
+
+	public void setApiResponse(String apiResponse) {
+		if(apiResponse!=null) {
+			this.apiResponse = JSONObject.parseObject(apiResponse);
+		}
 	}
 
 }

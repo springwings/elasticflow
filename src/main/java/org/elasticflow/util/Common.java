@@ -34,10 +34,10 @@ import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
-import org.elasticflow.model.EFRequest;
+import org.elasticflow.model.EFSearchRequest;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.model.NMRequest;
-import org.elasticflow.model.EFResponse;
+import org.elasticflow.model.EFSearchResponse;
 import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.node.CPU;
 import org.elasticflow.param.warehouse.WarehouseParam;
@@ -152,8 +152,7 @@ public final class Common {
 				Method setMethod = c.getMethod(setMethodName, new Class[] { String.class });
 				setMethod.invoke(Obj, new Object[] { value });
 			}
-		}
-		
+		}		
 	}
  
 	public static long getNow() {
@@ -534,8 +533,8 @@ public final class Common {
 		 }
 	}
 	
-	public static EFRequest getEFRequest(Request rq,EFResponse rps) {
-		EFRequest RR = null;
+	public static EFSearchRequest getEFRequest(Request rq,EFSearchResponse rps) {
+		EFSearchRequest RR = null;
 		String ctype = rq.getHeader("Content-type"); 
 		if(ctype!=null && ctype.contentEquals("application/json")) {
 			try (BufferedReader _br = new BufferedReader(new InputStreamReader(rq.getInputStream(), "UTF-8"));) {
@@ -561,8 +560,8 @@ public final class Common {
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
-	public static EFRequest getRequest(String jsonInput) {
-		EFRequest rr = EFRequest.getInstance(); 
+	public static EFSearchRequest getRequest(String jsonInput) {
+		EFSearchRequest rr = EFSearchRequest.getInstance(); 
 		JSONObject jsonObject = JSONObject.fromObject(jsonInput);
 		Iterator<?> iter = jsonObject.entrySet().iterator();
         while (iter.hasNext()) {
@@ -577,8 +576,8 @@ public final class Common {
 	 * @param input
 	 * @return
 	 */
-	public static EFRequest getRequest(Request input) {
-		EFRequest rr = EFRequest.getInstance(); 
+	public static EFSearchRequest getRequest(Request input) {
+		EFSearchRequest rr = EFSearchRequest.getInstance(); 
 		Request rq = (Request) input;
 		String path = rq.getPathInfo();
 		String pipe = path.substring(1); 

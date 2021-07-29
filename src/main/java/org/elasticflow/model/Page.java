@@ -2,6 +2,7 @@ package org.elasticflow.model;
 
 import java.util.Map;
 
+import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.reader.handler.Handler;
 
@@ -23,14 +24,15 @@ public final class Page {
 	private String additional;
 
 	public static Page getInstance(String readerKey, String readerScanKey, String start, String end,
-			Handler readHandler, Map<String, EFField> transField, String additional) {
+			Handler readHandler, InstanceConfig instanceConfig, String additional) {
 		Page o = new Page();
 		o.readerKey = readerKey;
 		o.readerScanKey = readerScanKey;
 		o.start = start;
 		o.end = end;
 		o.readHandler = readHandler;
-		o.transField = transField;
+		o.transField = instanceConfig.openCompute() ? instanceConfig.getComputeFields()
+				: instanceConfig.getWriteFields();
 		o.additional = additional;
 		return o;
 	}

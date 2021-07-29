@@ -47,7 +47,11 @@ public class DataSetReader{
 	public PipeDataUnit getLineData() {  
 		return this.datas.poll();
 	}
- 
+	
+	public int getDataNums() {
+		return this.datas.size();
+	}
+	
 	public boolean nextLine() {
 		if (datas.isEmpty()) {
 			return false; 

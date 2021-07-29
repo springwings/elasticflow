@@ -20,7 +20,6 @@ public class PipeParam {
 	private int readPageSize = GlobalParam.READ_PAGE_SIZE;
 	private int logLevel = 0;
 	private String writeTo;
-	private String modelFrom;
 	private String writeHandler;
 	private boolean writerPoolShareAlias = true;
 	private String searchFrom;
@@ -57,9 +56,7 @@ public class PipeParam {
 	public int getLogLevel() {
 		return logLevel;
 	}
-	public String getModelFrom() {
-		return modelFrom;
-	}
+
 	public MECHANISM getWriteMechanism() {
 		return writeMechanism;
 	}
@@ -171,9 +168,7 @@ public class PipeParam {
 	public void setReadPageSize(int readPageSize) {
 		this.readPageSize = Integer.valueOf(readPageSize);
 	}
-	public void setModelFrom(String modelFrom) {
-		this.modelFrom = modelFrom;
-	}
+
 	public void setWriteHandler(String writeHandler) {
 		this.writeHandler = writeHandler;
 	}

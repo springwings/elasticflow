@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -16,6 +15,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFHttpClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,12 +56,11 @@ public class VearchConnector {
 		this.dbObject.put("name", this.dbName);
 	}
 
-	public boolean deleteSpace(String space) {
-		HttpDelete master_delete = new HttpDelete(this.method +this.MASTER+"/space/"+this.dbName+"/"+space);
-		master_delete.addHeader("Content-Type", "application/json;charset=UTF-8");
+	public boolean deleteSpace(String space) {		
         try {
-        	CloseableHttpResponse response = this.httpClient.execute(master_delete);
-			JSONObject jr = JSONObject.fromObject(this.getContent(response));
+        	String response = EFHttpClientUtil.process(this.method +this.MASTER+"/space/"+this.dbName+"/"+space,
+        			HttpDelete.METHOD_NAME,EFHttpClientUtil.DEFAULT_CONTENT_TYPE);
+			JSONObject jr = JSONObject.fromObject(response);
 			if(Integer.valueOf(String.valueOf(jr.get("code")))==200) {
 				return true;
 			}else {
@@ -75,10 +74,10 @@ public class VearchConnector {
  
 	
 	public boolean checkSpaceExists(String table) {
-		HttpGet master_get = new HttpGet(this.method + this.MASTER+"/list/space?db="+this.dbName);
 		try {
-        	CloseableHttpResponse response = this.httpClient.execute(master_get);
-			JSONObject jr = JSONObject.fromObject(this.getContent(response));
+        	String response = EFHttpClientUtil.process(this.method + this.MASTER+"/list/space?db="+this.dbName,
+        			HttpGet.METHOD_NAME,EFHttpClientUtil.DEFAULT_CONTENT_TYPE);
+			JSONObject jr = JSONObject.fromObject(response);
 			if(Integer.valueOf(String.valueOf(jr.get("code")))==200){
 				JSONArray jArray = jr.getJSONArray("data");
 				for(int i=0;i<jArray.size();i++) {
@@ -93,15 +92,11 @@ public class VearchConnector {
 	}
 
 	public boolean createSpace(JSONObject tableMeta) throws EFException {
-		this.createDbifNotExists();
-		HttpPut master_post = new HttpPut(this.method + this.MASTER+"/space/"+this.dbName+"/_create");
-		master_post.addHeader("Content-Type", "application/json;charset=UTF-8");
-		StringEntity stringEntity = new StringEntity(tableMeta.toString(), "UTF-8");
-        stringEntity.setContentEncoding("UTF-8");
-        master_post.setEntity(stringEntity);
+		this.createDbifNotExists();	
         try {
-        	CloseableHttpResponse response = this.httpClient.execute(master_post);
-			JSONObject jr = JSONObject.fromObject(this.getContent(response));
+        	String response = EFHttpClientUtil.process(this.method + this.MASTER+"/space/"+this.dbName+"/_create",
+        			HttpPut.METHOD_NAME,EFHttpClientUtil.DEFAULT_CONTENT_TYPE);
+			JSONObject jr = JSONObject.fromObject(response);
 			if(Integer.valueOf(String.valueOf(jr.get("code")))==200)
 				return true;
 			else if(Integer.valueOf(String.valueOf(jr.get("code")))==564){
@@ -117,13 +112,8 @@ public class VearchConnector {
 	}
 	
 	public void writeSingle(String table,JSONObject datas) throws Exception {
-		HttpPost rooter_post = new HttpPost(this.method +this.ROOTER+"/"+this.dbName+"/"+table);
-		rooter_post.addHeader("Content-Type", "application/json;charset=UTF-8");
-		StringEntity stringEntity = new StringEntity(datas.toString(), "UTF-8");
-        stringEntity.setContentEncoding("UTF-8");
-        rooter_post.setEntity(stringEntity); 
-        CloseableHttpResponse response = this.httpClient.execute(rooter_post);
-        JSONObject jr = JSONObject.fromObject(this.getContent(response));
+        String response = EFHttpClientUtil.process(this.method +this.ROOTER+"/"+this.dbName+"/"+table, datas.toString());
+        JSONObject jr = JSONObject.fromObject(response);
 		if(Integer.valueOf(String.valueOf(jr.get("status")))==200)
 			return;
 		else {
@@ -160,11 +150,10 @@ public class VearchConnector {
 	}
 
 	private void createDbifNotExists(){
-		CloseableHttpResponse response;
-		try {
-			response = this.httpClient
-					.execute(new HttpGet(this.method +this.MASTER + listDb));
-			JSONObject jr = JSONObject.fromObject(this.getContent(response));
+		try {			
+			String response = EFHttpClientUtil.process(this.method +this.MASTER + listDb,
+        			HttpGet.METHOD_NAME,EFHttpClientUtil.DEFAULT_CONTENT_TYPE);
+			JSONObject jr = JSONObject.fromObject(response);
 			JSONArray jsonArr = JSONArray.fromObject(jr.get("data"));
 			@SuppressWarnings("unchecked")
 			Iterator<Object> it = jsonArr.iterator();
@@ -184,16 +173,5 @@ public class VearchConnector {
 			log.error("createSpace Exception",e);
 			return;
 		}
-	}
-	
-	private String getContent(CloseableHttpResponse response) throws IOException {
-		StringBuffer result = new StringBuffer();
-		try (BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))) {
-			String line;
-			while ((line = rd.readLine()) != null) {
-				result.append(line);
-			}
-		}
-		return result.toString();
 	}
 }

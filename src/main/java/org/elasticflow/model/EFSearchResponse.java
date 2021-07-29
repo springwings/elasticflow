@@ -16,7 +16,7 @@ import com.alibaba.fastjson.JSON;
  * @version 2.0
  * @date 2018-11-05 13:53
  */
-public class EFResponse {
+public class EFSearchResponse {
 	protected Map<String, String> parsedParams = new HashMap<>();
 	private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	protected Object payload = null;
@@ -26,8 +26,8 @@ public class EFResponse {
 	private String instance = ""; 
 	public Map<String, Object> response = new LinkedHashMap<>();
 
-	public static EFResponse getInstance() {
-		EFResponse rs = new EFResponse();
+	public static EFSearchResponse getInstance() {
+		EFSearchResponse rs = new EFSearchResponse();
 		rs.response.put("status", RESPONSE_STATUS.Success.getVal());
 		rs.response.put("info", RESPONSE_STATUS.Success);
 		rs.response.put("instance",null);

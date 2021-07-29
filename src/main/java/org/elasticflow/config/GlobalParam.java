@@ -32,7 +32,7 @@ public final class GlobalParam {
 	public static String VERSION;
 	
 	public static final String PROJ = "ElasticFlow";
-	
+	 
 	/**Task Running status define*/
 	public static enum STATUS {  
 		Blank(0),Ready(1),Running(2),Termination(4),Stop(8),Waiting(16);
@@ -137,6 +137,11 @@ public final class GlobalParam {
 	public final static String DEFAULT_SEQ = "_DFAUTL";
 	public final static String JOB_INCREMENTINFO_PATH = "batch";  
 	public final static String JOB_FULLINFO_PATH = "full_info"; 
+	
+	//computer parameters
+	public static enum COMPUTER_STAGE{
+		TRAIN,PREDICT,TEST
+	} 
 	
 	//searcher parameters
 	public final static int SEARCH_MAX_WINDOW=20000; 

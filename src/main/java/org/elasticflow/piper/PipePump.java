@@ -15,6 +15,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.STATUS;
@@ -50,14 +51,14 @@ public final class PipePump extends Instruction {
 	/** defined custom read flow socket */
 	Handler readHandler;
 
-	public static PipePump getInstance(ReaderFlowSocket reader, ReaderFlowSocket extReader,
-			List<WriterFlowSocket> writer, InstanceConfig instanceConfig) {
-		return new PipePump(reader, extReader, writer, instanceConfig);
+	public static PipePump getInstance(ReaderFlowSocket reader,
+			ComputerFlowSocket computer,List<WriterFlowSocket> writer, InstanceConfig instanceConfig) {
+		return new PipePump(reader, computer,writer, instanceConfig);
 	}
 
-	private PipePump(ReaderFlowSocket reader, ReaderFlowSocket extReader, List<WriterFlowSocket> writer,
-			InstanceConfig instanceConfig) {
-		CPU.prepare(getID(), instanceConfig, writer, reader, extReader);
+	private PipePump(ReaderFlowSocket reader, ComputerFlowSocket computer,
+			List<WriterFlowSocket> writer,InstanceConfig instanceConfig) {
+		CPU.prepare(getID(), instanceConfig, writer, reader,computer);
 		try {
 			if (instanceConfig.getPipeParams().getReadHandler() != null) {
 				this.readHandler = (Handler) Class.forName(instanceConfig.getPipeParams().getReadHandler())
@@ -196,26 +197,20 @@ public final class PipePump extends Instruction {
 								+ task.getJobType().name(),
 						mainName, storeId, task.getL1seq(), 0, "",
 						GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(task.getL2seq()), 0, ",totalpage:" + pageNum));
-
-			String computeModel;
-			if (getInstanceConfig().getComputeParams().getComputeType() == "batch") {
-				computeModel = "batchCompute";
-			} else {
-				computeModel = "flowCompute";
-			}
+ 
 			long start = Common.getNow();
 			AtomicInteger total = new AtomicInteger(0);
 			if (getInstanceConfig().getPipeParams().isMultiThread()) {
 				CountDownLatch synThreads = new CountDownLatch(estimateThreads(pageNum));
 				Resource.ThreadPools.submitJobPage(
-						new PumpThread(synThreads, task, storeId, pageList, writeTo, computeModel, total));
+						new PumpThread(synThreads, task, storeId, pageList, writeTo, total));
 				try {
 					synThreads.await();
 				} catch (Exception e) {
 					throw new EFException(e);
 				}
 			} else {
-				singleThread(task, storeId, pageList, writeTo, computeModel, total);
+				singleThread(task, storeId, pageList, writeTo, total);
 			}
 			if(task.getInstanceConfig().getPipeParams().getLogLevel()<2)
 				log.info(Common.formatLog("complete", "Complete " + task.getJobType().name(), mainName, storeId,
@@ -234,7 +229,7 @@ public final class PipePump extends Instruction {
 	 * @throws EFException
 	 */
 	private void singleThread(Task task, String storeId, ConcurrentLinkedDeque<String> pageList, String writeTo,
-			String computeModel, AtomicInteger total) throws EFException {
+			 AtomicInteger total) throws EFException {
 		ReaderState rState = null;
 		int processPos = 0;
 		String startId = "0";
@@ -258,10 +253,10 @@ public final class PipePump extends Instruction {
 				break;
 			} else {
 				DataPage pagedata = this.getPageData(Page.getInstance(keyField, scanField, startId, dataBoundary,
-						this.readHandler, getInstanceConfig().getWriteFields(), dataScanDSL));
+						this.readHandler, getInstanceConfig(), dataScanDSL));
 				if (getInstanceConfig().openCompute()) {
-					pagedata = (DataPage) CPU.RUN(getID(), "ML", computeModel, false, getID(), task.getJobType().name(),
-							writeTo, pagedata);
+					pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(), task.getJobType().name(),
+							writeTo, pagedata); 
 					if (processPos == pageNum) {
 						rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
 								writeTo, storeId, task.getL2seq(), pagedata, ",process:" + processPos + "/" + pageNum,
@@ -310,7 +305,6 @@ public final class PipePump extends Instruction {
 		final String ID = CPU.getUUID();
 		final String writeTo;
 		final String storeId;
-		final String computeModel;
 		final AtomicInteger total;
 
 		Task task;
@@ -322,14 +316,13 @@ public final class PipePump extends Instruction {
 		boolean isUpdate = getInstanceConfig().getPipeParams().getWriteType().equals("increment") ? true : false;
 
 		public PumpThread(CountDownLatch synThreads, Task task, String storeId, ConcurrentLinkedDeque<String> pageList,
-				String writeTo, String computeModel, AtomicInteger total) {
+				String writeTo, AtomicInteger total) {
 			this.pageList = pageList;
 			this.writeTo = writeTo;
 			this.storeId = storeId;
 			this.synThreads = synThreads;
 			this.pageSize = pageList.size();
 			this.total = total;
-			this.computeModel = computeModel;
 			this.task = task;
 		}
 
@@ -360,9 +353,9 @@ public final class PipePump extends Instruction {
 				} else {
 					DataPage pagedata = getPageData(Page.getInstance(task.getScanParam().getKeyField(),
 							task.getScanParam().getScanField(), startId, dataBoundary, readHandler,
-							getInstanceConfig().getWriteFields(), dataScanDSL));
+							getInstanceConfig(), dataScanDSL));
 					if (getInstanceConfig().openCompute()) {
-						pagedata = (DataPage) CPU.RUN(getID(), "ML", computeModel, false, getID(),
+						pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(),
 								task.getJobType().name(), writeTo, pagedata);
 						synchronized (processPos) {
 							if (processPos.get() == this.pageSize) {

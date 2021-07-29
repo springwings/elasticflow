@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.elasticflow.computer.Computer;
+import org.elasticflow.computer.ComputerFlowSocket;
+import org.elasticflow.computer.ComputerFlowSocketFactory;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseParam;
@@ -40,12 +41,11 @@ import org.elasticflow.yarn.Resource;
 public final class SocketCenter {
 
 	/** for special data transfer **/
-	private Map<String, Searcher> searcherMap = new ConcurrentHashMap<>();
-	private Map<String, Computer> computerMap = new ConcurrentHashMap<>();
-
+	private Map<String, Searcher> searcherMap = new ConcurrentHashMap<>(); 
 	/** for normal transfer **/
 	private Map<String, PipePump> pipePumpMap = new ConcurrentHashMap<>();
 	private Map<String, WriterFlowSocket> writerSocketMap = new ConcurrentHashMap<>();
+	private Map<String, ComputerFlowSocket> computerSocketMap = new ConcurrentHashMap<>();
 	private Map<String, ReaderFlowSocket> readerSocketMap = new ConcurrentHashMap<>();
 	private Map<String, SearcherFlowSocket> searcherSocketMap = new ConcurrentHashMap<>();
 
@@ -73,34 +73,15 @@ public final class SocketCenter {
 				PipePump transDataFlow = PipePump
 						.getInstance(
 								getReaderSocket(Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
-										.getReadFrom(), instance, L1seq, tag),
-								(Resource.nodeConfig.getInstanceConfigs().get(instance).getComputeParams()
-										.getComputeType().equals("flow")
-												? getReaderSocket(Resource.nodeConfig.getInstanceConfigs().get(instance)
-														.getPipeParams().getWriteTo(), instance, L1seq, tag)
-												: null),
+										.getReadFrom(), instance, L1seq, tag),	 
+								(Resource.nodeConfig.getInstanceConfigs().get(instance).openCompute()? 
+										getComputerSocket(instance, tags, needReset) :null),
 								wfs, Resource.nodeConfig.getInstanceConfigs().get(instance));
 				pipePumpMap.put(tags, transDataFlow);
 			}
 			return pipePumpMap.get(tags);
 		}
-	}
-
-	public Computer getComputer(String instance, String L1seq, String tag, boolean reload) {
-		synchronized (computerMap) {
-			if (reload || !computerMap.containsKey(instance)) {
-				if (!Resource.nodeConfig.getInstanceConfigs().containsKey(instance))
-					return null;
-				InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instance);
-				Computer computer = Computer.getInstance(instance, instanceConfig,
-						getReaderSocket(
-								Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getModelFrom(),
-								instance, L1seq, tag));
-				computerMap.put(instance, computer);
-			}
-		}
-		return computerMap.get(instance);
-	}
+	} 
 
 	public Searcher getSearcher(String instance, String L1seq, String tag, boolean reload) {
 		synchronized (searcherMap) {
@@ -161,6 +142,16 @@ public final class SocketCenter {
 			}
 			return readerSocketMap.get(tags);
 		}
+	}
+	
+	public ComputerFlowSocket getComputerSocket(String instance, String tag, boolean reload) {
+		synchronized (computerSocketMap) {
+			if (reload || !computerSocketMap.containsKey(instance)) {
+				computerSocketMap.put(instance, ComputerFlowSocketFactory.getInstance(ConnectParams.getInstance(null, null, 
+						Resource.nodeConfig.getInstanceConfigs().get(instance),null))); 
+			}
+		}
+		return computerSocketMap.get(instance);	
 	}
 
 	public WriterFlowSocket getWriterSocket(String resourceName, String instance, String L1seq, String tag) {

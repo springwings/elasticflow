@@ -9,6 +9,7 @@ package org.elasticflow.instruction;
 
 import java.util.List;
 
+import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.util.EFWriterUtil;
@@ -29,15 +30,15 @@ public class Context {
 	
 	private ReaderFlowSocket reader;
 	
-	/**extension reader for special requires like flow computing*/
-	private ReaderFlowSocket extReader;
+	private ComputerFlowSocket computer; 
 	
-	public static Context initContext(InstanceConfig instanceConfig,List<WriterFlowSocket> writer,ReaderFlowSocket reader,ReaderFlowSocket extReader) {
+	public static Context initContext(InstanceConfig instanceConfig,List<WriterFlowSocket> writer,
+			ReaderFlowSocket reader,ComputerFlowSocket computer) {
 		Context c = new Context();
 		c.instanceConfig = instanceConfig;
 		c.writer = writer;
 		c.reader = reader;
-		c.extReader = extReader;
+		c.computer = computer; 
 		return c;
 	}
 
@@ -57,8 +58,8 @@ public class Context {
 		return reader;
 	} 
 	
-	public ReaderFlowSocket extExtReader() {
-		return extReader;
+	public ComputerFlowSocket getComputer() {
+		return computer;
 	} 
-	
+	 
 }

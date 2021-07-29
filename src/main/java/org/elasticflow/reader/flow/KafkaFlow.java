@@ -45,11 +45,9 @@ public class KafkaFlow extends ReaderFlowSocket {
 
 	@Override
 	public DataPage getPageData(final Page page, int pageSize) {
-
 		if (this.records == null) {
 			return this.dataPage;
 		}
-
 		int count = 0;
 		boolean releaseConn = false;
 		PREPARE(false, false);
