@@ -11,6 +11,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.model.Page;
 import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
@@ -104,7 +105,7 @@ public class KafkaFlow extends ReaderFlowSocket {
 		boolean releaseConn = false;
 		PREPARE(false, false);
 		@SuppressWarnings("unchecked")
-		KafkaConsumer<String, String> conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(false);
+		KafkaConsumer<String, String> conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader);
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
 		try {
 			while (true) {

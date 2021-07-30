@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.connect.EsConnector;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.searcher.ResponseDataUnit;
@@ -53,7 +54,7 @@ public final class ESFlow extends SearcherFlowSocket {
 		if(!ISLINK())
 			return res;
 		try{ 
-			EsConnector ESC = (EsConnector) GETSOCKET().getConnection(true);
+			EsConnector ESC = (EsConnector) GETSOCKET().getConnection(END_TYPE.searcher);
 			RestHighLevelClient conn = ESC.getClient();
 			int start = fq.getStart();
 			int count = fq.getCount(); 

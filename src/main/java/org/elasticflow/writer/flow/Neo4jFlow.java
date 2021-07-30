@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
@@ -43,7 +44,7 @@ public class Neo4jFlow extends WriterFlowSocket {
 			PREPARE(false, false);
 			if (!ISLINK())
 				return;
-			Connection conn = (Connection) GETSOCKET().getConnection(false);
+			Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
 			try (PreparedStatement statement = conn.prepareStatement(
 					getWriteSQL(writerParam, unit, transParams));) {
 				statement.execute();
@@ -90,7 +91,7 @@ public class Neo4jFlow extends WriterFlowSocket {
 	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) { 
 		if (isIncrement)
 			return "a";
-		Connection conn = (Connection) GETSOCKET().getConnection(false);
+		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
 		try (PreparedStatement statement = conn.prepareStatement("match(n) return n limit 1");) {
 			ResultSet rs = statement.executeQuery();
 			if (rs.next()) {

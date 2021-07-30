@@ -2,6 +2,7 @@ package org.elasticflow.connect;
 
 import java.io.RandomAccessFile;
 
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.slf4j.Logger;
@@ -33,7 +34,7 @@ public class FileConnection extends EFConnectionSocket<RandomAccessFile> {
 	}
 	
 	@Override
-	public RandomAccessFile getConnection(boolean searcher) {
+	public RandomAccessFile getConnection(END_TYPE endType) {
 		connect();
 		return conn;
 	}

@@ -6,6 +6,7 @@ import java.io.RandomAccessFile;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.model.Page;
 import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
@@ -38,7 +39,7 @@ public class FileFlow extends ReaderFlowSocket {
 		try {
 			if (!ISLINK())
 				return this.dataPage;
-			RandomAccessFile rf = (RandomAccessFile) GETSOCKET().getConnection(false); 
+			RandomAccessFile rf = (RandomAccessFile) GETSOCKET().getConnection(END_TYPE.reader); 
 			int start = Integer.parseInt(page.getStart());
 			int pos = 0;
 			while (pos++ > 1) {

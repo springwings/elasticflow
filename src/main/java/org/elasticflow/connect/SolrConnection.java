@@ -1,6 +1,7 @@
 package org.elasticflow.connect;
 
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class SolrConnection extends EFConnectionSocket<CloudSolrClient> {
 	}
 
 	@Override
-	public CloudSolrClient getConnection(boolean searcher) {
+	public CloudSolrClient getConnection(END_TYPE endType) {
 		int tryTime = 0;
 		try {
 			while (tryTime < 5 && !connect()) {

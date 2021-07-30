@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.Page;
 import org.elasticflow.model.Task;
@@ -42,7 +43,7 @@ public class OracleFlow extends ReaderFlowSocket{
 		PREPARE(false,false); 
 		if(!ISLINK())
 			return this.dataPage; 
-		Connection conn = (Connection) GETSOCKET().getConnection(false); 
+		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.reader); 
 		try (PreparedStatement statement = conn.prepareStatement(page.getAdditional());){ 
 			statement.setFetchSize(pageSize); 
 			try(ResultSet rs = statement.executeQuery();){				
@@ -95,7 +96,7 @@ public class OracleFlow extends ReaderFlowSocket{
 		PREPARE(false,false); 
 		if(!ISLINK())
 			return page;
-		Connection conn = (Connection) GETSOCKET().getConnection(false);
+		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.reader);
 		PreparedStatement statement = null;
 		ResultSet rs  = null;
 		boolean releaseConn = false;

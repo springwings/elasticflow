@@ -16,6 +16,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.util.NamedList;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.connect.handler.ConnectionHandler;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.searcher.ResponseDataUnit;
@@ -72,7 +73,7 @@ public class SolrFlow extends SearcherFlowSocket {
 		if(!ISLINK())
 			return res;
 		try {
-			CloudSolrClient conn = (CloudSolrClient) GETSOCKET().getConnection(true);
+			CloudSolrClient conn = (CloudSolrClient) GETSOCKET().getConnection(END_TYPE.searcher);
 			int start = fq.getStart();
 			int count = fq.getCount();
 			SolrQuery qb = (SolrQuery) fq.getQuery();

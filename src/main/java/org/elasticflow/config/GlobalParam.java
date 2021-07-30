@@ -99,6 +99,10 @@ public final class GlobalParam {
 	public static final String pluginPath = System.getProperty("plugin");
 	public static volatile URLClassLoader PLUGIN_CLASS_LOADER;
 	
+	public static enum END_TYPE{
+		reader,computer,writer,searcher
+	}
+	
 	/**master,slave,backup*/
 	public static enum NODE_TYPE{
 		master,slave,backup

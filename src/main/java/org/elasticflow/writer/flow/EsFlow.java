@@ -12,6 +12,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.connect.EsConnector;
 import org.elasticflow.field.EFField;
 import org.elasticflow.field.FieldHandler;
@@ -57,7 +58,7 @@ import net.sf.json.JSONObject;
  * @date 2018-10-30 14:02
  */
 @NotThreadSafe
-public class ESFlow extends WriterFlowSocket {
+public class EsFlow extends WriterFlowSocket {
 
 	protected EsConnector CONNS;
 
@@ -65,8 +66,8 @@ public class ESFlow extends WriterFlowSocket {
 
 	private final static Logger log = LoggerFactory.getLogger("ESFlow");
 
-	public static ESFlow getInstance(ConnectParams connectParams) {
-		ESFlow o = new ESFlow();
+	public static EsFlow getInstance(ConnectParams connectParams) {
+		EsFlow o = new EsFlow();
 		o.INIT(connectParams);
 		return o;
 	}
@@ -431,7 +432,7 @@ public class ESFlow extends WriterFlowSocket {
 	private synchronized EsConnector getESC() {
 		if (this.CONNS == null || reconn) {
 			reconn = false;
-			this.CONNS = (EsConnector) GETSOCKET().getConnection(false);
+			this.CONNS = (EsConnector) GETSOCKET().getConnection(END_TYPE.writer);
 		}
 		return this.CONNS;
 	}

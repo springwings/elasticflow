@@ -6,6 +6,7 @@ import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Table;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.slf4j.Logger;
@@ -64,7 +65,7 @@ public class HbaseConnection extends EFConnectionSocket<Table>{
 	}
 
 	@Override
-	public Table getConnection(boolean searcher) {
+	public Table getConnection(END_TYPE endType) {
 		int tryTime = 0;
 		try {
 			while (tryTime < 5 && !connect()) {

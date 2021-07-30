@@ -1,5 +1,6 @@
 package org.elasticflow.connect;
 
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ public class VearchConnection extends EFConnectionSocket<VearchConnector> {
 	}
 
 	@Override
-	public VearchConnector getConnection(boolean searcher) {
+	public VearchConnector getConnection(END_TYPE endType) {
 		int tryTime = 0;
 		try {
 			while (tryTime < 5 && !connect()) {

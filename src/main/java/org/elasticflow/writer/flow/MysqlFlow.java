@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
@@ -70,7 +71,7 @@ public class MysqlFlow extends WriterFlowSocket {
 	}
 
 	private void insertDb(String sql) {
-		Connection conn = (Connection) GETSOCKET().getConnection(false);
+		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
 		try (PreparedStatement statement = conn.prepareStatement(sql);) {
 			statement.execute();
 		} catch (Exception e) {
@@ -91,7 +92,7 @@ public class MysqlFlow extends WriterFlowSocket {
 		if (!ISLINK())
 			return false;
 		if(!this.storePositionExists(name)) {
-			Connection conn = (Connection) GETSOCKET().getConnection(false);
+			Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
 			try (PreparedStatement statement = conn.prepareStatement(this.getTableSql(name, instanceConfig));) {
 				log.info("create Instance " + name + ":" + type);
 				statement.execute();
@@ -118,7 +119,7 @@ public class MysqlFlow extends WriterFlowSocket {
 		PREPARE(false, false);
 		if (!ISLINK())
 			return;
-		Connection conn = (Connection) GETSOCKET().getConnection(false);
+		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
 		try (PreparedStatement statement = conn.prepareStatement("DROP table if exists " + name);) {
 			log.info("Remove Instance " + name + " success!");
 			statement.execute();
@@ -148,7 +149,7 @@ public class MysqlFlow extends WriterFlowSocket {
 		PREPARE(false, false);
 		if (!ISLINK())
 			return select;
-		Connection conn = (Connection) GETSOCKET().getConnection(false);
+		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
 		String checkSql = " show tables like '" + Common.getStoreName(mainName, "a") + "';";
 		try (PreparedStatement statement = conn.prepareStatement(checkSql);) {
 			try (ResultSet rs = statement.executeQuery();) {
@@ -198,7 +199,7 @@ public class MysqlFlow extends WriterFlowSocket {
 	@Override
 	public boolean storePositionExists(String storeName) {
 		String checkdatabase = "show databases like \"" + storeName + "\"";
-		Connection conn = (Connection) GETSOCKET().getConnection(false);
+		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
 		try (PreparedStatement stat = conn.prepareStatement(checkdatabase);) {
 			ResultSet resultSet = stat.executeQuery();
 			if (resultSet.next()) {

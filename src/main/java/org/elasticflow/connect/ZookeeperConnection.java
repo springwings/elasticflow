@@ -3,6 +3,7 @@ package org.elasticflow.connect;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.ZooKeeper.States;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class ZookeeperConnection extends EFConnectionSocket<ZooKeeper> {
 	}
 
 	@Override
-	public ZooKeeper getConnection(boolean searcher) {
+	public ZooKeeper getConnection(END_TYPE endType) {
 		int tryTime = 0;
 		try {
 			while (tryTime < 5 && !connect()) {

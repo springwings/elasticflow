@@ -1,5 +1,6 @@
 package org.elasticflow.connect; 
 
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
 
 /** 
@@ -16,7 +17,7 @@ public abstract class EFConnectionSocket<T>{
 	
 	public abstract boolean connect(); 
 	
-	public abstract T getConnection(boolean searcher);
+	public abstract T getConnection(END_TYPE endtype);
 	
 	public abstract boolean status();
 	

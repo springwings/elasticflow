@@ -12,12 +12,6 @@ import java.lang.reflect.Method;
 import org.elasticflow.flow.Socket;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
-import org.elasticflow.writer.flow.ESFlow;
-import org.elasticflow.writer.flow.HBaseFlow;
-import org.elasticflow.writer.flow.MysqlFlow;
-import org.elasticflow.writer.flow.Neo4jFlow;
-import org.elasticflow.writer.flow.SolrFlow;
-import org.elasticflow.writer.flow.VearchFlow;
 
 /**
  * 
@@ -47,31 +41,19 @@ public class WriterSocketFactory implements Socket<WriterFlowSocket>{
  
 	
 	private static WriterFlowSocket getFlowSocket(ConnectParams connectParams,String L1seq,String handler) { 
-		if(handler!=null) {
-			try {
+		try {
+			if(handler!=null) {			
 				Class<?> clz = Class.forName(handler);
 				Method m = clz.getMethod("getInstance",ConnectParams.class);
-				return (WriterFlowSocket) m.invoke(null,connectParams);
-			}catch (Exception e) {
-				Common.LOG.error("getNoSqlFlow Exception!",e);
-			}  
-		}
-		switch (connectParams.getWhp().getType()) {
-			case ES:
-				return ESFlow.getInstance(connectParams);
-			case SOLR:
-				return SolrFlow.getInstance(connectParams); 
-			case HBASE:
-				return HBaseFlow.getInstance(connectParams); 
-			case MYSQL: 
-				return MysqlFlow.getInstance(connectParams); 
-			case NEO4J:
-				return Neo4jFlow.getInstance(connectParams); 
-			case VEARCH:
-				return VearchFlow.getInstance(connectParams); 
-			default:
-				Common.LOG.error("WriterFlowSocket Connect Type "+connectParams.getWhp().getType()+" Not Support!");
-				return null;
-		}  
+				return (WriterFlowSocket) m.invoke(null,connectParams);			
+			}
+			String cname = connectParams.getWhp().getType().name().toLowerCase();
+			Class<?> clz = Class.forName("org.elasticflow.writer.flow."+Common.changeFirstCase(cname)+"Flow");
+			Method m = clz.getMethod("getInstance",ConnectParams.class);
+			return (WriterFlowSocket) m.invoke(null,connectParams);		
+		}catch (Exception e) {
+			Common.LOG.error("get NoSql Flow Exception!",e);
+		}   
+		return null;
 	} 
 }

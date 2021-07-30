@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.connect.VearchConnector;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
@@ -52,7 +53,7 @@ public class VearchFlow extends WriterFlowSocket {
 		if (!ISLINK())
 			return false;
 		if(!this.storePositionExists(name)) {
-			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(false);
+			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 			try {
 				log.info("create Instance " + name + ":" + type);
 				conn.createSpace(this.getTableMeta(name,instanceConfig));
@@ -70,7 +71,7 @@ public class VearchFlow extends WriterFlowSocket {
 
 	@Override
 	public boolean storePositionExists(String storeName) {		
-		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(false);
+		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 		return conn.checkSpaceExists(storeName);
 	}
 
@@ -81,7 +82,7 @@ public class VearchFlow extends WriterFlowSocket {
 		try {
 			if (!ISLINK())
 				return;
-			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(false);	
+			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);	
 			JSONObject row = new JSONObject();
 			for (Entry<String, Object> r : unit.getData().entrySet()) {
 				String field = r.getKey();
@@ -120,7 +121,7 @@ public class VearchFlow extends WriterFlowSocket {
 	public void delete(String instance, String storeId, String keyColumn, String keyVal) throws EFException {
 		String name = Common.getStoreName(instance, storeId);
 		try {
-			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(false);	
+			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);	
 			conn.deleteSpace(name);
 		} catch (Exception e) {
 			throw new EFException(e);
@@ -133,7 +134,7 @@ public class VearchFlow extends WriterFlowSocket {
 		PREPARE(false, false);
 		if (!ISLINK())
 			return;
-		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(false);	
+		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);	
 		try {
 			conn.deleteSpace(name);
 			log.info("Remove Instance " + name + " success!");
@@ -161,7 +162,7 @@ public class VearchFlow extends WriterFlowSocket {
 		if (this.isBatch) {
 			synchronized (this.DATAS) {
 				if(this.DATAS.size()>0) {
-					VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(false);	
+					VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);	
 					conn.writeBatch(this.curTable, this.DATAS);
 					currentSec = Common.getNow();
 					this.DATAS.clear();

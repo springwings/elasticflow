@@ -11,6 +11,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
@@ -27,14 +28,14 @@ import org.slf4j.LoggerFactory;
  * @version 1.0 
  */
 @ThreadSafe
-public class HBaseFlow extends WriterFlowSocket { 
+public class HbaseFlow extends WriterFlowSocket { 
 	 
 	private List<Put> data = new CopyOnWriteArrayList<Put>();   
 	private String columnFamily;
 	private final static Logger log = LoggerFactory.getLogger("HBaseFlow"); 
 	
-	public static HBaseFlow getInstance(ConnectParams connectParams) {
-		HBaseFlow o = new HBaseFlow();
+	public static HbaseFlow getInstance(ConnectParams connectParams) {
+		HbaseFlow o = new HbaseFlow();
 		o.INIT(connectParams);
 		return o;
 	}
@@ -53,7 +54,7 @@ public class HBaseFlow extends WriterFlowSocket {
 	
 	
 	private Table getTable() { 
-		return (Table) GETSOCKET().getConnection(false);
+		return (Table) GETSOCKET().getConnection(END_TYPE.writer);
 	}
 
 	 

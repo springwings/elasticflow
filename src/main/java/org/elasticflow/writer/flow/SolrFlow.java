@@ -29,6 +29,7 @@ import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
@@ -452,7 +453,7 @@ public class SolrFlow extends WriterFlowSocket{
 	private CloudSolrClient getSolrConn() { 
 		synchronized (this) {
 			if(this.CONNS==null)
-				this.CONNS = (CloudSolrClient) GETSOCKET().getConnection(false);
+				this.CONNS = (CloudSolrClient) GETSOCKET().getConnection(END_TYPE.writer);
 			return this.CONNS;
 		} 
 	}

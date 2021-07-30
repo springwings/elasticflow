@@ -3,6 +3,7 @@ package org.elasticflow.connect;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseSqlParam;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ public class Neo4jConnection extends EFConnectionSocket<Connection> {
 	}
 
 	@Override
-	public Connection getConnection(boolean searcher) {
+	public Connection getConnection(END_TYPE endType) {
 		int tryTime = 0;
 		try {
 			while (tryTime < 5 && !connect()) {

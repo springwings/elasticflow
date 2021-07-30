@@ -17,6 +17,7 @@ import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.model.Page;
 import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
@@ -63,7 +64,7 @@ public class HbaseFlow extends ReaderFlowSocket {
 		try {
 			if(!ISLINK())
 				return this.dataPage;
-			Table table = (Table) GETSOCKET().getConnection(true);
+			Table table = (Table) GETSOCKET().getConnection(END_TYPE.reader);
 			Scan scan = new Scan();
 			List<Filter> filters = new ArrayList<Filter>();
 			SingleColumnValueFilter range = new SingleColumnValueFilter(
@@ -137,7 +138,7 @@ public class HbaseFlow extends ReaderFlowSocket {
 		boolean releaseConn = false;
 		try {
 			Scan scan = new Scan();
-			Table table = (Table) GETSOCKET().getConnection(true);
+			Table table = (Table) GETSOCKET().getConnection(END_TYPE.reader);
 			List<Filter> filters = new ArrayList<Filter>();
 			SingleColumnValueFilter range = new SingleColumnValueFilter(
 					Bytes.toBytes(this.columnFamily), Bytes.toBytes(task.getScanParam().getScanField()),

@@ -1,6 +1,7 @@
 package org.elasticflow.connect;
 
 import org.apache.http.HttpHost;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -65,9 +66,9 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 	}
 
 	@Override
-	public EsConnector getConnection(boolean searcher) {
+	public EsConnector getConnection(END_TYPE endType) {
 		connect(); 
-		if (!searcher) {
+		if (endType!=END_TYPE.searcher) {
 			if (this.bulkProcessor == null) {
 				getBulkProcessor(this.conn);
 				this.ESC.setBulkProcessor(this.bulkProcessor);
