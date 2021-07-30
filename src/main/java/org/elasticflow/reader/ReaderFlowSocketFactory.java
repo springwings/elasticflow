@@ -37,7 +37,7 @@ public final class ReaderFlowSocketFactory implements Socket<ReaderFlowSocket> {
 	private static ReaderFlowSocket flowChannel(final ConnectParams connectParams, String L1Seq, String handler) { 
 		if (handler != null) {
 			try {
-				Class<?> clz = Class.forName("org.elasticflow.reader.handler." + handler);
+				Class<?> clz = Class.forName(handler);
 				Method m = clz.getMethod("getInstance", ConnectParams.class);
 				return (ReaderFlowSocket) m.invoke(null, connectParams);
 			} catch (Exception e) {

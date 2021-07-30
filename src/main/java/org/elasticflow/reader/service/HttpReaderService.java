@@ -137,9 +137,14 @@ public class HttpReaderService {
 								if (writeTo == null) {
 									writeTo = Common.getMainName(instance, seq);
 								} 
+								DataPage pagedata = this.getPageData(RR.getParam("data"), keycolumn, updatecolumn,
+										pipePump.getInstanceConfig().getWriteFields());
+								if (pipePump.getInstanceConfig().openCompute()) {
+									pagedata = (DataPage) CPU.RUN(pipePump.getID(), "ML", "compute", false, pipePump.getID(),"add",
+											writeTo, pagedata); 				
+								} 
 								CPU.RUN(pipePump.getID(), "Pipe", "writeDataSet", false, "HTTP PUT", writeTo, storeid,
-										"", this.getPageData(RR.getParam("data"), keycolumn, updatecolumn,
-												pipePump.getInstanceConfig().getWriteFields()),
+										"", pagedata,
 										"", isUpdate, monopoly);
 							} catch (Exception e) {
 								Common.LOG.error("Http Write Exception,", e);

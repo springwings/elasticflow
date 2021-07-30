@@ -16,7 +16,6 @@ import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 public class Neo4jFlow extends WriterFlowSocket {
@@ -107,7 +106,8 @@ public class Neo4jFlow extends WriterFlowSocket {
 	}
 	
 	private String getWriteSQL(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> transParams) { 
-		String tmp = writerParam.getDSL(); 
+		JSONObject JO = writerParam.getCustomParams(); 
+		String res="";
 		for (Entry<String, Object> r : unit.getData().entrySet()) {
 			String field = r.getKey();
 			EFField transParam = transParams.get(field);
@@ -116,14 +116,13 @@ public class Neo4jFlow extends WriterFlowSocket {
 			if (transParam == null)
 				continue;
 			if(writerParam.getDslParse().equals("condition") && transParam.getIndextype().equals("condition")) {
-				JSONObject sql = JSON.parseObject(tmp);
-				tmp = sql.getString(String.valueOf(r.getValue()));
+				res = JO.getString(String.valueOf(r.getValue()));
 			}else {
-				tmp = tmp.replace("#{"+field+"}", String.valueOf(r.getValue()));
+				res = JO.toString().replace("#{"+field+"}", String.valueOf(r.getValue()));
 			} 
 			
 		}
-		return tmp;
+		return res;
 	}
 
 	@Override

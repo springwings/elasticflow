@@ -26,6 +26,8 @@ public class ComputeParam {
 	private JSONObject apiRequest;
 	/**writer and response fields map*/
 	private JSONObject apiResponse;
+	/**User defined JSON parameters can be used to extend the plugin*/
+	private JSONObject customParams;
 	protected String keyField;
 	/** value= int or string */
 	protected String keyFieldType;
@@ -165,6 +167,16 @@ public class ComputeParam {
 		if(apiResponse!=null) {
 			this.apiResponse = JSONObject.parseObject(apiResponse);
 		}
+	}
+
+	public JSONObject getCustomParams() {
+		return customParams;
+	}
+
+	public void setCustomParams(String customParams) {
+		if(customParams!=null) {
+			this.customParams = JSONObject.parseObject(customParams);
+		}	
 	}
 
 }

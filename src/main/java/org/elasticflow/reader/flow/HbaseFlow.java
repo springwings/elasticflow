@@ -85,9 +85,11 @@ public class HbaseFlow extends ReaderFlowSocket {
 				String updateFieldValue=null; 
 				this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
 				this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey()); 
-				for (Result r : resultScanner) { 
-					PipeDataUnit u = PipeDataUnit.getInstance();
-					if(page.getReadHandler()==null){
+				if(page.getReadHandler()!=null && page.getReadHandler().supportHandleData()){
+					page.getReadHandler().handleData(this,resultScanner,page,pageSize);
+				}else {
+					for (Result r : resultScanner) { 
+						PipeDataUnit u = PipeDataUnit.getInstance();
 						for (Cell cell : r.rawCells()) {
 							String k = new String(CellUtil.cloneQualifier(cell));
 							String v = new String(CellUtil.cloneValue(cell), "UTF-8"); 
@@ -100,11 +102,10 @@ public class HbaseFlow extends ReaderFlowSocket {
 							}
 							u.addFieldValue(k, v, page.getTransField());
 						} 
-					}else{
-						page.getReadHandler().handleData(r,u);
+						this.dataUnit.add(u);
 					} 
-					this.dataUnit.add(u);
-				} 
+				}
+				
 				if (updateFieldValue==null){ 
 					this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis()); 
 				}else{

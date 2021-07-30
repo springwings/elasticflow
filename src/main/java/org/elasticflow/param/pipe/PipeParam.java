@@ -20,13 +20,13 @@ public class PipeParam {
 	private int readPageSize = GlobalParam.READ_PAGE_SIZE;
 	private int logLevel = 0;
 	private String writeTo;
-	private String writeHandler;
+	private String customWriter;
 	private boolean writerPoolShareAlias = true;
 	private String searchFrom;
-	private String searcherHandler;
+	private String customSearcher;
 	private boolean searcherShareAlias = true;
 	private String readFrom;
-	private String readHandler;
+	private String customReader;
 	private boolean readerPoolShareAlias = false;
 	private String deltaCron;
 	private String fullCron;
@@ -70,14 +70,14 @@ public class PipeParam {
 	public boolean isMultiThread() {
 		return multiThread;
 	} 
-	public String getReadHandler() { 
-		return readHandler;
+	public String getCustomReader() { 
+		return customReader;
 	}
-	public String getWriteHandler() {
-		return writeHandler;
+	public String getCustomWriter() {
+		return customWriter;
 	}
-	public String getSearcherHandler() {
-		return searcherHandler;
+	public String getCustomSearcher() {
+		return customSearcher;
 	} 
 	public String getInstanceName() {
 		return instanceName;
@@ -169,8 +169,8 @@ public class PipeParam {
 		this.readPageSize = Integer.valueOf(readPageSize);
 	}
 
-	public void setWriteHandler(String writeHandler) {
-		this.writeHandler = writeHandler;
+	public void setCustomWriter(String customWriter) {
+		this.customWriter = customWriter;
 	}
 	public void setWriterPoolShareAlias(String writerPoolShareAlias) {
 		this.writerPoolShareAlias = Boolean.valueOf(writerPoolShareAlias);
@@ -178,8 +178,8 @@ public class PipeParam {
 	public void setSearchFrom(String searchFrom) {
 		this.searchFrom = searchFrom;
 	}
-	public void setSearcherHandler(String searcherHandler) {
-		this.searcherHandler = searcherHandler;
+	public void setCustomSearcher(String customSearcher) {
+		this.customSearcher = customSearcher;
 	}
 	public void setSearcherShareAlias(String searcherShareAlias) {
 		this.searcherShareAlias = Boolean.valueOf(searcherShareAlias);
@@ -187,8 +187,8 @@ public class PipeParam {
 	public void setReadFrom(String readFrom) {
 		this.readFrom = readFrom;
 	}
-	public void setReadHandler(String readHandler) {
-		this.readHandler = readHandler;
+	public void setCustomReader(String customReader) {
+		this.customReader = customReader;
 	}
 	public void setReaderPoolShareAlias(String readerPoolShareAlias) { 
 		this.readerPoolShareAlias = Boolean.valueOf(readerPoolShareAlias);

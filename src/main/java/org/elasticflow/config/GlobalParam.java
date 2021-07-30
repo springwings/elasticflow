@@ -8,6 +8,7 @@
 package org.elasticflow.config;
 
 import java.net.InetAddress;
+import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,6 +31,8 @@ public final class GlobalParam {
 	public static String RUN_ENV; 
 	
 	public static String VERSION;
+	
+	public static String GROUPID;
 	
 	public static final String PROJ = "ElasticFlow";
 	 
@@ -92,6 +95,9 @@ public final class GlobalParam {
 	/**configure file local path*/
 	public static final String configPath = System.getProperty("config");
 	
+	/**configure plugin local path*/
+	public static final String pluginPath = System.getProperty("plugin");
+	public static volatile URLClassLoader PLUGIN_CLASS_LOADER;
 	
 	/**master,slave,backup*/
 	public static enum NODE_TYPE{

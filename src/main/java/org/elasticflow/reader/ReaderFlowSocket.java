@@ -34,6 +34,14 @@ public abstract class ReaderFlowSocket extends Flow{
 		this.connectParams = connectParams; 
 		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq()); 
 	} 
+	
+	public LinkedList<PipeDataUnit> getDataUnit(){
+		return dataUnit;
+	}
+	
+	public DataPage getDataPage() {
+		return dataPage;
+	}
 	 
 	public abstract DataPage getPageData(final Page page,int pageSize);
 

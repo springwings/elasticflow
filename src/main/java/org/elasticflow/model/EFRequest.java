@@ -1,13 +1,5 @@
 package org.elasticflow.model;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.elasticflow.config.GlobalParam;
-import org.elasticflow.param.end.SearcherParam;
-
 /**
  * ElasticFlow Search Request parameters Model
  * @author chengwen

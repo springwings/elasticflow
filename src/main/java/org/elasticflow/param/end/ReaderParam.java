@@ -14,6 +14,8 @@ import java.util.List;
 
 import org.elasticflow.util.Common;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * reader scan basic parameters
  * @author chengwen
@@ -35,7 +37,21 @@ public class ReaderParam {
 	private boolean isNoSql = false;
 	/** defined series scan location */
 	protected List<String> L2seqs = new ArrayList<String>();
+	
+	/**User defined JSON parameters can be used to extend the plugin*/
+	private JSONObject customParams;
+	
+	
+	public JSONObject getCustomParams() {
+		return customParams;
+	}
 
+	public void setCustomParams(String customParams) {
+		if(customParams!=null) {
+			this.customParams = JSONObject.parseObject(customParams);
+		}	
+	}
+	
 	public String getDataScanDSL() {
 		return dataScanDSL;
 	}

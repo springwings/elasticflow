@@ -7,6 +7,7 @@
  */
 package org.elasticflow.reader.handler;
 
+import org.elasticflow.model.Page;
 import org.elasticflow.model.Task;
 
 
@@ -16,11 +17,23 @@ import org.elasticflow.model.Task;
  * @version 2.0
  * @date 2018-12-28 09:27
  */
-public abstract class Handler{
+public abstract class ReadHandler{
 	
-	public abstract <T>T handlePage(Object... args);
+	protected boolean supportHandlePage = false;
 	
-	public abstract <T>T handleData(Object... args);
+	protected boolean supportHandleData = false;
+	
+	public boolean supportHandlePage() {
+		return supportHandlePage;
+	}
+
+	public boolean supportHandleData() {
+		return supportHandleData;
+	}
+	
+	public abstract <T>T handlePage(Object invokeObject,final Task task,int pageSize);
+	
+	public abstract void handleData(Object invokeObject,Object datas,Page page,int pageSize);
 	
 	public boolean loopScan(Task task) {
 		return false;

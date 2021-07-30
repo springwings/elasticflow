@@ -7,8 +7,13 @@
  */
 package org.elasticflow.node.startup;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -62,6 +67,9 @@ public final class Run {
 	@Value("#{nodeSystemInfo['version']}")
 	private String version;
 	
+	@Value("#{nodeSystemInfo['groupId']}")
+	private String groupId;
+	
 	@Value("#{nodeSystemInfo['debug']}")
 	private boolean debug;
 
@@ -84,6 +92,7 @@ public final class Run {
 	public void init(boolean initInstance) {
 		GlobalParam.RUN_ENV = String.valueOf(GlobalParam.StartConfig.get("run_environment"));
 		GlobalParam.VERSION = version;
+		GlobalParam.GROUPID = groupId;
 		GlobalParam.DEBUG = debug;
 		GlobalParam.POOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("pool_size"));
 		GlobalParam.WRITE_BATCH = GlobalParam.StartConfig.getProperty("write_batch").equals("false") ? false : true;
@@ -155,10 +164,26 @@ public final class Run {
 		GlobalParam.INSTANCE_PATH = (GlobalParam.CONFIG_PATH+"/INSTANCES").intern();
 		ZKUtil.setZkHost(GlobalParam.StartConfig.getProperty("zkhost"));
 	}
+	
+	private void loadPlugins(String plugin) {
+		List<File> jars = Arrays.asList(new File(plugin).listFiles());
+		URL[] urls = new URL[jars.size()];
+		for (int i = 0; i < jars.size(); i++) {
+		    try {
+		        urls[i] = jars.get(i).toURI().toURL();
+		    } catch (Exception e) {
+		    	Common.LOG.error("load Plugins Exception", e);
+		    }
+		}
+		GlobalParam.PLUGIN_CLASS_LOADER = new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
+		Thread.currentThread().setContextClassLoader(GlobalParam.PLUGIN_CLASS_LOADER);  
 
+	}
+	
 	private void start() {
 		loadGlobalConfig(this.startConfigPath, false);
 		GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");
+		loadPlugins(GlobalParam.pluginPath);
 		ReportStatus.nodeConfigs();
 		if (!GlobalParam.StartConfig.containsKey("node_type"))
 			GlobalParam.StartConfig.setProperty("node_type", NODE_TYPE.slave.name());

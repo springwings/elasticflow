@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
-import org.elasticflow.reader.handler.Handler;
+import org.elasticflow.reader.handler.ReadHandler;
 
 /**
  * JobPage define Task Page Segment
@@ -19,12 +19,12 @@ public final class Page {
 	private String readerKey;
 	private String start;
 	private String end;
-	private Handler readHandler;
+	private ReadHandler readHandler;
 	private Map<String, EFField> transField;
 	private String additional;
 
 	public static Page getInstance(String readerKey, String readerScanKey, String start, String end,
-			Handler readHandler, InstanceConfig instanceConfig, String additional) {
+			ReadHandler readHandler, InstanceConfig instanceConfig, String additional) {
 		Page o = new Page();
 		o.readerKey = readerKey;
 		o.readerScanKey = readerScanKey;
@@ -69,11 +69,11 @@ public final class Page {
 		this.end = end;
 	}
 
-	public Handler getReadHandler() {
+	public ReadHandler getReadHandler() {
 		return readHandler;
 	}
 
-	public void setReadHandler(Handler readHandler) {
+	public void setReadHandler(ReadHandler readHandler) {
 		this.readHandler = readHandler;
 	}
 

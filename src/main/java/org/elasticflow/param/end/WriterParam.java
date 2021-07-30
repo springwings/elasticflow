@@ -7,6 +7,8 @@
  */
 package org.elasticflow.param.end;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * 
  * @author chengwen
@@ -14,6 +16,7 @@ package org.elasticflow.param.end;
  * @date 2018-11-09 11:36
  */
 public class WriterParam {
+	
 	private String writeKey;
 	/**keyType:scan|unique
 		scan,scan update batch record
@@ -21,9 +24,11 @@ public class WriterParam {
 	*/
 	private String keyType;
 	/**user define field,pass custom value**/
-	private String DSL;
+	private JSONObject customParams;
 	/** dsl parse method  normal/condition**/
 	private String dslParse = "normal";
+	
+	private String handler;
 
 	public String getWriteKey() {
 		return writeKey;
@@ -33,13 +38,17 @@ public class WriterParam {
 		return keyType;
 	}
 	
-	public String getDSL() {
-		return DSL;
+	public JSONObject getCustomParams() {
+		return customParams;
 	}
 
 	public String getDslParse() {
 		return dslParse;
 	}
+	
+	public String getHandler() {
+		return handler;
+	} 
 
 	public static void setKeyValue(WriterParam wp, String k, String v) {
 		switch (k.toLowerCase()) {
@@ -49,11 +58,16 @@ public class WriterParam {
 		case "keytype":
 			wp.keyType = v;
 			break;
-		case "dsl":
-			wp.DSL = v;
+		case "customParams":
+			if(v!=null) {
+				wp.customParams = JSONObject.parseObject(v);
+			}	
 			break;
 		case "dslparse":
 			wp.dslParse = v;
+			break;
+		case "handler":
+			wp.handler = v;
 			break;
 		}
 	}

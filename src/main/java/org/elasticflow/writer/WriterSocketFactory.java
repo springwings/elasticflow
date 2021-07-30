@@ -49,7 +49,7 @@ public class WriterSocketFactory implements Socket<WriterFlowSocket>{
 	private static WriterFlowSocket getFlowSocket(ConnectParams connectParams,String L1seq,String handler) { 
 		if(handler!=null) {
 			try {
-				Class<?> clz = Class.forName("org.elasticflow.writer.handler."+handler);
+				Class<?> clz = Class.forName(handler);
 				Method m = clz.getMethod("getInstance",ConnectParams.class);
 				return (WriterFlowSocket) m.invoke(null,connectParams);
 			}catch (Exception e) {

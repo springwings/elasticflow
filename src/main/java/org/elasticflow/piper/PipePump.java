@@ -27,13 +27,14 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.ReaderState;
 import org.elasticflow.node.CPU;
 import org.elasticflow.reader.ReaderFlowSocket;
-import org.elasticflow.reader.handler.Handler;
+import org.elasticflow.reader.handler.ReadHandler;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.util.PipeNormsUtil;
 import org.elasticflow.writer.WriterFlowSocket;
+import org.elasticflow.writer.handler.WriteHandler;
 import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,9 @@ public final class PipePump extends Instruction {
 
 	private final static Logger log = LoggerFactory.getLogger("PipePump");
 	/** defined custom read flow socket */
-	Handler readHandler;
+	ReadHandler readHandler;
+	/** defined custom write flow socket */
+	WriteHandler writeHandler;
 
 	public static PipePump getInstance(ReaderFlowSocket reader,
 			ComputerFlowSocket computer,List<WriterFlowSocket> writer, InstanceConfig instanceConfig) {
@@ -60,9 +63,23 @@ public final class PipePump extends Instruction {
 			List<WriterFlowSocket> writer,InstanceConfig instanceConfig) {
 		CPU.prepare(getID(), instanceConfig, writer, reader,computer);
 		try {
-			if (instanceConfig.getPipeParams().getReadHandler() != null) {
-				this.readHandler = (Handler) Class.forName(instanceConfig.getPipeParams().getReadHandler())
-						.newInstance();
+			if (instanceConfig.getReadParams().getHandler() != null) {
+				if(instanceConfig.getReadParams().getHandler().startsWith(GlobalParam.GROUPID)) {
+					this.readHandler = (ReadHandler) Class.forName(instanceConfig.getReadParams().getHandler())
+							.newInstance();
+				}else {
+					this.readHandler = (ReadHandler) Class.forName(instanceConfig.getReadParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
+							.newInstance();
+				}				
+			}
+			if (instanceConfig.getWriterParams().getHandler() != null) {
+				if(instanceConfig.getWriterParams().getHandler().startsWith(GlobalParam.GROUPID)) {
+					this.writeHandler = (WriteHandler) Class.forName(instanceConfig.getWriterParams().getHandler())
+							.newInstance();
+				}else {
+					this.writeHandler = (WriteHandler) Class.forName(instanceConfig.getWriterParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
+							.newInstance();
+				}				
 			}
 		} catch (Exception e) {
 			log.error("PipePump init Exception,", e);
@@ -256,19 +273,11 @@ public final class PipePump extends Instruction {
 						this.readHandler, getInstanceConfig(), dataScanDSL));
 				if (getInstanceConfig().openCompute()) {
 					pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(), task.getJobType().name(),
-							writeTo, pagedata); 
-					if (processPos == pageNum) {
-						rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
-								writeTo, storeId, task.getL2seq(), pagedata, ",process:" + processPos + "/" + pageNum,
-								isUpdate, false);
-					} else {
-						continue;
-					}
-				} else {
-					rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
-							writeTo, storeId, task.getL2seq(), pagedata, ",process:" + processPos + "/" + pageNum,
-							isUpdate, false);
-				}
+							writeTo, pagedata); 				
+				} 
+				rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
+						writeTo, storeId, task.getL2seq(), pagedata, ",process:" + processPos + "/" + pageNum,
+						isUpdate, false);
 				if (rState.isStatus() == false)
 					throw new EFException("writeDataSet data exception!");
 				total.getAndAdd(rState.getCount());
@@ -357,24 +366,15 @@ public final class PipePump extends Instruction {
 					if (getInstanceConfig().openCompute()) {
 						pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(),
 								task.getJobType().name(), writeTo, pagedata);
-						synchronized (processPos) {
-							if (processPos.get() == this.pageSize) {
-								rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false,
-										task.getJobType().name(), writeTo, storeId, task.getL2seq(), pagedata,
-										",process:" + processPos + "/" + this.pageSize, isUpdate, false);
-							} else {
-								continue;
-							}
-						}
-					} else {
-						try {
-							rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false,
-									task.getJobType().name(), writeTo, storeId, task.getL2seq(), pagedata,
-									",process:" + processPos + "/" + pageSize, isUpdate, false);
-						} finally {
-							Common.setFlowStatus(task.getInstance(), task.getL1seq(), GlobalParam.JOB_TYPE.FULL.name(),
-									STATUS.Blank, STATUS.Ready);
-						}
+				
+					} 
+					try {
+						rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false,
+								task.getJobType().name(), writeTo, storeId, task.getL2seq(), pagedata,
+								",process:" + processPos + "/" + pageSize, isUpdate, false);
+					} finally {
+						Common.setFlowStatus(task.getInstance(), task.getL1seq(), GlobalParam.JOB_TYPE.FULL.name(),
+								STATUS.Blank, STATUS.Ready);
 					}
 					if (rState.isStatus() == false) {
 						Common.LOG.warn("read data exception!");

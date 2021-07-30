@@ -56,34 +56,39 @@ public class KafkaFlow extends ReaderFlowSocket {
 			String LAST_STAMP = null;
 			this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
 			this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
-			for (ConsumerRecord<String, String> record : records) {
-				count++;
-				if (count >= Integer.valueOf(page.getStart()) && count < Integer.valueOf(page.getEnd())) {				
-					PipeDataUnit u = PipeDataUnit.getInstance();
-					String val = record.value();
-					JSONObject jsonObject = JSON.parseObject(val);
-					Set<Entry<String, Object>> itr = jsonObject.entrySet();	
-					for (Entry<String, Object> k : itr) {
-						if(page.getTransField().containsKey(k.getKey())) {
-							u.addFieldValue(k.getKey(), k.getValue(), page.getTransField());
-							if (k.getKey().equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))) {
-								LAST_STAMP = String.valueOf(k.getValue());
-							}else if(k.getKey().equals(this.dataPage.get(GlobalParam.READER_KEY))) {
-								u.setReaderKeyVal(k.getValue());
-								dataBoundary = String.valueOf(k.getValue());
-							}
-						}						
+			if(page.getReadHandler()==null){
+				for (ConsumerRecord<String, String> record : this.records) {
+					count++;
+					if (count >= Integer.valueOf(page.getStart()) && count < Integer.valueOf(page.getEnd())) {				
+						PipeDataUnit u = PipeDataUnit.getInstance();
+						String val = record.value();
+						JSONObject jsonObject = JSON.parseObject(val);
+						Set<Entry<String, Object>> itr = jsonObject.entrySet();	
+						for (Entry<String, Object> k : itr) {
+							if(page.getTransField().containsKey(k.getKey())) {
+								u.addFieldValue(k.getKey(), k.getValue(), page.getTransField());
+								if (k.getKey().equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))) {
+									LAST_STAMP = String.valueOf(k.getValue());
+								}else if(k.getKey().equals(this.dataPage.get(GlobalParam.READER_KEY))) {
+									u.setReaderKeyVal(k.getValue());
+									dataBoundary = String.valueOf(k.getValue());
+								}
+							}						
+						}
+						this.dataUnit.add(u);
 					}
-					this.dataUnit.add(u);
 				}
-			}
-			if (LAST_STAMP == null) {
-				this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis());
-			} else {
-				this.dataPage.put(GlobalParam.READER_LAST_STAMP, LAST_STAMP);
-			} 
-			this.dataPage.putData(this.dataUnit);
-			this.dataPage.putDataBoundary(dataBoundary);			
+				if (LAST_STAMP == null) {
+					this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis());
+				} else {
+					this.dataPage.put(GlobalParam.READER_LAST_STAMP, LAST_STAMP);
+				} 
+				this.dataPage.putData(this.dataUnit);
+				this.dataPage.putDataBoundary(dataBoundary);		
+			}else {
+				//handler reference mysql flow getAllData function 
+				page.getReadHandler().handleData(this,this.records,page,pageSize);
+			} 				
 		} catch (Exception e) {
 			releaseConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS, false);

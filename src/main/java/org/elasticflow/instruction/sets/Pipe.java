@@ -90,7 +90,7 @@ public class Pipe extends Instruction {
 		String info = String.valueOf(args[5]);
 		boolean isUpdate = (boolean) args[6];
 		boolean monopoly = (boolean) args[7];
-
+		
 		if (pageData.size() == 0)
 			return rstate;
 		DataSetReader DSReader = new DataSetReader();

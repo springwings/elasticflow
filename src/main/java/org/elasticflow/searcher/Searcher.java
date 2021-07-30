@@ -43,8 +43,8 @@ public class Searcher {
 		this.searcherFlowSocket = searcherFlowSocket;
 		this.instanceConfig = instanceConfig;
 		try {
-			if(instanceConfig.getPipeParams().getSearcherHandler()!=null) {
-				this.handler = (Handler) Class.forName(instanceConfig.getPipeParams().getSearcherHandler()).newInstance();
+			if(instanceConfig.getPipeParams().getCustomSearcher()!=null) {
+				this.handler = (Handler) Class.forName(instanceConfig.getPipeParams().getCustomSearcher()).newInstance();
 			}
 		}catch(Exception e){
 			log.error("Searcher Handler Exception",e);

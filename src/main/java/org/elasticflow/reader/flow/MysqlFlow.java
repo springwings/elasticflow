@@ -48,10 +48,11 @@ public class MysqlFlow extends ReaderFlowSocket{
 			try(ResultSet rs = statement.executeQuery();){				
 				this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
 				this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
-				if(page.getReadHandler()==null){
-					getAllData(rs,page.getTransField()); 
+				if(page.getReadHandler()!=null && page.getReadHandler().supportHandleData()){
+					//handler reference getAllData function 
+					page.getReadHandler().handleData(this,rs,page,pageSize);					
 				}else{
-					page.getReadHandler().handleData(this,rs,page.getTransField());
+					getAllData(rs,page.getTransField()); 
 				} 
 			} catch (Exception e) {
 				this.dataPage.put(GlobalParam.READER_STATUS,false);

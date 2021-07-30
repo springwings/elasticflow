@@ -138,7 +138,7 @@ public final class SocketCenter {
 						ConnectParams.getInstance(whp, L1seq, Resource.nodeConfig.getInstanceConfigs().get(instance),
 								null),
 						L1seq,
-						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadHandler()));
+						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getCustomReader()));
 			}
 			return readerSocketMap.get(tags);
 		}
@@ -173,7 +173,7 @@ public final class SocketCenter {
 						ConnectParams.getInstance(whp, L1seq, Resource.nodeConfig.getInstanceConfigs().get(instance),
 								null),
 						L1seq,
-						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getWriteHandler()));
+						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getCustomWriter()));
 			}
 			return writerSocketMap.get(tags);
 		}
