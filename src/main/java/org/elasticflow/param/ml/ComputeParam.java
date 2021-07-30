@@ -41,6 +41,7 @@ public class ComputeParam {
 	private String computeType = "batch";
 	/** train,test,predict **/
 	private String stage = "train";
+	private String handler;
 	
 	
 	public String getKeyField() {
@@ -178,5 +179,13 @@ public class ComputeParam {
 			this.customParams = JSONObject.parseObject(customParams);
 		}	
 	}
+	
+	public String getHandler() {
+		return handler;
+	} 
+	
+	public void setHandler(String handler) {
+		this.handler = handler;
+	} 
 
 }

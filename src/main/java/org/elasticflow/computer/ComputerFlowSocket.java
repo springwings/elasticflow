@@ -10,6 +10,7 @@ package org.elasticflow.computer;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.elasticflow.computer.handler.ComputeHandler;
 import org.elasticflow.field.EFField;
 import org.elasticflow.flow.Flow;
 import org.elasticflow.instruction.Context;
@@ -21,6 +22,9 @@ import org.elasticflow.reader.util.DataSetReader;
 
 public abstract class ComputerFlowSocket extends Flow { 
 	
+	/** defined custom Computer flow handler */
+	protected ComputeHandler computerHandler;
+	
 	protected DataPage dataPage = new DataPage(); 
 	
 	protected LinkedList<PipeDataUnit> dataUnit = new LinkedList<>(); 
@@ -28,6 +32,22 @@ public abstract class ComputerFlowSocket extends Flow {
 	@Override
 	public void INIT(ConnectParams connectParams) {
 		this.connectParams = connectParams; 
+	}  
+	
+	public DataPage getDataPage() {
+		return dataPage;
+	}
+
+	public LinkedList<PipeDataUnit> getDataUnit() {
+		return dataUnit;
+	}
+
+	public ComputeHandler getComputerHandler() {
+		return computerHandler;
+	} 
+
+	public void setComputerHandler(ComputeHandler computerHandler) {
+		this.computerHandler = computerHandler;
 	} 
 	
 	abstract public boolean loadModel(Object datas);

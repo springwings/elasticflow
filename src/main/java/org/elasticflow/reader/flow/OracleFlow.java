@@ -48,9 +48,9 @@ public class OracleFlow extends ReaderFlowSocket{
 			try(ResultSet rs = statement.executeQuery();){				
 				this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
 				this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
-				if(page.getReadHandler()!=null && page.getReadHandler().supportHandleData()){
+				if(this.readHandler!=null && this.readHandler.supportHandleData()){
 					//handler reference getAllData function 
-					page.getReadHandler().handleData(this,rs,page,pageSize);					
+					this.readHandler.handleData(this,rs,page,pageSize);					
 				}else{
 					getAllData(rs,page.getTransField()); 
 				} 

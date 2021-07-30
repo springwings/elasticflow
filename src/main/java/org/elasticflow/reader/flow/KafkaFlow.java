@@ -56,7 +56,7 @@ public class KafkaFlow extends ReaderFlowSocket {
 			String LAST_STAMP = null;
 			this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
 			this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
-			if(page.getReadHandler()==null){
+			if(this.readHandler==null){
 				for (ConsumerRecord<String, String> record : this.records) {
 					count++;
 					if (count >= Integer.valueOf(page.getStart()) && count < Integer.valueOf(page.getEnd())) {				
@@ -87,7 +87,7 @@ public class KafkaFlow extends ReaderFlowSocket {
 				this.dataPage.putDataBoundary(dataBoundary);		
 			}else {
 				//handler reference mysql flow getAllData function 
-				page.getReadHandler().handleData(this,this.records,page,pageSize);
+				this.readHandler.handleData(this,this.records,page,pageSize);
 			} 				
 		} catch (Exception e) {
 			releaseConn = true;

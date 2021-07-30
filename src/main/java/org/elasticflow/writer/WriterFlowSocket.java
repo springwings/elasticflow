@@ -24,6 +24,7 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFTuple;
 import org.elasticflow.util.EFWriterUtil;
+import org.elasticflow.writer.handler.WriteHandler;
 import org.elasticflow.yarn.Resource;
  
 /**
@@ -36,6 +37,9 @@ import org.elasticflow.yarn.Resource;
 @NotThreadSafe
 public abstract class WriterFlowSocket extends Flow{
 	
+	/** defined custom write flow handler */
+	protected WriteHandler writeHandler;
+	
 	/**batch submit documents*/
 	protected Boolean isBatch = true;   
 	
@@ -45,6 +49,14 @@ public abstract class WriterFlowSocket extends Flow{
 		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq());
 		this.isBatch = GlobalParam.WRITE_BATCH; 
 	}   
+	
+	public void setWriteHandler(WriteHandler writeHandler) {
+		this.writeHandler = writeHandler;
+	}
+	
+	public WriteHandler getWriteHandler() {
+		return writeHandler;
+	}	
 	
 	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
 		if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.AB) {

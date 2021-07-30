@@ -85,8 +85,8 @@ public class HbaseFlow extends ReaderFlowSocket {
 				String updateFieldValue=null; 
 				this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
 				this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey()); 
-				if(page.getReadHandler()!=null && page.getReadHandler().supportHandleData()){
-					page.getReadHandler().handleData(this,resultScanner,page,pageSize);
+				if(this.readHandler!=null && this.readHandler.supportHandleData()){
+					this.readHandler.handleData(this,resultScanner,page,pageSize);
 				}else {
 					for (Result r : resultScanner) { 
 						PipeDataUnit u = PipeDataUnit.getInstance();

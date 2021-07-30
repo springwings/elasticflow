@@ -1,5 +1,8 @@
 package org.elasticflow.writer.handler;
 
+import org.elasticflow.instruction.Context;
+import org.elasticflow.model.reader.DataPage;
+
 /**
  * Write Handler interface
  * @author chengwen
@@ -8,5 +11,7 @@ package org.elasticflow.writer.handler;
  * 
  */
 public abstract class WriteHandler{
-
+	
+	public abstract DataPage handleData(Context context,DataPage dataPage);
+	
 }

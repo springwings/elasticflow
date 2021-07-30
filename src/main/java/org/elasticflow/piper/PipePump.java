@@ -16,6 +16,7 @@ import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.computer.ComputerFlowSocket;
+import org.elasticflow.computer.handler.ComputeHandler;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.STATUS;
@@ -49,10 +50,8 @@ import org.slf4j.LoggerFactory;
 public final class PipePump extends Instruction {
 
 	private final static Logger log = LoggerFactory.getLogger("PipePump");
-	/** defined custom read flow socket */
-	ReadHandler readHandler;
-	/** defined custom write flow socket */
-	WriteHandler writeHandler;
+	
+
 
 	public static PipePump getInstance(ReaderFlowSocket reader,
 			ComputerFlowSocket computer,List<WriterFlowSocket> writer, InstanceConfig instanceConfig) {
@@ -65,21 +64,32 @@ public final class PipePump extends Instruction {
 		try {
 			if (instanceConfig.getReadParams().getHandler() != null) {
 				if(instanceConfig.getReadParams().getHandler().startsWith(GlobalParam.GROUPID)) {
-					this.readHandler = (ReadHandler) Class.forName(instanceConfig.getReadParams().getHandler())
-							.newInstance();
+					reader.setReaderHandler((ReadHandler) Class.forName(instanceConfig.getReadParams().getHandler())
+							.newInstance());
 				}else {
-					this.readHandler = (ReadHandler) Class.forName(instanceConfig.getReadParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
-							.newInstance();
+					reader.setReaderHandler((ReadHandler) Class.forName(instanceConfig.getReadParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
+							.newInstance());
+				}				
+			}
+			if (instanceConfig.getComputeParams().getHandler() != null) {
+				if(instanceConfig.getComputeParams().getHandler().startsWith(GlobalParam.GROUPID)) {
+					computer.setComputerHandler((ComputeHandler) Class.forName(instanceConfig.getComputeParams().getHandler())
+							.newInstance());
+				}else {
+					computer.setComputerHandler((ComputeHandler) Class.forName(instanceConfig.getComputeParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
+							.newInstance());
 				}				
 			}
 			if (instanceConfig.getWriterParams().getHandler() != null) {
-				if(instanceConfig.getWriterParams().getHandler().startsWith(GlobalParam.GROUPID)) {
-					this.writeHandler = (WriteHandler) Class.forName(instanceConfig.getWriterParams().getHandler())
-							.newInstance();
-				}else {
-					this.writeHandler = (WriteHandler) Class.forName(instanceConfig.getWriterParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
-							.newInstance();
-				}				
+				for(WriterFlowSocket wfs : writer) {
+					if(instanceConfig.getWriterParams().getHandler().startsWith(GlobalParam.GROUPID)) {
+						wfs.setWriteHandler((WriteHandler) Class.forName(instanceConfig.getWriterParams().getHandler())
+								.newInstance());
+					}else {
+						wfs.setWriteHandler((WriteHandler) Class.forName(instanceConfig.getWriterParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
+								.newInstance());
+					}	
+				}							
 			}
 		} catch (Exception e) {
 			log.error("PipePump init Exception,", e);
@@ -112,7 +122,7 @@ public final class PipePump extends Instruction {
 			Resource.FLOW_INFOS.set(instance, job_type.name(), new HashMap<String, String>());
 		}
 		Resource.FLOW_INFOS.get(instance, job_type.name()).put(instance + " seqs nums", String.valueOf(L2seqs.size()));
-		Task task = Task.getInstance(instance, L1seq, job_type, getInstanceConfig(), null, this.readHandler);
+		Task task = Task.getInstance(instance, L1seq, job_type, getInstanceConfig(), null);
 		processFlow(task, mainName, storeId, L2seqs, writeTo, writeInSamePosition);
 		Resource.FLOW_INFOS.get(instance, job_type.name()).clear();
 		if (isFull) {
@@ -270,11 +280,11 @@ public final class PipePump extends Instruction {
 				break;
 			} else {
 				DataPage pagedata = this.getPageData(Page.getInstance(keyField, scanField, startId, dataBoundary,
-						this.readHandler, getInstanceConfig(), dataScanDSL));
+						getInstanceConfig(), dataScanDSL));
 				if (getInstanceConfig().openCompute()) {
 					pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(), task.getJobType().name(),
 							writeTo, pagedata); 				
-				} 
+				} 	 
 				rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
 						writeTo, storeId, task.getL2seq(), pagedata, ",process:" + processPos + "/" + pageNum,
 						isUpdate, false);
@@ -284,8 +294,8 @@ public final class PipePump extends Instruction {
 				startId = dataBoundary;
 			}
 
-			if ((this.readHandler == null || !this.readHandler.loopScan(task)) && rState.getReaderScanStamp()
-					.compareTo(GlobalParam.SCAN_POSITION.get(task.getInstance()).getL2SeqPos(task.getL2seq())) > 0) {
+			if (rState.getReaderScanStamp().compareTo(GlobalParam.SCAN_POSITION.get(task.getInstance()).
+					getL2SeqPos(task.getL2seq())) > 0) {
 				GlobalParam.SCAN_POSITION.get(task.getInstance()).updateL2SeqPos(task.getL2seq(),
 						rState.getReaderScanStamp());
 			}
@@ -361,7 +371,7 @@ public final class PipePump extends Instruction {
 					break;
 				} else {
 					DataPage pagedata = getPageData(Page.getInstance(task.getScanParam().getKeyField(),
-							task.getScanParam().getScanField(), startId, dataBoundary, readHandler,
+							task.getScanParam().getScanField(), startId, dataBoundary,
 							getInstanceConfig(), dataScanDSL));
 					if (getInstanceConfig().openCompute()) {
 						pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(),
@@ -384,7 +394,7 @@ public final class PipePump extends Instruction {
 					startId = dataBoundary;
 				}
 
-				if ((readHandler == null || !readHandler.loopScan(task)) && rState.getReaderScanStamp().compareTo(
+				if (rState.getReaderScanStamp().compareTo(
 						GlobalParam.SCAN_POSITION.get(task.getInstance()).getL2SeqPos(task.getL2seq())) > 0) {
 					GlobalParam.SCAN_POSITION.get(task.getInstance()).updateL2SeqPos(task.getL2seq(),
 							rState.getReaderScanStamp());

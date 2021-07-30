@@ -2,9 +2,8 @@ package org.elasticflow.model;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
-import org.elasticflow.param.end.ReaderParam;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.reader.handler.ReadHandler;
+import org.elasticflow.param.end.ReaderParam;
 import org.elasticflow.util.Common;
 
 /**
@@ -23,23 +22,18 @@ public final class Task {
 	/** sql source store with originalSql */
 	private String additional;
 	private JOB_TYPE jobType;
-	private ReadHandler readHandler;
 
 	public static Task getInstance(String instance, String L1seq, JOB_TYPE jobType, InstanceConfig instanceConfig,
-			String additional, ReadHandler readHandler) {
+			String additional) {
 		Task o = new Task();
 		o.instance = instance;
 		o.L1seq = L1seq;
 		o.instanceConfig = instanceConfig;
 		o.jobType = jobType;
 		o.additional = additional;
-		o.readHandler = readHandler;
 		return o;
 	}
 	
-	public ReadHandler getReadHandler() {
-		return readHandler;
-	}
 	
 	public InstanceConfig getInstanceConfig() {
 		return this.instanceConfig;

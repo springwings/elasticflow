@@ -86,15 +86,17 @@ public class Pipe extends Instruction {
 		String instance = String.valueOf(args[1]);
 		String storeId = String.valueOf(args[2]);
 		String L2seq = String.valueOf(args[3]);
-		DataPage pageData = (DataPage) args[4];
+		DataPage dataPage = (DataPage) args[4];
 		String info = String.valueOf(args[5]);
 		boolean isUpdate = (boolean) args[6];
 		boolean monopoly = (boolean) args[7];
 		
-		if (pageData.size() == 0)
+		if (dataPage.size() == 0)
 			return rstate;
+		if(context.getWriter().getWriteHandler()!=null)
+			dataPage = context.getWriter().getWriteHandler().handleData(context, dataPage);
 		DataSetReader DSReader = new DataSetReader();
-		DSReader.init(pageData);
+		DSReader.init(dataPage);
 		long start = Common.getNow();
 		int num = 0;
 		if (DSReader.status()) {

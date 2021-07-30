@@ -25,15 +25,14 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+/**
+ * Rest API Compute
+ * @author chengwen
+ * @version 1.0
+ * @date 2018-05-22 09:08
+ */
 public class RestService extends ComputerFlowSocket{
-	
-	double[] theta;  
-    int featureSize; 
-    double learning_rate;  
-    SamplePoint[] samples;  
-    int samNum;  
-    double threshold; 
-    
+	    
     protected final static Logger log = LoggerFactory.getLogger("RestService");
     
 	public static RestService getInstance(final ConnectParams connectParams) {
@@ -54,62 +53,67 @@ public class RestService extends ComputerFlowSocket{
 	}
 
 	@Override
-	public DataPage predict(Context context,DataSetReader DSR) {
-		this.dataPage.put(GlobalParam.READER_KEY, context.getInstanceConfig().getComputeParams().getKeyField());
-		this.dataPage.put(GlobalParam.READER_SCAN_KEY, context.getInstanceConfig().getComputeParams().getScanField());
-		JSONObject requstParams = context.getInstanceConfig().getComputeParams().getApiRequest();
-		JSONObject responseParams = context.getInstanceConfig().getComputeParams().getApiResponse();
-		JSONObject data = new JSONObject(); 
-		ArrayList<JSONObject> keepDatas = new ArrayList<>();
-		String[] apis = context.getInstanceConfig().getComputeParams().getApi();
-		while (DSR.nextLine()) { 
-			PipeDataUnit pdu = 	DSR.getLineData();
-			keepDatas.add(this.keepData(pdu.getData(), context.getInstanceConfig().getWriteFields(),
-					context.getInstanceConfig().getComputeFields()));
-			Set<Entry<String, Object>> itr = requstParams.entrySet();				
-			for (Entry<String, Object> k : itr) { 
-				JSONObject fielddes = (JSONObject) k.getValue();
-				Queue<String> queue = new LinkedList<>(Arrays.asList(fielddes.getString("field").split("\\.")));				
-				if(fielddes.getString("type").equals("list")) {
-					if(!data.containsKey(k.getKey())) {
-						data.put(k.getKey(), new JSONArray());
-					}
-					JSONArray _JR = (JSONArray) data.get(k.getKey());
-					_JR.add(this.getData(pdu.getData(), queue));
-				}else {
-					data.put(k.getKey(), this.getData(pdu.getData(), queue));
-				}
-			}
-		} 
-		JSONObject res = JSONObject.parseObject(EFHttpClientUtil.process(apis[0], data.toString()));
-		JSONArray JA = res.getJSONArray(responseParams.getString("dataField"));
-		String dataBoundary = null;
-		String LAST_STAMP = null;
-		for (int i = 0; i < JA.size(); i++) {
-			JSONObject jr = keepDatas.get(i);
-			jr.putAll((JSONObject) JA.get(i));
-			Set<Entry<String, Object>> itr = jr.entrySet();	
-			PipeDataUnit u = PipeDataUnit.getInstance();
-			for (Entry<String, Object> k : itr) { 
-				if(context.getInstanceConfig().getWriteFields().containsKey(k.getKey())) {
-					u.addFieldValue(k.getKey(), k.getValue(),context.getInstanceConfig().getWriteFields());
-					if (k.getKey().equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))) {
-						LAST_STAMP = String.valueOf(k.getValue());
-					}else if(k.getKey().equals(this.dataPage.get(GlobalParam.READER_KEY))) {
-						u.setReaderKeyVal(k.getValue());
-						dataBoundary = String.valueOf(k.getValue());
+	public DataPage predict(Context context,DataSetReader DSR) {		
+		if(this.computerHandler!=null) {
+			this.computerHandler.handleData(this, context, DSR);
+		}else {
+			this.dataPage.put(GlobalParam.READER_KEY, context.getInstanceConfig().getComputeParams().getKeyField());
+			this.dataPage.put(GlobalParam.READER_SCAN_KEY, context.getInstanceConfig().getComputeParams().getScanField());
+			JSONObject requstParams = context.getInstanceConfig().getComputeParams().getApiRequest();
+			JSONObject responseParams = context.getInstanceConfig().getComputeParams().getApiResponse();
+			JSONObject data = new JSONObject(); 
+			ArrayList<JSONObject> keepDatas = new ArrayList<>();
+			String[] apis = context.getInstanceConfig().getComputeParams().getApi();
+			while (DSR.nextLine()) { 
+				PipeDataUnit pdu = 	DSR.getLineData();
+				keepDatas.add(this.keepData(pdu.getData(), context.getInstanceConfig().getWriteFields(),
+						context.getInstanceConfig().getComputeFields()));
+				Set<Entry<String, Object>> itr = requstParams.entrySet();				
+				for (Entry<String, Object> k : itr) { 
+					JSONObject fielddes = (JSONObject) k.getValue();
+					Queue<String> queue = new LinkedList<>(Arrays.asList(fielddes.getString("field").split("\\.")));				
+					if(fielddes.getString("type").equals("list")) {
+						if(!data.containsKey(k.getKey())) {
+							data.put(k.getKey(), new JSONArray());
+						}
+						JSONArray _JR = (JSONArray) data.get(k.getKey());
+						_JR.add(this.getData(pdu.getData(), queue));
+					}else {
+						data.put(k.getKey(), this.getData(pdu.getData(), queue));
 					}
 				}
-			}
-			this.dataUnit.add(u);
-		}  
-		if (LAST_STAMP == null) {
-			this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis());
-		} else {
-			this.dataPage.put(GlobalParam.READER_LAST_STAMP, LAST_STAMP);
-		} 
-		this.dataPage.putData(this.dataUnit);
-		this.dataPage.putDataBoundary(dataBoundary);		
+			} 
+			JSONObject res = JSONObject.parseObject(EFHttpClientUtil.process(apis[0], data.toString()));
+			JSONArray JA = res.getJSONArray(responseParams.getString("dataField"));
+			
+			String dataBoundary = null;
+			String LAST_STAMP = null;
+			for (int i = 0; i < JA.size(); i++) {
+				JSONObject jr = keepDatas.get(i);
+				jr.putAll((JSONObject) JA.get(i));
+				Set<Entry<String, Object>> itr = jr.entrySet();	
+				PipeDataUnit u = PipeDataUnit.getInstance();
+				for (Entry<String, Object> k : itr) { 
+					if(context.getInstanceConfig().getWriteFields().containsKey(k.getKey())) {
+						u.addFieldValue(k.getKey(), k.getValue(),context.getInstanceConfig().getWriteFields());
+						if (k.getKey().equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))) {
+							LAST_STAMP = String.valueOf(k.getValue());
+						}else if(k.getKey().equals(this.dataPage.get(GlobalParam.READER_KEY))) {
+							u.setReaderKeyVal(k.getValue());
+							dataBoundary = String.valueOf(k.getValue());
+						}
+					}
+				}
+				this.dataUnit.add(u);
+			}  
+			if (LAST_STAMP == null) {
+				this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis());
+			} else {
+				this.dataPage.put(GlobalParam.READER_LAST_STAMP, LAST_STAMP);
+			} 
+			this.dataPage.putData(this.dataUnit);
+			this.dataPage.putDataBoundary(dataBoundary);	
+		}		  	
 		return this.dataPage;
 	}
 	
@@ -128,20 +132,6 @@ public class RestService extends ComputerFlowSocket{
 			if(ef.getStored().equals("true")) {
 				if(transfields.containsKey(k.getKey())) {
 					dt.put(k.getKey(), k.getValue());
-				}else {
-					Set<Entry<String, Object>> itr2 = null;
-					if(k.getValue() instanceof JSONObject) {
-						itr2 = ((JSONObject)k.getValue()).entrySet();
-					}else if(k.getValue() instanceof HashMap) {
-						itr2 = ((JSONObject)k.getValue()).entrySet();
-					}
-					if(itr2!=null) {
-						for (Entry<String, Object> k2 : itr2) {
-							if(transfields.containsKey(k2.getKey())) {
-								dt.put(k2.getKey(), k2.getValue());
-							}
-						}
-					}
 				}
 			}			
 		}
@@ -154,6 +144,7 @@ public class RestService extends ComputerFlowSocket{
 	 * @param fields
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	private Object getData(HashMap<String,Object> data,Queue<String> fields) {
 		Set<Entry<String, Object>> itr = data.entrySet();
 		String field = fields.poll();
