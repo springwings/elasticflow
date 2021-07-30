@@ -8,9 +8,11 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
+import org.elasticflow.field.FieldHandler;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
@@ -38,6 +40,7 @@ public class KafkaFlow extends WriterFlowSocket {
 		try {
 			if (!ISLINK())
 				return;
+			@SuppressWarnings("unchecked")
 			KafkaProducer<String, String> conn = (KafkaProducer<String, String>) GETSOCKET().getConnection(END_TYPE.writer);
 			for (Entry<String, Object> r : unit.getData().entrySet()) {
 				String field = r.getKey();
@@ -48,10 +51,18 @@ public class KafkaFlow extends WriterFlowSocket {
 					transParam = transParams.get(field.toLowerCase());
 				if (transParam == null)
 					continue;
-				String value = String.valueOf(r.getValue());
-				
+				if(transParam.getStored().equals("true")) {
+					Object val = r.getValue();
+					if (transParam.getParamtype().contains("org.elasticflow.field.handler")) {
+						FieldHandler<?> _v = (FieldHandler<?>) Common.parseFieldValue(String.valueOf(val),
+								transParam);	
+						conn.send(new ProducerRecord<String, String>(transParams.get("topic").getDefaultvalue(), unit.getReaderKeyVal(),_v.toString()));
+					}else {
+						conn.send(new ProducerRecord<String, String>(transParams.get("topic").getDefaultvalue(), unit.getReaderKeyVal(),val.toString()));
+					}
+				}						
 			}
-			conn.send(new ProducerRecord<String, String>("", "",""));
+			
 		} catch (Exception e) {
 			log.error("write Exception", e);
 		}
@@ -59,7 +70,9 @@ public class KafkaFlow extends WriterFlowSocket {
 
 	@Override
 	public void flush() throws Exception {
-
+		@SuppressWarnings("unchecked")
+		KafkaProducer<String, String> conn = (KafkaProducer<String, String>) GETSOCKET().getConnection(END_TYPE.writer);
+		conn.flush();
 	}
 
 	@Override

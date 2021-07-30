@@ -129,11 +129,9 @@ public class RestService extends ComputerFlowSocket{
 		Set<Entry<String, Object>> itr = data.entrySet();
 		for (Entry<String, Object> k : itr) {
 			EFField ef = computeField.get(k.getKey());
-			if(ef.getStored().equals("true")) {
-				if(transfields.containsKey(k.getKey())) {
-					dt.put(k.getKey(), k.getValue());
-				}
-			}			
+			if(transfields.containsKey(k.getKey())) {
+				dt.put(k.getKey(), k.getValue());
+			}		
 		}
 		return dt;
 	}
