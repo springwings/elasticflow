@@ -25,7 +25,7 @@ public class WarehouseNosqlParam implements WarehouseParam{
 	/**Used to identify linked resources**/
 	private String alias;
 	private String path;
-	private String defaultValue;
+	private JSONObject defaultValue;
 	private JSONObject customParams;
 	private String handler;
 	private String[] L1seq = {};
@@ -78,11 +78,13 @@ public class WarehouseNosqlParam implements WarehouseParam{
 	public void setHandler(String handler) {
 		this.handler = handler;
 	}
-	public String getDefaultValue() {
+	public JSONObject getDefaultValue() {
 		return this.defaultValue;
 	}
-	public void setDefaultValue(String defaultvalue) {
-		this.defaultValue = defaultvalue;
+	public void setDefaultValue(String defaultValue) {
+		if(defaultValue!=null) {
+			this.defaultValue = JSONObject.parseObject(defaultValue);
+		}	
 	} 
 	public String getAlias() {
 		if(this.alias == null){

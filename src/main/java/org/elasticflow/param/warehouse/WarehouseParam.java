@@ -32,4 +32,6 @@ public interface WarehouseParam {
 	public int getMaxConn();	
 	
 	public JSONObject getCustomParams();
+	
+	public JSONObject getDefaultValue();
 }

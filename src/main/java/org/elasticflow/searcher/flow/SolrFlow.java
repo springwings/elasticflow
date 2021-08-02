@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SolrFlow extends SearcherFlowSocket { 
 	
+	final String DEFAULT_KEY = "collectionname";
 	private String collectionName = "";
 	private long storetime = 0; 
 	private ConnectionHandler handler;
@@ -117,7 +118,7 @@ public class SolrFlow extends SearcherFlowSocket {
 			}  
 		}
 		if(this.collectionName==null || this.collectionName=="")
-				this.collectionName = ((WarehouseNosqlParam) this.connectParams.getWhp()).getDefaultValue();
+				this.collectionName = ((WarehouseNosqlParam) this.connectParams.getWhp()).getDefaultValue().getString(DEFAULT_KEY);
 		return this.collectionName;
 	} 
 	

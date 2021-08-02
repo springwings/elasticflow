@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 public class HbaseConnection extends EFConnectionSocket<Table>{
 	private final static Logger log = LoggerFactory
 			.getLogger("HBase Socket");
+	final String DEFAULT_KEY = "tableColumnFamily";
 	private Configuration hbaseConfig;
 	private Connection Hconn;
 	private Table conn;
@@ -109,7 +110,8 @@ public class HbaseConnection extends EFConnectionSocket<Table>{
 		if (!status()) {
 			try {
 				this.Hconn = ConnectionFactory.createConnection(this.hbaseConfig);
-				String tableColumnFamily = ((WarehouseNosqlParam) connectParams.getWhp()).getDefaultValue();
+				String tableColumnFamily = ((WarehouseNosqlParam) connectParams.getWhp()).
+						getDefaultValue().getString(DEFAULT_KEY);
 				if (tableColumnFamily != null && tableColumnFamily.length() > 0) {
 					String[] strs = tableColumnFamily.split(":"); 
 					this.conn = this.Hconn.getTable(

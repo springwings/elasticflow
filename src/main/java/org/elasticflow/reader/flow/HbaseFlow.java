@@ -37,6 +37,8 @@ import org.slf4j.LoggerFactory;
 public class HbaseFlow extends ReaderFlowSocket { 
  
 	private String columnFamily;
+	
+	final String DEFAULT_KEY = "tableColumnFamily";
 	 
 	private final static Logger log = LoggerFactory.getLogger(HbaseFlow.class); 
 
@@ -48,7 +50,7 @@ public class HbaseFlow extends ReaderFlowSocket {
  
 	public void INIT(ConnectParams connectParams) {
 		this.connectParams = connectParams;
-		String tableColumnFamily = ((WarehouseNosqlParam) connectParams.getWhp()).getDefaultValue();
+		String tableColumnFamily = ((WarehouseNosqlParam) connectParams.getWhp()).getDefaultValue().getString(DEFAULT_KEY);
 		if (tableColumnFamily != null && tableColumnFamily.length() > 0) {
 			String[] strs = tableColumnFamily.split(":"); 
 			if (strs != null && strs.length > 1)

@@ -29,7 +29,8 @@ import org.slf4j.LoggerFactory;
  */
 @ThreadSafe
 public class HbaseFlow extends WriterFlowSocket { 
-	 
+	
+	final String DEFAULT_KEY = "tableColumnFamily";
 	private List<Put> data = new CopyOnWriteArrayList<Put>();   
 	private String columnFamily;
 	private final static Logger log = LoggerFactory.getLogger("HBaseFlow"); 
@@ -43,7 +44,7 @@ public class HbaseFlow extends WriterFlowSocket {
 	@Override
 	public void INIT(ConnectParams connectParams) {
 		this.connectParams = connectParams;  
-		String tableColumnFamily = ((WarehouseNosqlParam) connectParams.getWhp()).getDefaultValue();
+		String tableColumnFamily = ((WarehouseNosqlParam) connectParams.getWhp()).getDefaultValue().getString(DEFAULT_KEY);
 		if (tableColumnFamily != null && tableColumnFamily.length() > 0) {
 			String[] strs = tableColumnFamily.split(":"); 
 			if (strs != null && strs.length > 1)

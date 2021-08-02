@@ -18,6 +18,8 @@ public class VearchConnection extends EFConnectionSocket<VearchConnector> {
 
 	private final static Logger log = LoggerFactory.getLogger("Vearch Socket");
 	
+	final String DEAFULT_KEY = "dbname";
+	
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
 		EFConnectionSocket<?> o = new VearchConnection();
 		o.init(ConnectParams);
@@ -31,7 +33,7 @@ public class VearchConnection extends EFConnectionSocket<VearchConnector> {
 		if (wnp.getPath() != null) {
 			if (!status()) { 
 				String[] paths = wnp.getPath().split("#");
-				this.conn = new VearchConnector(paths[0],paths[1],wnp.getDefaultValue());
+				this.conn = new VearchConnector(paths[0],paths[1],wnp.getDefaultValue().getString(DEAFULT_KEY));
 			}
 		} else {
 			return false;

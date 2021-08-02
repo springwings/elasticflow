@@ -18,7 +18,8 @@ import org.slf4j.LoggerFactory;
  */
 
 public class HdfsConnection extends EFConnectionSocket<FileSystem> {
-
+	
+	final String DEFAULT_KEY = "username";
 	
 	private FileSystem conn = null;
 	
@@ -40,7 +41,7 @@ public class HdfsConnection extends EFConnectionSocket<FileSystem> {
 		        configuration.set("fs.defaultFS", wnp.getPath());
 		        try {
 					this.conn = FileSystem.get(new URI(wnp.getPath()), configuration, 
-							wnp.getCustomParams().getString("username"));
+							wnp.getDefaultValue().getString(DEFAULT_KEY));
 				} catch (Exception e) {
 					log.error("Hdfs connect Exception",e);
 					this.conn = null;

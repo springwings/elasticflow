@@ -32,6 +32,7 @@ public class WarehouseSqlParam implements WarehouseParam{
 	private String[] L1seq = {};
 	private String handler;
 	private JSONObject customParams;
+	private JSONObject defaultValue;
 	
 	public String getName() {
 		return name;
@@ -127,5 +128,14 @@ public class WarehouseSqlParam implements WarehouseParam{
 			this.customParams = JSONObject.parseObject(customParams);
 		}	
 	}
+	
+	public JSONObject getDefaultValue() {
+		return this.defaultValue;
+	}
+	public void setDefaultValue(String defaultValue) {
+		if(defaultValue!=null) {
+			this.defaultValue = JSONObject.parseObject(defaultValue);
+		}	
+	} 
 	  
 }
