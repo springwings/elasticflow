@@ -54,6 +54,9 @@ public class WarehouseNosqlParam implements WarehouseParam{
 		case "VEARCH":
 			this.type = DATA_SOURCE_TYPE.VEARCH;
 			break;
+		case "HDFS":
+			this.type = DATA_SOURCE_TYPE.HDFS;
+			break;
 		} 
 	}
 	public String getName(String seq) {
