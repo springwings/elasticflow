@@ -7,7 +7,9 @@
  */
 package org.elasticflow.param.warehouse;
 
-import org.elasticflow.config.GlobalParam.DATA_SOURCE_TYPE;;
+import org.elasticflow.config.GlobalParam.DATA_SOURCE_TYPE;
+
+import com.alibaba.fastjson.JSONObject;;
 
 /**
  * Configuration parameters model of NoSQL database
@@ -24,6 +26,7 @@ public class WarehouseNosqlParam implements WarehouseParam{
 	private String alias;
 	private String path;
 	private String defaultValue;
+	private JSONObject customParams;
 	private String handler;
 	private String[] L1seq = {};
 	
@@ -99,6 +102,17 @@ public class WarehouseNosqlParam implements WarehouseParam{
 	@Override
 	public String getPoolName(String seq) { 
 		return ((seq != null) ? this.alias.replace("#{seq}", seq):this.alias)+"_"+this.type+"_"+this.path;
+	}	
+	
+	@Override
+	public JSONObject getCustomParams() {
+		return customParams;
+	}
+
+	public void setCustomParams(String customParams) {
+		if(customParams!=null) {
+			this.customParams = JSONObject.parseObject(customParams);
+		}	
 	}
 
 	@Override

@@ -9,6 +9,8 @@ package org.elasticflow.param.warehouse;
 
 import org.elasticflow.config.GlobalParam.DATA_SOURCE_TYPE;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * seq for series data position define
  * @author chengwen
@@ -28,4 +30,6 @@ public interface WarehouseParam {
 	public String getPoolName(String seq);
 	
 	public int getMaxConn();	
+	
+	public JSONObject getCustomParams();
 }

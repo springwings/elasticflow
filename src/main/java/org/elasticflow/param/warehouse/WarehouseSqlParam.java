@@ -9,6 +9,8 @@ package org.elasticflow.param.warehouse;
 
 import org.elasticflow.config.GlobalParam.DATA_SOURCE_TYPE;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * Configuration parameters model of SQL database
  * @author chengwen
@@ -29,6 +31,7 @@ public class WarehouseSqlParam implements WarehouseParam{
 	private DATA_SOURCE_TYPE type = DATA_SOURCE_TYPE.UNKNOWN;
 	private String[] L1seq = {};
 	private String handler;
+	private JSONObject customParams;
 	
 	public String getName() {
 		return name;
@@ -112,6 +115,17 @@ public class WarehouseSqlParam implements WarehouseParam{
 	@Override
 	public int getMaxConn() { 
 		return 0;
+	}
+	
+	@Override
+	public JSONObject getCustomParams() {
+		return customParams;
+	}
+
+	public void setCustomParams(String customParams) {
+		if(customParams!=null) {
+			this.customParams = JSONObject.parseObject(customParams);
+		}	
 	}
 	  
 }
