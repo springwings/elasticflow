@@ -18,6 +18,7 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.util.DataSetReader;
+import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFHttpClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,7 @@ public class RestService extends ComputerFlowSocket{
 	}
 
 	@Override
-	public DataPage predict(Context context,DataSetReader DSR) {		
+	public DataPage predict(Context context,DataSetReader DSR) throws EFException {		
 		if(this.computerHandler!=null) {
 			this.computerHandler.handleData(this, context, DSR);
 		}else {

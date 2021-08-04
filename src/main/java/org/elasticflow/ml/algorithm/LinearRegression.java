@@ -11,6 +11,7 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.util.DataSetReader;
+import org.elasticflow.util.EFException;
 
 /**
  * 
@@ -32,9 +33,10 @@ public class LinearRegression extends Regression {
 	 * @param samples
 	 * @param transParam
 	 * @return
+	 * @throws EFException 
 	 */
 	@Override
-	public DataPage train(Context context, DataSetReader DSR, Map<String, EFField> transParam) {
+	public DataPage train(Context context, DataSetReader DSR, Map<String, EFField> transParam) throws EFException {
 		LinearRegression LR = new LinearRegression();
 		SampleSets samples = SampleSets.getInstance(DSR.getDataNums()); 
 		while (DSR.nextLine()) {

@@ -19,6 +19,7 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.util.DataSetReader;
+import org.elasticflow.util.EFException;
 
 public abstract class ComputerFlowSocket extends Flow { 
 	
@@ -52,15 +53,15 @@ public abstract class ComputerFlowSocket extends Flow {
 	
 	abstract public boolean loadModel(Object datas);
 	
-	abstract public DataPage train(Context context, DataSetReader DSR, Map<String, EFField> transParam);
+	abstract public DataPage train(Context context, DataSetReader DSR, Map<String, EFField> transParam) throws EFException;
 	 
     /**
      * predicte the value of sample s
      * @param s : prediction sample
      * @return : predicted value
      */ 
-	abstract public Object predict(SamplePoint point);
+	abstract public Object predict(SamplePoint point) throws EFException;
 	
-	abstract public DataPage predict(Context context,DataSetReader DSR);
+	abstract public DataPage predict(Context context,DataSetReader DSR) throws EFException;
 	 
 }

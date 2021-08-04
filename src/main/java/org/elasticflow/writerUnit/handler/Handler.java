@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
+import org.elasticflow.util.EFException;
 
 /**
  * user defined data unit process function
@@ -20,5 +21,5 @@ import org.elasticflow.model.reader.PipeDataUnit;
  * @date 2018-10-26 09:11
  */
 public interface Handler { 
-	void handle(PipeDataUnit u,EFField field,Object obj,Map<String, EFField> transParams); 
+	void handle(PipeDataUnit u,EFField field,Object obj,Map<String, EFField> transParams) throws EFException; 
 }

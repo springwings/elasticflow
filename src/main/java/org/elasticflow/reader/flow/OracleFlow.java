@@ -17,6 +17,7 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
+import org.elasticflow.util.EFException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,7 +150,7 @@ public class OracleFlow extends ReaderFlowSocket{
 	} 
 	 
 
-	private void getAllData(ResultSet rs,Map<String, EFField> transParam) {   
+	private void getAllData(ResultSet rs,Map<String, EFField> transParam) throws EFException {   
 		String dataBoundary = null;
 		String LAST_STAMP = null;
 		try {  

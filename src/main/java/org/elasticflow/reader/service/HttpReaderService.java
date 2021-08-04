@@ -238,7 +238,7 @@ public class HttpReaderService {
 		}
 
 		private DataPage getPageData(Object data, String keycolumn, String updatecolumn,
-				Map<String, EFField> transParams) {
+				Map<String, EFField> transParams) throws EFException {
 			DataPage DP = new DataPage();
 			LinkedList<PipeDataUnit> datas = new LinkedList<PipeDataUnit>();
 			DP.put(GlobalParam.READER_KEY, keycolumn);

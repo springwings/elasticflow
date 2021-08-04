@@ -39,10 +39,10 @@ public class EFHttpClientUtil {
 	public static PoolingHttpClientConnectionManager connectionPools;
 	public static CloseableHttpClient httpClient;
 	public static final String DEFAULT_CONTENT_TYPE = "application/json";
-	private static final int DEFAUL_TIME_OUT = 15000;
+	private static final int DEFAUL_TIME_OUT = 30000;
 	private static final int count = 32;
 	private static final int totalCount = 1000;
-	private static final int Http_Default_Keep_Time = 15000;
+	private static final int Http_Default_Keep_Time = 30000;
 	private static Logger logger = LoggerFactory.getLogger(EFHttpClientUtil.class);
 
 	static {
@@ -121,6 +121,7 @@ public class EFHttpClientUtil {
 							+ ", cost time(ms):" + (System.currentTimeMillis() - startTime));
 				}
 			}
+			//logger.info("cost time(ms):" + (System.currentTimeMillis() - startTime));
 		}
 		return responseBody;
 	} 

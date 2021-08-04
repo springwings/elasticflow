@@ -3,6 +3,7 @@ package org.elasticflow.computer.handler;
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.reader.util.DataSetReader;
+import org.elasticflow.util.EFException;
 
 /**
  * user defined Computer data process function
@@ -12,6 +13,6 @@ import org.elasticflow.reader.util.DataSetReader;
  */
 public abstract class ComputeHandler {
 	
-	public abstract void handleData(ComputerFlowSocket invokeObject,Context context,DataSetReader dataSetReader);
+	public abstract void handleData(ComputerFlowSocket invokeObject,Context context,DataSetReader dataSetReader) throws EFException;
 	
 }

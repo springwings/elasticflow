@@ -2,6 +2,7 @@ package org.elasticflow.writer.handler;
 
 import org.elasticflow.instruction.Context;
 import org.elasticflow.model.reader.DataPage;
+import org.elasticflow.util.EFException;
 
 /**
  * Write Handler interface
@@ -12,6 +13,6 @@ import org.elasticflow.model.reader.DataPage;
  */
 public abstract class WriteHandler{
 	
-	public abstract DataPage handleData(Context context,DataPage dataPage);
+	public abstract DataPage handleData(Context context,DataPage dataPage) throws EFException;
 	
 }

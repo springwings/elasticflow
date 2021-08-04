@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.elasticflow.field.EFField;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 
 /**
  * 
@@ -32,7 +33,7 @@ public class PipeDataUnit implements Cloneable{
 		this.SYSTEM_UPDATE_TIME = System.currentTimeMillis();
 	}
 	
-	public boolean addFieldValue(String k,Object v,Map<String, EFField> transParams){
+	public boolean addFieldValue(String k,Object v,Map<String, EFField> transParams) throws EFException{
 		EFField param = transParams.get(k);
 		if (param != null){
 			if (param.getHandler()!=null){

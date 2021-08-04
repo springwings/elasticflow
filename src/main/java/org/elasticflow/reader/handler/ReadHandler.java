@@ -9,6 +9,7 @@ package org.elasticflow.reader.handler;
 
 import org.elasticflow.model.Page;
 import org.elasticflow.model.Task;
+import org.elasticflow.util.EFException;
 
 
 /**
@@ -31,9 +32,9 @@ public abstract class ReadHandler{
 		return supportHandleData;
 	}
 	
-	public abstract <T>T handlePage(Object invokeObject,final Task task,int pageSize);
+	public abstract <T>T handlePage(Object invokeObject,final Task task,int pageSize) throws EFException;
 	
-	public abstract void handleData(Object invokeObject,Object datas,Page page,int pageSize);
+	public abstract void handleData(Object invokeObject,Object datas,Page page,int pageSize) throws EFException;
 	
 	public boolean loopScan(Task task) {
 		return false;
