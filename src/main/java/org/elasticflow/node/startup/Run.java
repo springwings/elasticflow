@@ -182,8 +182,8 @@ public final class Run {
 	
 	private void start() {
 		loadGlobalConfig(this.startConfigPath, false);
-		GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");
 		loadPlugins(GlobalParam.pluginPath);
+		GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");		
 		ReportStatus.nodeConfigs();
 		if (!GlobalParam.StartConfig.containsKey("node_type"))
 			GlobalParam.StartConfig.setProperty("node_type", NODE_TYPE.slave.name());

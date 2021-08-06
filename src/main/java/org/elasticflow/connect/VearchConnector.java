@@ -95,7 +95,7 @@ public class VearchConnector {
 		this.createDbifNotExists();	
         try {
         	String response = EFHttpClientUtil.process(this.method + this.MASTER+"/space/"+this.dbName+"/_create",
-        			HttpPut.METHOD_NAME,EFHttpClientUtil.DEFAULT_CONTENT_TYPE);
+        			tableMeta.toString(),HttpPut.METHOD_NAME,EFHttpClientUtil.DEFAULT_CONTENT_TYPE,3000);
 			JSONObject jr = JSONObject.fromObject(response);
 			if(Integer.valueOf(String.valueOf(jr.get("code")))==200)
 				return true;

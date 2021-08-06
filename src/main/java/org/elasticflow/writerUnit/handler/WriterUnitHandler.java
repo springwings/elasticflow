@@ -20,6 +20,6 @@ import org.elasticflow.util.EFException;
  * @version 1.0
  * @date 2018-10-26 09:11
  */
-public interface Handler { 
+public interface WriterUnitHandler { 
 	void handle(PipeDataUnit u,EFField field,Object obj,Map<String, EFField> transParams) throws EFException; 
 }

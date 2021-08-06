@@ -40,7 +40,7 @@ public class PipeDataUnit implements Cloneable{
 				param.getHandler().handle(this,param,v,transParams); 
 			}
 			else{ 
-				this.data.put(param.getAlias(),v);
+				this.data.put(param.getName(),v);
 			}
 			return true;
 		}else{

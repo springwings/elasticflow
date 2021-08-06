@@ -16,7 +16,7 @@ import org.elasticflow.util.Common;
  * @version 2.0
  * @date 2021-06-30 14:02
  */
-public class ToTimestamp implements Handler{
+public class ToTimestamp implements WriterUnitHandler{
 	
 	private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
@@ -25,7 +25,7 @@ public class ToTimestamp implements Handler{
 		Date date;
 		try {
 			date = SDF.parse(String.valueOf(obj));
-			u.getData().put(field.getAlias(),date.getTime());
+			u.getData().put(field.getName(),date.getTime());
 		} catch (ParseException e) {
 			Common.LOG.error("ToTimestamp parse exception!",e);
 		}        

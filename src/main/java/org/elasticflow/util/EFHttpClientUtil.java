@@ -38,7 +38,7 @@ public class EFHttpClientUtil {
 
 	public static PoolingHttpClientConnectionManager connectionPools;
 	public static CloseableHttpClient httpClient;
-	public static final String DEFAULT_CONTENT_TYPE = "application/json";
+	public static final String DEFAULT_CONTENT_TYPE = "application/json;charset=UTF-8";
 	private static final int DEFAUL_TIME_OUT = 30000;
 	private static final int count = 32;
 	private static final int totalCount = 1000;
@@ -94,11 +94,11 @@ public class EFHttpClientUtil {
 		try {			
 			CloseableHttpResponse rps;
 			method = getRequest(uri, methodName, contentType, timeout);
-			if(methodName.equals(HttpPost.METHOD_NAME)) {
-				HttpEntityEnclosingRequestBase tmp = (HttpEntityEnclosingRequestBase) method;
-				tmp.setEntity(new StringEntity(data, "UTF-8"));
+			if(data!=null) {
+				HttpEntityEnclosingRequestBase rq = (HttpEntityEnclosingRequestBase) method;
+				rq.setEntity(new StringEntity(data, "UTF-8"));
 				HttpContext context = HttpClientContext.create();
-				rps = httpClient.execute(tmp, context);
+				rps = httpClient.execute(rq, context);
 			}else {				
 				rps = httpClient.execute(getRequest(uri, methodName, contentType, timeout));
 			}			

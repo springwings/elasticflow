@@ -61,6 +61,7 @@ public final class PipePump extends Instruction {
 	private PipePump(ReaderFlowSocket reader, ComputerFlowSocket computer,
 			List<WriterFlowSocket> writer,InstanceConfig instanceConfig) {
 		CPU.prepare(getID(), instanceConfig, writer, reader,computer);
+		 
 		try {
 			if (instanceConfig.getReadParams().getHandler() != null) {
 				if(instanceConfig.getReadParams().getHandler().startsWith(GlobalParam.GROUPID)) {
@@ -71,15 +72,20 @@ public final class PipePump extends Instruction {
 							.newInstance());
 				}				
 			}
-			if (instanceConfig.getComputeParams().getHandler() != null) {
-				if(instanceConfig.getComputeParams().getHandler().startsWith(GlobalParam.GROUPID)) {
-					computer.setComputerHandler((ComputeHandler) Class.forName(instanceConfig.getComputeParams().getHandler())
-							.newInstance());
-				}else {
-					computer.setComputerHandler((ComputeHandler) Class.forName(instanceConfig.getComputeParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
-							.newInstance());
-				}				
-			}
+			reader.setInstanceConfig(instanceConfig); 
+			if(computer != null) {
+				if (instanceConfig.getComputeParams().getHandler() != null) {
+					if(instanceConfig.getComputeParams().getHandler().startsWith(GlobalParam.GROUPID)) {
+						computer.setComputerHandler((ComputeHandler) Class.forName(instanceConfig.getComputeParams().getHandler())
+								.newInstance());
+					}else {
+						computer.setComputerHandler((ComputeHandler) Class.forName(instanceConfig.getComputeParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
+								.newInstance());
+					}				
+				}
+				computer.setInstanceConfig(instanceConfig);
+			}			
+			
 			if (instanceConfig.getWriterParams().getHandler() != null) {
 				for(WriterFlowSocket wfs : writer) {
 					if(instanceConfig.getWriterParams().getHandler().startsWith(GlobalParam.GROUPID)) {
@@ -89,6 +95,7 @@ public final class PipePump extends Instruction {
 						wfs.setWriteHandler((WriteHandler) Class.forName(instanceConfig.getWriterParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
 								.newInstance());
 					}	
+					wfs.setInstanceConfig(instanceConfig);
 				}							
 			}
 		} catch (Exception e) {

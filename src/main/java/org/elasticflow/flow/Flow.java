@@ -9,6 +9,7 @@ package org.elasticflow.flow;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connect.EFConnectionPool;
 import org.elasticflow.connect.EFConnectionSocket;
 import org.elasticflow.param.pipe.ConnectParams;
@@ -26,6 +27,8 @@ public abstract class Flow {
 	protected volatile EFConnectionSocket<?> EFConn;
 	
 	protected String poolName; 
+	
+	protected InstanceConfig instanceConfig;
 	
 	/** Average load of scheduled tasks,the amount of data processed per second**/
 	protected long LOAD;
@@ -57,6 +60,14 @@ public abstract class Flow {
 			}
 		} 
 		return this.EFConn;
+	}
+	
+	public void setInstanceConfig(InstanceConfig instanceConfig) {
+		this.instanceConfig = instanceConfig;
+	}
+	
+	public InstanceConfig getInstanceConfig() {
+		return this.instanceConfig;
 	}
 	
 	public void REALEASE(boolean isMonopoly,boolean releaseConn) { 

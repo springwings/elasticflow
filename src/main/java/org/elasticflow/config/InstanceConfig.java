@@ -67,15 +67,7 @@ public class InstanceConfig {
 	public void reload() {
 		Common.LOG.info("starting reload " + filename);
 		init();
-	} 
-	
-	public boolean checkWriteField(String key, String value) {
-		if (!this.writeFields.containsKey(key)) {
-			return true;
-		} else {
-			return this.writeFields.get(key).isValid(value);
-		}
-	}
+	}  
 
 	public EFField getWriteField(String key) {
 		return this.writeFields.get(key);
