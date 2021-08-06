@@ -958,7 +958,7 @@ public final class NodeMonitor {
 			String[] seqs = getInstanceL1seqs(instance);
 			for (String seq : seqs) {
 				if (Common.checkFlowStatus(inst, seq, controlType, STATUS.Running)) {
-					Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination);
+					Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination,true);
 					while (!Common.checkFlowStatus(inst, seq, controlType, STATUS.Ready)) {
 						try {
 							waittime++;
@@ -971,8 +971,8 @@ public final class NodeMonitor {
 						}
 					}
 				}
-				Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination);
-				if (Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Termination, state)) {
+				Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination,true);
+				if (Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Termination, state,true)) {
 					Common.LOG.info("Instance " + inst + " success set state " + state);
 				} else {
 					Common.LOG.info("Instance " + inst + " fail set state " + state);

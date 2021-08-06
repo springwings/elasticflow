@@ -78,7 +78,8 @@ public class FlowTask {
 	 * slave instance full job
 	 */
 	public void runFull() {
-		if (!breaker.isOn() && Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running)) {
+		if (!breaker.isOn() && Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running,
+				transDataFlow.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try { 
 				String storeId=null;
 				if (writeInSamePosition && Resource.FLOW_INFOS.containsKey(transDataFlow.getInstanceConfig().getPipeParams().getInstanceName(),
@@ -103,7 +104,8 @@ public class FlowTask {
 				breaker.log();
 				log.error(instance + " Full Exception", e);
 			} finally {
-				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready);
+				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready,
+						transDataFlow.getInstanceConfig().getPipeParams().showInfoLog());
 			}
 		} else {
 			if(transDataFlow.getInstanceConfig().getPipeParams().getLogLevel()==0)
@@ -115,7 +117,8 @@ public class FlowTask {
 	 * Primary virtual node full task running
 	 */
 	public void runMasterFull() {
-		if (Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running)) {
+		if (Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running,
+				transDataFlow.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
 				String storeId = Common.getStoreId(instance, L1seq, transDataFlow, false, false); 
 				String destination = instance;
@@ -141,7 +144,8 @@ public class FlowTask {
 			} catch (Exception e) {
 				log.error(instance + " Full Exception", e);
 			} finally {
-				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready);
+				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready,
+						transDataFlow.getInstanceConfig().getPipeParams().showInfoLog());
 			}
 		} else {
 			if(transDataFlow.getInstanceConfig().getPipeParams().getLogLevel()==0)
@@ -153,7 +157,8 @@ public class FlowTask {
 	 * Primary virtual node Increment task running
 	 */
 	public void runMasterIncrement() {
-		if (Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running)) {
+		if (Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
+				transDataFlow.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
 				String storeId = Common.getStoreId(instance, L1seq, transDataFlow, true, recompute); 
 				String destination = instance;
@@ -170,7 +175,8 @@ public class FlowTask {
 					Resource.FlOW_CENTER.runInstanceNow(slave, "increment",transDataFlow.getInstanceConfig().getPipeParams().isAsync());
 				}
 			} finally {
-				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready);  
+				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
+						transDataFlow.getInstanceConfig().getPipeParams().showInfoLog());  
 				recompute = false;
 			}
 		} else {
@@ -183,7 +189,8 @@ public class FlowTask {
 	 * slave instance increment job
 	 */
 	public void runIncrement() {  
-		if (!breaker.isOn() && Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running)) {
+		if (!breaker.isOn() && Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
+				transDataFlow.getInstanceConfig().getPipeParams().showInfoLog())) {
 			String storeId;
 			if (writeInSamePosition) {
 				storeId = Resource.FLOW_INFOS.get(transDataFlow.getInstanceConfig().getPipeParams().getInstanceName(),
@@ -208,7 +215,8 @@ public class FlowTask {
 				log.error(instance + " IncrementJob Exception", e);
 			} finally {
 				recompute = this.checkReCompute(storeId);
-				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready); 
+				Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
+						transDataFlow.getInstanceConfig().getPipeParams().showInfoLog()); 
 			}
 		} else {
 			if(transDataFlow.getInstanceConfig().getPipeParams().getLogLevel()==0)

@@ -7,15 +7,14 @@
  */
 package org.elasticflow.instruction.sets;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.util.Common;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -126,7 +125,8 @@ public class Pond extends Instruction {
 		storeId = String.valueOf(args[2]); 
 		int waittime=0; 
 		if(Common.checkFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT,STATUS.Running)) {
-			Common.setFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT.name(), STATUS.Blank, STATUS.Termination);
+			Common.setFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT.name(), STATUS.Blank, STATUS.Termination,
+					context.getInstanceConfig().getPipeParams().showInfoLog());
 			while (!Common.checkFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready)) {
 				try {
 					waittime++;
@@ -139,7 +139,8 @@ public class Pond extends Instruction {
 				}
 			}  
 		} 
-		Common.setFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT.name(), STATUS.Blank, STATUS.Termination); 
+		Common.setFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT.name(), STATUS.Blank, STATUS.Termination,
+				context.getInstanceConfig().getPipeParams().showInfoLog()); 
 		context.getWriter().PREPARE(false, false);  
 		if (context.getWriter().ISLINK()) {
 			try {
@@ -159,7 +160,8 @@ public class Pond extends Instruction {
 				log.error("switchInstance Exception", e);
 			} finally { 
 				Common.saveTaskInfo(String.valueOf(args[0]), String.valueOf(args[1]), storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
-				Common.setFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready);
+				Common.setFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
+						context.getInstanceConfig().getPipeParams().showInfoLog());
 				context.getWriter().REALEASE(false,false); 
 			}
 		}

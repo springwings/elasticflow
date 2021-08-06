@@ -391,7 +391,7 @@ public final class PipePump extends Instruction {
 								",process:" + processPos + "/" + pageSize, isUpdate, false);
 					} finally {
 						Common.setFlowStatus(task.getInstance(), task.getL1seq(), GlobalParam.JOB_TYPE.FULL.name(),
-								STATUS.Blank, STATUS.Ready);
+								STATUS.Blank, STATUS.Ready,getInstanceConfig().getPipeParams().showInfoLog());
 					}
 					if (rState.isStatus() == false) {
 						Common.LOG.warn("read data exception!");

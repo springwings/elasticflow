@@ -481,13 +481,14 @@ public final class Common {
 	 * @param removeState
 	 * @return boolean,lock status
 	 */
-	public static boolean setFlowStatus(String instance,String L1seq,String type,STATUS needState, STATUS setState) {
+	public static boolean setFlowStatus(String instance,String L1seq,String type,STATUS needState, STATUS setState,boolean showLog) {
 		synchronized (Resource.FLOW_STATUS.get(instance, L1seq, type)) {
 			if (needState.equals(STATUS.Blank) || (Resource.FLOW_STATUS.get(instance, L1seq, type).get() == needState.getVal())) {
 				Resource.FLOW_STATUS.get(instance, L1seq, type).set(setState.getVal()); 
 				return true;
 			} else {
-				LOG.info(instance + " " + type + " not in "+needState.name()+" state!");
+				if(showLog)
+					LOG.info(instance + " " + type + " not in "+needState.name()+" state!");
 				return false;
 			}
 		}

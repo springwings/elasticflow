@@ -56,6 +56,12 @@ public class PipeParam {
 	public int getLogLevel() {
 		return logLevel;
 	}
+	
+	public boolean showInfoLog() {
+		if(logLevel==0)
+			return true;
+		return false;
+	}
 
 	public MECHANISM getWriteMechanism() {
 		return writeMechanism;
