@@ -57,6 +57,9 @@ public class WarehouseNosqlParam implements WarehouseParam{
 		case "HDFS":
 			this.type = DATA_SOURCE_TYPE.HDFS;
 			break;
+		case "FASTDFS":
+			this.type = DATA_SOURCE_TYPE.FASTDFS;
+			break;
 		} 
 	}
 	public String getName(String seq) {
