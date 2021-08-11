@@ -1,7 +1,7 @@
 package org.elasticflow.reader;
 
-import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -29,7 +29,7 @@ public abstract class ReaderFlowSocket extends Flow{
 
 	protected DataPage dataPage = new DataPage(); 
 	
-	protected LinkedList<PipeDataUnit> dataUnit = new LinkedList<>(); 
+	protected ConcurrentLinkedQueue<PipeDataUnit> dataUnit = new ConcurrentLinkedQueue<>(); 
 	
 	public final Lock lock = new ReentrantLock(); 
 	
@@ -49,7 +49,7 @@ public abstract class ReaderFlowSocket extends Flow{
 		return readHandler;
 	}	
 	
-	public LinkedList<PipeDataUnit> getDataUnit(){
+	public ConcurrentLinkedQueue<PipeDataUnit> getDataUnit(){
 		return dataUnit;
 	}
 	

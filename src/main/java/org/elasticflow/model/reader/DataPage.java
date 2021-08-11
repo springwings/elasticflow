@@ -8,7 +8,7 @@
 package org.elasticflow.model.reader;
 
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.elasticflow.config.GlobalParam;
 
@@ -26,7 +26,7 @@ public class DataPage extends HashMap<String, Object> {
 		this.put(GlobalParam.READER_STATUS,true);
 	}
 	
-	public void putData(LinkedList<PipeDataUnit> data) {
+	public void putData(ConcurrentLinkedQueue<PipeDataUnit> data) {
 		this.put("__DATAS", data);
 	}
 	
@@ -39,8 +39,8 @@ public class DataPage extends HashMap<String, Object> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public LinkedList<PipeDataUnit> getData() {
-		return (LinkedList<PipeDataUnit>) this.get("__DATAS");
+	public ConcurrentLinkedQueue<PipeDataUnit> getData() { 
+		return (ConcurrentLinkedQueue<PipeDataUnit>) this.get("__DATAS");
 	}  
 	
 	@Override
@@ -52,7 +52,9 @@ public class DataPage extends HashMap<String, Object> {
 	@Override
 	public DataPage clone() { 
 		DataPage dp  = (DataPage) super.clone();
-		dp.put("__DATAS", getData().clone());
+		ConcurrentLinkedQueue<PipeDataUnit> dt = new ConcurrentLinkedQueue<>();
+		dt.addAll(this.getData());
+		dp.put("__DATAS", dt);
 		return dp;
 	}
 }

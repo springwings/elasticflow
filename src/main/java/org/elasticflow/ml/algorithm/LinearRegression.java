@@ -1,7 +1,7 @@
 package org.elasticflow.ml.algorithm;
 
-import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.elasticflow.field.EFField;
 import org.elasticflow.instruction.Context;
@@ -50,7 +50,7 @@ public class LinearRegression extends Regression {
 		LR.Update();
 		DataPage DP = new DataPage();
 		PipeDataUnit du = new PipeDataUnit();
-		LinkedList<PipeDataUnit> dataUnit = new LinkedList<>();
+		ConcurrentLinkedQueue<PipeDataUnit> dataUnit = new ConcurrentLinkedQueue<>();
 		du.addFieldValue("model", LR.getModel(), transParam);
 		StringBuffer sf = new StringBuffer();
 		sf.append(context.getInstanceConfig().getComputeParams().getAlgorithm() + ",<br> ");

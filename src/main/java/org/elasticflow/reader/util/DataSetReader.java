@@ -7,7 +7,7 @@
  */
 package org.elasticflow.reader.util;
 
-import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.model.reader.DataPage;
@@ -24,7 +24,7 @@ public class DataSetReader{
 	private String keyColumn;
 	private String READER_LAST_STAMP = "";
 	private String dataBoundary;
-	private LinkedList<PipeDataUnit> datas;
+	private ConcurrentLinkedQueue<PipeDataUnit> datas;
 	private boolean status = true;
  
 	public void init(DataPage DP) {
@@ -36,7 +36,7 @@ public class DataSetReader{
 				this.READER_LAST_STAMP = String.valueOf(DP.get(GlobalParam.READER_LAST_STAMP));
 			if(DP.containsKey(GlobalParam.READER_STATUS))
 				this.status = (boolean) DP.get(GlobalParam.READER_STATUS);
-			this.datas = (LinkedList<PipeDataUnit>) DP.getData();
+			this.datas = (ConcurrentLinkedQueue<PipeDataUnit>) DP.getData();
 		}
 	}
  

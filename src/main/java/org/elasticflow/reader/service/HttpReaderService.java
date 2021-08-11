@@ -10,19 +10,13 @@ package org.elasticflow.reader.service;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.handler.AbstractHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
@@ -42,6 +36,11 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.MD5Util;
 import org.elasticflow.yarn.Resource;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
+import org.mortbay.jetty.handler.AbstractHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -240,7 +239,7 @@ public class HttpReaderService {
 		private DataPage getPageData(Object data, String keycolumn, String updatecolumn,
 				Map<String, EFField> transParams) throws EFException {
 			DataPage DP = new DataPage();
-			LinkedList<PipeDataUnit> datas = new LinkedList<PipeDataUnit>();
+			ConcurrentLinkedQueue<PipeDataUnit> datas = new ConcurrentLinkedQueue<PipeDataUnit>();
 			DP.put(GlobalParam.READER_KEY, keycolumn);
 			DP.put(GlobalParam.READER_SCAN_KEY, updatecolumn);
 			DP.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis());

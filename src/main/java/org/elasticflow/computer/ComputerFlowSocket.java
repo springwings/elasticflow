@@ -7,8 +7,8 @@
  */
 package org.elasticflow.computer;
 
-import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.elasticflow.computer.handler.ComputeHandler;
 import org.elasticflow.field.EFField;
@@ -28,7 +28,7 @@ public abstract class ComputerFlowSocket extends Flow {
 	
 	protected DataPage dataPage = new DataPage(); 
 	
-	protected LinkedList<PipeDataUnit> dataUnit = new LinkedList<>(); 
+	protected ConcurrentLinkedQueue<PipeDataUnit> dataUnit = new ConcurrentLinkedQueue<>(); 
 	
 	@Override
 	public void INIT(ConnectParams connectParams) {
@@ -39,7 +39,7 @@ public abstract class ComputerFlowSocket extends Flow {
 		return dataPage;
 	}
 
-	public LinkedList<PipeDataUnit> getDataUnit() {
+	public ConcurrentLinkedQueue<PipeDataUnit> getDataUnit() {
 		return dataUnit;
 	}
 
