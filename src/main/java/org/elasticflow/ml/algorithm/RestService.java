@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.Queue;
 import java.util.Set;
 
@@ -20,6 +24,7 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFHttpClientUtil;
+import org.elasticflow.util.EFException.ELEVEL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +38,13 @@ import com.alibaba.fastjson.JSONObject;
  * @date 2018-05-22 09:08
  */
 public class RestService extends ComputerFlowSocket{
-	    
+	  
     protected final static Logger log = LoggerFactory.getLogger("RestService");
+    protected ExecutorService executorService;
+	protected ArrayBlockingQueue<String> apiBlockingQueue;
+	protected boolean successRunAll = true;
+	/**Maximum amount of data submitted per post request**/
+	protected int MAX_SEND_NUM = 10;
     
 	public static RestService getInstance(final ConnectParams connectParams) {
 		RestService o = new RestService();
@@ -62,60 +72,120 @@ public class RestService extends ComputerFlowSocket{
 			this.dataPage.put(GlobalParam.READER_SCAN_KEY, context.getInstanceConfig().getComputeParams().getScanField());
 			JSONObject requstParams = context.getInstanceConfig().getComputeParams().getApiRequest();
 			JSONObject responseParams = context.getInstanceConfig().getComputeParams().getApiResponse();
-			JSONObject data = new JSONObject(); 
-			ArrayList<JSONObject> keepDatas = new ArrayList<>();
+			 
+			//construct thread pool
 			String[] apis = context.getInstanceConfig().getComputeParams().getApi();
+			this.apiBlockingQueue = new ArrayBlockingQueue<>(apis.length);  
+			for(String api:apis)
+				this.apiBlockingQueue.add(api);
+			this.executorService = Executors.newFixedThreadPool(apis.length);
+			
+			// construct rest post data
+			JSONObject post_data = new JSONObject(); 
+			this.successRunAll = true;
+			ArrayList<JSONObject> keepDatas = new ArrayList<>();
+			int count = 0;
+			
 			while (DSR.nextLine()) { 
 				PipeDataUnit pdu = 	DSR.getLineData();
-				keepDatas.add(this.keepData(pdu.getData(), context.getInstanceConfig().getWriteFields(),
-						context.getInstanceConfig().getComputeFields()));
+				keepDatas.add(this.keepData(pdu.getData(), context.getInstanceConfig().getComputeFields()));
 				Set<Entry<String, Object>> itr = requstParams.entrySet();				
 				for (Entry<String, Object> k : itr) { 
 					JSONObject fielddes = (JSONObject) k.getValue();
 					Queue<String> queue = new LinkedList<>(Arrays.asList(fielddes.getString("field").split("\\.")));				
 					if(fielddes.getString("type").equals("list")) {
-						if(!data.containsKey(k.getKey())) {
-							data.put(k.getKey(), new JSONArray());
+						if(!post_data.containsKey(k.getKey())) {
+							post_data.put(k.getKey(), new JSONArray());
 						}
-						JSONArray _JR = (JSONArray) data.get(k.getKey());
-						_JR.add(this.getData(pdu.getData(), queue));
+						((JSONArray) post_data.get(k.getKey())).add(this.getData(pdu.getData(), queue));
 					}else {
-						data.put(k.getKey(), this.getData(pdu.getData(), queue));
+						post_data.put(k.getKey(), this.getData(pdu.getData(), queue));
 					}
 				}
+				count++;
+				if (count > this.MAX_SEND_NUM) {
+					JSONObject _postdt = (JSONObject) post_data.clone();
+					@SuppressWarnings("unchecked")
+					ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();
+					this.executorService.execute(() -> {
+						try {
+							String api = this.apiBlockingQueue.take();
+							JSONObject tmp = this.sentRequest(_postdt, api);
+							this.apiBlockingQueue.put(api);
+							this.write(context, tmp, responseParams, _keepdt);						
+						} catch (Exception e) { 
+							this.successRunAll = false;
+							e.printStackTrace();
+						}   
+		            }); 
+					post_data.clear(); 
+					keepDatas.clear();
+					count = 0;
+				} 		
 			} 
-			JSONObject res = JSONObject.parseObject(EFHttpClientUtil.process(apis[0], data.toString()));
-			JSONArray JA = res.getJSONArray(responseParams.getString("dataField"));
 			
-			String dataBoundary = null;
-			String LAST_STAMP = null;
-			for (int i = 0; i < JA.size(); i++) {
-				JSONObject jr = keepDatas.get(i);
-				jr.putAll((JSONObject) JA.get(i));
-				Set<Entry<String, Object>> itr = jr.entrySet();	
-				PipeDataUnit u = PipeDataUnit.getInstance();
-				for (Entry<String, Object> k : itr) { 
-					if(context.getInstanceConfig().getWriteFields().containsKey(k.getKey())) {
-						u.addFieldValue(k.getKey(), k.getValue(),context.getInstanceConfig().getWriteFields());
-						if (k.getKey().equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))) {
-							LAST_STAMP = String.valueOf(k.getValue());
-						}else if(k.getKey().equals(this.dataPage.get(GlobalParam.READER_KEY))) {
-							u.setReaderKeyVal(k.getValue());
-							dataBoundary = String.valueOf(k.getValue());
-						}
-					}
-				}
-				this.dataUnit.add(u);
-			}  
-			if (LAST_STAMP == null) {
-				this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis());
-			} else {
-				this.dataPage.put(GlobalParam.READER_LAST_STAMP, LAST_STAMP);
-			} 
+			if (count > 0) { 
+				JSONObject _postdt = (JSONObject) post_data.clone();
+				@SuppressWarnings("unchecked")
+				ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();
+				this.executorService.execute(() -> {
+					try {
+						String api = this.apiBlockingQueue.take();
+						JSONObject tmp = this.sentRequest(_postdt, api);
+						this.apiBlockingQueue.put(api);
+						this.write(context,tmp, responseParams, _keepdt);						
+					} catch (Exception e) { 
+						this.successRunAll = false;
+						e.printStackTrace();
+					}   
+	            });  
+				post_data.clear();
+				keepDatas.clear();
+			}
+			executorService.shutdown();
+			try {
+				executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+			} catch (Exception e) { 
+				throw new EFException(e.getMessage(), ELEVEL.Stop);
+			}		
+			if(this.successRunAll==false)
+				throw new EFException("job executorService exception", ELEVEL.Stop);
+			
+			this.dataPage.put(GlobalParam.READER_LAST_STAMP, DSR.getScanStamp());
 			this.dataPage.putData(this.dataUnit);
-			this.dataPage.putDataBoundary(dataBoundary);	
+			this.dataPage.putDataBoundary(DSR.getDataBoundary());	
 		}		  	
 		return this.dataPage;
+	}
+	
+	/**
+	 * Round robin send request
+	 * 
+	 * @param post_data
+	 * @return
+	 */
+	private JSONObject sentRequest(JSONObject post_data, String api) {
+		return JSONObject.parseObject(EFHttpClientUtil.process(api, post_data.toString()));
+	}
+	
+	private void write(Context context, JSONObject datas, JSONObject responseParams,
+			ArrayList<JSONObject> keepDatas) throws EFException {	
+		String datafield = responseParams.getJSONObject("dataField").getString("name");
+		JSONArray JA = datas.getJSONArray(datafield); 		
+		if(JA.size()!=keepDatas.size())
+			throw new EFException("predict result not match size.", ELEVEL.Stop);
+		for (int i = 0; i < JA.size(); i++) {
+			JSONObject jr = keepDatas.get(i);
+			jr.putAll((JSONObject) JA.get(i));
+			Set<Entry<String, Object>> itr = jr.entrySet();	
+			PipeDataUnit u = PipeDataUnit.getInstance();
+			for (Entry<String, Object> k : itr) { 
+				if(context.getInstanceConfig().getWriteFields().containsKey(k.getKey())) {
+					u.addFieldValue(k.getKey(), k.getValue(),context.getInstanceConfig().getWriteFields());					
+				}
+			}
+			this.dataUnit.add(u);
+		}  
 	}
 	
 	/**
@@ -125,7 +195,7 @@ public class RestService extends ComputerFlowSocket{
 	 * @param computeField
 	 * @return
 	 */
-	private JSONObject keepData(HashMap<String,Object> data,Map<String, EFField> transfields,Map<String, EFField> computeField) {
+	private JSONObject keepData(HashMap<String,Object> data,Map<String, EFField> transfields) {
 		JSONObject dt = new JSONObject();
 		Set<Entry<String, Object>> itr = data.entrySet();
 		for (Entry<String, Object> k : itr) {
