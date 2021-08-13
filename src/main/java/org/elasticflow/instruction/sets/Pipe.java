@@ -108,7 +108,8 @@ public class Pipe extends Instruction {
 			boolean freeConn = false;
 			try {
 				while (DSReader.nextLine()) {
-					context.getWriter().write(context.getInstanceConfig().getWriterParams(), DSReader.getLineData(),
+					context.getWriter().write(context.getInstanceConfig().getWriterParams(), 
+							DSReader.getLineData().virtualWrite(context.getInstanceConfig().getWriteFields()),
 							context.getInstanceConfig().getWriteFields(), instance, storeId, isUpdate);
 					num++;
 				}

@@ -45,12 +45,12 @@ public class LogisticRegression extends Regression {
 		DataPage DP = new DataPage();
 		PipeDataUnit du = new PipeDataUnit();
 		ConcurrentLinkedQueue<PipeDataUnit> dataUnit = new ConcurrentLinkedQueue<>(); 
-		du.addFieldValue("model", lr.getModel(), transParam);
+		PipeDataUnit.addFieldValue("model", lr.getModel(), transParam,du);
 		StringBuffer sf = new StringBuffer();
 		sf.append(context.getInstanceConfig().getComputeParams().getAlgorithm()+",<br> ");
 		sf.append(context.getInstanceConfig().getComputeParams().getValue()+",<br> ");
 		sf.append(context.getInstanceConfig().getComputeParams().getFeatures());
-		du.addFieldValue("remark", sf.toString(), transParam);
+		PipeDataUnit.addFieldValue("remark", sf.toString(), transParam,du);
 		dataUnit.add(du);
 		DP.putData(dataUnit); 
 		return DP;

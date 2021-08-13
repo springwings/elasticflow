@@ -61,9 +61,19 @@ public abstract class WriterFlowSocket extends Flow{
 	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
 		if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.AB) {
 			return abMechanism(mainName,isIncrement,instanceConfig);
-		}else {
+		}else if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.Time) {
 			return timeMechanism(mainName,isIncrement,instanceConfig);
-		} 
+		}else {
+			return normMechanism(mainName, isIncrement, instanceConfig);
+		}
+	}
+	
+	protected String normMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) { 
+		String iName = Common.getStoreName(mainName, "");		
+		if(this.storePositionExists(iName)==false) {
+			this.create(mainName, "", instanceConfig);			
+		}			
+		return "";
 	}
 	
 	/**

@@ -259,7 +259,7 @@ public class HttpReaderService {
 					if (k.getKey().equals(updatecolumn)) {
 						updateFieldValue = String.valueOf(k.getValue());
 					}
-					u.addFieldValue(k.getKey(), k.getValue(), transParams);
+					PipeDataUnit.addFieldValue(k.getKey(), k.getValue(), transParams,u);
 				}
 				datas.add(u);
 			}

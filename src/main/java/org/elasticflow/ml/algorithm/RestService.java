@@ -2,16 +2,16 @@ package org.elasticflow.ml.algorithm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.Queue;
-import java.util.Set;
 
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.config.GlobalParam;
@@ -23,8 +23,8 @@ import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFHttpClientUtil;
 import org.elasticflow.util.EFException.ELEVEL;
+import org.elasticflow.util.EFHttpClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -180,8 +180,9 @@ public class RestService extends ComputerFlowSocket{
 			Set<Entry<String, Object>> itr = jr.entrySet();	
 			PipeDataUnit u = PipeDataUnit.getInstance();
 			for (Entry<String, Object> k : itr) { 
-				if(context.getInstanceConfig().getWriteFields().containsKey(k.getKey())) {
-					u.addFieldValue(k.getKey(), k.getValue(),context.getInstanceConfig().getWriteFields());					
+				PipeDataUnit.addFieldValue(k.getKey(), k.getValue(),context.getInstanceConfig().getComputeFields(),u);	
+				if(context.getInstanceConfig().getReadParams().getKeyField().equals(k.getKey())) {
+					u.setReaderKeyVal(u.getData().get(k.getKey()));
 				}
 			}
 			this.dataUnit.add(u);
@@ -195,11 +196,11 @@ public class RestService extends ComputerFlowSocket{
 	 * @param computeField
 	 * @return
 	 */
-	private JSONObject keepData(HashMap<String,Object> data,Map<String, EFField> transfields) {
+	private JSONObject keepData(ConcurrentHashMap<String,Object> data,Map<String, EFField> transfields) {
 		JSONObject dt = new JSONObject();
 		Set<Entry<String, Object>> itr = data.entrySet();
 		for (Entry<String, Object> k : itr) {
-			if(transfields.containsKey(k.getKey())) {
+			if(transfields.size()==0 || transfields.containsKey(k.getKey())) {
 				dt.put(k.getKey(), k.getValue());
 			}		
 		}
@@ -213,7 +214,7 @@ public class RestService extends ComputerFlowSocket{
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private Object getData(HashMap<String,Object> data,Queue<String> fields) {
+	private Object getData(ConcurrentHashMap<String,Object> data,Queue<String> fields) {
 		Set<Entry<String, Object>> itr = data.entrySet();
 		String field = fields.poll();
 		Object rs = null;
@@ -227,7 +228,7 @@ public class RestService extends ComputerFlowSocket{
 			if(rs instanceof JSONObject) {
 				return getData((JSONObject)rs, fields);
 			}else {
-				return getData((HashMap<String,Object>)rs, fields);
+				return getData((ConcurrentHashMap<String,Object>)rs, fields);
 			}
 		}else {
 			return rs;

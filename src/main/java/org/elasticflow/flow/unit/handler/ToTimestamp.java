@@ -1,4 +1,4 @@
-package org.elasticflow.writerUnit.handler;
+package org.elasticflow.flow.unit.handler;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,7 +16,7 @@ import org.elasticflow.util.Common;
  * @version 2.0
  * @date 2021-06-30 14:02
  */
-public class ToTimestamp implements WriterUnitHandler{
+public class ToTimestamp implements UnitHandler{
 	
 	private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	

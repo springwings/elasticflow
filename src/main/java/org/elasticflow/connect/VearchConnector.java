@@ -129,7 +129,7 @@ public class VearchConnector {
 		while(i<datas.size()) {
 			sb.append("\n"+String.valueOf(datas.get(i))+"\n");
 			sb.append(datas.get(i+1).toString());
-			i+=2;
+			i+=2; 
 		}
 		StringEntity params = new StringEntity(sb.toString().trim());
 		params.setContentEncoding("UTF-8");

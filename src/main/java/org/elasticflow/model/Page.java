@@ -1,9 +1,6 @@
 package org.elasticflow.model;
 
-import java.util.Map;
-
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.field.EFField;
 
 /**
  * JobPage define Task Page Segment
@@ -18,7 +15,7 @@ public final class Page {
 	private String readerKey;
 	private String start;
 	private String end;
-	private Map<String, EFField> transField;
+	private InstanceConfig instanceConfig;
 	private String additional;
 
 	public static Page getInstance(String readerKey, String readerScanKey, String start, String end,
@@ -28,8 +25,7 @@ public final class Page {
 		o.readerScanKey = readerScanKey;
 		o.start = start;
 		o.end = end;
-		o.transField = instanceConfig.openCompute() ? instanceConfig.getComputeFields()
-				: instanceConfig.getWriteFields();
+		o.instanceConfig = instanceConfig;
 		o.additional = additional;
 		return o;
 	}
@@ -54,32 +50,15 @@ public final class Page {
 		return start;
 	}
 
-	public void setStart(String start) {
-		this.start = start;
-	}
-
 	public String getEnd() {
 		return end;
 	}
 
-	public void setEnd(String end) {
-		this.end = end;
-	}
-
-
-	public Map<String, EFField> getTransField() {
-		return transField;
-	}
-
-	public void setTransField(Map<String, EFField> transField) {
-		this.transField = transField;
-	}
+	public InstanceConfig getInstanceConfig() {
+		return this.instanceConfig;
+	} 
 
 	public String getAdditional() {
 		return additional;
-	}
-
-	public void setAdditional(String additional) {
-		this.additional = additional;
-	}
+	} 
 }

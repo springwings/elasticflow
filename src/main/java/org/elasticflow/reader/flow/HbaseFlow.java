@@ -103,7 +103,7 @@ public class HbaseFlow extends ReaderFlowSocket {
 							if(k.equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))){
 								updateFieldValue = v;
 							}
-							u.addFieldValue(k, v, page.getTransField());
+							PipeDataUnit.addFieldValue(k, v, page.getInstanceConfig().getReadFields(),u);
 						} 
 						this.dataUnit.add(u);
 					} 

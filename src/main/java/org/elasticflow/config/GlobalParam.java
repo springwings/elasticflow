@@ -114,9 +114,10 @@ public final class GlobalParam {
 		NOSQL,SQL,INSTRUCTION
 	};
 	 
-	/**writer parameters Mechanism*/
+	/**writer parameters Mechanism: AB Active/standby switching mode,
+	 * Time Build instance in time steps, NORM Keep only a single instance mode*/
 	public static enum MECHANISM{
-		AB,Time
+		AB,Time,NORM
 	};
 	public static enum INSTANCE_TYPE {  
 		Blank(0),Trans(1),WithCompute(2);

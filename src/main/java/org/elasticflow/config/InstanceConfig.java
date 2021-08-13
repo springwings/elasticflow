@@ -36,9 +36,11 @@ public class InstanceConfig {
 	private String alias = "";
 	private boolean status = true;
 	private String name;
-	private volatile Map<String, EFField> writeFields;
-	private volatile Map<String, String> externConfigs;
+	/**Domain configuration when data at each end is written to the virtual channel*/
+	private volatile Map<String, EFField> readFields; 
+	private volatile Map<String, EFField> writeFields; 
 	private volatile Map<String, EFField> computeFields;
+	private volatile Map<String, String> externConfigs;
 	private volatile Map<String,SearcherParam> searcherParams;
 	private volatile WriterParam writerParams;
 	private volatile PipeParam pipeParams;
@@ -56,6 +58,7 @@ public class InstanceConfig {
 		this.pipeParams = new PipeParam();
 		this.writeFields = new HashMap<>();
 		this.computeFields = new HashMap<>();
+		this.readFields = new HashMap<>();
 		this.searcherParams = new HashMap<>();
 		this.externConfigs = new HashMap<>();
 		this.computeParams = new ComputeParam();
@@ -103,6 +106,10 @@ public class InstanceConfig {
 	
 	public Map<String, EFField> getComputeFields() {
 		return this.computeFields;
+	}
+	
+	public Map<String, EFField> getReadFields() {
+		return this.readFields;
 	}
 	
 	public boolean getHasFullJob() {
@@ -213,7 +220,12 @@ public class InstanceConfig {
 						readParams.setNoSql(true);
 						parseNode(params.getElementsByTagName("param"), "readParam",
 								ReaderParam.class);
-					}  
+					}   
+					params = (Element) params.getElementsByTagName("fields").item(0);
+					if(params != null) {
+						paramlist = params.getElementsByTagName("field");
+						parseNode(paramlist, "readFields", EFField.class); 
+					}					
 				} 
 				
 				params = (Element) dataflow.getElementsByTagName("ExternConfig").item(0);
@@ -226,9 +238,11 @@ public class InstanceConfig {
 				if (params!=null) {
 					parseNode(params.getElementsByTagName("param"), "computeParam", ComputeParam.class);
 					params = (Element) params.getElementsByTagName("fields").item(0);
-					paramlist = params.getElementsByTagName("field");
-					parseNode(paramlist, "computeFields", EFField.class); 
-				}
+					if(params != null) {
+						paramlist = params.getElementsByTagName("field");
+						parseNode(paramlist, "computeFields", EFField.class); 
+					}					
+				} 
 				
 				params = (Element) dataflow.getElementsByTagName("WriteParam").item(0);   
 				if (params!=null) { 
@@ -238,8 +252,10 @@ public class InstanceConfig {
 						WriterParam.setKeyValue(writerParams,"keytype","unique"); 
 					}
 					params = (Element) params.getElementsByTagName("fields").item(0);
-					paramlist = params.getElementsByTagName("field");
-					parseNode(paramlist, "writeFields", EFField.class); 
+					if(params != null) {
+						paramlist = params.getElementsByTagName("field");
+						parseNode(paramlist, "writeFields", EFField.class); 
+					}					
 				}
 				
 				params = (Element) dataflow.getElementsByTagName("SearchParam").item(0);   
@@ -266,6 +282,10 @@ public class InstanceConfig {
 					case "writeFields":
 						EFField wf = (EFField) Common.getXmlObj(param, c);
 						writeFields.put(wf.getName(), wf);
+						break;
+					case "readFields":
+						EFField rf = (EFField) Common.getXmlObj(param, c);
+						readFields.put(rf.getName(), rf);
 						break;
 					case "computeFields":
 						EFField cf = (EFField) Common.getXmlObj(param, c);

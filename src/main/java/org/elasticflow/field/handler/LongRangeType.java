@@ -9,20 +9,22 @@ import org.elasticflow.util.EFException;
  * @version 2.0
  * @date 2018-11-20 10:47
  */
-public class LongRangeType implements FieldHandler<Long> {
+public class LongRangeType implements FieldHandler<Long,LongRangeType> {
 
 	protected Long min;
 	protected Long max;
 	protected Long val;
 	public final static String RangeSeperator = "_";
-
-	public static LongRangeType valueOf(String s) throws EFException {
-		LongRangeType ir = new LongRangeType();
-		ir.parse(s);
-		return ir;
+	
+	public static LongRangeType getInstance() throws EFException { 
+		LongRangeType obj = new LongRangeType();
+		return obj;
 	}
 
-	@Override
+	public static Long valueOf(Object data) throws EFException { 
+		return Long.valueOf(String.valueOf(data));
+	}
+	 
 	public Long getVal() {
 		return this.val;
 	}
@@ -31,29 +33,30 @@ public class LongRangeType implements FieldHandler<Long> {
 		min = 0l;
 		max = Long.MAX_VALUE;
 	}
-
+	
 	@Override
-	public void parse(String s) throws EFException {
+	public Long parse(Object s) throws EFException {
 		if (s == null) {
 			throw new EFException("parse error with value is null!");
 		}
-		int seg = s.indexOf(RangeSeperator);
-		if (seg >= s.length()) {
-			throw new NumberFormatException(s);
+		String val = String.valueOf(s);
+		int seg = val.indexOf(RangeSeperator);
+		if (seg >= val.length()) {
+			throw new NumberFormatException(val);
 		}
 		
 		if (seg < 0) {
-			this.val = Long.valueOf(s);
+			this.val = Long.valueOf(val);
 			this.max = this.val;
 			this.min = this.val;
 		} else {
 			try {
 				if (seg > 0) {
-					String minStr = s.substring(0, seg);
+					String minStr = val.substring(0, seg);
 					this.min = Long.valueOf(minStr);
 				}
-				if (seg < s.length() - 1) {
-					String maxStr = s.substring(seg + 1);
+				if (seg < val.length() - 1) {
+					String maxStr = val.substring(seg + 1);
 					this.max = Long.valueOf(maxStr);
 				}
 				this.val = this.min;
@@ -61,10 +64,11 @@ public class LongRangeType implements FieldHandler<Long> {
 				throw new EFException(e);
 			}
 		}
+		return this.val;
 	}
 	
-	public static String valueOf(Object val) {
-		return String.valueOf(val);
+	public String toString() {
+		return String.valueOf(this.getVal());
 	}
 	
 	public boolean isValid() {
@@ -77,5 +81,5 @@ public class LongRangeType implements FieldHandler<Long> {
 
 	public Object getMax() {
 		return max;
-	}
+	} 
 }

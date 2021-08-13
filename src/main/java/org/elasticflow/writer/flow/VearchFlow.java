@@ -87,16 +87,18 @@ public class VearchFlow extends WriterFlowSocket {
 			for (Entry<String, Object> r : unit.getData().entrySet()) {
 				String field = r.getKey();
 				if (r.getValue() == null)
-					continue;
+					continue;				
 				Object value = r.getValue();
 				EFField transParam = transParams.get(field);
+				if(transParam==null)
+					continue;
 				if(transParam.getIndextype().equals("vector")) {
 					JSONObject _feature = new JSONObject();
-					_feature.put("feature", Common.parseFieldValue(value,transParam));
+					_feature.put("feature", value);
 					row.put(transParam.getAlias(),_feature);
 				}else {
-					row.put(transParam.getAlias(), Common.parseFieldValue(value,transParam));
-				}			
+					row.put(transParam.getAlias(), value);
+				}		
 			} 
 			if (this.isBatch) {
 				this.curTable = table;
@@ -147,8 +149,23 @@ public class VearchFlow extends WriterFlowSocket {
 
 	@Override
 	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
-		log.error("abMechanism not support!");
-		return null;
+		String select = "a";
+		boolean a = this.storePositionExists(Common.getStoreName(mainName, "a"));
+		boolean b = this.storePositionExists(Common.getStoreName(mainName, "b"));
+		
+		if (isIncrement) {
+			if(a && b) {
+				select = "a";
+			}else {
+				select = a ? "a" : (b ? "b" : "a");
+			}
+			if ((select.equals("a") && !a) || (select.equals("b") && !b)) {
+				this.create(mainName, select, instanceConfig);
+			}			
+		}else {
+			this.create(mainName, select, instanceConfig);
+		} 		
+		return select;
 	}
 
 	@Override

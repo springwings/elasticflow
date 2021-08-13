@@ -41,7 +41,7 @@ public class PipeParam {
 	private boolean isMasterControl = false;
 	/**data write into type,full create new record,increment update part of data*/
 	private String writeType="full";
-	private MECHANISM writeMechanism = MECHANISM.AB;
+	private MECHANISM writeMechanism = MECHANISM.NORM;
 	/**if MECHANISM.Time,keepNums is used for keep max store data instances*/
 	private String keepNums = "30d";
 	private boolean multiThread = false;
@@ -226,9 +226,14 @@ public class PipeParam {
 		
 	}
 	public void setWriteMechanism(String writeMechanism) {
-		if(!writeMechanism.toLowerCase().equals("ab")) {
-			this.writeMechanism = MECHANISM.Time;
-		} 
+		switch(writeMechanism.toLowerCase()) {
+			case "ab":
+				this.writeMechanism = MECHANISM.AB;
+				break;
+			case "time":
+				this.writeMechanism = MECHANISM.Time;
+				break;				
+		}		 
 	}
 	public void setMultiThread(String multiThread) {
 		if(multiThread.length()>0 && (multiThread.equals("true")))

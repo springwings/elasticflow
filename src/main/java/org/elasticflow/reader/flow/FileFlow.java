@@ -47,7 +47,7 @@ public class FileFlow extends ReaderFlowSocket {
 					rf.readLine();
 				}else {
 					PipeDataUnit u = PipeDataUnit.getInstance();
-					u.addFieldValue("id",rf.readLine(), page.getTransField());
+					PipeDataUnit.addFieldValue("id",rf.readLine(), page.getInstanceConfig().getReadFields(),u);
 					this.dataUnit.add(u);
 					if(pos>start+pageSize)
 						break;

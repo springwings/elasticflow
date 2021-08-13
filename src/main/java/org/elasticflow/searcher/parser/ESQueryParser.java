@@ -162,7 +162,7 @@ public class ESQueryParser implements QueryParser{
 			if (!not_analyzed || fuzzy>0) {
 				query = fieldParserQuery(key, String.valueOf(v), fuzzy);
 			} else if (tp.getParamtype().equals("org.elasticflow.field.handler.LongRangeType")) {
-				Object _v = Common.parseFieldValue(v, tp);
+				Object _v = Common.parseFieldObject(v, tp);
 				LongRangeType val = (LongRangeType) _v; 
 				query = QueryBuilders.rangeQuery(key).from(val.getMin()).to(val.getMax())
 						.includeLower(sp == null ? true : sp.isIncludeLower())

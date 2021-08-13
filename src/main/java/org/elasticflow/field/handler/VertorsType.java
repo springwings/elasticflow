@@ -13,7 +13,7 @@ import org.elasticflow.util.EFException;
 * @data 2021-01-12
 */
 
-public class VertorsType implements FieldHandler<List<Float>>{
+public class VertorsType implements FieldHandler<List<Float>,VertorsType>{
 	
 	protected List<Float> vals;
 	
@@ -24,11 +24,14 @@ public class VertorsType implements FieldHandler<List<Float>>{
 		return vc;
 	}
 	
+	public static VertorsType getInstance() throws EFException { 
+		return null;
+	}
+	
 	
 	/**
 	 * @param s, "0,1,1,2,0.5"
 	 */
-	@Override
 	public void parse(String s) throws EFException {
 		this.vals = new ArrayList<>();
 		String[] tmp = s.split(",");
@@ -38,9 +41,14 @@ public class VertorsType implements FieldHandler<List<Float>>{
 	}
 
 
-	@Override
 	public List<Float> getVal() { 
 		return this.vals;
+	}
+
+	@Override
+	public List<Float> parse(Object data) throws EFException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -66,14 +66,12 @@ public class KafkaFlow extends ReaderFlowSocket {
 						JSONObject jsonObject = JSON.parseObject(val);
 						Set<Entry<String, Object>> itr = jsonObject.entrySet();	
 						for (Entry<String, Object> k : itr) {
-							if(page.getTransField().containsKey(k.getKey())) {
-								u.addFieldValue(k.getKey(), k.getValue(), page.getTransField());
-								if (k.getKey().equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))) {
-									LAST_STAMP = String.valueOf(k.getValue());
-								}else if(k.getKey().equals(this.dataPage.get(GlobalParam.READER_KEY))) {
-									u.setReaderKeyVal(k.getValue());
-									dataBoundary = String.valueOf(k.getValue());
-								}
+							PipeDataUnit.addFieldValue(k.getKey(), k.getValue(), page.getInstanceConfig().getReadFields(),u);
+							if (k.getKey().equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))) {
+								LAST_STAMP = String.valueOf(k.getValue());
+							}else if(k.getKey().equals(this.dataPage.get(GlobalParam.READER_KEY))) {
+								u.setReaderKeyVal(k.getValue());
+								dataBoundary = String.valueOf(k.getValue());
 							}						
 						}
 						this.dataUnit.add(u);

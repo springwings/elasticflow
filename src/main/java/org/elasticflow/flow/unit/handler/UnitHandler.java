@@ -5,7 +5,7 @@
  * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
  * Side Public License, v 1.
  */
-package org.elasticflow.writerUnit.handler;
+package org.elasticflow.flow.unit.handler;
 
 import java.util.Map;
 
@@ -20,6 +20,6 @@ import org.elasticflow.util.EFException;
  * @version 1.0
  * @date 2018-10-26 09:11
  */
-public interface WriterUnitHandler { 
+public interface UnitHandler { 
 	void handle(PipeDataUnit u,EFField field,Object obj,Map<String, EFField> transParams) throws EFException; 
 }

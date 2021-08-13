@@ -54,7 +54,7 @@ public class OracleFlow extends ReaderFlowSocket{
 					//handler reference getAllData function 
 					this.readHandler.handleData(this,rs,page,pageSize);					
 				}else{
-					getAllData(rs,page.getTransField()); 
+					getAllData(rs,page.getInstanceConfig().getReadFields()); 
 				} 
 				this.dataPage.put(GlobalParam.READER_STATUS,true);
 			} catch (Exception e) {
@@ -168,7 +168,7 @@ public class OracleFlow extends ReaderFlowSocket{
 					if(k.equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))){
 						LAST_STAMP = v;
 					}
-					u.addFieldValue(k, v, transParam);
+					PipeDataUnit.addFieldValue(k, v, transParam,u);
 				}
 				this.dataUnit.add(u);
 			}

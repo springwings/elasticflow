@@ -8,11 +8,9 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
-import org.elasticflow.field.FieldHandler;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
@@ -53,13 +51,7 @@ public class KafkaFlow extends WriterFlowSocket {
 					continue;
 				if(transParam.getStored().equals("true")) {
 					Object val = r.getValue();
-					if (transParam.getParamtype().contains("org.elasticflow.field.handler")) {
-						FieldHandler<?> _v = (FieldHandler<?>) Common.parseFieldValue(String.valueOf(val),
-								transParam);	
-						conn.send(new ProducerRecord<String, String>(transParams.get("topic").getDefaultvalue(), unit.getReaderKeyVal(),_v.toString()));
-					}else {
-						conn.send(new ProducerRecord<String, String>(transParams.get("topic").getDefaultvalue(), unit.getReaderKeyVal(),val.toString()));
-					}
+					conn.send(new ProducerRecord<String, String>(transParams.get("topic").getDefaultvalue(), unit.getReaderKeyVal(),val.toString()));
 				}						
 			}
 			

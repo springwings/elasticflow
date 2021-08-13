@@ -8,7 +8,7 @@
 package org.elasticflow.field;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.writerUnit.handler.WriterUnitHandler;
+import org.elasticflow.flow.unit.handler.UnitHandler;
 
 /**
  * Definition of data fields in data-flow 
@@ -30,7 +30,7 @@ public class EFField {
 	private String indextype;
 	private String indexed = "true";
 	private float boost = 1.0f;
-	private WriterUnitHandler handler;
+	private UnitHandler handler;
 	private boolean router=false;
 	private String paramtype;
 	private String dsl;
@@ -130,7 +130,7 @@ public class EFField {
 		this.indexed = indexed.toLowerCase();
 	}
 
-	public WriterUnitHandler getHandler() {
+	public UnitHandler getHandler() {
 		return this.handler;
 	}
 	/**
@@ -141,9 +141,9 @@ public class EFField {
 	public void setHandler(String handler) throws Exception {
 		if(handler!=null && handler.length()>1){
 			if(handler.startsWith(GlobalParam.GROUPID)) {
-				this.handler = (WriterUnitHandler) Class.forName(handler).newInstance();
+				this.handler = (UnitHandler) Class.forName(handler).newInstance();
 			}else {
-				this.handler = (WriterUnitHandler) Class.forName(handler,true,GlobalParam.PLUGIN_CLASS_LOADER).newInstance();
+				this.handler = (UnitHandler) Class.forName(handler,true,GlobalParam.PLUGIN_CLASS_LOADER).newInstance();
 			}			
 		}
 	}

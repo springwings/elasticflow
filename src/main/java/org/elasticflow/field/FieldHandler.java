@@ -10,15 +10,16 @@ package org.elasticflow.field;
 import org.elasticflow.util.EFException;
 
 /**
- * 
+ * must implementation 
+ * public static T1 valueOf(Object data) throws EFException;
+ * public static T2 getInstance(Object data) throws EFException;
  * @author chengwen
  * @version 1.0
  * @date 2018-11-20 10:47
  */
-public interface FieldHandler<T>{ 
+public interface FieldHandler<EF_VALUE_TYPE,EF_INSTANCE_TYPE>{ 
 	
-	public T getVal();
-	
-	public void parse(String s) throws EFException;
+	/**Domain value fetch function**/
+	public EF_VALUE_TYPE parse(Object data) throws EFException;
 	
 }

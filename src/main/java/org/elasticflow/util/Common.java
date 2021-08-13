@@ -42,6 +42,7 @@ import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.node.CPU;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.piper.PipePump;
+import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.Request;
 import org.slf4j.Logger;
@@ -499,40 +500,16 @@ public final class Common {
 			return true; 
 		return false;
 	} 
-	
-	public static Object parseFieldValue(String v, EFField fd) throws Exception {
-		if (fd == null)
+		
+	public static Object parseFieldObject(Object v, EFField fd) throws Exception {
+		if (fd == null || v==null)
 			return null; 
-		if (v==null) {
-			v = fd.getDefaultvalue();
-		} 
-		Class<?> c = Class.forName(fd.getParamtype());  
-		Method method = c.getMethod("valueOf", String.class);
-		return method.invoke(c,String.valueOf(v));
-	}
-	
-	public static Object parseFieldValue(Object v, EFField fd) throws Exception {
-		if (fd == null)
-			return null; 
-		if (v==null) {
-			v = fd.getDefaultvalue();
-		} 
-		Class<?> c = Class.forName(fd.getParamtype());		
-		if (fd.getSeparator() != null) {
-			String[] vs = String.valueOf(v).split(fd.getSeparator());
-			if(!fd.getParamtype().equals("java.lang.String")) {
-				Object[] _vs = new Object[vs.length];
-				Method method = c.getMethod("valueOf", String.class);
-				for(int j=0;j<vs.length;j++) 
-					_vs[j] = method.invoke(c,vs[j]); 
-				return _vs;
-			}
-			return vs;
-		 }else {
-			 Method method = c.getMethod("valueOf", Object.class);
-			 return method.invoke(c,v);
-		 }
-	}
+		if(fd.getParamtype().startsWith(GlobalParam.GROUPID)) {
+			return Class.forName(fd.getParamtype()).newInstance();
+		}else {
+			return Class.forName(fd.getParamtype(),true,GlobalParam.PLUGIN_CLASS_LOADER).newInstance();
+		}			
+	} 
 	
 	public static EFSearchRequest getEFRequest(Request rq,EFSearchResponse rps) {
 		EFSearchRequest RR = null;

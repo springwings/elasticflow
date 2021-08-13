@@ -11,11 +11,10 @@ import java.util.Map.Entry;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connect.EsConnector;
 import org.elasticflow.field.EFField;
-import org.elasticflow.field.FieldHandler;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
@@ -98,8 +97,6 @@ public class EsFlow extends WriterFlowSocket {
 				continue;
 			EFField transParam = transParams.get(field);
 			if (transParam == null)
-				transParam = transParams.get(field.toLowerCase());
-			if (transParam == null)
 				continue;
 			String value = String.valueOf(r.getValue());
 			sf.append("ctx._source." + transParam.getAlias() + " = " + value + ",");
@@ -128,8 +125,6 @@ public class EsFlow extends WriterFlowSocket {
 				Object value = r.getValue();
 				EFField transParam = transParams.get(field);
 				if (transParam == null)
-					transParam = transParams.get(field.toLowerCase());
-				if (transParam == null)
 					continue;
 				
 				if (transParam.getAnalyzer().length() == 0) {
@@ -139,12 +134,8 @@ public class EsFlow extends WriterFlowSocket {
 							cbuilder.latlon(field, Double.parseDouble(vs[0]), Double.parseDouble(vs[1]));					
 					} else if (transParam.getIndextype().equals("nested")) {
 						cbuilder.array(transParam.getAlias(), JSONArray.fromObject(value));
-					} else if (transParam.getParamtype().contains("org.elasticflow.field.handler")) {
-						FieldHandler<?> _v = (FieldHandler<?>) Common.parseFieldValue(String.valueOf(value),
-								transParam);
-						cbuilder.field(transParam.getAlias(), _v.getVal());
 					} else {
-						cbuilder.field(transParam.getAlias(), Common.parseFieldValue(value,transParam));		
+						cbuilder.field(transParam.getAlias(), value);		
 					}						
 				} else {
 					cbuilder.field(transParam.getAlias(), value);
