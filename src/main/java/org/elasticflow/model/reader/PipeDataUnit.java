@@ -57,7 +57,8 @@ public class PipeDataUnit implements Cloneable{
 				pdu.data.put(param.getName(),val);
 			}
 		}else{
-			pdu.data.put(k,v);
+			if(transParams.size()==0)
+				pdu.data.put(k,v);
 		}
 	}
 	
