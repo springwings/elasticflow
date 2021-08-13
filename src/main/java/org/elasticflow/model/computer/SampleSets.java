@@ -1,7 +1,7 @@
 package org.elasticflow.model.computer;
 
 import org.elasticflow.model.reader.PipeDataUnit;
-import org.elasticflow.param.ml.ComputeParam;
+import org.elasticflow.param.end.ComputerParam;
 
 /**
  * 
@@ -20,14 +20,14 @@ public class SampleSets {
 		return sp;
 	}
 	
-	public void addPoint(PipeDataUnit PD,ComputeParam computeParam) {
+	public void addPoint(PipeDataUnit PD,ComputerParam computeParam) {
 		if(iterator<this.datas.length) { 
 			this.datas[iterator] = genericPoint(PD,computeParam); 
 			iterator++;
 		}
 	}
 	
-	public static SamplePoint genericPoint(PipeDataUnit PD,ComputeParam computeParam) {
+	public static SamplePoint genericPoint(PipeDataUnit PD,ComputerParam computeParam) {
 		int i=0;
 		String[] feature_fields = computeParam.getFeatures().split(",");
 		SamplePoint sp = new SamplePoint(feature_fields.length);

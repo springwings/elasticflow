@@ -5,7 +5,7 @@
  * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
  * Side Public License, v 1.
  */
-package org.elasticflow.param.ml;
+package org.elasticflow.param.end;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -15,7 +15,7 @@ import com.alibaba.fastjson.JSONObject;
  * @version 1.0
  * @date 2018-07-22 09:08
  */
-public class ComputeParam {
+public class ComputerParam {
 	
 	/**The characteristic fields are separated by ","**/
 	private String features;
@@ -24,6 +24,8 @@ public class ComputeParam {
 	private String[] api;
 	/**reader and request fields map*/
 	private JSONObject apiRequest;
+	/** api max send data nums per request**/
+	private int apiRequestMaxDatas = 60;
 	/**writer and response fields map*/
 	private JSONObject apiResponse;
 	/**User defined JSON parameters can be used to extend the plugin*/
@@ -149,15 +151,24 @@ public class ComputeParam {
 			this.api = api.split(",");
 		}		
 	}
+	
+	public int apiRequestMaxDatas() {
+		return this.apiRequestMaxDatas;
+	}
 
 	public JSONObject getApiRequest() {
-		return apiRequest;
+		return this.apiRequest;
 	}
 
 	public void setApiRequest(String apiRequest) {
 		if(apiRequest!=null) {
 			this.apiRequest = JSONObject.parseObject(apiRequest);
 		}		
+	}
+	
+	public void setApiRequestMaxDatas(String apiRequestMaxDatas) {
+		if(apiRequestMaxDatas!=null)
+			this.apiRequestMaxDatas = Integer.parseInt(apiRequestMaxDatas);
 	}
 
 	public JSONObject getApiResponse() {

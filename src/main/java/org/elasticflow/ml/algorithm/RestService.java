@@ -43,8 +43,6 @@ public class RestService extends ComputerFlowSocket{
     protected ExecutorService executorService;
 	protected ArrayBlockingQueue<String> apiBlockingQueue;
 	protected boolean successRunAll = true;
-	/**Maximum amount of data submitted per post request**/
-	protected int MAX_SEND_NUM = 10;
     
 	public static RestService getInstance(final ConnectParams connectParams) {
 		RestService o = new RestService();
@@ -103,7 +101,7 @@ public class RestService extends ComputerFlowSocket{
 					}
 				}
 				count++;
-				if (count > this.MAX_SEND_NUM) {
+				if (count > context.getInstanceConfig().getComputeParams().apiRequestMaxDatas()) {
 					JSONObject _postdt = (JSONObject) post_data.clone();
 					@SuppressWarnings("unchecked")
 					ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();

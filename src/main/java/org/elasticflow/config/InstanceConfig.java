@@ -11,10 +11,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
 import org.elasticflow.field.EFField;
 import org.elasticflow.param.BasicParam;
+import org.elasticflow.param.end.ComputerParam;
 import org.elasticflow.param.end.ReaderParam;
 import org.elasticflow.param.end.SearcherParam;
 import org.elasticflow.param.end.WriterParam;
-import org.elasticflow.param.ml.ComputeParam;
 import org.elasticflow.param.pipe.PipeParam;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.ConfigStorer;
@@ -45,7 +45,7 @@ public class InstanceConfig {
 	private volatile WriterParam writerParams;
 	private volatile PipeParam pipeParams;
 	private volatile ReaderParam readParams;
-	private volatile ComputeParam computeParams;
+	private volatile ComputerParam computeParams;
 	private int instanceType = INSTANCE_TYPE.Blank.getVal(); 
 	private boolean hasFullJob = true;
 
@@ -61,7 +61,7 @@ public class InstanceConfig {
 		this.readFields = new HashMap<>();
 		this.searcherParams = new HashMap<>();
 		this.externConfigs = new HashMap<>();
-		this.computeParams = new ComputeParam();
+		this.computeParams = new ComputerParam();
 		this.writerParams = new WriterParam();
 		loadInstanceConfig();
 		Common.LOG.info(filename + " config loaded");
@@ -80,7 +80,7 @@ public class InstanceConfig {
 		return this.searcherParams.get(key);
 	}
 	
-	public ComputeParam getComputeParams() {
+	public ComputerParam getComputeParams() {
 		return this.computeParams;
 	}
 	
@@ -236,7 +236,7 @@ public class InstanceConfig {
 				
 				params = (Element) dataflow.getElementsByTagName("ComputeParam").item(0);   
 				if (params!=null) {
-					parseNode(params.getElementsByTagName("param"), "computeParam", ComputeParam.class);
+					parseNode(params.getElementsByTagName("param"), "computeParam", ComputerParam.class);
 					params = (Element) params.getElementsByTagName("fields").item(0);
 					if(params != null) {
 						paramlist = params.getElementsByTagName("field");
