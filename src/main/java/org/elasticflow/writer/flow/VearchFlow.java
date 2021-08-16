@@ -13,6 +13,7 @@ import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,10 +80,10 @@ public class VearchFlow extends WriterFlowSocket {
 	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams, String instance,
 			String storeId, boolean isUpdate) throws EFException {
 		String table = Common.getStoreName(instance, storeId);
-		try {
-			if (!ISLINK())
-				return;
-			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);	
+		if (!ISLINK())
+			return;
+		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
+		try {				
 			JSONObject row = new JSONObject();
 			for (Entry<String, Object> r : unit.getData().entrySet()) {
 				String field = r.getKey();
@@ -115,8 +116,24 @@ public class VearchFlow extends WriterFlowSocket {
 				conn.writeSingle(table, row);
 			}
 		} catch (Exception e) {
-			log.error("write Exception", e);
+			log.error("write Exception", e);  
+//			try {
+//				this.deleteAndInsert();
+//			} catch (Exception e2) {
+//				
+//			}			
+			throw new EFException(e.getMessage(),ELEVEL.Stop);
 		} 
+	}
+	
+	public void deleteAndInsert() throws Exception {
+		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
+		synchronized (this.DATAS) {			
+			conn.deleteBatch(this.curTable, this.DATAS);
+			conn.writeBatch(this.curTable, this.DATAS);
+			currentSec = Common.getNow();
+			this.DATAS.clear();
+		}		
 	}
 
 	@Override
@@ -126,7 +143,7 @@ public class VearchFlow extends WriterFlowSocket {
 			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);	
 			conn.deleteSpace(name);
 		} catch (Exception e) {
-			throw new EFException(e);
+			throw new EFException(e.getMessage(),ELEVEL.Stop);
 		} 
 	}
 
@@ -180,7 +197,12 @@ public class VearchFlow extends WriterFlowSocket {
 			synchronized (this.DATAS) {
 				if(this.DATAS.size()>0) {
 					VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);	
-					conn.writeBatch(this.curTable, this.DATAS);
+					try {
+						conn.writeBatch(this.curTable, this.DATAS);
+					} catch (Exception e) {
+//						this.deleteAndInsert();
+						throw new EFException(e.getMessage(),ELEVEL.Stop);
+					} 
 					currentSec = Common.getNow();
 					this.DATAS.clear();
 				}				
@@ -219,8 +241,13 @@ public class VearchFlow extends WriterFlowSocket {
 		for (Map.Entry<String, EFField> entry : writefields.entrySet()) {
 			if(entry.getValue().getDsl()!=null) {
 				properties.put(entry.getKey(),entry.getValue().getDsl());
-			}else {
-				properties.put(entry.getKey(),"{\"type\":\""+entry.getValue().getIndextype()+"\"}");
+			}else { 
+				StringBuilder sb = new StringBuilder();
+				sb.append("\"type\":\""+entry.getValue().getIndextype()+"\"");
+				if(entry.getValue().getIndexed().equals("true")) {
+					sb.append(",\"index\":true");
+				}
+				properties.put(entry.getKey(),"{"+sb.toString()+"}");
 			}			
 		} 
 		tableMeta.put("properties", properties);

@@ -170,7 +170,7 @@ public class RestService extends ComputerFlowSocket{
 			ArrayList<JSONObject> keepDatas) throws EFException {	
 		String datafield = responseParams.getJSONObject("dataField").getString("name");
 		JSONArray JA = datas.getJSONArray(datafield); 		
-		if(JA.size()!=keepDatas.size())
+		if(keepDatas!=null && JA.size()!=keepDatas.size())
 			throw new EFException("predict result not match size.", ELEVEL.Stop);
 		for (int i = 0; i < JA.size(); i++) {
 			JSONObject jr = keepDatas.get(i);
