@@ -54,10 +54,7 @@ public class ML extends Instruction {
 					res = context.getComputer().predict(context, DSReader);
 				}else if(context.getInstanceConfig().getComputeParams().getStage().equals(GlobalParam.COMPUTER_STAGE.TRAIN.name()))  {
 					res = context.getComputer().train(context, DSReader, context.getInstanceConfig().getWriteFields());
-				} 
-				log.info(Common.formatLog("onepage", " -- " + types + " compute onepage ", instance,
-						context.getInstanceConfig().getComputeParams().getAlgorithm(), "", num,
-						DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, ""));
+				} 		
 			} catch (Exception e) {
 				log.error("batch Compute Exception", e);
 			} finally {
