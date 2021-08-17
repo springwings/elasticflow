@@ -73,7 +73,7 @@ public class EFEmailSender extends WebApplicationObjectSupport {
 				.getBean("javaxEmailBean");
 		Properties mailConfigBean = (Properties) super.getApplicationContext()
 				.getBean("mailConfigBean");
-
+		
 		Properties emailProperties = new Properties();
 		emailProperties.put("mail.smtp.host",
 				mailConfigBean.getProperty("mail.host"));
@@ -85,10 +85,8 @@ public class EFEmailSender extends WebApplicationObjectSupport {
 				mailConfigBean.getProperty("mail.smtp.timeout"));
 		emailProperties.put("mail.smtp.auth",
 				mailConfigBean.getProperty("mail.smtps.auth"));
-		emailProperties.put("mail.debug", "true");
- 
+		emailProperties.put("mail.debug", "true"); 
 		emailInfo.setProperties(emailProperties);
-
 		return emailInfo;
 	}
 

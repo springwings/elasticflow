@@ -96,6 +96,6 @@ public class MysqlConnection extends EFConnectionSocket<Connection> {
 		return "jdbc:mysql://" + ((WarehouseSqlParam) this.connectParams.getWhp()).getHost() + ":"
 				+ ((WarehouseSqlParam) this.connectParams.getWhp()).getPort() + "/"
 				+ ((WarehouseSqlParam) this.connectParams.getWhp()).getDbname(this.connectParams.getL1Seq())
-				+ "?autoReconnect=true&failOverReadOnly=false";
+				+ "?autoReconnect=true&failOverReadOnly=false&useSSL=false";
 	}
 }
