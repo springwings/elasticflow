@@ -15,7 +15,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
- 
+
+import org.elasticflow.config.GlobalParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -54,10 +55,13 @@ public class EFEmailSender extends WebApplicationObjectSupport {
 
 	public boolean sendHtmlMailBySynchronizationMode(String subject,
 			String content) {
-		EmailConfig emailInfo = getEmailConfig(subject);
-		emailInfo.setSubject(subject);
-		emailInfo.setContent(content);
-		return sendHtmlMail(emailInfo);
+		if(GlobalParam.SEND_EMAIL) {
+			EmailConfig emailInfo = getEmailConfig(subject);
+			emailInfo.setSubject(subject);
+			emailInfo.setContent(content);
+			return sendHtmlMail(emailInfo);
+		}
+		return true;
 	}
 
 	public EmailConfig getEmailConfig(String fromName) {
@@ -68,12 +72,10 @@ public class EFEmailSender extends WebApplicationObjectSupport {
 	}
 
 	public EmailConfig getEmailConfig() {
-
 		EmailConfig emailInfo = (EmailConfig) super.getApplicationContext()
 				.getBean("javaxEmailBean");
 		Properties mailConfigBean = (Properties) super.getApplicationContext()
-				.getBean("mailConfigBean");
-		
+				.getBean("mailConfigBean");		
 		Properties emailProperties = new Properties();
 		emailProperties.put("mail.smtp.host",
 				mailConfigBean.getProperty("mail.host"));

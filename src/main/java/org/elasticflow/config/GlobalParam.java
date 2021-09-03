@@ -27,6 +27,9 @@ public final class GlobalParam {
 	
 	public static boolean DEBUG;
 	
+	/**send error mail or not **/
+	public static boolean SEND_EMAIL = false;
+	
 	/**system Runtime Environment*/
 	public static String RUN_ENV; 
 	
