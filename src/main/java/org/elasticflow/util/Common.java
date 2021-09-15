@@ -422,7 +422,7 @@ public final class Common {
 		StringBuilder str = new StringBuilder("["+heads+" "+instanceName + "_" + storeId+"] "+(!seq.equals("") ? " table:" + seq : ""));
 		String update;
 		if(lastUpdateTime.length()>9 && lastUpdateTime.matches("[0-9]+")){ 
-			update = SDF.format(lastUpdateTime.length()<12?new Long(lastUpdateTime+"000"):new Long(lastUpdateTime));
+			update = SDF.format(lastUpdateTime.length()<12?Long.valueOf(lastUpdateTime+"000"):Long.valueOf(lastUpdateTime));
 		}else{
 			update = lastUpdateTime;
 		} 

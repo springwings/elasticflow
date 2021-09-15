@@ -542,7 +542,7 @@ public final class NodeMonitor {
 							if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
 								update = dstr[0] + ":"
 										+ (SDF.format(
-												dstr[1].length() < 12 ? new Long(dstr[1] + "000") : new Long(dstr[1])))
+												dstr[1].length() < 12 ? Long.valueOf(dstr[1] + "000") :  Long.valueOf(dstr[1])))
 										+ " (" + dstr[1] + ")";
 							} else {
 								update = str;
@@ -564,7 +564,7 @@ public final class NodeMonitor {
 								String[] dstr = tm.split(":");
 								if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
 									stateStr.append(dstr[0] + ":"
-											+ SDF.format(tm.length() < 12 ? new Long(dstr[1] + "000") : new Long(dstr[1])));
+											+ SDF.format(tm.length() < 12 ?  Long.valueOf(dstr[1] + "000") : Long.valueOf(dstr[1])));
 									stateStr.append(" (").append(tm).append(")");
 								} else {
 									stateStr.append(tm);

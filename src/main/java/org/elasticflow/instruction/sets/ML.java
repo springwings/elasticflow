@@ -12,7 +12,6 @@ import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.reader.util.DataSetReader;
-import org.elasticflow.util.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +36,6 @@ public class ML extends Instruction {
 			log.error("Compute parameter not match!");
 			return res;
 		}
-		String types = String.valueOf(args[1]);
-		String instance = String.valueOf(args[2]);
 		DataPage dp = (DataPage) args[3];
 
 		if (dp.size() == 0)
@@ -46,8 +43,6 @@ public class ML extends Instruction {
 
 		DataSetReader DSReader = new DataSetReader();
 		DSReader.init(dp);
-		long start = Common.getNow();
-		int num = DSReader.getDataNums();
 		if (DSReader.status()) {
 			try { 
 				if(context.getInstanceConfig().getComputeParams().getStage().equals(GlobalParam.COMPUTER_STAGE.PREDICT.name())) {
