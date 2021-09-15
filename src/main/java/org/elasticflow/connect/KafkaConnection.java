@@ -110,7 +110,6 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 	@Override
 	public boolean free() {
 		try {
-			this.cconn.commitSync();
 			this.cconn.close();
 			this.cconn = null;
 			this.pconn.close();

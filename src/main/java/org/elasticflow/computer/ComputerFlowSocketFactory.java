@@ -32,6 +32,7 @@ public final class ComputerFlowSocketFactory implements Socket<ComputerFlowSocke
 			return (ComputerFlowSocket) m.invoke(null, connectParams);
 		} catch (Exception e) {
 			Common.LOG.error("get ComputerFlowSocket Exception!", e);
+			Common.stopSystem();
 		}  
 		return null;
 	}  
