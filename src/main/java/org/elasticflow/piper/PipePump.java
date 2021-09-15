@@ -211,11 +211,7 @@ public final class PipePump extends Instruction {
 					Resource.mailSender.sendHtmlMailBySynchronizationMode(" [EFLOWS] " + GlobalParam.RUN_ENV,
 							"Job " + mainName + " " + task.getJobType().name() + " Has stopped!");
 				}
-				if(e.getErrorLevel().equals(ELEVEL.Termination)) {
-					Thread.currentThread().interrupt();
-				}else if (e.getErrorLevel().equals(ELEVEL.Stop)) {
-					System.exit(0);
-				}
+				Common.processErrorLevel(e);
 			}
 		}
 	}

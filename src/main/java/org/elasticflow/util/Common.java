@@ -42,6 +42,7 @@ import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.node.CPU;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.piper.PipePump;
+import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.Request;
 import org.slf4j.Logger;
@@ -608,4 +609,16 @@ public final class Common {
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTimeInMillis();
     }
+	
+	public static void processErrorLevel(EFException e) {
+		if(e.getErrorLevel().equals(ELEVEL.Termination)) {
+			Thread.currentThread().interrupt();
+		}else if (e.getErrorLevel().equals(ELEVEL.Stop)) {
+			stopSystem();
+		}
+	}
+	
+	public static void stopSystem() {
+		System.exit(0);
+	}
 }

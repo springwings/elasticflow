@@ -12,6 +12,8 @@ import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.reader.util.DataSetReader;
+import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +52,9 @@ public class ML extends Instruction {
 				}else if(context.getInstanceConfig().getComputeParams().getStage().equals(GlobalParam.COMPUTER_STAGE.TRAIN.name()))  {
 					res = context.getComputer().train(context, DSReader, context.getInstanceConfig().getWriteFields());
 				} 		
-			} catch (Exception e) {
+			} catch (EFException e) {
 				log.error("batch Compute Exception", e);
+				Common.processErrorLevel(e);
 			} finally {
 				DSReader.close();
 			}

@@ -113,7 +113,7 @@ public class RestService extends ComputerFlowSocket{
 							this.write(context, tmp, responseParams, _keepdt);						
 						} catch (Exception e) { 
 							this.successRunAll = false;
-							e.printStackTrace();
+							log.error(e.getMessage());
 						}   
 		            }); 
 					post_data.clear(); 
@@ -134,7 +134,7 @@ public class RestService extends ComputerFlowSocket{
 						this.write(context,tmp, responseParams, _keepdt);						
 					} catch (Exception e) { 
 						this.successRunAll = false;
-						e.printStackTrace();
+						log.error(e.getMessage());
 					}   
 	            });  
 				post_data.clear();
