@@ -33,7 +33,7 @@ import com.alibaba.fastjson.JSONObject;
 @NotThreadSafe
 public class KafkaFlow extends ReaderFlowSocket {
 	
-	final int readms = 100;
+	final int readms = 2000;
 	ConsumerRecords<String, String> records;
 
 	private final static Logger log = LoggerFactory.getLogger(KafkaFlow.class);
