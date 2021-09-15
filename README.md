@@ -1,5 +1,5 @@
 # ElasticFlow
-elasticflow for build computing flow ，support jobs like ML,DataTrasfer,Data Searcher platform,etc
+Elasticflow can be used for the construction of computational flow，support jobs like Inference,DataTrasfer,Data Searcher etc...
 
 ![image](https://github.com/springwings/elasticflow/blob/master/architecture.jpg)
 
@@ -10,7 +10,6 @@ elasticflow for build computing flow ，support jobs like ML,DataTrasfer,Data Se
 ElasticFlow就是为解决该问题而生。
 
 
-
 业务中我们或许需要：
 
 	原始日志进入数据库层，
@@ -18,13 +17,13 @@ ElasticFlow就是为解决该问题而生。
 	原始大数据进入机器学习中间数据层
 	机器学习数据进入用户展示层
 	通用搜索服务
+    数据推断服务 
 	...
 综上任务都可以通过ElasticFlow，使用其可控的可计算流管道来实现。
 
 # Versions
-$ version 5.x
-$ Java>=1.8
-
+	version 5.x
+	Java>=1.8
 
 # Reader Support
 	Hbase 1.2.1
@@ -44,12 +43,7 @@ $ Java>=1.8
 ==>>[详细文档参照wiki](https://github.com/springwings/elasticflow/wiki)  
 
 # Changes
-4.0以后版本对之前版本在架构上全新升级，不仅仅是一个流管道建立以交换数据功能版本，该流将具有可计算的功能。
-4.1版本属于持续迭代不断实现版本
-
+5.0 版本对之前版本在架构上全新升级，不再通过Java原生支持深度学习，计算流通过调用外部推断服务rest接口实现数据计算服务。
 
 # develop plan
-
-1 Improving machine learning algorithm
-
-2 Increase support deeplearning framework,such as tensorflow,dl4j...
+1 Support external computing Libraries such as so/dll
