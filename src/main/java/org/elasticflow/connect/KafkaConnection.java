@@ -62,7 +62,8 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
         props.put("key.deserializer", StringDeserializer.class);
         props.put("value.deserializer", StringDeserializer.class);
         props.put("max.poll.records",GlobalParam.READ_PAGE_SIZE);
-        props.put("max.partition.fetch.bytes", MAX_FETCH_BYTES);            
+        props.put("max.partition.fetch.bytes", MAX_FETCH_BYTES);
+        props.put("enable.auto.commit", "false");
         this.cconn = new KafkaConsumer<String, String>(props);
 		this.cconn.subscribe(Arrays.asList(wnp.getDefaultValue().getString(CUSTOM_CONSUMER_TOPIC).split(",")));
 	}
@@ -109,6 +110,7 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 	@Override
 	public boolean free() {
 		try {
+			this.cconn.commitSync();
 			this.cconn.close();
 			this.cconn = null;
 			this.pconn.close();

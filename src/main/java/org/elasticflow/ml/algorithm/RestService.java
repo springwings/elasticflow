@@ -144,10 +144,10 @@ public class RestService extends ComputerFlowSocket{
 			try {
 				executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 			} catch (Exception e) { 
-				throw new EFException(e.getMessage(), ELEVEL.Stop);
+				throw new EFException(e.getMessage(), ELEVEL.Termination);
 			}		
 			if(this.successRunAll==false)
-				throw new EFException("job executorService exception", ELEVEL.Stop);
+				throw new EFException("job executorService exception", ELEVEL.Termination);
 			
 			this.dataPage.put(GlobalParam.READER_LAST_STAMP, DSR.getScanStamp());
 			this.dataPage.putData(this.dataUnit);
@@ -171,7 +171,7 @@ public class RestService extends ComputerFlowSocket{
 		String datafield = responseParams.getJSONObject("dataField").getString("name");
 		JSONArray JA = datas.getJSONArray(datafield); 		
 		if(keepDatas!=null && JA.size()!=keepDatas.size())
-			throw new EFException("predict result not match size.", ELEVEL.Stop);
+			throw new EFException("predict result not match size.", ELEVEL.Termination);
 		for (int i = 0; i < JA.size(); i++) {
 			JSONObject jr = keepDatas.get(i);
 			jr.putAll((JSONObject) JA.get(i));

@@ -52,6 +52,8 @@ public class KafkaFlow extends ReaderFlowSocket {
 		int count = 0;
 		boolean releaseConn = false;
 		PREPARE(false, false);
+		@SuppressWarnings("unchecked")
+		KafkaConsumer<String, String> conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader);
 		try {
 			String dataBoundary = null;
 			String LAST_STAMP = null;
@@ -87,7 +89,9 @@ public class KafkaFlow extends ReaderFlowSocket {
 			}else {
 				//handler reference mysql flow getAllData function 
 				this.readHandler.handleData(this,this.records,page,pageSize);
-			} 				
+			}   
+			
+			conn.commitSync();
 		} catch (Exception e) {
 			releaseConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS, false);

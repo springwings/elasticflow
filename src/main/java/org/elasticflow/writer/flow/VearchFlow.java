@@ -122,7 +122,7 @@ public class VearchFlow extends WriterFlowSocket {
 //			} catch (Exception e2) {
 //				
 //			}			
-			throw new EFException(e.getMessage(),ELEVEL.Stop);
+			throw new EFException(e.getMessage(),ELEVEL.Termination);
 		} 
 	}
 	
@@ -143,7 +143,7 @@ public class VearchFlow extends WriterFlowSocket {
 			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);	
 			conn.deleteSpace(name);
 		} catch (Exception e) {
-			throw new EFException(e.getMessage(),ELEVEL.Stop);
+			throw new EFException(e.getMessage(),ELEVEL.Termination);
 		} 
 	}
 
@@ -201,7 +201,7 @@ public class VearchFlow extends WriterFlowSocket {
 						conn.writeBatch(this.curTable, this.DATAS);
 					} catch (Exception e) {
 //						this.deleteAndInsert();
-						throw new EFException(e.getMessage(),ELEVEL.Stop);
+						throw new EFException(e.getMessage(),ELEVEL.Termination);
 					} 
 					currentSec = Common.getNow();
 					this.DATAS.clear();

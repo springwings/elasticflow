@@ -41,6 +41,7 @@ import org.elasticflow.util.EFLoc;
 import org.elasticflow.util.ConfigStorer;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.ZKUtil;
+import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.email.EFEmailSender;
 import org.elasticflow.yarn.Resource;
 
@@ -157,8 +158,9 @@ public final class Run {
 					Common.LOG.error("load Global Properties file Exception", e);
 				}
 			}
-		} catch (Exception e) {
+		} catch (Exception e) { 
 			Common.LOG.error("load Global Properties Config Exception", e);
+			System.exit(0);
 		}
 		GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");
 		GlobalParam.USE_ZK = Boolean.valueOf(GlobalParam.StartConfig.getProperty("use_zk"));

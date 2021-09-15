@@ -11,8 +11,10 @@ public class EFException extends Exception {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Ignore continue running with warnning Dispose need to fix and continue
-	 * Termination stop thread Stop stop program
+	 * Ignore continue running with warning 
+	 * Dispose need to fix and continue
+	 * Termination, will stop thread 
+	 * Stop, will stop program
 	 */
 	public static enum ELEVEL {
 		Ignore, Dispose, Termination, Stop;
