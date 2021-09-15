@@ -10,49 +10,64 @@ package org.elasticflow.field;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.flow.unit.handler.UnitHandler;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
- * Definition of data fields in data-flow 
+ * Definition of data fields in data-flow
  * 
  * @author chengwen
  * @version 1.0
  * @date 2018-11-20 09:48
  */
-public class EFField { 
-	/**read name*/
+public class EFField {
+	/** read name */
 	private String name;
-	/**write name*/
+	/** write name */
 	private String alias;
-	private String defaultvalue="";
-	private String analyzer="";
+	private String defaultvalue = "";
+	private String analyzer = "";
 	private String stored = "false";
 	private String separator;
-	/**for data storetype*/
+	/** for data storetype */
 	private String indextype;
 	private String indexed = "true";
 	private float boost = 1.0f;
 	private UnitHandler handler;
-	private boolean router=false;
+	private boolean router = false;
 	private String paramtype;
+	/** user define extension field configuration **/
 	private String dsl;
-	 
-	public boolean isValid(String value) { 
+	/** User defined JSON parameters can be used to extend the plugin */
+	private JSONObject customParams;
+
+	public boolean isValid(String value) {
 		return true;
-	}  
-	
+	}
+
+	public JSONObject getCustomParams() {
+		return customParams;
+	}
+
+	public void setCustomParams(String customParams) {
+		if (customParams != null) {
+			this.customParams = JSONObject.parseObject(customParams);
+		}
+	}
+
 	public String getAlias() {
-		if(this.alias==null){
+		if (this.alias == null) {
 			this.alias = this.name;
 		}
 		return this.alias;
-	} 
+	}
 
 	public void setAlias(String alias) {
 		this.alias = alias;
-	} 
-	
+	}
+
 	public void setBoost(float boost) {
 		this.boost = boost;
-	}   
+	}
 
 	public float getBoost() {
 		return boost;
@@ -60,20 +75,19 @@ public class EFField {
 
 	public void setBoost(String boost) {
 		this.boost = Float.valueOf(boost);
-	} 
-	
+	}
+
 	public String getParamtype() {
-		if(this.paramtype==null){
+		if (this.paramtype == null) {
 			this.paramtype = "java.lang.String";
 		}
 		return this.paramtype;
-	} 
+	}
 
 	public void setParamtype(String paramtype) {
 		this.paramtype = paramtype;
-	} 
+	}
 
-	
 	public String getDefaultvalue() {
 		return defaultvalue;
 	}
@@ -133,18 +147,21 @@ public class EFField {
 	public UnitHandler getHandler() {
 		return this.handler;
 	}
+
 	/**
 	 * if use dynamic class loader,load class first and then reload instance configs
+	 * 
 	 * @param handler
 	 * @throws Exception
 	 */
 	public void setHandler(String handler) throws Exception {
-		if(handler!=null && handler.length()>1){
-			if(handler.startsWith(GlobalParam.GROUPID)) {
+		if (handler != null && handler.length() > 1) {
+			if (handler.startsWith(GlobalParam.GROUPID)) {
 				this.handler = (UnitHandler) Class.forName(handler).newInstance();
-			}else {
-				this.handler = (UnitHandler) Class.forName(handler,true,GlobalParam.PLUGIN_CLASS_LOADER).newInstance();
-			}			
+			} else {
+				this.handler = (UnitHandler) Class.forName(handler, true, GlobalParam.PLUGIN_CLASS_LOADER)
+						.newInstance();
+			}
 		}
 	}
 
@@ -153,7 +170,7 @@ public class EFField {
 	}
 
 	public void setRouter(String router) {
-		this.router = router.toLowerCase().equals("true")?true:false;
+		this.router = router.toLowerCase().equals("true") ? true : false;
 	}
 
 	public String getDsl() {
@@ -162,5 +179,5 @@ public class EFField {
 
 	public void setDsl(String dsl) {
 		this.dsl = dsl;
-	} 
+	}
 }
