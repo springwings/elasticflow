@@ -159,7 +159,7 @@ public final class Run {
 			}
 		} catch (Exception e) { 
 			Common.LOG.error("load Global Properties Config Exception", e);
-			System.exit(0);
+			Common.stopSystem();
 		}
 		GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");
 		GlobalParam.USE_ZK = Boolean.valueOf(GlobalParam.StartConfig.getProperty("use_zk"));
