@@ -619,6 +619,7 @@ public final class Common {
 	}
 	
 	public static void stopSystem() {
+		LOG.info("Internal serious error, the system stops automatically!");
 		System.exit(0);
 	}
 }

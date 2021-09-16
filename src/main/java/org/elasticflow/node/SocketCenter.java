@@ -86,8 +86,10 @@ public final class SocketCenter {
 	public Searcher getSearcher(String instance, String L1seq, String tag, boolean reload) {
 		synchronized (searcherMap) {
 			if (reload || !searcherMap.containsKey(instance)) {
-				if (!Resource.nodeConfig.getSearchConfigs().containsKey(instance))
+				if (!Resource.nodeConfig.getSearchConfigs().containsKey(instance)) {
+					Common.LOG.error(instance+"  not exist!");
 					return null;
+				} 
 				InstanceConfig instanceConfig = Resource.nodeConfig.getSearchConfigs().get(instance);
 				Searcher searcher = Searcher.getInstance(instance, instanceConfig,
 						getSearcherSocket(
@@ -104,7 +106,6 @@ public final class SocketCenter {
 			String tags = Common.getResourceTag(instance, L1seq, tag, false);
 			if (pipePumpMap.containsKey(tags)) {
 				pipePumpMap.remove(tags);
-
 				boolean ignoreSeqUseAlias = false;
 				if (Resource.nodeConfig.getInstanceConfigs().get(instance) != null)
 					ignoreSeqUseAlias = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
@@ -132,8 +133,10 @@ public final class SocketCenter {
 
 			if (!readerSocketMap.containsKey(tags)) {
 				WarehouseParam whp = getWHP(resourceName);
-				if (whp == null)
-					return null;
+				if (whp == null) {
+					Common.LOG.error(resourceName+" resource not exist!");
+					Common.stopSystem();
+				}					
 				readerSocketMap.put(tags, ReaderFlowSocketFactory.getInstance(
 						ConnectParams.getInstance(whp, L1seq, Resource.nodeConfig.getInstanceConfigs().get(instance),
 								null),
@@ -167,8 +170,10 @@ public final class SocketCenter {
 
 			if (!writerSocketMap.containsKey(tags)) {
 				WarehouseParam whp = getWHP(resourceName);
-				if (whp == null)
-					return null;
+				if (whp == null) {
+					Common.LOG.error(resourceName+" resource not exist!");
+					Common.stopSystem();
+				}  
 				writerSocketMap.put(tags, WriterSocketFactory.getInstance(
 						ConnectParams.getInstance(whp, L1seq, Resource.nodeConfig.getInstanceConfigs().get(instance),
 								null),
@@ -193,8 +198,10 @@ public final class SocketCenter {
 
 			if (reload || !searcherSocketMap.containsKey(tags)) {
 				WarehouseParam whp = getWHP(resourceName);
-				if (whp == null)
-					return null;
+				if (whp == null) {
+					Common.LOG.error(resourceName+" resource not exist!");
+					Common.stopSystem();
+				} 
 				SearcherFlowSocket searcher = SearcherSocketFactory
 						.getInstance(
 								ConnectParams.getInstance(whp, L1seq,
