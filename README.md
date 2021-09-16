@@ -44,6 +44,12 @@ ElasticFlow就是为解决该问题而生。
 
 # Changes
 5.0 版本对之前版本在架构上全新升级，不再通过Java原生支持深度学习，计算流通过调用外部推断服务rest接口实现数据计算服务。
+# maven 
+<dependency>
+  <groupId>org.elasticflow</groupId>
+  <artifactId>elasticflow</artifactId>
+  <version>5.0.1</version>
+</dependency>
 
 # develop plan
 1 Support external computing Libraries such as so/dll
