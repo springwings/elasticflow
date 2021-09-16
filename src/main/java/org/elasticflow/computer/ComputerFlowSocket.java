@@ -21,6 +21,12 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.EFException;
 
+/**
+ * Computer Flow Socket
+ * @author chengwen
+ * @version 1.0
+ * @date 2018-12-28 09:27
+ */
 public abstract class ComputerFlowSocket extends Flow { 
 	
 	/** defined custom Computer flow handler */
