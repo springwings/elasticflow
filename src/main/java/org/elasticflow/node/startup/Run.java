@@ -17,11 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.elasticflow.computer.service.ComputerService;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.NODE_TYPE;
@@ -37,13 +32,17 @@ import org.elasticflow.searcher.service.SearcherService;
 import org.elasticflow.service.EFMonitor;
 import org.elasticflow.task.FlowTask;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.EFLoc;
 import org.elasticflow.util.ConfigStorer;
+import org.elasticflow.util.EFLoc;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.ZKUtil;
-import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.email.EFEmailSender;
 import org.elasticflow.yarn.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * Application startup position
