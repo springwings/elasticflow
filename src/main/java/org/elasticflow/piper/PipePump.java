@@ -50,8 +50,6 @@ import org.slf4j.LoggerFactory;
 public final class PipePump extends Instruction {
 
 	private final static Logger log = LoggerFactory.getLogger("PipePump");
-	
-
 
 	public static PipePump getInstance(ReaderFlowSocket reader,
 			ComputerFlowSocket computer,List<WriterFlowSocket> writer, InstanceConfig instanceConfig) {
@@ -60,46 +58,58 @@ public final class PipePump extends Instruction {
 
 	private PipePump(ReaderFlowSocket reader, ComputerFlowSocket computer,
 			List<WriterFlowSocket> writer,InstanceConfig instanceConfig) {
-		CPU.prepare(getID(), instanceConfig, writer, reader,computer);
-		 
+		CPU.prepare(getID(), instanceConfig, writer, reader,computer);		
 		try {
 			if (instanceConfig.getReadParams().getHandler() != null) {
-				if(instanceConfig.getReadParams().getHandler().startsWith(GlobalParam.GROUPID)) {
+				try {
 					reader.setReaderHandler((ReadHandler) Class.forName(instanceConfig.getReadParams().getHandler())
 							.newInstance());
-				}else {
-					reader.setReaderHandler((ReadHandler) Class.forName(instanceConfig.getReadParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
-							.newInstance());
+				} catch (Exception e) {
+					if(GlobalParam.PLUGIN_CLASS_LOADER!=null) {
+						reader.setReaderHandler((ReadHandler) Class.forName(instanceConfig.getReadParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
+								.newInstance());
+					}else {
+						throw new EFException(e.getMessage(), ELEVEL.Termination);
+					}						
 				}				
 			}
 			reader.setInstanceConfig(instanceConfig); 
 			if(computer != null) {
 				if (instanceConfig.getComputeParams().getHandler() != null) {
-					if(instanceConfig.getComputeParams().getHandler().startsWith(GlobalParam.GROUPID)) {
+					try {
 						computer.setComputerHandler((ComputeHandler) Class.forName(instanceConfig.getComputeParams().getHandler())
 								.newInstance());
-					}else {
-						computer.setComputerHandler((ComputeHandler) Class.forName(instanceConfig.getComputeParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
-								.newInstance());
-					}				
+					} catch (Exception e) {
+						if(GlobalParam.PLUGIN_CLASS_LOADER!=null) {
+							computer.setComputerHandler((ComputeHandler) Class.forName(instanceConfig.getComputeParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
+									.newInstance());
+						}else {
+							throw new EFException(e.getMessage(), ELEVEL.Termination);
+						}
+					}			
 				}
 				computer.setInstanceConfig(instanceConfig);
 			}			
 			
 			if (instanceConfig.getWriterParams().getHandler() != null) {
 				for(WriterFlowSocket wfs : writer) {
-					if(instanceConfig.getWriterParams().getHandler().startsWith(GlobalParam.GROUPID)) {
+					try {
 						wfs.setWriteHandler((WriteHandler) Class.forName(instanceConfig.getWriterParams().getHandler())
 								.newInstance());
-					}else {
-						wfs.setWriteHandler((WriteHandler) Class.forName(instanceConfig.getWriterParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
-								.newInstance());
+					} catch (Exception e) {
+						if(GlobalParam.PLUGIN_CLASS_LOADER!=null) {
+							wfs.setWriteHandler((WriteHandler) Class.forName(instanceConfig.getWriterParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
+									.newInstance());
+						}else {
+							throw new EFException(e.getMessage(), ELEVEL.Termination);
+						}
 					}	
 					wfs.setInstanceConfig(instanceConfig);
 				}							
 			}
 		} catch (Exception e) {
 			log.error("PipePump init Exception,", e);
+			Common.stopSystem();
 		}
 	}
 

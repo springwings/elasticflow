@@ -168,18 +168,19 @@ public final class Run {
 	}
 	
 	private void loadPlugins(String plugin) {
-		List<File> jars = Arrays.asList(new File(plugin).listFiles());
-		URL[] urls = new URL[jars.size()];
-		for (int i = 0; i < jars.size(); i++) {
-		    try {
-		        urls[i] = jars.get(i).toURI().toURL();
-		    } catch (Exception e) {
-		    	Common.LOG.error("load Plugins Exception", e);
-		    }
+		if(plugin!=null && plugin.length()>1) {
+			List<File> jars = Arrays.asList(new File(plugin).listFiles());
+			URL[] urls = new URL[jars.size()];
+			for (int i = 0; i < jars.size(); i++) {
+			    try {
+			        urls[i] = jars.get(i).toURI().toURL();
+			    } catch (Exception e) {
+			    	Common.LOG.error("load Plugins Exception", e);
+			    }
+			}
+			GlobalParam.PLUGIN_CLASS_LOADER = new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
+			Thread.currentThread().setContextClassLoader(GlobalParam.PLUGIN_CLASS_LOADER);  
 		}
-		GlobalParam.PLUGIN_CLASS_LOADER = new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
-		Thread.currentThread().setContextClassLoader(GlobalParam.PLUGIN_CLASS_LOADER);  
-
 	}
 	
 	private void start() {
