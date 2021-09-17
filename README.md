@@ -44,12 +44,33 @@ ElasticFlow就是为解决该问题而生。
 
 # Changes
 5.0 版本对之前版本在架构上全新升级，不再通过Java原生支持深度学习，计算流通过调用外部推断服务rest接口实现数据计算服务。
-# maven 
-    <dependency>
-      <groupId>org.elasticflow</groupId>
-      <artifactId>elasticflow</artifactId>
-      <version>5.0.1</version>
-    </dependency>
+
+# EF Plugin develop
+   1. pom入包：
+   ```xml
+      <dependency>
+        <groupId>org.elasticflow</groupId>
+        <artifactId>elasticflow</artifactId>
+        <version>5.0.2</version>
+      </dependency>
+   ```
+   2. testunit代码，例如：
+   ```java
+        @Before
+        public void setUp() {
+            System.setProperty("config", "file:/work/EF/config");
+            System.setProperty("nodeid", "1");
+        }
+        
+        @Test
+        public void testPlugin() throws Exception {
+            Run.main(null);
+            while(true) {
+        
+            }
+        }
+   ```
+       
 
 # develop plan
 1 Support external computing Libraries such as so/dll
