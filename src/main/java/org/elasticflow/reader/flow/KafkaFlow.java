@@ -25,7 +25,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 /**
- * 
+ * The message is confirmed manually when the data is completely processed.
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:24
@@ -51,9 +51,7 @@ public class KafkaFlow extends ReaderFlowSocket {
 		}
 		int count = 0;
 		boolean releaseConn = false;
-		PREPARE(false, false);
-		@SuppressWarnings("unchecked")
-		KafkaConsumer<String, String> conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader);
+		PREPARE(false, false);		
 		try {
 			String dataBoundary = null;
 			String LAST_STAMP = null;
@@ -89,9 +87,8 @@ public class KafkaFlow extends ReaderFlowSocket {
 			}else {
 				//handler reference mysql flow getAllData function 
 				this.readHandler.handleData(this,this.records,page,pageSize);
-			}   
+			}    
 			
-			conn.commitSync();
 		} catch (Exception e) {
 			releaseConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS, false);
@@ -100,6 +97,13 @@ public class KafkaFlow extends ReaderFlowSocket {
 			REALEASE(false, releaseConn);
 		}
 		return this.dataPage;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public void flush() {
+		PREPARE(false, false);
+		((KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader)).commitSync();
 	}
 
 	@Override

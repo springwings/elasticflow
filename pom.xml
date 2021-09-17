@@ -6,10 +6,29 @@
 	<groupId>org.elasticflow</groupId>
 	<artifactId>elasticflow</artifactId>
 	<packaging>jar</packaging>
-	<version>5.0.1</version>
+	<version>5.0.2</version>
 	<name>elasticflow</name>
 	<description>ElasticFlow是一个开源数据流系统，支持在任意类型数据端之间以及数据与用户之间通过建立可计算流通道，进行可定时定量多渠道方式交换数据服务。可用于数据交换、通用搜索引擎、数据发布服务等项目。</description>
 	<url>https://github.com/springwings/elasticflow/tree/master</url>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>actable</distribution>
+		</license>
+	</licenses> 
+	<developers>
+		<developer>
+			<name>chengwen</name>
+			<email>seo@5lulu.com</email>
+			<organization>5lulu.com</organization>
+		</developer>
+	</developers>
+	<scm>
+		<connection>scm:git:git@github.com:springwings/elasticflow.git</connection>
+		<developerConnection>scm:git:git@github.com:springwings/elasticflow.git</developerConnection>
+		<url>https://github.com/springwings/elasticflow/tree/master</url>
+	</scm>
 	<dependencies>
 		<dependency>
 			<groupId>org.elasticsearch.client</groupId>
@@ -460,40 +479,8 @@
 				</configuration>
 			</plugin>
 		</plugins>
-	</build>
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>actable</distribution>
-		</license>
-	</licenses>
-
-	<developers>
-		<developer>
-			<name>chengwen</name>
-			<email>seo@5lulu.com</email>
-			<organization>5lulu.com</organization>
-		</developer>
-	</developers>
-	<scm>
-		<connection>scm:git:git@github.com:springwings/elasticflow.git</connection>
-		<developerConnection>scm:git:git@github.com:springwings/elasticflow.git</developerConnection>
-		<url>https://github.com/springwings/elasticflow/tree/master</url>
-	</scm>
-
-	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-
-		<repository>
-			<id>ossrh</id>
-			<name>Nexus Release Repository</name>
-			<url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
+	</build> 
+	 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<configPath>src/main/resources</configPath>

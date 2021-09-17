@@ -31,8 +31,7 @@ public abstract class ReaderFlowSocket extends Flow{
 	
 	protected ConcurrentLinkedQueue<PipeDataUnit> dataUnit = new ConcurrentLinkedQueue<>(); 
 	
-	public final Lock lock = new ReentrantLock(); 
-	
+	public final Lock lock = new ReentrantLock(); 	
 	
 	
 	@Override
@@ -61,8 +60,20 @@ public abstract class ReaderFlowSocket extends Flow{
 
 	public abstract ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize);
 	
+	/**
+	 * Transaction confirmation
+	 */
+	public void flush() {
+		
+	}
+	
+	/**
+	 * release job page
+	 */
 	public void freeJobPage() {
 		this.dataPage.clear(); 
 		this.dataUnit.clear();  
 	} 
+	
+	
 }

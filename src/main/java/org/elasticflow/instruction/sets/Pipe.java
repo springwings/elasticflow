@@ -124,8 +124,9 @@ public class Pipe extends Instruction {
 					freeConn = true;
 				}
 			} finally {
-				DSReader.close();
+				DSReader.close(); 
 				context.getWriter().flush();
+				context.getReader().flush();
 				context.getWriter().REALEASE(monopoly, freeConn);
 			}
 		} else {
