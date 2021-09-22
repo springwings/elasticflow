@@ -1,2 +1,5 @@
 #!/bin/bash
-sh ./stop.sh && ./start.sh
+PROC_NAME=elasticflow
+sh ./stop.sh
+sleep 3
+./start.sh
