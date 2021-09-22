@@ -33,7 +33,9 @@ import com.alibaba.fastjson.JSONObject;
 @NotThreadSafe
 public class KafkaFlow extends ReaderFlowSocket {
 	
-	static int readms = 3000;
+	private int readms = 3000;
+	
+	private boolean autoCommit = false;
 	
 	ConsumerRecords<String, String> records;
 
@@ -44,8 +46,14 @@ public class KafkaFlow extends ReaderFlowSocket {
 		o.INIT(connectParams);
 		if(connectParams.getWhp().getCustomParams()!=null) {
 			if(connectParams.getWhp().getCustomParams().containsKey("max.poll.interval.ms"))
-				readms = connectParams.getWhp().getCustomParams().getIntValue("max.poll.interval.ms");
-		}
+				o.readms = connectParams.getWhp().getCustomParams().getIntValue("max.poll.interval.ms");
+			if(connectParams.getWhp().getCustomParams().containsKey("enable.auto.commit")) {
+				String tmp = connectParams.getWhp().getCustomParams().getString("max.poll.interval.ms");
+				if(tmp.toLowerCase().equals("false")) {
+					o.autoCommit = true;
+				}
+			} 
+		} 
 		return o;
 	}
 
@@ -56,7 +64,7 @@ public class KafkaFlow extends ReaderFlowSocket {
 		}
 		int count = 0;
 		boolean releaseConn = false;
-		PREPARE(false, false);		
+		PREPARE(true, false);		
 		try {
 			String dataBoundary = null;
 			String LAST_STAMP = null;
@@ -107,15 +115,17 @@ public class KafkaFlow extends ReaderFlowSocket {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void flush() {
-		PREPARE(false, false);
-		((KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader)).commitSync();
+		if(this.autoCommit) {
+			PREPARE(true, false);
+			((KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader)).commitSync();
+		}		
 	}
 
 	@Override
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) {
 		boolean releaseConn = false;
-		PREPARE(false, false);
-		@SuppressWarnings("unchecked")
+		PREPARE(true, false);
+		@SuppressWarnings("unchecked") 
 		KafkaConsumer<String, String> conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader);
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
 		try {

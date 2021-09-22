@@ -46,6 +46,12 @@ public abstract class Flow {
 	
 	public abstract void INIT(ConnectParams connectParams);
 	
+	/**
+	 * 
+	 * @param isMonopoly  if true, the task will monopolize a specific connection and will not release it 
+	 * @param canSharePipe  if true, Use global shared connections
+	 * @return
+	 */
 	public EFConnectionSocket<?> PREPARE(boolean isMonopoly,boolean canSharePipe) {  
 		synchronized (this.retainer) {  
 			if(isMonopoly) {

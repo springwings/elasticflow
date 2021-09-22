@@ -256,7 +256,7 @@ public final class PipePump extends Instruction {
 				}
 			} else {
 				singleThread(task, storeId, pageList, writeTo, total);
-			}
+			}  
 			if(task.getInstanceConfig().getPipeParams().getLogLevel()<2)
 				log.info(Common.formatLog("complete", "Complete " + task.getJobType().name(), mainName, storeId,
 						task.getL2seq(), total.get(), "",

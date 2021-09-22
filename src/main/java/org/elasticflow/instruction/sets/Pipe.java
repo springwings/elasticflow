@@ -115,6 +115,7 @@ public class Pipe extends Instruction {
 				}
 				rstate.setReaderScanStamp(DSReader.getScanStamp());
 				rstate.setCount(num);
+				context.getReader().flush();
 				log.info(Common.formatLog("onepage"," -- " + id + " onepage ", instance, storeId, L2seq, num,
 						DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));
 			} catch (EFException e) {
@@ -123,10 +124,9 @@ public class Pipe extends Instruction {
 				} else {
 					freeConn = true;
 				}
-			} finally {
+			} finally { 
 				DSReader.close(); 
-				context.getWriter().flush();
-				context.getReader().flush();
+				context.getWriter().flush();				
 				context.getWriter().REALEASE(monopoly, freeConn);
 			}
 		} else {
