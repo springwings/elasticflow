@@ -33,7 +33,8 @@ import com.alibaba.fastjson.JSONObject;
 @NotThreadSafe
 public class KafkaFlow extends ReaderFlowSocket {
 	
-	final int readms = 2000;
+	static int readms = 3000;
+	
 	ConsumerRecords<String, String> records;
 
 	private final static Logger log = LoggerFactory.getLogger(KafkaFlow.class);
@@ -41,6 +42,10 @@ public class KafkaFlow extends ReaderFlowSocket {
 	public static KafkaFlow getInstance(final ConnectParams connectParams) {
 		KafkaFlow o = new KafkaFlow();
 		o.INIT(connectParams);
+		if(connectParams.getWhp().getCustomParams()!=null) {
+			if(connectParams.getWhp().getCustomParams().containsKey("max.poll.interval.ms"))
+				readms = connectParams.getWhp().getCustomParams().getIntValue("max.poll.interval.ms");
+		}
 		return o;
 	}
 

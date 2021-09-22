@@ -64,6 +64,20 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
         props.put("max.poll.records",GlobalParam.READ_PAGE_SIZE);
         props.put("max.partition.fetch.bytes", MAX_FETCH_BYTES);
         props.put("enable.auto.commit", "false");
+        props.put("session.timeout.ms", "15000");
+        props.put("heartbeat.interval.ms", "3000");
+        if(wnp.getCustomParams()!=null) {
+        	if(wnp.getCustomParams().containsKey("max.poll.records"))
+        		props.put("max.poll.records",wnp.getCustomParams().getString("max.poll.records"));
+        	if(wnp.getCustomParams().containsKey("max.partition.fetch.bytes"))
+        		props.put("max.partition.fetch.bytes",wnp.getCustomParams().getString("max.partition.fetch.bytes"));
+        	if(wnp.getCustomParams().containsKey("session.timeout.ms"))
+        		props.put("session.timeout.ms",wnp.getCustomParams().getString("session.timeout.ms"));
+        	if(wnp.getCustomParams().containsKey("heartbeat.interval.ms"))
+        		props.put("heartbeat.interval.ms",wnp.getCustomParams().getString("heartbeat.interval.ms"));
+        	if(wnp.getCustomParams().containsKey("enable.auto.commit"))
+        		props.put("enable.auto.commit",wnp.getCustomParams().getString("enable.auto.commit"));
+        }
         this.cconn = new KafkaConsumer<String, String>(props);
 		this.cconn.subscribe(Arrays.asList(wnp.getDefaultValue().getString(CUSTOM_CONSUMER_TOPIC).split(",")));
 	}
@@ -78,6 +92,12 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
         props.put("buffer.memory", 33554432);
         props.put("key.serializer",StringSerializer.class);
         props.put("value.serializer",StringSerializer.class);
+        if(wnp.getCustomParams()!=null) {
+        	if(wnp.getCustomParams().containsKey("batch.size"))
+        		props.put("batch.size",wnp.getCustomParams().getString("batch.size"));
+        	if(wnp.getCustomParams().containsKey("acks"))
+        		props.put("acks",wnp.getCustomParams().getString("acks"));
+        }
         this.pconn = new KafkaProducer<>(props);
 	}
 
