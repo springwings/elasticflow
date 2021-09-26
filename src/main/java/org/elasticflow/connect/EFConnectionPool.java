@@ -114,7 +114,7 @@ public final class EFConnectionPool {
 	 */
 	private class ConnectionPool {
 		private AtomicInteger activeNum = new AtomicInteger(0);
-		private final int maxConn;
+		private int maxConn;
 		private final String poolName;
 		private final ConnectParams params; 
 		private ConcurrentLinkedQueue<EFConnectionSocket<?>> freeConnections = new ConcurrentLinkedQueue<EFConnectionSocket<?>>();

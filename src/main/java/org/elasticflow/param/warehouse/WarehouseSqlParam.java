@@ -33,6 +33,7 @@ public class WarehouseSqlParam implements WarehouseParam{
 	private String handler;
 	private JSONObject customParams;
 	private JSONObject defaultValue;
+	private int maxConn = 0;
 	
 	public String getName() {
 		return name;
@@ -113,10 +114,18 @@ public class WarehouseSqlParam implements WarehouseParam{
 	public String getPoolName(String seq) {  
 		return this.alias+"_"+this.type+"_"+this.host+"_"+((seq != null) ? this.dbname.replace("#{seq}", seq):this.dbname);
 	}
+	
 	@Override
-	public int getMaxConn() { 
-		return 0;
+	public int getMaxConn() {
+		return this.maxConn;
 	}
+
+	@Override
+	public void setMaxConn(String maxConn) {
+		if(maxConn!=null) {
+			this.maxConn = Integer.parseInt(maxConn);
+		}
+	} 
 	
 	@Override
 	public JSONObject getCustomParams() {

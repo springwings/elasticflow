@@ -29,6 +29,7 @@ public class WarehouseNosqlParam implements WarehouseParam{
 	private JSONObject customParams;
 	private String handler;
 	private String[] L1seq = {};
+	private int maxConn = 0;
 	
 	public DATA_SOURCE_TYPE getType() {
 		return type;
@@ -125,8 +126,14 @@ public class WarehouseNosqlParam implements WarehouseParam{
 
 	@Override
 	public int getMaxConn() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.maxConn;
+	}
+
+	@Override
+	public void setMaxConn(String maxConn) {
+		if(maxConn!=null) {
+			this.maxConn = Integer.parseInt(maxConn);
+		}
 	} 
- 
+	
 }

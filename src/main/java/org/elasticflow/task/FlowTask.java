@@ -220,7 +220,7 @@ public class FlowTask {
 			}
 		} else {
 			if(transDataFlow.getInstanceConfig().getPipeParams().getLogLevel()==0)
-				log.info(instance + " Current Increment flow has been breaked!");
+				log.info(instance + " The last round is not over, and the new increment is aborted!");
 		}
 	}
 	

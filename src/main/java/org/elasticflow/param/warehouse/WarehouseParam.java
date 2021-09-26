@@ -29,7 +29,9 @@ public interface WarehouseParam {
 	
 	public String getPoolName(String seq);
 	
-	public int getMaxConn();	
+	public int getMaxConn();
+	
+	public void setMaxConn(String maxConn);
 	
 	public JSONObject getCustomParams();
 	
