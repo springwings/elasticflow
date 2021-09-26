@@ -613,9 +613,10 @@ public final class Common {
 	public static void processErrorLevel(EFException e) {
 		if(e.getErrorLevel().equals(ELEVEL.Termination)) {
 			Thread.currentThread().interrupt();
+			LOG.info("A error has occurred and the current thread has been interrupted automatically!");
 		}else if (e.getErrorLevel().equals(ELEVEL.Stop)) {
 			stopSystem();
-		}
+		} 
 	}
 	
 	public static void stopSystem() {

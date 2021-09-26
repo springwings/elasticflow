@@ -90,7 +90,7 @@ public class PipeDataUnit implements Cloneable{
 					 return method.invoke(c,v);
 				 }
 			} catch (Exception e) {
-				throw new EFException(e.getMessage(), ELEVEL.Termination);
+				throw new EFException(e.getMessage()+",Field "+fd.getName(), ELEVEL.Dispose);
 			}			
 		}		
 	}

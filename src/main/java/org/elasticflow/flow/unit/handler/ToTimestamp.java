@@ -8,6 +8,8 @@ import java.util.Map;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ELEVEL;
 
 /**
  * Date to millisecond timestamp
@@ -21,13 +23,14 @@ public class ToTimestamp implements UnitHandler{
 	private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	@Override
-	public void handle(PipeDataUnit u,EFField field, Object obj, Map<String, EFField> transParams) {
+	public void handle(PipeDataUnit u,EFField field, Object obj, Map<String, EFField> transParams) throws EFException {
 		Date date;
 		try {
 			date = SDF.parse(String.valueOf(obj));
 			u.getData().put(field.getName(),date.getTime());
-		} catch (ParseException e) {
-			Common.LOG.error("ToTimestamp parse exception!",e);
+		} catch (ParseException e) { 
+			Common.LOG.error(field.getName()+" with reader key "+u.getReaderKeyVal()+",ToTimestamp parse exception!");
+			throw new EFException(e.getMessage(), ELEVEL.Dispose);
 		}        
 	}
 
