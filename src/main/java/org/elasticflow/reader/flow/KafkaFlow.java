@@ -48,8 +48,8 @@ public class KafkaFlow extends ReaderFlowSocket {
 			if(connectParams.getWhp().getCustomParams().containsKey("max.poll.interval.ms"))
 				o.readms = connectParams.getWhp().getCustomParams().getIntValue("max.poll.interval.ms");
 			if(connectParams.getWhp().getCustomParams().containsKey("enable.auto.commit")) {
-				String tmp = connectParams.getWhp().getCustomParams().getString("max.poll.interval.ms");
-				if(tmp.toLowerCase().equals("false")) {
+				String tmp = connectParams.getWhp().getCustomParams().getString("enable.auto.commit");
+				if(tmp.toLowerCase().equals("true")) {
 					o.autoCommit = true;
 				}
 			} 
@@ -115,7 +115,7 @@ public class KafkaFlow extends ReaderFlowSocket {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void flush() {
-		if(this.autoCommit) {
+		if(!this.autoCommit) {
 			PREPARE(true, false);
 			((KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader)).commitSync();
 		}		
