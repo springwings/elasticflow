@@ -31,15 +31,19 @@ public class KafkaFlow extends WriterFlowSocket {
 		o.INIT(connectParams);
 		return o;
 	}
-
+	
+	@SuppressWarnings("unchecked")
+	private KafkaProducer<String, String> getconn() {
+		return (KafkaProducer<String, String>) GETSOCKET().getConnection(END_TYPE.writer);
+	}
+	
 	@Override
 	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams, String instance,
 			String storeId, boolean isUpdate) throws EFException {
 		try {
 			if (!ISLINK())
-				return;
-			@SuppressWarnings("unchecked")
-			KafkaProducer<String, String> conn = (KafkaProducer<String, String>) GETSOCKET().getConnection(END_TYPE.writer);
+				return; 
+			KafkaProducer<String, String> conn = this.getconn();
 			for (Entry<String, Object> r : unit.getData().entrySet()) {
 				String field = r.getKey();
 				if (r.getValue() == null)
@@ -53,8 +57,7 @@ public class KafkaFlow extends WriterFlowSocket {
 					Object val = r.getValue();
 					conn.send(new ProducerRecord<String, String>(transParams.get("topic").getDefaultvalue(), unit.getReaderKeyVal(),val.toString()));
 				}						
-			}
-			
+			}			
 		} catch (Exception e) {
 			log.error("write Exception", e);
 		}
@@ -62,9 +65,7 @@ public class KafkaFlow extends WriterFlowSocket {
 
 	@Override
 	public void flush() throws Exception {
-		@SuppressWarnings("unchecked")
-		KafkaProducer<String, String> conn = (KafkaProducer<String, String>) GETSOCKET().getConnection(END_TYPE.writer);
-		conn.flush();
+		this.getconn().flush();
 	}
 
 	@Override

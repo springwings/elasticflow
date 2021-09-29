@@ -394,7 +394,6 @@ public final class PipePump extends Instruction {
 					if (getInstanceConfig().openCompute()) {
 						pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(),
 								task.getJobType().name(), writeTo, pagedata);
-				
 					} 
 					try {
 						rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false,

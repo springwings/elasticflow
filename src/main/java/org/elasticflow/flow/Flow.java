@@ -64,7 +64,7 @@ public abstract class Flow {
 							this.poolName,canSharePipe);  
 				} 
 			}
-		} 
+		}
 		return this.EFConn;
 	}
 	

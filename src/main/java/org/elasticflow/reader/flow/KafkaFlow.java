@@ -25,7 +25,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 /**
- * The message is confirmed manually when the data is completely processed.
+ * The message is confirmed manually 
+ * when autoCommit is false.
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:24
@@ -40,7 +41,10 @@ public class KafkaFlow extends ReaderFlowSocket {
 	ConsumerRecords<String, String> records;
 
 	private final static Logger log = LoggerFactory.getLogger(KafkaFlow.class);
-
+	
+	private KafkaConsumer<String, String> conn = null;
+	
+	
 	public static KafkaFlow getInstance(final ConnectParams connectParams) {
 		KafkaFlow o = new KafkaFlow();
 		o.INIT(connectParams);
@@ -53,8 +57,15 @@ public class KafkaFlow extends ReaderFlowSocket {
 					o.autoCommit = true;
 				}
 			} 
-		} 
+		}  
+		o.initconn();
 		return o;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void initconn() {
+		PREPARE(true, false);
+		this.conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader);
 	}
 
 	@Override
@@ -64,7 +75,6 @@ public class KafkaFlow extends ReaderFlowSocket {
 		}
 		int count = 0;
 		boolean releaseConn = false;
-		PREPARE(false, false);		
 		try {
 			String dataBoundary = null;
 			String LAST_STAMP = null;
@@ -106,27 +116,26 @@ public class KafkaFlow extends ReaderFlowSocket {
 			releaseConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS, false);
 			REALEASE(false, releaseConn);
+			this.initconn();
 			log.error("get Page Data Exception so free connection,details ", e);
 		}  
 		return this.dataPage;
 	}
 	
+	/**
+	 * Do not release the connection unless there is a processing error
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public void flush() {
-		PREPARE(false, false); 
 		if(!this.autoCommit) { 
 			((KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader)).commitSync();
 		}	
-		REALEASE(false, false);
 	}
 
 	@Override
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) {
 		boolean releaseConn = false;
-		PREPARE(false, false);
-		@SuppressWarnings("unchecked") 
-		KafkaConsumer<String, String> conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader);
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
 		try {
 			while (true) {
@@ -148,6 +157,7 @@ public class KafkaFlow extends ReaderFlowSocket {
 			releaseConn = true;
 			page.clear();
 			REALEASE(false, releaseConn);
+			this.initconn();
 			log.error("get dataPage Exception so free connection,details ", e);
 		}  
 		return page;
