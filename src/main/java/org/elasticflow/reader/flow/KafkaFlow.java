@@ -64,7 +64,7 @@ public class KafkaFlow extends ReaderFlowSocket {
 		}
 		int count = 0;
 		boolean releaseConn = false;
-		PREPARE(true, false);		
+		PREPARE(false, false);		
 		try {
 			String dataBoundary = null;
 			String LAST_STAMP = null;
@@ -105,26 +105,26 @@ public class KafkaFlow extends ReaderFlowSocket {
 		} catch (Exception e) {
 			releaseConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS, false);
-			log.error("get Page Data Exception so free connection,details ", e);
-		} finally {
 			REALEASE(false, releaseConn);
-		}
+			log.error("get Page Data Exception so free connection,details ", e);
+		}  
 		return this.dataPage;
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void flush() {
-		if(!this.autoCommit) {
-			PREPARE(true, false);
+		PREPARE(false, false); 
+		if(!this.autoCommit) { 
 			((KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader)).commitSync();
-		}		
+		}	
+		REALEASE(false, false);
 	}
 
 	@Override
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) {
 		boolean releaseConn = false;
-		PREPARE(true, false);
+		PREPARE(false, false);
 		@SuppressWarnings("unchecked") 
 		KafkaConsumer<String, String> conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader);
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
@@ -144,14 +144,12 @@ public class KafkaFlow extends ReaderFlowSocket {
 					break;
 				}
 			}
-
 		} catch (Exception e) {
 			releaseConn = true;
 			page.clear();
-			log.error("get dataPage Exception so free connection,details ", e);
-		} finally {
 			REALEASE(false, releaseConn);
-		}
+			log.error("get dataPage Exception so free connection,details ", e);
+		}  
 		return page;
 	}
 

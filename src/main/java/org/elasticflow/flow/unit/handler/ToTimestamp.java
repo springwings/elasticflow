@@ -1,15 +1,13 @@
 package org.elasticflow.flow.unit.handler;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
-import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ELEVEL;
 
 /**
  * Date to millisecond timestamp
@@ -20,18 +18,11 @@ import org.elasticflow.util.EFException.ELEVEL;
  */
 public class ToTimestamp implements UnitHandler{
 	
-	private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static DateTimeFormatter DFT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	
 	@Override
 	public void handle(PipeDataUnit u,EFField field, Object obj, Map<String, EFField> transParams) throws EFException {
-		Date date;
-		try {
-			date = SDF.parse(String.valueOf(obj));
-			u.getData().put(field.getName(),date.getTime());
-		} catch (ParseException e) { 
-			Common.LOG.error(field.getName()+" with reader key "+u.getReaderKeyVal()+",ToTimestamp parse exception!");
-			throw new EFException(e.getMessage(), ELEVEL.Dispose);
-		}        
+		LocalDateTime localDate = LocalDateTime.parse(String.valueOf(obj), DFT); 
+		u.getData().put(field.getName(),localDate.toInstant(ZoneOffset.of("+8")).toEpochMilli());
 	}
-
 }
