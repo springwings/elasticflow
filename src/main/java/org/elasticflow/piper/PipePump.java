@@ -311,9 +311,9 @@ public final class PipePump extends Instruction {
 				total.getAndAdd(rState.getCount());
 				startId = dataBoundary;
 			}
-
-			if (rState.getReaderScanStamp().compareTo(GlobalParam.SCAN_POSITION.get(task.getInstance()).
-					getL2SeqPos(task.getL2seq())) > 0) {
+			
+			if (this.scanPosCompare(rState.getReaderScanStamp(), GlobalParam.SCAN_POSITION.get(task.getInstance()).
+					getL2SeqPos(task.getL2seq()))) {
 				GlobalParam.SCAN_POSITION.get(task.getInstance()).updateL2SeqPos(task.getL2seq(),
 						rState.getReaderScanStamp());
 			}
@@ -323,6 +323,13 @@ public final class PipePump extends Instruction {
 		}
 	}
 
+	boolean scanPosCompare(String s1,String s2) {
+		if (s1.compareTo(s2) > 0 || 
+				s1.length()>s2.length()) 
+			return true;
+		return false;
+	}
+	
 	int estimateThreads(int numJobs) {
 		return (int) (1 + Math.log(numJobs));
 	}
