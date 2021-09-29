@@ -322,7 +322,7 @@ public final class PipePump extends Instruction {
 			}
 		}
 	}
-
+ 
 	boolean scanPosCompare(String s1,String s2) {
 		if (s1.compareTo(s2) > 0 || 
 				s1.length()>s2.length()) 
