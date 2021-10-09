@@ -95,7 +95,7 @@ public class ZKUtil {
 		try {
 			return getZk().getData(filename, watcher, null);
 		} catch (Exception e) {
-			if(e.getMessage().contains("NoNode") && create) {
+			if(Common.exceptionCheckContain(e, "NoNode") && create) {
 				createPath(filename, true);
 				return "".getBytes();
 			}

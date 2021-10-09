@@ -113,7 +113,7 @@ public class RestService extends ComputerFlowSocket{
 							this.write(context, tmp, responseParams, _keepdt);						
 						} catch (Exception e) { 
 							this.successRunAll = false;
-							log.error(e.getMessage());
+							log.error("rest post data process error",e);
 						}   
 		            }); 
 					post_data.clear(); 
@@ -134,7 +134,7 @@ public class RestService extends ComputerFlowSocket{
 						this.write(context,tmp, responseParams, _keepdt);						
 					} catch (Exception e) { 
 						this.successRunAll = false;
-						log.error(e.getMessage());
+						log.error("executor process error",e);
 					}   
 	            });  
 				post_data.clear();
@@ -144,7 +144,7 @@ public class RestService extends ComputerFlowSocket{
 			try {
 				executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 			} catch (Exception e) { 
-				throw new EFException(e.getMessage(), ELEVEL.Termination);
+				throw new EFException(e, ELEVEL.Termination);
 			}		
 			if(this.successRunAll==false)
 				throw new EFException("job executorService exception", ELEVEL.Termination);

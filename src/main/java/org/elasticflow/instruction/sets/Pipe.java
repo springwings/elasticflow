@@ -16,6 +16,7 @@ import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,7 +123,7 @@ public class Pipe extends Instruction {
 			} catch (EFException e) {
 				Common.processErrorLevel(e);
 				if (e.getErrorType().equals(ETYPE.WRITE_POS_NOT_FOUND)) {
-					throw e;
+					throw new EFException(e, ELEVEL.Termination);
 				} else {
 					freeConn = true;
 				}

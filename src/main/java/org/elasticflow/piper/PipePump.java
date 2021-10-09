@@ -69,7 +69,7 @@ public final class PipePump extends Instruction {
 						reader.setReaderHandler((ReaderHandler) Class.forName(instanceConfig.getReadParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
 								.newInstance());
 					}else {
-						throw new EFException(e.getMessage(), ELEVEL.Termination);
+						throw new EFException(e, ELEVEL.Termination);
 					}						
 				}				
 			}
@@ -84,7 +84,7 @@ public final class PipePump extends Instruction {
 							computer.setComputerHandler((ComputerHandler) Class.forName(instanceConfig.getComputeParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
 									.newInstance());
 						}else {
-							throw new EFException(e.getMessage(), ELEVEL.Termination);
+							throw new EFException(e, ELEVEL.Termination);
 						}
 					}			
 				}
@@ -101,7 +101,7 @@ public final class PipePump extends Instruction {
 							wfs.setWriteHandler((WriterHandler) Class.forName(instanceConfig.getWriterParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
 									.newInstance());
 						}else {
-							throw new EFException(e.getMessage(), ELEVEL.Termination);
+							throw new EFException(e, ELEVEL.Termination);
 						}
 					}	
 					wfs.setInstanceConfig(instanceConfig);

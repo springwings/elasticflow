@@ -212,10 +212,10 @@ public class SolrFlow extends WriterFlowSocket{
 					getSolrConn().add(docs);
 					getSolrConn().commit(true, true, true);
 				} catch (Exception e) {
-					if (e.getMessage().contains("Collection not found")) {
+					if (Common.exceptionCheckContain(e, "Collection not found")) {
 						throw new EFException("storeId not found",ELEVEL.Dispose,ETYPE.WRITE_POS_NOT_FOUND);
 					} else {
-						throw new EFException(e.getMessage());
+						throw new EFException(e);
 					}
 				}
 				docs.clear();

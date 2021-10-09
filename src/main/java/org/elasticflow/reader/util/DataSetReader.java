@@ -53,7 +53,7 @@ public class DataSetReader{
 	}
 	
 	public boolean nextLine() {
-		if (datas.isEmpty()) {
+		if (datas == null || datas.isEmpty()) {
 			return false; 
 		}
 		return true;

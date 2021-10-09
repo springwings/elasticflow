@@ -12,6 +12,7 @@ import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,7 @@ public class KafkaFlow extends WriterFlowSocket {
 			}			
 		} catch (Exception e) {
 			log.error("write Exception", e);
+			throw new EFException(e,ELEVEL.Dispose);
 		}
 	}
 

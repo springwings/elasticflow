@@ -21,26 +21,29 @@ public class EFException extends Exception {
 	}
 
 	public static enum ETYPE {
-		WRITE_POS_NOT_FOUND;
+		WRITE_POS_NOT_FOUND,UNKNOWN;
 	}
 
-	private ELEVEL e_level;
+	private ELEVEL e_level = ELEVEL.Ignore;
 
-	private ETYPE e_type;
+	private ETYPE e_type = ETYPE.UNKNOWN;
 
 	public EFException(String msg) {
 		super(msg);
-		e_level = ELEVEL.Ignore;
 	} 
 	
 	public EFException(Exception e) {
 		super(e);
-		e_level = ELEVEL.Ignore;
 	}
 	
-	public EFException(String msg, ELEVEL etype) {
+	public EFException(Exception e, ELEVEL elevel) {
+		super(e);
+		e_level = elevel;
+	}
+	
+	public EFException(String msg, ELEVEL elevel) {
 		super(msg);
-		e_level = etype;
+		e_level = elevel;
 	}
 
 	public EFException(String msg, ELEVEL elevel, ETYPE etype) {

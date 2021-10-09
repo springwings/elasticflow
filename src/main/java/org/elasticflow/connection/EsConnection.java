@@ -89,7 +89,6 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 	@Override
 	public boolean free() {
 		try {
-			freeBP();
 			this.conn.close();
 			this.ESC = null;
 			this.conn = null;
@@ -99,14 +98,6 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 			return false;
 		}
 		return true;
-	}
-
-	private void freeBP() {
-		if (this.bulkProcessor != null) {
-			this.bulkProcessor.flush();
-			this.bulkProcessor.close();
-			this.bulkProcessor = null;
-		}
 	}
 
 	private void getBulkProcessor(RestHighLevelClient _client) {
@@ -123,8 +114,6 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 								if (response.hasFailures()) {
 									log.error("BulkProcessor error," + response.buildFailureMessage());
 									ESC.setRunState(false);
-								} else {
-									ESC.setRunState(true);
 								}
 							}
 
@@ -132,7 +121,7 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 							public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
 								if (failure != null) {
 									ESC.setRunState(false);
-									failure.printStackTrace();
+									log.error("BulkProcessor error," + failure.getMessage());
 								}
 							}
 						})

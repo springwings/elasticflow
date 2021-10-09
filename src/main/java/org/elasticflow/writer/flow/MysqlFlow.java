@@ -15,6 +15,7 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.PipeNormsUtil;
+import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +68,7 @@ public class MysqlFlow extends WriterFlowSocket {
 			}
 		} catch (Exception e) {
 			log.error("write Exception", e);
+			throw new EFException(e,ELEVEL.Dispose);
 		}
 	}
 

@@ -174,7 +174,7 @@ public class MysqlFlow extends ReaderFlowSocket{
 			}
 			rs.close();
 		} catch (Exception e) {
-			throw new EFException(e.getMessage());
+			throw new EFException(e);
 		}
 		if (LAST_STAMP==null){ 
 			this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis()); 

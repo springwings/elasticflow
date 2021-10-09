@@ -511,6 +511,15 @@ public final class Common {
 		}			
 	} 
 	
+	public static boolean exceptionCheckContain(Exception ex,String key) {
+		StringBuffer sb = new StringBuffer();
+		StackTraceElement[] trace = ex.getStackTrace();
+		for (StackTraceElement s : trace) {
+			sb.append("\tat " + s + "\r\n");
+		}
+		return sb.toString().contains(key);
+	}
+	
 	public static EFSearchRequest getEFRequest(Request rq,EFSearchResponse rps) {
 		EFSearchRequest RR = null;
 		String ctype = rq.getHeader("Content-type"); 

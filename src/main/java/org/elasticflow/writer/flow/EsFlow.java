@@ -171,10 +171,10 @@ public class EsFlow extends WriterFlowSocket {
 			}
 		} catch (Exception e) {
 			log.error("write Exception", e);
-			if (e.getMessage().contains("IndexNotFoundException")) {
-				throw new EFException("storeId not found", ELEVEL.Dispose, ETYPE.WRITE_POS_NOT_FOUND);
+			if (Common.exceptionCheckContain(e, "IndexNotFoundException")) {
+				throw new EFException("storeId not found", ELEVEL.Termination, ETYPE.WRITE_POS_NOT_FOUND);
 			} else {
-				throw new EFException(e);
+				throw new EFException(e,ELEVEL.Dispose);
 			}
 		}
 	}
@@ -196,7 +196,7 @@ public class EsFlow extends WriterFlowSocket {
 				getESC().getBulkProcessor().flush();
 			} catch (Exception e) {
 				getESC().setBulkProcessor(null);
-				throw new EFException(e.getMessage());
+				throw new EFException(e);
 			} 
 			if (getESC().getRunState() == false) {
 				getESC().setRunState(true);
