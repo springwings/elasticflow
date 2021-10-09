@@ -13,8 +13,8 @@ import org.elasticsearch.client.RestHighLevelClient;
  */
 public final class EsConnector {
 	
-	private RestHighLevelClient client;
-	private BulkProcessor bulkProcessor;
+	private volatile RestHighLevelClient client;
+	private volatile BulkProcessor bulkProcessor;
 	private AtomicBoolean bulkRunState  = new AtomicBoolean(true);
 	
 	public RestHighLevelClient getClient() {

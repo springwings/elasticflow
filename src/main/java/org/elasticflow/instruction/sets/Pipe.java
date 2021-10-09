@@ -116,9 +116,11 @@ public class Pipe extends Instruction {
 				rstate.setReaderScanStamp(DSReader.getScanStamp());
 				rstate.setCount(num);
 				context.getReader().flush();
+				context.getWriter().flush();
 				log.info(Common.formatLog("onepage"," -- " + id + " onepage ", instance, storeId, L2seq, num,
 						DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));
 			} catch (EFException e) {
+				Common.processErrorLevel(e);
 				if (e.getErrorType().equals(ETYPE.WRITE_POS_NOT_FOUND)) {
 					throw e;
 				} else {
@@ -126,8 +128,7 @@ public class Pipe extends Instruction {
 				}
 			} finally { 
 				DSReader.close(); 
-				context.getWriter().flush();				
-				context.getWriter().REALEASE(monopoly, freeConn);
+				context.getWriter().REALEASE(monopoly, freeConn); 
 			}
 		} else {
 			rstate.setStatus(false);

@@ -131,6 +131,7 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 							@Override
 							public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
 								if (failure != null) {
+									ESC.setRunState(false);
 									failure.printStackTrace();
 								}
 							}

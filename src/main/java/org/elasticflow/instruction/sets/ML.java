@@ -55,9 +55,6 @@ public class ML extends Instruction {
 				} 		
 			} catch (EFException e) {
 				log.error("batch Compute Exception", e);
-				if(e.getErrorLevel().equals(ELEVEL.Dispose)) {
-					context.getComputer().clearPool();
-				}
 				Common.processErrorLevel(e);
 			} finally {
 				DSReader.close();

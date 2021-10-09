@@ -15,19 +15,9 @@
 		http://www.springframework.org/schema/aop
 		http://www.springframework.org/schema/aop/spring-aop.xsd
 	    http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc.xsd"> 
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd">  
 	<context:component-scan base-package="org.elasticflow" /> 
 	<util:properties id="nodeSystemInfo" location="classpath:config/node.properties"></util:properties>
- 
-	<bean id="log4jInitialization" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-	   <property name="targetClass" value="org.springframework.util.Log4jConfigurer" />
-	   <property name="targetMethod" value="initLogging" />
-	   <property name="arguments">
-	      <list>
-	         <value>#{systemProperties['config']}/log4j.properties</value>
-	      </list>
-	   </property>
-	</bean>  
 
 	<bean id="SocketCenter" class="org.elasticflow.node.SocketCenter"/> 
 	<bean id="FlowCenter" class="org.elasticflow.node.FlowCenter" /> 

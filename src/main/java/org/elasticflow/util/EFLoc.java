@@ -7,6 +7,9 @@
  */
 package org.elasticflow.util;
 
+import java.io.FileNotFoundException;
+
+import org.elasticflow.config.GlobalParam;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -17,9 +20,15 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @date 2018-10-26 09:19
  */
 public final class EFLoc {
+	
 	private static ApplicationContext ACT; 
 	
 	static {
+		try {
+			org.springframework.util.Log4jConfigurer.initLogging(GlobalParam.configPath+"/log4j.properties");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 		ACT = new ClassPathXmlApplicationContext ("spring.xml");
 	} 
 

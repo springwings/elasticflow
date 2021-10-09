@@ -190,9 +190,14 @@ public class EsFlow extends WriterFlowSocket {
 	}
 
 	@Override
-	public void flush() throws Exception {
+	public void flush() throws EFException {
 		if (this.isBatch) {
-			getESC().getBulkProcessor().flush();
+			try {
+				getESC().getBulkProcessor().flush();
+			} catch (Exception e) {
+				getESC().setBulkProcessor(null);
+				throw new EFException(e.getMessage());
+			} 
 			if (getESC().getRunState() == false) {
 				getESC().setRunState(true);
 				throw new EFException("BulkProcessor Exception!Need Redo!");

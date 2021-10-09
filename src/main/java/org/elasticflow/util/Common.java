@@ -616,7 +616,7 @@ public final class Common {
 			LOG.info("A error has occurred and the current thread has been interrupted automatically!");
 		}else if (e.getErrorLevel().equals(ELEVEL.Stop)) {
 			stopSystem();
-		} 
+		}  
 	}
 	
 	public static void stopSystem() {

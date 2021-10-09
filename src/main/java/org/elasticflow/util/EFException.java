@@ -33,6 +33,11 @@ public class EFException extends Exception {
 		e_level = ELEVEL.Ignore;
 	} 
 	
+	public EFException(Exception e) {
+		super(e);
+		e_level = ELEVEL.Ignore;
+	}
+	
 	public EFException(String msg, ELEVEL etype) {
 		super(msg);
 		e_level = etype;
@@ -50,9 +55,5 @@ public class EFException extends Exception {
 
 	public ETYPE getErrorType() {
 		return e_type;
-	}
-
-	public EFException(Exception e) {
-		super(e);
-	}
+	} 
 }
