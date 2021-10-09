@@ -226,7 +226,7 @@ public final class EFConnectionPool {
 		private EFConnectionSocket<?> newConnection() {
 			EFConnectionSocket<?> conn = null;
 			if (params != null) {
-				String _class_name = "org.elasticflow.connect."+Common.changeFirstCase(params.getWhp().getType().name().toLowerCase())+"Connection";
+				String _class_name = "org.elasticflow.connection."+Common.changeFirstCase(params.getWhp().getType().name().toLowerCase())+"Connection";
 				try {					
 					Class<?> clz = Class.forName(_class_name); 
 					Method m = clz.getMethod("getInstance", ConnectParams.class);  
