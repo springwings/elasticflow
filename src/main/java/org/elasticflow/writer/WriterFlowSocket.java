@@ -24,7 +24,7 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFTuple;
 import org.elasticflow.util.EFWriterUtil;
-import org.elasticflow.writer.handler.WriteHandler;
+import org.elasticflow.writer.handler.WriterHandler;
 import org.elasticflow.yarn.Resource;
  
 /**
@@ -38,7 +38,7 @@ import org.elasticflow.yarn.Resource;
 public abstract class WriterFlowSocket extends Flow{
 	
 	/** defined custom write flow handler */
-	protected WriteHandler writeHandler;
+	protected WriterHandler writeHandler;
 	
 	/**batch submit documents*/
 	protected Boolean isBatch = true;   
@@ -50,11 +50,11 @@ public abstract class WriterFlowSocket extends Flow{
 		this.isBatch = GlobalParam.WRITE_BATCH; 
 	}   
 	
-	public void setWriteHandler(WriteHandler writeHandler) {
+	public void setWriteHandler(WriterHandler writeHandler) {
 		this.writeHandler = writeHandler;
 	}
 	
-	public WriteHandler getWriteHandler() {
+	public WriterHandler getWriteHandler() {
 		return writeHandler;
 	}	
 	

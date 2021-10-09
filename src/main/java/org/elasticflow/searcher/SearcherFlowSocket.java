@@ -6,7 +6,7 @@ import org.elasticflow.flow.Flow;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherResult;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.searcher.handler.Handler;
+import org.elasticflow.searcher.handler.SearcherHandler;
 import org.elasticflow.util.EFException;
 
 /**
@@ -26,7 +26,7 @@ public abstract class SearcherFlowSocket extends Flow {
 		this.instanceConfig = connectParams.getInstanceConfig(); 
 	} 
 
-	public abstract SearcherResult Search(SearcherModel<?, ?, ?> query, String instance, Handler handler)
+	public abstract SearcherResult Search(SearcherModel<?, ?, ?> query, String instance, SearcherHandler handler)
 			throws EFException; 
 
 	public DATA_SOURCE_TYPE getType() {

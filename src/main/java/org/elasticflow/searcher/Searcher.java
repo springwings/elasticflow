@@ -14,7 +14,7 @@ import org.elasticflow.model.searcher.SearcherESModel;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherResult;
 import org.elasticflow.model.searcher.SearcherSolrModel;
-import org.elasticflow.searcher.handler.Handler;
+import org.elasticflow.searcher.handler.SearcherHandler;
 import org.elasticflow.util.SearchParamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class Searcher {
 	private SearcherFlowSocket searcherFlowSocket;
 	private InstanceConfig instanceConfig;
 	private String instanceName;
-	private Handler handler;
+	private SearcherHandler handler;
 
 	public static Searcher getInstance(String instanceName,
 			InstanceConfig instanceConfig, SearcherFlowSocket searcher) {
@@ -44,7 +44,7 @@ public class Searcher {
 		this.instanceConfig = instanceConfig;
 		try {
 			if(instanceConfig.getPipeParams().getCustomSearcher()!=null) {
-				this.handler = (Handler) Class.forName(instanceConfig.getPipeParams().getCustomSearcher()).newInstance();
+				this.handler = (SearcherHandler) Class.forName(instanceConfig.getPipeParams().getCustomSearcher()).newInstance();
 			}
 		}catch(Exception e){
 			log.error("Searcher Handler Exception",e);

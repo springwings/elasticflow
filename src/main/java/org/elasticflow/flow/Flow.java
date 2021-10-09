@@ -10,8 +10,8 @@ package org.elasticflow.flow;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.connect.EFConnectionPool;
-import org.elasticflow.connect.EFConnectionSocket;
+import org.elasticflow.connection.EFConnectionPool;
+import org.elasticflow.connection.EFConnectionSocket;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory; 
@@ -118,7 +118,7 @@ public abstract class Flow {
 		this.PERFORMANCE = performance;
 	}
 	
-	public void freeConnPool() {
-		EFConnectionPool.release(this.poolName);
+	public void clearPool() {
+		EFConnectionPool.clearPool(this.poolName);
 	}
 }

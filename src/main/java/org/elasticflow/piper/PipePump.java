@@ -16,7 +16,7 @@ import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.computer.ComputerFlowSocket;
-import org.elasticflow.computer.handler.ComputeHandler;
+import org.elasticflow.computer.handler.ComputerHandler;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.STATUS;
@@ -28,14 +28,14 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.ReaderState;
 import org.elasticflow.node.CPU;
 import org.elasticflow.reader.ReaderFlowSocket;
-import org.elasticflow.reader.handler.ReadHandler;
+import org.elasticflow.reader.handler.ReaderHandler;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.util.PipeNormsUtil;
 import org.elasticflow.writer.WriterFlowSocket;
-import org.elasticflow.writer.handler.WriteHandler;
+import org.elasticflow.writer.handler.WriterHandler;
 import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,11 +62,11 @@ public final class PipePump extends Instruction {
 		try {
 			if (instanceConfig.getReadParams().getHandler() != null) {
 				try {
-					reader.setReaderHandler((ReadHandler) Class.forName(instanceConfig.getReadParams().getHandler())
+					reader.setReaderHandler((ReaderHandler) Class.forName(instanceConfig.getReadParams().getHandler())
 							.newInstance());
 				} catch (Exception e) {
 					if(GlobalParam.PLUGIN_CLASS_LOADER!=null) {
-						reader.setReaderHandler((ReadHandler) Class.forName(instanceConfig.getReadParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
+						reader.setReaderHandler((ReaderHandler) Class.forName(instanceConfig.getReadParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
 								.newInstance());
 					}else {
 						throw new EFException(e.getMessage(), ELEVEL.Termination);
@@ -77,11 +77,11 @@ public final class PipePump extends Instruction {
 			if(computer != null) {
 				if (instanceConfig.getComputeParams().getHandler() != null) {
 					try {
-						computer.setComputerHandler((ComputeHandler) Class.forName(instanceConfig.getComputeParams().getHandler())
+						computer.setComputerHandler((ComputerHandler) Class.forName(instanceConfig.getComputeParams().getHandler())
 								.newInstance());
 					} catch (Exception e) {
 						if(GlobalParam.PLUGIN_CLASS_LOADER!=null) {
-							computer.setComputerHandler((ComputeHandler) Class.forName(instanceConfig.getComputeParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
+							computer.setComputerHandler((ComputerHandler) Class.forName(instanceConfig.getComputeParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
 									.newInstance());
 						}else {
 							throw new EFException(e.getMessage(), ELEVEL.Termination);
@@ -94,11 +94,11 @@ public final class PipePump extends Instruction {
 			if (instanceConfig.getWriterParams().getHandler() != null) {
 				for(WriterFlowSocket wfs : writer) {
 					try {
-						wfs.setWriteHandler((WriteHandler) Class.forName(instanceConfig.getWriterParams().getHandler())
+						wfs.setWriteHandler((WriterHandler) Class.forName(instanceConfig.getWriterParams().getHandler())
 								.newInstance());
 					} catch (Exception e) {
 						if(GlobalParam.PLUGIN_CLASS_LOADER!=null) {
-							wfs.setWriteHandler((WriteHandler) Class.forName(instanceConfig.getWriterParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
+							wfs.setWriteHandler((WriterHandler) Class.forName(instanceConfig.getWriterParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
 									.newInstance());
 						}else {
 							throw new EFException(e.getMessage(), ELEVEL.Termination);

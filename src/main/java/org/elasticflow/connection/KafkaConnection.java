@@ -1,4 +1,4 @@
-package org.elasticflow.connect;
+package org.elasticflow.connection;
 
 import java.util.Arrays;
 import java.util.Properties;

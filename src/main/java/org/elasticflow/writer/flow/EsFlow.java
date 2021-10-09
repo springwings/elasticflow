@@ -12,8 +12,8 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.connection.EsConnector;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.connect.EsConnector;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;

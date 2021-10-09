@@ -33,8 +33,8 @@ import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.GlobalParam.STATUS;
+import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.connect.EFConnectionPool;
 import org.elasticflow.model.EFSearchResponse;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.param.pipe.InstructionParam;
@@ -177,10 +177,10 @@ public final class NodeMonitor {
 					seqs = wp.getL1seq();
 					if (seqs.length > 0) {
 						for (String seq : seqs) {
-							EFConnectionPool.release(wp.getPoolName(seq));
+							EFConnectionPool.clearPool(wp.getPoolName(seq));
 						}
 					} else {
-						EFConnectionPool.release(wp.getPoolName(null));
+						EFConnectionPool.clearPool(wp.getPoolName(null));
 					}
 					break;
 					
@@ -189,10 +189,10 @@ public final class NodeMonitor {
 					seqs = wp.getL1seq();
 					if (seqs.length > 0) {
 						for (String seq : seqs) {
-							EFConnectionPool.release(wp.getPoolName(seq));
+							EFConnectionPool.clearPool(wp.getPoolName(seq));
 						}
 					} else {
-						EFConnectionPool.release(wp.getPoolName(null));
+						EFConnectionPool.clearPool(wp.getPoolName(null));
 					}
 					break;
 					

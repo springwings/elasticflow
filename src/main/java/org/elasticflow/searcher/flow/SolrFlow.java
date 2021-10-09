@@ -17,7 +17,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.util.NamedList;
 import org.elasticflow.config.GlobalParam.END_TYPE;
-import org.elasticflow.connect.handler.ConnectionHandler;
+import org.elasticflow.connection.handler.ConnectionHandler;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.searcher.ResponseDataUnit;
 import org.elasticflow.model.searcher.SearcherModel;
@@ -25,7 +25,7 @@ import org.elasticflow.model.searcher.SearcherResult;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.searcher.SearcherFlowSocket;
-import org.elasticflow.searcher.handler.Handler;
+import org.elasticflow.searcher.handler.SearcherHandler;
 import org.elasticflow.util.EFException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +67,7 @@ public class SolrFlow extends SearcherFlowSocket {
 	} 
 
 	@Override
-	public SearcherResult Search(SearcherModel<?, ?, ?> fq, String instance,Handler handler) throws EFException{
+	public SearcherResult Search(SearcherModel<?, ?, ?> fq, String instance,SearcherHandler handler) throws EFException{
 		SearcherResult res = new SearcherResult();
 		PREPARE(false, true);
 		boolean releaseConn = false;

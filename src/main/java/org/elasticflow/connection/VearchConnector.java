@@ -1,4 +1,4 @@
-package org.elasticflow.connect;
+package org.elasticflow.connection;
 
 import java.io.BufferedReader;
 import java.io.IOException;

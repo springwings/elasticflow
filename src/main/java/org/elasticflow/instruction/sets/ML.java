@@ -14,6 +14,7 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ELEVEL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +55,9 @@ public class ML extends Instruction {
 				} 		
 			} catch (EFException e) {
 				log.error("batch Compute Exception", e);
+				if(e.getErrorLevel().equals(ELEVEL.Dispose)) {
+					context.getComputer().clearPool();
+				}
 				Common.processErrorLevel(e);
 			} finally {
 				DSReader.close();

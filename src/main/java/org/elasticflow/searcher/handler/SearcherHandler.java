@@ -12,6 +12,6 @@ package org.elasticflow.searcher.handler;
  * @author chengwen
  * @version 1.0 
  */
-public interface Handler{
+public interface SearcherHandler{
 	public <T>T Handle(Object... args);
 }

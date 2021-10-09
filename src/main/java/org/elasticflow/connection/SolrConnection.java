@@ -1,9 +1,6 @@
-package org.elasticflow.connect;
+package org.elasticflow.connection;
 
-import java.net.URI;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
@@ -14,38 +11,31 @@ import org.slf4j.LoggerFactory;
  * 
  * @author chengwen
  * @version 1.0
- * @date 2021-06-24 09:25
+ * @date 2018-10-26 09:25
  */
+public class SolrConnection extends EFConnectionSocket<CloudSolrClient> {
 
-public class HdfsConnection extends EFConnectionSocket<FileSystem> {
-	
-	final String DEFAULT_KEY = "username";
-	
-	private FileSystem conn = null;
-	
-	private final static Logger log = LoggerFactory.getLogger("Hdfs Socket");
-	
+	private final static int zkClientTimeout = 180000;
+	private final static int zkConnectTimeout = 60000;
+	private CloudSolrClient conn = null;
+
+	private final static Logger log = LoggerFactory.getLogger("Solr Socket");
+
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
-		EFConnectionSocket<?> o = new HdfsConnection();
+		EFConnectionSocket<?> o = new SolrConnection();
 		o.init(ConnectParams);
 		o.connect();
 		return o;
 	}
-	
+
 	@Override
 	public boolean connect() {
 		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
 		if (wnp.getPath() != null) {
-			if (!status()) { 			        	
-				Configuration configuration = new Configuration();
-		        configuration.set("fs.defaultFS", wnp.getPath());
-		        try {
-					this.conn = FileSystem.get(new URI(wnp.getPath()), configuration, 
-							wnp.getDefaultValue().getString(DEFAULT_KEY));
-				} catch (Exception e) {
-					log.error("Hdfs connect Exception",e);
-					this.conn = null;
-				}
+			if (!status()) {
+				this.conn = new CloudSolrClient(wnp.getPath());
+				this.conn.setZkClientTimeout(zkClientTimeout);
+				this.conn.setZkConnectTimeout(zkConnectTimeout);
 			}
 		} else {
 			return false;
@@ -54,7 +44,7 @@ public class HdfsConnection extends EFConnectionSocket<FileSystem> {
 	}
 
 	@Override
-	public FileSystem getConnection(END_TYPE endtype) {
+	public CloudSolrClient getConnection(END_TYPE endType) {
 		int tryTime = 0;
 		try {
 			while (tryTime < 5 && !connect()) {
@@ -64,13 +54,14 @@ public class HdfsConnection extends EFConnectionSocket<FileSystem> {
 		} catch (Exception e) {
 			log.error("try to get Connection Exception,", e);
 		}
-		return this.conn;		
+		return this.conn;
 	}
 
 	@Override
 	public boolean status() {
-		if(this.conn==null)
+		if (this.conn == null) {
 			return false;
+		}
 		return true;
 	}
 

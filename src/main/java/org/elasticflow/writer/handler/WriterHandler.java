@@ -11,7 +11,7 @@ import org.elasticflow.util.EFException;
  * @date 2018-11-14 16:54
  * 
  */
-public abstract class WriteHandler{
+public abstract class WriterHandler{
 	
 	public abstract DataPage handleData(Context context,DataPage dataPage) throws EFException;
 	

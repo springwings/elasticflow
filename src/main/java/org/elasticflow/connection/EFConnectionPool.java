@@ -1,4 +1,4 @@
-package org.elasticflow.connect;
+package org.elasticflow.connection;
 
 import java.lang.reflect.Method;
 import java.util.Map.Entry;
@@ -45,22 +45,22 @@ public final class EFConnectionPool {
 		return EFCPool.getConnection(params, poolName, canShareConn);
 	}
 
-	public static void freeConn(EFConnectionSocket<?> conn, String poolName, boolean releaseConn) {
-		EFCPool.freeConnection(poolName, conn, releaseConn);
+	public static void freeConn(EFConnectionSocket<?> conn, String poolName, boolean clearConn) {
+		EFCPool.freeConnection(poolName, conn, clearConn);
 	}
 
 	public static String getStatus(String poolName) {
 		return EFCPool.getState(poolName);
 	}
 
-	public static void release(String poolName) {
-		EFCPool.releasePool(poolName);
+	public static void clearPool(String poolName) {
+		EFCPool._clearPool(poolName);
 	}
 
 	/**
-	 * release pools
+	 * Clear all connections in the resource pool
 	 */
-	private void releasePool(String poolName) {
+	private void _clearPool(String poolName) {
 		synchronized (this._pools) {
 			if (poolName != null) {
 				if (this._pools.containsKey(poolName))
@@ -92,11 +92,13 @@ public final class EFConnectionPool {
 			return this._pools.get(poolName).getState();
 		}
 	}
-
-	private void freeConnection(String poolName, EFConnectionSocket<?> conn, boolean releaseConn) {
+	/*
+	 * Release resource possession
+	 */
+	private void freeConnection(String poolName, EFConnectionSocket<?> conn, boolean clearConn) {
 		ConnectionPool pool = (ConnectionPool) this._pools.get(poolName);
 		if (pool != null) {
-			pool.freeConnection(conn, releaseConn);
+			pool.freeConnection(conn, clearConn);
 		}
 	}
 
@@ -161,7 +163,7 @@ public final class EFConnectionPool {
 		}
 
 		/**
-		 * close connection pool all connections
+		 * Release all connections in the resource pool
 		 */
 		public void releaseAll() {
 			synchronized(freeConnections) {
@@ -177,20 +179,19 @@ public final class EFConnectionPool {
 		}
 
 		/**
-		 * free connection and add to pool auto keep fixed connections
-		 * 
-		 * @param conn
-		 *            free connection
+		 * Intelligently determine whether to recycle connections to the resource pool
+		 * @param conn  connection socker
+		 * @param releaseConn Determine whether to discard the connection
 		 * 
 		 */
-		private void freeConnection(EFConnectionSocket<?> conn, boolean releaseConn) {
+		private void freeConnection(EFConnectionSocket<?> conn, boolean clearConn) {
 			synchronized (this) {
 				if (conn.isShare()) {
-					if (releaseConn) {
+					if (clearConn) {
 						conn.free();
 					}
 				} else {
-					if (releaseConn) {
+					if (clearConn) {
 						conn.free();
 					} else {
 						freeConnections.add(conn);

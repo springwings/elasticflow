@@ -1,5 +1,9 @@
-package org.elasticflow.connect;
+package org.elasticflow.connection;
 
+import java.net.URI;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
@@ -10,30 +14,38 @@ import org.slf4j.LoggerFactory;
  * 
  * @author chengwen
  * @version 1.0
- * @date 2021-07-09 09:25
+ * @date 2021-06-24 09:25
  */
-public class VearchConnection extends EFConnectionSocket<VearchConnector> {
 
-	private VearchConnector conn = null;
-
-	private final static Logger log = LoggerFactory.getLogger("Vearch Socket");
+public class HdfsConnection extends EFConnectionSocket<FileSystem> {
 	
-	final String DEAFULT_KEY = "dbname";
+	final String DEFAULT_KEY = "username";
+	
+	private FileSystem conn = null;
+	
+	private final static Logger log = LoggerFactory.getLogger("Hdfs Socket");
 	
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
-		EFConnectionSocket<?> o = new VearchConnection();
+		EFConnectionSocket<?> o = new HdfsConnection();
 		o.init(ConnectParams);
 		o.connect();
 		return o;
 	}
-
+	
 	@Override
 	public boolean connect() {
 		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
 		if (wnp.getPath() != null) {
-			if (!status()) { 
-				String[] paths = wnp.getPath().split("#");
-				this.conn = new VearchConnector(paths[0],paths[1],wnp.getDefaultValue().getString(DEAFULT_KEY));
+			if (!status()) { 			        	
+				Configuration conf = new Configuration();
+				conf.set("fs.defaultFS", wnp.getPath());
+		        try {
+					this.conn = FileSystem.get(new URI(wnp.getPath()), conf, 
+							wnp.getDefaultValue().getString(DEFAULT_KEY));
+				} catch (Exception e) {
+					log.error("Hdfs connect Exception",e);
+					this.conn = null;
+				}
 			}
 		} else {
 			return false;
@@ -42,7 +54,7 @@ public class VearchConnection extends EFConnectionSocket<VearchConnector> {
 	}
 
 	@Override
-	public VearchConnector getConnection(END_TYPE endType) {
+	public FileSystem getConnection(END_TYPE endtype) {
 		int tryTime = 0;
 		try {
 			while (tryTime < 5 && !connect()) {
@@ -52,14 +64,13 @@ public class VearchConnection extends EFConnectionSocket<VearchConnector> {
 		} catch (Exception e) {
 			log.error("try to get Connection Exception,", e);
 		}
-		return this.conn;
+		return this.conn;		
 	}
 
 	@Override
 	public boolean status() {
-		if (this.conn == null) {
+		if(this.conn==null)
 			return false;
-		}
 		return true;
 	}
 

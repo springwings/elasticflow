@@ -10,7 +10,7 @@ package org.elasticflow.computer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.elasticflow.computer.handler.ComputeHandler;
+import org.elasticflow.computer.handler.ComputerHandler;
 import org.elasticflow.field.EFField;
 import org.elasticflow.flow.Flow;
 import org.elasticflow.instruction.Context;
@@ -27,10 +27,10 @@ import org.elasticflow.util.EFException;
  * @version 1.0
  * @date 2018-12-28 09:27
  */
-public abstract class ComputerFlowSocket extends Flow { 
+public abstract class ComputerFlowSocket extends Flow{ 
 	
 	/** defined custom Computer flow handler */
-	protected ComputeHandler computerHandler;
+	protected ComputerHandler computerHandler;
 	
 	protected DataPage dataPage = new DataPage(); 
 	
@@ -49,11 +49,11 @@ public abstract class ComputerFlowSocket extends Flow {
 		return dataUnit;
 	}
 
-	public ComputeHandler getComputerHandler() {
+	public ComputerHandler getComputerHandler() {
 		return computerHandler;
 	} 
 
-	public void setComputerHandler(ComputeHandler computerHandler) {
+	public void setComputerHandler(ComputerHandler computerHandler) {
 		this.computerHandler = computerHandler;
 	} 
 	

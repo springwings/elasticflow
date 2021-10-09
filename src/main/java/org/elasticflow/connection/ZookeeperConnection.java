@@ -1,4 +1,4 @@
-package org.elasticflow.connect;
+package org.elasticflow.connection;
 
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;

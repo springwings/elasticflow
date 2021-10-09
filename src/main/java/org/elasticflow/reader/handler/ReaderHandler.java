@@ -18,7 +18,7 @@ import org.elasticflow.util.EFException;
  * @version 2.0
  * @date 2018-12-28 09:27
  */
-public abstract class ReadHandler{
+public abstract class ReaderHandler{
 	
 	protected boolean supportHandlePage = false;
 	

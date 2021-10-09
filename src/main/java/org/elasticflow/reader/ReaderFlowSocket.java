@@ -13,7 +13,7 @@ import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.reader.handler.ReadHandler;
+import org.elasticflow.reader.handler.ReaderHandler;
 
 /**
  * 
@@ -25,7 +25,7 @@ import org.elasticflow.reader.handler.ReadHandler;
 public abstract class ReaderFlowSocket extends Flow{  
 	
 	/** defined custom read flow handler */
-	protected ReadHandler readHandler;
+	protected ReaderHandler readHandler;
 
 	protected DataPage dataPage = new DataPage(); 
 	
@@ -40,11 +40,11 @@ public abstract class ReaderFlowSocket extends Flow{
 		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq()); 		
 	} 
 	
-	public void setReaderHandler(ReadHandler readHandler) {
+	public void setReaderHandler(ReaderHandler readHandler) {
 		this.readHandler = readHandler;
 	}
 	
-	public ReadHandler getReaderHandler() {
+	public ReaderHandler getReaderHandler() {
 		return readHandler;
 	}	
 	

@@ -1,4 +1,4 @@
-package org.elasticflow.connect;
+package org.elasticflow.connection;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,14 +9,28 @@ import org.elasticflow.param.warehouse.WarehouseSqlParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Neo4jConnection extends EFConnectionSocket<Connection> {
+/**
+ * 
+ * @author chengwen
+ * @version 1.0
+ * @date 2018-10-26 09:25
+ */
+public class MysqlConnection extends EFConnectionSocket<Connection> {
 
 	private Connection conn = null;
 
-	private final static Logger log = LoggerFactory.getLogger("Neo4j Socket");
+	private final static Logger log = LoggerFactory.getLogger("Mysql Socket");
+
+	static {
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+		} catch (Exception e) {
+			log.error("MysqlConnection Exception,", e);
+		}
+	}
 
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
-		EFConnectionSocket<?> o = new Neo4jConnection();
+		EFConnectionSocket<?> o = new MysqlConnection();
 		o.init(ConnectParams);
 		o.connect();
 		return o;
@@ -26,7 +40,10 @@ public class Neo4jConnection extends EFConnectionSocket<Connection> {
 	public boolean connect() {
 		try {
 			if (!status()) {
-				this.conn = DriverManager.getConnection(this.getConnectionUrl());
+				WarehouseSqlParam wsp = (WarehouseSqlParam) this.connectParams.getWhp();
+				this.conn = DriverManager.getConnection(getConnectionUrl(),
+						wsp.getUser(),
+						wsp.getPassword());
 				log.info("build connect to " + getConnectionUrl());
 			}
 			return true;
@@ -51,18 +68,6 @@ public class Neo4jConnection extends EFConnectionSocket<Connection> {
 	}
 
 	@Override
-	public boolean status() {
-		try {
-			if (this.conn != null && !this.conn.isClosed()) {
-				return true;
-			}
-		} catch (Exception e) {
-			log.error("get status Exception,", e);
-		}
-		return false;
-	}
-
-	@Override
 	public boolean free() {
 		try {
 			this.conn.close();
@@ -75,11 +80,22 @@ public class Neo4jConnection extends EFConnectionSocket<Connection> {
 		return true;
 	}
 
-	private String getConnectionUrl() {
-		return "jdbc:neo4j:bolt://" + ((WarehouseSqlParam) this.connectParams.getWhp()).getHost() + "/?user="
-				+ ((WarehouseSqlParam) this.connectParams.getWhp()).getUser() + ",password="
-				+ ((WarehouseSqlParam) this.connectParams.getWhp()).getPassword()
-				+ ",scheme=basic,failOverReadOnly=false";
+	@Override
+	public boolean status() {
+		try {
+			if (this.conn != null && !this.conn.isClosed()) {
+				return true;
+			}
+		} catch (Exception e) {
+			log.error("get status Exception,", e);
+		}
+		return false;
 	}
 
+	private String getConnectionUrl() {
+		return "jdbc:mysql://" + ((WarehouseSqlParam) this.connectParams.getWhp()).getHost() + ":"
+				+ ((WarehouseSqlParam) this.connectParams.getWhp()).getPort() + "/"
+				+ ((WarehouseSqlParam) this.connectParams.getWhp()).getDbname(this.connectParams.getL1Seq())
+				+ "?autoReconnect=true&failOverReadOnly=false&useSSL=false";
+	}
 }

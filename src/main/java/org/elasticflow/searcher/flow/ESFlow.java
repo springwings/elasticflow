@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.elasticflow.config.GlobalParam.END_TYPE;
-import org.elasticflow.connect.EsConnector;
+import org.elasticflow.connection.EsConnector;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.searcher.ResponseDataUnit;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherResult;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.searcher.SearcherFlowSocket;
-import org.elasticflow.searcher.handler.Handler;
+import org.elasticflow.searcher.handler.SearcherHandler;
 import org.elasticflow.util.EFException;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -46,7 +46,7 @@ public final class ESFlow extends SearcherFlowSocket {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public SearcherResult Search(SearcherModel<?, ?, ?> fq, String instance,Handler handler)
+	public SearcherResult Search(SearcherModel<?, ?, ?> fq, String instance,SearcherHandler handler)
 			throws EFException {
 		PREPARE(false, true);
 		boolean releaseConn = false;

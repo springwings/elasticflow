@@ -5,7 +5,7 @@
  * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
  * Side Public License, v 1.
  */
-package org.elasticflow.connect.handler;
+package org.elasticflow.connection.handler;
 
 import org.elasticflow.param.pipe.ConnectParams;
 

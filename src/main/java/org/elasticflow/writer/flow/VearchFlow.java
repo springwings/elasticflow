@@ -6,7 +6,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.config.GlobalParam.END_TYPE;
-import org.elasticflow.connect.VearchConnector;
+import org.elasticflow.connection.VearchConnector;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;

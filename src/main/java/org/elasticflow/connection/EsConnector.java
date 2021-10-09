@@ -1,4 +1,4 @@
-package org.elasticflow.connect;
+package org.elasticflow.connection;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

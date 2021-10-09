@@ -1,4 +1,4 @@
-package org.elasticflow.connect; 
+package org.elasticflow.connection; 
 
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;

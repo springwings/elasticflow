@@ -1,6 +1,5 @@
-package org.elasticflow.connect;
+package org.elasticflow.connection;
 
-import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
@@ -11,18 +10,18 @@ import org.slf4j.LoggerFactory;
  * 
  * @author chengwen
  * @version 1.0
- * @date 2018-10-26 09:25
+ * @date 2021-07-09 09:25
  */
-public class SolrConnection extends EFConnectionSocket<CloudSolrClient> {
+public class VearchConnection extends EFConnectionSocket<VearchConnector> {
 
-	private final static int zkClientTimeout = 180000;
-	private final static int zkConnectTimeout = 60000;
-	private CloudSolrClient conn = null;
+	private VearchConnector conn = null;
 
-	private final static Logger log = LoggerFactory.getLogger("Solr Socket");
-
+	private final static Logger log = LoggerFactory.getLogger("Vearch Socket");
+	
+	final String DEAFULT_KEY = "dbname";
+	
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
-		EFConnectionSocket<?> o = new SolrConnection();
+		EFConnectionSocket<?> o = new VearchConnection();
 		o.init(ConnectParams);
 		o.connect();
 		return o;
@@ -32,10 +31,9 @@ public class SolrConnection extends EFConnectionSocket<CloudSolrClient> {
 	public boolean connect() {
 		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
 		if (wnp.getPath() != null) {
-			if (!status()) {
-				this.conn = new CloudSolrClient(wnp.getPath());
-				this.conn.setZkClientTimeout(zkClientTimeout);
-				this.conn.setZkConnectTimeout(zkConnectTimeout);
+			if (!status()) { 
+				String[] paths = wnp.getPath().split("#");
+				this.conn = new VearchConnector(paths[0],paths[1],wnp.getDefaultValue().getString(DEAFULT_KEY));
 			}
 		} else {
 			return false;
@@ -44,7 +42,7 @@ public class SolrConnection extends EFConnectionSocket<CloudSolrClient> {
 	}
 
 	@Override
-	public CloudSolrClient getConnection(END_TYPE endType) {
+	public VearchConnector getConnection(END_TYPE endType) {
 		int tryTime = 0;
 		try {
 			while (tryTime < 5 && !connect()) {

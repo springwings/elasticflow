@@ -1,4 +1,4 @@
-package org.elasticflow.connect;
+package org.elasticflow.connection;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,22 +15,22 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @date 2018-10-26 09:25
  */
-public class MysqlConnection extends EFConnectionSocket<Connection> {
+public class OracleConnection extends EFConnectionSocket<Connection> {
 
 	private Connection conn = null;
 
-	private final static Logger log = LoggerFactory.getLogger("Mysql Socket");
+	private final static Logger log = LoggerFactory.getLogger("Oracle Socket");
 
 	static {
 		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");
+			Class.forName("oracle.jdbc.OracleDriver");
 		} catch (Exception e) {
-			log.error("MysqlConnection Exception,", e);
+			log.error("OracleConnection Exception,", e);
 		}
 	}
 
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
-		EFConnectionSocket<?> o = new MysqlConnection();
+		EFConnectionSocket<?> o = new OracleConnection();
 		o.init(ConnectParams);
 		o.connect();
 		return o;
@@ -48,7 +48,7 @@ public class MysqlConnection extends EFConnectionSocket<Connection> {
 			}
 			return true;
 		} catch (Exception e) {
-			log.error(((WarehouseSqlParam) this.connectParams.getWhp()).getHost() + " connect Exception,", e);
+			log.error(((WarehouseSqlParam) this.connectParams.getWhp()).getHost() + "connect Exception,", e);
 			return false;
 		}
 	}
@@ -93,9 +93,8 @@ public class MysqlConnection extends EFConnectionSocket<Connection> {
 	}
 
 	private String getConnectionUrl() {
-		return "jdbc:mysql://" + ((WarehouseSqlParam) this.connectParams.getWhp()).getHost() + ":"
-				+ ((WarehouseSqlParam) this.connectParams.getWhp()).getPort() + "/"
-				+ ((WarehouseSqlParam) this.connectParams.getWhp()).getDbname(this.connectParams.getL1Seq())
-				+ "?autoReconnect=true&failOverReadOnly=false&useSSL=false";
+		return "jdbc:oracle:thin:@" + ((WarehouseSqlParam) this.connectParams.getWhp()).getHost() + ":"
+				+ ((WarehouseSqlParam) this.connectParams.getWhp()).getPort() + "/CURD";
 	}
+
 }
