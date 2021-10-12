@@ -106,14 +106,16 @@ public class RestService extends ComputerFlowSocket{
 					@SuppressWarnings("unchecked")
 					ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();
 					this.executorService.execute(() -> {
+						String api = null; 
 						try {
-							String api = this.apiBlockingQueue.take();
+							api = this.apiBlockingQueue.take();
 							JSONObject tmp = this.sentRequest(_postdt, api);
 							this.apiBlockingQueue.put(api);
 							this.write(context, tmp, responseParams, _keepdt);						
 						} catch (Exception e) { 
 							this.successRunAll = false;
 							log.error("rest post data process error",e);
+							log.error(api);
 						}   
 		            }); 
 					post_data.clear(); 
@@ -127,14 +129,16 @@ public class RestService extends ComputerFlowSocket{
 				@SuppressWarnings("unchecked")
 				ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();
 				this.executorService.execute(() -> {
+					String api = null; 
 					try {
-						String api = this.apiBlockingQueue.take();
+						api = this.apiBlockingQueue.take();
 						JSONObject tmp = this.sentRequest(_postdt, api);
 						this.apiBlockingQueue.put(api);
 						this.write(context,tmp, responseParams, _keepdt);						
 					} catch (Exception e) { 
 						this.successRunAll = false;
-						log.error("executor process error",e);
+						log.error("rest post data process error",e);
+						log.error(api);
 					}   
 	            });  
 				post_data.clear();
