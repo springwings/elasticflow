@@ -118,9 +118,14 @@ public abstract class WriterFlowSocket extends Flow{
 	
 	protected abstract String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig);
 	
-	public abstract void setAlias(String instance, String storeId, String aliasName);
-
-	public abstract void flush() throws Exception;
+	public abstract void setAlias(String instance, String storeId, String aliasName); 
+	
+	/**
+	 * Transaction confirmation
+	 */
+	public void flush() throws EFException{
+		
+	}
 
 	public abstract void optimize(String instance, String storeId);
 }

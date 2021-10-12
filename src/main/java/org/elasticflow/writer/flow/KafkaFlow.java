@@ -41,10 +41,10 @@ public class KafkaFlow extends WriterFlowSocket {
 	@Override
 	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams, String instance,
 			String storeId, boolean isUpdate) throws EFException {
-		try {
-			if (!ISLINK())
-				return; 
-			KafkaProducer<String, String> conn = this.getconn();
+		if (!ISLINK())
+			return; 
+		KafkaProducer<String, String> conn = this.getconn();
+		try { 
 			for (Entry<String, Object> r : unit.getData().entrySet()) {
 				String field = r.getKey();
 				if (r.getValue() == null)
@@ -66,7 +66,7 @@ public class KafkaFlow extends WriterFlowSocket {
 	}
 
 	@Override
-	public void flush() throws Exception {
+	public void flush() throws EFException {
 		this.getconn().flush();
 	}
 

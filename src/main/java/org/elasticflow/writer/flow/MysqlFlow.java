@@ -79,12 +79,7 @@ public class MysqlFlow extends WriterFlowSocket {
 		} catch (Exception e) {
 			log.error("PreparedStatement Exception", e);
 		}
-	}
-
-	@Override
-	public void flush() throws Exception {
-
-	}
+	} 
 
 	@Override
 	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) {

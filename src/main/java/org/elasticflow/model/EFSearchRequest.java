@@ -14,7 +14,7 @@ import org.elasticflow.param.end.SearcherParam;
  * @version 1.0
  * @date 2018-10-22 09:08
  */
-public class EFSearchRequest {
+public class EFSearchRequest implements EFRequest{
 	private String pipe = null;
 	private String detail = null;
 	private String originalKeyword = null;

@@ -6,6 +6,6 @@ package org.elasticflow.model;
  * @version 1.0
  * @date 2018-10-22 09:08
  */
-public class EFRequest {
+public interface EFRequest {
 
 }

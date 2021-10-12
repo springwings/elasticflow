@@ -77,7 +77,7 @@ public class Pipe extends Instruction {
 	 *            boolean monopoly
 	 * @throws Exception
 	 */
-	public static ReaderState writeDataSet(Context context, Object[] args) throws Exception {
+	public static ReaderState writeDataSet(Context context, Object[] args) throws EFException {
 		ReaderState rstate = new ReaderState();
 		if (!isValid(8, args)) {
 			log.error("writeDataSet parameter not match!");

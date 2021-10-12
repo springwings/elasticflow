@@ -14,6 +14,7 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.handler.ReaderHandler;
+import org.elasticflow.util.EFException;
 
 /**
  * 
@@ -63,7 +64,7 @@ public abstract class ReaderFlowSocket extends Flow{
 	/**
 	 * Transaction confirmation
 	 */
-	public void flush() {
+	public void flush() throws EFException{
 		
 	}
 	

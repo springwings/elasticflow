@@ -76,13 +76,7 @@ public class Neo4jFlow extends WriterFlowSocket {
 	@Override
 	public void setAlias(String instance, String storeId, String aliasName) {
 		log.info("no need to set Alias."); 
-	}
-
-	@Override
-	public void flush() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
+	} 
 
 	@Override
 	public void optimize(String instance, String storeId) {
@@ -132,4 +126,5 @@ public class Neo4jFlow extends WriterFlowSocket {
 	public boolean storePositionExists(String storeName) {
 		return true;
 	}
+
 }

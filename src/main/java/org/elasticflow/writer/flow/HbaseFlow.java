@@ -1,5 +1,6 @@
 package org.elasticflow.writer.flow;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,6 +19,7 @@ import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,9 +112,13 @@ public class HbaseFlow extends WriterFlowSocket {
 	}
 
 	@Override
-	public void flush() throws Exception { 
+	public void flush() throws EFException { 
 		synchronized (data) {
-			getTable().put(data);
+			try {
+				getTable().put(data);
+			} catch (IOException e) {
+				throw new EFException(e, ELEVEL.Termination);
+			}
 			data.clear();
 		} 
 	}

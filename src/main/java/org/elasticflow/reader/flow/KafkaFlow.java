@@ -3,7 +3,12 @@ package org.elasticflow.reader.flow;
 import java.time.Duration;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -18,6 +23,8 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
+import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ELEVEL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,21 +131,36 @@ public class KafkaFlow extends ReaderFlowSocket {
 	
 	/**
 	 * Do not release the connection unless there is a processing error
+	 * @throws EFException 
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void flush() {
+	public void flush() throws EFException { 
 		if(!this.autoCommit) { 
-			((KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader)).commitSync();
+			try {
+				((KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader)).commitSync();
+			} catch (Exception e) {
+				throw new EFException(e, ELEVEL.Termination);
+			}
 		}	
 	}
-
+	
 	@Override
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) {
 		boolean releaseConn = false;
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		//Connection release for Kafka timeout read
+		FutureTask<ConsumerRecords<String, String>> futureTask = new FutureTask<ConsumerRecords<String, String>>(
+				new Callable<ConsumerRecords<String, String>>() {
+					@Override
+					public ConsumerRecords<String, String> call() throws Exception {
+						return conn.poll(Duration.ofMillis(readms));
+					}
+				});
+		executor.execute(futureTask);
 		try {
-			this.records = conn.poll(Duration.ofMillis(readms));
+			this.records = futureTask.get(readms * 10, TimeUnit.MILLISECONDS);
 			int totalNum = this.records.count();
 			if (totalNum > 0) {
 				int pagenum = (int) Math.ceil(totalNum / pageSize);
@@ -151,13 +173,15 @@ public class KafkaFlow extends ReaderFlowSocket {
 				}
 			}
 		} catch (Exception e) {
+			futureTask.cancel(true);
 			releaseConn = true;
 			page.clear();
 			REALEASE(false, releaseConn);
 			this.initconn();
-			log.error("get dataPage Exception so free connection,details ", e);
-		}  
+			log.error("Error in getting Kafka data, the connection will be cleared automatically.", e);
+		} finally {
+			executor.shutdown();
+		}
 		return page;
 	}
-
 }

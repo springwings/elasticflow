@@ -187,7 +187,7 @@ public class VearchFlow extends WriterFlowSocket {
 	}
 
 	@Override
-	public void flush() throws Exception {
+	public void flush() throws EFException {
 		if (this.isBatch) {
 			synchronized (this.DATAS) {
 				if(this.DATAS.size()>0) {
