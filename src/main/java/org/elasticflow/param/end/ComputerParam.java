@@ -25,7 +25,7 @@ public class ComputerParam {
 	/**reader and request fields map*/
 	private JSONObject apiRequest;
 	/** api max send data nums per request**/
-	private int apiRequestMaxDatas = 60;
+	private int apiRequestMaxDatas = 30;
 	/**writer and response fields map*/
 	private JSONObject apiResponse;
 	/**User defined JSON parameters can be used to extend the plugin*/
