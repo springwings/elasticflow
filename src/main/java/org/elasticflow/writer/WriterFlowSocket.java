@@ -71,7 +71,9 @@ public abstract class WriterFlowSocket extends Flow{
 	protected String normMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) { 
 		String iName = Common.getStoreName(mainName, "");		
 		if(this.storePositionExists(iName)==false) {
-			this.create(mainName, "", instanceConfig);			
+			this.create(mainName, "", instanceConfig);
+			if(isIncrement==true)
+				this.setAlias(mainName, "", instanceConfig.getAlias());
 		}			
 		return "";
 	}
@@ -85,9 +87,9 @@ public abstract class WriterFlowSocket extends Flow{
 	 * @return time-stamp of second
 	 */
 	protected String timeMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
-		EFTuple<Long, Long> dTuple = EFWriterUtil.timeMechanism(instanceConfig);
+		EFTuple<Long, Long> dTuple = EFWriterUtil.timeMechanism(instanceConfig); 
 		String iName = Common.getStoreName(mainName, String.valueOf(dTuple.v2));
-		try {
+		try {			
 			//remove out of date instance ,but this function not support cross L1Seqs destination		
 			PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(mainName,this.connectParams.getL1Seq(), 
 					false,GlobalParam.FLOW_TAG._DEFAULT.name());
