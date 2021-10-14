@@ -9,6 +9,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -74,11 +75,11 @@ public class RestService extends ComputerFlowSocket {
 			JSONObject responseParams = context.getInstanceConfig().getComputeParams().getApiResponse();
 
 			// construct thread pool
-			String[] apis = context.getInstanceConfig().getComputeParams().getApi();
-			this.apiBlockingQueue = new ArrayBlockingQueue<>(apis.length);
+			CopyOnWriteArrayList<String> apis = context.getInstanceConfig().getComputeParams().getApi();
+			this.apiBlockingQueue = new ArrayBlockingQueue<>(apis.size());
 			for (String api : apis)
 				this.apiBlockingQueue.add(api);
-			this.executorService = Executors.newFixedThreadPool(apis.length);
+			this.executorService = Executors.newFixedThreadPool(apis.size());
 
 			// construct rest post data
 			JSONObject post_data = new JSONObject();

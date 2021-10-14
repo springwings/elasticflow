@@ -44,7 +44,7 @@ public class Searcher {
 		this.instanceConfig = instanceConfig;
 		try {
 			if(instanceConfig.getPipeParams().getCustomSearcher()!=null) {
-				this.handler = (SearcherHandler) Class.forName(instanceConfig.getPipeParams().getCustomSearcher()).newInstance();
+				this.handler = (SearcherHandler) Class.forName(instanceConfig.getPipeParams().getCustomSearcher()).getDeclaredConstructor().newInstance();
 			}
 		}catch(Exception e){
 			log.error("Searcher Handler Exception",e);

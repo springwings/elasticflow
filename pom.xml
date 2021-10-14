@@ -480,8 +480,7 @@
 			</plugin>
 			
 		</plugins>
-	</build>  
-	 
+	</build>   
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<configPath>src/main/resources</configPath>

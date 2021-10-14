@@ -58,7 +58,7 @@ public class SolrFlow extends SearcherFlowSocket {
 		this.instanceConfig = connectParams.getInstanceConfig(); 
 		if(connectParams.getWhp().getHandler()!=null){ 
 			try {
-				this.handler = (ConnectionHandler)Class.forName(connectParams.getWhp().getHandler()).newInstance();
+				this.handler = (ConnectionHandler)Class.forName(connectParams.getWhp().getHandler()).getDeclaredConstructor().newInstance();
 				this.handler.init(connectParams);
 			} catch (Exception e) {
 				log.error("Init handler Exception",e);

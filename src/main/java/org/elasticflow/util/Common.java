@@ -505,9 +505,9 @@ public final class Common {
 		if (fd == null || v==null)
 			return null; 
 		if(fd.getParamtype().startsWith(GlobalParam.GROUPID)) {
-			return Class.forName(fd.getParamtype()).newInstance();
+			return Class.forName(fd.getParamtype()).getDeclaredConstructor().newInstance();
 		}else {
-			return Class.forName(fd.getParamtype(),true,GlobalParam.PLUGIN_CLASS_LOADER).newInstance();
+			return Class.forName(fd.getParamtype(),true,GlobalParam.PLUGIN_CLASS_LOADER).getDeclaredConstructor().newInstance();
 		}			
 	} 
 	

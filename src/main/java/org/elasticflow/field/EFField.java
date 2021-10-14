@@ -157,10 +157,10 @@ public class EFField {
 	public void setHandler(String handler) throws Exception {
 		if (handler != null && handler.length() > 1) {
 			if (handler.startsWith(GlobalParam.GROUPID)) {
-				this.handler = (UnitHandler) Class.forName(handler).newInstance();
+				this.handler = (UnitHandler) Class.forName(handler).getDeclaredConstructor().newInstance();
 			} else {
 				this.handler = (UnitHandler) Class.forName(handler, true, GlobalParam.PLUGIN_CLASS_LOADER)
-						.newInstance();
+						.getDeclaredConstructor().newInstance();
 			}
 		}
 	}

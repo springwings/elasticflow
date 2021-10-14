@@ -14,7 +14,6 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ELEVEL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

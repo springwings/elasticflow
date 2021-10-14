@@ -7,6 +7,8 @@
  */
 package org.elasticflow.param.end;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import com.alibaba.fastjson.JSONObject;
 
 /**
@@ -21,7 +23,7 @@ public class ComputerParam {
 	private String features;
 	private String value;
 	private String algorithm;
-	private String[] api;
+	private volatile CopyOnWriteArrayList<String> api = new CopyOnWriteArrayList<>();
 	/**reader and request fields map*/
 	private JSONObject apiRequest;
 	/** api max send data nums per request**/
@@ -142,13 +144,16 @@ public class ComputerParam {
 		this.computeType = computeType.toLowerCase();
 	}
 
-	public String[] getApi() {
+	public CopyOnWriteArrayList<String> getApi() {
 		return api;
 	}
 
 	public void setApi(String api) {
+		if(this.api.isEmpty()) 
+			this.api.clear();
 		if(api!=null) {
-			this.api = api.split(",");
+			for(String url:api.split(","))
+				this.api.add(url);
 		}		
 	}
 	

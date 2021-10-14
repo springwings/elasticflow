@@ -63,11 +63,11 @@ public final class PipePump extends Instruction {
 			if (instanceConfig.getReadParams().getHandler() != null) {
 				try {
 					reader.setReaderHandler((ReaderHandler) Class.forName(instanceConfig.getReadParams().getHandler())
-							.newInstance());
+							.getDeclaredConstructor().newInstance());
 				} catch (Exception e) {
 					if(GlobalParam.PLUGIN_CLASS_LOADER!=null) {
 						reader.setReaderHandler((ReaderHandler) Class.forName(instanceConfig.getReadParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
-								.newInstance());
+								.getDeclaredConstructor().newInstance());
 					}else {
 						throw new EFException(e, ELEVEL.Termination);
 					}						
@@ -78,11 +78,11 @@ public final class PipePump extends Instruction {
 				if (instanceConfig.getComputeParams().getHandler() != null) {
 					try {
 						computer.setComputerHandler((ComputerHandler) Class.forName(instanceConfig.getComputeParams().getHandler())
-								.newInstance());
+								.getDeclaredConstructor().newInstance());
 					} catch (Exception e) {
 						if(GlobalParam.PLUGIN_CLASS_LOADER!=null) {
 							computer.setComputerHandler((ComputerHandler) Class.forName(instanceConfig.getComputeParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
-									.newInstance());
+									.getDeclaredConstructor().newInstance());
 						}else {
 							throw new EFException(e, ELEVEL.Termination);
 						}
@@ -95,11 +95,11 @@ public final class PipePump extends Instruction {
 				for(WriterFlowSocket wfs : writer) {
 					try {
 						wfs.setWriteHandler((WriterHandler) Class.forName(instanceConfig.getWriterParams().getHandler())
-								.newInstance());
+								.getDeclaredConstructor().newInstance());
 					} catch (Exception e) {
 						if(GlobalParam.PLUGIN_CLASS_LOADER!=null) {
 							wfs.setWriteHandler((WriterHandler) Class.forName(instanceConfig.getWriterParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
-									.newInstance());
+									.getDeclaredConstructor().newInstance());
 						}else {
 							throw new EFException(e, ELEVEL.Termination);
 						}
