@@ -3,12 +3,7 @@ package org.elasticflow.reader.flow;
 import java.time.Duration;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -44,8 +39,10 @@ public class KafkaFlow extends ReaderFlowSocket {
 	private int readms = 3000;
 	
 	private boolean autoCommit = false;
-	
+	  
 	ConsumerRecords<String, String> records;
+	
+	private int noDataTimes = 0;
 
 	private final static Logger log = LoggerFactory.getLogger(KafkaFlow.class);
 	
@@ -147,20 +144,9 @@ public class KafkaFlow extends ReaderFlowSocket {
 	
 	@Override
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) {
-		boolean releaseConn = false;
-		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
-		ExecutorService executor = Executors.newSingleThreadExecutor();
-		//Connection release for Kafka timeout read
-		FutureTask<ConsumerRecords<String, String>> futureTask = new FutureTask<ConsumerRecords<String, String>>(
-				new Callable<ConsumerRecords<String, String>>() {
-					@Override
-					public ConsumerRecords<String, String> call() throws Exception {
-						return conn.poll(Duration.ofMillis(readms));
-					}
-				});
-		executor.execute(futureTask);
+		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();	
 		try {
-			this.records = futureTask.get(readms * 10, TimeUnit.MILLISECONDS);
+			this.records = conn.poll(Duration.ofMillis(readms));
 			int totalNum = this.records.count();
 			if (totalNum > 0) {
 				int pagenum = (int) Math.ceil(totalNum / pageSize);
@@ -171,17 +157,18 @@ public class KafkaFlow extends ReaderFlowSocket {
 					if (curentpage >= pagenum)
 						break;
 				}
+				noDataTimes = 0;
+			}else {
+				noDataTimes +=1;
 			}
 		} catch (Exception e) {
-			futureTask.cancel(true);
-			releaseConn = true;
 			page.clear();
-			REALEASE(false, releaseConn);
+			REALEASE(false, true);
 			this.initconn();
 			log.error("Error in getting Kafka data, the connection will be cleared automatically.", e);
-		} finally {
-			executor.shutdown();
-		}
+		} 
+		if(noDataTimes>5)
+			REALEASE(false, true);
 		return page;
 	}
 }
