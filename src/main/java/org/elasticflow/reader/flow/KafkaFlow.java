@@ -18,6 +18,7 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
+import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.slf4j.Logger;
@@ -39,10 +40,10 @@ public class KafkaFlow extends ReaderFlowSocket {
 	private int readms = 3000;
 	
 	private boolean autoCommit = false;
+	
+	private long lastScanTime = 0;
 	  
 	ConsumerRecords<String, String> records;
-	
-	private int noDataTimes = 0;
 
 	private final static Logger log = LoggerFactory.getLogger(KafkaFlow.class);
 	
@@ -146,8 +147,15 @@ public class KafkaFlow extends ReaderFlowSocket {
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) {
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();	
 		try {
-			this.records = conn.poll(Duration.ofMillis(readms));
-			int totalNum = this.records.count();
+			int totalNum = 0;
+			while(totalNum==0){
+				this.records = conn.poll(Duration.ofMillis(this.readms));
+				totalNum = this.records.count();
+				if(totalNum==0 && (Common.getNow()-this.lastScanTime>this.readms*15)) {
+					REALEASE(false, true);
+					this.initconn();
+				}
+			} 
 			if (totalNum > 0) {
 				int pagenum = (int) Math.ceil(totalNum / pageSize);
 				int curentpage = 0;
@@ -157,18 +165,14 @@ public class KafkaFlow extends ReaderFlowSocket {
 					if (curentpage >= pagenum)
 						break;
 				}
-				noDataTimes = 0;
-			}else {
-				noDataTimes +=1;
-			}
+				this.lastScanTime = Common.getNow();
+			} 
 		} catch (Exception e) {
 			page.clear();
 			REALEASE(false, true);
 			this.initconn();
 			log.error("Error in getting Kafka data, the connection will be cleared automatically.", e);
 		} 
-		if(noDataTimes>2)
-			REALEASE(false, true);
 		return page;
 	}
 }
