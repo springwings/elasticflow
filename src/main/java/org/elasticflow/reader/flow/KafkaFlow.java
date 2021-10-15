@@ -167,7 +167,7 @@ public class KafkaFlow extends ReaderFlowSocket {
 			this.initconn();
 			log.error("Error in getting Kafka data, the connection will be cleared automatically.", e);
 		} 
-		if(noDataTimes>5)
+		if(noDataTimes>2)
 			REALEASE(false, true);
 		return page;
 	}
