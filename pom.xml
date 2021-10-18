@@ -168,18 +168,11 @@
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
 			<version>1.4</version>
-		</dependency>
-
+		</dependency> 
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka-clients</artifactId>
-			<version>2.1.1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-api</artifactId>
-				</exclusion>
-			</exclusions>
+			<version>2.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
@@ -481,6 +474,7 @@
 			
 		</plugins>
 	</build>   
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<configPath>src/main/resources</configPath>

@@ -3,7 +3,12 @@ package org.elasticflow.reader.flow;
 import java.time.Duration;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -18,7 +23,6 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
-import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.slf4j.Logger;
@@ -41,8 +45,6 @@ public class KafkaFlow extends ReaderFlowSocket {
 	
 	private boolean autoCommit = false;
 	
-	private long lastScanTime = 0;
-	  
 	ConsumerRecords<String, String> records;
 
 	private final static Logger log = LoggerFactory.getLogger(KafkaFlow.class);
@@ -145,17 +147,21 @@ public class KafkaFlow extends ReaderFlowSocket {
 	
 	@Override
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) {
-		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();	
+		boolean releaseConn = false;
+		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		//Connection release for Kafka timeout read
+		FutureTask<ConsumerRecords<String, String>> futureTask = new FutureTask<ConsumerRecords<String, String>>(
+				new Callable<ConsumerRecords<String, String>>() {
+					@Override
+					public ConsumerRecords<String, String> call() throws Exception {
+						return conn.poll(Duration.ofMillis(readms));
+					}
+				});
+		executor.execute(futureTask);
 		try {
-			int totalNum = 0;
-			while(totalNum==0){
-				this.records = conn.poll(Duration.ofMillis(this.readms));
-				totalNum = this.records.count();
-				if(totalNum==0 && (Common.getNow()-this.lastScanTime>this.readms*15)) {
-					REALEASE(false, true);
-					this.initconn();
-				}
-			} 
+			this.records = futureTask.get(readms * 10, TimeUnit.MILLISECONDS);
+			int totalNum = this.records.count();
 			if (totalNum > 0) {
 				int pagenum = (int) Math.ceil(totalNum / pageSize);
 				int curentpage = 0;
@@ -165,14 +171,17 @@ public class KafkaFlow extends ReaderFlowSocket {
 					if (curentpage >= pagenum)
 						break;
 				}
-				this.lastScanTime = Common.getNow();
-			} 
+			}
 		} catch (Exception e) {
+			futureTask.cancel(true);
+			releaseConn = true;
 			page.clear();
-			REALEASE(false, true);
+			REALEASE(false, releaseConn);
 			this.initconn();
 			log.error("Error in getting Kafka data, the connection will be cleared automatically.", e);
-		} 
+		} finally {
+			executor.shutdown();
+		}
 		return page;
 	}
 }
