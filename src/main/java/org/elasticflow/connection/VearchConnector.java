@@ -18,8 +18,7 @@ import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFHttpClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.minidev.json.JSONValue;
+ 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -153,9 +152,19 @@ public class VearchConnector {
 		params.setContentEncoding("UTF-8");
 		rooter_post.setEntity(params);
 		HttpResponse response = this.httpClient.execute(rooter_post);
+		String str = "";
+		sb = new StringBuffer();
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-		Object jr = JSONValue.parse(rd);
-		JSONArray ja = JSONArray.fromObject(jr);
+		while ((str=rd.readLine())!=null) {
+			sb.append(str);
+        }
+		JSONArray ja;
+		if(sb.substring(0, 1).equals("[")) {
+			ja = JSONArray.fromObject(sb.toString());
+		}else {
+			ja = JSONArray.fromObject("["+sb.toString()+"]");
+		}
+		
 		for (int j = 0; j < ja.size(); j++) {
 			JSONObject jo = JSONObject.fromObject(ja.get(j));
 			if (Integer.valueOf(String.valueOf(jo.get("status"))) != 200)
