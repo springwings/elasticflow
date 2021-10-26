@@ -51,7 +51,7 @@ ElasticFlow就是为解决该问题而生。
       <dependency>
         <groupId>org.elasticflow</groupId>
         <artifactId>elasticflow</artifactId>
-        <version>5.0.2</version>
+        <version>5.0.8</version>
       </dependency>
    ```
    2. testunit代码，例如：
