@@ -63,6 +63,7 @@ public final class SocketCenter {
 			String tags = Common.getResourceTag(instance, L1seq, tag, false);
 			if (!pipePumpMap.containsKey(tags) || needReset) {
 				List<WriterFlowSocket> wfs = new ArrayList<>();
+				//Balanced write to multiple targets
 				String[] writeDests = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
 						.getWriteTo().split(",");
 				if(writeDests.length<1)

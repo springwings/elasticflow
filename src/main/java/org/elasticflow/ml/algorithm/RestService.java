@@ -165,7 +165,7 @@ public class RestService extends ComputerFlowSocket {
 			this.dataPage.put(GlobalParam.READER_LAST_STAMP, DSR.getScanStamp());
 			this.dataPage.putData(this.dataUnit);
 			this.dataPage.putDataBoundary(DSR.getDataBoundary());
-		}
+		} 
 		return this.dataPage;
 	}
 

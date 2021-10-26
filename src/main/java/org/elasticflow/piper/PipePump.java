@@ -169,6 +169,10 @@ public final class PipePump extends Instruction {
 		return CPU.getContext(getID()).getReader();
 	}
 	
+	public ComputerFlowSocket getComputer() {
+		return CPU.getContext(getID()).getComputer();
+	}
+	
 	public WriterFlowSocket getWriter(Long outTime) {
 		return CPU.getContext(getID()).getWriter(outTime);
 	}

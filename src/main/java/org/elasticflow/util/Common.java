@@ -35,7 +35,7 @@ import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.EFSearchRequest;
-import org.elasticflow.model.EFSearchResponse;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.model.NMRequest;
 import org.elasticflow.model.reader.ScanPosition;
@@ -520,7 +520,7 @@ public final class Common {
 		return sb.toString().contains(key);
 	}
 	
-	public static EFSearchRequest getEFRequest(Request rq,EFSearchResponse rps) {
+	public static EFSearchRequest getEFRequest(Request rq,EFResponse rps) {
 		EFSearchRequest RR = null;
 		String ctype = rq.getHeader("Content-type"); 
 		if(ctype!=null && ctype.contentEquals("application/json")) {

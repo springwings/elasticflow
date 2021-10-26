@@ -19,7 +19,7 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.EFSearchRequest;
-import org.elasticflow.model.EFSearchResponse;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.service.EFService;
 import org.elasticflow.service.HttpService;
 import org.elasticflow.util.Common;
@@ -56,9 +56,9 @@ public class ComputerService {
 		} 
 		return true;
 	}
-	public EFSearchResponse process(EFSearchRequest request) { 
+	public EFResponse process(EFSearchRequest request) { 
 		long startTime = System.currentTimeMillis();
-		EFSearchResponse response = new EFSearchResponse(); 
+		EFResponse response = new EFResponse(); 
 		String pipe = request.getPipe(); 
 		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 		if (configMap.containsKey(pipe)) { 
@@ -83,7 +83,7 @@ public class ComputerService {
 			response.setHeader("PowerBy", GlobalParam.PROJ); 
 			rq.setHandled(true);
 			EFSearchRequest RR = Common.getRequest(rq);
-			EFSearchResponse rps = EFSearchResponse.getInstance();
+			EFResponse rps = EFResponse.getInstance();
 			rps.setRequest(RR.getParams());
 			if (Resource.nodeConfig.getSearchConfigs().containsKey(
 					RR.getPipe())) {

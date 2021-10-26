@@ -47,11 +47,17 @@ public class ML extends Instruction {
 		DSReader.init(dp);
 		if (DSReader.status()) {
 			try { 
+				long start = Common.getNow();
+				int dataNums = DSReader.getDataNums();
+				
 				if(context.getInstanceConfig().getComputeParams().getStage().equals(GlobalParam.COMPUTER_STAGE.PREDICT.name())) {
 					res = context.getComputer().predict(context, DSReader);
 				}else if(context.getInstanceConfig().getComputeParams().getStage().equals(GlobalParam.COMPUTER_STAGE.TRAIN.name()))  {
 					res = context.getComputer().train(context, DSReader, context.getInstanceConfig().getWriteFields());
 				} 		
+				context.getComputer().setLoad((long)(dataNums+1./(start-context.getComputer().lastGetPageTime+1.)));		
+				context.getComputer().lastGetPageTime = start;
+				context.getComputer().setPerformance((long) (dataNums+1./(Common.getNow()-start+1.)));
 			} catch (EFException e) {
 				log.error("batch Compute Exception", e);
 				Common.processErrorLevel(e);

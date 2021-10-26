@@ -13,6 +13,7 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.connection.EFConnectionSocket;
 import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.util.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory; 
 /**
@@ -30,13 +31,13 @@ public abstract class Flow {
 	
 	protected InstanceConfig instanceConfig;
 	
-	/** Average load of scheduled tasks,the amount of data processed per second**/
-	protected long LOAD;
+	/** Average load of the flow,the amount of data processed per second**/
+	protected long LOAD=-1;
 	
-	/**Transient performance,the amount of data processed per second**/
-	protected long PERFORMANCE;
+	/**Transient performance,the amount of data processed per second in batch**/
+	protected long PERFORMANCE=-1;
 	
-	public long lastGetPageTime = System.currentTimeMillis();
+	public long lastGetPageTime = Common.getNow();
 	
 	protected ConnectParams connectParams;
 	
@@ -111,11 +112,12 @@ public abstract class Flow {
 	}
 	
 	public void setLoad(long load) {
-		this.LOAD = load;;
+		this.LOAD = load;
 	}
 	
 	public void setPerformance(long performance) {
-		this.PERFORMANCE = performance;
+		if(performance>this.PERFORMANCE)
+			this.PERFORMANCE = performance;
 	}
 	
 	public void clearPool() {

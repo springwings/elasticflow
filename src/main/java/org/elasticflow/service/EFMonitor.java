@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.model.EFSearchRequest;
-import org.elasticflow.model.EFSearchResponse;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.util.Common;
 import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.HttpConnection;
@@ -55,7 +55,7 @@ public class EFMonitor {
 					: HttpConnection.getCurrentConnection().getRequest(); 
 			String dataTo = rq.getPathInfo().substring(1);
 			EFSearchRequest RR = Common.getRequest(rq);
-			EFSearchResponse rps = EFSearchResponse.getInstance();
+			EFResponse rps = EFResponse.getInstance();
 			rps.setRequest(RR.getParams());
 			switch (dataTo) {  
 			case "efm.doaction":{

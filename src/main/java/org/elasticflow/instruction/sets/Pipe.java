@@ -18,6 +18,7 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
+import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,11 +63,11 @@ public class Pipe extends Instruction {
 		}
 		Page page = (Page) args[0]; 
 		ReaderFlowSocket RFS = (ReaderFlowSocket) args[1]; 
-		long start = System.currentTimeMillis();
+		long start = Common.getNow();
 		DataPage tmp = (DataPage) RFS.getPageData(page,context.getInstanceConfig().getPipeParams().getReadPageSize());	
-		RFS.setLoad(tmp.getData().size()*1000/(start-RFS.lastGetPageTime));		
+		RFS.setLoad((long)((tmp.getData().size()+1.)/(start-RFS.lastGetPageTime+1.)));		
 		RFS.lastGetPageTime = start;
-		RFS.setPerformance((long) (tmp.getData().size()*1000/(System.currentTimeMillis()-start+0.0001)));
+		RFS.setPerformance((long) ((tmp.getData().size()+1.)/(Common.getNow()-start+1.)));
 		return (DataPage) tmp.clone();
 	} 
 
@@ -94,28 +95,32 @@ public class Pipe extends Instruction {
 		
 		if (dataPage.size() == 0)
 			return rstate;
-		if(context.getWriter().getWriteHandler()!=null)
-			dataPage = context.getWriter().getWriteHandler().handleData(context, dataPage);
+		WriterFlowSocket writer = context.getWriter();
+		if(writer.getWriteHandler()!=null)
+			dataPage = writer.getWriteHandler().handleData(context, dataPage);
 		DataSetReader DSReader = new DataSetReader();
 		DSReader.init(dataPage);
 		long start = Common.getNow();
 		int num = 0;
 		if (DSReader.status()) {
-			context.getWriter().PREPARE(monopoly, false);
-			if (!context.getWriter().ISLINK()) {
+			writer.PREPARE(monopoly, false);
+			if (!writer.ISLINK()) {
 				rstate.setStatus(false);
 				return rstate;
 			}
 			boolean freeConn = false;
 			try {
 				while (DSReader.nextLine()) {
-					context.getWriter().write(context.getInstanceConfig().getWriterParams(), 
+					writer.write(context.getInstanceConfig().getWriterParams(), 
 							DSReader.getLineData().virtualWrite(context.getInstanceConfig().getWriteFields()),
 							context.getInstanceConfig().getWriteFields(), instance, storeId, isUpdate);
 					num++;
 				}
 				rstate.setReaderScanStamp(DSReader.getScanStamp());
 				rstate.setCount(num);
+				writer.setLoad((long)((num+1.)/(start-writer.lastGetPageTime+1.)));		
+				writer.lastGetPageTime = start;
+				writer.setPerformance((long) ((num+1.)/(Common.getNow()-start+1.)));
 				context.getReader().flush();
 				context.getWriter().flush();
 				log.info(Common.formatLog("onepage"," -- " + id + " onepage ", instance, storeId, L2seq, num,

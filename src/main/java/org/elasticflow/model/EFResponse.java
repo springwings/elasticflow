@@ -1,3 +1,10 @@
+/*
+ * Copyright ElasticFlow B.V. and/or licensed to ElasticFlow B.V. under one
+ * or more contributor license agreements. Licensed under the ElasticFlow License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
+ * Side Public License, v 1.
+ */
 package org.elasticflow.model;
 
 import java.text.SimpleDateFormat;
@@ -12,43 +19,41 @@ import com.alibaba.fastjson.JSON;
 
 /**
  * ElasticFlow response model
+ * 
  * @author chengwen
  * @version 2.0
  * @date 2018-11-05 13:53
  */
-public class EFSearchResponse {
+public class EFResponse {
+	
 	protected Map<String, String> parsedParams = new HashMap<>();
 	private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	protected Object payload = null;
 	private long startTime = 0;
 	private long endTime = 0;
-	private long duration = 0; 
-	private String instance = ""; 
+	private String instance = "";
 	public Map<String, Object> response = new LinkedHashMap<>();
 
-	public static EFSearchResponse getInstance() {
-		EFSearchResponse rs = new EFSearchResponse();
+	public static EFResponse getInstance() {
+		EFResponse rs = new EFResponse();
 		rs.response.put("status", RESPONSE_STATUS.Success.getVal());
-		rs.response.put("info", RESPONSE_STATUS.Success);
-		rs.response.put("instance",null);
-		rs.response.put("datas",null);
-		rs.response.put("useTime",null);
+		rs.response.put("info", RESPONSE_STATUS.Success);  
 		return rs;
 	}
-	
-	public void setStatus(Object info,GlobalParam.RESPONSE_STATUS status) { 
+
+	public void setStatus(Object info, GlobalParam.RESPONSE_STATUS status) {
 		response.put("info", status.getMsg());
-		response.put("datas", info);
-		response.put("status",status.getVal());
-	}  
-	
-	public void setInfo(String info) { 
+		this.setPayload(info);
+		response.put("status", status.getVal());
+	}
+
+	public void setInfo(String info) {
 		response.put("info", info);
-		response.put("status",GlobalParam.RESPONSE_STATUS.Success.getVal());
-	}  
+		response.put("status", GlobalParam.RESPONSE_STATUS.Success.getVal());
+	}
 
 	public void setRequest(Map<String, Object> params) {
-		response.put("request", params); 
+		response.put("request", params);
 	}
 
 	public Object getPayload() {
@@ -73,43 +78,38 @@ public class EFSearchResponse {
 
 	public void setEndTime(long endTime) {
 		this.endTime = endTime;
-		this.duration = this.endTime - this.startTime;
 	}
 
 	public long getDuration() {
-		return duration;
-	}
+		return this.endTime - this.startTime;
+	} 
 
-	public void setDuration(long duration) {
-		this.duration = duration;
-	}
- 
 	public void setInstance(String instance) {
 		this.instance = instance;
 	}
 
 	public String getResponse(boolean isJson) {
-		if(isJson) {
+		if (isJson) {
 			return JSON.toJSONString(formatData());
-		}else {
+		} else {
 			return formatData().toString();
 		}
-	} 
-	
-	private Map<String, Object> formatData() { 
-		Map<String, Object> rsp = new LinkedHashMap<String, Object>();  
+	}
+
+	private Map<String, Object> formatData() {
+		Map<String, Object> rsp = new LinkedHashMap<String, Object>();
 		response.put("instance", this.instance);
-		response.put("useTime", String.valueOf(getDuration()) + "ms");
+		response.put("duration", String.valueOf(getDuration()) + "ms");
 		if (payload != null) {
 			rsp.put("datas", payload);
 		}
 		response.put("response", rsp);
-		response.put("createTime",SDF.format(System.currentTimeMillis()));
-		response.put("__SOURCE",GlobalParam.PROJ);
-		response.put("__VERSION",GlobalParam.VERSION);
-		response.put("__ENV", GlobalParam.RUN_ENV); 
-		response.put("__IS_DEBUG", GlobalParam.DEBUG); 
-		response.put("__SYS_START_TIME",SDF.format(GlobalParam.SYS_START_TIME));
+		response.put("createTime", SDF.format(System.currentTimeMillis()));
+		response.put("__SOURCE", GlobalParam.PROJ);
+		response.put("__VERSION", GlobalParam.VERSION);
+		response.put("__ENV", GlobalParam.RUN_ENV);
+		response.put("__IS_DEBUG", GlobalParam.DEBUG);
+		response.put("__SYS_START_TIME", SDF.format(GlobalParam.SYS_START_TIME));
 		return response;
-	}  
+	}
 }

@@ -35,7 +35,7 @@ import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.model.EFSearchResponse;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.param.pipe.InstructionParam;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
@@ -60,7 +60,7 @@ import com.alibaba.fastjson.JSONObject;
 
 /**
  * * data-flow router maintain apis,default port
- * 8617,localhost:8617/search.doaction?ac=[actions]
+ * 8617,localhost:8617/ef.doaction?ac=[actions]
  * 
  * @actions reloadConfig reload instance config and re-add all jobs clean relate
  *          pools
@@ -130,7 +130,7 @@ public final class NodeMonitor {
 		this.response_info =info;
 	}
 
-	public void ac(Request rq,EFSearchResponse RS) {
+	public void ac(Request rq,EFResponse RS) {
 		try {
 			if (this.actions.contains(rq.getParameter("ac"))) {
 				Method m = NodeMonitor.class.getMethod(rq.getParameter("ac"), Request.class);
@@ -482,13 +482,20 @@ public final class NodeMonitor {
 			
 			String[] L1seqs = Common.getL1seqs(config,true);  
 			for (String seq : L1seqs) {
-				PipePump transDataFlow = Resource.SOCKET_CENTER.getPipePump(config.getName(), seq, false,GlobalParam.FLOW_TAG._DEFAULT.name());				if(seq=="") {
-					JO.put("Reader Load ", transDataFlow.getReader().getLoad());
-					JO.put("Reader Performance ", transDataFlow.getReader().getPerformance());
-				}else {
-					JO.put("Seq(" + seq + ") Reader Load ", transDataFlow.getReader().getLoad());
-					JO.put("Seq(" + seq + ") Reader Performance ", transDataFlow.getReader().getPerformance());
+				PipePump transDataFlow = Resource.SOCKET_CENTER.getPipePump(config.getName(), seq, false,GlobalParam.FLOW_TAG._DEFAULT.name());				String appendPipe = "";
+				if(seq!="") {
+					appendPipe = "Seq(" + seq + ") ";
+				} 
+				JO.put(appendPipe+"Reader Load ", transDataFlow.getReader().getLoad());
+				JO.put(appendPipe+"Reader Performance ", transDataFlow.getReader().getPerformance());
+				if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {
+					JO.put(appendPipe+"Computer Load ", transDataFlow.getComputer().getLoad());
+					JO.put(appendPipe+"Computer Performance ", transDataFlow.getComputer().getPerformance());
 				}
+				if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
+					JO.put(appendPipe+"Writer Load ", transDataFlow.getWriter().getLoad());
+					JO.put(appendPipe+"Writer Performance ", transDataFlow.getWriter().getPerformance());
+				} 				  
 			}
 
 			if (Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
@@ -552,8 +559,8 @@ public final class NodeMonitor {
 						}
 						fullstate.append(seq + ":" + Common.getFullStartInfo(instance, seq) + "; ");
 					}
-					JO.put("增量存储状态", sb);
-					JO.put("全量存储状态", fullstate);
+					JO.put("Incremental storage status", sb);
+					JO.put("Full storage status", fullstate);
 				} else {
 					String strs = GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null))
 							.getPositionString();
@@ -572,25 +579,25 @@ public final class NodeMonitor {
 								stateStr.append(", ");
 							}
 						}
-						JO.put("增量存储状态", GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null)).getStoreId()
+						JO.put("Incremental storage status", GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null)).getStoreId()
 								+ ":" + stateStr.toString());
 					}
-					JO.put("全量存储状态", Common.getFullStartInfo(instance, null));
+					JO.put("Full storage status", Common.getFullStartInfo(instance, null));
 				}
 				if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.FULL.name())
 						|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()).size() == 0) {
-					JO.put("全量运行状态", "full:null");
+					JO.put("Full progress", "full:none");
 				} else {
-					JO.put("全量运行状态", "full:" + Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()));
+					JO.put("Full progress", "full:" + Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()));
 				}
 				if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.INCREMENT.name())
 						|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()).size() == 0) {
-					JO.put("增量运行状态", "increment:null");
+					JO.put("Incremental progress", "increment:none");
 				} else {
-					JO.put("增量运行状态", "increment:" + Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()));
+					JO.put("Incremental progress", "increment:" + Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()));
 				}
-				JO.put("增量线程状态", threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
-				JO.put("全量线程状态", threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
+				JO.put("Incremental thread status", threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
+				JO.put("Full thread status", threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
 			}
 			setResponse(RESPONSE_STATUS.Success, JO);
 		} else {
