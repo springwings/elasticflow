@@ -14,6 +14,7 @@ import org.elasticflow.model.searcher.SearcherResult;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.searcher.SearcherFlowSocket;
 import org.elasticflow.searcher.handler.SearcherHandler;
+import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -35,10 +36,10 @@ import com.alibaba.fastjson.JSON;
  * @version 2.0
  * @date 2018-10-26 09:23
  */
-public final class ESFlow extends SearcherFlowSocket {  
+public final class EsSearcher extends SearcherFlowSocket {  
 	 
-	public static ESFlow getInstance(ConnectParams connectParams) {
-		ESFlow o = new ESFlow();
+	public static EsSearcher getInstance(ConnectParams connectParams) {
+		EsSearcher o = new EsSearcher();
 		o.INIT(connectParams);
 		return o;
 	} 
@@ -84,7 +85,7 @@ public final class ESFlow extends SearcherFlowSocket {
 			} 
 		}catch(Exception e){ 
 			releaseConn = true;
-			throw new EFException(e);
+			throw Common.getException(e);
 		}finally{
 			REALEASE(false,releaseConn); 
 		} 

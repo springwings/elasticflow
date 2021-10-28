@@ -18,9 +18,9 @@ import org.elasticflow.piper.Breaker;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.util.EFTuple;
 import org.elasticflow.util.EFWriterUtil;
-import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,7 @@ public class FlowTask {
 	 * seq for scan series datas
 	 */
 	private String L1seq = "";
-
+ 
 	private final static Logger log = LoggerFactory.getLogger(FlowTask.class);
 
 	public static FlowTask createTask(String instanceName, PipePump transDataFlow) {
@@ -66,13 +66,18 @@ public class FlowTask {
 
 	/**
 	 * if no full job will auto open optimize job
+	 * @throws EFException 
 	 */
-	public void optimizeInstance() {
+	public void optimizeInstance() throws EFException {
 		String storeName = Common.getMainName(instance, L1seq);
 		CPU.RUN(transDataFlow.getID(), "Pond", "optimizeInstance", true, storeName,
 				Common.getStoreId(instance, L1seq, transDataFlow, true, false));
 	}
-
+	
+	
+	public void setRecompute(boolean recompute) {
+		this.recompute = recompute;
+	}
 	
 	/**
 	 * slave instance full job
@@ -155,8 +160,9 @@ public class FlowTask {
 	
 	/**
 	 * Primary virtual node Increment task running
+	 * @throws EFException 
 	 */
-	public void runMasterIncrement() {
+	public void runMasterIncrement() throws EFException {
 		if (Common.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
 				transDataFlow.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
@@ -202,8 +208,9 @@ public class FlowTask {
 			try {
 				transDataFlow.run(instance, storeId, L1seq, false, writeInSamePosition); 
 			} catch (EFException e) {
-				if (!writeInSamePosition && e.getErrorType()==ETYPE.WRITE_POS_NOT_FOUND) {
+				if (!writeInSamePosition && e.getErrorType()==ETYPE.WRITE_POS_NOT_FOUND) { 
 					storeId = Common.getStoreId(instance, L1seq, transDataFlow, true, true);
+					log.warn("try to rebuild "+instance+" storage location！");
 					try {
 						transDataFlow.run(instance, storeId,L1seq, false, writeInSamePosition);
 					} catch (EFException ex) {

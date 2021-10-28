@@ -14,6 +14,7 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
+import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,8 +117,11 @@ public class VearchFlow extends WriterFlowSocket {
 				conn.writeSingle(table, row);
 			}
 		} catch (Exception e) {
-			log.error("write Exception", e);  
-			throw new EFException(e,ELEVEL.Dispose);
+			if(e.getMessage().contains("spaceName param not build")) {
+				throw new EFException(e,ELEVEL.Dispose,ETYPE.WRITE_POS_NOT_FOUND);
+			}else {
+				throw new EFException(e,ELEVEL.Dispose);
+			} 
 		} 
 	}
 	
@@ -195,8 +199,11 @@ public class VearchFlow extends WriterFlowSocket {
 					try {
 						conn.writeBatch(this.curTable, this.DATAS);
 					} catch (Exception e) {
-//						this.deleteAndInsert();
-						throw new EFException(e,ELEVEL.Termination);
+						if(e.getMessage().contains("spaceName param not build")) {
+							throw new EFException(e,ELEVEL.Dispose,ETYPE.WRITE_POS_NOT_FOUND);
+						}else {
+							throw new EFException(e,ELEVEL.Termination);
+						}
 					} 
 					currentSec = Common.getNow();
 					this.DATAS.clear();

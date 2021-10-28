@@ -53,8 +53,7 @@ public class Neo4jFlow extends WriterFlowSocket {
 				log.error("PreparedStatement Exception", e);
 				log.info(getWriteSQL(writerParam, unit, transParams));
 			}
-		} catch (Exception e) {
-			log.error("write Exception", e);
+		} catch (Exception e) { 
 			throw new EFException(e,ELEVEL.Dispose);
 		} finally {
 			REALEASE(false, releaseConn);

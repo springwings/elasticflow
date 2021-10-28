@@ -18,7 +18,7 @@ import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFHttpClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
- 
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -136,6 +136,15 @@ public class VearchConnector {
 
 		} catch (Exception e) {
 		}
+	}
+	
+
+	public JSONObject search(String table,String query) throws Exception { 
+		String response = EFHttpClientUtil.process(this.method + this.ROOTER + "/" + this.dbName + "/" + table + "/_search",
+				HttpPost.METHOD_NAME,
+				EFHttpClientUtil.DEFAULT_CONTENT_TYPE,
+				query); 
+		return JSONObject.fromObject(response);	 
 	}
 
 	public void writeBatch(String table, CopyOnWriteArrayList<Object> datas) throws Exception {

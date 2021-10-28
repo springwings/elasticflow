@@ -17,6 +17,7 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.elasticflow.writer.WriterFlowSocket;
 
 /**
@@ -46,7 +47,7 @@ public class CPU {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Object RUN(String runId,String instructionsSet,String instruction,boolean runCheck,Object... args){ 
+	public static Object RUN(String runId,String instructionsSet,String instruction,boolean runCheck,Object... args) throws EFException{ 
 		Object rs=null;
 		try {
 			Class<?> clz = Class.forName("org.elasticflow.instruction.sets."+instructionsSet); 
@@ -62,8 +63,8 @@ public class CPU {
 				Common.LOG.error("CPU not ready to run!");
 			}
 		}catch (Exception e) {
-			Common.LOG.error("CPU RUN Exception",e);
-		} 
+			throw Common.getException(e);
+		}
 		return rs;
 	}
 	

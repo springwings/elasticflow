@@ -83,6 +83,9 @@ public class EFHttpClientUtil {
 	public static String process(String uri, String data) {
 		return process(uri,data,HttpPost.METHOD_NAME, DEFAULT_CONTENT_TYPE, DEFAUL_TIME_OUT);
 	}
+	public static String process(String uri, String methodName,String contentType,String data) {
+		return process(uri,data,methodName,contentType, DEFAUL_TIME_OUT);
+	}
 	public static String process(String uri, String methodName,String contentType) {
 		return process(uri,null,methodName, contentType, DEFAUL_TIME_OUT);
 	}

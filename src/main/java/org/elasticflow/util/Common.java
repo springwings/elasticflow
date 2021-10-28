@@ -34,8 +34,8 @@ import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
-import org.elasticflow.model.EFSearchRequest;
 import org.elasticflow.model.EFResponse;
+import org.elasticflow.model.EFSearchRequest;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.model.NMRequest;
 import org.elasticflow.model.reader.ScanPosition;
@@ -335,17 +335,23 @@ public final class Common {
 	 * @param instance
 	 *            data source main tag name
 	 * @return String
+	 * @throws EFException 
 	 */
 	public static String getStoreId(String instance, String L1seq, PipePump transDataFlow, boolean isIncrement,
-			boolean reCompute) {
-		if (isIncrement) { 
-			return getIncrementStoreId(instance,L1seq,transDataFlow,reCompute);
-		} else {
-			return  (String) CPU.RUN(transDataFlow.getID(), "Pond", "getNewStoreId",true, getMainName(instance, L1seq), false);
+			boolean reCompute){
+		try {
+			if (isIncrement) { 
+				return getIncrementStoreId(instance,L1seq,transDataFlow,reCompute);
+			} else {
+				return (String) CPU.RUN(transDataFlow.getID(), "Pond", "getNewStoreId",true, getMainName(instance, L1seq), false);
+			}
+		} catch (EFException e) {
+			Common.LOG.error(e.getMessage());
 		}
+		return null;		
 	} 
 	
-	private static synchronized String getIncrementStoreId(String instance, String L1seq, PipePump transDataFlow,boolean reCompute) {
+	private static synchronized String getIncrementStoreId(String instance, String L1seq, PipePump transDataFlow,boolean reCompute) throws EFException {
 		String storeId = getStoreId(instance,L1seq,true); 
 		if (storeId.length() == 0 || reCompute) {
 			storeId = (String) CPU.RUN(transDataFlow.getID(), "Pond", "getNewStoreId",false, getMainName(instance, L1seq), true); 
@@ -618,6 +624,15 @@ public final class Common {
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTimeInMillis();
     }
+	
+	public static EFException getException(Exception e) {
+		Throwable except = e.getCause();
+		if(except instanceof EFException) { 
+			return (EFException)except;
+		}else {
+			return new EFException(e);
+		}
+	}
 	
 	public static void processErrorLevel(EFException e) {
 		if(e.getErrorLevel().equals(ELEVEL.Termination)) {

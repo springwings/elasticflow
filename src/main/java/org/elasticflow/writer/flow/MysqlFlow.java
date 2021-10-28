@@ -66,8 +66,7 @@ public class MysqlFlow extends WriterFlowSocket {
 			} else {
 				this.insertDb(PipeNormsUtil.getWriteSql(table, unit, transParams));
 			}
-		} catch (Exception e) {
-			log.error("write Exception", e);
+		} catch (Exception e) { 
 			throw new EFException(e,ELEVEL.Dispose);
 		}
 	}

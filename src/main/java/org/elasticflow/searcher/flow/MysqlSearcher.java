@@ -13,9 +13,9 @@ import org.elasticflow.util.EFException;
  * @version 2.0
  * @date 2018-10-26 09:23
  */
-public class MysqlFlow extends SearcherFlowSocket{
+public class MysqlSearcher extends SearcherFlowSocket{
 
-	public static MysqlFlow getInstance(ConnectParams connectParams) {
+	public static MysqlSearcher getInstance(ConnectParams connectParams) {
 		return null;
 	}
 

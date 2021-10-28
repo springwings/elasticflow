@@ -46,6 +46,7 @@ import org.elasticflow.reader.service.HttpReaderService;
 import org.elasticflow.searcher.service.SearcherService;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.ConfigStorer;
+import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFLoader;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.SystemInfoUtil;
@@ -648,8 +649,9 @@ public final class NodeMonitor {
 	/**
 	 * run ElasticFlow CPU instruction program.
 	 * @param rq
+	 * @throws EFException 
 	 */
-	public void runCode(Request rq) {
+	public void runCode(Request rq) throws EFException {
 		if (rq.getParameter("script") != null && rq.getParameter("script").contains("Track.cpuFree")) {
 			ArrayList<InstructionTree> Instructions = Common.compileCodes(rq.getParameter("script"), CPU.getUUID());
 			for (InstructionTree Instruction : Instructions) {

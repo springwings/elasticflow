@@ -29,118 +29,82 @@ import org.elasticsearch.search.sort.SortOrder;
  * @version 1.0
  * @date 2018-07-22 09:08
  */
-public class SearcherESModel implements SearcherModel<QueryBuilder,SortBuilder<?>,AggregationBuilder>{
+public class SearcherESModel extends SearcherModel<QueryBuilder, SortBuilder<?>, AggregationBuilder> {
+
 	private QueryBuilder query;
 	private List<SortBuilder<?>> sortinfo;
-	private int start = 0;
-	private int count = 5;
-	Map<String,List<String[]>> facetSearchParams;
-	List<AggregationBuilder> facetsConfig = new ArrayList<AggregationBuilder>(); 
-	private boolean showQueryInfo = false;
+	Map<String, List<String[]>> facetSearchParams;
+	List<AggregationBuilder> facetsConfig = new ArrayList<AggregationBuilder>();
+
 	private boolean needCorpfuncCnt = false;
 	private boolean cacheRequest = true;
 	private Set<Integer> excludeSet;
 	private String type;
-	private String fl="";
-	private String fq="";
-	private String facet_ext="";
-	private String requesthandler="";
-	
+
 	public static SearcherESModel getInstance(EFSearchRequest request, InstanceConfig instanceConfig) {
-		SearcherESModel eq = new SearcherESModel(); 
+		SearcherESModel eq = new SearcherESModel();
+		eq.setRequestHandler("");
 		eq.setSorts(SearchParamUtil.getSortField(request, instanceConfig));
 		eq.setFacetSearchParams(SearchParamUtil.getFacetParams(request, instanceConfig));
-		if(request.getParam("facet_ext")!=null){
+		if (request.getParam("facet_ext") != null) {
 			eq.setFacet_ext((String) request.getParams().get("facet_ext"));
-		}  
-		BoolQueryBuilder query = ESQueryParser.parseRequest(request,instanceConfig);
-		eq.setQuery(query); 
+		}
+		BoolQueryBuilder query = ESQueryParser.parseRequest(request, instanceConfig);
+		eq.setQuery(query);
 		return eq;
 	}
- 
-	
+
 	@Override
 	public QueryBuilder getQuery() {
-		if (query != null)
-		{			
+		if (query != null) {
 			BoolQueryBuilder bQuery = QueryBuilders.boolQuery();
-			bQuery.must(query); 
+			bQuery.must(query);
 			return bQuery;
 		}
 		return query;
 	}
-	
+
 	@Override
 	public void setQuery(QueryBuilder query) {
 		this.query = query;
-	} 
-	
+	}
+
 	@Override
 	public List<SortBuilder<?>> getSortinfo() {
 		return sortinfo;
 	}
+
 	public void setSorts(List<SortBuilder<?>> sortinfo) {
 		this.sortinfo = sortinfo;
 	}
-	
+
 	@Override
-	public int getStart() {
-		return start;
-	}
-	public void setStart(int start) {
-		this.start = start;
-	}
-	@Override
-	public int getCount() {
-		return count;
-	}
-	public void setCount(int count) {
-		this.count = count;
-	}
-	@Override
-	public Map<String,List<String[]>> getFacetSearchParams() {
+	public Map<String, List<String[]>> getFacetSearchParams() {
 		return facetSearchParams;
 	}
-	public void setFacetSearchParams(Map<String,List<String[]>> facetSearchParams) {
+
+	public void setFacetSearchParams(Map<String, List<String[]>> facetSearchParams) {
 		this.facetSearchParams = facetSearchParams;
 	}
-	
-	public void setFacet_ext(String facet_ext) {
-		this.facet_ext = facet_ext;
-	}
 
-	
 	@Override
 	public List<AggregationBuilder> getFacetsConfig() {
-		if (facetSearchParams != null)
-		{ 
-			for(Map.Entry<String,List<String[]>> e : facetSearchParams.entrySet())
-			{	 
-				int i=0;
-				AggregationBuilder  agg = null ;
-				for(String[] strs:e.getValue()) {
-					if(i==0) {
-						agg = genAgg(strs[0],strs[1],strs[2],true);
-					}else {
-						((AggregationBuilder) agg).subAggregation(genAgg(strs[0],strs[1],strs[2],false));
+		if (facetSearchParams != null) {
+			for (Map.Entry<String, List<String[]>> e : facetSearchParams.entrySet()) {
+				int i = 0;
+				AggregationBuilder agg = null;
+				for (String[] strs : e.getValue()) {
+					if (i == 0) {
+						agg = genAgg(strs[0], strs[1], strs[2], true);
+					} else {
+						((AggregationBuilder) agg).subAggregation(genAgg(strs[0], strs[1], strs[2], false));
 					}
-					i++; 
-				}  
+					i++;
+				}
 				facetsConfig.add(agg);
 			}
 		}
 		return facetsConfig;
-	} 
- 
-	
-	@Override
-	public boolean isShowQueryInfo() {
-		return this.showQueryInfo;
-	}
-
-	@Override
-	public void setShowQueryInfo(boolean isshow) {
-		this.showQueryInfo = isshow;
 	}
 
 	public boolean isNeedCorpfuncCnt() {
@@ -166,6 +130,7 @@ public class SearcherESModel implements SearcherModel<QueryBuilder,SortBuilder<?
 	public void setType(String type) {
 		this.type = type;
 	}
+
 	@Override
 	public boolean cacheRequest() {
 		return cacheRequest;
@@ -174,133 +139,91 @@ public class SearcherESModel implements SearcherModel<QueryBuilder,SortBuilder<?
 	public void setCacheRequest(boolean cacheRequest) {
 		this.cacheRequest = cacheRequest;
 	}
- 
 
-	@Override
-	public String getFl() {
-		return this.fl;
-	}
-
-	@Override
-	public void setFl(String fl) {
-		this.fl = fl;
-	}
-
-	@Override
-	public String getFq() { 
-		return fq;
-	}
-
-	@Override
-	public void setFq(String fq) {
-		this.fq = fq;
-	}
-
-	@Override
-	public Map<String, String> getFacetExt() {
-		Map<String, String> ext = new HashMap<String, String>();
-		if(this.facet_ext.length()>0){ 
-			for(String str:this.facet_ext.split(",")){
-				String[] tmp = str.split(":");
-				ext.put(tmp[0], tmp[1]);
-			}
-		} 
-		return ext;
-	}
-	
-	@Override
-	public void setRequestHandler(String handler) {
-		this.requesthandler = handler; 
-	}
-
-	@Override
-	public String getRequestHandler() { 
-		return this.requesthandler;
-	} 
-	
 	/**
 	 * get Aggregation
+	 * 
 	 * @param type  true is main , false is sub
 	 * @param name
 	 * @param field
 	 * @param fun
 	 * @return
 	 */
-	private AggregationBuilder genAgg(String fun,String name,String field,boolean type) {
+	private AggregationBuilder genAgg(String fun, String name, String field, boolean type) {
 		HashMap<String, String> kv = new HashMap<>();
-		if(field.contains("(DEF(")) {
+		if (field.contains("(DEF(")) {
 			kv = getDEF(field);
 		}
 		switch (fun) {
-			case "cardinality": 
-				return AggregationBuilders.cardinality(name).field(field); 
-			case "avg":
-				return AggregationBuilders.avg(name).field(field); 
-			case "sum":
-				if(field.contains("(script(")) {
-					return AggregationBuilders.sum(name).script(getScript(field)); 
-				}else {
-					return AggregationBuilders.sum(name).field(field); 
-				} 
-			case "topHits":
-				if(kv.size()>0) {
-					TopHitsAggregationBuilder tb = AggregationBuilders.topHits(fun);
-					if(kv.containsKey("sort")) {
-						String sortField;
-						SortOrder sod;
-						if(kv.get("sort").endsWith(GlobalParam.SORT_ASC)) {
-							sortField = kv.get("sort").substring(0, kv.get("sort").indexOf(GlobalParam.SORT_ASC));
-							sod = SortOrder.ASC;
-						}else {
-							sortField = kv.get("sort").substring(0, kv.get("sort").indexOf(GlobalParam.SORT_DESC));
-							sod = SortOrder.DESC;
-						}
-						tb.sort(sortField, sod).from(Integer.valueOf(name));
-					} 
-					if(kv.containsKey("size")) {
-						tb.size(Integer.valueOf(kv.get("size")));
+		case "cardinality":
+			return AggregationBuilders.cardinality(name).field(field);
+		case "avg":
+			return AggregationBuilders.avg(name).field(field);
+		case "sum":
+			if (field.contains("(script(")) {
+				return AggregationBuilders.sum(name).script(getScript(field));
+			} else {
+				return AggregationBuilders.sum(name).field(field);
+			}
+		case "topHits":
+			if (kv.size() > 0) {
+				TopHitsAggregationBuilder tb = AggregationBuilders.topHits(fun);
+				if (kv.containsKey("sort")) {
+					String sortField;
+					SortOrder sod;
+					if (kv.get("sort").endsWith(GlobalParam.SORT_ASC)) {
+						sortField = kv.get("sort").substring(0, kv.get("sort").indexOf(GlobalParam.SORT_ASC));
+						sod = SortOrder.ASC;
+					} else {
+						sortField = kv.get("sort").substring(0, kv.get("sort").indexOf(GlobalParam.SORT_DESC));
+						sod = SortOrder.DESC;
 					}
-					if(kv.containsKey("includes")) {
-						tb.fetchSource(kv.get("includes").split("\\|"), null);
-					}
-					return tb.from(Integer.valueOf(name));
-				}else {
-					return AggregationBuilders.topHits(fun).from(Integer.valueOf(name)).size(Integer.valueOf(field));
-				} 
-		} 
-		if(type) {
+					tb.sort(sortField, sod).from(Integer.valueOf(name));
+				}
+				if (kv.containsKey("size")) {
+					tb.size(Integer.valueOf(kv.get("size")));
+				}
+				if (kv.containsKey("includes")) {
+					tb.fetchSource(kv.get("includes").split("\\|"), null);
+				}
+				return tb.from(Integer.valueOf(name));
+			} else {
+				return AggregationBuilders.topHits(fun).from(Integer.valueOf(name)).size(Integer.valueOf(field));
+			}
+		}
+		if (type) {
 			Map<String, String> ext = getFacetExt();
 			TermsAggregationBuilder tb = AggregationBuilders.terms(name).field(field);
-			if(ext.containsKey("size")) {
+			if (ext.containsKey("size")) {
 				tb.size(Integer.valueOf(ext.get("size")));
-			} 
-			if(ext.containsKey("order")) {
+			}
+			if (ext.containsKey("order")) {
 				String[] tmp = ext.get("order").split(" ");
-				if(tmp.length==2)
-					tb.order(BucketOrder.aggregation(tmp[0], tmp[1].equals("desc")?false:true));
+				if (tmp.length == 2)
+					tb.order(BucketOrder.aggregation(tmp[0], tmp[1].equals("desc") ? false : true));
 			}
 			return tb;
 		}
 		return AggregationBuilders.terms(name).field(field);
 	}
-	
- private org.elasticsearch.script.Script getScript(String str) {
-	 str = str.replace("(script(", "");
-	 str = str.substring(0, str.length()-2); 
-	 Script script = new Script(str); 
-	 return script;
- }
- 
- private HashMap<String, String> getDEF(String str){
-	 str = str.replace("(DEF(", "");
-	 str = str.substring(0, str.length()-2); 
-	 HashMap<String, String> res = new HashMap<>();
-	 for(String s:str.split(";")) {
-		 String[] tmp = s.split("=");
-		 if(tmp.length==2)
-			 res.put(tmp[0], tmp[1]);
-	 }
-	 return res;
- }
+
+	private org.elasticsearch.script.Script getScript(String str) {
+		str = str.replace("(script(", "");
+		str = str.substring(0, str.length() - 2);
+		Script script = new Script(str);
+		return script;
+	}
+
+	private HashMap<String, String> getDEF(String str) {
+		str = str.replace("(DEF(", "");
+		str = str.substring(0, str.length() - 2);
+		HashMap<String, String> res = new HashMap<>();
+		for (String s : str.split(";")) {
+			String[] tmp = s.split("=");
+			if (tmp.length == 2)
+				res.put(tmp[0], tmp[1]);
+		}
+		return res;
+	}
 
 }

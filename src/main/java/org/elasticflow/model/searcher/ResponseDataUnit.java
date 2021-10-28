@@ -7,6 +7,7 @@
  */
 package org.elasticflow.model.searcher;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -22,6 +23,10 @@ public class ResponseDataUnit {
 	
 	public static ResponseDataUnit getInstance(){
 		return new ResponseDataUnit();
+	}
+	
+	public void pushAll(HashMap<String, Object> datas) {
+		this.internalMap = datas;
 	}
 	
 	public void addObject(String key, Object o){

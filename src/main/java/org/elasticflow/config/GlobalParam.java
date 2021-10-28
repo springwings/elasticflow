@@ -160,6 +160,8 @@ public final class GlobalParam {
 	} 
 	
 	//searcher parameters
+	public final static String CLOSE_REQUEST_RESPONSE = "__request_not_return";
+	public final static String PARAM_STORE_ID = "__storeid";
 	public final static int SEARCH_MAX_WINDOW=20000; 
 	public final static int SEARCH_MAX_PAGE=2000;
 	public final static float DISJUNCTION_QUERY_WEIGHT = 0.1f; 

@@ -1,11 +1,10 @@
 package org.elasticflow.searcher;
 
+import java.lang.reflect.Method;
+
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.flow.Socket;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.searcher.flow.ESFlow;
-import org.elasticflow.searcher.flow.MysqlFlow;
-import org.elasticflow.searcher.flow.SolrFlow;
 import org.elasticflow.util.Common;
 
 /**
@@ -37,17 +36,15 @@ public class SearcherSocketFactory implements Socket<SearcherFlowSocket>{
 
 	private static SearcherFlowSocket getFlowSocket(ConnectParams connectParams, InstanceConfig instanceConfig, String L1seq) {
 		connectParams.setInstanceConfig(instanceConfig);
-		switch (connectParams.getWhp().getType()) {
-		case ES:
-			return ESFlow.getInstance(connectParams); 
-		case SOLR:
-			return SolrFlow.getInstance(connectParams); 
-		case MYSQL:
-			return MysqlFlow.getInstance(connectParams); 
-		default:
+		String _class_name = "org.elasticflow.searcher.flow."+Common.changeFirstCase(connectParams.getWhp().getType().name().toLowerCase())+"Searcher";
+		try {					
+			Class<?> clz = Class.forName(_class_name); 
+			Method m = clz.getMethod("getInstance", ConnectParams.class);  
+			return (SearcherFlowSocket) m.invoke(null,connectParams);
+		}catch (Exception e) { 
 			Common.LOG.error("SearcherSocket Connect Type "+connectParams.getWhp().getType()+" Not Support!");
-			return null;
 		} 
+		return null;
 	}
  
 }

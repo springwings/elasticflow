@@ -21,7 +21,7 @@ public class EFException extends Exception {
 	}
 
 	public static enum ETYPE {
-		WRITE_POS_NOT_FOUND,UNKNOWN;
+		WRITE_POS_NOT_FOUND,RESOURCE_FAILURE,UNKNOWN;
 	}
 
 	private ELEVEL e_level = ELEVEL.Ignore;
@@ -45,6 +45,13 @@ public class EFException extends Exception {
 		super(msg);
 		e_level = elevel;
 	}
+	
+	public EFException(Exception e, ELEVEL elevel, ETYPE etype) {
+		super(e);
+		e_level = elevel;
+		e_type = etype;
+	}
+
 
 	public EFException(String msg, ELEVEL elevel, ETYPE etype) {
 		super(msg);

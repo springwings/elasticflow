@@ -32,8 +32,10 @@ public class EFResponse {
 	private long startTime = 0;
 	private long endTime = 0;
 	private String instance = "";
+	private Map<String, Object> request;
 	public Map<String, Object> response = new LinkedHashMap<>();
-
+	
+	
 	public static EFResponse getInstance() {
 		EFResponse rs = new EFResponse();
 		rs.response.put("status", RESPONSE_STATUS.Success.getVal());
@@ -52,9 +54,9 @@ public class EFResponse {
 		response.put("status", GlobalParam.RESPONSE_STATUS.Success.getVal());
 	}
 
-	public void setRequest(Map<String, Object> params) {
-		response.put("request", params);
-	}
+	public void setRequest(Map<String, Object> request) {
+		this.request = request;
+	} 
 
 	public Object getPayload() {
 		return payload;
@@ -98,6 +100,10 @@ public class EFResponse {
 
 	private Map<String, Object> formatData() {
 		Map<String, Object> rsp = new LinkedHashMap<String, Object>();
+		if(!request.containsKey(GlobalParam.CLOSE_REQUEST_RESPONSE) || 
+				!request.get(GlobalParam.CLOSE_REQUEST_RESPONSE).toString().toLowerCase().equals("true")) {
+			response.put("request", request);
+		}
 		response.put("instance", this.instance);
 		response.put("duration", String.valueOf(getDuration()) + "ms");
 		if (payload != null) {

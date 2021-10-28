@@ -22,6 +22,7 @@ public final class Task {
 	/** sql source store with originalSql */
 	private String additional;
 	private JOB_TYPE jobType;
+	public TaskState taskState;
 
 	public static Task getInstance(String instance, String L1seq, JOB_TYPE jobType, InstanceConfig instanceConfig,
 			String additional) {
@@ -31,6 +32,7 @@ public final class Task {
 		o.instanceConfig = instanceConfig;
 		o.jobType = jobType;
 		o.additional = additional;
+		o.taskState = new TaskState();
 		return o;
 	}
 	

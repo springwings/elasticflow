@@ -10,6 +10,7 @@ package org.elasticflow.task;
 import java.util.ArrayList;
 
 import org.elasticflow.model.InstructionTree;
+import org.elasticflow.util.EFException;
 import org.elasticflow.yarn.Resource;
 
 /**
@@ -28,7 +29,7 @@ public class InstructionTask {
 		return tk;
 	}
 
-	public void runInstructions() {
+	public void runInstructions() throws EFException {
 		ArrayList<InstructionTree> Instructions = Resource.nodeConfig.getInstructions().get(this.codeID).getCode(); 
 		for(InstructionTree Instruction:Instructions ) {
 			Instruction.depthRun(Instruction.getRoot());

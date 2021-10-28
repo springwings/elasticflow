@@ -127,11 +127,10 @@ public class Pipe extends Instruction {
 						DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));
 			} catch (EFException e) {
 				Common.processErrorLevel(e);
-				if (e.getErrorType().equals(ETYPE.WRITE_POS_NOT_FOUND)) {
-					throw new EFException(e, ELEVEL.Termination);
-				} else {
+				if (!e.getErrorType().equals(ETYPE.WRITE_POS_NOT_FOUND)) { 
 					freeConn = true;
 				}
+				throw e;
 			} finally { 
 				DSReader.close(); 
 				context.getWriter().REALEASE(monopoly, freeConn); 

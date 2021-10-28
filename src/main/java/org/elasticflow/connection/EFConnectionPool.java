@@ -192,7 +192,8 @@ public final class EFConnectionPool {
 					}
 				} else {
 					if (clearConn) {
-						conn.free();
+						Common.LOG.info("clear connection "+conn+".");
+						conn.free();						
 					} else {
 						freeConnections.add(conn);
 					}

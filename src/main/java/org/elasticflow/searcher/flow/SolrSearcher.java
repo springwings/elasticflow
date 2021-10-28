@@ -26,6 +26,7 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.searcher.SearcherFlowSocket;
 import org.elasticflow.searcher.handler.SearcherHandler;
+import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,17 +37,17 @@ import org.slf4j.LoggerFactory;
  * @version 2.0
  * @date 2018-10-26 09:23
  */
-public class SolrFlow extends SearcherFlowSocket { 
+public class SolrSearcher extends SearcherFlowSocket { 
 	
 	final String DEFAULT_KEY = "collectionname";
 	private String collectionName = "";
 	private long storetime = 0; 
 	private ConnectionHandler handler;
 
-	private final static Logger log = LoggerFactory.getLogger(SolrFlow.class);
+	private final static Logger log = LoggerFactory.getLogger(SolrSearcher.class);
 
-	public static SolrFlow getInstance(ConnectParams connectParams) {
-		SolrFlow o = new SolrFlow();
+	public static SolrSearcher getInstance(ConnectParams connectParams) {
+		SolrSearcher o = new SolrSearcher();
 		o.INIT(connectParams);
 		return o;
 	}
@@ -102,7 +103,7 @@ public class SolrFlow extends SearcherFlowSocket {
 			}
 		}catch(Exception e){
 			releaseConn = true; 
-			throw e;
+			throw Common.getException(e);
 		}finally{
 			REALEASE(false,releaseConn);
 		} 

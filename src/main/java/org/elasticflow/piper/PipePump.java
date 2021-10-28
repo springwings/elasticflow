@@ -250,14 +250,16 @@ public final class PipePump extends Instruction {
 			long start = Common.getNow();
 			AtomicInteger total = new AtomicInteger(0);
 			if (getInstanceConfig().getPipeParams().isMultiThread()) {
-				CountDownLatch synThreads = new CountDownLatch(estimateThreads(pageNum));
+				CountDownLatch synThreads = new CountDownLatch(estimateThreads(pageNum)); 
 				Resource.ThreadPools.submitJobPage(
 						new PumpThread(synThreads, task, storeId, pageList, writeTo, total));
-				try {
+				try { 
 					synThreads.await();
 				} catch (Exception e) {
-					throw new EFException(e);
+					throw Common.getException(e);
 				}
+				if(task.taskState.getEfException()!=null)
+					throw task.taskState.getEfException();
 			} else {
 				singleThread(task, storeId, pageList, writeTo, total);
 			}  
@@ -401,23 +403,25 @@ public final class PipePump extends Instruction {
 				} else {
 					DataPage pagedata = getPageData(Page.getInstance(task.getScanParam().getKeyField(),
 							task.getScanParam().getScanField(), startId, dataBoundary,
-							getInstanceConfig(), dataScanDSL));
-					if (getInstanceConfig().openCompute()) {
-						pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(),
-								task.getJobType().name(), writeTo, pagedata);
-					} 
+							getInstanceConfig(), dataScanDSL)); 
 					try {
+						if (getInstanceConfig().openCompute()) {
+							pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(),
+									task.getJobType().name(), writeTo, pagedata);
+						} 
 						rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false,
 								task.getJobType().name(), writeTo, storeId, task.getL2seq(), pagedata,
 								",process:" + processPos + "/" + pageSize, isUpdate, false);
-					} finally {
+					} catch (EFException e) {
+						task.taskState.setEfException(e);
+					}finally{
+						if (rState==null || rState.isStatus() == false) {
+							Common.LOG.warn("read data exception!");
+							return;
+						}
 						Common.setFlowStatus(task.getInstance(), task.getL1seq(), GlobalParam.JOB_TYPE.FULL.name(),
 								STATUS.Blank, STATUS.Ready,getInstanceConfig().getPipeParams().showInfoLog());
-					}
-					if (rState.isStatus() == false) {
-						Common.LOG.warn("read data exception!");
-						return;
-					}
+					} 
 					total.addAndGet(rState.getCount());
 					startId = dataBoundary;
 				}

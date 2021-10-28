@@ -14,6 +14,7 @@ import org.elasticflow.model.searcher.SearcherESModel;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherResult;
 import org.elasticflow.model.searcher.SearcherSolrModel;
+import org.elasticflow.model.searcher.SearcherVearchModel;
 import org.elasticflow.searcher.handler.SearcherHandler;
 import org.elasticflow.util.SearchParamUtil;
 import org.slf4j.Logger;
@@ -73,8 +74,12 @@ public class Searcher {
 			searcherModel = SearcherSolrModel.getInstance(rq,instanceConfig);
 			SearchParamUtil.normalParam(rq, searcherModel,instanceConfig);
 			break; 
+		case VEARCH:
+			searcherModel = SearcherVearchModel.getInstance(rq,instanceConfig);
+			SearchParamUtil.normalParam(rq, searcherModel,instanceConfig);
+			break; 
 		default:
-			response.setStatus("Not Support Searcher Type!",RESPONSE_STATUS.ParameterErr);
+			response.setStatus("Not Support Searcher Type "+this.searcherFlowSocket.getType(),RESPONSE_STATUS.ParameterErr);
 			return ; 
 		}  
 		try {

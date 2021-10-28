@@ -3,6 +3,7 @@ package org.elasticflow.model;
 import java.util.ArrayList;
 
 import org.elasticflow.node.CPU;
+import org.elasticflow.util.EFException;
 
 /**
  * Instruction data structure
@@ -31,7 +32,7 @@ public class InstructionTree {
         return tn;
     }
  
-    public Object depthRun(Node nodes){
+    public Object depthRun(Node nodes) throws EFException{
     	Object[] args = new Object[nodes.leaf.size()];
 		for(int i=0;i<nodes.leaf.size();i++) {
 			if(nodes.leaf.get(i).leaf.size()==0) {
