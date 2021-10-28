@@ -60,24 +60,29 @@ public class VearchSearcher extends SearcherFlowSocket{
 			String table = Common.getStoreName(instance, query.getStoreId());
 			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.searcher); 
 			JSONObject JO = conn.search(table, query.getFq());
-			List<ResponseDataUnit> unitSet = new ArrayList<ResponseDataUnit>();
-			int total = JO.getJSONObject("hits").getInt("total");
-			if(total>0) {
-				JSONArray hits = JO.getJSONObject("hits").getJSONArray("hits");
-				for(int i=0;i<hits.size();i++) {
-					ResponseDataUnit rn = ResponseDataUnit.getInstance();
-					JSONObject row = hits.getJSONObject(i).getJSONObject("_source");
-					@SuppressWarnings("unchecked")
-					Iterator<String> it = row.keys();
-					while (it.hasNext()) {
-						String k = it.next();
-						rn.addObject(k, row.get(k));
-			        } 
-					rn.addObject("_score", hits.getJSONObject(i).get("_score"));
-					unitSet.add(rn);
-				}
-			}			
-			res.setUnitSet(unitSet);
+			if(JO.getJSONObject("hits").containsKey("total")) {
+				List<ResponseDataUnit> unitSet = new ArrayList<ResponseDataUnit>();
+				int total = JO.getJSONObject("hits").getInt("total");
+				if(total>0) {
+					JSONArray hits = JO.getJSONObject("hits").getJSONArray("hits");
+					for(int i=0;i<hits.size();i++) {
+						ResponseDataUnit rn = ResponseDataUnit.getInstance();
+						JSONObject row = hits.getJSONObject(i).getJSONObject("_source");
+						@SuppressWarnings("unchecked")
+						Iterator<String> it = row.keys();
+						while (it.hasNext()) {
+							String k = it.next();
+							rn.addObject(k, row.get(k));
+				        } 
+						rn.addObject("_score", hits.getJSONObject(i).get("_score"));
+						unitSet.add(rn);
+					}
+				}			
+				res.setUnitSet(unitSet);
+			}else {
+				res.setSuccess(false);
+				res.setErrorInfo("please check the search parameters!");
+			}
 		}catch(Exception e){
 			releaseConn = true; 
 			throw Common.getException(e);

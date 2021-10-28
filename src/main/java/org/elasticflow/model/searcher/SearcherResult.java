@@ -10,6 +10,7 @@ import java.util.List;
  * @date 2018-07-22 09:08
  */
 public class SearcherResult {
+	
 	private float useTime;
 	private String callDateTime; 
 	private long totalHit;
@@ -17,7 +18,9 @@ public class SearcherResult {
 	private Object facetInfo=null;   
 	private Object queryDetail = null;
 	private Object explainInfo;
-
+	private boolean success = true;
+	private String errorInfo = "";
+	
 	public SearcherResult() {
 		unitSet = new ArrayList<ResponseDataUnit>();
 	}
@@ -77,5 +80,21 @@ public class SearcherResult {
 
 	public void setExplainInfo(Object explainInfo) {
 		this.explainInfo = explainInfo;
-	} 
+	}
+
+	public boolean isSuccess() {
+		return success;
+	}
+
+	public void setSuccess(boolean success) {
+		this.success = success;
+	}
+
+	public String getErrorInfo() {
+		return errorInfo;
+	}
+
+	public void setErrorInfo(String errorInfo) {
+		this.errorInfo = errorInfo;
+	}   
 }

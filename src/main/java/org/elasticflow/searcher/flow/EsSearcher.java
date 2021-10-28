@@ -65,7 +65,7 @@ public final class EsSearcher extends SearcherFlowSocket {
 					.getFacetsConfig(); 
 			
 			List<String> returnFields = new ArrayList<String>();
-			if (fq.getFl().length() > 0) {
+			if (fq.getFl()!=null) {
 				for (String s : fq.getFl().split(",")) {
 					returnFields.add(s);
 				}

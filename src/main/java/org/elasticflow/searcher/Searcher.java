@@ -80,13 +80,13 @@ public class Searcher {
 			break; 
 		default:
 			response.setStatus("Not Support Searcher Type "+this.searcherFlowSocket.getType(),RESPONSE_STATUS.ParameterErr);
-			return ; 
+			return; 
 		}  
 		try {
 			if(rq.hasErrors()) {
 				response.setStatus(rq.getErrors(),RESPONSE_STATUS.CodeException);
 			}else {
-				response.setPayload(formatResult(this.searcherFlowSocket.Search(searcherModel, instanceName,handler)));
+				formatResult(this.searcherFlowSocket.Search(searcherModel, instanceName,handler),response);
 			} 
 		} catch (Exception e) {
 			response.setStatus("searcher parameters may be wrong!",RESPONSE_STATUS.ParameterErr);
@@ -94,7 +94,7 @@ public class Searcher {
 		} 
 	}  
 	
-	private static Map<String, Object> formatResult(SearcherResult data) {
+	private static void formatResult(SearcherResult data,EFResponse response) {
 		Map<String, Object> contentMap = new LinkedHashMap<String, Object>();
 		contentMap.put("total", data.getTotalHit()); 
 		List<Object> objList = new ArrayList<Object>();
@@ -109,6 +109,9 @@ public class Searcher {
 			contentMap.put("query", data.getQueryDetail()); 
 		if (data.getExplainInfo() != null)
 			contentMap.put("explain", data.getExplainInfo()); 
-		return contentMap;
+		if(data.isSuccess()==false) {
+			response.setStatus(data.getErrorInfo(), RESPONSE_STATUS.ParameterErr);
+		}
+		response.setPayload(contentMap);
 	}
 } 

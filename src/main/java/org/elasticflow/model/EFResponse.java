@@ -44,8 +44,7 @@ public class EFResponse {
 	}
 
 	public void setStatus(Object info, GlobalParam.RESPONSE_STATUS status) {
-		response.put("info", status.getMsg());
-		this.setPayload(info);
+		response.put("info", status.getMsg()+","+info); 
 		response.put("status", status.getVal());
 	}
 
