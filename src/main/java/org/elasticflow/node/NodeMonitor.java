@@ -84,8 +84,10 @@ public final class NodeMonitor {
 	private HttpReaderService HttpReaderService;
 
 	private RESPONSE_STATUS response_status;
-	
-	private Object response_info;
+
+	private String response_info;
+
+	private Object response_data;
 
 	private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -104,7 +106,7 @@ public final class NodeMonitor {
 			add("startHttpReaderServiceService");
 			add("stopHttpReaderServiceService");
 			add("restartNode");
-			add("loadHandler"); 
+			add("loadHandler");
 			// instance manage
 			add("resetInstanceState");
 			add("getInstanceSeqs");
@@ -119,24 +121,25 @@ public final class NodeMonitor {
 			add("runCode");
 		}
 	};
- 
 
 	/**
 	 * 
 	 * @param status 0 faild 1 success
 	 * @param info   response information
 	 */
-	public void setResponse(RESPONSE_STATUS status, Object info) { 
+	public void setResponse(RESPONSE_STATUS status, String info, Object data) {
 		this.response_status = status;
-		this.response_info =info;
+		this.response_info = info;
+		this.response_data = data;
 	}
 
-	public void ac(Request rq,EFResponse RS) {
+	public void ac(Request rq, EFResponse RS) {
 		try {
 			if (this.actions.contains(rq.getParameter("ac"))) {
 				Method m = NodeMonitor.class.getMethod(rq.getParameter("ac"), Request.class);
 				m.invoke(this, rq);
 				RS.setStatus(this.response_info, this.response_status);
+				RS.setPayload(this.response_data);
 			} else {
 				RS.setStatus("Actions Not Exists!", RESPONSE_STATUS.ParameterErr);
 			}
@@ -173,42 +176,41 @@ public final class NodeMonitor {
 			}
 
 			switch (type) {
-				case NOSQL:
-					wp = Resource.nodeConfig.getNoSqlWarehouse().get(name); 
-					seqs = wp.getL1seq();
-					if (seqs.length > 0) {
-						for (String seq : seqs) {
-							EFConnectionPool.clearPool(wp.getPoolName(seq));
-						}
-					} else {
-						EFConnectionPool.clearPool(wp.getPoolName(null));
+			case NOSQL:
+				wp = Resource.nodeConfig.getNoSqlWarehouse().get(name);
+				seqs = wp.getL1seq();
+				if (seqs.length > 0) {
+					for (String seq : seqs) {
+						EFConnectionPool.clearPool(wp.getPoolName(seq));
 					}
-					break;
-					
-				case SQL:
-					wp = Resource.nodeConfig.getSqlWarehouse().get(name);
-					seqs = wp.getL1seq();
-					if (seqs.length > 0) {
-						for (String seq : seqs) {
-							EFConnectionPool.clearPool(wp.getPoolName(seq));
-						}
-					} else {
-						EFConnectionPool.clearPool(wp.getPoolName(null));
+				} else {
+					EFConnectionPool.clearPool(wp.getPoolName(null));
+				}
+				break;
+
+			case SQL:
+				wp = Resource.nodeConfig.getSqlWarehouse().get(name);
+				seqs = wp.getL1seq();
+				if (seqs.length > 0) {
+					for (String seq : seqs) {
+						EFConnectionPool.clearPool(wp.getPoolName(seq));
 					}
-					break;
-					
-	
-				case INSTRUCTION:
-					Resource.nodeConfig.getInstructions().remove(name);
-					break;
+				} else {
+					EFConnectionPool.clearPool(wp.getPoolName(null));
+				}
+				break;
+
+			case INSTRUCTION:
+				Resource.nodeConfig.getInstructions().remove(name);
+				break;
 			}
-			JSONObject jsonObject =  new JSONObject();
-			jsonObject.put("name",name);
-			updateResourceXml(type.name(),jsonObject,true);
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", name);
+			updateResourceXml(type.name(), jsonObject, true);
 		} else {
-			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!");
+			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!", null);
 		}
-	} 
+	}
 
 	/**
 	 * @param socket resource configs json string
@@ -225,7 +227,7 @@ public final class NodeMonitor {
 					o = new WarehouseSqlParam();
 					for (String key : iter) {
 						Common.setConfigObj(o, WarehouseSqlParam.class, key, jsonObject.getString(key));
-					} 
+					}
 					break;
 				case NOSQL:
 					o = new WarehouseNosqlParam();
@@ -242,27 +244,29 @@ public final class NodeMonitor {
 				}
 				if (o != null) {
 					Resource.nodeConfig.addSource(type, o);
-					setResponse(RESPONSE_STATUS.Success, "add Resource to node success!"); 
-					updateResourceXml(type.name(), jsonObject,false);
+					setResponse(RESPONSE_STATUS.Success, "add Resource to node success!", null);
+					updateResourceXml(type.name(), jsonObject, false);
 				}
 			} catch (Exception e) {
-				setResponse(RESPONSE_STATUS.CodeException, "add Resource to node Exception " + e.getMessage());
+				setResponse(RESPONSE_STATUS.CodeException, "add Resource to node Exception " + e.getMessage(), null);
 			}
 		} else {
-			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!");
+			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!", null);
 		}
 	}
-	
+
 	/**
 	 * get node start run configure parameters.
+	 * 
 	 * @param rq
 	 */
 	public void getNodeConfig(Request rq) {
-		setResponse(RESPONSE_STATUS.Success, GlobalParam.StartConfig);
+		setResponse(RESPONSE_STATUS.Success, "", GlobalParam.StartConfig);
 	}
 
 	/**
 	 * set node start configure parameters,will auto write into file.
+	 * 
 	 * @param k    property key
 	 * @param v    property value
 	 * @param type action type,set/remove
@@ -276,17 +280,18 @@ public final class NodeMonitor {
 			}
 			try {
 				saveNodeConfig();
-				setResponse(RESPONSE_STATUS.Success, "Config set success!");
+				setResponse(RESPONSE_STATUS.Success, "Config set success!", null);
 			} catch (Exception e) {
-				setResponse(RESPONSE_STATUS.CodeException, "Config save Exception " + e.getMessage());
+				setResponse(RESPONSE_STATUS.CodeException, "Config save Exception " + e.getMessage(), null);
 			}
 		} else {
-			setResponse(RESPONSE_STATUS.DataErr, "Config parameters k v or type not exists!");
+			setResponse(RESPONSE_STATUS.DataErr, "Config parameters k v or type not exists!", null);
 		}
 	}
-	
+
 	/**
 	 * restart node
+	 * 
 	 * @param rq
 	 */
 	public void restartNode(Request rq) {
@@ -297,13 +302,13 @@ public final class NodeMonitor {
 			}
 		});
 		thread.start();
-		setResponse(RESPONSE_STATUS.CodeException, "current node is in restarting...");
+		setResponse(RESPONSE_STATUS.CodeException, "current node is in restarting...", null);
 	}
 
 	/**
-	 * Loading Java handler classes in real time 
-	 * only support no dependency handler like org.elasticflow.writerUnit.handler
-	 * org.elasticflow.reader.handler org.elasticflow.searcher.handler
+	 * Loading Java handler classes in real time only support no dependency handler
+	 * like org.elasticflow.writerUnit.handler org.elasticflow.reader.handler
+	 * org.elasticflow.searcher.handler
 	 * 
 	 * @param rq
 	 */
@@ -311,18 +316,19 @@ public final class NodeMonitor {
 		if (rq.getParameter("path") != null && rq.getParameter("name") != null) {
 			try {
 				new EFLoader(rq.getParameter("path")).loadClass(rq.getParameter("name"));
-				setResponse(RESPONSE_STATUS.Success, "Load Handler success!");
+				setResponse(RESPONSE_STATUS.Success, "Load Handler success!", null);
 			} catch (Exception e) {
-				setResponse(RESPONSE_STATUS.CodeException, "Load Handler Exception " + e.getMessage());
+				setResponse(RESPONSE_STATUS.CodeException, "Load Handler Exception " + e.getMessage(), null);
 			}
 		} else {
-			setResponse(RESPONSE_STATUS.CodeException, "Parameters path not exists!");
+			setResponse(RESPONSE_STATUS.CodeException, "Parameters path not exists!", null);
 		}
 
 	}
-	
+
 	/**
 	 * stop node http reader pipe service
+	 * 
 	 * @param rq
 	 */
 	public void stopHttpReaderServiceService(Request rq) {
@@ -331,14 +337,15 @@ public final class NodeMonitor {
 			service_level -= 4;
 		}
 		if (HttpReaderService.close()) {
-			setResponse(RESPONSE_STATUS.Success, "Stop Searcher Service Successed!");
+			setResponse(RESPONSE_STATUS.Success, "Stop Searcher Service Successed!", null);
 		} else {
-			setResponse(RESPONSE_STATUS.CodeException, "Stop Searcher Service Failed!");
+			setResponse(RESPONSE_STATUS.CodeException, "Stop Searcher Service Failed!", null);
 		}
 	}
-	
+
 	/**
 	 * start node http reader pipe service
+	 * 
 	 * @param rq
 	 */
 	public void startHttpReaderServiceService(Request rq) {
@@ -347,11 +354,12 @@ public final class NodeMonitor {
 			service_level += 4;
 			HttpReaderService.start();
 		}
-		setResponse(RESPONSE_STATUS.Success, "Start Searcher Service Successed!");
+		setResponse(RESPONSE_STATUS.Success, "Start Searcher Service Successed!", null);
 	}
-	
+
 	/**
 	 * stop node searcher service
+	 * 
 	 * @param rq
 	 */
 	public void stopSearcherService(Request rq) {
@@ -360,14 +368,15 @@ public final class NodeMonitor {
 			service_level -= 1;
 		}
 		if (SearcherService.close()) {
-			setResponse(RESPONSE_STATUS.Success, "Stop Searcher Service Successed!");
+			setResponse(RESPONSE_STATUS.Success, "Stop Searcher Service Successed!", null);
 		} else {
-			setResponse(RESPONSE_STATUS.CodeException, "Stop Searcher Service Failed!");
+			setResponse(RESPONSE_STATUS.CodeException, "Stop Searcher Service Failed!", null);
 		}
 	}
-	
+
 	/**
 	 * open node searcher service
+	 * 
 	 * @param rq
 	 */
 	public void startSearcherService(Request rq) {
@@ -376,11 +385,12 @@ public final class NodeMonitor {
 			service_level += 1;
 			SearcherService.start();
 		}
-		setResponse(RESPONSE_STATUS.Success, "Start Searcher Service Successed!");
+		setResponse(RESPONSE_STATUS.Success, "Start Searcher Service Successed!", null);
 	}
 
 	/**
 	 * get node environmental state.
+	 * 
 	 * @param rq
 	 */
 	public void getStatus(Request rq) {
@@ -398,11 +408,12 @@ public final class NodeMonitor {
 		} catch (Exception e) {
 			Common.LOG.error(" getStatus Exception ", e);
 		}
-		setResponse(RESPONSE_STATUS.Success, dt);
+		setResponse(RESPONSE_STATUS.Success, null, dt);
 	}
 
 	/**
 	 * Data source level delimited sequence
+	 * 
 	 * @param rq
 	 */
 	public void getInstanceSeqs(Request rq) {
@@ -415,17 +426,18 @@ public final class NodeMonitor {
 				if (dataMap == null) {
 					dataMap = Resource.nodeConfig.getSqlWarehouse().get(instanceConfig.getPipeParams().getReadFrom());
 				}
-				setResponse(RESPONSE_STATUS.Success, StringUtils.join(dataMap.getL1seq(), ","));
+				setResponse(RESPONSE_STATUS.Success, null, StringUtils.join(dataMap.getL1seq(), ","));
 			} catch (Exception e) {
-				setResponse(RESPONSE_STATUS.CodeException, rq.getParameter("instance") + " not exists!");
+				setResponse(RESPONSE_STATUS.CodeException, rq.getParameter("instance") + " not exists!", null);
 			}
 		} else {
-			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!");
+			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!", null);
 		}
 	}
-	
+
 	/**
-	 * reset Instance full and increment running state 
+	 * reset Instance full and increment running state
+	 * 
 	 * @param rq
 	 */
 	public void resetInstanceState(Request rq) {
@@ -443,17 +455,18 @@ public final class NodeMonitor {
 					Common.saveTaskInfo(instance, L1seq, Common.getStoreId(instance, L1seq, false),
 							GlobalParam.JOB_INCREMENTINFO_PATH);
 				}
-				setResponse(RESPONSE_STATUS.Success, rq.getParameter("instance") + " reset Success!");
+				setResponse(RESPONSE_STATUS.Success, rq.getParameter("instance") + " reset Success!", null);
 			} catch (Exception e) {
-				setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance") + " not exists!");
+				setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance") + " not exists!", null);
 			}
 		} else {
-			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!");
+			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!", null);
 		}
 	}
-	
+
 	/**
 	 * get instance detail informations.
+	 * 
 	 * @param rq
 	 */
 	public void getInstanceInfo(Request rq) {
@@ -480,23 +493,25 @@ public final class NodeMonitor {
 					JO.put("Reader Pool Status", EFConnectionPool.getStatus(poolname));
 				}
 			}
-			
-			String[] L1seqs = Common.getL1seqs(config,true);  
+
+			String[] L1seqs = Common.getL1seqs(config, true);
 			for (String seq : L1seqs) {
-				PipePump transDataFlow = Resource.SOCKET_CENTER.getPipePump(config.getName(), seq, false,GlobalParam.FLOW_TAG._DEFAULT.name());				String appendPipe = "";
-				if(seq!="") {
+				PipePump transDataFlow = Resource.SOCKET_CENTER.getPipePump(config.getName(), seq, false,
+						GlobalParam.FLOW_TAG._DEFAULT.name());
+				String appendPipe = "";
+				if (seq != "") {
 					appendPipe = "Seq(" + seq + ") ";
-				} 
-				JO.put(appendPipe+"Reader Load ", transDataFlow.getReader().getLoad());
-				JO.put(appendPipe+"Reader Performance ", transDataFlow.getReader().getPerformance());
+				}
+				JO.put(appendPipe + "Reader Load ", transDataFlow.getReader().getLoad());
+				JO.put(appendPipe + "Reader Performance ", transDataFlow.getReader().getPerformance());
 				if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {
-					JO.put(appendPipe+"Computer Load ", transDataFlow.getComputer().getLoad());
-					JO.put(appendPipe+"Computer Performance ", transDataFlow.getComputer().getPerformance());
+					JO.put(appendPipe + "Computer Load ", transDataFlow.getComputer().getLoad());
+					JO.put(appendPipe + "Computer Performance ", transDataFlow.getComputer().getPerformance());
 				}
 				if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
-					JO.put(appendPipe+"Writer Load ", transDataFlow.getWriter().getLoad());
-					JO.put(appendPipe+"Writer Performance ", transDataFlow.getWriter().getPerformance());
-				} 				  
+					JO.put(appendPipe + "Writer Load ", transDataFlow.getWriter().getLoad());
+					JO.put(appendPipe + "Writer Performance ", transDataFlow.getWriter().getPerformance());
+				}
 			}
 
 			if (Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
@@ -529,9 +544,10 @@ public final class NodeMonitor {
 			}
 
 			if (config.openTrans()) {
-				WarehouseParam wsp = null;;
+				WarehouseParam wsp = null;
+				;
 				wsp = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom());
-				if(wsp==null)
+				if (wsp == null)
 					wsp = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom());
 				if (wsp.getL1seq().length > 0) {
 					StringBuilder sb = new StringBuilder();
@@ -548,9 +564,8 @@ public final class NodeMonitor {
 							String update;
 							String[] dstr = str.split(":");
 							if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
-								update = dstr[0] + ":"
-										+ (SDF.format(
-												dstr[1].length() < 12 ? Long.valueOf(dstr[1] + "000") :  Long.valueOf(dstr[1])))
+								update = dstr[0] + ":" + (SDF.format(
+										dstr[1].length() < 12 ? Long.valueOf(dstr[1] + "000") : Long.valueOf(dstr[1])))
 										+ " (" + dstr[1] + ")";
 							} else {
 								update = str;
@@ -565,14 +580,14 @@ public final class NodeMonitor {
 				} else {
 					String strs = GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null))
 							.getPositionString();
-					if(strs.length()>0) {
+					if (strs.length() > 0) {
 						StringBuilder stateStr = new StringBuilder();
 						if (strs.split(",").length > 0) {
 							for (String tm : strs.split(",")) {
 								String[] dstr = tm.split(":");
 								if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
-									stateStr.append(dstr[0] + ":"
-											+ SDF.format(tm.length() < 12 ?  Long.valueOf(dstr[1] + "000") : Long.valueOf(dstr[1])));
+									stateStr.append(dstr[0] + ":" + SDF.format(
+											tm.length() < 12 ? Long.valueOf(dstr[1] + "000") : Long.valueOf(dstr[1])));
 									stateStr.append(" (").append(tm).append(")");
 								} else {
 									stateStr.append(tm);
@@ -580,8 +595,9 @@ public final class NodeMonitor {
 								stateStr.append(", ");
 							}
 						}
-						JO.put("Incremental storage status", GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null)).getStoreId()
-								+ ":" + stateStr.toString());
+						JO.put("Incremental storage status",
+								GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null)).getStoreId() + ":"
+										+ stateStr.toString());
 					}
 					JO.put("Full storage status", Common.getFullStartInfo(instance, null));
 				}
@@ -595,14 +611,15 @@ public final class NodeMonitor {
 						|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()).size() == 0) {
 					JO.put("Incremental progress", "increment:none");
 				} else {
-					JO.put("Incremental progress", "increment:" + Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()));
+					JO.put("Incremental progress",
+							"increment:" + Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()));
 				}
 				JO.put("Incremental thread status", threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
 				JO.put("Full thread status", threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
 			}
-			setResponse(RESPONSE_STATUS.Success, JO);
+			setResponse(RESPONSE_STATUS.Success, null, JO);
 		} else {
-			setResponse(RESPONSE_STATUS.DataErr, "instance not exits!");
+			setResponse(RESPONSE_STATUS.DataErr, "instance not exits!", null);
 		}
 	}
 
@@ -643,13 +660,14 @@ public final class NodeMonitor {
 				rs.put(config.getAlias(), tmp);
 			}
 		}
-		setResponse(RESPONSE_STATUS.Success, rs);
+		setResponse(RESPONSE_STATUS.Success, null, rs);
 	}
-	
+
 	/**
 	 * run ElasticFlow CPU instruction program.
+	 * 
 	 * @param rq
-	 * @throws EFException 
+	 * @throws EFException
 	 */
 	public void runCode(Request rq) throws EFException {
 		if (rq.getParameter("script") != null && rq.getParameter("script").contains("Track.cpuFree")) {
@@ -657,14 +675,15 @@ public final class NodeMonitor {
 			for (InstructionTree Instruction : Instructions) {
 				Instruction.depthRun(Instruction.getRoot());
 			}
-			setResponse(RESPONSE_STATUS.Success, "code run success!");
+			setResponse(RESPONSE_STATUS.Success, "code run success!", null);
 		} else {
-			setResponse(RESPONSE_STATUS.DataErr, "script not set or script grammer is not correct!");
+			setResponse(RESPONSE_STATUS.DataErr, "script not set or script grammer is not correct!", null);
 		}
 	}
-	
+
 	/**
-	 * Perform the instance task immediately  
+	 * Perform the instance task immediately
+	 * 
 	 * @param rq
 	 */
 	public void runNow(Request rq) {
@@ -674,31 +693,35 @@ public final class NodeMonitor {
 				boolean state = Resource.FlOW_CENTER.runInstanceNow(rq.getParameter("instance"),
 						rq.getParameter("jobtype"), true);
 				if (state) {
-					setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job has been started now!");
+					setResponse(RESPONSE_STATUS.Success,
+							"Writer " + rq.getParameter("instance") + " job has been started now!", null);
 				} else {
 					setResponse(RESPONSE_STATUS.DataErr, "Writer " + rq.getParameter("instance")
-							+ " job not exists or run failed or had been stated!");
+							+ " job not exists or run failed or had been stated!", null);
 				}
 			} else {
-				setResponse(RESPONSE_STATUS.DataErr, "Writer " + rq.getParameter("instance") + " job not open in this node!Run start faild!");
+				setResponse(RESPONSE_STATUS.DataErr,
+						"Writer " + rq.getParameter("instance") + " job not open in this node!Run start faild!", null);
 			}
 		} else {
 			setResponse(RESPONSE_STATUS.DataErr, "Writer " + rq.getParameter("instance")
-					+ " job started now error,instance and jobtype parameter not both set!");
+					+ " job started now error,instance and jobtype parameter not both set!", null);
 		}
 	}
 
 	public void removeInstance(Request rq) {
 		if (rq.getParameter("instance").length() > 1) {
 			removeInstance(rq.getParameter("instance"));
-			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have removed!");
+			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have removed!", null);
 		} else {
-			setResponse(RESPONSE_STATUS.DataErr, "Writer " + rq.getParameter("instance") + " remove error,instance parameter not set!");
+			setResponse(RESPONSE_STATUS.DataErr,
+					"Writer " + rq.getParameter("instance") + " remove error,instance parameter not set!", null);
 		}
 	}
-	
+
 	/**
 	 * stop instance job.
+	 * 
 	 * @param rq
 	 */
 	public void stopInstance(Request rq) {
@@ -708,14 +731,16 @@ public final class NodeMonitor {
 			} else {
 				controlThreadState(rq.getParameter("instance"), STATUS.Stop, true);
 			}
-			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have stopped!");
+			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have stopped!", null);
 		} else {
-			setResponse(RESPONSE_STATUS.DataErr, "Writer " + rq.getParameter("instance") + " stop error,index parameter not set!");
+			setResponse(RESPONSE_STATUS.DataErr,
+					"Writer " + rq.getParameter("instance") + " stop error,index parameter not set!", null);
 		}
 	}
-	
+
 	/**
 	 * resume instance job.
+	 * 
 	 * @param rq
 	 */
 	public void resumeInstance(Request rq) {
@@ -725,16 +750,18 @@ public final class NodeMonitor {
 			} else {
 				controlThreadState(rq.getParameter("instance"), STATUS.Ready, true);
 			}
-			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have resumed!");
+			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have resumed!", null);
 		} else {
-			setResponse(RESPONSE_STATUS.DataErr, "Writer " + rq.getParameter("instance") + " resume error,index parameter not set!");
+			setResponse(RESPONSE_STATUS.DataErr,
+					"Writer " + rq.getParameter("instance") + " resume error,index parameter not set!", null);
 		}
 	}
-	
+
 	/**
 	 * reload instance configure,auto rebuild instance in memory
-	 * @param rq instance=xx&reset=true|false 
-	 * reset true will recreate the instance in java from instance configure.
+	 * 
+	 * @param rq instance=xx&reset=true|false reset true will recreate the instance
+	 *           in java from instance configure.
 	 */
 	public void reloadInstanceConfig(Request rq) {
 		if (rq.getParameter("instance").length() > 1) {
@@ -745,7 +772,7 @@ public final class NodeMonitor {
 				instanceConfig = rq.getParameter("instance") + ":" + type;
 			} else {
 				if (!Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance")))
-					setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance") + " not exists!");
+					setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance") + " not exists!", null);
 			}
 			Resource.FLOW_INFOS.remove(rq.getParameter("instance"), JOB_TYPE.FULL.name());
 			Resource.FLOW_INFOS.remove(rq.getParameter("instance"), JOB_TYPE.INCREMENT.name());
@@ -760,14 +787,15 @@ public final class NodeMonitor {
 			}
 			rebuildFlowGovern(instanceConfig);
 			controlThreadState(rq.getParameter("instance"), STATUS.Ready, true);
-			setResponse(RESPONSE_STATUS.Success, rq.getParameter("instance") + " reload Config Success!");
+			setResponse(RESPONSE_STATUS.Success, rq.getParameter("instance") + " reload Config Success!", null);
 		} else {
-			setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance") + " not exists!");
+			setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance") + " not exists!", null);
 		}
 	}
 
 	/**
 	 * add instance into system and add to configure also.
+	 * 
 	 * @param rq instance parameter example,instanceName:1
 	 */
 	public void addInstance(Request rq) {
@@ -786,12 +814,13 @@ public final class NodeMonitor {
 							","));
 			try {
 				saveNodeConfig();
-				setResponse(RESPONSE_STATUS.Success, instanceName + " add to node " + GlobalParam.IP + " Success!");
+				setResponse(RESPONSE_STATUS.Success, instanceName + " add to node " + GlobalParam.IP + " Success!",
+						null);
 			} catch (Exception e) {
-				setResponse(RESPONSE_STATUS.CodeException, e.getMessage());
+				setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
 			}
 		} else {
-			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!");
+			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!", null);
 		}
 	}
 
@@ -810,7 +839,7 @@ public final class NodeMonitor {
 				String instance = ents.getKey();
 				InstanceConfig instanceConfig = ents.getValue();
 				if (instanceConfig.getPipeParams().getWriteMechanism() != MECHANISM.AB) {
-					setResponse(RESPONSE_STATUS.Success, "delete " + _instance + " Success!");
+					setResponse(RESPONSE_STATUS.Success, "delete " + _instance + " Success!", null);
 					return;
 				}
 				if (instance.equals(_instance) || instanceConfig.getAlias().equals(_instance)) {
@@ -836,78 +865,81 @@ public final class NodeMonitor {
 				}
 			}
 			if (state) {
-				setResponse(RESPONSE_STATUS.Success, "delete " + _instance + " Success!");
+				setResponse(RESPONSE_STATUS.Success, "delete " + _instance + " Success!", null);
 			} else {
-				setResponse(RESPONSE_STATUS.CodeException, "delete " + _instance + " Failed!");
+				setResponse(RESPONSE_STATUS.CodeException, "delete " + _instance + " Failed!", null);
 			}
 		} else {
-			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!");
+			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!", null);
 		}
-	} 
-	
-	private boolean updateResourceXml(String resourcetype,JSONObject resourceData,boolean isDel) {  
-        try {
-        	String pondPath = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
-        	byte[] resourceXml = ConfigStorer.getData(pondPath,false);
-            String rname = resourceData.getString("name");
-            SAXReader reader = new SAXReader();
-            Document doc = reader.read(new ByteArrayInputStream(resourceXml));
-            Element root = doc.getRootElement(); 
-            Element content = root.element(resourcetype);
-            List<?> socketlist = content.elements();
-            boolean isExist = false;
-            for (Iterator<?> it = socketlist.iterator(); it.hasNext();) {
-                Element socket = (Element) it.next(); 
-                if(rname.equals(socket.element("name").getTextTrim())){
-                	if (isDel) {
-                		socketlist.remove(socket);
-                		break;
-                	}
-                	isExist = true;
-                    List<?> itemlist = socket.elements();
-                    for (Iterator<?> sitem = itemlist.iterator(); sitem.hasNext();) {
-                        Element socketContent = (Element) sitem.next();
-                        if(resourceData.getString(socketContent.getName())!=null&&resourceData.getString(socketContent.getName())!=""){
-							if (socketContent
-									.getText() != resourceData.getString(socketContent.getName())
-                                    && !socketContent.getText().equals(resourceData.getString(socketContent.getName()))){
+	}
+
+	private boolean updateResourceXml(String resourcetype, JSONObject resourceData, boolean isDel) {
+		try {
+			String pondPath = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
+			byte[] resourceXml = ConfigStorer.getData(pondPath, false);
+			String rname = resourceData.getString("name");
+			SAXReader reader = new SAXReader();
+			Document doc = reader.read(new ByteArrayInputStream(resourceXml));
+			Element root = doc.getRootElement();
+			Element content = root.element(resourcetype);
+			List<?> socketlist = content.elements();
+			boolean isExist = false;
+			for (Iterator<?> it = socketlist.iterator(); it.hasNext();) {
+				Element socket = (Element) it.next();
+				if (rname.equals(socket.element("name").getTextTrim())) {
+					if (isDel) {
+						socketlist.remove(socket);
+						break;
+					}
+					isExist = true;
+					List<?> itemlist = socket.elements();
+					for (Iterator<?> sitem = itemlist.iterator(); sitem.hasNext();) {
+						Element socketContent = (Element) sitem.next();
+						if (resourceData.getString(socketContent.getName()) != null
+								&& resourceData.getString(socketContent.getName()) != "") {
+							if (socketContent.getText() != resourceData.getString(socketContent.getName())
+									&& !socketContent.getText()
+											.equals(resourceData.getString(socketContent.getName()))) {
 								socketContent.setText(resourceData.getString(socketContent.getName()));
-                            }
+							}
 							resourceData.remove(socketContent.getName());
 
-                        }else if(resourceData.getString(socketContent.getName())==null || resourceData.getString(socketContent.getName())==""){
-                            socket.remove(socketContent);
-                            resourceData.remove(socketContent.getName());
-                        }
-                    }
-                    if(resourceData.size()>0){
-                        for (Map.Entry<String, Object> entry : resourceData.entrySet()) {
-                            Element socketinfo = socket.addElement(entry.getKey());
-                            socketinfo.setText(entry.getValue().toString());
-                        }
-                    }
-                }else{
-                    continue;
-                }
-            }
-            if(!isExist && !isDel){
-                Element newelement = content.addElement("socket");
-                for (Map.Entry<String, Object> entry : resourceData.entrySet()) {
-                    Element element = newelement.addElement(entry.getKey());
-                    element.setText(entry.getValue().toString());
-                }
-            }  
-            ConfigStorer.setData(pondPath, Common.formatXml(doc)); 
-        } catch (Exception e) {
-        	Common.LOG.error(e.getMessage());
-			setResponse(RESPONSE_STATUS.CodeException, "save Resource Exception " + e.getMessage());
+						} else if (resourceData.getString(socketContent.getName()) == null
+								|| resourceData.getString(socketContent.getName()) == "") {
+							socket.remove(socketContent);
+							resourceData.remove(socketContent.getName());
+						}
+					}
+					if (resourceData.size() > 0) {
+						for (Map.Entry<String, Object> entry : resourceData.entrySet()) {
+							Element socketinfo = socket.addElement(entry.getKey());
+							socketinfo.setText(entry.getValue().toString());
+						}
+					}
+				} else {
+					continue;
+				}
+			}
+			if (!isExist && !isDel) {
+				Element newelement = content.addElement("socket");
+				for (Map.Entry<String, Object> entry : resourceData.entrySet()) {
+					Element element = newelement.addElement(entry.getKey());
+					element.setText(entry.getValue().toString());
+				}
+			}
+			ConfigStorer.setData(pondPath, Common.formatXml(doc));
+		} catch (Exception e) {
+			Common.LOG.error(e.getMessage());
+			setResponse(RESPONSE_STATUS.CodeException, "save Resource Exception " + e.getMessage(), null);
 			return false;
-		} 
-        return true;
-    }
-	
+		}
+		return true;
+	}
+
 	/**
 	 * remove instance from system, stop all jobs and save to configure file.
+	 * 
 	 * @param instance
 	 */
 	private void removeInstance(String instance) {
@@ -929,7 +961,7 @@ public final class NodeMonitor {
 		try {
 			saveNodeConfig();
 		} catch (Exception e) {
-			setResponse(RESPONSE_STATUS.CodeException, e.getMessage());
+			setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
 		}
 	}
 
@@ -967,7 +999,7 @@ public final class NodeMonitor {
 			String[] seqs = getInstanceL1seqs(instance);
 			for (String seq : seqs) {
 				if (Common.checkFlowStatus(inst, seq, controlType, STATUS.Running)) {
-					Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination,true);
+					Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
 					while (!Common.checkFlowStatus(inst, seq, controlType, STATUS.Ready)) {
 						try {
 							waittime++;
@@ -980,8 +1012,8 @@ public final class NodeMonitor {
 						}
 					}
 				}
-				Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination,true);
-				if (Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Termination, state,true)) {
+				Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
+				if (Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Termination, state, true)) {
 					Common.LOG.info("Instance " + inst + " success set state " + state);
 				} else {
 					Common.LOG.info("Instance " + inst + " fail set state " + state);

@@ -43,8 +43,12 @@ public class EFResponse {
 		return rs;
 	}
 
-	public void setStatus(Object info, GlobalParam.RESPONSE_STATUS status) {
-		response.put("info", status.getMsg()+","+info); 
+	public void setStatus(String info, GlobalParam.RESPONSE_STATUS status) {
+		if(info!=null) {
+			response.put("info", status.getMsg()+","+info); 
+		}else {
+			response.put("info", status.getMsg()); 
+		}		
 		response.put("status", status.getVal());
 	}
 
