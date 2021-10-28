@@ -133,7 +133,7 @@ public final class GlobalParam {
 	    } 
 	} 
 	public static enum KEY_PARAM {
-		start, count, sort, facet, detail, facet_count,group,fl
+		start, count, sort, facet, detail, facet_count,group,fl,__storeid
 	}  
 	public static enum DATA_SOURCE_TYPE{
 		MYSQL, ORACLE, HIVE, ES, SOLR, HBASE,ZOOKEEPER,UNKNOWN,H2,FILES,NEO4J,KAFKA,VEARCH,HDFS,FASTDFS
@@ -161,7 +161,6 @@ public final class GlobalParam {
 	
 	//searcher parameters
 	public final static String CLOSE_REQUEST_RESPONSE = "__request_not_return";
-	public final static String PARAM_STORE_ID = "__storeid";
 	public final static int SEARCH_MAX_WINDOW=20000; 
 	public final static int SEARCH_MAX_PAGE=2000;
 	public final static float DISJUNCTION_QUERY_WEIGHT = 0.1f; 
@@ -170,6 +169,7 @@ public final class GlobalParam {
 	public final static String SORT_ASC = "_asc";
 	public final static String SORT_DESC = "_desc"; 
 	public final static String PARAM_FL = "fl";
+	
 	public final static String PARAM_FQ = "fq";
 	public final static String PARAM_FUZZY = "fuzzy";
 	public final static String PARAM_KEYWORD = "keyword"; 

@@ -29,8 +29,8 @@ import org.elasticflow.param.end.SearcherParam;
 public class SearchParamUtil {
 
 	public static void normalParam(EFSearchRequest request, SearcherModel<?, ?, ?> fq,InstanceConfig instanceConfig) {
-		Object o = request.get(GlobalParam.KEY_PARAM.start.toString(),
-				instanceConfig.getSearcherParam(KEY_PARAM.start.toString()),"java.lang.Integer");
+		Object o = request.get(GlobalParam.KEY_PARAM.start.name(),
+				instanceConfig.getSearcherParam(KEY_PARAM.start.name()),"java.lang.Integer");
 		int start = 0;
 		int count = 1;
 		if (o != null) {
@@ -38,8 +38,8 @@ public class SearchParamUtil {
 			if (start >= 0)
 				fq.setStart(start);
 		}
-		o = request.get(KEY_PARAM.count.toString(),
-				instanceConfig.getSearcherParam(KEY_PARAM.count.toString()),"java.lang.Integer");
+		o = request.get(KEY_PARAM.count.name(),
+				instanceConfig.getSearcherParam(KEY_PARAM.count.name()),"java.lang.Integer");
 		if (o != null) {
 			count = (int) o;
 			if (count >= 1 && count <= GlobalParam.SEARCH_MAX_PAGE) {
@@ -61,7 +61,7 @@ public class SearchParamUtil {
 	}
 	
 	public static List<SortBuilder<?>> getSortField(EFSearchRequest request, InstanceConfig instanceConfig) {  
-		String sortstrs = (String) request.getParam(KEY_PARAM.sort.toString());
+		String sortstrs = (String) request.getParam(KEY_PARAM.sort.name());
 		List<SortBuilder<?>> sortList = new ArrayList<SortBuilder<?>>();
 		boolean useScore = false;
 		if (sortstrs != null && sortstrs.length() > 0) { 

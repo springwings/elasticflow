@@ -25,15 +25,14 @@ public class SearcherVearchModel extends SearcherModel<String, String, String> {
 		Map<String, Object> paramMap = request.getParams();
 		Set<Entry<String, Object>> entries = paramMap.entrySet();
 		Iterator<Entry<String, Object>> iter = entries.iterator();
-		JSONObject fq = new JSONObject();
-		fq.put("query", new JSONObject());
+		JSONObject query = new JSONObject(); 
 		JSONArray _jarr = new JSONArray();
 		JSONObject _jObject = new JSONObject();
 		while (iter.hasNext()) {
 			Entry<String, Object> entry = iter.next();
 			String k = entry.getKey();
 			String v = String.valueOf(entry.getValue());
-			if (k.equals(GlobalParam.PARAM_STORE_ID)) {
+			if (k.equals(GlobalParam.KEY_PARAM.__storeid.name())) {
 				current.storeId = v;
 			} else {
 				if (instanceConfig.getWriteFields().containsKey(k)) { 
@@ -42,15 +41,17 @@ public class SearcherVearchModel extends SearcherModel<String, String, String> {
 						_jObject.put("feature",v); 
 					}  
 				} else {
-					if(k.equals("max_score")) {
+					switch(k) {
+					case "max_score":
 						_jObject.put("max_score",Float.parseFloat(v)); 
-					}
+						break; 
+					} 
 				}
 			}
 		}
 		_jarr.add(_jObject);
-		fq.getJSONObject("query").put("sum",_jarr);
-		current.setFq(fq.toString());
+		query.put("sum",_jarr);
+		current.setFq(query.toString());
 	}
 
 	@Override
