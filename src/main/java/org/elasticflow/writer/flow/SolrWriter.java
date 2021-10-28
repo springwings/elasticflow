@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * @date 2018-10-30 14:08
  */
 @NotThreadSafe
-public class SolrFlow extends WriterFlowSocket{
+public class SolrWriter extends WriterFlowSocket{
 	 
 	private static String linux_spilt= "/";
 	private static String srcDir= "config/template";
@@ -61,8 +61,8 @@ public class SolrFlow extends WriterFlowSocket{
 	
 	private final static Logger log = LoggerFactory.getLogger("SolrFlow");  
 	
-	public static SolrFlow getInstance(ConnectParams connectParams) {
-		SolrFlow o = new SolrFlow();
+	public static SolrWriter getInstance(ConnectParams connectParams) {
+		SolrWriter o = new SolrWriter();
 		o.INIT(connectParams);
 		return o;
 	}

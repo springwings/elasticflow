@@ -19,41 +19,46 @@ import org.elasticflow.util.Common;
  * @version 4.0
  * @date 2018-11-14 16:54
  */
-public class WriterSocketFactory implements Socket<WriterFlowSocket>{ 
-	
+public class WriterSocketFactory implements Socket<WriterFlowSocket> {
+
 	private static WriterSocketFactory o = new WriterSocketFactory();
-	
+
 	public static WriterFlowSocket getInstance(Object... args) {
 		return o.getSocket(args);
 	}
-	
+
 	/**
-	 * args getInstance function parameters
-	 * WarehouseParam param, String seq,String handler
+	 * args getInstance function parameters WarehouseParam param, String seq,String
+	 * handler
 	 */
 	@Override
 	public WriterFlowSocket getSocket(Object... args) {
 		ConnectParams param = (ConnectParams) args[0];
 		String L1seq = (String) args[1];
 		String handler = (String) args[2];
-		return getFlowSocket(param,L1seq,handler); 
-	} 
- 
-	
-	private static WriterFlowSocket getFlowSocket(ConnectParams connectParams,String L1seq,String handler) { 
+		return getFlowSocket(param, L1seq, handler);
+	}
+
+	private static WriterFlowSocket getFlowSocket(ConnectParams connectParams, String L1seq, String writerFlowhandler) { 
+		String _class_name;
+		if (writerFlowhandler != null) {
+			_class_name = writerFlowhandler;
+		} else {
+			_class_name = "org.elasticflow.writer.flow."
+					+ Common.changeFirstCase(connectParams.getWhp().getType().name().toLowerCase()) + "Writer";
+		}
 		try {
-			if(handler!=null) {			
-				Class<?> clz = Class.forName(handler);
-				Method m = clz.getMethod("getInstance",ConnectParams.class);
-				return (WriterFlowSocket) m.invoke(null,connectParams);			
+			Class<?> clz = Class.forName(_class_name);
+			Method m = clz.getMethod("getInstance", ConnectParams.class);
+			return (WriterFlowSocket) m.invoke(null, connectParams);
+		} catch (Exception e) {
+			if(writerFlowhandler!=null) {
+				Common.LOG.error("custom WriterFlowSocket "+connectParams.getWhp().getType()+" not exists!",e); 
+			}else { 
+				Common.LOG.error("the "+connectParams.getWhp().getType()+" WriterFlowSocket does not exist!",e); 
 			}
-			String cname = connectParams.getWhp().getType().name().toLowerCase();
-			Class<?> clz = Class.forName("org.elasticflow.writer.flow."+Common.changeFirstCase(cname)+"Flow");
-			Method m = clz.getMethod("getInstance",ConnectParams.class);
-			return (WriterFlowSocket) m.invoke(null,connectParams);		
-		}catch (Exception e) {
-			Common.LOG.error("get NoSql Flow Exception!",e);
-		}   
+			Common.stopSystem();
+		}
 		return null;
-	} 
+	}
 }

@@ -21,10 +21,10 @@ import org.elasticflow.writer.WriterFlowSocket;
  * @version 1.0 
  */
 
-public class KafkaFlow extends WriterFlowSocket {
+public class KafkaWriter extends WriterFlowSocket {
 
-	public static KafkaFlow getInstance(ConnectParams connectParams) {
-		KafkaFlow o = new KafkaFlow();
+	public static KafkaWriter getInstance(ConnectParams connectParams) {
+		KafkaWriter o = new KafkaWriter();
 		o.INIT(connectParams);
 		return o;
 	}

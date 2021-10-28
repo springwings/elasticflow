@@ -20,12 +20,12 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 
-public class Neo4jFlow extends WriterFlowSocket {
+public class Neo4jWriter extends WriterFlowSocket {
 	
 	private final static Logger log = LoggerFactory.getLogger("Neo4jFlow");
 	
-	public static Neo4jFlow getInstance(ConnectParams connectParams) {
-		Neo4jFlow o = new Neo4jFlow();
+	public static Neo4jWriter getInstance(ConnectParams connectParams) {
+		Neo4jWriter o = new Neo4jWriter();
 		o.INIT(connectParams);
 		return o;
 	}

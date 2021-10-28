@@ -34,16 +34,16 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @date 2018-10-26 09:24
  */
-public class HbaseFlow extends ReaderFlowSocket { 
+public class HbaseReader extends ReaderFlowSocket { 
  
 	private String columnFamily;
 	
 	final String DEFAULT_KEY = "tableColumnFamily";
 	 
-	private final static Logger log = LoggerFactory.getLogger(HbaseFlow.class); 
+	private final static Logger log = LoggerFactory.getLogger(HbaseReader.class); 
 
-	public static HbaseFlow getInstance(ConnectParams connectParams) {
-		HbaseFlow o = new HbaseFlow();
+	public static HbaseReader getInstance(ConnectParams connectParams) {
+		HbaseReader o = new HbaseReader();
 		o.INIT(connectParams);
 		return o;
 	}

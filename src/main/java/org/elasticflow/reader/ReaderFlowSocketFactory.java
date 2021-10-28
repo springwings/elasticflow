@@ -4,11 +4,6 @@ import java.lang.reflect.Method;
 
 import org.elasticflow.flow.Socket;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.reader.flow.FileFlow;
-import org.elasticflow.reader.flow.HbaseFlow;
-import org.elasticflow.reader.flow.KafkaFlow;
-import org.elasticflow.reader.flow.MysqlFlow;
-import org.elasticflow.reader.flow.OracleFlow;
 import org.elasticflow.util.Common;
 
 /**
@@ -34,30 +29,25 @@ public final class ReaderFlowSocketFactory implements Socket<ReaderFlowSocket> {
 		return flowChannel(connectParams, L1Seq, handler);
 	}
 
-	private static ReaderFlowSocket flowChannel(final ConnectParams connectParams, String L1Seq, String handler) { 
-		if (handler != null) {
-			try {
-				Class<?> clz = Class.forName(handler);
-				Method m = clz.getMethod("getInstance", ConnectParams.class);
-				return (ReaderFlowSocket) m.invoke(null, connectParams);
-			} catch (Exception e) {
-				Common.LOG.error("getNoSqlFlow Exception!", e);
-			} 
-		}
-		switch (connectParams.getWhp().getType()) {
-		case MYSQL:
-			return MysqlFlow.getInstance(connectParams); 
-		case ORACLE:
-			return OracleFlow.getInstance(connectParams); 
-		case HBASE:
-			return HbaseFlow.getInstance(connectParams);
-		case FILE: 
-			return FileFlow.getInstance(connectParams);
-		case KAFKA:
-			return KafkaFlow.getInstance(connectParams);
-		default:
-			Common.LOG.error("ReaderFlowSocket Connect Type "+connectParams.getWhp().getType()+" Not Support!");
-			return null;
+	private static ReaderFlowSocket flowChannel(final ConnectParams connectParams, String L1Seq, String readerFlowhandler) {  
+		String _class_name;
+		if (readerFlowhandler != null) {
+			_class_name = readerFlowhandler;
+		}else {
+			_class_name = "org.elasticflow.reader.flow."+Common.changeFirstCase(connectParams.getWhp().getType().name().toLowerCase())+"Reader";
 		} 
+		try {					
+			Class<?> clz = Class.forName(_class_name); 
+			Method m = clz.getMethod("getInstance", ConnectParams.class);  
+			return (ReaderFlowSocket) m.invoke(null,connectParams);
+		}catch (Exception e) { 
+			if(readerFlowhandler!=null) {
+				Common.LOG.error("custom ReaderFlowSocket "+connectParams.getWhp().getType()+" not exists!",e); 
+			}else { 
+				Common.LOG.error("the "+connectParams.getWhp().getType()+" ReaderFlowSocket does not exist!",e); 
+			}			
+			Common.stopSystem();
+		}  
+		return null;
 	}  
 }

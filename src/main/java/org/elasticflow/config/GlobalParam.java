@@ -136,7 +136,7 @@ public final class GlobalParam {
 		start, count, sort, facet, detail, facet_count,group,fl
 	}  
 	public static enum DATA_SOURCE_TYPE{
-		MYSQL, ORACLE, HIVE, ES, SOLR, HBASE,ZOOKEEPER,UNKNOWN,H2,FILE,NEO4J,KAFKA,VEARCH,HDFS,FASTDFS
+		MYSQL, ORACLE, HIVE, ES, SOLR, HBASE,ZOOKEEPER,UNKNOWN,H2,FILES,NEO4J,KAFKA,VEARCH,HDFS,FASTDFS
 	}  
 	public static enum FLOW_TAG {
 		_DEFAULT,_MOP

@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0 
  */
 
-public class MysqlFlow extends WriterFlowSocket {
+public class MysqlWriter extends WriterFlowSocket {
 
 	private final static Logger log = LoggerFactory.getLogger("MysqlFlow");
 
@@ -38,8 +38,8 @@ public class MysqlFlow extends WriterFlowSocket {
 
 	private long currentSec = Common.getNow();
 
-	public static MysqlFlow getInstance(ConnectParams connectParams) {
-		MysqlFlow o = new MysqlFlow();
+	public static MysqlWriter getInstance(ConnectParams connectParams) {
+		MysqlWriter o = new MysqlWriter();
 		o.INIT(connectParams);
 		return o;
 	}

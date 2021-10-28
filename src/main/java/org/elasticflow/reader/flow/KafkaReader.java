@@ -39,7 +39,7 @@ import com.alibaba.fastjson.JSONObject;
  * @date 2018-10-26 09:24
  */
 @NotThreadSafe
-public class KafkaFlow extends ReaderFlowSocket {
+public class KafkaReader extends ReaderFlowSocket {
 	
 	private int readms = 3000;
 	
@@ -47,13 +47,13 @@ public class KafkaFlow extends ReaderFlowSocket {
 	
 	ConsumerRecords<String, String> records;
 
-	private final static Logger log = LoggerFactory.getLogger(KafkaFlow.class);
+	private final static Logger log = LoggerFactory.getLogger(KafkaReader.class);
 	
 	private KafkaConsumer<String, String> conn = null;
 	
 	
-	public static KafkaFlow getInstance(final ConnectParams connectParams) {
-		KafkaFlow o = new KafkaFlow();
+	public static KafkaReader getInstance(final ConnectParams connectParams) {
+		KafkaReader o = new KafkaReader();
 		o.INIT(connectParams);
 		if(connectParams.getWhp().getCustomParams()!=null) {
 			if(connectParams.getWhp().getCustomParams().containsKey("max.poll.interval.ms"))

@@ -30,15 +30,15 @@ import org.slf4j.LoggerFactory;
  * @version 1.0 
  */
 @ThreadSafe
-public class HbaseFlow extends WriterFlowSocket { 
+public class HbaseWriter extends WriterFlowSocket { 
 	
 	final String DEFAULT_KEY = "tableColumnFamily";
 	private List<Put> data = new CopyOnWriteArrayList<Put>();   
 	private String columnFamily;
 	private final static Logger log = LoggerFactory.getLogger("HBaseFlow"); 
 	
-	public static HbaseFlow getInstance(ConnectParams connectParams) {
-		HbaseFlow o = new HbaseFlow();
+	public static HbaseWriter getInstance(ConnectParams connectParams) {
+		HbaseWriter o = new HbaseWriter();
 		o.INIT(connectParams);
 		return o;
 	}

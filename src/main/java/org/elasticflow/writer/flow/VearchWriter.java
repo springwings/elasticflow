@@ -27,7 +27,7 @@ import net.sf.json.JSONObject;
  * @version 1.0 
  */
 
-public class VearchFlow extends WriterFlowSocket {
+public class VearchWriter extends WriterFlowSocket {
 	
 	final static int flushSize = 100;
 
@@ -41,8 +41,8 @@ public class VearchFlow extends WriterFlowSocket {
 	
 	private String curTable;
 	
-	public static VearchFlow getInstance(ConnectParams connectParams) {
-		VearchFlow o = new VearchFlow();
+	public static VearchWriter getInstance(ConnectParams connectParams) {
+		VearchWriter o = new VearchWriter();
 		o.INIT(connectParams);
 		return o;
 	}	

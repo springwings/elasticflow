@@ -46,8 +46,8 @@ public class WarehouseNosqlParam implements WarehouseParam{
 		case "HBASE":
 			this.type = DATA_SOURCE_TYPE.HBASE;
 			break;
-		case "FILE":
-			this.type = DATA_SOURCE_TYPE.FILE;
+		case "FILES":
+			this.type = DATA_SOURCE_TYPE.FILES;
 			break;
 		case "KAFKA":
 			this.type = DATA_SOURCE_TYPE.KAFKA;

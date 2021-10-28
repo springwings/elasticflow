@@ -31,7 +31,7 @@ public final class ComputerFlowSocketFactory implements Socket<ComputerFlowSocke
 			Method m = clz.getMethod("getInstance", ConnectParams.class);
 			return (ComputerFlowSocket) m.invoke(null, connectParams);
 		} catch (Exception e) {
-			Common.LOG.error("get ComputerFlowSocket Exception!", e);
+			Common.LOG.error("the "+connectParams.getWhp().getType()+" ComputerFlowSocket does not exist!",e);
 			Common.stopSystem();
 		}  
 		return null;

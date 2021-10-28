@@ -27,19 +27,18 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @date 2018-10-26 09:24
  */
-public class OracleFlow extends ReaderFlowSocket{ 
-  
-	private final static Logger log = LoggerFactory.getLogger(OracleFlow.class);
+public class MysqlReader extends ReaderFlowSocket{    
 
-	public static OracleFlow getInstance(final ConnectParams connectParams) {
-		OracleFlow o = new OracleFlow();
+	private final static Logger log = LoggerFactory.getLogger(MysqlReader.class);  
+
+	public static MysqlReader getInstance(final ConnectParams connectParams) {
+		MysqlReader o = new MysqlReader();
 		o.INIT(connectParams);
 		return o;
-	} 
+	}  
  
-
 	@Override
-	public DataPage getPageData(final Page page,int pageSize) {
+	public DataPage getPageData(final Page page,int pageSize) {  
 		boolean releaseConn = false;
 		PREPARE(false,false); 
 		if(!ISLINK())
@@ -56,35 +55,37 @@ public class OracleFlow extends ReaderFlowSocket{
 				}else{
 					getAllData(rs,page.getInstanceConfig().getReadFields()); 
 				} 
-				this.dataPage.put(GlobalParam.READER_STATUS,true);
 			} catch (Exception e) {
+				this.dataPage.put(GlobalParam.READER_STATUS,false);
 				log.error("get data Page Exception", e);
 			} 
 		} catch (SQLException e){ 
+			this.dataPage.put(GlobalParam.READER_STATUS,false);
 			log.error(page.getAdditional() + " get dataPage SQLException", e);
 		} catch (Exception e) { 
 			releaseConn = true;
-			log.error("get dataPage Exception so free connection,details ", e);
+			this.dataPage.put(GlobalParam.READER_STATUS,false);
+			log.error("get Page Data Exception so free connection,details ", e);
 		}finally{
 			REALEASE(false,releaseConn);
 		} 
 		return this.dataPage;
-	}
-
+	} 
+	
 	@Override
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) {
 		String sql;
 		if(task.getScanParam().getPageScanDSL()!=null){
-			sql = " select "+GlobalParam._page_field+" as id,ROWNUM AS EF_ROW_ID from ("
+			sql = " select "+GlobalParam._page_field+" as id,(@a:=@a+1) AS EF_ROW_ID from ("
 					+ task.getScanParam().getPageScanDSL()
-					+ ") EF_FPG_MAIN  order by "+GlobalParam._page_field+" desc";
+					+ ") EF_FPG_MAIN join (SELECT @a := -1) EF_FPG_ROW order by "+GlobalParam._page_field+" desc";
 		}else{
-			sql = " select "+GlobalParam._page_field+" as id,ROWNUM AS EF_ROW_ID from ("
+			sql = " select "+GlobalParam._page_field+" as id,(@a:=@a+1) AS EF_ROW_ID from ("
 					+ task.getScanParam().getDataScanDSL()
-					+ ") EF_FPG_MAIN  order by "+GlobalParam._page_field+" desc";
-		} 
-		sql = " select id from (" + sql + ") EF_FPG_END where MOD(EF_ROW_ID, "
-				+ pageSize + ") = 0";
+					+ ") EF_FPG_MAIN join (SELECT @a := -1) EF_FPG_ROW order by "+GlobalParam._page_field+" desc"; 
+		}
+		sql = " select id from (" + sql
+				+ ") EF_FPG_END where MOD(EF_ROW_ID, "+pageSize+") = 0";
 		sql = sql 
 				.replace(GlobalParam._scan_field, task.getScanParam().getScanField())
 				.replace(GlobalParam._page_field, task.getScanParam().getPageField())
@@ -97,23 +98,23 @@ public class OracleFlow extends ReaderFlowSocket{
 		PREPARE(false,false); 
 		if(!ISLINK())
 			return page;
-		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.reader);
+		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.reader); 
 		PreparedStatement statement = null;
 		ResultSet rs  = null;
 		boolean releaseConn = false;
 		try {
-			boolean autoSelect = true;
+			boolean autoSelect = true; 
 			if(task.getScanParam().getKeyFieldType() != null){
 				autoSelect = false;
 				if(task.getScanParam().getKeyFieldType().equals("int")){
-					statement = conn.prepareStatement(sql.replace("#{end}", Long.MAX_VALUE + "").replace(
-							"#{END}", Long.MAX_VALUE + ""));
+					statement = conn.prepareStatement(sql.replace(GlobalParam._end, String.valueOf(Long.MAX_VALUE)).replace(
+							GlobalParam._start, "0"));
 				}else{
-					statement = conn.prepareStatement(sql.replace("#{end}", "~").replace("#{END}", "~")); 
+					statement = conn.prepareStatement(sql.replace(GlobalParam._end, "~").replace(GlobalParam._start, "0")); 
 				}
 			}else{
-				statement = conn.prepareStatement(sql.replace("#{end}", Long.MAX_VALUE + "").replace(
-						"#{END}", Long.MAX_VALUE + ""));
+				statement = conn.prepareStatement(sql.replace(GlobalParam._end, String.valueOf(Long.MAX_VALUE)).replace(
+						GlobalParam._start,""));
 			} 
 			statement.setFetchSize(pageSize);
 			rs = statement.executeQuery(); 
@@ -123,10 +124,10 @@ public class OracleFlow extends ReaderFlowSocket{
 			if (autoSelect && page.size() == 0) {
 				statement.close();
 				rs.close();
-				statement = conn.prepareStatement(sql.replace("#{end}", "~").replace("#{END}", "~")); 
+				statement = conn.prepareStatement(sql.replace(GlobalParam._end, "~")); 
 				rs = statement.executeQuery();  
 				while (rs.next()) {
-					page.add(rs.getString("id"));
+					page.push(rs.getString("id"));
 				}
 			} 
 		}catch(SQLException e){
@@ -148,11 +149,10 @@ public class OracleFlow extends ReaderFlowSocket{
 		}  
 		return page;
 	} 
-	 
-
+	
 	private void getAllData(ResultSet rs,Map<String, EFField> transParam) throws EFException {   
 		String dataBoundary = null;
-		String LAST_STAMP = null;
+		String LAST_STAMP=null;
 		try {  
 			ResultSetMetaData metaData = rs.getMetaData();
 			int columncount = metaData.getColumnCount(); 
@@ -173,9 +173,8 @@ public class OracleFlow extends ReaderFlowSocket{
 				this.dataUnit.add(u);
 			}
 			rs.close();
-		} catch (SQLException e) {
-			this.dataPage.put(GlobalParam.READER_STATUS,false);
-			log.error("get page data SQLException,", e);
+		} catch (Exception e) {
+			throw new EFException(e);
 		}
 		if (LAST_STAMP==null){ 
 			this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis()); 

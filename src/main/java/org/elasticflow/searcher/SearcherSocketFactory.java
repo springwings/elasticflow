@@ -42,7 +42,8 @@ public class SearcherSocketFactory implements Socket<SearcherFlowSocket>{
 			Method m = clz.getMethod("getInstance", ConnectParams.class);  
 			return (SearcherFlowSocket) m.invoke(null,connectParams);
 		}catch (Exception e) { 
-			Common.LOG.error("SearcherSocket Connect Type "+connectParams.getWhp().getType()+" Not Support!");
+			Common.LOG.error("the "+connectParams.getWhp().getType()+" SearcherFlowSocket does not exist!",e); 
+			Common.stopSystem();
 		} 
 		return null;
 	}

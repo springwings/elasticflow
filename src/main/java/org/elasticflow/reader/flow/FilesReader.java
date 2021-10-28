@@ -23,12 +23,12 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @date 2018-11-22 09:33
  */
-public class FileFlow extends ReaderFlowSocket {
+public class FilesReader extends ReaderFlowSocket {
 
-	private final static Logger log = LoggerFactory.getLogger(FileFlow.class);
+	private final static Logger log = LoggerFactory.getLogger(FilesReader.class);
 
-	public static FileFlow getInstance(ConnectParams connectParams) {
-		FileFlow o = new FileFlow();
+	public static FilesReader getInstance(ConnectParams connectParams) {
+		FilesReader o = new FilesReader();
 		o.INIT(connectParams);
 		return o;
 	}

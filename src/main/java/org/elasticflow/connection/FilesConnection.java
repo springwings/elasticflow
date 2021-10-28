@@ -8,14 +8,14 @@ import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FileConnection extends EFConnectionSocket<RandomAccessFile> {
+public class FilesConnection extends EFConnectionSocket<RandomAccessFile> {
 	
 	private RandomAccessFile conn;
 
 	private final static Logger log = LoggerFactory.getLogger("File Socket");
  
 	public static EFConnectionSocket<?> getInstance(ConnectParams connectParams){
-		EFConnectionSocket<?> o = new FileConnection();
+		EFConnectionSocket<?> o = new FilesConnection();
 		o.init(connectParams);  
 		return o;
 	}

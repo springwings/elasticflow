@@ -57,7 +57,7 @@ import net.sf.json.JSONObject;
  * @date 2018-10-30 14:02
  */
 @NotThreadSafe
-public class EsFlow extends WriterFlowSocket {
+public class EsWriter extends WriterFlowSocket {
 
 	protected EsConnector CONNS;
 
@@ -65,8 +65,8 @@ public class EsFlow extends WriterFlowSocket {
 
 	private final static Logger log = LoggerFactory.getLogger("ESFlow");
 
-	public static EsFlow getInstance(ConnectParams connectParams) {
-		EsFlow o = new EsFlow();
+	public static EsWriter getInstance(ConnectParams connectParams) {
+		EsWriter o = new EsWriter();
 		o.INIT(connectParams);
 		return o;
 	}
