@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.concurrent.ThreadSafe;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 import org.slf4j.Logger;
@@ -38,11 +39,11 @@ public final class EFConnectionPool {
 	}
 
 	/**
-	 * @param canShareConn ,Control whether the connection can share processing data
+	 * @param acceptShareConn ,Accept using stateless shared links
 	 * @return
 	 */
-	public static EFConnectionSocket<?> getConn(ConnectParams params, String poolName, boolean canShareConn) {
-		return EFCPool.getConnection(params, poolName, canShareConn);
+	public static EFConnectionSocket<?> getConn(ConnectParams params, String poolName, boolean acceptShareConn) {
+		return EFCPool.getConnection(params, poolName, acceptShareConn);
 	}
 
 	public static void freeConn(EFConnectionSocket<?> conn, String poolName, boolean clearConn) {
@@ -76,13 +77,13 @@ public final class EFConnectionPool {
 	/**
 	 * get connection from pool and waiting
 	 */
-	private EFConnectionSocket<?> getConnection(ConnectParams params, String poolName, boolean canShareConn) {
+	private EFConnectionSocket<?> getConnection(ConnectParams params, String poolName, boolean acceptShareConn) {
 		synchronized (this._pools) {
 			if (this._pools.get(poolName) == null) {
 				createPools(poolName, params);
 			}
 		}
-		return this._pools.get(poolName).getConnection(this._waitTime, canShareConn);
+		return this._pools.get(poolName).getConnection(this._waitTime, acceptShareConn);
 	}
 
 	private String getState(String poolName) {
@@ -135,13 +136,13 @@ public final class EFConnectionPool {
 			this.shareConn.setShare(true);
 		}
 
-		public EFConnectionSocket<?> getConnection(long timeout, boolean canShareConn) {
+		public EFConnectionSocket<?> getConnection(long timeout, boolean acceptShareConn) {
 			EFConnectionSocket<?> conn = null;
 			int tryTime = 0;
 			while ((conn = getConnection()) == null) {
-				if (canShareConn && conn == null) {
+				if (acceptShareConn && conn == null) {
 					if (this.shareConn.status() == false) {
-						this.shareConn.connect();
+						this.shareConn.connect(END_TYPE.searcher);
 					}
 					return this.shareConn;
 				}

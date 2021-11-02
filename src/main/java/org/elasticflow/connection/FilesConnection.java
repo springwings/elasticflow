@@ -21,7 +21,7 @@ public class FilesConnection extends EFConnectionSocket<RandomAccessFile> {
 	}
 	
 	@Override
-	public boolean connect() {
+	protected boolean connect(END_TYPE endType) {
 		if (!status()) {
 			try { 
 				this.conn = new RandomAccessFile(String.valueOf(((WarehouseNosqlParam) connectParams.getWhp()).getPath()), "rw");
@@ -35,7 +35,7 @@ public class FilesConnection extends EFConnectionSocket<RandomAccessFile> {
 	
 	@Override
 	public RandomAccessFile getConnection(END_TYPE endType) {
-		connect();
+		connect(endType);
 		return conn;
 	}
 

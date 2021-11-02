@@ -27,7 +27,7 @@ public class FastdfsConnection extends EFConnectionSocket<StorageClient> {
 	}
 	
 	@Override
-	public boolean connect() {
+	protected boolean connect(END_TYPE endType) {
 		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
 		if (wnp.getPath() != null) {
 			if (!status()) { 			        	
@@ -51,7 +51,7 @@ public class FastdfsConnection extends EFConnectionSocket<StorageClient> {
 	public StorageClient getConnection(END_TYPE endtype) {
 		int tryTime = 0;
 		try {
-			while (tryTime < 5 && !connect()) {
+			while (tryTime < 5 && !connect(endtype)) {
 				tryTime++;
 				Thread.sleep(2000);
 			}

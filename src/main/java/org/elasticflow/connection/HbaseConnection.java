@@ -29,7 +29,6 @@ public class HbaseConnection extends EFConnectionSocket<Table>{
 	public static EFConnectionSocket<?> getInstance(ConnectParams connectParams) {
 		EFConnectionSocket<?> o = new HbaseConnection();
 		o.init(connectParams);
-		o.connect();
 		return o;
 	}
 
@@ -69,7 +68,7 @@ public class HbaseConnection extends EFConnectionSocket<Table>{
 	public Table getConnection(END_TYPE endType) {
 		int tryTime = 0;
 		try {
-			while (tryTime < 5 && !connect()) {
+			while (tryTime < 5 && !connect(endType)) {
 				tryTime++;
 				Thread.sleep(2000);
 			}
@@ -106,7 +105,7 @@ public class HbaseConnection extends EFConnectionSocket<Table>{
 	}
 
 	@Override
-	public boolean connect() {
+	protected boolean connect(END_TYPE endType) {
 		if (!status()) {
 			try {
 				this.Hconn = ConnectionFactory.createConnection(this.hbaseConfig);

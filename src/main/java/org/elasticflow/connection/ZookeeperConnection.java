@@ -27,12 +27,11 @@ public class ZookeeperConnection extends EFConnectionSocket<ZooKeeper> {
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
 		EFConnectionSocket<?> o = new ZookeeperConnection();
 		o.init(ConnectParams);
-		o.connect();
 		return o;
 	} 
 
 	@Override
-	public boolean connect() {
+	protected boolean connect(END_TYPE endType) {
 		if (!status()) {
 			try { 
 				this.conn = new ZooKeeper(
@@ -50,7 +49,7 @@ public class ZookeeperConnection extends EFConnectionSocket<ZooKeeper> {
 	public ZooKeeper getConnection(END_TYPE endType) {
 		int tryTime = 0;
 		try {
-			while (tryTime < 5 && !connect()) {
+			while (tryTime < 5 && !connect(endType)) {
 				tryTime++;
 				Thread.sleep(2000);
 			}

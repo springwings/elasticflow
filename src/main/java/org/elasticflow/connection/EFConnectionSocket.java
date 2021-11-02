@@ -15,7 +15,7 @@ public abstract class EFConnectionSocket<T>{
 	
 	private boolean isShare = false; 
 	
-	public abstract boolean connect(); 
+	protected abstract boolean connect(END_TYPE endType); 
 	
 	public abstract T getConnection(END_TYPE endtype);
 	

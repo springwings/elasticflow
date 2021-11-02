@@ -38,12 +38,11 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
 		EFConnectionSocket<?> o = new EsConnection();
 		o.init(ConnectParams);
-		o.connect();
 		return o;
 	}
 
 	@Override
-	public boolean connect() {
+	protected boolean connect(END_TYPE endType) {
 		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
 		if (wnp.getPath() != null) {
 			if (!status()) {
@@ -67,7 +66,7 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 
 	@Override
 	public EsConnector getConnection(END_TYPE endType) {
-		connect(); 
+		connect(endType); 
 		if (endType!=END_TYPE.searcher) {
 			if (this.bulkProcessor == null) {
 				getBulkProcessor(this.conn);

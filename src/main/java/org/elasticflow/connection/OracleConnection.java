@@ -32,12 +32,11 @@ public class OracleConnection extends EFConnectionSocket<Connection> {
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
 		EFConnectionSocket<?> o = new OracleConnection();
 		o.init(ConnectParams);
-		o.connect();
 		return o;
 	}
 
 	@Override
-	public boolean connect() {
+	protected boolean connect(END_TYPE endType) {
 		try {
 			if (!status()) {
 				WarehouseSqlParam wsp = (WarehouseSqlParam) this.connectParams.getWhp();
@@ -57,7 +56,7 @@ public class OracleConnection extends EFConnectionSocket<Connection> {
 	public Connection getConnection(END_TYPE endType) {
 		int tryTime = 0;
 		try {
-			while (tryTime < 5 && !connect()) {
+			while (tryTime < 5 && !connect(endType)) {
 				tryTime++;
 				Thread.sleep(2000);
 			}

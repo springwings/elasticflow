@@ -23,12 +23,11 @@ public class VearchConnection extends EFConnectionSocket<VearchConnector> {
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
 		EFConnectionSocket<?> o = new VearchConnection();
 		o.init(ConnectParams);
-		o.connect();
 		return o;
 	}
 
 	@Override
-	public boolean connect() {
+	protected boolean connect(END_TYPE endType) {
 		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
 		if (wnp.getPath() != null) {
 			if (!status()) { 
@@ -45,7 +44,7 @@ public class VearchConnection extends EFConnectionSocket<VearchConnector> {
 	public VearchConnector getConnection(END_TYPE endType) {
 		int tryTime = 0;
 		try {
-			while (tryTime < 5 && !connect()) {
+			while (tryTime < 5 && !connect(endType)) {
 				tryTime++;
 				Thread.sleep(2000);
 			}

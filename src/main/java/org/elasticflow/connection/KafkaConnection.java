@@ -37,17 +37,18 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
 		EFConnectionSocket<?> o = new KafkaConnection();
 		o.init(ConnectParams);
-		o.connect();
 		return o;
 	}
 
 	@Override
-	public boolean connect() {
+	protected boolean connect(END_TYPE endType) {
 		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
 		if (wnp.getPath() != null) {
-			if (!status()) { 			        	
-				this.genConsumer(wnp);
-				this.genProducer(wnp);
+			if (!status()) { 			
+				if(endType.equals(END_TYPE.reader))
+					this.genConsumer(wnp);
+				if(endType.equals(END_TYPE.writer))
+					this.genProducer(wnp);
 			}
 		} else {
 			return false;
@@ -105,7 +106,7 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 	public Object getConnection(END_TYPE endType) {
 		int tryTime = 0;
 		try {
-			while (tryTime < 5 && !connect()) {
+			while (tryTime < 5 && !connect(endType)) {
 				tryTime++;
 				Thread.sleep(2000);
 			}
@@ -130,10 +131,14 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 	@Override
 	public boolean free() {
 		try {
-			this.cconn.close();
-			this.cconn = null;
-			this.pconn.close();
-			this.pconn = null;
+			if(this.cconn!=null) {
+				this.cconn.close();
+				this.cconn = null;
+			}
+			if(this.pconn!=null) {
+				this.pconn.close();
+				this.pconn = null;
+			}
 			this.connectParams = null;
 		} catch (Exception e) {
 			log.error("free connect Exception,", e);

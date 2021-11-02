@@ -48,21 +48,21 @@ public abstract class Flow {
 	public abstract void INIT(ConnectParams connectParams);
 	
 	/**
-	 * 
+	 * Enable exclusive resolution if the link has a special resource binding
 	 * @param isMonopoly  if true, the task will monopolize a specific connection and will not release it 
-	 * @param canSharePipe  if true, Use global shared connections
+	 * @param acceptShareConn  if true, Use global shared connections
 	 * @return
 	 */
-	public EFConnectionSocket<?> PREPARE(boolean isMonopoly,boolean canSharePipe) {  
+	public EFConnectionSocket<?> PREPARE(boolean isMonopoly,boolean acceptShareConn) {  
 		synchronized (this.retainer) {  
 			if(isMonopoly) {
 				if(this.EFConn==null) 
 					this.EFConn = EFConnectionPool.getConn(this.connectParams,
-							this.poolName,canSharePipe); 
+							this.poolName,acceptShareConn); 
 			}else {
 				if(this.retainer.getAndIncrement()==0) {
 					this.EFConn = EFConnectionPool.getConn(this.connectParams,
-							this.poolName,canSharePipe);  
+							this.poolName,acceptShareConn);  
 				} 
 			}
 		}
