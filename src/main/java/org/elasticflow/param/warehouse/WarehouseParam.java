@@ -27,7 +27,7 @@ public interface WarehouseParam {
 	
 	public String getHandler(); 
 	
-	public String getPoolName(String seq);
+	public String getPoolName(String L1seq);
 	
 	public int getMaxConn();
 	

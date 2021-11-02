@@ -102,7 +102,7 @@ public class Searcher {
 			objList.add(unit.getContent());
 		}
 		if (objList.size() > 0)
-			contentMap.put("list", objList); 
+			contentMap.put("lists", objList); 
 		if (data.getFacetInfo()!=null)
 			contentMap.put("facet", data.getFacetInfo());  
 		if (data.getQueryDetail() != null)

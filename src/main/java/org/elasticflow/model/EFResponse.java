@@ -107,7 +107,8 @@ public class EFResponse {
 				!request.get(GlobalParam.CLOSE_REQUEST_RESPONSE).toString().toLowerCase().equals("true")) {
 			response.put("request", request);
 		}
-		response.put("instance", this.instance);
+		if(this.instance!="")
+			response.put("instance", this.instance);		
 		response.put("duration", String.valueOf(getDuration()) + "ms");
 		if (payload != null) {
 			rsp.put("datas", payload);

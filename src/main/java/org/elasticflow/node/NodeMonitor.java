@@ -33,8 +33,8 @@ import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.GlobalParam.STATUS;
-import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.param.pipe.InstructionParam;
@@ -47,7 +47,9 @@ import org.elasticflow.searcher.service.SearcherService;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.ConfigStorer;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFLoader;
+import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.SystemInfoUtil;
 import org.elasticflow.writer.WriterFlowSocket;
@@ -83,7 +85,7 @@ public final class NodeMonitor {
 	@Autowired
 	private HttpReaderService HttpReaderService;
 
-	private RESPONSE_STATUS response_status;
+	private RESPONSE_STATUS response_status = RESPONSE_STATUS.CodeException;
 
 	private String response_info;
 
@@ -108,6 +110,7 @@ public final class NodeMonitor {
 			add("restartNode");
 			add("loadHandler");
 			// instance manage
+			add("cloneInstance");
 			add("resetInstanceState");
 			add("getInstanceSeqs");
 			add("reloadInstanceConfig");
@@ -155,7 +158,7 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void removeResource(Request rq) {
-		if (rq.getParameter("name") != null && rq.getParameter("type") != null) {
+		if (EFMonitorUtil.checkParams(this, rq, "name,type")) {
 			String name = rq.getParameter("name");
 			RESOURCE_TYPE type = RESOURCE_TYPE.valueOf(rq.getParameter("type").toUpperCase());
 			String[] seqs;
@@ -207,8 +210,6 @@ public final class NodeMonitor {
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("name", name);
 			updateResourceXml(type.name(), jsonObject, true);
-		} else {
-			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!", null);
 		}
 	}
 
@@ -216,7 +217,7 @@ public final class NodeMonitor {
 	 * @param socket resource configs json string
 	 */
 	public void addResource(Request rq) {
-		if (rq.getParameter("socket") != null && rq.getParameter("type") != null) {
+		if (EFMonitorUtil.checkParams(this, rq, "socket,type")) {
 			JSONObject jsonObject = JSON.parseObject(rq.getParameter("socket"));
 			RESOURCE_TYPE type = RESOURCE_TYPE.valueOf(rq.getParameter("type").toUpperCase());
 			Object o = null;
@@ -250,8 +251,6 @@ public final class NodeMonitor {
 			} catch (Exception e) {
 				setResponse(RESPONSE_STATUS.CodeException, "add Resource to node Exception " + e.getMessage(), null);
 			}
-		} else {
-			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!", null);
 		}
 	}
 
@@ -417,7 +416,7 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void getInstanceSeqs(Request rq) {
-		if (rq.getParameter("instance").length() > 1) {
+		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
 			try {
 				String instance = rq.getParameter("instance");
 				InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instance);
@@ -430,8 +429,6 @@ public final class NodeMonitor {
 			} catch (Exception e) {
 				setResponse(RESPONSE_STATUS.CodeException, rq.getParameter("instance") + " not exists!", null);
 			}
-		} else {
-			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!", null);
 		}
 	}
 
@@ -441,7 +438,7 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void resetInstanceState(Request rq) {
-		if (rq.getParameter("instance").length() > 1) {
+		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
 			try {
 				String instance = rq.getParameter("instance");
 				String val = "0";
@@ -459,8 +456,6 @@ public final class NodeMonitor {
 			} catch (Exception e) {
 				setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance") + " not exists!", null);
 			}
-		} else {
-			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!", null);
 		}
 	}
 
@@ -470,156 +465,162 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void getInstanceInfo(Request rq) {
-		if (Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance"))) {
-			String instance = rq.getParameter("instance");
-			JSONObject JO = new JSONObject();
-			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
-			if (Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
-				String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom())
-						.getPoolName(null);
-				JO.put("Reader Pool Status", EFConnectionPool.getStatus(poolname));
-			} else if (Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
-				WarehouseSqlParam ws = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom());
-				String poolname = "";
-				if (ws.getL1seq() != null && ws.getL1seq().length > 0) {
-					for (String seq : ws.getL1seq()) {
-						poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom())
-								.getPoolName(seq);
-						JO.put("Seq(" + seq + ") Reader Pool Status", EFConnectionPool.getStatus(poolname));
-					}
-				} else {
-					poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom())
+		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
+			if (Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance"))) {
+				String instance = rq.getParameter("instance");
+				JSONObject JO = new JSONObject();
+				InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
+				if (Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
+					String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom())
 							.getPoolName(null);
 					JO.put("Reader Pool Status", EFConnectionPool.getStatus(poolname));
-				}
-			}
-
-			String[] L1seqs = Common.getL1seqs(config, true);
-			for (String seq : L1seqs) {
-				PipePump transDataFlow = Resource.SOCKET_CENTER.getPipePump(config.getName(), seq, false,
-						GlobalParam.FLOW_TAG._DEFAULT.name());
-				String appendPipe = "";
-				if (seq != "") {
-					appendPipe = "Seq(" + seq + ") ";
-				}
-				JO.put(appendPipe + "Reader Load ", transDataFlow.getReader().getLoad());
-				JO.put(appendPipe + "Reader Performance ", transDataFlow.getReader().getPerformance());
-				if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {
-					JO.put(appendPipe + "Computer Load ", transDataFlow.getComputer().getLoad());
-					JO.put(appendPipe + "Computer Performance ", transDataFlow.getComputer().getPerformance());
-				}
-				if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
-					JO.put(appendPipe + "Writer Load ", transDataFlow.getWriter().getLoad());
-					JO.put(appendPipe + "Writer Performance ", transDataFlow.getWriter().getPerformance());
-				}
-			}
-
-			if (Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
-				String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getWriteTo())
-						.getPoolName(null);
-				JO.put("Writer Pool Status", EFConnectionPool.getStatus(poolname));
-			} else if (Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
-				String poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getWriteTo())
-						.getPoolName(null);
-				JO.put("Writer Pool Status", EFConnectionPool.getStatus(poolname));
-			}
-
-			if ((GlobalParam.SERVICE_LEVEL & 1) > 0) {
-				String searchFrom = config.getPipeParams().getSearchFrom();
-				String searcherInfo = "";
-				if (config.getPipeParams().getWriteTo() != null
-						&& config.getPipeParams().getWriteTo().equals(searchFrom)) {
-					searcherInfo = "Searcher Pool (Share With Writer) Status";
-				} else {
-					searcherInfo = "Searcher Pool Status";
-				}
-
-				if (Resource.nodeConfig.getNoSqlWarehouse().get(searchFrom) != null) {
-					String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(searchFrom).getPoolName(null);
-					JO.put(searcherInfo, EFConnectionPool.getStatus(poolname));
-				} else {
-					String poolname = Resource.nodeConfig.getSqlWarehouse().get(searchFrom).getPoolName(null);
-					JO.put(searcherInfo, EFConnectionPool.getStatus(poolname));
-				}
-			}
-
-			if (config.openTrans()) {
-				WarehouseParam wsp = null;
-				;
-				wsp = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom());
-				if (wsp == null)
-					wsp = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom());
-				if (wsp.getL1seq().length > 0) {
-					StringBuilder sb = new StringBuilder();
-					StringBuilder fullstate = new StringBuilder();
-					for (String seq : wsp.getL1seq()) {
-						String strs = GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, seq))
-								.getPositionString();
-						if (strs == null)
-							continue;
-						sb.append("\r\n;(" + seq + ") "
-								+ GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, seq)).getStoreId() + ":");
-
-						for (String str : strs.split(",")) {
-							String update;
-							String[] dstr = str.split(":");
-							if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
-								update = dstr[0] + ":" + (SDF.format(
-										dstr[1].length() < 12 ? Long.valueOf(dstr[1] + "000") : Long.valueOf(dstr[1])))
-										+ " (" + dstr[1] + ")";
-							} else {
-								update = str;
-							}
-							sb.append(", ");
-							sb.append(update);
+				} else if (Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
+					WarehouseSqlParam ws = Resource.nodeConfig.getSqlWarehouse()
+							.get(config.getPipeParams().getReadFrom());
+					String poolname = "";
+					if (ws.getL1seq() != null && ws.getL1seq().length > 0) {
+						for (String seq : ws.getL1seq()) {
+							poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom())
+									.getPoolName(seq);
+							JO.put("Seq(" + seq + ") Reader Pool Status", EFConnectionPool.getStatus(poolname));
 						}
-						fullstate.append(seq + ":" + Common.getFullStartInfo(instance, seq) + "; ");
+					} else {
+						poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom())
+								.getPoolName(null);
+						JO.put("Reader Pool Status", EFConnectionPool.getStatus(poolname));
 					}
-					JO.put("Incremental storage status", sb);
-					JO.put("Full storage status", fullstate);
-				} else {
-					String strs = GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null))
-							.getPositionString();
-					if (strs.length() > 0) {
-						StringBuilder stateStr = new StringBuilder();
-						if (strs.split(",").length > 0) {
-							for (String tm : strs.split(",")) {
-								String[] dstr = tm.split(":");
+				}
+
+				String[] L1seqs = Common.getL1seqs(config, true);
+				for (String seq : L1seqs) {
+					PipePump transDataFlow = Resource.SOCKET_CENTER.getPipePump(config.getName(), seq, false,
+							GlobalParam.FLOW_TAG._DEFAULT.name());
+					String appendPipe = "";
+					if (seq != "") {
+						appendPipe = "Seq(" + seq + ") ";
+					}
+					JO.put(appendPipe + "Reader Load ", transDataFlow.getReader().getLoad());
+					JO.put(appendPipe + "Reader Performance ", transDataFlow.getReader().getPerformance());
+					if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {
+						JO.put(appendPipe + "Computer Load ", transDataFlow.getComputer().getLoad());
+						JO.put(appendPipe + "Computer Performance ", transDataFlow.getComputer().getPerformance());
+					}
+					if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
+						JO.put(appendPipe + "Writer Load ", transDataFlow.getWriter().getLoad());
+						JO.put(appendPipe + "Writer Performance ", transDataFlow.getWriter().getPerformance());
+					}
+				}
+
+				if (Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
+					String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getWriteTo())
+							.getPoolName(null);
+					JO.put("Writer Pool Status", EFConnectionPool.getStatus(poolname));
+				} else if (Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
+					String poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getWriteTo())
+							.getPoolName(null);
+					JO.put("Writer Pool Status", EFConnectionPool.getStatus(poolname));
+				}
+
+				if ((GlobalParam.SERVICE_LEVEL & 1) > 0) {
+					String searchFrom = config.getPipeParams().getSearchFrom();
+					String searcherInfo = "";
+					if (config.getPipeParams().getWriteTo() != null
+							&& config.getPipeParams().getWriteTo().equals(searchFrom)) {
+						searcherInfo = "Searcher Pool (Share With Writer) Status";
+					} else {
+						searcherInfo = "Searcher Pool Status";
+					}
+
+					if (Resource.nodeConfig.getNoSqlWarehouse().get(searchFrom) != null) {
+						String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(searchFrom).getPoolName(null);
+						JO.put(searcherInfo, EFConnectionPool.getStatus(poolname));
+					} else {
+						String poolname = Resource.nodeConfig.getSqlWarehouse().get(searchFrom).getPoolName(null);
+						JO.put(searcherInfo, EFConnectionPool.getStatus(poolname));
+					}
+				}
+
+				if (config.openTrans()) {
+					WarehouseParam wsp = null;
+					;
+					wsp = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom());
+					if (wsp == null)
+						wsp = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom());
+					if (wsp.getL1seq().length > 0) {
+						StringBuilder sb = new StringBuilder();
+						StringBuilder fullstate = new StringBuilder();
+						for (String seq : wsp.getL1seq()) {
+							String strs = GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, seq))
+									.getPositionString();
+							if (strs == null)
+								continue;
+							sb.append("\r\n;(" + seq + ") "
+									+ GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, seq)).getStoreId()
+									+ ":");
+
+							for (String str : strs.split(",")) {
+								String update;
+								String[] dstr = str.split(":");
 								if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
-									stateStr.append(dstr[0] + ":" + SDF.format(
-											tm.length() < 12 ? Long.valueOf(dstr[1] + "000") : Long.valueOf(dstr[1])));
-									stateStr.append(" (").append(tm).append(")");
+									update = dstr[0] + ":"
+											+ (SDF.format(dstr[1].length() < 12 ? Long.valueOf(dstr[1] + "000")
+													: Long.valueOf(dstr[1])))
+											+ " (" + dstr[1] + ")";
 								} else {
-									stateStr.append(tm);
+									update = str;
 								}
-								stateStr.append(", ");
+								sb.append(", ");
+								sb.append(update);
 							}
+							fullstate.append(seq + ":" + Common.getFullStartInfo(instance, seq) + "; ");
 						}
-						JO.put("Incremental storage status",
-								GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null)).getStoreId() + ":"
-										+ stateStr.toString());
+						JO.put("Incremental storage status", sb);
+						JO.put("Full storage status", fullstate);
+					} else {
+						String strs = GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null))
+								.getPositionString();
+						if (strs.length() > 0) {
+							StringBuilder stateStr = new StringBuilder();
+							if (strs.split(",").length > 0) {
+								for (String tm : strs.split(",")) {
+									String[] dstr = tm.split(":");
+									if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
+										stateStr.append(dstr[0] + ":"
+												+ SDF.format(tm.length() < 12 ? Long.valueOf(dstr[1] + "000")
+														: Long.valueOf(dstr[1])));
+										stateStr.append(" (").append(tm).append(")");
+									} else {
+										stateStr.append(tm);
+									}
+									stateStr.append(", ");
+								}
+							}
+							JO.put("Incremental storage status",
+									GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null)).getStoreId()
+											+ ":" + stateStr.toString());
+						}
+						JO.put("Full storage status", Common.getFullStartInfo(instance, null));
 					}
-					JO.put("Full storage status", Common.getFullStartInfo(instance, null));
+					if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.FULL.name())
+							|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()).size() == 0) {
+						JO.put("Full progress", "full:none");
+					} else {
+						JO.put("Full progress", "full:" + Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()));
+					}
+					if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.INCREMENT.name())
+							|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()).size() == 0) {
+						JO.put("Incremental progress", "increment:none");
+					} else {
+						JO.put("Incremental progress",
+								"increment:" + Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()));
+					}
+					JO.put("Incremental thread status", threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
+					JO.put("Full thread status", threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
 				}
-				if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.FULL.name())
-						|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()).size() == 0) {
-					JO.put("Full progress", "full:none");
-				} else {
-					JO.put("Full progress", "full:" + Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()));
-				}
-				if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.INCREMENT.name())
-						|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()).size() == 0) {
-					JO.put("Incremental progress", "increment:none");
-				} else {
-					JO.put("Incremental progress",
-							"increment:" + Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()));
-				}
-				JO.put("Incremental thread status", threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
-				JO.put("Full thread status", threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
+				setResponse(RESPONSE_STATUS.Success, null, JO);
+			} else {
+				setResponse(RESPONSE_STATUS.DataErr, "instance not exits!", null);
 			}
-			setResponse(RESPONSE_STATUS.Success, null, JO);
-		} else {
-			setResponse(RESPONSE_STATUS.DataErr, "instance not exits!", null);
 		}
 	}
 
@@ -687,7 +688,7 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void runNow(Request rq) {
-		if (rq.getParameter("instance") != null && rq.getParameter("jobtype") != null) {
+		if (EFMonitorUtil.checkParams(this, rq, "instance,jobtype")) {
 			if (Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance"))
 					&& Resource.nodeConfig.getInstanceConfigs().get(rq.getParameter("instance")).openTrans()) {
 				boolean state = Resource.FlOW_CENTER.runInstanceNow(rq.getParameter("instance"),
@@ -703,19 +704,13 @@ public final class NodeMonitor {
 				setResponse(RESPONSE_STATUS.DataErr,
 						"Writer " + rq.getParameter("instance") + " job not open in this node!Run start faild!", null);
 			}
-		} else {
-			setResponse(RESPONSE_STATUS.DataErr, "Writer " + rq.getParameter("instance")
-					+ " job started now error,instance and jobtype parameter not both set!", null);
 		}
 	}
 
 	public void removeInstance(Request rq) {
-		if (rq.getParameter("instance").length() > 1) {
+		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
 			removeInstance(rq.getParameter("instance"));
 			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have removed!", null);
-		} else {
-			setResponse(RESPONSE_STATUS.DataErr,
-					"Writer " + rq.getParameter("instance") + " remove error,instance parameter not set!", null);
 		}
 	}
 
@@ -725,16 +720,13 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void stopInstance(Request rq) {
-		if (rq.getParameter("instance").length() > 1) {
+		if (EFMonitorUtil.checkParams(this, rq, "instance,type")) {
 			if (rq.getParameter("type").toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
 				controlThreadState(rq.getParameter("instance"), STATUS.Stop, false);
 			} else {
 				controlThreadState(rq.getParameter("instance"), STATUS.Stop, true);
 			}
 			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have stopped!", null);
-		} else {
-			setResponse(RESPONSE_STATUS.DataErr,
-					"Writer " + rq.getParameter("instance") + " stop error,index parameter not set!", null);
 		}
 	}
 
@@ -744,16 +736,13 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void resumeInstance(Request rq) {
-		if (rq.getParameter("instance").length() > 1) {
+		if (EFMonitorUtil.checkParams(this, rq, "instance,type")) {
 			if (rq.getParameter("type").toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
 				controlThreadState(rq.getParameter("instance"), STATUS.Ready, false);
 			} else {
 				controlThreadState(rq.getParameter("instance"), STATUS.Ready, true);
 			}
 			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have resumed!", null);
-		} else {
-			setResponse(RESPONSE_STATUS.DataErr,
-					"Writer " + rq.getParameter("instance") + " resume error,index parameter not set!", null);
 		}
 	}
 
@@ -764,7 +753,7 @@ public final class NodeMonitor {
 	 *           in java from instance configure.
 	 */
 	public void reloadInstanceConfig(Request rq) {
-		if (rq.getParameter("instance").length() > 1) {
+		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
 			controlThreadState(rq.getParameter("instance"), STATUS.Stop, true);
 			int type = Resource.nodeConfig.getInstanceConfigs().get(rq.getParameter("instance")).getInstanceType();
 			String instanceConfig = rq.getParameter("instance");
@@ -788,8 +777,16 @@ public final class NodeMonitor {
 			rebuildFlowGovern(instanceConfig);
 			controlThreadState(rq.getParameter("instance"), STATUS.Ready, true);
 			setResponse(RESPONSE_STATUS.Success, rq.getParameter("instance") + " reload Config Success!", null);
-		} else {
-			setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance") + " not exists!", null);
+		}
+	}
+
+	public void cloneInstance(Request rq) {
+		if (EFMonitorUtil.checkParams(this, rq, "instance,new_instance_name")) {
+			EFFileUtil.copyFolder(GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("instance"),
+					GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("new_instance_name"));
+			EFFileUtil.delFile(GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("new_instance_name") + "/batch");
+			EFFileUtil.delFile(GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("new_instance_name") + "/full_info");
+			setResponse(RESPONSE_STATUS.Success, rq.getParameter("new_instance_name") + " clone Success!", null);
 		}
 	}
 
@@ -799,7 +796,7 @@ public final class NodeMonitor {
 	 * @param rq instance parameter example,instanceName:1
 	 */
 	public void addInstance(Request rq) {
-		if (rq.getParameter("instance").length() > 1) {
+		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
 			Resource.nodeConfig.loadConfig(rq.getParameter("instance"), false);
 			String tmp[] = rq.getParameter("instance").split(":");
 			String instanceName = rq.getParameter("instance");
@@ -819,8 +816,6 @@ public final class NodeMonitor {
 			} catch (Exception e) {
 				setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
 			}
-		} else {
-			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!", null);
 		}
 	}
 
@@ -831,7 +826,7 @@ public final class NodeMonitor {
 	 * @return
 	 */
 	public void deleteInstanceData(Request rq) {
-		if (rq.getParameter("instance") != null) {
+		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
 			String _instance = rq.getParameter("instance");
 			Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 			boolean state = true;
@@ -869,8 +864,6 @@ public final class NodeMonitor {
 			} else {
 				setResponse(RESPONSE_STATUS.CodeException, "delete " + _instance + " Failed!", null);
 			}
-		} else {
-			setResponse(RESPONSE_STATUS.ParameterErr, "Parameter not match!", null);
 		}
 	}
 

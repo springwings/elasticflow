@@ -109,8 +109,8 @@ public class WarehouseNosqlParam implements WarehouseParam{
 	}
 
 	@Override
-	public String getPoolName(String seq) { 
-		return ((seq != null) ? this.alias.replace("#{seq}", seq):this.alias)+"_"+this.type+"_"+this.path;
+	public String getPoolName(String L1seq) { 
+		return ((L1seq != null) ? this.alias.replace("#{seq}", L1seq):this.alias)+"_"+this.type+"_"+this.path;
 	}	
 	
 	@Override

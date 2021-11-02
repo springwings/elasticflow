@@ -21,7 +21,7 @@ public class EFException extends Exception {
 	}
 
 	public static enum ETYPE {
-		WRITE_POS_NOT_FOUND,RESOURCE_FAILURE,UNKNOWN;
+		WRITE_POS_NOT_FOUND,PARAMETER_ERROR,RESOURCE_FAILURE,UNKNOWN;
 	}
 
 	private ELEVEL e_level = ELEVEL.Ignore;
