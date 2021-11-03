@@ -98,7 +98,7 @@ public class SolrWriter extends WriterFlowSocket{
 	} 
 	
 	@Override
-	public void write(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> writeParamMap, String instantcName, String storeId,boolean isUpdate) throws EFException { 
+	public void write(InstanceConfig instanceConfig,PipeDataUnit unit,String instantcName, String storeId,boolean isUpdate) throws EFException { 
 		String name = Common.getStoreName(instantcName,storeId);
 		if (unit.getData().size() == 0){
 			log.warn("Empty IndexUnit for " + name );
@@ -107,13 +107,15 @@ public class SolrWriter extends WriterFlowSocket{
 		if(getSolrConn().getDefaultCollection() == null){
 			getSolrConn().setDefaultCollection(name);
 		}  
+		Map<String, EFField> transParams = instanceConfig.getWriteFields();
+		WriterParam writerParam = instanceConfig.getWriterParams();
 		SolrInputDocument doc = new SolrInputDocument(); 
 		for(Entry<String, Object> r:unit.getData().entrySet()){
 			String field = r.getKey(); 
 			if (r.getValue() == null)
 				continue;
 			String value = String.valueOf(r.getValue());
-			EFField transParam = writeParamMap.get(field);
+			EFField transParam = transParams.get(field);
 			if (transParam == null)
 				continue;
 			

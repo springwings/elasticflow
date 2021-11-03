@@ -5,11 +5,10 @@ import java.util.Map.Entry;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
-import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
@@ -27,19 +26,19 @@ public class KafkaWriter extends WriterFlowSocket {
 		KafkaWriter o = new KafkaWriter();
 		o.INIT(connectParams);
 		return o;
-	}
-	
+	} 
+
 	@SuppressWarnings("unchecked")
 	private KafkaProducer<String, String> getconn() {
 		return (KafkaProducer<String, String>) GETSOCKET().getConnection(END_TYPE.writer);
 	}
 	
 	@Override
-	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams, String instance,
+	public void write(InstanceConfig instanceConfig,PipeDataUnit unit,String instance,
 			String storeId, boolean isUpdate) throws EFException {
 		if (!ISLINK())
 			return; 
-		KafkaProducer<String, String> conn = this.getconn();
+		Map<String, EFField> transParams = instanceConfig.getWriteFields();
 		try { 
 			for (Entry<String, Object> r : unit.getData().entrySet()) {
 				String field = r.getKey();
@@ -52,7 +51,7 @@ public class KafkaWriter extends WriterFlowSocket {
 					continue;
 				if(transParam.getStored().equals("true")) {
 					Object val = r.getValue();
-					conn.send(new ProducerRecord<String, String>(transParams.get("topic").getDefaultvalue(), unit.getReaderKeyVal(),val.toString()));
+					getconn().send(new ProducerRecord<String, String>(transParams.get("topic").getDefaultvalue(), unit.getReaderKeyVal(),val.toString()));
 				}						
 			}			
 		} catch (Exception e) {
@@ -103,4 +102,5 @@ public class KafkaWriter extends WriterFlowSocket {
 	public boolean storePositionExists(String storeName) {
 		return true;
 	}
+
 }

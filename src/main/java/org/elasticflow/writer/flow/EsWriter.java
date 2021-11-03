@@ -12,8 +12,8 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
-import org.elasticflow.connection.EsConnector;
 import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.connection.EsConnector;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
@@ -72,10 +72,12 @@ public class EsWriter extends WriterFlowSocket {
 	}
 
 	@Override
-	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams, String instance,
+	public void write(InstanceConfig instanceConfig,PipeDataUnit unit,String instance,
 			String storeId, boolean isUpdate) throws EFException {
 		String name = Common.getStoreName(instance, storeId);
 		String type = instance;
+		Map<String, EFField> transParams = instanceConfig.getWriteFields();
+		WriterParam writerParam = instanceConfig.getWriterParams();
 		if (unit == null || unit.getData().size() == 0) {
 			log.info(instance + " WriteUnit contain Dirty data!");
 			return;
@@ -425,14 +427,6 @@ public class EsWriter extends WriterFlowSocket {
 		return exists;
 	}
 
-	private synchronized EsConnector getESC() {
-		if (this.CONNS == null || reconn) {
-			reconn = false;
-			this.CONNS = (EsConnector) GETSOCKET().getConnection(END_TYPE.writer);
-		}
-		return this.CONNS;
-	}
-
 	@Override
 	public boolean storePositionExists(String storeName) {
 		try {
@@ -443,4 +437,13 @@ public class EsWriter extends WriterFlowSocket {
 		}
 		return false;
 	}
+	
+	private synchronized EsConnector getESC() {
+		if (this.CONNS == null || reconn) {
+			reconn = false;
+			this.CONNS = (EsConnector) GETSOCKET().getConnection(END_TYPE.writer);
+		}
+		return this.CONNS;
+	}
+
 }

@@ -109,10 +109,10 @@ public class Pipe extends Instruction {
 			}
 			boolean freeConn = false;
 			try {
-				while (DSReader.nextLine()) {
-					writer.write(context.getInstanceConfig().getWriterParams(), 
+				while (DSReader.nextLine()) { 
+					writer.write(context.getInstanceConfig(),
 							DSReader.getLineData().virtualWrite(context.getInstanceConfig().getWriteFields()),
-							context.getInstanceConfig().getWriteFields(), instance, storeId, isUpdate);
+							instance, storeId, isUpdate);
 					num++;
 				}
 				rstate.setReaderScanStamp(DSReader.getScanStamp());
@@ -121,7 +121,7 @@ public class Pipe extends Instruction {
 				writer.lastGetPageTime = start;
 				writer.setPerformance((long) ((num+1.)/(Common.getNow()-start+1.)));
 				context.getReader().flush();
-				context.getWriter().flush();
+				writer.flush();
 				log.info(Common.formatLog("onepage"," -- " + id + " onepage ", instance, storeId, L2seq, num,
 						DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));
 			} catch (EFException e) {
@@ -132,7 +132,7 @@ public class Pipe extends Instruction {
 				throw e;
 			} finally { 
 				DSReader.close(); 
-				context.getWriter().REALEASE(monopoly, freeConn); 
+				writer.REALEASE(monopoly, freeConn); 
 			}
 		} else {
 			rstate.setStatus(false);

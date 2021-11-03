@@ -122,7 +122,7 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 
 	@Override
 	public boolean status() {
-		if (this.cconn == null) {
+		if (this.cconn == null && this.pconn == null) {
 			return false;
 		}
 		return true;

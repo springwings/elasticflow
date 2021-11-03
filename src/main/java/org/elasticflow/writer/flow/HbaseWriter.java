@@ -11,11 +11,10 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
-import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.util.EFException;
@@ -62,11 +61,12 @@ public class HbaseWriter extends WriterFlowSocket {
 
 	 
 	@Override
-	public void write(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> transParams, String instantcName, String storeId,boolean isUpdate) throws EFException { 
+	public void write(InstanceConfig instanceConfig,PipeDataUnit unit,String instantcName, String storeId,boolean isUpdate) throws EFException { 
 		if (unit.getData().size() == 0){
 			log.info("Empty IndexUnit for " + instantcName + " " + storeId);
 			return;
 		}  
+		Map<String, EFField> transParams = instanceConfig.getWriteFields();
 		String id = unit.getReaderKeyVal(); 
 		Put put = new Put(Bytes.toBytes(id));
 		

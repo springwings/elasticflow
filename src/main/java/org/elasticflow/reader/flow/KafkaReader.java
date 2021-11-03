@@ -3,12 +3,7 @@ package org.elasticflow.reader.flow;
 import java.time.Duration;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -148,20 +143,13 @@ public class KafkaReader extends ReaderFlowSocket {
 	@Override
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) {
 		boolean releaseConn = false;
-		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
-		ExecutorService executor = Executors.newSingleThreadExecutor();
-		//Connection release for Kafka timeout read
-		FutureTask<ConsumerRecords<String, String>> futureTask = new FutureTask<ConsumerRecords<String, String>>(
-				new Callable<ConsumerRecords<String, String>>() {
-					@Override
-					public ConsumerRecords<String, String> call() throws Exception {
-						return conn.poll(Duration.ofMillis(readms));
-					}
-				});
-		executor.execute(futureTask);
+		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>(); 
 		try {
-			this.records = futureTask.get(readms * 10, TimeUnit.MILLISECONDS);
-			int totalNum = this.records.count();
+			int totalNum = 0;
+			while(totalNum==0) {
+				this.records = conn.poll(Duration.ofMillis(readms));
+				totalNum = this.records.count();
+			}			
 			if (totalNum > 0) {
 				int pagenum = (int) Math.ceil(totalNum / pageSize);
 				int curentpage = 0;
@@ -173,15 +161,13 @@ public class KafkaReader extends ReaderFlowSocket {
 				}
 			}
 		} catch (Exception e) {
-			futureTask.cancel(true);
+			e.printStackTrace();
 			releaseConn = true;
 			page.clear();
 			REALEASE(false, releaseConn);
 			this.initconn();
 			log.error("Error in getting Kafka data, the connection will be cleared automatically.", e);
-		} finally {
-			executor.shutdown();
-		}
+		}  
 		return page;
 	}
 }

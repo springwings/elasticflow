@@ -38,13 +38,15 @@ public class Neo4jWriter extends WriterFlowSocket {
 
 
 	@Override
-	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams, String instance,
+	public void write(InstanceConfig instanceConfig,PipeDataUnit unit, String instance,
 			String storeId, boolean isUpdate) throws EFException {
 		boolean releaseConn = false;
 		try { 
 			PREPARE(false, false);
 			if (!ISLINK())
 				return;
+			Map<String, EFField> transParams = instanceConfig.getWriteFields();
+			WriterParam writerParam = instanceConfig.getWriterParams();
 			Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
 			try (PreparedStatement statement = conn.prepareStatement(
 					getWriteSQL(writerParam, unit, transParams));) {

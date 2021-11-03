@@ -4,12 +4,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.VearchConnector;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
-import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
@@ -77,11 +76,12 @@ public class VearchWriter extends WriterFlowSocket {
 	}
 
 	@Override
-	public void write(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams, String instance,
+	public void write(InstanceConfig instanceConfig,PipeDataUnit unit, String instance,
 			String storeId, boolean isUpdate) throws EFException {
 		String table = Common.getStoreName(instance, storeId);
 		if (!ISLINK())
 			return;
+		Map<String, EFField> transParams = instanceConfig.getWriteFields();
 		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 		try {				
 			JSONObject row = new JSONObject();

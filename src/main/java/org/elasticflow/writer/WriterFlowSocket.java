@@ -7,17 +7,13 @@
  */
 package org.elasticflow.writer;
 
-import java.util.Map;
-
 import javax.annotation.concurrent.NotThreadSafe;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.field.EFField;
 import org.elasticflow.flow.Flow;
 import org.elasticflow.model.reader.PipeDataUnit;
-import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.Common;
@@ -48,7 +44,7 @@ public abstract class WriterFlowSocket extends Flow{
 		this.connectParams = connectParams;
 		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq());
 		this.isBatch = GlobalParam.WRITE_BATCH; 
-	}   
+	}    
 	
 	public void setWriteHandler(WriterHandler writeHandler) {
 		this.writeHandler = writeHandler;
@@ -111,7 +107,7 @@ public abstract class WriterFlowSocket extends Flow{
 	public abstract boolean storePositionExists(String storeName);
 	
 	/**write one row data **/
-	public abstract void write(WriterParam writerParam,PipeDataUnit unit,Map<String, EFField> transParams,String instance, String storeId,boolean isUpdate) throws EFException;
+	public abstract void write(InstanceConfig instanceConfig,PipeDataUnit unit,String instance, String storeId,boolean isUpdate) throws EFException;
 	
 	/**Delete a single record through the key id*/ 
 	public abstract void delete(String instance, String storeId,String keyColumn,String keyVal) throws EFException;
