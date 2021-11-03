@@ -12,7 +12,7 @@ import java.util.List;
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.reader.ReaderFlowSocket;
-import org.elasticflow.util.EFWriterUtil;
+import org.elasticflow.util.instance.EFWriterUtil;
 import org.elasticflow.writer.WriterFlowSocket;
  
 /**

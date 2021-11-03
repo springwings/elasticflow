@@ -14,8 +14,9 @@ import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.PipeNormsUtil;
 import org.elasticflow.util.EFException.ELEVEL;
+import org.elasticflow.util.EFException.ETYPE;
+import org.elasticflow.util.instance.PipeNormsUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +82,7 @@ public class MysqlWriter extends WriterFlowSocket {
 	} 
 
 	@Override
-	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) {
+	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) throws EFException{
 		String name = Common.getStoreName(mainName, storeId);
 		String type = mainName;
 		PREPARE(false, false);
@@ -94,8 +95,7 @@ public class MysqlWriter extends WriterFlowSocket {
 				statement.execute();
 				return true;
 			} catch (Exception e) {
-				log.error("create Instance " + name + ":" + type + " failed!", e);
-				return false;
+				throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
 			} finally {
 				REALEASE(false, false);
 			}

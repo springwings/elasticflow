@@ -1,4 +1,4 @@
-package org.elasticflow.util;
+package org.elasticflow.util.instance;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -9,6 +9,7 @@ import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.ZooKeeper.States;
+import org.elasticflow.util.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

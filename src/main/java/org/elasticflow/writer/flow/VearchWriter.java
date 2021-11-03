@@ -48,7 +48,7 @@ public class VearchWriter extends WriterFlowSocket {
 	}	
 	
 	@Override
-	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) {
+	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) throws EFException{
 		String name = Common.getStoreName(mainName, storeId);
 		String type = mainName;
 		PREPARE(false, false);
@@ -61,8 +61,7 @@ public class VearchWriter extends WriterFlowSocket {
 				conn.createSpace(this.getTableMeta(name,instanceConfig));
 				return true;
 			} catch (Exception e) {
-				log.error("create Instance " + name + ":" + type + " failed!", e);
-				return false;
+				throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
 			} finally {
 				REALEASE(false, false);
 			}
@@ -164,7 +163,7 @@ public class VearchWriter extends WriterFlowSocket {
 	}
 
 	@Override
-	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
+	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) throws EFException{
 		String select = "a";
 		boolean a = this.storePositionExists(Common.getStoreName(mainName, "a"));
 		boolean b = this.storePositionExists(Common.getStoreName(mainName, "b"));

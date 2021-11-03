@@ -10,7 +10,7 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.EFSearchRequest;
 import org.elasticflow.searcher.parser.ESQueryParser;
-import org.elasticflow.util.SearchParamUtil;
+import org.elasticflow.util.instance.SearchParamUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;

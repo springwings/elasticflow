@@ -43,6 +43,7 @@ import org.elasticflow.node.CPU;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.EFException.ELEVEL;
+import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.Request;
 import org.slf4j.Logger;
@@ -243,7 +244,7 @@ public final class Common {
 	public static void saveTaskInfo(String instance, String L1seq,String storeId,String location) {
 		String instanceName = getMainName(instance, L1seq);
 		GlobalParam.SCAN_POSITION.get(instanceName).updateStoreId(storeId);
-		ConfigStorer.setData(getTaskStorePath(instanceName, L1seq,location),
+		EFDataStorer.setData(getTaskStorePath(instanceName, L1seq,location),
 				GlobalParam.SCAN_POSITION.get(instanceName).getString());
 	} 
 
@@ -290,7 +291,7 @@ public final class Common {
 	public static String getFullStartInfo(String instance, String L1seq) {
 		String info = "0";
 		String path = Common.getTaskStorePath(instance, L1seq,GlobalParam.JOB_FULLINFO_PATH);
-		byte[] b = ConfigStorer.getData(path,true); 
+		byte[] b = EFDataStorer.getData(path,true); 
 		if (b != null && b.length > 0) {
 			String str = new String(b); 
 			if (str.length() > 1) {
@@ -311,7 +312,7 @@ public final class Common {
 		synchronized (GlobalParam.SCAN_POSITION) {
 			if(!GlobalParam.SCAN_POSITION.containsKey(mainName)) {
 				String path = Common.getTaskStorePath(mainName, L1seq,GlobalParam.JOB_INCREMENTINFO_PATH);
-				byte[] b = ConfigStorer.getData(path,true);
+				byte[] b = EFDataStorer.getData(path,true);
 				if (b != null && b.length > 0) {
 					String str = new String(b); 
 					GlobalParam.SCAN_POSITION.put(mainName, new ScanPosition(str,instance,storeId));  
@@ -346,7 +347,9 @@ public final class Common {
 				return (String) CPU.RUN(transDataFlow.getID(), "Pond", "getNewStoreId",true, getMainName(instance, L1seq), false);
 			}
 		} catch (EFException e) {
-			Common.LOG.error(e.getMessage());
+			Common.LOG.error("getStoreId",e);
+			Resource.FlOW_CENTER.removeInstance(instance, true, true);
+			processErrorLevel(e);
 		}
 		return null;		
 	} 
@@ -371,7 +374,7 @@ public final class Common {
 		String instanceName = getMainName(instance, L1seq);
 		if(reload) {
 			String path = Common.getTaskStorePath(instance, L1seq,GlobalParam.JOB_INCREMENTINFO_PATH);
-			byte[] b = ConfigStorer.getData(path, true);
+			byte[] b = EFDataStorer.getData(path, true);
 			if (b != null && b.length > 0) {
 				String str = new String(b);
 				GlobalParam.SCAN_POSITION.put(instanceName, new ScanPosition(str,instance,L1seq));  

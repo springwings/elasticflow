@@ -1,4 +1,4 @@
-package org.elasticflow.util;
+package org.elasticflow.util.instance;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

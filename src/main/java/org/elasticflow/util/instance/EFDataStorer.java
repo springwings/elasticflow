@@ -1,4 +1,4 @@
-package org.elasticflow.util;
+package org.elasticflow.util.instance;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -6,15 +6,16 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.util.Common;
 
 /**
- * Instance configuration storage control
+ * Instance related configuration, running resources and running data utils
  * 
  * @author chengwen
  * @version 1.2
  * @date 2018-10-11 11:00
  */
-public class ConfigStorer {
+public class EFDataStorer {
 
 	public static boolean exists(String path) {
 		try {

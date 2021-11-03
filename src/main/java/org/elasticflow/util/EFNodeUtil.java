@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.reader.ScanPosition;
+import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.yarn.Resource;
 
 /**
@@ -36,7 +37,7 @@ public final class EFNodeUtil {
 			Resource.FLOW_STATUS.set(instance, L1seq, GlobalParam.JOB_TYPE.FULL.name(), new AtomicInteger(1));
 			Resource.FLOW_STATUS.set(instance, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(), new AtomicInteger(1));
 			String path = Common.getTaskStorePath(instance, L1seq, GlobalParam.JOB_INCREMENTINFO_PATH);
-			byte[] b = ConfigStorer.getData(path, true);
+			byte[] b = EFDataStorer.getData(path, true);
 			if (b != null && b.length > 0) {
 				String str = new String(b);
 				GlobalParam.SCAN_POSITION.put(Common.getMainName(instance, L1seq),

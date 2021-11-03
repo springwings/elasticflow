@@ -22,8 +22,8 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFTuple;
-import org.elasticflow.util.EFWriterUtil;
+import org.elasticflow.util.instance.EFTuple;
+import org.elasticflow.util.instance.EFWriterUtil;
 import org.elasticflow.writer.handler.WriterHandler;
 import org.elasticflow.yarn.Resource;
  
@@ -58,7 +58,7 @@ public abstract class WriterFlowSocket extends Flow{
 		return writeHandler;
 	}	
 	
-	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
+	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig) throws EFException{
 		if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.AB) {
 			return abMechanism(mainName,isIncrement,instanceConfig);
 		}else if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.Time) {
@@ -68,7 +68,7 @@ public abstract class WriterFlowSocket extends Flow{
 		}
 	}
 	
-	protected String normMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) { 
+	protected String normMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) throws EFException{ 
 		String iName = Common.getStoreName(mainName, "");		
 		if(this.storePositionExists(iName)==false) {
 			this.create(mainName, "", instanceConfig);
@@ -86,7 +86,7 @@ public abstract class WriterFlowSocket extends Flow{
 	 * @param instanceConfig
 	 * @return time-stamp of second
 	 */
-	protected String timeMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
+	protected String timeMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) throws EFException{
 		EFTuple<Long, Long> dTuple = EFWriterUtil.timeMechanism(instanceConfig); 
 		String iName = Common.getStoreName(mainName, String.valueOf(dTuple.v2));
 		try {			
@@ -106,7 +106,7 @@ public abstract class WriterFlowSocket extends Flow{
 	}
 	
 	/**Create storage instance*/
-	public abstract boolean create(String mainName, String storeId, InstanceConfig instanceConfig);
+	public abstract boolean create(String mainName, String storeId, InstanceConfig instanceConfig) throws EFException;
 	
 	public abstract boolean storePositionExists(String storeName);
 	
@@ -118,7 +118,7 @@ public abstract class WriterFlowSocket extends Flow{
   
 	public abstract void removeInstance(String instance, String storeId);
 	
-	protected abstract String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig);
+	protected abstract String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) throws EFException;
 	
 	public abstract void setAlias(String instance, String storeId, String aliasName); 
 	

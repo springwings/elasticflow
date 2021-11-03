@@ -9,7 +9,7 @@ package org.elasticflow.correspond;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.ConfigStorer;
+import org.elasticflow.util.instance.EFDataStorer;
  
 /**
  * Report EF machine node status.
@@ -25,28 +25,28 @@ public final class ReportStatus {
 	
 	public static void nodeConfigs(){
 		try {
-			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH)==false) {
+			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH)==false) {
 				String path = "";
 				for (String str : GlobalParam.CONFIG_PATH.split("/")) {
 					path += "/" + str;
-					ConfigStorer.createPath(path,false);
+					EFDataStorer.createPath(path,false);
 				} 
 			}
-			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH+"/INSTANCES")==false)
-				ConfigStorer.createPath(GlobalParam.CONFIG_PATH+"/INSTANCES",false);
-			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH+"/instructions.xml")==false)
-				ConfigStorer.createPath(GlobalParam.CONFIG_PATH+"/instructions.xml",true);
-			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH+"/resource.xml")==false) 
-				ConfigStorer.createPath(GlobalParam.CONFIG_PATH+"/resource.xml",true);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH+"/INSTANCES")==false)
+				EFDataStorer.createPath(GlobalParam.CONFIG_PATH+"/INSTANCES",false);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH+"/instructions.xml")==false)
+				EFDataStorer.createPath(GlobalParam.CONFIG_PATH+"/instructions.xml",true);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH+"/resource.xml")==false) 
+				EFDataStorer.createPath(GlobalParam.CONFIG_PATH+"/resource.xml",true);
 			
-			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES")==false) {
-				ConfigStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES",false);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES")==false) {
+				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES",false);
 			}
-			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP)==false) {
-				ConfigStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP,false);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP)==false) {
+				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP,false);
 			}
-			if (ConfigStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP + "/configs")==false) {
-				ConfigStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP + "/configs",true);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP + "/configs")==false) {
+				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP + "/configs",true);
 			}
 		} catch (Exception e) {
 			Common.LOG.error("environmentCheck Exception", e);

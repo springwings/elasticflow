@@ -8,8 +8,6 @@
 package org.elasticflow.node;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,13 +43,13 @@ import org.elasticflow.piper.PipePump;
 import org.elasticflow.reader.service.HttpReaderService;
 import org.elasticflow.searcher.service.SearcherService;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.ConfigStorer;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFLoader;
 import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.SystemInfoUtil;
+import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.Request;
@@ -278,7 +276,7 @@ public final class NodeMonitor {
 				GlobalParam.StartConfig.remove(rq.getParameter("k"));
 			}
 			try {
-				saveNodeConfig();
+				EFMonitorUtil.saveNodeConfig();
 				setResponse(RESPONSE_STATUS.Success, "Config set success!", null);
 			} catch (Exception e) {
 				setResponse(RESPONSE_STATUS.CodeException, "Config save Exception " + e.getMessage(), null);
@@ -445,7 +443,7 @@ public final class NodeMonitor {
 				if (rq.getParameterMap().get("set_value") != null)
 					val = rq.getParameter("set_value");
 				String instanceName;
-				String[] L1seqs = getInstanceL1seqs(instance);
+				String[] L1seqs = EFMonitorUtil.getInstanceL1seqs(instance);
 				for (String L1seq : L1seqs) {
 					instanceName = Common.getMainName(instance, L1seq);
 					GlobalParam.SCAN_POSITION.get(instanceName).batchUpdateSeqPos(val);
@@ -614,8 +612,8 @@ public final class NodeMonitor {
 						JO.put("Incremental progress",
 								"increment:" + Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()));
 					}
-					JO.put("Incremental thread status", threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
-					JO.put("Full thread status", threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
+					JO.put("Incremental thread status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
+					JO.put("Full thread status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
 				}
 				setResponse(RESPONSE_STATUS.Success, null, JO);
 			} else {
@@ -650,7 +648,7 @@ public final class NodeMonitor {
 			instance.put("WriteTo", config.getPipeParams().getWriteTo().replace(",", ";"));
 			instance.put("openTrans", config.openTrans());
 			instance.put("IsMaster", config.getPipeParams().isMaster());
-			instance.put("InstanceType", this.getInstanceType(config.getInstanceType()));
+			instance.put("InstanceType", EFMonitorUtil.getInstanceType(config.getInstanceType()));
 
 			if (rs.containsKey(config.getAlias())) {
 				rs.get(config.getAlias()).add(instance);
@@ -722,9 +720,9 @@ public final class NodeMonitor {
 	public void stopInstance(Request rq) {
 		if (EFMonitorUtil.checkParams(this, rq, "instance,type")) {
 			if (rq.getParameter("type").toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
-				controlThreadState(rq.getParameter("instance"), STATUS.Stop, false);
+				EFMonitorUtil.controlInstanceState(rq.getParameter("instance"), STATUS.Stop, false);
 			} else {
-				controlThreadState(rq.getParameter("instance"), STATUS.Stop, true);
+				EFMonitorUtil.controlInstanceState(rq.getParameter("instance"), STATUS.Stop, true);
 			}
 			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have stopped!", null);
 		}
@@ -738,9 +736,9 @@ public final class NodeMonitor {
 	public void resumeInstance(Request rq) {
 		if (EFMonitorUtil.checkParams(this, rq, "instance,type")) {
 			if (rq.getParameter("type").toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
-				controlThreadState(rq.getParameter("instance"), STATUS.Ready, false);
+				EFMonitorUtil.controlInstanceState(rq.getParameter("instance"), STATUS.Ready, false);
 			} else {
-				controlThreadState(rq.getParameter("instance"), STATUS.Ready, true);
+				EFMonitorUtil.controlInstanceState(rq.getParameter("instance"), STATUS.Ready, true);
 			}
 			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have resumed!", null);
 		}
@@ -754,7 +752,7 @@ public final class NodeMonitor {
 	 */
 	public void reloadInstanceConfig(Request rq) {
 		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
-			controlThreadState(rq.getParameter("instance"), STATUS.Stop, true);
+			EFMonitorUtil.controlInstanceState(rq.getParameter("instance"), STATUS.Stop, true);
 			int type = Resource.nodeConfig.getInstanceConfigs().get(rq.getParameter("instance")).getInstanceType();
 			String instanceConfig = rq.getParameter("instance");
 			if (type > 0) {
@@ -774,8 +772,8 @@ public final class NodeMonitor {
 				Resource.nodeConfig.loadConfig(instanceConfig, false);
 				Resource.FlOW_CENTER.removeInstance(rq.getParameter("instance"), true, true);
 			}
-			rebuildFlowGovern(instanceConfig);
-			controlThreadState(rq.getParameter("instance"), STATUS.Ready, true);
+			EFMonitorUtil.rebuildFlowGovern(instanceConfig);
+			EFMonitorUtil.controlInstanceState(rq.getParameter("instance"), STATUS.Ready, true);
 			setResponse(RESPONSE_STATUS.Success, rq.getParameter("instance") + " reload Config Success!", null);
 		}
 	}
@@ -805,12 +803,10 @@ public final class NodeMonitor {
 			InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instanceName);
 			if (instanceConfig.checkStatus())
 				EFNodeUtil.initParams(instanceConfig);
-			rebuildFlowGovern(rq.getParameter("instance"));
-			GlobalParam.StartConfig.setProperty("instances",
-					(GlobalParam.StartConfig.getProperty("instances") + "," + rq.getParameter("instance")).replace(",,",
-							","));
+			EFMonitorUtil.rebuildFlowGovern(rq.getParameter("instance"));
+			EFMonitorUtil.addConfigInstances(rq.getParameter("instance"));
 			try {
-				saveNodeConfig();
+				EFMonitorUtil.saveNodeConfig();
 				setResponse(RESPONSE_STATUS.Success, instanceName + " add to node " + GlobalParam.IP + " Success!",
 						null);
 			} catch (Exception e) {
@@ -838,12 +834,12 @@ public final class NodeMonitor {
 					return;
 				}
 				if (instance.equals(_instance) || instanceConfig.getAlias().equals(_instance)) {
-					String[] L1seqs = getInstanceL1seqs(instance);
+					String[] L1seqs = EFMonitorUtil.getInstanceL1seqs(instance);
 					if (L1seqs.length == 0) {
 						L1seqs = new String[1];
 						L1seqs[0] = GlobalParam.DEFAULT_RESOURCE_SEQ;
 					}
-					controlThreadState(instance, STATUS.Stop, true);
+					EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
 					for (String L1seq : L1seqs) {
 						String tags = Common.getResourceTag(instance, L1seq, GlobalParam.FLOW_TAG._DEFAULT.name(),
 								false);
@@ -856,7 +852,7 @@ public final class NodeMonitor {
 							wfs.REALEASE(false, false);
 						}
 					}
-					controlThreadState(instance, STATUS.Ready, true);
+					EFMonitorUtil.controlInstanceState(instance, STATUS.Ready, true);
 				}
 			}
 			if (state) {
@@ -870,7 +866,7 @@ public final class NodeMonitor {
 	private boolean updateResourceXml(String resourcetype, JSONObject resourceData, boolean isDel) {
 		try {
 			String pondPath = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
-			byte[] resourceXml = ConfigStorer.getData(pondPath, false);
+			byte[] resourceXml = EFDataStorer.getData(pondPath, false);
 			String rname = resourceData.getString("name");
 			SAXReader reader = new SAXReader();
 			Document doc = reader.read(new ByteArrayInputStream(resourceXml));
@@ -921,7 +917,7 @@ public final class NodeMonitor {
 					element.setText(entry.getValue().toString());
 				}
 			}
-			ConfigStorer.setData(pondPath, Common.formatXml(doc));
+			EFDataStorer.setData(pondPath, Common.formatXml(doc));
 		} catch (Exception e) {
 			Common.LOG.error(e.getMessage());
 			setResponse(RESPONSE_STATUS.CodeException, "save Resource Exception " + e.getMessage(), null);
@@ -936,136 +932,18 @@ public final class NodeMonitor {
 	 * @param instance
 	 */
 	private void removeInstance(String instance) {
-		controlThreadState(instance, STATUS.Stop, true);
+		EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
 		if (Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType() > 0) {
 			Resource.FLOW_INFOS.remove(instance, JOB_TYPE.FULL.name());
 			Resource.FLOW_INFOS.remove(instance, JOB_TYPE.INCREMENT.name());
 		}
 		Resource.nodeConfig.getInstanceConfigs().remove(instance);
 		Resource.FlOW_CENTER.removeInstance(instance, true, true);
-		String tmp = "";
-		for (String str : GlobalParam.StartConfig.getProperty("instances").split(",")) {
-			String[] s = str.split(":");
-			if (s[0].equals(instance))
-				continue;
-			tmp += str + ",";
-		}
-		GlobalParam.StartConfig.setProperty("instances", tmp);
+		EFMonitorUtil.removeConfigInstance(instance);
 		try {
-			saveNodeConfig();
+			EFMonitorUtil.saveNodeConfig();
 		} catch (Exception e) {
 			setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
 		}
-	}
-
-	private String getInstanceType(int type) {
-		if (type > 0) {
-			String res = "";
-			if ((type & INSTANCE_TYPE.Trans.getVal()) > 0)
-				res += INSTANCE_TYPE.Trans.name() + ",";
-			if ((type & INSTANCE_TYPE.WithCompute.getVal()) > 0)
-				res += INSTANCE_TYPE.WithCompute.name();
-			return res;
-		} else {
-			return INSTANCE_TYPE.Blank.name();
-		}
-	}
-
-	/**
-	 * control current run thread, prevent error data write
-	 * 
-	 * @param instance    multi-instances seperate with ","
-	 * @param state
-	 * @param isIncrement control thread type
-	 */
-	private void controlThreadState(String instance, STATUS state, boolean isIncrement) {
-		if ((GlobalParam.SERVICE_LEVEL & 6) == 0) {
-			return;
-		}
-		JOB_TYPE controlType = GlobalParam.JOB_TYPE.FULL;
-		if (isIncrement)
-			controlType = GlobalParam.JOB_TYPE.INCREMENT;
-
-		for (String inst : instance.split(",")) {
-			Common.LOG.info("Instance " + inst + " waitting set state " + state + " ...");
-			int waittime = 0;
-			String[] seqs = getInstanceL1seqs(instance);
-			for (String seq : seqs) {
-				if (Common.checkFlowStatus(inst, seq, controlType, STATUS.Running)) {
-					Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
-					while (!Common.checkFlowStatus(inst, seq, controlType, STATUS.Ready)) {
-						try {
-							waittime++;
-							Thread.sleep(300);
-							if (waittime > 200) {
-								break;
-							}
-						} catch (InterruptedException e) {
-							Common.LOG.error("currentThreadState InterruptedException", e);
-						}
-					}
-				}
-				Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
-				if (Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Termination, state, true)) {
-					Common.LOG.info("Instance " + inst + " success set state " + state);
-				} else {
-					Common.LOG.info("Instance " + inst + " fail set state " + state);
-				}
-			}
-		}
-	}
-
-	private String threadStateInfo(String instance, JOB_TYPE type) {
-		String[] seqs = getInstanceL1seqs(instance);
-		StringBuilder sb = new StringBuilder();
-		for (String seq : seqs) {
-			sb.append(seq.length() == 0 ? "MAIN " : seq + ":");
-			if (Common.checkFlowStatus(instance, seq, type, STATUS.Stop))
-				sb.append("Stop,");
-			if (Common.checkFlowStatus(instance, seq, type, STATUS.Ready))
-				sb.append("Ready,");
-			if (Common.checkFlowStatus(instance, seq, type, STATUS.Running))
-				sb.append("Running,");
-			if (Common.checkFlowStatus(instance, seq, type, STATUS.Termination))
-				sb.append("Termination,");
-			sb.append(" ;");
-		}
-		return sb.toString();
-	}
-
-	private String[] getInstanceL1seqs(String instance) {
-		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instance);
-		WarehouseParam dataMap = Resource.nodeConfig.getNoSqlWarehouse()
-				.get(instanceConfig.getPipeParams().getReadFrom());
-		if (dataMap == null) {
-			dataMap = Resource.nodeConfig.getSqlWarehouse().get(instanceConfig.getPipeParams().getReadFrom());
-		}
-		String[] seqs;
-		if (dataMap == null) {
-			seqs = new String[] {};
-		} else {
-			seqs = dataMap.getL1seq();
-		}
-
-		if (seqs.length == 0) {
-			seqs = new String[1];
-			seqs[0] = GlobalParam.DEFAULT_RESOURCE_SEQ;
-		}
-		return seqs;
-	}
-
-	private void rebuildFlowGovern(String index) {
-		for (String inst : index.split(",")) {
-			String[] strs = inst.split(":");
-			if (strs.length < 1)
-				continue;
-			Resource.FlOW_CENTER.addFlowGovern(strs[0], Resource.nodeConfig.getInstanceConfigs().get(strs[0]), true);
-		}
-	}
-
-	private void saveNodeConfig() throws Exception {
-		OutputStream os = null;
-		os = new FileOutputStream(GlobalParam.configPath.replace("file:", "") + "/config.properties");
-		GlobalParam.StartConfig.store(os, "Auto Save Config with no format,BeCarefull!");
 	}
 }

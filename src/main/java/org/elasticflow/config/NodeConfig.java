@@ -26,7 +26,7 @@ import org.elasticflow.param.pipe.InstructionParam;
 import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.param.warehouse.WarehouseSqlParam;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.ConfigStorer;
+import org.elasticflow.util.instance.EFDataStorer;
 
 /**
  * The EF node configuration control center,
@@ -151,7 +151,7 @@ public class NodeConfig {
 	private void parseInstructionsFile(String src) {
 		InputStream in = null;
 		try {
-			byte[] bt = ConfigStorer.getData(src, false);
+			byte[] bt = EFDataStorer.getData(src, false);
 			if (bt.length <= 0)
 				return;
 			in = new ByteArrayInputStream(bt, 0, bt.length);
@@ -179,7 +179,7 @@ public class NodeConfig {
 	private void parsePondFile(String src) {
 		InputStream in = null;
 		try {
-			byte[] bt = ConfigStorer.getData(src, false);
+			byte[] bt = EFDataStorer.getData(src, false);
 			if (bt.length <= 0)
 				return;
 			in = new ByteArrayInputStream(bt, 0, bt.length);

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
  * Side Public License, v 1.
  */
-package org.elasticflow.util;
+package org.elasticflow.util.instance;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -13,6 +13,7 @@ import java.time.ZoneOffset;
 import java.util.TimeZone;
 
 import org.elasticflow.config.GlobalParam.MECHANISM;
+import org.elasticflow.util.Common;
 import org.elasticflow.config.InstanceConfig;
 
 /**

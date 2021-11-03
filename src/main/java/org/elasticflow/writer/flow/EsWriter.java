@@ -159,7 +159,7 @@ public class EsWriter extends WriterFlowSocket {
 					getESC().getClient().update(_UR, RequestOptions.DEFAULT);
 				}
 			} else {
-				IndexRequest _IR = new IndexRequest(instance);
+				IndexRequest _IR = new IndexRequest(instance).id(id);
 				_IR.source(cbuilder);
 				if (routing.length() > 0)
 					_IR.routing(routing.toString());
@@ -206,7 +206,7 @@ public class EsWriter extends WriterFlowSocket {
 	}
 
 	@Override
-	public boolean create(String instance, String storeId, InstanceConfig instanceConfig) {
+	public boolean create(String instance, String storeId, InstanceConfig instanceConfig) throws EFException{
 		String iName = Common.getStoreName(instance, storeId);
 		try {
 			log.info("create Instance " + iName);
@@ -217,7 +217,7 @@ public class EsWriter extends WriterFlowSocket {
 								Integer.parseInt(instanceConfig.getExternConfigs().get("number_of_shards")))
 						.put("index.number_of_replicas",
 								Integer.parseInt(instanceConfig.getExternConfigs().get("number_of_replicas")))); 
-				_CIR.mapping(this.getSettingMap(instanceConfig.getWriteFields()));
+				_CIR.mapping(this.getSettingMap(instanceConfig));
 				CreateIndexResponse createIndexResponse = getESC().getClient().indices().create(_CIR,
 						RequestOptions.DEFAULT);
 				log.info("create new Instance " + iName + " response isAcknowledged:"
@@ -226,8 +226,7 @@ public class EsWriter extends WriterFlowSocket {
 			return true;
 		} catch (Exception e) {
 			reconn = true;
-			log.error("create Instance " + iName+" failed.", e);
-			return false;
+			throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);			
 		}
 	}
 
@@ -304,12 +303,13 @@ public class EsWriter extends WriterFlowSocket {
 		return map;
 	}
 
-	private Map<String, Object> getSettingMap(Map<String, EFField> transParams) {
+	private Map<String, Object> getSettingMap(InstanceConfig instanceConfig) {
 		Map<String, Object> settingMap = new HashMap<String, Object>();
 		Map<String, Object> root_map = new HashMap<String, Object>();
 		try {
-			for (Map.Entry<String, EFField> e : transParams.entrySet()) {
-				Map<String, Object> map = new HashMap<String, Object>();
+			Map<String, Object> map = new HashMap<String, Object>();
+			for (Map.Entry<String, EFField> e : instanceConfig.getWriteFields().entrySet()) {
+				map = new HashMap<String, Object>();
 				EFField p = e.getValue();
 				if (p.getName() == null)
 					continue;
@@ -340,7 +340,7 @@ public class EsWriter extends WriterFlowSocket {
 		return root_map;
 	}
 
-	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
+	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) throws EFException {
 		boolean a_alias = false;
 		boolean b_alias = false;
 		String select = "";
@@ -406,7 +406,7 @@ public class EsWriter extends WriterFlowSocket {
 				}
 			}
 		} catch (Exception e) {
-			log.error("abMechanism Exception", e);
+			throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
 		}
 		return select;
 	}

@@ -13,6 +13,9 @@ import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ELEVEL;
+import org.elasticflow.util.EFException.ETYPE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -172,7 +175,7 @@ public class Pond extends Instruction {
 	 * @param args
 	 *            parameter order is: String mainName, boolean isIncrement 
 	 */
-	public static String getNewStoreId(Context context, Object[] args) {
+	public static String getNewStoreId(Context context, Object[] args) throws EFException{
 		String storeId = null;
 		if (!isValid(2, args)) {
 			log.error("getNewStoreId parameter not match!");
@@ -187,6 +190,7 @@ public class Pond extends Instruction {
 				storeId = context.getWriter().getNewStoreId(mainName, isIncrement, context.getInstanceConfig());
 			} catch (Exception e) {
 				release = true;
+				throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
 			}finally {
 				context.getWriter().REALEASE(false,release);
 			}

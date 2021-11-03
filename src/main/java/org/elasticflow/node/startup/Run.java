@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.elasticflow.computer.service.ComputerService;
 import org.elasticflow.config.GlobalParam;
@@ -23,6 +22,7 @@ import org.elasticflow.config.GlobalParam.NODE_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.config.NodeConfig;
 import org.elasticflow.correspond.ReportStatus;
+import org.elasticflow.model.FormatProperties;
 import org.elasticflow.node.FlowCenter;
 import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.node.RecoverMonitor;
@@ -32,11 +32,11 @@ import org.elasticflow.searcher.service.SearcherService;
 import org.elasticflow.service.EFMonitor;
 import org.elasticflow.task.FlowTask;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.ConfigStorer;
 import org.elasticflow.util.EFLoc;
 import org.elasticflow.util.EFNodeUtil;
-import org.elasticflow.util.ZKUtil;
 import org.elasticflow.util.email.EFEmailSender;
+import org.elasticflow.util.instance.EFDataStorer;
+import org.elasticflow.util.instance.ZKUtil;
 import org.elasticflow.yarn.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -106,7 +106,7 @@ public final class Run {
 		Resource.nodeMonitor = nodeMonitor; 
 		
 		if (initInstance) {
-			ConfigStorer.setData(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP + "/configs", JSON.toJSONString(GlobalParam.StartConfig)); 
+			EFDataStorer.setData(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP + "/configs", JSON.toJSONString(GlobalParam.StartConfig)); 
 			Resource.nodeConfig = NodeConfig.getInstance(GlobalParam.StartConfig.getProperty("pond"), GlobalParam.StartConfig.getProperty("instructions"));
 			Resource.nodeConfig.init(GlobalParam.StartConfig.getProperty("instances"),GlobalParam.SERVICE_LEVEL);
 			Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
@@ -141,9 +141,9 @@ public final class Run {
 
 	public void loadGlobalConfig(String path, boolean fromZk) {
 		try {
-			GlobalParam.StartConfig = new Properties();
+			GlobalParam.StartConfig = new FormatProperties();
 			if (fromZk) {
-				JSONObject _JO = (JSONObject) JSON.parse(ConfigStorer.getData(path, false));
+				JSONObject _JO = (JSONObject) JSON.parse(EFDataStorer.getData(path, false));
 				for (Map.Entry<String, Object> row : _JO.entrySet()) {
 					GlobalParam.StartConfig.setProperty(row.getKey(), String.valueOf(row.getValue()));
 				}

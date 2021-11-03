@@ -16,7 +16,7 @@ import org.elasticflow.model.searcher.SearcherResult;
 import org.elasticflow.model.searcher.SearcherSolrModel;
 import org.elasticflow.model.searcher.SearcherVearchModel;
 import org.elasticflow.searcher.handler.SearcherHandler;
-import org.elasticflow.util.SearchParamUtil;
+import org.elasticflow.util.instance.SearchParamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

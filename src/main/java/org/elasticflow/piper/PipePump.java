@@ -33,7 +33,7 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
-import org.elasticflow.util.PipeNormsUtil;
+import org.elasticflow.util.instance.PipeNormsUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.writer.handler.WriterHandler;
 import org.elasticflow.yarn.Resource;

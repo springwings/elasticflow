@@ -17,7 +17,7 @@ import org.elasticflow.param.end.SearcherParam;
 import org.elasticflow.param.end.WriterParam;
 import org.elasticflow.param.pipe.PipeParam;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.ConfigStorer;
+import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.yarn.Resource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -168,7 +168,7 @@ public class InstanceConfig {
 	private void loadInstanceConfig() {
 		InputStream in;
 		try {
-			byte[] bt = ConfigStorer.getData(this.filename,false);
+			byte[] bt = EFDataStorer.getData(this.filename,false);
 			if (bt.length <= 0)
 				return;
 			in = new ByteArrayInputStream(bt, 0, bt.length);
