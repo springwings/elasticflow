@@ -50,7 +50,8 @@ public class FilesConnection extends EFConnectionSocket<RandomAccessFile> {
 	@Override
 	public boolean free() {
 		try {
-			this.conn.close();
+			if(this.conn!=null)
+				this.conn.close();
 			this.conn = null;
 		} catch (Exception e) {
 			 log.error("free connect Exception,",e);

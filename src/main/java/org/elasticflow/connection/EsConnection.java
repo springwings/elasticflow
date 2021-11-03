@@ -88,7 +88,8 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 	@Override
 	public boolean free() {
 		try {
-			this.conn.close();
+			if(this.conn!=null)
+				this.conn.close();
 			this.ESC = null;
 			this.conn = null;
 			this.connectParams = null;

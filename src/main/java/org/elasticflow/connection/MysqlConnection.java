@@ -69,7 +69,8 @@ public class MysqlConnection extends EFConnectionSocket<Connection> {
 	@Override
 	public boolean free() {
 		try {
-			this.conn.close();
+			if(this.conn!=null)
+				this.conn.close();
 			this.conn = null;
 			this.connectParams = null;
 		} catch (Exception e) {

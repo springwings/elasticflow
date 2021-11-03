@@ -70,7 +70,8 @@ public class ZookeeperConnection extends EFConnectionSocket<ZooKeeper> {
 	@Override
 	public boolean free() {
 		try {
-			this.conn.close();
+			if(this.conn!=null)
+				this.conn.close();
 			this.conn = null;
 			this.connectParams = null;
 		} catch (Exception e) {

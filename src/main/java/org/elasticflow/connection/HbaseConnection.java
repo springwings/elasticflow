@@ -93,8 +93,10 @@ public class HbaseConnection extends EFConnectionSocket<Table>{
 	@Override
 	public boolean free() {
 		try {
-			this.conn.close();
-			this.Hconn.close();
+			if(this.conn!=null)
+				this.conn.close();
+			if(this.Hconn!=null)
+				this.Hconn.close();
 			this.conn = null;
 			this.connectParams = null;
 		} catch (Exception e) {

@@ -14,6 +14,7 @@ import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.connection.EFConnectionSocket;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
+import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory; 
 /**
@@ -36,6 +37,8 @@ public abstract class Flow {
 	
 	/**Transient performance,the amount of data processed per second in batch**/
 	protected long PERFORMANCE=-1;
+	
+	private int clearConnNum = 0; 
 	
 	public long lastGetPageTime = Common.getNow();
 	
@@ -77,11 +80,22 @@ public abstract class Flow {
 		return this.instanceConfig;
 	}
 	
+	private void stopTask() {
+		clearConnNum+=1;
+		if(clearConnNum>2) {
+			clearConnNum = 0;
+			log.warn("The resource is unstable. Try to stop the task of "+this.instanceConfig.getName());
+			Resource.FlOW_CENTER.removeInstance(this.instanceConfig.getName(), true, true);
+		}
+	}
+	
 	public void REALEASE(boolean isMonopoly,boolean releaseConn) { 
 		if(isMonopoly==false || releaseConn) { 
 			synchronized(retainer){ 
-				if(releaseConn)
+				if(releaseConn) {
+					this.stopTask();
 					retainer.set(0);
+				}					
 				if(retainer.decrementAndGet()<=0){
 					EFConnectionPool.freeConn(this.EFConn, this.poolName,releaseConn);  
 					this.EFConn = null;
@@ -121,6 +135,7 @@ public abstract class Flow {
 	}
 	
 	public void clearPool() {
+		this.stopTask();
 		EFConnectionPool.clearPool(this.poolName);
 	}
 }
