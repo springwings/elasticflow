@@ -37,6 +37,8 @@ public final class GlobalParam {
 	
 	public static String GROUPID;
 	
+	public static int CONNECTION_POOL_SIZE = 5;
+	
 	public static String NODEID = System.getProperty("nodeid");;
 	
 	public static final String PROJ = "ElasticFlow";
@@ -91,7 +93,6 @@ public final class GlobalParam {
 	
 	public static String IP; 
 	
-	public static int POOL_SIZE = 6;
 	/** CONNECT_EXPIRED is milliseconds time */
 	public static int CONNECT_EXPIRED = 7200000;   
 	

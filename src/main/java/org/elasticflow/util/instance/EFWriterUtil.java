@@ -25,29 +25,30 @@ import org.elasticflow.config.InstanceConfig;
  * @modify 2021-01-10 09:45
  */
 public class EFWriterUtil {
-	
-	public static int getWriterSocketIndex(InstanceConfig instanceConfig,int socketNum,long outTime) {
-		if(instanceConfig.getPipeParams().getWriteMechanism()==MECHANISM.AB) {
+
+	public static int getWriterSocketIndex(InstanceConfig instanceConfig, int socketNum, long outTime) {
+		if (instanceConfig.getPipeParams().getWriteMechanism() == MECHANISM.AB) {
 			return 0;
-		}else { 
+		} else {
 			int[] timeSpan = instanceConfig.getPipeParams().getKeepNums();
 			LocalDate lnow;
-			if(outTime>0) {
-				lnow = Instant.ofEpochMilli(outTime*1000).atZone(ZoneOffset.ofHours(8)).toLocalDate();
-			}else {
+			if (outTime > 0) {
+				lnow = Instant.ofEpochMilli(outTime * 1000).atZone(ZoneOffset.ofHours(8)).toLocalDate();
+			} else {
 				lnow = LocalDate.now();
-			}				
+			}
 			if (timeSpan[0] == 0) {
-				return lnow.getDayOfMonth()%socketNum;
-			}else {
-				return lnow.getMonthValue()%socketNum;
+				return lnow.getDayOfMonth() % socketNum;
+			} else {
+				return lnow.getMonthValue() % socketNum;
 			}
 		}
 	}
-	
+
 	/**
-	 * writer with time Mechanism store id 
-	 * It only supports load balancing etc. at the top level of the resource
+	 * writer with time Mechanism store id It only supports load balancing etc. at
+	 * the top level of the resource
+	 * 
 	 * @param instanceConfig
 	 * @return store id and need remove store-id
 	 */
@@ -68,6 +69,6 @@ public class EFWriterUtil {
 		}
 		Long keepLastTime = foward / 1000;
 		return new EFTuple<Long, Long>(storeId, keepLastTime);
-	}
+	} 
 
 }

@@ -15,7 +15,7 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
-import org.elasticflow.util.instance.PipeNormsUtil;
+import org.elasticflow.util.instance.PipeUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +53,7 @@ public class MysqlWriter extends WriterFlowSocket {
 			if (!ISLINK())
 				return;
 			if (this.isBatch) {
-				sqlData.add(PipeNormsUtil.getWriteSqlTailData(table, unit, transParams));
+				sqlData.add(PipeUtil.getWriteSqlTailData(table, unit, transParams));
 				if (currentSec - Common.getNow() > flushSecond || sqlData.size() > flushSize) {
 					StringBuffer sb = new StringBuffer();
 					for (String s : sqlData) {
@@ -62,10 +62,10 @@ public class MysqlWriter extends WriterFlowSocket {
 					sqlData.clear();
 					currentSec = Common.getNow();
 					this.insertDb(
-							PipeNormsUtil.getWriteSqlHead(table, unit, transParams) + sb.substring(0, sb.length() - 1));
+							PipeUtil.getWriteSqlHead(table, unit, transParams) + sb.substring(0, sb.length() - 1));
 				}
 			} else {
-				this.insertDb(PipeNormsUtil.getWriteSql(table, unit, transParams));
+				this.insertDb(PipeUtil.getWriteSql(table, unit, transParams));
 			}
 		} catch (Exception e) { 
 			throw new EFException(e,ELEVEL.Dispose);

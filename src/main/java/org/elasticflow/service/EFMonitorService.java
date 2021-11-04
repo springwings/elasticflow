@@ -31,7 +31,7 @@ import org.mortbay.jetty.handler.AbstractHandler;
  * @version 4.0
  * @date 2018-10-26 09:13
  */
-public class EFMonitor {  
+public class EFMonitorService {  
 	
 	public void start() {
 		HashMap<String, Object> serviceParams = new HashMap<String, Object>();

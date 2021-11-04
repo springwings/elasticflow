@@ -108,12 +108,12 @@ public class RestService extends ComputerFlowSocket {
 					JSONObject _postdt = (JSONObject) post_data.clone();
 					@SuppressWarnings("unchecked")
 					ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();
+					if(this.apiBlockingQueue.isEmpty())
+						this.incrementBlockTime();
 					this.executorService.execute(() -> {
 						String api = null;
 						JSONObject tmp = null;
 						try { 
-							if(this.apiBlockingQueue.size()==0)
-								this.incrementBlockTime();
 							api = this.apiBlockingQueue.take();
 							tmp = JSONObject.parseObject(this.sentRequest(_postdt, api));
 							this.apiBlockingQueue.put(api);
@@ -136,12 +136,12 @@ public class RestService extends ComputerFlowSocket {
 				JSONObject _postdt = (JSONObject) post_data.clone();
 				@SuppressWarnings("unchecked")
 				ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();
+				if(this.apiBlockingQueue.isEmpty())
+					this.incrementBlockTime();
 				this.executorService.execute(() -> {
 					String api = null;
 					JSONObject tmp = null;
 					try {
-						if(this.apiBlockingQueue.size()==0)
-							this.incrementBlockTime();
 						api = this.apiBlockingQueue.take();
 						tmp = JSONObject.parseObject(this.sentRequest(_postdt, api));
 						this.apiBlockingQueue.put(api);

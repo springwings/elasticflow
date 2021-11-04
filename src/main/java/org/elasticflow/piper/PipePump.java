@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.computer.ComputerFlowSocket;
@@ -33,7 +32,7 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
-import org.elasticflow.util.instance.PipeNormsUtil;
+import org.elasticflow.util.instance.PipeUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.writer.handler.WriterHandler;
 import org.elasticflow.yarn.Resource;
@@ -250,11 +249,11 @@ public final class PipePump extends Instruction {
 			long start = Common.getNow();
 			AtomicInteger total = new AtomicInteger(0);
 			if (getInstanceConfig().getPipeParams().isMultiThread()) {
-				CountDownLatch synThreads = new CountDownLatch(estimateThreads(pageNum)); 
+				CountDownLatch taskSingal = new CountDownLatch(PipeUtil.estimateThreads(pageNum)); 
 				Resource.ThreadPools.submitJobPage(
-						new PumpThread(synThreads, task, storeId, pageList, writeTo, total));
+						new PumpThread(taskSingal, task, storeId, pageList, writeTo, total));
 				try { 
-					synThreads.await();
+					taskSingal.await();
 				} catch (Exception e) {
 					throw Common.getException(e);
 				}
@@ -297,8 +296,8 @@ public final class PipePump extends Instruction {
 			processPos++;
 			Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name())
 					.put(task.getInstance() + task.getL2seq(), processPos + "/" + pageList.size());
-			String dataScanDSL = PipeNormsUtil.fillParam(task.getScanParam().getDataScanDSL(),
-					PipeNormsUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
+			String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(),
+					PipeUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
 							task.getEndTime(), scanField));
 			if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination)) {
 				break;
@@ -318,7 +317,7 @@ public final class PipePump extends Instruction {
 				startId = dataBoundary;
 			}
 			
-			if (this.scanPosCompare(rState.getReaderScanStamp(), GlobalParam.SCAN_POSITION.get(task.getInstance()).
+			if (PipeUtil.scanPosCompare(rState.getReaderScanStamp(), GlobalParam.SCAN_POSITION.get(task.getInstance()).
 					getL2SeqPos(task.getL2seq()))) {
 				GlobalParam.SCAN_POSITION.get(task.getInstance()).updateL2SeqPos(task.getL2seq(),
 						rState.getReaderScanStamp());
@@ -327,18 +326,7 @@ public final class PipePump extends Instruction {
 				Common.saveTaskInfo(task.getInstance(), task.getL1seq(), storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
 			}
 		}
-	}
- 
-	boolean scanPosCompare(String s1,String s2) {
-		if (s1.compareTo(s2) > 0 || 
-				s1.length()>s2.length()) 
-			return true;
-		return false;
-	}
-	
-	int estimateThreads(int numJobs) {
-		return (int) (1 + Math.log(numJobs));
-	}
+	} 
 
 	/**
 	 * use thread pool run task,it is not a steady mode if task fail will need re-do
@@ -358,19 +346,19 @@ public final class PipePump extends Instruction {
 		final AtomicInteger total;
 
 		Task task;
-		CountDownLatch synThreads;
+		CountDownLatch taskSingal;
 		ReaderState rState = null;
 		AtomicInteger processPos = new AtomicInteger(0);
 		String startId = "0";
 		ConcurrentLinkedDeque<String> pageList;
 		boolean isUpdate = getInstanceConfig().getPipeParams().getWriteType().equals("increment") ? true : false;
 
-		public PumpThread(CountDownLatch synThreads, Task task, String storeId, ConcurrentLinkedDeque<String> pageList,
+		public PumpThread(CountDownLatch taskSingal, Task task, String storeId, ConcurrentLinkedDeque<String> pageList,
 				String writeTo, AtomicInteger total) {
 			this.pageList = pageList;
 			this.writeTo = writeTo;
 			this.storeId = storeId;
-			this.synThreads = synThreads;
+			this.taskSingal = taskSingal;
 			this.pageSize = pageList.size();
 			this.total = total;
 			this.task = task;
@@ -381,7 +369,7 @@ public final class PipePump extends Instruction {
 		}
 
 		public int needThreads() {
-			return estimateThreads(this.pageSize);
+			return PipeUtil.estimateThreads(this.pageSize);
 		}
 
 		@Override
@@ -392,8 +380,8 @@ public final class PipePump extends Instruction {
 				processPos.incrementAndGet();
 				Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name())
 						.put(task.getInstance() + task.getL2seq(), processPos + "/" + this.pageSize);
-				String dataScanDSL = PipeNormsUtil.fillParam(task.getScanParam().getDataScanDSL(),
-						PipeNormsUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
+				String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(),
+						PipeUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
 								task.getEndTime(), task.getScanParam().getScanField()));
 				if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(),
 						STATUS.Termination)) {
@@ -436,19 +424,7 @@ public final class PipePump extends Instruction {
 							GlobalParam.JOB_INCREMENTINFO_PATH);
 				}
 			}
-			synThreads.countDown();
-		}
-
-	}
-
-	public class tasks extends RecursiveTask<Integer> {
-
-		private static final long serialVersionUID = -607427644538793287L;
-
-		@Override
-		protected Integer compute() {
-			int total = 0;
-			return total;
+			taskSingal.countDown();
 		}
 
 	}

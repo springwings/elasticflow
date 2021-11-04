@@ -24,7 +24,7 @@ import org.elasticflow.model.reader.PipeDataUnit;
  * @date 2018-11-02 13:53
  * @modify 2019-01-16 13:54
  */
-public final class PipeNormsUtil {
+public final class PipeUtil {
 	
 	/**
 	 * 
@@ -110,5 +110,23 @@ public final class PipeNormsUtil {
 		}
 		sql = sql + "(" + columns.substring(0, columns.length() - 1) + ") VALUES ";
 		return sql;
+	}
+	
+
+	public static boolean scanPosCompare(String s1, String s2) {
+		if (s1.compareTo(s2) > 0 || s1.length() > s2.length())
+			return true;
+		return false;
+	}
+	
+	public static int estimateThreads(int taskPageNum) {
+		int num = (int) (taskPageNum/3);
+		if(num<2) {
+			return 1;
+		}else if (num>20) {
+			return 20;
+		}else {
+			return num;
+		}
 	}
 }

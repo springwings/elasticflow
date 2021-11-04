@@ -13,9 +13,10 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.elasticflow.config.GlobalParam;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ELEVEL;
 
 /**
  * Running thread resources center
@@ -26,19 +27,22 @@ import org.elasticflow.util.Common;
  */
 public class ThreadPools {
 
-	private ArrayBlockingQueue<PipePump.PumpThread> waitJob = new ArrayBlockingQueue<>(GlobalParam.POOL_SIZE * 10);
+	private ArrayBlockingQueue<PipePump.PumpThread> waitJob;
 
-	private int maxThreadNums = GlobalParam.POOL_SIZE;
+	private ThreadPoolExecutor cachedThreadPool;
+	
+	public ThreadPools(int instanceNum) {
+		waitJob = new ArrayBlockingQueue<>(instanceNum * 5);
+		cachedThreadPool = new ThreadPoolExecutor(instanceNum, instanceNum*3,
+	            1L, TimeUnit.SECONDS,
+	            new SynchronousQueue<Runnable>());
+	}
 
-	ThreadPoolExecutor cachedThreadPool = new ThreadPoolExecutor(maxThreadNums, maxThreadNums,
-            1L, TimeUnit.SECONDS,
-            new SynchronousQueue<Runnable>());
-
-	public void submitJobPage(PipePump.PumpThread jobPage) {
+	public void submitJobPage(PipePump.PumpThread jobPage) throws EFException {
 		try {
 			waitJob.put(jobPage);
 		} catch (Exception e) {
-			Common.LOG.error("SubmitJobPage Exception", e);
+			throw new EFException(e,ELEVEL.Dispose);
 		}
 	}
 	

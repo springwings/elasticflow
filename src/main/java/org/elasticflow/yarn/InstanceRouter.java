@@ -14,5 +14,5 @@ package org.elasticflow.yarn;
  * @date 2018-12-04 13:39
  */
 public class InstanceRouter {
-
+		
 }

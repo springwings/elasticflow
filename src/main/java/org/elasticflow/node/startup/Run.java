@@ -29,7 +29,7 @@ import org.elasticflow.node.RecoverMonitor;
 import org.elasticflow.node.SocketCenter;
 import org.elasticflow.reader.service.HttpReaderService;
 import org.elasticflow.searcher.service.SearcherService;
-import org.elasticflow.service.EFMonitor;
+import org.elasticflow.service.EFMonitorService;
 import org.elasticflow.task.FlowTask;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFLoc;
@@ -38,6 +38,8 @@ import org.elasticflow.util.email.EFEmailSender;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.util.instance.ZKUtil;
 import org.elasticflow.yarn.Resource;
+import org.elasticflow.yarn.ThreadPools;
+import org.elasticflow.yarn.monitor.ResourceMonitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -94,7 +96,7 @@ public final class Run {
 		GlobalParam.VERSION = version;
 		GlobalParam.GROUPID = groupId;
 		GlobalParam.DEBUG = debug;
-		GlobalParam.POOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("pool_size"));
+		GlobalParam.CONNECTION_POOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("pool_size"));
 		GlobalParam.WRITE_BATCH = GlobalParam.StartConfig.getProperty("write_batch").equals("false") ? false : true;
 		GlobalParam.SEND_EMAIL = GlobalParam.StartConfig.getProperty("send_mail").equals("false") ? false : true;
 		GlobalParam.SERVICE_LEVEL = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
@@ -105,6 +107,7 @@ public final class Run {
 		Resource.FlOW_CENTER = flowCenter;
 		Resource.nodeMonitor = nodeMonitor; 
 		
+		int openThreadPools = 0;
 		if (initInstance) {
 			EFDataStorer.setData(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP + "/configs", JSON.toJSONString(GlobalParam.StartConfig)); 
 			Resource.nodeConfig = NodeConfig.getInstance(GlobalParam.StartConfig.getProperty("pond"), GlobalParam.StartConfig.getProperty("instructions"));
@@ -114,8 +117,14 @@ public final class Run {
 				InstanceConfig instanceConfig = entry.getValue();
 				if (instanceConfig.checkStatus())
 					EFNodeUtil.initParams(instanceConfig);
+				if(instanceConfig.getPipeParams().isMultiThread())
+					openThreadPools +=1;
 			}
 		}
+		if(openThreadPools>0) {
+			Resource.ThreadPools = new ThreadPools(openThreadPools);
+			Resource.ThreadPools.start();
+		}			
 	}
 
 	public void startService() {
@@ -123,7 +132,6 @@ public final class Run {
 			searcherService.start(); 
 		
 		if ((GlobalParam.SERVICE_LEVEL & 2) > 0) {
-			Resource.ThreadPools.start();
 			Resource.FlOW_CENTER.buildRWFlow();
 		} 
 		
@@ -136,7 +144,10 @@ public final class Run {
 		if ((GlobalParam.SERVICE_LEVEL & 8) > 0)
 			Resource.FlOW_CENTER.startInstructionsJob();
 		
-		new EFMonitor().start();
+		if ((GlobalParam.SERVICE_LEVEL & 32) > 0)
+			ResourceMonitor.start();
+		
+		new EFMonitorService().start();
 	}
 
 	public void loadGlobalConfig(String path, boolean fromZk) {

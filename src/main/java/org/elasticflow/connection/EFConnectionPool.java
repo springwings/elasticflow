@@ -104,7 +104,7 @@ public final class EFConnectionPool {
 	}
 
 	private void createPools(String poolName, ConnectParams params) {
-		ConnectionPool pool = new ConnectionPool(GlobalParam.POOL_SIZE, poolName, params);
+		ConnectionPool pool = new ConnectionPool(GlobalParam.CONNECTION_POOL_SIZE, poolName, params);
 		this._pools.put(poolName, pool);
 		log.info("success create pool " + poolName);
 	}

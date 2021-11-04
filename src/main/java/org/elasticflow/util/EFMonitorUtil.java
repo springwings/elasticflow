@@ -2,17 +2,23 @@ package org.elasticflow.util;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.GlobalParam.STATUS;
+import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.param.warehouse.WarehouseParam;
+import org.elasticflow.param.warehouse.WarehouseSqlParam;
+import org.elasticflow.piper.PipePump;
 import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.Request;
+
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * @author chengwen
@@ -21,6 +27,8 @@ import org.mortbay.jetty.Request;
  */
 
 public class EFMonitorUtil {
+	
+	public static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	public static boolean checkParams(NodeMonitor obj,Request rq,String checkParams){ 
 		for(String param:checkParams.split(",")) {
@@ -186,5 +194,186 @@ public class EFMonitorUtil {
 				}
 			}
 		}
+	}
+	
+/**
+ * get instance detail informations.
+ * @param instance
+ * @param type 
+ * 1 pool status ++
+ * 2 Performance status ++
+ * 4 task status ++
+ * @return
+ */
+	public static JSONObject getInstanceInfo(String instance,int type) {
+		JSONObject JO = new JSONObject();
+		if (Resource.nodeConfig.getInstanceConfigs().containsKey(instance)) {			
+			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
+			JSONObject Reader = new JSONObject();
+			JSONObject Writer = new JSONObject();
+			JSONObject Computer = new JSONObject();
+			JSONObject Searcher = new JSONObject();
+			JSONObject Task = new JSONObject();
+			if((type&1)>0) {
+				if (Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
+					String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom())
+							.getPoolName(null); 
+					Reader.put("Pool Status", EFConnectionPool.getStatus(poolname));
+				} else if (Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
+					WarehouseSqlParam ws = Resource.nodeConfig.getSqlWarehouse()
+							.get(config.getPipeParams().getReadFrom());
+					String poolname = "";
+					if (ws.getL1seq() != null && ws.getL1seq().length > 0) {
+						for (String seq : ws.getL1seq()) {
+							poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom())
+									.getPoolName(seq);
+							Reader.put("Seq(" + seq + ") Pool Status", JSONObject.parse(EFConnectionPool.getStatus(poolname)));
+						}
+					} else {
+						poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom())
+								.getPoolName(null);
+						Reader.put("Pool Status", JSONObject.parse(EFConnectionPool.getStatus(poolname)));
+					}
+				}
+				
+
+				if (Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
+					String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getWriteTo())
+							.getPoolName(null);
+					Writer.put("Pool Status", EFConnectionPool.getStatus(poolname));
+				} else if (Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
+					String poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getWriteTo())
+							.getPoolName(null);
+					Writer.put("Pool Status", EFConnectionPool.getStatus(poolname));
+				}
+
+				if ((GlobalParam.SERVICE_LEVEL & 1) > 0) {
+					String searchFrom = config.getPipeParams().getSearchFrom();
+					String searcherInfo = "";
+					if (config.getPipeParams().getWriteTo() != null
+							&& config.getPipeParams().getWriteTo().equals(searchFrom)) {
+						searcherInfo = "Pool (Default Writer) Status";
+					} else {
+						searcherInfo = "Pool Status";
+					}
+
+					if (Resource.nodeConfig.getNoSqlWarehouse().get(searchFrom) != null) {
+						String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(searchFrom).getPoolName(null);
+						Searcher.put(searcherInfo, EFConnectionPool.getStatus(poolname));
+					} else {
+						String poolname = Resource.nodeConfig.getSqlWarehouse().get(searchFrom).getPoolName(null);
+						Searcher.put(searcherInfo, EFConnectionPool.getStatus(poolname));
+					}
+				}
+			}
+			
+			if((type&2)>0) {
+				String[] L1seqs = Common.getL1seqs(config, true);
+				for (String seq : L1seqs) {
+					PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(config.getName(), seq, false,
+							GlobalParam.FLOW_TAG._DEFAULT.name());
+					String appendPipe = "";
+					if (seq != "") {
+						appendPipe = "Seq(" + seq + ") ";
+					}
+					Reader.put(appendPipe + "Load", pipePump.getReader().getLoad());
+					Reader.put(appendPipe + "Performance", pipePump.getReader().getPerformance());
+					if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {
+						Computer.put(appendPipe + "Load", pipePump.getComputer().getLoad());
+						Computer.put(appendPipe + "Performance", pipePump.getComputer().getPerformance());
+						Computer.put(appendPipe + "Blocked Time", pipePump.getComputer().getBlockTime());
+					}
+					if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
+						Writer.put(appendPipe + "Load", pipePump.getWriter().getLoad());
+						Writer.put(appendPipe + "Performance", pipePump.getWriter().getPerformance());
+					}
+				}
+			}			
+				
+			if((type&4)>0) {
+				if (config.openTrans()) {
+					WarehouseParam wsp = null;
+					wsp = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom());
+					if (wsp == null)
+						wsp = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom());
+					if (wsp.getL1seq().length > 0) {
+						StringBuilder sb = new StringBuilder();
+						StringBuilder fullstate = new StringBuilder();
+						for (String seq : wsp.getL1seq()) {
+							String strs = GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, seq))
+									.getPositionString();
+							if (strs == null)
+								continue;
+							sb.append("\r\n;(" + seq + ") "
+									+ GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, seq)).getStoreId()
+									+ ":");
+
+							for (String str : strs.split(",")) {
+								String update;
+								String[] dstr = str.split(":");
+								if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
+									update = dstr[0] + ":"
+											+ (SDF.format(dstr[1].length() < 12 ? Long.valueOf(dstr[1] + "000")
+													: Long.valueOf(dstr[1])))
+											+ " (" + dstr[1] + ")";
+								} else {
+									update = str;
+								}
+								sb.append(", ");
+								sb.append(update);
+							}
+							fullstate.append(seq + ":" + Common.getFullStartInfo(instance, seq) + "; ");
+						}
+						Task.put("Incremental storage status", sb);
+						Task.put("Full storage status", fullstate);
+					} else {
+						String strs = GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null))
+								.getPositionString();
+						if (strs.length() > 0) {
+							StringBuilder stateStr = new StringBuilder();
+							if (strs.split(",").length > 0) {
+								for (String tm : strs.split(",")) {
+									String[] dstr = tm.split(":");
+									if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
+										stateStr.append(dstr[0] + ":"
+												+ SDF.format(tm.length() < 12 ? Long.valueOf(dstr[1] + "000")
+														: Long.valueOf(dstr[1])));
+										stateStr.append(" (").append(tm).append(")");
+									} else {
+										stateStr.append(tm);
+									}
+									stateStr.append(", ");
+								}
+							}
+							Task.put("Incremental storage status",
+									GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null)).getStoreId()
+											+ ":" + stateStr.toString());
+						}
+						Task.put("Full storage status", Common.getFullStartInfo(instance, null));
+					}
+					if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.FULL.name())
+							|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()).size() == 0) {
+						Task.put("Full progress", new JSONObject().put("full","none"));
+					} else {
+						Task.put("Full progress",  new JSONObject().put("full",Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name())));
+					}
+					if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.INCREMENT.name())
+							|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()).size() == 0) {
+						Task.put("Incremental progress", "increment:none");
+					} else {
+						Task.put("Incremental progress",
+								"increment:" + Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()));
+					}
+					Task.put("Incremental thread status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
+					Task.put("Full thread status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
+				}	
+			}
+			JO.put("Reader", Reader);
+			JO.put("Computer", Computer);
+			JO.put("Writer", Writer);
+			JO.put("Searcher", Searcher);
+			JO.put("Task", Task);
+		} 		
+		return JO;
 	}
 }
