@@ -401,6 +401,7 @@ public final class PipePump extends Instruction {
 								task.getJobType().name(), writeTo, storeId, task.getL2seq(), pagedata,
 								",process:" + processPos + "/" + pageSize, isUpdate, false);
 					} catch (EFException e) {
+						log.error("PumpThread",e);
 						task.taskState.setEfException(e);
 					}finally{
 						if (rState==null || rState.isStatus() == false) {

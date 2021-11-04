@@ -171,7 +171,7 @@ public class PipeParam {
 		return async;
 	}
 	
-	public void setReadPageSize(int readPageSize) {
+	public void setReadPageSize(String readPageSize) {
 		this.readPageSize = Integer.valueOf(readPageSize);
 	}
 

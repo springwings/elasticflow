@@ -9,7 +9,7 @@ package org.elasticflow.yarn;
 
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -27,15 +27,20 @@ import org.elasticflow.util.EFException.ELEVEL;
  */
 public class ThreadPools {
 
-	private ArrayBlockingQueue<PipePump.PumpThread> waitJob;
+	private LinkedBlockingQueue<PipePump.PumpThread> waitJob;
 
 	private ThreadPoolExecutor cachedThreadPool;
 	
+	private static int maxnum = 60;
+	
 	public ThreadPools(int instanceNum) {
-		waitJob = new ArrayBlockingQueue<>(instanceNum * 5);
-		cachedThreadPool = new ThreadPoolExecutor(instanceNum, instanceNum*3,
+		waitJob = new LinkedBlockingQueue<>();
+		int maxthread = instanceNum*3;
+		if(maxthread>maxnum)
+			maxthread = maxnum;
+		cachedThreadPool = new ThreadPoolExecutor(instanceNum+2, maxthread,
 	            1L, TimeUnit.SECONDS,
-	            new SynchronousQueue<Runnable>());
+	            new ArrayBlockingQueue<Runnable>(maxthread*10));
 	}
 
 	public void submitJobPage(PipePump.PumpThread jobPage) throws EFException {
@@ -62,7 +67,7 @@ public class ThreadPools {
 				while(true) {
 					PipePump.PumpThread job = waitJob.take(); 
 					for(int i=0;i<job.needThreads();i++)
-						cachedThreadPool.execute(job);
+						cachedThreadPool.execute(job);						
 				}  
 			} catch (Exception e) {
 				Common.LOG.error("Start ThreadPools Exception", e);
