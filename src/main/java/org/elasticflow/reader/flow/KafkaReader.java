@@ -145,11 +145,8 @@ public class KafkaReader extends ReaderFlowSocket {
 		boolean releaseConn = false;
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>(); 
 		try {
-			int totalNum = 0;
-			while(totalNum==0) {
-				this.records = conn.poll(Duration.ofMillis(readms));
-				totalNum = this.records.count();
-			}			
+			this.records = conn.poll(Duration.ofMillis(readms));
+			int totalNum = this.records.count();		
 			if (totalNum > 0) {
 				int pagenum = (int) Math.ceil(totalNum / pageSize);
 				int curentpage = 0;
@@ -161,7 +158,6 @@ public class KafkaReader extends ReaderFlowSocket {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 			releaseConn = true;
 			page.clear();
 			REALEASE(false, releaseConn);

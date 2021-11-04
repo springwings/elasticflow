@@ -38,6 +38,9 @@ public abstract class Flow {
 	/**Transient performance,the amount of data processed per second in batch**/
 	protected long PERFORMANCE=-1;
 	
+	/**Batch processing blocking statistics**/
+	protected long BLOCKTIME = 0;
+	
 	private int clearConnNum = 0; 
 	
 	public long lastGetPageTime = Common.getNow();
@@ -125,6 +128,10 @@ public abstract class Flow {
 		return this.PERFORMANCE;
 	}
 	
+	public long getBlockTime() {
+		return this.BLOCKTIME;
+	} 
+	
 	public void setLoad(long load) {
 		this.LOAD = load;
 	}
@@ -134,6 +141,14 @@ public abstract class Flow {
 			this.PERFORMANCE = performance;
 	}
 	
+	public void resetBlockTime() {
+		this.BLOCKTIME = 0;
+	}
+	
+	public void incrementBlockTime() {
+		this.BLOCKTIME+=1;
+	}
+	 
 	public void clearPool() {
 		this.stopTask();
 		EFConnectionPool.clearPool(this.poolName);
