@@ -3,7 +3,7 @@ package org.elasticflow.connection;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
+import org.elasticflow.param.warehouse.WarehouseParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +29,10 @@ public class SolrConnection extends EFConnectionSocket<CloudSolrClient> {
 
 	@Override
 	protected boolean connect(END_TYPE endType) {
-		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
-		if (wnp.getPath() != null) {
+		WarehouseParam wnp = this.connectParams.getWhp();
+		if (wnp.getHost() != null) {
 			if (!status()) {
-				this.conn = new CloudSolrClient(wnp.getPath());
+				this.conn = new CloudSolrClient(wnp.getHost());
 				this.conn.setZkClientTimeout(zkClientTimeout);
 				this.conn.setZkConnectTimeout(zkConnectTimeout);
 			}

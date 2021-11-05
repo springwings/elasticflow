@@ -122,9 +122,11 @@ public final class Run {
 			}
 		}
 		if(openThreadPools>0) {
-			Resource.ThreadPools = new ThreadPools(openThreadPools);
+			Resource.ThreadPools = new ThreadPools(openThreadPools,true);
 			Resource.ThreadPools.start();
-		}			
+		}else {
+			Resource.ThreadPools = new ThreadPools(Integer.parseInt(GlobalParam.StartConfig.getProperty("default_threadpool_size")),false);
+		}
 	}
 
 	public void startService() {
@@ -195,19 +197,24 @@ public final class Run {
 	}
 	
 	private void start() {
-		loadGlobalConfig(this.startConfigPath, false);
-		loadPlugins(GlobalParam.pluginPath);
-		GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");		
-		ReportStatus.nodeConfigs();
-		if (!GlobalParam.StartConfig.containsKey("node_type"))
-			GlobalParam.StartConfig.setProperty("node_type", NODE_TYPE.slave.name());
-		if (GlobalParam.StartConfig.get("node_type").equals(NODE_TYPE.backup.name())) {
-			init(false);
-			recoverMonitor.start();
-		} else {
-			init(true);
-			startService();
-		}
+		try {
+			loadGlobalConfig(this.startConfigPath, false);
+			loadPlugins(GlobalParam.pluginPath);
+			GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");		
+			ReportStatus.nodeConfigs();
+			if (!GlobalParam.StartConfig.containsKey("node_type"))
+				GlobalParam.StartConfig.setProperty("node_type", NODE_TYPE.slave.name());
+			if (GlobalParam.StartConfig.get("node_type").equals(NODE_TYPE.backup.name())) {
+				init(false);
+				recoverMonitor.start();
+			} else {
+				init(true);
+				startService();
+			}
+		} catch (Exception e) {
+	    	Common.LOG.error("Init System Exception", e);
+	    	Common.stopSystem();
+	    } 
 		Common.LOG.info("ElasticFlow Start Success!");
 	} 
 

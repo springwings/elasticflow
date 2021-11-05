@@ -4,7 +4,6 @@ import java.io.RandomAccessFile;
 
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +23,7 @@ public class FilesConnection extends EFConnectionSocket<RandomAccessFile> {
 	protected boolean connect(END_TYPE endType) {
 		if (!status()) {
 			try { 
-				this.conn = new RandomAccessFile(String.valueOf(((WarehouseNosqlParam) connectParams.getWhp()).getPath()), "rw");
+				this.conn = new RandomAccessFile(String.valueOf(connectParams.getWhp().getHost()), "rw");
 				return true;
 			} catch (Exception e) {
 				 log.error("connect Exception,",e);

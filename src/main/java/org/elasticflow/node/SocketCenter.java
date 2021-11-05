@@ -216,11 +216,9 @@ public final class SocketCenter {
 
 	public WarehouseParam getWHP(String destination) {
 		WarehouseParam param = null;
-		if (Resource.nodeConfig.getNoSqlWarehouse().containsKey(destination)) {
-			param = Resource.nodeConfig.getNoSqlWarehouse().get(destination);
-		} else if (Resource.nodeConfig.getSqlWarehouse().containsKey(destination)) {
-			param = Resource.nodeConfig.getSqlWarehouse().get(destination);
-		}
+		if (Resource.nodeConfig.getWarehouse().containsKey(destination)) {
+			param = Resource.nodeConfig.getWarehouse().get(destination);
+		} 
 		return param;
 	}
 }

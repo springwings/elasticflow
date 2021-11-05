@@ -51,25 +51,23 @@ public class TaskControl extends Instruction{
 			EFDataStorer.setData(Common.getTaskStorePath(context.getInstanceConfig().getName(), L1seq,GlobalParam.JOB_FULLINFO_PATH),saveInfo);
 		} 
 	}
-	
+		
 	public static void setIncrementPosition(Context context, Object[] args) {
 		if (!isValid(1, args)) {
 			Common.LOG.error("moveFullPosition parameter not match!");
 			return ;
-		} 
-		
+		} 		
 		int position = Integer.parseInt(args[0].toString());
 		String[] seqs = Common.getL1seqs(context.getInstanceConfig(),true);  
-		String instanceName;
 		for(String seq:seqs) {  
-			instanceName = Common.getMainName(context.getInstanceConfig().getName(), seq);
-			List<String> table_seq = context.getInstanceConfig().getReadParams().getSeq();
+			List<String> L2Seq = context.getInstanceConfig().getReadParams().getL2Seq();
 			PipePump transDataFlow = Resource.SOCKET_CENTER.getPipePump(context.getInstanceConfig().getName(), seq, false,GlobalParam.FLOW_TAG._DEFAULT.name());
 			String storeId = Common.getStoreId(context.getInstanceConfig().getName(), seq, transDataFlow, true, false);
 			if(storeId==null)
 				break;
-			for(String tseq:table_seq) {
-				GlobalParam.SCAN_POSITION.get(instanceName).updateL2SeqPos(tseq, String.valueOf(position));  
+			for(String tseq:L2Seq) {
+				GlobalParam.SCAN_POSITION.get(context.getInstanceConfig().getName()).updateLSeqPos(
+						Common.getLseq(seq, tseq), String.valueOf(position));  
 			}
 			Common.saveTaskInfo(context.getInstanceConfig().getName(), seq, storeId,GlobalParam.JOB_INCREMENTINFO_PATH);
 		}

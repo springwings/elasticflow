@@ -13,7 +13,6 @@ import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.param.warehouse.WarehouseParam;
-import org.elasticflow.param.warehouse.WarehouseSqlParam;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.Request;
@@ -100,11 +99,8 @@ public class EFMonitorUtil {
 	
 	public static String[] getInstanceL1seqs(String instance) {
 		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instance);
-		WarehouseParam dataMap = Resource.nodeConfig.getNoSqlWarehouse()
+		WarehouseParam dataMap = Resource.nodeConfig.getWarehouse()
 				.get(instanceConfig.getPipeParams().getReadFrom());
-		if (dataMap == null) {
-			dataMap = Resource.nodeConfig.getSqlWarehouse().get(instanceConfig.getPipeParams().getReadFrom());
-		}
 		String[] seqs;
 		if (dataMap == null) {
 			seqs = new String[] {};
@@ -215,34 +211,26 @@ public class EFMonitorUtil {
 			JSONObject Searcher = new JSONObject();
 			JSONObject Task = new JSONObject();
 			if((type&1)>0) {
-				if (Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
-					String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom())
-							.getPoolName(null); 
-					Reader.put("Pool Status", EFConnectionPool.getStatus(poolname));
-				} else if (Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
-					WarehouseSqlParam ws = Resource.nodeConfig.getSqlWarehouse()
+				if (Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
+					WarehouseParam ws = Resource.nodeConfig.getWarehouse()
 							.get(config.getPipeParams().getReadFrom());
 					String poolname = "";
-					if (ws.getL1seq() != null && ws.getL1seq().length > 0) {
+					if (ws.getL1seq().length > 0) {
 						for (String seq : ws.getL1seq()) {
-							poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom())
+							poolname = Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom())
 									.getPoolName(seq);
-							Reader.put("Seq(" + seq + ") Pool Status", JSONObject.parse(EFConnectionPool.getStatus(poolname)));
+							Reader.put("Seq(" + seq + ") Pool Status", EFConnectionPool.getStatus(poolname));
 						}
 					} else {
-						poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom())
+						poolname = Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom())
 								.getPoolName(null);
-						Reader.put("Pool Status", JSONObject.parse(EFConnectionPool.getStatus(poolname)));
+						Reader.put("Pool Status", EFConnectionPool.getStatus(poolname));
 					}
 				}
 				
 
-				if (Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
-					String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getWriteTo())
-							.getPoolName(null);
-					Writer.put("Pool Status", EFConnectionPool.getStatus(poolname));
-				} else if (Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
-					String poolname = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getWriteTo())
+				if (Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
+					String poolname = Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getWriteTo())
 							.getPoolName(null);
 					Writer.put("Pool Status", EFConnectionPool.getStatus(poolname));
 				}
@@ -255,15 +243,10 @@ public class EFMonitorUtil {
 						searcherInfo = "Pool (Default Writer) Status";
 					} else {
 						searcherInfo = "Pool Status";
-					}
-
-					if (Resource.nodeConfig.getNoSqlWarehouse().get(searchFrom) != null) {
-						String poolname = Resource.nodeConfig.getNoSqlWarehouse().get(searchFrom).getPoolName(null);
-						Searcher.put(searcherInfo, EFConnectionPool.getStatus(poolname));
-					} else {
-						String poolname = Resource.nodeConfig.getSqlWarehouse().get(searchFrom).getPoolName(null);
-						Searcher.put(searcherInfo, EFConnectionPool.getStatus(poolname));
-					}
+					}					
+					String poolname = Resource.nodeConfig.getWarehouse().get(searchFrom).getPoolName(null);
+					Searcher.put(searcherInfo, EFConnectionPool.getStatus(poolname));
+					
 				}
 			}
 			
@@ -292,20 +275,17 @@ public class EFMonitorUtil {
 				
 			if((type&4)>0) {
 				if (config.openTrans()) {
-					WarehouseParam wsp = null;
-					wsp = Resource.nodeConfig.getSqlWarehouse().get(config.getPipeParams().getReadFrom());
-					if (wsp == null)
-						wsp = Resource.nodeConfig.getNoSqlWarehouse().get(config.getPipeParams().getReadFrom());
+					WarehouseParam wsp = Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom());
 					if (wsp.getL1seq().length > 0) {
 						StringBuilder sb = new StringBuilder();
 						StringBuilder fullstate = new StringBuilder();
 						for (String seq : wsp.getL1seq()) {
-							String strs = GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, seq))
+							String strs = GlobalParam.SCAN_POSITION.get(instance)
 									.getPositionString();
 							if (strs == null)
 								continue;
 							sb.append("\r\n;(" + seq + ") "
-									+ GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, seq)).getStoreId()
+									+ GlobalParam.SCAN_POSITION.get(instance).getStoreId()
 									+ ":");
 
 							for (String str : strs.split(",")) {
@@ -327,7 +307,7 @@ public class EFMonitorUtil {
 						Task.put("Incremental storage status", sb);
 						Task.put("Full storage status", fullstate);
 					} else {
-						String strs = GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null))
+						String strs = GlobalParam.SCAN_POSITION.get(instance)
 								.getPositionString();
 						if (strs.length() > 0) {
 							StringBuilder stateStr = new StringBuilder();
@@ -346,7 +326,7 @@ public class EFMonitorUtil {
 								}
 							}
 							Task.put("Incremental storage status",
-									GlobalParam.SCAN_POSITION.get(Common.getStoreName(instance, null)).getStoreId()
+									GlobalParam.SCAN_POSITION.get(instance).getStoreId()
 											+ ":" + stateStr.toString());
 						}
 						Task.put("Full storage status", Common.getFullStartInfo(instance, null));

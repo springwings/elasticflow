@@ -134,7 +134,7 @@ public class HttpReaderService {
 							try {
 								String writeTo = pipePump.getInstanceConfig().getPipeParams().getInstanceName();
 								if (writeTo == null) {
-									writeTo = Common.getMainName(instance, seq);
+									writeTo = Common.getInstanceId(instance, seq);
 								} 
 								DataPage pagedata = this.getPageData(RR.getParam("data"), keycolumn, updatecolumn,
 										pipePump.getInstanceConfig().getWriteFields());

@@ -19,23 +19,23 @@ public class EFState<T> extends ConcurrentHashMap<String,T>{
 	} 
 	
 	public void set(String instance,String L1seq,T dt) {
-		put(Common.getMainName(instance, L1seq), dt);
+		put(Common.getInstanceId(instance, L1seq), dt);
 	} 
 	
 	public void set(String instance,String L1seq,String tag,T dt) {
-		put(Common.getMainName(instance, L1seq)+tag, dt);
+		put(Common.getInstanceId(instance, L1seq)+tag, dt);
 	}  
 	
 	public T get(String instance,String L1seq) {
-		return get(Common.getMainName(instance, L1seq));
+		return get(Common.getInstanceId(instance, L1seq));
 	}
 	
 	public T get(String instance,String L1seq,String tag) {
-		return get(Common.getMainName(instance, L1seq)+tag);
+		return get(Common.getInstanceId(instance, L1seq)+tag);
 	}
 	
 	public boolean containsKey(String instance,String L1seq) {
-		return containsKey(Common.getMainName(instance, L1seq));
+		return containsKey(Common.getInstanceId(instance, L1seq));
 	}
 	 
 }

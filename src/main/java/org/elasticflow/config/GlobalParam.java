@@ -115,7 +115,7 @@ public final class GlobalParam {
 	};
 	
 	public static enum RESOURCE_TYPE{
-		NOSQL,SQL,INSTRUCTION
+		WAREHOUSE,INSTRUCTION
 	};
 	 
 	/**writer parameters Mechanism: AB Active/standby switching mode,

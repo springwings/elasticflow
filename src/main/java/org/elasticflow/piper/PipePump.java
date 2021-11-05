@@ -28,6 +28,7 @@ import org.elasticflow.model.reader.ReaderState;
 import org.elasticflow.node.CPU;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.handler.ReaderHandler;
+import org.elasticflow.task.TaskThread;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
@@ -50,61 +51,71 @@ public final class PipePump extends Instruction {
 
 	private final static Logger log = LoggerFactory.getLogger("PipePump");
 
-	public static PipePump getInstance(ReaderFlowSocket reader,
-			ComputerFlowSocket computer,List<WriterFlowSocket> writer, InstanceConfig instanceConfig) {
-		return new PipePump(reader, computer,writer, instanceConfig);
+	public static PipePump getInstance(ReaderFlowSocket reader, ComputerFlowSocket computer,
+			List<WriterFlowSocket> writer, InstanceConfig instanceConfig) {
+		return new PipePump(reader, computer, writer, instanceConfig);
 	}
 
-	private PipePump(ReaderFlowSocket reader, ComputerFlowSocket computer,
-			List<WriterFlowSocket> writer,InstanceConfig instanceConfig) {
-		CPU.prepare(getID(), instanceConfig, writer, reader,computer);		
+	private PipePump(ReaderFlowSocket reader, ComputerFlowSocket computer, List<WriterFlowSocket> writer,
+			InstanceConfig instanceConfig) {
+		CPU.prepare(getID(), instanceConfig, writer, reader, computer);
 		try {
 			if (instanceConfig.getReadParams().getHandler() != null) {
 				try {
 					reader.setReaderHandler((ReaderHandler) Class.forName(instanceConfig.getReadParams().getHandler())
 							.getDeclaredConstructor().newInstance());
 				} catch (Exception e) {
-					if(GlobalParam.PLUGIN_CLASS_LOADER!=null) {
-						reader.setReaderHandler((ReaderHandler) Class.forName(instanceConfig.getReadParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
-								.getDeclaredConstructor().newInstance());
-					}else {
+					if (GlobalParam.PLUGIN_CLASS_LOADER != null) {
+						reader.setReaderHandler(
+								(ReaderHandler) Class
+										.forName(instanceConfig.getReadParams().getHandler(), true,
+												GlobalParam.PLUGIN_CLASS_LOADER)
+										.getDeclaredConstructor().newInstance());
+					} else {
 						throw new EFException(e, ELEVEL.Termination);
-					}						
-				}				
+					}
+				}
 			}
-			reader.setInstanceConfig(instanceConfig); 
-			if(computer != null) {
+			reader.setInstanceConfig(instanceConfig);
+			if (computer != null) {
 				if (instanceConfig.getComputeParams().getHandler() != null) {
 					try {
-						computer.setComputerHandler((ComputerHandler) Class.forName(instanceConfig.getComputeParams().getHandler())
-								.getDeclaredConstructor().newInstance());
+						computer.setComputerHandler(
+								(ComputerHandler) Class.forName(instanceConfig.getComputeParams().getHandler())
+										.getDeclaredConstructor().newInstance());
 					} catch (Exception e) {
-						if(GlobalParam.PLUGIN_CLASS_LOADER!=null) {
-							computer.setComputerHandler((ComputerHandler) Class.forName(instanceConfig.getComputeParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
-									.getDeclaredConstructor().newInstance());
-						}else {
+						if (GlobalParam.PLUGIN_CLASS_LOADER != null) {
+							computer.setComputerHandler(
+									(ComputerHandler) Class
+											.forName(instanceConfig.getComputeParams().getHandler(), true,
+													GlobalParam.PLUGIN_CLASS_LOADER)
+											.getDeclaredConstructor().newInstance());
+						} else {
 							throw new EFException(e, ELEVEL.Termination);
 						}
-					}			
+					}
 				}
 				computer.setInstanceConfig(instanceConfig);
-			}			
-			
+			}
+
 			if (instanceConfig.getWriterParams().getHandler() != null) {
-				for(WriterFlowSocket wfs : writer) {
+				for (WriterFlowSocket wfs : writer) {
 					try {
 						wfs.setWriteHandler((WriterHandler) Class.forName(instanceConfig.getWriterParams().getHandler())
 								.getDeclaredConstructor().newInstance());
 					} catch (Exception e) {
-						if(GlobalParam.PLUGIN_CLASS_LOADER!=null) {
-							wfs.setWriteHandler((WriterHandler) Class.forName(instanceConfig.getWriterParams().getHandler(),true,GlobalParam.PLUGIN_CLASS_LOADER)
-									.getDeclaredConstructor().newInstance());
-						}else {
+						if (GlobalParam.PLUGIN_CLASS_LOADER != null) {
+							wfs.setWriteHandler(
+									(WriterHandler) Class
+											.forName(instanceConfig.getWriterParams().getHandler(), true,
+													GlobalParam.PLUGIN_CLASS_LOADER)
+											.getDeclaredConstructor().newInstance());
+						} else {
 							throw new EFException(e, ELEVEL.Termination);
 						}
-					}	
+					}
 					wfs.setInstanceConfig(instanceConfig);
-				}							
+				}
 			}
 		} catch (Exception e) {
 			log.error("PipePump init Exception,", e);
@@ -114,6 +125,7 @@ public final class PipePump extends Instruction {
 
 	/**
 	 * Job running entry
+	 * 
 	 * @param instance
 	 * @param storeId
 	 * @param L1seq
@@ -124,22 +136,26 @@ public final class PipePump extends Instruction {
 	public void run(String instance, String storeId, String L1seq, boolean isFull, boolean writeInSamePosition)
 			throws EFException {
 		JOB_TYPE job_type;
-		String mainName = Common.getMainName(instance, L1seq);
-		String writeTo = writeInSamePosition ? getInstanceConfig().getPipeParams().getInstanceName() : mainName;
+		String instanceId = Common.getInstanceId(instance, L1seq);
+		String writeInstanceName = writeInSamePosition ? getInstanceConfig().getPipeParams().getInstanceName()
+				: instance;
 		if (isFull) {
 			job_type = JOB_TYPE.FULL;
 		} else {
 			job_type = JOB_TYPE.INCREMENT;
 		}
-		List<String> L2seqs = getInstanceConfig().getReadParams().getSeq().size() > 0
-				? getInstanceConfig().getReadParams().getSeq()
+		Task task = Task.getInstance(instanceId, instance, L1seq, job_type, getInstanceConfig(), null);
+
+		List<String> L2seqs = getInstanceConfig().getReadParams().getL2Seq().size() > 0
+				? getInstanceConfig().getReadParams().getL2Seq()
 				: Arrays.asList("");
 		if (!Resource.FLOW_INFOS.containsKey(instance, job_type.name())) {
 			Resource.FLOW_INFOS.set(instance, job_type.name(), new HashMap<String, String>());
 		}
-		Resource.FLOW_INFOS.get(instance, job_type.name()).put(instance + " seqs nums", String.valueOf(L2seqs.size()));
-		Task task = Task.getInstance(instance, L1seq, job_type, getInstanceConfig(), null);
-		processFlow(task, mainName, storeId, L2seqs, writeTo, writeInSamePosition);
+		Resource.FLOW_INFOS.get(instance, job_type.name()).put(instanceId + " L2seqs nums",
+				String.valueOf(L2seqs.size()));
+
+		processFlow(task, instance, storeId, L2seqs, writeInstanceName, writeInSamePosition);
 		Resource.FLOW_INFOS.get(instance, job_type.name()).clear();
 		if (isFull) {
 			if (writeInSamePosition) {
@@ -147,7 +163,7 @@ public final class PipePump extends Instruction {
 				synchronized (Resource.FLOW_INFOS.get(destination, GlobalParam.FLOWINFO.MASTER.name())) {
 					String remainJobs = Resource.FLOW_INFOS.get(destination, GlobalParam.FLOWINFO.MASTER.name())
 							.get(GlobalParam.FLOWINFO.FULL_JOBS.name());
-					remainJobs = remainJobs.replace(mainName, "").trim();
+					remainJobs = remainJobs.replace(instance, "").trim();
 					Resource.FLOW_INFOS.get(destination, GlobalParam.FLOWINFO.MASTER.name())
 							.put(GlobalParam.FLOWINFO.FULL_JOBS.name(), remainJobs);
 					if (remainJobs.length() == 0) {
@@ -167,15 +183,15 @@ public final class PipePump extends Instruction {
 	public ReaderFlowSocket getReader() {
 		return CPU.getContext(getID()).getReader();
 	}
-	
+
 	public ComputerFlowSocket getComputer() {
 		return CPU.getContext(getID()).getComputer();
 	}
-	
+
 	public WriterFlowSocket getWriter(Long outTime) {
 		return CPU.getContext(getID()).getWriter(outTime);
 	}
-	
+
 	public WriterFlowSocket getWriter() {
 		return CPU.getContext(getID()).getWriter();
 	}
@@ -191,25 +207,24 @@ public final class PipePump extends Instruction {
 	 * @param masterControl
 	 * @throws EFException
 	 */
-	private void processFlow(Task task, String mainName, String storeId, List<String> L2seqs, String writeTo,
+	private void processFlow(Task task, String instance, String storeId, List<String> L2seqs, String writeInstanceName,
 			boolean writeInSamePosition) throws EFException {
 		for (String L2seq : L2seqs) {
 			try {
 				task.setL2seq(L2seq);
-				Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name()).put(task.getInstance() + L2seq,
+				Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name()).put(task.getId() + L2seq,
 						"start count page...");
 				ConcurrentLinkedDeque<String> pageList = this.getPageLists(task);
 				if (pageList == null)
 					throw new EFException("Reader page split exception!", ELEVEL.Termination);
-				processListsPages(task, writeTo, pageList, storeId);
-
+				processListsPages(task, writeInstanceName, pageList, storeId);
 			} catch (EFException e) {
 				if (task.getJobType().equals(JOB_TYPE.FULL) && !writeInSamePosition) {
 					for (int t = 0; t < 5; t++) {
 						getWriter().PREPARE(false, false);
 						if (getWriter().ISLINK()) {
 							try {
-								getWriter().removeInstance(mainName, storeId);
+								getWriter().removeInstance(instance, storeId);
 							} finally {
 								getWriter().REALEASE(false, false);
 							}
@@ -220,52 +235,57 @@ public final class PipePump extends Instruction {
 				if (e.getErrorType().equals(ETYPE.WRITE_POS_NOT_FOUND)) {
 					throw e;
 				} else {
-					log.error("[" + task.getJobType().name() + " " + mainName + L2seq + "_" + storeId + " ERROR]", e);
+					log.error("[" + task.getJobType().name() + " " + instance + L2seq + "_" + storeId + " ERROR]", e);
 					Resource.mailSender.sendHtmlMailBySynchronizationMode(" [EFLOWS] " + GlobalParam.RUN_ENV,
-							"Job " + mainName + " " + task.getJobType().name() + " Has stopped!");
+							"Job " + instance + " " + task.getJobType().name() + " Has stopped!");
 				}
 				Common.processErrorLevel(e);
 			}
 		}
 	}
 
-	private void processListsPages(Task task, String writeTo, ConcurrentLinkedDeque<String> pageList, String storeId)
-			throws EFException {
-		String mainName = Common.getMainName(task.getInstance(), task.getL1seq());
+	private void processListsPages(Task task, String writeInstanceName, ConcurrentLinkedDeque<String> pageList,
+			String storeId) throws EFException {
+		String instanceId = Common.getInstanceId(task.getInstance(), task.getL1seq());
 		int pageNum = pageList.size();
 		if (pageNum == 0) {
-			if(task.getInstanceConfig().getPipeParams().getLogLevel()==0)
-				log.info(Common.formatLog("start", "Complete " + task.getJobType().name(), mainName, storeId,
-						task.getL2seq(), 0, "", GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(task.getL2seq()), 0,
-						" no data!"));
+			if (task.getInstanceConfig().getPipeParams().getLogLevel() == 0)
+				log.info(Common.formatLog("start", "Complete " + task.getJobType().name(), instanceId, storeId,
+						task.getL2seq(), 0, "", GlobalParam.SCAN_POSITION.get(task.getInstance())
+								.getLSeqPos(Common.getLseq(task.getL1seq(), task.getL2seq())),
+						0, " no data!"));
 		} else {
-			if(task.getInstanceConfig().getPipeParams().getLogLevel()<2)
+			if (task.getInstanceConfig().getPipeParams().getLogLevel() < 2)
 				log.info(Common.formatLog("start",
-						(getInstanceConfig().getPipeParams().isMultiThread() ? "MultiThread" : "SingleThread") + " Start "
-								+ task.getJobType().name(),
-						mainName, storeId, task.getL1seq(), 0, "",
-						GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(task.getL2seq()), 0, ",totalpage:" + pageNum));
- 
+						(getInstanceConfig().getPipeParams().isMultiThread() ? "MultiThread" : "SingleThread")
+								+ " Start " + task.getJobType().name(),
+						instanceId, storeId, task.getL1seq(), 0, "", GlobalParam.SCAN_POSITION.get(task.getInstance())
+								.getLSeqPos(Common.getLseq(task.getL1seq(), task.getL2seq())),
+						0, ",totalpage:" + pageNum));
+
 			long start = Common.getNow();
 			AtomicInteger total = new AtomicInteger(0);
 			if (getInstanceConfig().getPipeParams().isMultiThread()) {
-				CountDownLatch taskSingal = new CountDownLatch(PipeUtil.estimateThreads(pageNum)); 
-				Resource.ThreadPools.submitJobPage(
-						new PumpThread(taskSingal, task, storeId, pageList, writeTo, total));
-				try { 
+				CountDownLatch taskSingal = new CountDownLatch(PipeUtil.estimateThreads(pageNum));
+				Resource.ThreadPools
+						.submitTask(new PumpThread(taskSingal, task, storeId, pageList, writeInstanceName, total,getInstanceConfig()));
+				try {
 					taskSingal.await();
 				} catch (Exception e) {
 					throw Common.getException(e);
 				}
-				if(task.taskState.getEfException()!=null)
+				if (task.taskState.getEfException() != null)
 					throw task.taskState.getEfException();
 			} else {
-				singleThread(task, storeId, pageList, writeTo, total);
-			}  
-			if(task.getInstanceConfig().getPipeParams().getLogLevel()<2)
-				log.info(Common.formatLog("complete", "Complete " + task.getJobType().name(), mainName, storeId,
-						task.getL2seq(), total.get(), "",
-						GlobalParam.SCAN_POSITION.get(mainName).getL2SeqPos(task.getL2seq()), Common.getNow() - start, ""));
+				currentThreadRun(task, storeId, pageList, writeInstanceName, total);
+			}
+			if (task.getInstanceConfig().getPipeParams().getLogLevel() < 2)
+				log.info(
+						Common.formatLog("complete", "Complete " + task.getJobType().name(), instanceId, storeId,
+								task.getL2seq(), total.get(), "",
+								GlobalParam.SCAN_POSITION.get(task.getInstance())
+										.getLSeqPos(Common.getLseq(task.getL1seq(), task.getL2seq())),
+								Common.getNow() - start, ""));
 			if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination))
 				throw new EFException(
 						task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
@@ -278,8 +298,8 @@ public final class PipePump extends Instruction {
 	 * @param pageList
 	 * @throws EFException
 	 */
-	private void singleThread(Task task, String storeId, ConcurrentLinkedDeque<String> pageList, String writeTo,
-			 AtomicInteger total) throws EFException {
+	private void currentThreadRun(Task task, String storeId, ConcurrentLinkedDeque<String> pageList,
+			String writeInstanceName, AtomicInteger total) throws EFException {
 		ReaderState rState = null;
 		int processPos = 0;
 		String startId = "0";
@@ -294,140 +314,38 @@ public final class PipePump extends Instruction {
 		while (!pageList.isEmpty()) {
 			dataBoundary = pageList.poll();
 			processPos++;
-			Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name())
-					.put(task.getInstance() + task.getL2seq(), processPos + "/" + pageList.size());
-			String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(),
-					PipeUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
-							task.getEndTime(), scanField));
+			Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name()).put(task.getId() + task.getL2seq(),
+					processPos + "/" + pageList.size());
+			String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(), PipeUtil.getScanParam(
+					task.getL2seq(), startId, dataBoundary, task.getStartTime(), task.getEndTime(), scanField));
 			if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination)) {
 				break;
 			} else {
-				DataPage pagedata = this.getPageData(Page.getInstance(keyField, scanField, startId, dataBoundary,
-						getInstanceConfig(), dataScanDSL));
+				DataPage pagedata = this.getPageData(
+						Page.getInstance(keyField, scanField, startId, dataBoundary, getInstanceConfig(), dataScanDSL));
 				if (getInstanceConfig().openCompute()) {
 					pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(), task.getJobType().name(),
-							writeTo, pagedata); 				
-				} 	 
+							writeInstanceName, pagedata);
+				}
 				rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
-						writeTo, storeId, task.getL2seq(), pagedata, ",process:" + processPos + "/" + pageNum,
+						writeInstanceName, storeId, task.getL2seq(), pagedata, ",L1seq:"+task.getL1seq()+
+						",process:" + processPos + "/" + pageNum,
 						isUpdate, false);
 				if (rState.isStatus() == false)
 					throw new EFException("writeDataSet data exception!");
 				total.getAndAdd(rState.getCount());
 				startId = dataBoundary;
 			}
-			
-			if (PipeUtil.scanPosCompare(rState.getReaderScanStamp(), GlobalParam.SCAN_POSITION.get(task.getInstance()).
-					getL2SeqPos(task.getL2seq()))) {
-				GlobalParam.SCAN_POSITION.get(task.getInstance()).updateL2SeqPos(task.getL2seq(),
-						rState.getReaderScanStamp());
+
+			if (PipeUtil.scanPosCompare(rState.getReaderScanStamp(), GlobalParam.SCAN_POSITION.get(task.getInstance())
+					.getLSeqPos(Common.getLseq(task.getL1seq(), task.getL2seq())))) {
+				GlobalParam.SCAN_POSITION.get(task.getInstance())
+						.updateLSeqPos(Common.getLseq(task.getL1seq(), task.getL2seq()), rState.getReaderScanStamp());
 			}
 			if (task.getJobType() == JOB_TYPE.INCREMENT) {
 				Common.saveTaskInfo(task.getInstance(), task.getL1seq(), storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
 			}
 		}
-	} 
-
-	/**
-	 * use thread pool run task,it is not a steady mode if task fail will need re-do
-	 * from start position.
-	 * 
-	 * @author chengwen
-	 * @version 1.0
-	 * @date 2019-01-11 10:45
-	 * @modify 2019-01-11 10:45
-	 */
-	public class PumpThread implements Runnable {
-		long start = Common.getNow();
-		final int pageSize;
-		final String ID = CPU.getUUID();
-		final String writeTo;
-		final String storeId;
-		final AtomicInteger total;
-
-		Task task;
-		CountDownLatch taskSingal;
-		ReaderState rState = null;
-		AtomicInteger processPos = new AtomicInteger(0);
-		String startId = "0";
-		ConcurrentLinkedDeque<String> pageList;
-		boolean isUpdate = getInstanceConfig().getPipeParams().getWriteType().equals("increment") ? true : false;
-
-		public PumpThread(CountDownLatch taskSingal, Task task, String storeId, ConcurrentLinkedDeque<String> pageList,
-				String writeTo, AtomicInteger total) {
-			this.pageList = pageList;
-			this.writeTo = writeTo;
-			this.storeId = storeId;
-			this.taskSingal = taskSingal;
-			this.pageSize = pageList.size();
-			this.total = total;
-			this.task = task;
-		}
-
-		public String getId() {
-			return ID;
-		}
-
-		public int needThreads() {
-			return PipeUtil.estimateThreads(this.pageSize);
-		}
-
-		@Override
-		public void run() {
-			String dataBoundary;
-			while (!pageList.isEmpty()) {
-				dataBoundary = pageList.poll();
-				processPos.incrementAndGet();
-				Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name())
-						.put(task.getInstance() + task.getL2seq(), processPos + "/" + this.pageSize);
-				String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(),
-						PipeUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
-								task.getEndTime(), task.getScanParam().getScanField()));
-				if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(),
-						STATUS.Termination)) {
-					Resource.ThreadPools.cleanWaitJob(getId());
-					Common.LOG.warn(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
-					break;
-				} else {
-					DataPage pagedata = getPageData(Page.getInstance(task.getScanParam().getKeyField(),
-							task.getScanParam().getScanField(), startId, dataBoundary,
-							getInstanceConfig(), dataScanDSL)); 
-					try {
-						if (getInstanceConfig().openCompute()) {
-							pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(),
-									task.getJobType().name(), writeTo, pagedata);
-						} 
-						rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false,
-								task.getJobType().name(), writeTo, storeId, task.getL2seq(), pagedata,
-								",process:" + processPos + "/" + pageSize, isUpdate, false);
-					} catch (EFException e) {
-						log.error("PumpThread",e);
-						task.taskState.setEfException(e);
-					}finally{
-						if (rState==null || rState.isStatus() == false) {
-							Common.LOG.warn("read data exception!");
-							return;
-						}
-						Common.setFlowStatus(task.getInstance(), task.getL1seq(), GlobalParam.JOB_TYPE.FULL.name(),
-								STATUS.Blank, STATUS.Ready,getInstanceConfig().getPipeParams().showInfoLog());
-					} 
-					total.addAndGet(rState.getCount());
-					startId = dataBoundary;
-				}
-
-				if (rState.getReaderScanStamp().compareTo(
-						GlobalParam.SCAN_POSITION.get(task.getInstance()).getL2SeqPos(task.getL2seq())) > 0) {
-					GlobalParam.SCAN_POSITION.get(task.getInstance()).updateL2SeqPos(task.getL2seq(),
-							rState.getReaderScanStamp());
-				}
-				if (task.getJobType() == JOB_TYPE.INCREMENT) {
-					Common.saveTaskInfo(task.getInstance(), task.getL1seq(), storeId,
-							GlobalParam.JOB_INCREMENTINFO_PATH);
-				}
-			}
-			taskSingal.countDown();
-		}
-
 	}
 
 	// thread safe get page list
@@ -458,4 +376,112 @@ public final class PipePump extends Instruction {
 		}
 		return pagedata;
 	}
+	
+	/**
+	 * use thread pool run task,it is not a steady mode if task fail will need re-do
+	 * from start position.
+	 * 
+	 * @author chengwen
+	 * @version 1.0
+	 * @date 2019-01-11 10:45
+	 * @modify 2019-01-11 10:45
+	 */
+	class PumpThread implements TaskThread {
+		long start = Common.getNow();
+		final int pageSize;
+		final String ID = CPU.getUUID();
+		final String writeInstanceName;
+		final String storeId;
+		final AtomicInteger total;
+
+		Task task;
+		CountDownLatch taskSingal;
+		ReaderState rState = null;
+		AtomicInteger processPos = new AtomicInteger(0);
+		String startId = "0";
+		ConcurrentLinkedDeque<String> pageList;
+		InstanceConfig instanceConfig;
+		boolean isUpdate = false;
+
+		public PumpThread(CountDownLatch taskSingal, Task task, String storeId, ConcurrentLinkedDeque<String> pageList,
+				String writeInstanceName, AtomicInteger total,InstanceConfig instanceConfig) {
+			this.pageList = pageList;
+			this.writeInstanceName = writeInstanceName;
+			this.storeId = storeId;
+			this.taskSingal = taskSingal;
+			this.pageSize = pageList.size();
+			this.total = total;
+			this.task = task;
+			this.instanceConfig = instanceConfig;
+			if(instanceConfig.getPipeParams().getWriteType().equals("increment"))
+				isUpdate = true;
+		}
+		
+		@Override
+		public String getId() {
+			return ID;
+		}
+		
+		@Override
+		public int needThreads() {
+			return PipeUtil.estimateThreads(this.pageSize);
+		}
+
+		@Override
+		public void run() {
+			String dataBoundary;
+			while (!pageList.isEmpty()) {
+				dataBoundary = pageList.poll();
+				processPos.incrementAndGet();
+				Resource.FLOW_INFOS.get(task.getInstance(), task.getJobType().name())
+						.put(task.getId() + task.getL2seq(), processPos + "/" + this.pageSize);
+				String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(),
+						PipeUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
+								task.getEndTime(), task.getScanParam().getScanField()));
+				if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(),
+						STATUS.Termination)) {
+					Resource.ThreadPools.cleanWaitJob(getId());
+					Common.LOG.warn(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
+					break;
+				} else {
+					DataPage pagedata = getPageData(
+							Page.getInstance(task.getScanParam().getKeyField(), task.getScanParam().getScanField(),
+									startId, dataBoundary, getInstanceConfig(), dataScanDSL));
+					try {
+						if (getInstanceConfig().openCompute()) {
+							pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(),
+									task.getJobType().name(), writeInstanceName, pagedata);
+						}
+						rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
+								writeInstanceName, storeId, task.getL2seq(), pagedata,
+								",L1seq:"+task.getL1seq()+",process:" + processPos + "/" + pageSize, isUpdate, false);
+					} catch (EFException e) {
+						log.error("PumpThread", e);
+						task.taskState.setEfException(e);
+					} finally {
+						if (rState == null || rState.isStatus() == false) {
+							Common.LOG.warn("read data exception!");
+							return;
+						}
+						Common.setFlowStatus(task.getInstance(), task.getL1seq(), GlobalParam.JOB_TYPE.FULL.name(),
+								STATUS.Blank, STATUS.Ready, getInstanceConfig().getPipeParams().showInfoLog());
+					}
+					total.addAndGet(rState.getCount());
+					startId = dataBoundary;
+				}
+
+				if (rState.getReaderScanStamp().compareTo(GlobalParam.SCAN_POSITION.get(task.getInstance())
+						.getLSeqPos(Common.getLseq(task.getL1seq(), task.getL2seq()))) > 0) {
+					GlobalParam.SCAN_POSITION.get(task.getInstance()).updateLSeqPos(
+							Common.getLseq(task.getL1seq(), task.getL2seq()), rState.getReaderScanStamp());
+				}
+				if (task.getJobType() == JOB_TYPE.INCREMENT) {
+					Common.saveTaskInfo(task.getInstance(), task.getL1seq(), storeId,
+							GlobalParam.JOB_INCREMENTINFO_PATH);
+				}
+			}
+			taskSingal.countDown();
+		}
+
+	} 
 }

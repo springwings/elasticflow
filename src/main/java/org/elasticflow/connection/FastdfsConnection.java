@@ -8,7 +8,7 @@ import org.csource.fastdfs.StorageServer;
 import org.csource.fastdfs.TrackerClient;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
+import org.elasticflow.param.warehouse.WarehouseParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,11 +28,11 @@ public class FastdfsConnection extends EFConnectionSocket<StorageClient> {
 	
 	@Override
 	protected boolean connect(END_TYPE endType) {
-		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
-		if (wnp.getPath() != null) {
+		WarehouseParam wnp = this.connectParams.getWhp();
+		if (wnp.getHost() != null) {
 			if (!status()) { 			        	
 				Properties props = new Properties();
-				props.put(ClientGlobal.PROP_KEY_TRACKER_SERVERS,wnp.getPath());
+				props.put(ClientGlobal.PROP_KEY_TRACKER_SERVERS,wnp.getHost());
 				try {
 					ClientGlobal.initByProperties(props);  
 					this.conn = new StorageClient(new TrackerClient().getTrackerServer(), storageServer);

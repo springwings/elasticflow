@@ -16,7 +16,7 @@ public class ScanPosition {
 	private String instance;
 	private String storeId;
 	/**L2seq Scan switch point location information which in Piper configuration file*/
-	private ConcurrentHashMap<String, String> L2seqPos = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, String> LseqPos = new ConcurrentHashMap<>();
 	private String JOB_STATE_SPERATOR = ":";
 	private String JOB_SEQ_SPERATOR = ",";
 	private String INFO_SPERATOR = "#";
@@ -34,7 +34,7 @@ public class ScanPosition {
 			String[] row;
 			for(String seq:L2seqs) {
 				row = seq.split(JOB_STATE_SPERATOR);
-				L2seqPos.put(row[0], row[1]);
+				LseqPos.put(row[0], row[1]);
 			}
 		}
 	}
@@ -44,8 +44,13 @@ public class ScanPosition {
 		this.storeId = storeId;
 	}
 	
-	public void updateL2SeqPos(String k,String v) {		
-		L2seqPos.put(k, v);
+	/**
+	 * 
+	 * @param seq combine L1seq L2seq
+	 * @param pos
+	 */
+	public void updateLSeqPos(String seq,String pos) {		
+		LseqPos.put(seq, pos);
 	} 
 	
 	/**
@@ -56,28 +61,28 @@ public class ScanPosition {
 	}
 	
 	public void recoverKeep() { 
-		L2seqPos.clear();
+		LseqPos.clear();
 		if(keep.length()>0) {
 			String[] seqs = keep.split(JOB_SEQ_SPERATOR);
 			String[] row;
 			for(String seq:seqs) {
 				row = seq.split(JOB_STATE_SPERATOR);
-				L2seqPos.put(row[0], row[1]);
+				LseqPos.put(row[0], row[1]);
 			}
 		} 
 	}
 	
 	public void batchUpdateSeqPos(String v) {
-		Iterator<Map.Entry<String, String>> iter = L2seqPos.entrySet().iterator();
+		Iterator<Map.Entry<String, String>> iter = LseqPos.entrySet().iterator();
 		while (iter.hasNext()) {
 			Map.Entry<String, String> entry = (Entry<String, String>) iter.next();
-			L2seqPos.put(entry.getKey(), v);
+			LseqPos.put(entry.getKey(), v);
 		}
 	}
 	
-	public String getL2SeqPos(String seq) {
-		if(L2seqPos.containsKey(seq)) {
-			return L2seqPos.get(seq);
+	public String getLSeqPos(String seq) {
+		if(LseqPos.containsKey(seq)) {
+			return LseqPos.get(seq);
 		}
 		return "0";
 	}
@@ -97,7 +102,7 @@ public class ScanPosition {
 	
 	public String getPositionString() {
 		StringBuilder sf = new StringBuilder(); 
-		Iterator<Map.Entry<String, String>> iter = L2seqPos.entrySet().iterator();
+		Iterator<Map.Entry<String, String>> iter = LseqPos.entrySet().iterator();
 		while (iter.hasNext()) {
 			Map.Entry<String, String> entry = (Entry<String, String>) iter.next();
 			sf.append(entry.getKey()+JOB_STATE_SPERATOR+entry.getValue()+JOB_SEQ_SPERATOR);

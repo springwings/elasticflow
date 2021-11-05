@@ -6,7 +6,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
+import org.elasticflow.param.warehouse.WarehouseParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,13 +33,13 @@ public class HdfsConnection extends EFConnectionSocket<FileSystem> {
 	
 	@Override
 	protected boolean connect(END_TYPE endType) {
-		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
-		if (wnp.getPath() != null) {
+		WarehouseParam wnp = this.connectParams.getWhp();
+		if (wnp.getHost() != null) {
 			if (!status()) { 			        	
 				Configuration conf = new Configuration();
-				conf.set("fs.defaultFS", wnp.getPath());
+				conf.set("fs.defaultFS", wnp.getHost());
 		        try {
-					this.conn = FileSystem.get(new URI(wnp.getPath()), conf, 
+					this.conn = FileSystem.get(new URI(wnp.getHost()), conf, 
 							wnp.getDefaultValue().getString(DEFAULT_KEY));
 				} catch (Exception e) {
 					log.error("Hdfs connect Exception",e);

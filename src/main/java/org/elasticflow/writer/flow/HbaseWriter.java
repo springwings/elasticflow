@@ -16,7 +16,6 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.writer.WriterFlowSocket;
@@ -45,7 +44,7 @@ public class HbaseWriter extends WriterFlowSocket {
 	@Override
 	public void INIT(ConnectParams connectParams) {
 		this.connectParams = connectParams;  
-		String tableColumnFamily = ((WarehouseNosqlParam) connectParams.getWhp()).getDefaultValue().getString(DEFAULT_KEY);
+		String tableColumnFamily = connectParams.getWhp().getDefaultValue().getString(DEFAULT_KEY);
 		if (tableColumnFamily != null && tableColumnFamily.length() > 0) {
 			String[] strs = tableColumnFamily.split(":"); 
 			if (strs != null && strs.length > 1)

@@ -5,7 +5,6 @@ import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.ZooKeeper.States;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +34,7 @@ public class ZookeeperConnection extends EFConnectionSocket<ZooKeeper> {
 		if (!status()) {
 			try { 
 				this.conn = new ZooKeeper(
-						((WarehouseNosqlParam) this.connectParams.getWhp()).getPath(),
+						this.connectParams.getWhp().getHost(),
 						CONNECTION_TIMEOUT, (Watcher) this.connectParams.getPlugin()); 
 			} catch (Exception e) {
 				log.error("connection Exception", e);

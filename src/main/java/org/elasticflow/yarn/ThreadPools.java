@@ -13,7 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.elasticflow.piper.PipePump;
+import org.elasticflow.task.TaskThread;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
@@ -27,47 +27,65 @@ import org.elasticflow.util.EFException.ELEVEL;
  */
 public class ThreadPools {
 
-	private LinkedBlockingQueue<PipePump.PumpThread> waitJob;
+	private LinkedBlockingQueue<TaskThread> waitTask;
 
 	private ThreadPoolExecutor cachedThreadPool;
 	
 	private static int maxnum = 60;
 	
-	public ThreadPools(int instanceNum) {
-		waitJob = new LinkedBlockingQueue<>();
+	public ThreadPools(int instanceNum,boolean autoNum) {
+		waitTask = new LinkedBlockingQueue<>();
+		if(autoNum) {
+			this.autoNum(instanceNum);
+		}else {
+			this.init(instanceNum);
+		}		
+	}
+	
+	public void autoNum(int instanceNum) {
 		int maxthread = instanceNum*3;
 		if(maxthread>maxnum)
 			maxthread = maxnum;
-		cachedThreadPool = new ThreadPoolExecutor(instanceNum+2, maxthread,
+		cachedThreadPool = new ThreadPoolExecutor(instanceNum+2, maxthread+3,
 	            1L, TimeUnit.SECONDS,
 	            new ArrayBlockingQueue<Runnable>(maxthread*10));
 	}
+	
+	public void init(int minthread) {  
+		cachedThreadPool = new ThreadPoolExecutor(minthread, minthread+5,
+	            1L, TimeUnit.SECONDS,
+	            new ArrayBlockingQueue<Runnable>(minthread*5));
+	}
 
-	public void submitJobPage(PipePump.PumpThread jobPage) throws EFException {
+	public void submitTask(TaskThread jobPage) throws EFException {
 		try {
-			waitJob.put(jobPage);
+			waitTask.put(jobPage);
 		} catch (Exception e) {
 			throw new EFException(e,ELEVEL.Dispose);
 		}
 	}
 	
 	public void cleanWaitJob(String id) {
-		Iterator<PipePump.PumpThread> iter = waitJob.iterator();
-		PipePump.PumpThread job;
+		Iterator<TaskThread> iter = waitTask.iterator();
+		TaskThread job;
         while(iter.hasNext()) {
         	job = iter.next();
         	if(job.getId().equals(id))
-        		waitJob.remove(job);
+        		waitTask.remove(job);
         }
+	}
+	
+	public void execute(Runnable job) {
+		cachedThreadPool.execute(job);
 	}
 
 	public void start() {
 		new Thread(() -> {
 			try {
 				while(true) {
-					PipePump.PumpThread job = waitJob.take(); 
+					TaskThread job = waitTask.take(); 
 					for(int i=0;i<job.needThreads();i++)
-						cachedThreadPool.execute(job);						
+						execute(job);						
 				}  
 			} catch (Exception e) {
 				Common.LOG.error("Start ThreadPools Exception", e);

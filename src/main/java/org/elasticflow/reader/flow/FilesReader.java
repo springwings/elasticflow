@@ -12,7 +12,6 @@ import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +71,7 @@ public class FilesReader extends ReaderFlowSocket {
 			return page;
 		try { 
 			LineNumberReader lnr = new LineNumberReader(
-					new FileReader(((WarehouseNosqlParam) GETSOCKET().getConnectParams().getWhp()).getPath()));
+					new FileReader(GETSOCKET().getConnectParams().getWhp().getHost()));
 			lnr.skip(Long.MAX_VALUE);
 	        int lineNo = lnr.getLineNumber() + 1;
 	        lnr.close();

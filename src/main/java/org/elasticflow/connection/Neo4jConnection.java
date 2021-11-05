@@ -5,7 +5,6 @@ import java.sql.DriverManager;
 
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.param.warehouse.WarehouseSqlParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +29,7 @@ public class Neo4jConnection extends EFConnectionSocket<Connection> {
 			}
 			return true;
 		} catch (Exception e) {
-			log.error(((WarehouseSqlParam) this.connectParams.getWhp()).getHost() + " connect Exception,", e);
+			log.error(this.connectParams.getWhp().getHost() + " connect Exception,", e);
 			return false;
 		}
 	}
@@ -75,9 +74,9 @@ public class Neo4jConnection extends EFConnectionSocket<Connection> {
 	}
 
 	private String getConnectionUrl() {
-		return "jdbc:neo4j:bolt://" + ((WarehouseSqlParam) this.connectParams.getWhp()).getHost() + "/?user="
-				+ ((WarehouseSqlParam) this.connectParams.getWhp()).getUser() + ",password="
-				+ ((WarehouseSqlParam) this.connectParams.getWhp()).getPassword()
+		return "jdbc:neo4j:bolt://" + this.connectParams.getWhp().getHost() + "/?user="
+				+ this.connectParams.getWhp().getUser() + ",password="
+				+ this.connectParams.getWhp().getPassword()
 				+ ",scheme=basic,failOverReadOnly=false";
 	}
 

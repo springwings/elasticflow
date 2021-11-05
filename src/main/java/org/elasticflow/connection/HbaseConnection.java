@@ -8,7 +8,6 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Table;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,7 @@ public class HbaseConnection extends EFConnectionSocket<Table>{
 	public void init(ConnectParams connectParams) {
 		this.connectParams = connectParams;
 		this.hbaseConfig = HBaseConfiguration.create();
-		String ipString = ((WarehouseNosqlParam) connectParams.getWhp()).getPath();
+		String ipString = connectParams.getWhp().getHost();
 		if (ipString != null && ipString.length() > 0) {
 			String[] ips = ipString.split(",");
 			StringBuilder ipStr = new StringBuilder();
@@ -111,7 +110,7 @@ public class HbaseConnection extends EFConnectionSocket<Table>{
 		if (!status()) {
 			try {
 				this.Hconn = ConnectionFactory.createConnection(this.hbaseConfig);
-				String tableColumnFamily = ((WarehouseNosqlParam) connectParams.getWhp()).
+				String tableColumnFamily = connectParams.getWhp().
 						getDefaultValue().getString(DEFAULT_KEY);
 				if (tableColumnFamily != null && tableColumnFamily.length() > 0) {
 					String[] strs = tableColumnFamily.split(":"); 

@@ -212,7 +212,7 @@ public class InstanceConfig {
 				params = (Element) dataflow.getElementsByTagName("ReadParam").item(0);
 				if(params!=null) {
 					readParams = new ReaderParam();
-					if(Resource.nodeConfig.getSqlWarehouse().containsKey(pipeParams.getReadFrom())) { 
+					if(Resource.nodeConfig.getWarehouse().containsKey(pipeParams.getReadFrom())) { 
 						readParams.setNoSql(false);
 						parseNode(params.getElementsByTagName("param"), "readParam",
 								ReaderParam.class);  

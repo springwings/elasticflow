@@ -23,7 +23,6 @@ import org.elasticflow.model.searcher.ResponseDataUnit;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherResult;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.searcher.SearcherFlowSocket;
 import org.elasticflow.searcher.handler.SearcherHandler;
 import org.elasticflow.util.Common;
@@ -119,7 +118,7 @@ public class SolrSearcher extends SearcherFlowSocket {
 			}  
 		}
 		if(this.collectionName==null || this.collectionName=="")
-				this.collectionName = ((WarehouseNosqlParam) this.connectParams.getWhp()).getDefaultValue().getString(DEFAULT_KEY);
+				this.collectionName = this.connectParams.getWhp().getDefaultValue().getString(DEFAULT_KEY);
 		return this.collectionName;
 	} 
 	

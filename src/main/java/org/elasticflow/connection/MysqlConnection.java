@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.param.warehouse.WarehouseSqlParam;
+import org.elasticflow.param.warehouse.WarehouseParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +39,7 @@ public class MysqlConnection extends EFConnectionSocket<Connection> {
 	protected boolean connect(END_TYPE endType) {
 		try {
 			if (!status()) {
-				WarehouseSqlParam wsp = (WarehouseSqlParam) this.connectParams.getWhp();
+				WarehouseParam wsp = this.connectParams.getWhp();
 				this.conn = DriverManager.getConnection(getConnectionUrl(),
 						wsp.getUser(),
 						wsp.getPassword());
@@ -47,7 +47,7 @@ public class MysqlConnection extends EFConnectionSocket<Connection> {
 			}
 			return true;
 		} catch (Exception e) {
-			log.error(((WarehouseSqlParam) this.connectParams.getWhp()).getHost() + " connect Exception,", e);
+			log.error(this.connectParams.getWhp().getHost() + " connect Exception,", e);
 			return false;
 		}
 	}
@@ -93,9 +93,9 @@ public class MysqlConnection extends EFConnectionSocket<Connection> {
 	}
 
 	private String getConnectionUrl() {
-		return "jdbc:mysql://" + ((WarehouseSqlParam) this.connectParams.getWhp()).getHost() + ":"
-				+ ((WarehouseSqlParam) this.connectParams.getWhp()).getPort() + "/"
-				+ ((WarehouseSqlParam) this.connectParams.getWhp()).getDbname(this.connectParams.getL1Seq())
+		return "jdbc:mysql://" +this.connectParams.getWhp().getHost() + ":"
+				+ this.connectParams.getWhp().getPort() + "/"
+				+ this.connectParams.getWhp().getL1name(this.connectParams.getL1Seq())
 				+ "?autoReconnect=true&failOverReadOnly=false&useSSL=false";
 	}
 }

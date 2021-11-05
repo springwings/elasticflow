@@ -242,12 +242,15 @@ public final class Common {
 	 * @param location
 	 */
 	public static void saveTaskInfo(String instance, String L1seq,String storeId,String location) {
-		String instanceName = getMainName(instance, L1seq);
-		GlobalParam.SCAN_POSITION.get(instanceName).updateStoreId(storeId);
-		EFDataStorer.setData(getTaskStorePath(instanceName, L1seq,location),
-				GlobalParam.SCAN_POSITION.get(instanceName).getString());
-	} 
-
+		GlobalParam.SCAN_POSITION.get(instance).updateStoreId(storeId);
+		EFDataStorer.setData(getTaskStorePath(instance, L1seq,location),
+				GlobalParam.SCAN_POSITION.get(instance).getString());
+	}  
+	
+	public static String getLseq(String L1seq, String L2seq) {
+		return L1seq+"."+L2seq;
+	}
+	
 	/**
 	 * @param instanceName
 	 *            data source main tag name
@@ -270,7 +273,7 @@ public final class Common {
 	 *            data source main tag name 
 	 * @return String
 	 */
-	public static String getMainName(String instance, String L1seq) {
+	public static String getInstanceId(String instance, String L1seq) {
 		if (L1seq != null && L1seq.length()>0) {
 			return instance + L1seq;
 		} else {
@@ -308,16 +311,15 @@ public final class Common {
 	 * @param storeId  Master store id
 	 */
 	public static void setAndGetScanInfo(String instance, String L1seq,String storeId) {
-		String mainName = getMainName(instance, L1seq);
 		synchronized (GlobalParam.SCAN_POSITION) {
-			if(!GlobalParam.SCAN_POSITION.containsKey(mainName)) {
-				String path = Common.getTaskStorePath(mainName, L1seq,GlobalParam.JOB_INCREMENTINFO_PATH);
+			if(!GlobalParam.SCAN_POSITION.containsKey(instance)) {
+				String path = Common.getTaskStorePath(instance, L1seq,GlobalParam.JOB_INCREMENTINFO_PATH);
 				byte[] b = EFDataStorer.getData(path,true);
 				if (b != null && b.length > 0) {
 					String str = new String(b); 
-					GlobalParam.SCAN_POSITION.put(mainName, new ScanPosition(str,instance,storeId));  
+					GlobalParam.SCAN_POSITION.put(instance, new ScanPosition(str,instance,storeId));  
 				}else {
-					GlobalParam.SCAN_POSITION.put(mainName, new ScanPosition(instance,storeId));
+					GlobalParam.SCAN_POSITION.put(instance, new ScanPosition(instance,storeId));
 				}
 				saveTaskInfo(instance, L1seq,storeId,GlobalParam.JOB_INCREMENTINFO_PATH);
 			}
@@ -344,7 +346,7 @@ public final class Common {
 			if (isIncrement) { 
 				return getIncrementStoreId(instance,L1seq,transDataFlow,reCompute);
 			} else {
-				return (String) CPU.RUN(transDataFlow.getID(), "Pond", "getNewStoreId",true, getMainName(instance, L1seq), false);
+				return (String) CPU.RUN(transDataFlow.getID(), "Pond", "getNewStoreId",true, getInstanceId(instance, L1seq), false);
 			}
 		} catch (EFException e) {
 			Common.LOG.error("getStoreId",e);
@@ -357,7 +359,7 @@ public final class Common {
 	private static synchronized String getIncrementStoreId(String instance, String L1seq, PipePump transDataFlow,boolean reCompute) throws EFException {
 		String storeId = getStoreId(instance,L1seq,true); 
 		if (storeId.length() == 0 || reCompute) {
-			storeId = (String) CPU.RUN(transDataFlow.getID(), "Pond", "getNewStoreId",false, getMainName(instance, L1seq), true); 
+			storeId = (String) CPU.RUN(transDataFlow.getID(), "Pond", "getNewStoreId",false, getInstanceId(instance, L1seq), true); 
 			if (storeId == null)
 				storeId = "a";
 			saveTaskInfo(instance,L1seq,storeId,GlobalParam.JOB_INCREMENTINFO_PATH);
@@ -371,18 +373,17 @@ public final class Common {
 	 * @return String
 	 */
 	public static String getStoreId(String instance, String L1seq,boolean reload) { 
-		String instanceName = getMainName(instance, L1seq);
 		if(reload) {
 			String path = Common.getTaskStorePath(instance, L1seq,GlobalParam.JOB_INCREMENTINFO_PATH);
 			byte[] b = EFDataStorer.getData(path, true);
 			if (b != null && b.length > 0) {
 				String str = new String(b);
-				GlobalParam.SCAN_POSITION.put(instanceName, new ScanPosition(str,instance,L1seq));  
+				GlobalParam.SCAN_POSITION.put(instance, new ScanPosition(str,instance,L1seq));  
 			}else {
-				GlobalParam.SCAN_POSITION.put(instanceName, new ScanPosition(instance,L1seq));
+				GlobalParam.SCAN_POSITION.put(instance, new ScanPosition(instance,L1seq));
 			}
 		}  
-		return GlobalParam.SCAN_POSITION.get(instanceName).getStoreId();
+		return GlobalParam.SCAN_POSITION.get(instance).getStoreId();
 	}
 	
 	/**
@@ -393,14 +394,8 @@ public final class Common {
 	 */
 	public static String[] getL1seqs(InstanceConfig instanceConfig,boolean fillDefault){
 		String[] seqs = {};
-		WarehouseParam whParam;
-		if(Resource.nodeConfig.getNoSqlWarehouse().get(instanceConfig.getPipeParams().getReadFrom())!=null){
-			whParam = Resource.nodeConfig.getNoSqlWarehouse().get(
-					instanceConfig.getPipeParams().getReadFrom());
-		}else{
-			whParam = Resource.nodeConfig.getSqlWarehouse().get(
-					instanceConfig.getPipeParams().getReadFrom());
-		}
+		WarehouseParam whParam = Resource.nodeConfig.getWarehouse().get(
+				instanceConfig.getPipeParams().getReadFrom());
 		if (null != whParam) {
 			seqs = whParam.getL1seq();
 		}  
@@ -426,10 +421,10 @@ public final class Common {
 	 */
 	
 	public static String formatLog(String types,String heads,String instanceName, String storeId,
-			String seq, int total, String dataBoundary, String lastUpdateTime,
+			String L1seq, int total, String dataBoundary, String lastUpdateTime,
 			long useTime, String moreinfo) {
 		String useTimeFormat = Common.seconds2time(useTime);
-		StringBuilder str = new StringBuilder("["+heads+" "+instanceName + "_" + storeId+"] "+(!seq.equals("") ? " table:" + seq : ""));
+		StringBuilder str = new StringBuilder("["+heads+" "+instanceName + "_" + storeId+"] "+(!L1seq.equals("") ? " L1seq:" + L1seq : ""));
 		String update;
 		if(lastUpdateTime.length()>9 && lastUpdateTime.matches("[0-9]+")){ 
 			update = SDF.format(lastUpdateTime.length()<12?Long.valueOf(lastUpdateTime+"000"):Long.valueOf(lastUpdateTime));

@@ -10,7 +10,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
+import org.elasticflow.param.warehouse.WarehouseParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +42,8 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 
 	@Override
 	protected boolean connect(END_TYPE endType) {
-		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
-		if (wnp.getPath() != null) {
+		WarehouseParam wnp = this.connectParams.getWhp();
+		if (wnp.getHost() != null) {
 			if (!status()) { 			
 				if(endType.equals(END_TYPE.reader))
 					this.genConsumer(wnp);
@@ -56,9 +56,9 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 		return true;
 	}
 	
-	private void genConsumer(WarehouseNosqlParam wnp) {
+	private void genConsumer(WarehouseParam wnp) {
 		Properties props = new Properties();
-        props.put("bootstrap.servers", wnp.getPath());		        
+        props.put("bootstrap.servers", wnp.getHost());		        
         props.put("group.id",wnp.getDefaultValue().getString(CUSTOM_GROUP_ID));
         props.put("key.deserializer", StringDeserializer.class);
         props.put("value.deserializer", StringDeserializer.class);
@@ -83,9 +83,9 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 		this.cconn.subscribe(Arrays.asList(wnp.getDefaultValue().getString(CUSTOM_CONSUMER_TOPIC).split(",")));
 	}
 	
-	private void genProducer(WarehouseNosqlParam wnp) {
+	private void genProducer(WarehouseParam wnp) {
 		Properties props = new Properties();
-        props.put("bootstrap.servers", wnp.getPath());
+        props.put("bootstrap.servers", wnp.getHost());
         props.put("acks", "all");
         props.put("retries", 0);
         props.put("batch.size", 16384);

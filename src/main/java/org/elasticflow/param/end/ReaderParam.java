@@ -100,7 +100,7 @@ public class ReaderParam {
 		this.pageScanDSL = pageScanDSL;
 	}
 
-	public List<String> getSeq() {
+	public List<String> getL2Seq() {
 		return L2seqs;
 	}
 

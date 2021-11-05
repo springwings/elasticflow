@@ -2,17 +2,17 @@ package org.elasticflow.ml.algorithm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.config.GlobalParam;
@@ -26,6 +26,7 @@ import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFHttpClientUtil;
+import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +74,10 @@ public class RestService extends ComputerFlowSocket {
 					context.getInstanceConfig().getComputeParams().getScanField());
 			JSONObject requstParams = context.getInstanceConfig().getComputeParams().getApiRequest();
 			JSONObject responseParams = context.getInstanceConfig().getComputeParams().getApiResponse();
-
+			
+			CountDownLatch taskSingal = new CountDownLatch((int) Math.ceil((DSR.getDataNums()+0.)/
+					context.getInstanceConfig().getComputeParams().apiRequestMaxDatas()));
+			
 			// construct thread pool
 			CopyOnWriteArrayList<String> apis = context.getInstanceConfig().getComputeParams().getApi();
 			this.apiBlockingQueue = new ArrayBlockingQueue<>(apis.size());
@@ -104,28 +108,32 @@ public class RestService extends ComputerFlowSocket {
 					}
 				}
 				count++;
-				if (count > context.getInstanceConfig().getComputeParams().apiRequestMaxDatas()) {
+				if (count >= context.getInstanceConfig().getComputeParams().apiRequestMaxDatas()) {
 					JSONObject _postdt = (JSONObject) post_data.clone();
 					@SuppressWarnings("unchecked")
-					ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();
-					if(this.apiBlockingQueue.isEmpty())
-						this.incrementBlockTime();
-					this.executorService.execute(() -> {
-						String api = null;
-						JSONObject tmp = null;
-						try { 
-							api = this.apiBlockingQueue.take();
-							tmp = JSONObject.parseObject(this.sentRequest(_postdt, api));
-							this.apiBlockingQueue.put(api);
-							this.write(context, tmp, responseParams, _keepdt);
-						} catch (Exception e) {
-							this.successRunAll = false;
-							log.error("rest post data process error", e);
-							if (tmp != null)
-								log.error(tmp.toString());
-							log.error(api);
-						}
-					});
+					ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();					 
+					try {
+						if(this.apiBlockingQueue.isEmpty())
+							this.incrementBlockTime();
+						String api = this.apiBlockingQueue.take();
+						Resource.ThreadPools.execute(() -> {						
+							JSONObject tmp = null;	
+							try {
+								tmp = JSONObject.parseObject(this.sentRequest(_postdt, api));
+								this.apiBlockingQueue.put(api);
+								this.write(context, tmp, responseParams, _keepdt); 
+							} catch (Exception e) { 
+								this.successRunAll = false;
+								log.error(apis.get(0));
+								log.error("rest post data process error", e);
+							}
+							taskSingal.countDown();
+			            }); 
+					} catch (Exception e) { 
+						this.successRunAll = false;
+						log.error(apis.get(0));
+						log.error("rest post data process error", e);
+					}
 					post_data.clear();
 					keepDatas.clear();
 					count = 0;
@@ -136,33 +144,39 @@ public class RestService extends ComputerFlowSocket {
 				JSONObject _postdt = (JSONObject) post_data.clone();
 				@SuppressWarnings("unchecked")
 				ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();
-				if(this.apiBlockingQueue.isEmpty())
-					this.incrementBlockTime();
-				this.executorService.execute(() -> {
-					String api = null;
-					JSONObject tmp = null;
-					try {
-						api = this.apiBlockingQueue.take();
-						tmp = JSONObject.parseObject(this.sentRequest(_postdt, api));
-						this.apiBlockingQueue.put(api);
-						this.write(context, tmp, responseParams, _keepdt);
-					} catch (Exception e) {
-						this.successRunAll = false;
-						log.error("rest post data process error", e);
-						if (tmp != null)
-							log.error(tmp.toString());
-						log.error(api);
-					}
-				});
+				try {
+					if(this.apiBlockingQueue.isEmpty())
+						this.incrementBlockTime();
+					String api = this.apiBlockingQueue.take();
+					Resource.ThreadPools.execute(() -> {						
+						try {
+							JSONObject tmp = null;	
+							tmp = JSONObject.parseObject(this.sentRequest(_postdt, api));
+							this.apiBlockingQueue.put(api);
+							this.write(context, tmp, responseParams, _keepdt); 
+						} catch (Exception e) { 
+							this.successRunAll = false;
+							log.error(apis.get(0));
+							log.error("rest post data process error", e);
+						}
+						taskSingal.countDown();
+		            }); 
+				} catch (Exception e) { 
+					this.successRunAll = false;
+					log.error(apis.get(0));
+					log.error("rest post data process error", e);
+				}
 				post_data.clear();
 				keepDatas.clear();
 			}
-			executorService.shutdown();
+			
 			try {
-				executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-			} catch (Exception e) {
-				throw new EFException(e, ELEVEL.Termination);
-			}
+				if (this.successRunAll == true)
+					taskSingal.await();
+			} catch (Exception e) { 
+				throw new EFException(e.getMessage(), ELEVEL.Ignore);
+			}	
+			
 			if (this.successRunAll == false)
 				throw new EFException("job executorService exception", ELEVEL.Termination);
 
@@ -212,7 +226,7 @@ public class RestService extends ComputerFlowSocket {
 	 * @param computeField
 	 * @return
 	 */
-	private JSONObject keepData(ConcurrentHashMap<String, Object> data, Map<String, EFField> transfields) {
+	private JSONObject keepData(HashMap<String, Object> data, Map<String, EFField> transfields) {
 		JSONObject dt = new JSONObject();
 		Set<Entry<String, Object>> itr = data.entrySet();
 		for (Entry<String, Object> k : itr) {
@@ -231,7 +245,7 @@ public class RestService extends ComputerFlowSocket {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private Object getData(ConcurrentHashMap<String, Object> data, Queue<String> fields) {
+	private Object getData(HashMap<String, Object> data, Queue<String> fields) {
 		Set<Entry<String, Object>> itr = data.entrySet();
 		String field = fields.poll();
 		Object rs = null;
@@ -245,7 +259,7 @@ public class RestService extends ComputerFlowSocket {
 			if (rs instanceof JSONObject) {
 				return getData((JSONObject) rs, fields);
 			} else {
-				return getData((ConcurrentHashMap<String, Object>) rs, fields);
+				return getData((HashMap<String, Object>) rs, fields);
 			}
 		} else {
 			return rs;

@@ -14,7 +14,8 @@ import org.elasticflow.util.Common;
  * @date 2018-11-23 14:36
  */
 public final class Task {
-
+	
+	private String id;
 	private String instance;
 	private String L1seq;
 	private String L2seq;
@@ -24,9 +25,10 @@ public final class Task {
 	private JOB_TYPE jobType;
 	public TaskState taskState;
 
-	public static Task getInstance(String instance, String L1seq, JOB_TYPE jobType, InstanceConfig instanceConfig,
+	public static Task getInstance(String id,String instance, String L1seq, JOB_TYPE jobType, InstanceConfig instanceConfig,
 			String additional) {
 		Task o = new Task();
+		o.id = id;
 		o.instance = instance;
 		o.L1seq = L1seq;
 		o.instanceConfig = instanceConfig;
@@ -43,6 +45,10 @@ public final class Task {
 
 	public String getInstance() {
 		return this.instance;
+	}
+	
+	public String getId() {
+		return this.id;
 	}
 
 	public String getL1seq() {
@@ -63,7 +69,7 @@ public final class Task {
 
 	public String getStartTime() {
 		return jobType.equals(JOB_TYPE.FULL) ? Common.getFullStartInfo(instance, L1seq)
-				: GlobalParam.SCAN_POSITION.get(Common.getMainName(instance, L1seq)).getL2SeqPos(L2seq);
+				: GlobalParam.SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq));
 	}
 
 	public String getEndTime() {

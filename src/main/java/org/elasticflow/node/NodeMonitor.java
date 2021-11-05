@@ -34,9 +34,7 @@ import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.param.pipe.InstructionParam;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
 import org.elasticflow.param.warehouse.WarehouseParam;
-import org.elasticflow.param.warehouse.WarehouseSqlParam;
 import org.elasticflow.reader.service.HttpReaderService;
 import org.elasticflow.searcher.service.SearcherService;
 import org.elasticflow.util.Common;
@@ -172,20 +170,8 @@ public final class NodeMonitor {
 			}
 
 			switch (type) {
-			case NOSQL:
-				wp = Resource.nodeConfig.getNoSqlWarehouse().get(name);
-				seqs = wp.getL1seq();
-				if (seqs.length > 0) {
-					for (String seq : seqs) {
-						EFConnectionPool.clearPool(wp.getPoolName(seq));
-					}
-				} else {
-					EFConnectionPool.clearPool(wp.getPoolName(null));
-				}
-				break;
-
-			case SQL:
-				wp = Resource.nodeConfig.getSqlWarehouse().get(name);
+			case WAREHOUSE:
+				wp = Resource.nodeConfig.getWarehouse().get(name);
 				seqs = wp.getL1seq();
 				if (seqs.length > 0) {
 					for (String seq : seqs) {
@@ -216,17 +202,11 @@ public final class NodeMonitor {
 			Object o = null;
 			Set<String> iter = jsonObject.keySet();
 			try {
-				switch (type) {
-				case SQL:
-					o = new WarehouseSqlParam();
+				switch (type) {				
+				case WAREHOUSE:
+					o = new WarehouseParam();
 					for (String key : iter) {
-						Common.setConfigObj(o, WarehouseSqlParam.class, key, jsonObject.getString(key));
-					}
-					break;
-				case NOSQL:
-					o = new WarehouseNosqlParam();
-					for (String key : iter) {
-						Common.setConfigObj(o, WarehouseNosqlParam.class, key, jsonObject.getString(key));
+						Common.setConfigObj(o, WarehouseParam.class, key, jsonObject.getString(key));
 					}
 					break;
 				case INSTRUCTION:
@@ -413,11 +393,8 @@ public final class NodeMonitor {
 			try {
 				String instance = rq.getParameter("instance");
 				InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instance);
-				WarehouseParam dataMap = Resource.nodeConfig.getNoSqlWarehouse()
-						.get(instanceConfig.getPipeParams().getReadFrom());
-				if (dataMap == null) {
-					dataMap = Resource.nodeConfig.getSqlWarehouse().get(instanceConfig.getPipeParams().getReadFrom());
-				}
+				WarehouseParam dataMap = Resource.nodeConfig.getWarehouse()
+						.get(instanceConfig.getPipeParams().getReadFrom());				
 				setResponse(RESPONSE_STATUS.Success, null, StringUtils.join(dataMap.getL1seq(), ","));
 			} catch (Exception e) {
 				setResponse(RESPONSE_STATUS.CodeException, rq.getParameter("instance") + " not exists!", null);
@@ -437,11 +414,9 @@ public final class NodeMonitor {
 				String val = "0";
 				if (rq.getParameterMap().get("set_value") != null)
 					val = rq.getParameter("set_value");
-				String instanceName;
 				String[] L1seqs = EFMonitorUtil.getInstanceL1seqs(instance);
 				for (String L1seq : L1seqs) {
-					instanceName = Common.getMainName(instance, L1seq);
-					GlobalParam.SCAN_POSITION.get(instanceName).batchUpdateSeqPos(val);
+					GlobalParam.SCAN_POSITION.get(instance).batchUpdateSeqPos(val);
 					Common.saveTaskInfo(instance, L1seq, Common.getStoreId(instance, L1seq, false),
 							GlobalParam.JOB_INCREMENTINFO_PATH);
 				}

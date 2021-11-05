@@ -2,7 +2,7 @@ package org.elasticflow.connection;
 
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
+import org.elasticflow.param.warehouse.WarehouseParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +28,10 @@ public class VearchConnection extends EFConnectionSocket<VearchConnector> {
 
 	@Override
 	protected boolean connect(END_TYPE endType) {
-		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
-		if (wnp.getPath() != null) {
+		WarehouseParam wnp = this.connectParams.getWhp();
+		if (wnp.getHost() != null) {
 			if (!status()) { 
-				String[] paths = wnp.getPath().split("#");
+				String[] paths = wnp.getHost().split("#");
 				this.conn = new VearchConnector(paths[0],paths[1],wnp.getDefaultValue().getString(DEAFULT_KEY));
 			}
 		} else {

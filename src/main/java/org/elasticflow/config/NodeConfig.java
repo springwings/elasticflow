@@ -15,18 +15,16 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
+import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
+import org.elasticflow.param.pipe.InstructionParam;
+import org.elasticflow.param.warehouse.WarehouseParam;
+import org.elasticflow.util.Common;
+import org.elasticflow.util.instance.EFDataStorer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
-import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
-import org.elasticflow.param.pipe.InstructionParam;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
-import org.elasticflow.param.warehouse.WarehouseSqlParam;
-import org.elasticflow.util.Common;
-import org.elasticflow.util.instance.EFDataStorer;
 
 /**
  * The EF node configuration control center,
@@ -40,8 +38,7 @@ public class NodeConfig {
 
 	private final Map<String, InstanceConfig> instanceConfigs = new HashMap<>();
 	private final Map<String, InstanceConfig> searchConfigMap = new HashMap<>();
-	private final Map<String, WarehouseSqlParam> sqlWarehouse = new HashMap<>();
-	private final Map<String, WarehouseNosqlParam> NoSqlWarehouse = new HashMap<>();
+	private final Map<String, WarehouseParam> warehouse = new HashMap<>();
 	private final Map<String, InstructionParam> instructions = new HashMap<>();
 	private String pondFile = null;
 	private String instructionsFile = null;
@@ -115,13 +112,10 @@ public class NodeConfig {
 		return this.searchConfigMap;
 	}
 
-	public Map<String, WarehouseSqlParam> getSqlWarehouse() {
-		return this.sqlWarehouse;
+	public Map<String, WarehouseParam> getWarehouse() {
+		return this.warehouse;
 	}
 
-	public Map<String, WarehouseNosqlParam> getNoSqlWarehouse() {
-		return this.NoSqlWarehouse;
-	}
 
 	public void reload() {
 		for (Map.Entry<String, InstanceConfig> e : this.instanceConfigs.entrySet()) {
@@ -131,14 +125,9 @@ public class NodeConfig {
 
 	public void addSource(RESOURCE_TYPE type, Object o) {
 		switch (type) {
-		case SQL:
-			WarehouseSqlParam e1 = (WarehouseSqlParam) o;
-			sqlWarehouse.put(e1.getAlias(), e1);
-			break;
-
-		case NOSQL:
-			WarehouseNosqlParam e2 = (WarehouseNosqlParam) o;
-			NoSqlWarehouse.put(e2.getAlias(), e2);
+		case WAREHOUSE:
+			WarehouseParam e1 = (WarehouseParam) o;
+			warehouse.put(e1.getAlias(), e1);
 			break;
 
 		case INSTRUCTION:
@@ -188,15 +177,8 @@ public class NodeConfig {
 			Document doc = db.parse(in);
 			NodeList paramlist;
 
-			Element NoSql = (Element) doc.getElementsByTagName(RESOURCE_TYPE.NOSQL.name()).item(0);
-			if(NoSql != null) {
-				paramlist = NoSql.getElementsByTagName("socket");
-				parseNode(paramlist, WarehouseNosqlParam.class);
-			}
-
-			Element Sql = (Element) doc.getElementsByTagName(RESOURCE_TYPE.SQL.name()).item(0);
-			paramlist = Sql.getElementsByTagName("socket");
-			parseNode(paramlist, WarehouseSqlParam.class);
+			paramlist = doc.getElementsByTagName("socket");
+			parseNode(paramlist, WarehouseParam.class);
 
 		} catch (Exception e) {
 			Common.LOG.error("parse (" + src + ") error,", e);
@@ -217,10 +199,8 @@ public class NodeConfig {
 				Node param = paramlist.item(i);
 				if (param.getNodeType() == Node.ELEMENT_NODE) { 
 					Object o = Common.getXmlObj(param, c);
-					if (c == WarehouseNosqlParam.class) {
-						addSource(RESOURCE_TYPE.NOSQL, o);
-					} else if (c == WarehouseSqlParam.class) {
-						addSource(RESOURCE_TYPE.SQL, o);
+					if (c == WarehouseParam.class) {
+						addSource(RESOURCE_TYPE.WAREHOUSE, o);					
 					} else if (c == InstructionParam.class) {
 						addSource(RESOURCE_TYPE.INSTRUCTION, o);
 					}

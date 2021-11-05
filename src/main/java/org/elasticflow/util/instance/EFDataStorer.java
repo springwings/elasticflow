@@ -77,6 +77,10 @@ public class EFDataStorer {
 				try {
 					if(create) { 
 						File f = new File(path);
+						File fileParent = f.getParentFile();
+						if(!fileParent.exists()){
+							fileParent.mkdirs();
+						}
 						f.createNewFile();
 					}
 					return "".getBytes();

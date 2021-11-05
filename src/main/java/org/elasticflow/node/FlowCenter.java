@@ -77,7 +77,7 @@ public class FlowCenter{
 				
 				if(GlobalParam.JOB_TYPE.FULL.name().equals(type.toUpperCase())) {
 					if (Common.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready))
-						state = jobAction(Common.getMainName(instance, L1seq), GlobalParam.JOB_TYPE.FULL.name(), "run") && state;
+						state = jobAction(Common.getInstanceId(instance, L1seq), GlobalParam.JOB_TYPE.FULL.name(), "run") && state;
 						if(state && !asyn) {
 							Thread.sleep(1000);//waiting to start job
 							while(Common.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready)==false)
@@ -85,7 +85,7 @@ public class FlowCenter{
 						} 
 				}else {
 					if (Common.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready))
-						state = jobAction(Common.getMainName(instance, L1seq), GlobalParam.JOB_TYPE.INCREMENT.name(), "run") && state;
+						state = jobAction(Common.getInstanceId(instance, L1seq), GlobalParam.JOB_TYPE.INCREMENT.name(), "run") && state;
 						if(state && asyn) {
 							Thread.sleep(1000);//waiting to start job
 							while(Common.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready)==false)
@@ -112,9 +112,9 @@ public class FlowCenter{
 				for (String L1seq : L1seqs) {
 					if (L1seq == null)
 						continue;  
-					if(removeTask && Resource.tasks.containsKey(Common.getMainName(instance, L1seq))) {
-						Resource.tasks.remove(Common.getMainName(instance, L1seq));
-						state = removeFlowScheduleJob(Common.getMainName(instance, L1seq),instanceConfig) && state;
+					if(removeTask && Resource.tasks.containsKey(Common.getInstanceId(instance, L1seq))) {
+						Resource.tasks.remove(Common.getInstanceId(instance, L1seq));
+						state = removeFlowScheduleJob(Common.getInstanceId(instance, L1seq),instanceConfig) && state;
 					} 
 					
 					if(removePipe) {
@@ -139,11 +139,11 @@ public class FlowCenter{
 			for (String L1seq : L1seqs) {
 				if (L1seq == null)
 					continue; 
-				if(!Resource.tasks.containsKey(Common.getMainName(instanceName, L1seq)) || needClear){
-					Resource.tasks.put(Common.getMainName(instanceName, L1seq), FlowTask.createTask(instanceName,
+				if(!Resource.tasks.containsKey(Common.getInstanceId(instanceName, L1seq)) || needClear){
+					Resource.tasks.put(Common.getInstanceId(instanceName, L1seq), FlowTask.createTask(instanceName,
 					Resource.SOCKET_CENTER.getPipePump(instanceName, L1seq,needClear,GlobalParam.FLOW_TAG._DEFAULT.name()), L1seq));
 				}  
-				createFlowScheduleJob(Common.getMainName(instanceName, L1seq), Resource.tasks.get(Common.getMainName(instanceName, L1seq)),
+				createFlowScheduleJob(Common.getInstanceId(instanceName, L1seq), Resource.tasks.get(Common.getInstanceId(instanceName, L1seq)),
 						instanceConfig,needClear);
 			}
 		} catch (Exception e) {

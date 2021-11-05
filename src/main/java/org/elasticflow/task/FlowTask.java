@@ -69,7 +69,7 @@ public class FlowTask {
 	 * @throws EFException 
 	 */
 	public void optimizeInstance() throws EFException {
-		String storeName = Common.getMainName(instance, L1seq);
+		String storeName = Common.getInstanceId(instance, L1seq);
 		CPU.RUN(transDataFlow.getID(), "Pond", "optimizeInstance", true, storeName,
 				Common.getStoreId(instance, L1seq, transDataFlow, true, false));
 	}
@@ -96,13 +96,13 @@ public class FlowTask {
 				} else {
 					storeId = Common.getStoreId(instance, L1seq, transDataFlow, false, false);
 					CPU.RUN(transDataFlow.getID(), "Pond", "createStorePosition", true,
-							Common.getMainName(instance, L1seq), storeId);
+							Common.getInstanceId(instance, L1seq), storeId);
 				}
 				if(storeId!=null) {
-					GlobalParam.SCAN_POSITION.get(Common.getMainName(instance, L1seq)).keepCurrentPos();
+					GlobalParam.SCAN_POSITION.get(instance).keepCurrentPos();
 					transDataFlow.run(instance, storeId, L1seq, true,
 							writeInSamePosition);
-					GlobalParam.SCAN_POSITION.get(Common.getMainName(instance, L1seq)).recoverKeep(); 
+					GlobalParam.SCAN_POSITION.get(instance).recoverKeep(); 
 					Common.saveTaskInfo(instance, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
 				} 
 			} catch (Exception e) {
@@ -137,7 +137,7 @@ public class FlowTask {
 						GlobalParam.FLOWINFO.MASTER.name()).put(GlobalParam.FLOWINFO.FULL_STOREID.name(), storeId);
 
 				CPU.RUN(transDataFlow.getID(), "Pond", "createStorePosition", true,
-						Common.getMainName(instance, L1seq), storeId);
+						Common.getInstanceId(instance, L1seq), storeId);
 
 				Resource.FLOW_INFOS.get(destination, GlobalParam.FLOWINFO.MASTER.name()).put(
 						GlobalParam.FLOWINFO.FULL_JOBS.name(),
@@ -256,7 +256,7 @@ public class FlowTask {
 				for (String seq : _seqs) {
 					if (seq == null)
 						continue;
-					sf.append(Common.getMainName(job, seq) + " ");
+					sf.append(Common.getInstanceId(job, seq) + " ");
 				}
 			}
 		}

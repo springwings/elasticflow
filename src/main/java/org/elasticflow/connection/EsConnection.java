@@ -3,7 +3,7 @@ package org.elasticflow.connection;
 import org.apache.http.HttpHost;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.param.warehouse.WarehouseNosqlParam;
+import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -43,10 +43,10 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 
 	@Override
 	protected boolean connect(END_TYPE endType) {
-		WarehouseNosqlParam wnp = (WarehouseNosqlParam) this.connectParams.getWhp();
-		if (wnp.getPath() != null) {
+		WarehouseParam wnp = this.connectParams.getWhp();
+		if (wnp.getHost() != null) {
 			if (!status()) {
-				String[] hosts = wnp.getPath().split(",");
+				String[] hosts = wnp.getHost().split(",");
 				HttpHost[] httpHosts = new HttpHost[hosts.length];
 				for (int i = 0; i < hosts.length; i++) {
 					try {

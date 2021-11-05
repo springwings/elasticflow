@@ -124,7 +124,7 @@ public class Pond extends Instruction {
 		}
 		String removeId = ""; 
 		String mainName,storeId; 
-		mainName = Common.getMainName(String.valueOf(args[0]),String.valueOf(args[1]));
+		mainName = Common.getInstanceId(String.valueOf(args[0]),String.valueOf(args[1]));
 		storeId = String.valueOf(args[2]); 
 		int waittime=0; 
 		if(Common.checkFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT,STATUS.Running)) {

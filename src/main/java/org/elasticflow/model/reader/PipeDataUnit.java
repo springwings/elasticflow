@@ -8,9 +8,9 @@
 package org.elasticflow.model.reader;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.field.EFField;
@@ -26,14 +26,14 @@ import org.elasticflow.util.EFException.ELEVEL;
  */
 public class PipeDataUnit implements Cloneable{  
 	private String reader_key_val;
-	private ConcurrentHashMap<String,Object> data;  
+	private HashMap<String,Object> data;  
 	private long SYSTEM_UPDATE_TIME; 
 	
 	public static PipeDataUnit getInstance(){
 		return new PipeDataUnit();
 	}
 	public PipeDataUnit() {
-		this.data = new ConcurrentHashMap<String,Object>();
+		this.data = new HashMap<String,Object>();
 		this.SYSTEM_UPDATE_TIME = System.currentTimeMillis();
 	}
 	
@@ -56,7 +56,7 @@ public class PipeDataUnit implements Cloneable{
 			}else {
 				pdu.data.put(param.getName(),val);
 			}
-		}else{
+		}else{ 
 			if(transParams.size()==0)
 				pdu.data.put(k,v);
 		}
@@ -99,7 +99,7 @@ public class PipeDataUnit implements Cloneable{
 		this.reader_key_val = String.valueOf(reader_key_val);
 	}
  
-	public ConcurrentHashMap<String,Object> getData() {
+	public HashMap<String,Object> getData() {
 		return data;
 	}
 	
