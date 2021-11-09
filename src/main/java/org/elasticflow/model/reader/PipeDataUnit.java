@@ -7,16 +7,14 @@
  */
 package org.elasticflow.model.reader;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.FIELD_PARSE_TYPE;
 import org.elasticflow.field.EFField;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ELEVEL;
 
 /**
  * Build a virtual pipeline for data writing
@@ -47,53 +45,30 @@ public class PipeDataUnit implements Cloneable{
 		return u;		
 	}
 	
+	/**
+	 * If handler exists, cross domain processing is first used by handler; 
+	 * Finally, use paramtype process data
+	 * @param k
+	 * @param v
+	 * @param transParams
+	 * @param pdu
+	 * @throws EFException
+	 */
 	public static void addFieldValue(String k,Object v,Map<String, EFField> transParams,PipeDataUnit pdu) throws EFException{
 		EFField param = transParams.get(k);  
-		if (param != null){
-			Object val = parseFieldValue(v,param);
+		if (param != null){			
 			if (param.getHandler()!=null) {
-				param.getHandler().handle(pdu,param,val,transParams); 			  
+				param.getHandler().handle(pdu,param,v,transParams); 	
+				pdu.data.put(param.getName(),
+						Common.parseFieldValue(pdu.data.get(param.getName()),param,FIELD_PARSE_TYPE.valueOf));
 			}else {
-				pdu.data.put(param.getName(),val);
+				pdu.data.put(param.getName(),Common.parseFieldValue(v,param,FIELD_PARSE_TYPE.valueOf));
 			}
 		}else{ 
 			if(transParams.size()==0)
 				pdu.data.put(k,v);
 		}
-	}
-	
-	public static Object parseFieldValue(Object v, EFField fd) throws EFException {
-		if (fd == null)
-			return v; 
-		if (v==null) {
-			return fd.getDefaultvalue();
-		}else {
-			Class<?> c;
-			try {
-				if(fd.getParamtype().startsWith(GlobalParam.GROUPID) || fd.getParamtype().startsWith("java.lang")) {
-					c = Class.forName(fd.getParamtype());	
-				}else {
-					c = Class.forName(fd.getParamtype(),true,GlobalParam.PLUGIN_CLASS_LOADER);
-				}				
-				if (fd.getSeparator() != null) {
-					String[] vs = String.valueOf(v).split(fd.getSeparator());
-					if(!fd.getParamtype().equals("java.lang.String")) {
-						Object[] _vs = new Object[vs.length];
-						Method method = c.getMethod("valueOf", String.class);
-						for(int j=0;j<vs.length;j++) 
-							_vs[j] = method.invoke(c,vs[j]); 
-						return _vs;
-					}
-					return vs;
-				 }else {				 
-					 Method method = c.getMethod("valueOf", Object.class);
-					 return method.invoke(c,v);
-				 }
-			} catch (Exception e) {
-				throw new EFException(e.getMessage()+",Field "+fd.getName(), ELEVEL.Dispose);
-			}			
-		}		
-	}
+	}	
 	
 	public void setReaderKeyVal(Object reader_key_val){
 		this.reader_key_val = String.valueOf(reader_key_val);

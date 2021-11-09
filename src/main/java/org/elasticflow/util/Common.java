@@ -28,6 +28,7 @@ import org.apache.commons.lang.time.FastDateFormat;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.FIELD_PARSE_TYPE;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.KEY_PARAM;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
@@ -506,16 +507,39 @@ public final class Common {
 			return true; 
 		return false;
 	} 
-		
-	public static Object parseFieldObject(Object v, EFField fd) throws Exception {
-		if (fd == null || v==null)
-			return null; 
-		if(fd.getParamtype().startsWith(GlobalParam.GROUPID)) {
-			return Class.forName(fd.getParamtype()).getDeclaredConstructor(Object.class).newInstance(v);
+	
+	public static Object parseFieldValue(Object v, EFField fd,FIELD_PARSE_TYPE parsetype) throws EFException {
+		if (fd == null)
+			return v; 
+		if (v==null) {
+			return fd.getDefaultvalue();
 		}else {
-			return Class.forName(fd.getParamtype(),true,GlobalParam.PLUGIN_CLASS_LOADER).getDeclaredConstructor(Object.class).newInstance(v);
-		}			
-	} 
+			Class<?> c;
+			try {
+				if(fd.getParamtype().startsWith(GlobalParam.GROUPID) || fd.getParamtype().startsWith("java.lang")) {
+					c = Class.forName(fd.getParamtype());	
+				}else {
+					c = Class.forName(fd.getParamtype(),true,GlobalParam.PLUGIN_CLASS_LOADER);
+				}		
+				Method method = c.getMethod(parsetype.name(), Object.class);
+				if (fd.getSeparator() != null) {
+					String[] vs = String.valueOf(v).split(fd.getSeparator());
+					if(!fd.getParamtype().equals("java.lang.String")) {
+						Object[] _vs = new Object[vs.length];
+						for(int j=0;j<vs.length;j++) 
+							_vs[j] = method.invoke(c,vs[j]); 
+						return _vs;
+					}
+					return vs;
+				 }else {			
+					 return method.invoke(c,v);
+				 }
+			} catch (Exception e) {
+				throw new EFException(e.getMessage()+",Field "+fd.getName(), ELEVEL.Dispose);
+			}			
+		}		
+	}
+	
 	
 	public static boolean exceptionCheckContain(Exception ex,String key) {
 		StringBuffer sb = new StringBuffer();

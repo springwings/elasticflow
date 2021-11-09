@@ -7,23 +7,16 @@
  */
 package org.elasticflow.field;
 
-import org.elasticflow.util.EFException;
-
-/**
- * must implementation 
- * public static T1 valueOf(Object data) throws EFException;
- * public static T2 getInstance(Object data) throws EFException;
+/** 
+ * public static T1 valueOf(Object data) throws EFException; only get value
+ * public static T2 parse(Object data) throws EFException; get complex data
  * @author chengwen
  * @version 1.0
  * @date 2018-11-20 10:47
  */
 public interface FieldHandler<EF_VALUE_TYPE>{ 
 	
-	/**Domain value fetch function**/
-	public String toString();
-	
-	public boolean isValid();
-	
-	public EF_VALUE_TYPE parse(Object s) throws EFException;
-	
+	/**
+	 * valueOf
+	 */
 }

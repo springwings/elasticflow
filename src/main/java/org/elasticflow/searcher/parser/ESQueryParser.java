@@ -9,10 +9,10 @@ import java.util.Set;
 
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.FIELD_PARSE_TYPE;
 import org.elasticflow.config.GlobalParam.QUERY_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
-import org.elasticflow.field.handler.LongRangeType;
 import org.elasticflow.model.EFSearchRequest;
 import org.elasticflow.param.end.SearcherParam;
 import org.elasticflow.util.Common;
@@ -162,9 +162,8 @@ public class ESQueryParser implements QueryParser{
 			if (!not_analyzed || fuzzy>0) {
 				query = fieldParserQuery(key, String.valueOf(v), fuzzy);
 			} else if (tp.getParamtype().equals("org.elasticflow.field.handler.LongRangeType")) {
-				Object _v = Common.parseFieldObject(v, tp);
-				LongRangeType val = (LongRangeType) _v; 
-				query = QueryBuilders.rangeQuery(key).from(val.getMin()).to(val.getMax())
+				Long[] _v = (Long[]) Common.parseFieldValue(v, tp,FIELD_PARSE_TYPE.parse);
+				query = QueryBuilders.rangeQuery(key).from(_v[0]).to(_v[1])
 						.includeLower(sp == null ? true : sp.isIncludeLower())
 						.includeUpper(sp == null ? true : sp.isIncludeUpper());
 			}  else { 

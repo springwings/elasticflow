@@ -109,6 +109,10 @@ public final class GlobalParam {
 		reader,computer,writer,searcher
 	}
 	
+	public static enum FIELD_PARSE_TYPE{
+		valueOf,parse
+	}
+	
 	/**master,slave,backup*/
 	public static enum NODE_TYPE{
 		master,slave,backup
