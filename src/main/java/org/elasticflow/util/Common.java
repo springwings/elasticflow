@@ -520,8 +520,13 @@ public final class Common {
 					c = Class.forName(fd.getParamtype());	
 				}else {
 					c = Class.forName(fd.getParamtype(),true,GlobalParam.PLUGIN_CLASS_LOADER);
-				}		
-				Method method = c.getMethod(parsetype.name(), Object.class);
+				}
+				Method method;
+				if(fd.getParamtype().equals("java.lang.Double")) {
+					method = c.getMethod(parsetype.name(), String.class);
+				}else {
+					method = c.getMethod(parsetype.name(), Object.class);
+				}
 				if (fd.getSeparator() != null) {
 					String[] vs = String.valueOf(v).split(fd.getSeparator());
 					if(!fd.getParamtype().equals("java.lang.String")) {
