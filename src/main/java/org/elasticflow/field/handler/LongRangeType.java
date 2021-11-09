@@ -9,22 +9,17 @@ import org.elasticflow.util.EFException;
  * @version 2.0
  * @date 2018-11-20 10:47
  */
-public class LongRangeType implements FieldHandler<Long,LongRangeType> {
+public class LongRangeType implements FieldHandler<Long> {
 
 	protected Long min;
 	protected Long max;
 	protected Long val;
 	public final static String RangeSeperator = "_";
 	
-	public static LongRangeType getInstance() throws EFException { 
-		LongRangeType obj = new LongRangeType();
-		return obj;
+	public LongRangeType(Object data) throws EFException { 
+		parse(data);
 	}
 
-	public static Long valueOf(Object data) throws EFException { 
-		return Long.valueOf(String.valueOf(data));
-	}
-	 
 	public Long getVal() {
 		return this.val;
 	}
@@ -33,8 +28,7 @@ public class LongRangeType implements FieldHandler<Long,LongRangeType> {
 		min = 0l;
 		max = Long.MAX_VALUE;
 	}
-	
-	@Override
+	 
 	public Long parse(Object s) throws EFException {
 		if (s == null) {
 			throw new EFException("parse error with value is null!");
@@ -67,10 +61,12 @@ public class LongRangeType implements FieldHandler<Long,LongRangeType> {
 		return this.val;
 	}
 	
+	@Override
 	public String toString() {
 		return String.valueOf(this.getVal());
 	}
 	
+	@Override
 	public boolean isValid() {
 		return max.compareTo(min) >= 0;
 	}

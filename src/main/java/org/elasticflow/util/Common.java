@@ -424,7 +424,9 @@ public final class Common {
 			String L1seq, int total, String dataBoundary, String lastUpdateTime,
 			long useTime, String moreinfo) {
 		String useTimeFormat = Common.seconds2time(useTime);
-		StringBuilder str = new StringBuilder("["+heads+" "+instanceName + "_" + storeId+"] "+(!L1seq.equals("") ? " L1seq:" + L1seq : ""));
+		if(L1seq.length()<1)
+			L1seq = "None";
+		StringBuilder str = new StringBuilder("["+heads+" "+instanceName + "_" + storeId+"] "+(" L1seq:" + L1seq));
 		String update;
 		if(lastUpdateTime.length()>9 && lastUpdateTime.matches("[0-9]+")){ 
 			update = SDF.format(lastUpdateTime.length()<12?Long.valueOf(lastUpdateTime+"000"):Long.valueOf(lastUpdateTime));
@@ -509,9 +511,9 @@ public final class Common {
 		if (fd == null || v==null)
 			return null; 
 		if(fd.getParamtype().startsWith(GlobalParam.GROUPID)) {
-			return Class.forName(fd.getParamtype()).getDeclaredConstructor().newInstance();
+			return Class.forName(fd.getParamtype()).getDeclaredConstructor(Object.class).newInstance(v);
 		}else {
-			return Class.forName(fd.getParamtype(),true,GlobalParam.PLUGIN_CLASS_LOADER).getDeclaredConstructor().newInstance();
+			return Class.forName(fd.getParamtype(),true,GlobalParam.PLUGIN_CLASS_LOADER).getDeclaredConstructor(Object.class).newInstance(v);
 		}			
 	} 
 	

@@ -17,9 +17,13 @@ import org.elasticflow.util.EFException;
  * @version 1.0
  * @date 2018-11-20 10:47
  */
-public interface FieldHandler<EF_VALUE_TYPE,EF_INSTANCE_TYPE>{ 
+public interface FieldHandler<EF_VALUE_TYPE>{ 
 	
 	/**Domain value fetch function**/
-	public EF_VALUE_TYPE parse(Object data) throws EFException;
+	public String toString();
+	
+	public boolean isValid();
+	
+	public EF_VALUE_TYPE parse(Object s) throws EFException;
 	
 }
