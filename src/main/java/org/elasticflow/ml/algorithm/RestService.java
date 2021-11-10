@@ -209,7 +209,11 @@ public class RestService extends ComputerFlowSocket {
 			Set<Entry<String, Object>> itr = jr.entrySet();
 			PipeDataUnit u = PipeDataUnit.getInstance();
 			for (Entry<String, Object> k : itr) {
-				PipeDataUnit.addFieldValue(k.getKey(), k.getValue(), context.getInstanceConfig().getComputeFields(), u);
+				try {
+					PipeDataUnit.addFieldValue(k.getKey(), k.getValue(), context.getInstanceConfig().getComputeFields(), u);
+				} catch (EFException e) { 
+					log.error(e.getMessage());
+				}
 				if (context.getInstanceConfig().getReadParams().getKeyField().equals(k.getKey())) {
 					u.setReaderKeyVal(u.getData().get(k.getKey()));
 				}
