@@ -239,7 +239,6 @@ public class EsWriter extends WriterFlowSocket {
 			ForceMergeRequest request = new ForceMergeRequest(name);
 			request.maxNumSegments(2);
 			request.flush(true);
-			request.onlyExpungeDeletes(true);
 			ForceMergeResponse response = getESC().getClient().indices().forcemerge(request, RequestOptions.DEFAULT);
 
 			int failed_cnt = response.getFailedShards();

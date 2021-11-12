@@ -11,7 +11,7 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.MECHANISM;
 
 /**
- * data-flow trans parameters
+ * The control parameters of data-flow pipeline model
  * @author chengwen
  * @version 4.0
  * @date 2018-10-25 16:14
@@ -33,6 +33,8 @@ public class PipeParam {
 	private String optimizeCron; 
 	private String instanceName;
 	private String[] nextJob;
+	/**flow batch task processing use strict transaction control or not. **/
+	private boolean transactionControl;
 	/** default is slave pipe,if is master will only manage pipe with no detail transfer job! */
 	private boolean isMaster = false;
 	/** control each slave instance run in Concurrent mode or not **/
@@ -46,7 +48,12 @@ public class PipeParam {
 	private String keepNums = "30d";
 	private boolean multiThread = false;
 	
-	 
+	public boolean isTransactionControl() {
+		return transactionControl;
+	}
+	public void setTransactionControl(String transactionControl) {
+		this.transactionControl = Boolean.valueOf(transactionControl);;
+	}
 	public String getWriteTo() {
 		return writeTo;
 	}
@@ -113,6 +120,7 @@ public class PipeParam {
 	public void setLogLevel(String logLevel) {
 		this.logLevel = Integer.valueOf(logLevel);
 	}
+	
 	public void setWriteTo(String writeTo) {
 		this.writeTo = writeTo;
 	}

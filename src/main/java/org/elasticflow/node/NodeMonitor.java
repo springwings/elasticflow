@@ -43,6 +43,7 @@ import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFLoader;
 import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.EFNodeUtil;
+import org.elasticflow.util.PipeXMLUtil;
 import org.elasticflow.util.SystemInfoUtil;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.writer.WriterFlowSocket;
@@ -53,7 +54,6 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-
 /**
  * * data-flow router maintain apis,default port
  * 8617,localhost:8617/ef.doaction?ac=[actions]
@@ -113,6 +113,8 @@ public final class NodeMonitor {
 			add("deleteInstanceData");
 			add("getInstanceInfo");
 			add("runCode");
+			//pipe xml-config manage
+			add("setInstancePipeConfig");
 		}
 	};
 
@@ -128,7 +130,7 @@ public final class NodeMonitor {
 	}
 
 	public void ac(Request rq, EFResponse RS) {
-		try {
+		try {  
 			if (this.actions.contains(rq.getParameter("ac"))) {
 				Method m = NodeMonitor.class.getMethod(rq.getParameter("ac"), Request.class);
 				m.invoke(this, rq);
@@ -142,6 +144,8 @@ public final class NodeMonitor {
 			Common.LOG.error("ac " + rq.getParameter("ac") + " Exception ", e);
 		}
 	}
+	
+	
 
 	/**
 	 * Be care full,this will remove all relative instance
@@ -439,6 +443,48 @@ public final class NodeMonitor {
 				setResponse(RESPONSE_STATUS.DataErr, "instance not exits!", null);				
 			} else {
 				setResponse(RESPONSE_STATUS.Success, null, JO);				
+			}
+		}
+	}
+	
+	public void setInstancePipeConfig(Request rq) {
+		if (EFMonitorUtil.checkParams(this, rq, "instance,param.name,param.value")) {
+			if (Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance"))){
+				InstanceConfig tmp = Resource.nodeConfig.getInstanceConfigs().get(rq.getParameter("instance"));				
+				try {
+					String[] params = rq.getParameter("param.name").split("\\.");
+					if(params.length!=2)
+						throw new EFException("param.name Must be within two levels.");
+					Class<?> cls = null;
+					switch(params[0]) {
+					case "TransParam":
+						cls = tmp.getPipeParams().getClass();
+						break;
+					case "ReadParam":
+						cls = tmp.getReadParams().getClass();
+						break;
+					case "ComputeParam":
+						cls = tmp.getComputeParams().getClass();
+						break;
+					case "WriteParam":
+						cls = tmp.getWriterParams().getClass();
+						break;	
+					}
+					
+					Common.setConfigObj(tmp.getPipeParams(), cls, params[1], rq.getParameter("param.value"));	
+					String xmlPath = GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("instance")+"/task.xml";
+					
+					try {
+						PipeXMLUtil.ModifyNode(xmlPath, params[0]+".param", params[1], rq.getParameter("param.value"));
+					} catch (EFException e) {
+						setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance")
+								+ e.getMessage(), null);
+					} 
+				} catch (Exception e) {
+					setResponse(RESPONSE_STATUS.DataErr, e.getMessage(), null);
+				}
+			}else {
+				setResponse(RESPONSE_STATUS.DataErr,rq.getParameter("instance") + " not exists!", null);
 			}
 		}
 	}
