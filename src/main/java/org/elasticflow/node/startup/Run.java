@@ -27,6 +27,7 @@ import org.elasticflow.node.RecoverMonitor;
 import org.elasticflow.node.SocketCenter;
 import org.elasticflow.reader.service.HttpReaderService;
 import org.elasticflow.searcher.service.SearcherService;
+import org.elasticflow.service.EFMonitorService;
 import org.elasticflow.task.FlowTask;
 import org.elasticflow.task.schedule.TaskJobCenter;
 import org.elasticflow.util.Common;
@@ -150,7 +151,9 @@ public final class Run {
 			computerService.start(); 
 		
 		if ((GlobalParam.SERVICE_LEVEL & 8) > 0)
-			Resource.FlOW_CENTER.startInstructionsJob();  
+			Resource.FlOW_CENTER.startInstructionsJob(); 
+		
+		new EFMonitorService().start();
 	}
 
 	public void loadGlobalConfig(String path, boolean fromZk) {
