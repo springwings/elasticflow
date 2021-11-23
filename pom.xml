@@ -58,19 +58,9 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
 			<artifactId>spring-orm</artifactId>
 			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-aspects</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
+		</dependency>		
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
@@ -469,17 +459,17 @@
 			
 		</plugins>
 	</build>   
-<distributionManagement>
-<snapshotRepository>
-<id>ossrh</id>
-<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-</snapshotRepository>
-<repository>
-<id>ossrh</id>
-<name>Nexus Release Repository</name>
-<url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-</repository>
-</distributionManagement>
+<!-- 	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<name>Nexus Release Repository</name>
+			<url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement> -->
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<configPath>src/main/resources</configPath>

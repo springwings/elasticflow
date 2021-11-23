@@ -6,18 +6,21 @@ import java.util.Map;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.yarn.Resource;
 
-public class BlockMonitor extends Thread {		
-	HashMap<String,Integer> instances = new HashMap<>();	
+/**
+* Rebalance Tasks over all nodes.
+* @author chengwen
+* @version 2.0
+* @date 2018-11-21 15:43
+*/
+public class RebalanceTasks {
 	
-	public BlockMonitor() {
+	HashMap<String,Integer> instances = new HashMap<>();
+	
+	public void reloadConfigs() {
 		Map<String, InstanceConfig> nodes = Resource.nodeConfig.getInstanceConfigs();
 		for (Map.Entry<String, InstanceConfig> entry : nodes.entrySet()) {
-			InstanceConfig config = entry.getValue();
-			instances.put(entry.getKey(), config.getInstanceType());
+			
 		}
-	}		
-    @Override
-    public void run() {
-    
-    }
+	}
+
 }

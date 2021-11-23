@@ -42,6 +42,12 @@ public final class GlobalParam {
 	public static String NODEID = System.getProperty("nodeid");;
 	
 	public static final String PROJ = "ElasticFlow";
+	
+	public static String MASTER_HOST = ""; 
+	
+	public static NODE_TYPE node_type;
+	
+	public static boolean DISTRIBUTE_RUN = false;
 	 
 	/**Task Running status define*/
 	public static enum STATUS {  

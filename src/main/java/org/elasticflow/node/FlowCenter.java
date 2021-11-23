@@ -10,19 +10,16 @@ package org.elasticflow.node;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.quartz.SchedulerException;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.config.GlobalParam.STATUS;
+import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.param.pipe.InstructionParam;
 import org.elasticflow.task.FlowTask;
 import org.elasticflow.task.InstructionTask;
 import org.elasticflow.task.schedule.JobModel;
-import org.elasticflow.task.schedule.TaskJobCenter;
 import org.elasticflow.util.Common;
 import org.elasticflow.yarn.Resource;
+import org.quartz.SchedulerException;
 
 /**
  * read to write flow build center
@@ -30,10 +27,7 @@ import org.elasticflow.yarn.Resource;
  * @version 2.0 
  */
 public class FlowCenter{ 
-	
-	@Autowired
-	private TaskJobCenter taskJobCenter; 
-	
+		
 	private String default_cron = "0 PARAM 01 * * ?";
 	
 	private String not_run_cron = "0 0 0 1 1 ? 2099";
@@ -156,16 +150,16 @@ public class FlowCenter{
 		boolean state = false;
 		switch (actype) {
 		case "stop":
-			state = taskJobCenter.stopJob(jobname);
+			state = Resource.taskJobCenter.stopJob(jobname);
 			break;
 		case "run":
-			state = taskJobCenter.startNow(jobname);
+			state = Resource.taskJobCenter.startNow(jobname);
 			break;
 		case "resume":
-			state = taskJobCenter.restartJob(jobname);
+			state = Resource.taskJobCenter.restartJob(jobname);
 			break;
 		case "remove":
-			state = taskJobCenter.deleteJob(jobname);
+			state = Resource.taskJobCenter.deleteJob(jobname);
 			break;
 		}
 		if(state){
@@ -195,7 +189,7 @@ public class FlowCenter{
 				getJobName(param.getId(), GlobalParam.JOB_TYPE.INSTRUCTION.name()), param.getCron(),
 				"org.elasticflow.task.InstructionTask", "runInstructions", task); 
 		try {
-			taskJobCenter.addJob(_sj); 
+			Resource.taskJobCenter.addJob(_sj); 
 		}catch (Exception e) {
 			Common.LOG.error("create Instruction Job "+param.getId()+" Exception", e);
 		} 
@@ -217,7 +211,7 @@ public class FlowCenter{
 			JobModel _sj = new JobModel(
 					getJobName(instance, GlobalParam.JOB_TYPE.FULL.name()), instanceConfig.getPipeParams().getFullCron(),
 					"org.elasticflow.task.FlowTask", fullFun, task); 
-			taskJobCenter.addJob(_sj); 
+			Resource.taskJobCenter.addJob(_sj); 
 		}else if(instanceConfig.getPipeParams().getReadFrom()!= null && instanceConfig.getPipeParams().getWriteTo()!=null) { 
 			instanceConfig.setHasFullJob(false);
 			if(needclear)
@@ -226,7 +220,7 @@ public class FlowCenter{
 			JobModel _sj = new JobModel(
 					getJobName(instance,GlobalParam.JOB_TYPE.FULL.name()), not_run_cron,
 					"org.elasticflow.task.FlowTask", fullFun, task); 
-			taskJobCenter.addJob(_sj); 
+			Resource.taskJobCenter.addJob(_sj); 
 		}  
 		
 		if (instanceConfig.getPipeParams().getDeltaCron() != null) { 
@@ -249,7 +243,7 @@ public class FlowCenter{
 					getJobName(instance, GlobalParam.JOB_TYPE.INCREMENT.name()),
 					instanceConfig.getPipeParams().getDeltaCron(), "org.elasticflow.task.FlowTask",
 					incrementFun, task); 
-			taskJobCenter.addJob(_sj);
+			Resource.taskJobCenter.addJob(_sj);
 		}else if(instanceConfig.getPipeParams().getReadFrom()!= null && instanceConfig.getPipeParams().getWriteTo()!=null) {
 			if(needclear)
 				jobAction(instance, GlobalParam.JOB_TYPE.INCREMENT.name(), "remove");
@@ -258,7 +252,7 @@ public class FlowCenter{
 					getJobName(instance,GlobalParam.JOB_TYPE.INCREMENT.name()),
 					not_run_cron, "org.elasticflow.task.FlowTask",
 					incrementFun, task); 
-			taskJobCenter.addJob(_sj);
+			Resource.taskJobCenter.addJob(_sj);
 		}
 		
 		if(instanceConfig.getPipeParams().getFullCron() == null || instanceConfig.getPipeParams().getOptimizeCron()!=null){
@@ -277,7 +271,7 @@ public class FlowCenter{
 		JobModel _sj = new JobModel(
 				getJobName(indexName, GlobalParam.JOB_TYPE.OPTIMIZE.name()),cron,
 				"org.elasticflow.manager.Task", "optimizeInstance", batch); 
-		taskJobCenter.addJob(_sj); 
+		Resource.taskJobCenter.addJob(_sj); 
 	}
 
 	private String getJobName(String instance, String type) { 

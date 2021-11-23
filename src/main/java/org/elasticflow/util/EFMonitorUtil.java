@@ -164,7 +164,7 @@ public class EFMonitorUtil {
 			controlType = GlobalParam.JOB_TYPE.INCREMENT;
 
 		for (String inst : instance.split(",")) {
-			Common.LOG.info("Instance " + inst + " waitting set state " + state + " ...");
+			Common.LOG.info("Instance {} waitting set state {} ...",inst,state);
 			int waittime = 0;
 			String[] seqs = EFMonitorUtil.getInstanceL1seqs(instance);
 			for (String seq : seqs) {
@@ -184,9 +184,9 @@ public class EFMonitorUtil {
 				}
 				Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
 				if (Common.setFlowStatus(inst, seq, controlType.name(), STATUS.Termination, state, true)) {
-					Common.LOG.info("Instance " + inst + " success set state " + state);
+					Common.LOG.info("Instance {} success set state {}.",inst,state);
 				} else {
-					Common.LOG.info("Instance " + inst + " fail set state " + state);
+					Common.LOG.info("Instance {} fail set state {}.",inst,state);
 				}
 			}
 		}

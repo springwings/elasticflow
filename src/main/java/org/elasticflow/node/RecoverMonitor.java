@@ -8,8 +8,6 @@
 package org.elasticflow.node;
 
 import org.apache.commons.net.telnet.TelnetClient;
-import org.springframework.stereotype.Component;
-
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFNodeUtil;
@@ -21,7 +19,7 @@ import org.elasticflow.yarn.Resource;
  * @version 1.0
  * @date 2018-07-22 09:08
  */
-@Component
+
 public class RecoverMonitor {
 	 	
 	private String takeIp;

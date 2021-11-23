@@ -8,7 +8,6 @@
 package org.elasticflow.node.startup;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
@@ -21,7 +20,6 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.NODE_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.config.NodeConfig;
-import org.elasticflow.correspond.ReportStatus;
 import org.elasticflow.model.FormatProperties;
 import org.elasticflow.node.FlowCenter;
 import org.elasticflow.node.NodeMonitor;
@@ -29,8 +27,8 @@ import org.elasticflow.node.RecoverMonitor;
 import org.elasticflow.node.SocketCenter;
 import org.elasticflow.reader.service.HttpReaderService;
 import org.elasticflow.searcher.service.SearcherService;
-import org.elasticflow.service.EFMonitorService;
 import org.elasticflow.task.FlowTask;
+import org.elasticflow.task.schedule.TaskJobCenter;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFLoc;
 import org.elasticflow.util.EFNodeUtil;
@@ -40,6 +38,7 @@ import org.elasticflow.util.instance.ZKUtil;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.ThreadPools;
 import org.elasticflow.yarn.monitor.ResourceMonitor;
+import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -56,16 +55,13 @@ public final class Run {
 	@Autowired
 	private SearcherService searcherService;
 	@Autowired
-	private ComputerService computerService;
+	private ComputerService computerService;	
 	@Autowired
-	private FlowCenter flowCenter;
-	@Autowired
-	private RecoverMonitor recoverMonitor;
+	private Scheduler scheduler;
+	 
 	@Autowired
 	private HttpReaderService httpReaderService;
-	@Autowired
-	private SocketCenter socketCenter;
-
+	
 	@Value("#{nodeSystemInfo['version']}")
 	private String version;
 	
@@ -74,12 +70,6 @@ public final class Run {
 	
 	@Value("#{nodeSystemInfo['debug']}")
 	private boolean debug;
-
-	@Autowired
-	private EFEmailSender mailSender;
-
-	@Autowired
-	NodeMonitor nodeMonitor;
 
 	private String startConfigPath;
 
@@ -99,17 +89,32 @@ public final class Run {
 		GlobalParam.CONNECTION_POOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("pool_size"));
 		GlobalParam.WRITE_BATCH = GlobalParam.StartConfig.getProperty("write_batch").equals("false") ? false : true;
 		GlobalParam.SEND_EMAIL = GlobalParam.StartConfig.getProperty("send_mail").equals("false") ? false : true;
+		GlobalParam.DISTRIBUTE_RUN = GlobalParam.StartConfig.getProperty("distribute_run").equals("false") ? false : true;
+		GlobalParam.MASTER_HOST = GlobalParam.StartConfig.getProperty("master_host");
 		GlobalParam.SERVICE_LEVEL = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
-	
-		Resource.mailSender = mailSender;
+		
+		switch(GlobalParam.StartConfig.getProperty("node_type")) {
+		case "master":
+			GlobalParam.node_type = NODE_TYPE.master;
+			break;
+		case "backup":
+			GlobalParam.node_type = NODE_TYPE.backup;
+			break;
+		default:
+			GlobalParam.node_type = NODE_TYPE.slave;
+		}
+		 			
+		Resource.scheduler = scheduler;
+		Resource.mailSender = new EFEmailSender();
 		Resource.tasks = new HashMap<String, FlowTask>();
-		Resource.SOCKET_CENTER = socketCenter;
-		Resource.FlOW_CENTER = flowCenter;
-		Resource.nodeMonitor = nodeMonitor; 
+		Resource.taskJobCenter = new TaskJobCenter();
+		Resource.SOCKET_CENTER =  new SocketCenter();;
+		Resource.FlOW_CENTER = new FlowCenter();;
+		Resource.nodeMonitor = new NodeMonitor(); 
 		
 		int openThreadPools = 0;
-		if (initInstance) {
-			EFDataStorer.setData(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP + "/configs", JSON.toJSONString(GlobalParam.StartConfig)); 
+		if (initInstance && (GlobalParam.DISTRIBUTE_RUN==false ||
+				(GlobalParam.DISTRIBUTE_RUN==true && GlobalParam.node_type==NODE_TYPE.master))) {
 			Resource.nodeConfig = NodeConfig.getInstance(GlobalParam.StartConfig.getProperty("pond"), GlobalParam.StartConfig.getProperty("instructions"));
 			Resource.nodeConfig.init(GlobalParam.StartConfig.getProperty("instances"),GlobalParam.SERVICE_LEVEL);
 			Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
@@ -130,6 +135,7 @@ public final class Run {
 	}
 
 	public void startService() {
+		
 		if ((GlobalParam.SERVICE_LEVEL & 1) > 0) 
 			searcherService.start(); 
 		
@@ -144,31 +150,19 @@ public final class Run {
 			computerService.start(); 
 		
 		if ((GlobalParam.SERVICE_LEVEL & 8) > 0)
-			Resource.FlOW_CENTER.startInstructionsJob();
-		
-		if ((GlobalParam.SERVICE_LEVEL & 32) > 0)
-			ResourceMonitor.start();
-		
-		new EFMonitorService().start();
+			Resource.FlOW_CENTER.startInstructionsJob();  
 	}
 
 	public void loadGlobalConfig(String path, boolean fromZk) {
-		try {
-			GlobalParam.StartConfig = new FormatProperties();
+		try {			
 			if (fromZk) {
+				GlobalParam.StartConfig = new FormatProperties();
 				JSONObject _JO = (JSONObject) JSON.parse(EFDataStorer.getData(path, false));
 				for (Map.Entry<String, Object> row : _JO.entrySet()) {
 					GlobalParam.StartConfig.setProperty(row.getKey(), String.valueOf(row.getValue()));
 				}
 			} else {
-				String replaceStr = System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") == -1
-						? "file:"
-						: "file:/";
-				try (FileInputStream in = new FileInputStream(path.replace(replaceStr, ""))) {
-					GlobalParam.StartConfig.load(in);
-				} catch (Exception e) {
-					Common.LOG.error("load Global Properties file Exception", e);
-				}
+				GlobalParam.StartConfig = Common.loadProperties(path);				
 			}
 		} catch (Exception e) { 
 			Common.LOG.error("load Global Properties Config Exception", e);
@@ -200,15 +194,13 @@ public final class Run {
 		try {
 			loadGlobalConfig(this.startConfigPath, false);
 			loadPlugins(GlobalParam.pluginPath);
-			GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");		
-			ReportStatus.nodeConfigs();
-			if (!GlobalParam.StartConfig.containsKey("node_type"))
-				GlobalParam.StartConfig.setProperty("node_type", NODE_TYPE.slave.name());
+			GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");							
 			if (GlobalParam.StartConfig.get("node_type").equals(NODE_TYPE.backup.name())) {
 				init(false);
-				recoverMonitor.start();
+				new RecoverMonitor().start();
 			} else {
 				init(true);
+				ResourceMonitor.start(); 
 				startService();
 			}
 		} catch (Exception e) {

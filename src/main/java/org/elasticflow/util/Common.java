@@ -8,6 +8,7 @@
 package org.elasticflow.util;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
@@ -37,6 +38,7 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.EFSearchRequest;
+import org.elasticflow.model.FormatProperties;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.model.NMRequest;
 import org.elasticflow.model.reader.ScanPosition;
@@ -97,6 +99,19 @@ public final class Common {
 			return true;
 		else
 			return false;
+	}
+	
+	public static FormatProperties loadProperties(String path) {
+		FormatProperties fp = new FormatProperties();
+		String replaceStr = System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") == -1
+				? "file:"
+				: "file:/";
+		try (FileInputStream in = new FileInputStream(path.replace(replaceStr, ""))) {
+			fp.load(in);
+		} catch (Exception e) {
+			Common.LOG.error("load Global Properties file Exception", e);
+		}
+		return fp;
 	}
 	
 	public static void getXmlParam(Object Obj,Node param, Class<?> c) throws Exception {
@@ -496,7 +511,7 @@ public final class Common {
 				return true;
 			} else {
 				if(showLog)
-					LOG.info(instance + " " + type + " not in "+needState.name()+" state!");
+					LOG.info("{} {} not in {} state!",instance,type,needState.name());
 				return false;
 			}
 		}

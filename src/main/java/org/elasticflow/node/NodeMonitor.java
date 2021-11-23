@@ -50,7 +50,6 @@ import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.Request;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -68,7 +67,6 @@ import com.alibaba.fastjson.JSONObject;
  * @version 3.0
  * @date 2018-10-25 09:08
  */
-@Component
 @NotThreadSafe
 public final class NodeMonitor {
 

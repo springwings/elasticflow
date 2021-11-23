@@ -17,10 +17,9 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.util.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.support.WebApplicationObjectSupport;
 
 /** 
  * @author chengwen
@@ -28,8 +27,7 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  * @date 2018-10-11 11:00
  */
 
-@Component
-public class EFEmailSender extends WebApplicationObjectSupport {
+public class EFEmailSender {
 	private static Logger log = LoggerFactory.getLogger(EFEmailSender.class);
 	private ExecutorService mailTaskExecutor = Executors.newFixedThreadPool(5);
 
@@ -71,25 +69,12 @@ public class EFEmailSender extends WebApplicationObjectSupport {
 		return emailInfo;
 	}
 
-	public EmailConfig getEmailConfig() {
-		EmailConfig emailInfo = (EmailConfig) super.getApplicationContext()
-				.getBean("javaxEmailBean");
-		Properties mailConfigBean = (Properties) super.getApplicationContext()
-				.getBean("mailConfigBean");		
-		Properties emailProperties = new Properties();
-		emailProperties.put("mail.smtp.host",
-				mailConfigBean.getProperty("mail.host"));
-		emailProperties.put("mail.smtp.port",
-				mailConfigBean.getProperty("mail.port"));
-		emailProperties.put("mail.smtp.connectiontimeout",
-				mailConfigBean.getProperty("mail.smtp.connectiontimeout"));
-		emailProperties.put("mail.smtp.timeout",
-				mailConfigBean.getProperty("mail.smtp.timeout"));
-		emailProperties.put("mail.smtp.auth",
-				mailConfigBean.getProperty("mail.smtps.auth"));
-		emailProperties.put("mail.debug", "true"); 
-		emailInfo.setProperties(emailProperties);
-		return emailInfo;
+	public EmailConfig getEmailConfig() {		
+		Properties p = Common.loadProperties(GlobalParam.CONFIG_PATH+"/mail.properties");
+		EmailConfig EC = new EmailConfig(p.getProperty("mail.host"), p.getProperty("mail.From"), 
+				p.getProperty("mail.FromName"), p.getProperty("mail.Address"), p.getProperty("mail.Cc"), 
+				p.getProperty("mail.username"), p.getProperty("mail.password"), p.getProperty("mail.Subject"), p.getProperty("mail.Content")); 
+		return EC;
 	}
 
 	private boolean sendHtmlMail(EmailConfig mailInfo) {

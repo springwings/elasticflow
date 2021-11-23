@@ -1,18 +1,16 @@
 package org.elasticflow.task.schedule;
 
+import org.elasticflow.config.GlobalParam;
+import org.elasticflow.util.Common;
+import org.elasticflow.yarn.Resource;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import org.elasticflow.config.GlobalParam;
-import org.elasticflow.util.Common;
 
 /**
  * shedule job manager
@@ -21,9 +19,6 @@ import org.elasticflow.util.Common;
  * @version 1.0 
  */
 public class TaskJobCenter{
-	
-	@Autowired
-	Scheduler scheduler;
 
 	public boolean addJob(JobModel job) throws SchedulerException {
 		if (job == null){
@@ -32,7 +27,7 @@ public class TaskJobCenter{
 		} 
 
 		TriggerKey triggerKey = TriggerKey.triggerKey(job.getJobName());
-		CronTrigger trigger = (CronTrigger) scheduler.getTrigger(triggerKey);
+		CronTrigger trigger = (CronTrigger) Resource.scheduler.getTrigger(triggerKey);
 
 		if (trigger == null) {
 			Common.LOG.info("Add Schedule Job " + job.getJobName());			
@@ -40,12 +35,12 @@ public class TaskJobCenter{
 			jobDetail.getJobDataMap().put(GlobalParam.FLOW_TAG._DEFAULT.name(), job); 
 			CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule(job.getCron());
 			trigger = TriggerBuilder.newTrigger().withIdentity(job.getJobName(),job.getJobName()).withSchedule(scheduleBuilder).build();
-			scheduler.scheduleJob(jobDetail, trigger);
+			Resource.scheduler.scheduleJob(jobDetail, trigger);
 		} else {
 			Common.LOG.info("Modify Schedule Job " + job.getJobName());
 			CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule(job.getCron());
 			trigger = trigger.getTriggerBuilder().withIdentity(triggerKey).withSchedule(scheduleBuilder).build();
-			scheduler.rescheduleJob(triggerKey, trigger);
+			Resource.scheduler.rescheduleJob(triggerKey, trigger);
 		}
 		return true;
 	}
@@ -53,7 +48,7 @@ public class TaskJobCenter{
 	public boolean stopJob(String jobName){
 		JobKey jobKey = JobKey.jobKey(jobName,"DEFAULT");
 		try { 
-			scheduler.pauseJob(jobKey);
+			Resource.scheduler.pauseJob(jobKey);
 		} catch (Exception e) {
 			Common.LOG.error("Stop Job Exception",e);
 			return false;
@@ -64,7 +59,7 @@ public class TaskJobCenter{
 	public boolean startNow(String jobName){
 		JobKey jobKey = JobKey.jobKey(jobName,"DEFAULT");
 		try {
-			scheduler.triggerJob(jobKey);
+			Resource.scheduler.triggerJob(jobKey);
 		} catch (Exception e) {
 			Common.LOG.error("SchedulerException start do Job now",e);
 			return false;
@@ -75,7 +70,7 @@ public class TaskJobCenter{
 	public boolean restartJob(String jobName){
 		JobKey jobKey = JobKey.jobKey(jobName,"DEFAULT");
 		try {
-			scheduler.resumeJob(jobKey);
+			Resource.scheduler.resumeJob(jobKey);
 		} catch (Exception e) {
 			Common.LOG.error("SchedulerException restart Job",e);
 			return false;
@@ -86,7 +81,7 @@ public class TaskJobCenter{
 	public boolean deleteJob(String jobName) {   
 		JobKey jobKey = JobKey.jobKey(jobName,"DEFAULT");
 		try {
-			scheduler.deleteJob(jobKey);
+			Resource.scheduler.deleteJob(jobKey);
 		} catch (Exception e) {
 			Common.LOG.error("SchedulerException delete Job",e);
 			return false;

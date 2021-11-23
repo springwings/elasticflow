@@ -17,7 +17,9 @@ import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.node.SocketCenter;
 import org.elasticflow.node.startup.Run;
 import org.elasticflow.task.FlowTask;
+import org.elasticflow.task.schedule.TaskJobCenter;
 import org.elasticflow.util.email.EFEmailSender;
+import org.quartz.Scheduler;
 
 /**
  * Statistics current node resources
@@ -31,8 +33,12 @@ public final class Resource {
 	
 	public static FlowCenter FlOW_CENTER;
 	
-	public static NodeMonitor nodeMonitor; 
+	public static NodeMonitor nodeMonitor;
 	
+	public static TaskJobCenter taskJobCenter;
+
+	public static Scheduler scheduler;
+		
 	public static EFEmailSender mailSender; 
 	
 	public static NodeConfig nodeConfig;

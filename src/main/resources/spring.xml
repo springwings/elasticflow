@@ -5,11 +5,24 @@
     xmlns:mvc="http://www.springframework.org/schema/mvc"
 	xmlns:util="http://www.springframework.org/schema/util"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
-	    http://www.springframework.org/schema/beans/spring-beans.xsd">
-	<import resource="spring/spring-bean.xml" />
-	<import resource="spring/spring-mail.xml" />
-</beans>
+	    http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/util
+		http://www.springframework.org/schema/util/spring-util.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop.xsd">  
+	<context:component-scan base-package="org.elasticflow" /> 
+	<util:properties id="nodeSystemInfo" location="classpath:config/node.properties"></util:properties>
 
+	<bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean"/>
+	<bean id="HttpReaderService" class="org.elasticflow.reader.service.HttpReaderService"/> 
+	<bean id="SearcherService" class="org.elasticflow.searcher.service.SearcherService"/> 
+	<bean id="ComputerService" class="org.elasticflow.computer.service.ComputerService"/>  
+	<bean id="EFLOWS" class="org.elasticflow.node.startup.Run">  
+		<constructor-arg type="String" index="0" value="#{systemProperties['config']}/config.properties"/>
+	</bean>
+</beans>
 
 
 

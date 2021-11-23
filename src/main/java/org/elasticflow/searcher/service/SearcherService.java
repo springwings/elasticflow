@@ -18,9 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.model.EFSearchRequest;
 import org.elasticflow.model.EFResponse;
-import org.elasticflow.node.SocketCenter;
+import org.elasticflow.model.EFSearchRequest;
 import org.elasticflow.service.EFService;
 import org.elasticflow.service.HttpService;
 import org.elasticflow.util.Common;
@@ -28,7 +27,6 @@ import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * ElasticFlow searcher, support rest service
@@ -37,9 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @date 2018-07-22 09:08
  */
 public class SearcherService{
-	 
-	@Autowired
-	private SocketCenter SocketCenter;    
  
 	private EFService FS;
 	 
@@ -67,7 +62,7 @@ public class SearcherService{
 		String pipe = request.getPipe(); 
 		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getSearchConfigs();
 		if (configMap.containsKey(pipe)) {  
-			SocketCenter.getSearcher(pipe,"","",false).startSearch(request,response);
+			Resource.SOCKET_CENTER.getSearcher(pipe,"","",false).startSearch(request,response);
 		}   
 		response.setEndTime(System.currentTimeMillis());  
 		return response;

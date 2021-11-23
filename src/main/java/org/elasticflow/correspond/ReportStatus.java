@@ -42,11 +42,11 @@ public final class ReportStatus {
 			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES")==false) {
 				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES",false);
 			}
-			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP)==false) {
-				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP,false);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID)==false) {
+				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID,false);
 			}
-			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP + "/configs")==false) {
-				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.IP + "/configs",true);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs")==false) {
+				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs",true);
 			}
 		} catch (Exception e) {
 			Common.LOG.error("environmentCheck Exception", e);
