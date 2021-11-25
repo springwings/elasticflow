@@ -70,19 +70,19 @@ public class FlowCenter{
 					continue;
 				
 				if(GlobalParam.JOB_TYPE.FULL.name().equals(type.toUpperCase())) {
-					if (Common.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready))
+					if (GlobalParam.TASK_STATE.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready))
 						state = jobAction(Common.getInstanceId(instance, L1seq), GlobalParam.JOB_TYPE.FULL.name(), "run") && state;
 						if(state && !asyn) {
 							Thread.sleep(1000);//waiting to start job
-							while(Common.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready)==false)
+							while(GlobalParam.TASK_STATE.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready)==false)
 								Thread.sleep(1000);
 						} 
 				}else {
-					if (Common.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready))
+					if (GlobalParam.TASK_STATE.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready))
 						state = jobAction(Common.getInstanceId(instance, L1seq), GlobalParam.JOB_TYPE.INCREMENT.name(), "run") && state;
 						if(state && asyn) {
 							Thread.sleep(1000);//waiting to start job
-							while(Common.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready)==false)
+							while(GlobalParam.TASK_STATE.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready)==false)
 								Thread.sleep(1000);
 						} 
 				}

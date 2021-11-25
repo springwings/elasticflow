@@ -18,9 +18,9 @@ public class RebalanceTasks {
 	
 	public void reloadConfigs() {
 		Map<String, InstanceConfig> nodes = Resource.nodeConfig.getInstanceConfigs();
-		for (Map.Entry<String, InstanceConfig> entry : nodes.entrySet()) {
-			
-		}
+//		for (Map.Entry<String, InstanceConfig> entry : nodes.entrySet()) {
+//			
+//		}
 	}
 
 }

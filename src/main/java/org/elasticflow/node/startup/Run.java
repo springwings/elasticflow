@@ -29,6 +29,7 @@ import org.elasticflow.reader.service.HttpReaderService;
 import org.elasticflow.searcher.service.SearcherService;
 import org.elasticflow.service.EFMonitorService;
 import org.elasticflow.task.FlowTask;
+import org.elasticflow.task.TaskStateControl;
 import org.elasticflow.task.schedule.TaskJobCenter;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFLoc;
@@ -53,6 +54,7 @@ import com.alibaba.fastjson.JSONObject;
  * @date 2018-11-19 15:33
  */
 public final class Run {
+	
 	@Autowired
 	private SearcherService searcherService;
 	@Autowired
@@ -81,7 +83,11 @@ public final class Run {
 	public Run(String startConfigPath) {
 		this.startConfigPath = startConfigPath;
 	}
-
+	
+	/**
+	 * Initialize relevant models and task execution parameters
+	 * @param initInstance
+	 */
 	public void init(boolean initInstance) {
 		GlobalParam.RUN_ENV = String.valueOf(GlobalParam.StartConfig.get("run_environment"));
 		GlobalParam.VERSION = version;
@@ -106,6 +112,7 @@ public final class Run {
 		}
 		 			
 		Resource.scheduler = scheduler;
+		GlobalParam.TASK_STATE = new TaskStateControl();
 		Resource.mailSender = new EFEmailSender();
 		Resource.tasks = new HashMap<String, FlowTask>();
 		Resource.taskJobCenter = new TaskJobCenter();
@@ -114,8 +121,7 @@ public final class Run {
 		Resource.nodeMonitor = new NodeMonitor(); 
 		
 		int openThreadPools = 0;
-		if (initInstance && (GlobalParam.DISTRIBUTE_RUN==false ||
-				(GlobalParam.DISTRIBUTE_RUN==true && GlobalParam.node_type==NODE_TYPE.master))) {
+		if (initInstance && EFNodeUtil.isMaster()) {
 			Resource.nodeConfig = NodeConfig.getInstance(GlobalParam.StartConfig.getProperty("pond"), GlobalParam.StartConfig.getProperty("instructions"));
 			Resource.nodeConfig.init(GlobalParam.StartConfig.getProperty("instances"),GlobalParam.SERVICE_LEVEL);
 			Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
@@ -134,25 +140,28 @@ public final class Run {
 			Resource.ThreadPools = new ThreadPools(Integer.parseInt(GlobalParam.StartConfig.getProperty("default_threadpool_size")),false);
 		}
 	}
-
+	 
+	/**
+	 * distribute on:
+	 * 			Master, Monitoring cluster and distribution tasks
+	 * 			Slave,  Accept tasks
+	 * distribute off:
+	 * 			Open all services and run tasks normally
+	 */
 	public void startService() {
-		
-		if ((GlobalParam.SERVICE_LEVEL & 1) > 0) 
-			searcherService.start(); 
-		
-		if ((GlobalParam.SERVICE_LEVEL & 2) > 0) {
-			Resource.FlOW_CENTER.buildRWFlow();
+		if(EFNodeUtil.isMaster()) {
+			if ((GlobalParam.SERVICE_LEVEL & 1) > 0) 
+				searcherService.start(); 			
+			if ((GlobalParam.SERVICE_LEVEL & 16) > 0)
+				computerService.start(); 
+			if ((GlobalParam.SERVICE_LEVEL & 8) > 0)
+				Resource.FlOW_CENTER.startInstructionsJob(); 
 		} 
-		
+		if(GlobalParam.DISTRIBUTE_RUN==false && (GlobalParam.SERVICE_LEVEL & 2) > 0) {			
+			Resource.FlOW_CENTER.buildRWFlow();
+		}	 		
 		if ((GlobalParam.SERVICE_LEVEL & 4) > 0)
 			httpReaderService.start();
-		
-		if ((GlobalParam.SERVICE_LEVEL & 16) > 0)
-			computerService.start(); 
-		
-		if ((GlobalParam.SERVICE_LEVEL & 8) > 0)
-			Resource.FlOW_CENTER.startInstructionsJob(); 
-		
 		new EFMonitorService().start();
 	}
 

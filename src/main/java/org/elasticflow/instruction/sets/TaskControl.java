@@ -58,18 +58,17 @@ public class TaskControl extends Instruction{
 			return ;
 		} 		
 		int position = Integer.parseInt(args[0].toString());
-		String[] seqs = Common.getL1seqs(context.getInstanceConfig(),true);  
-		for(String seq:seqs) {  
+		String[] l1seqs = Common.getL1seqs(context.getInstanceConfig(),true);  
+		for(String l1seq:l1seqs) {  
 			List<String> L2Seq = context.getInstanceConfig().getReadParams().getL2Seq();
-			PipePump transDataFlow = Resource.SOCKET_CENTER.getPipePump(context.getInstanceConfig().getName(), seq, false,GlobalParam.FLOW_TAG._DEFAULT.name());
-			String storeId = Common.getStoreId(context.getInstanceConfig().getName(), seq, transDataFlow, true, false);
+			PipePump transDataFlow = Resource.SOCKET_CENTER.getPipePump(context.getInstanceConfig().getName(), l1seq, false,GlobalParam.FLOW_TAG._DEFAULT.name());
+			String storeId = GlobalParam.TASK_STATE.getStoreId(context.getInstanceConfig().getName(), l1seq, transDataFlow, true, false);
 			if(storeId==null)
 				break;
 			for(String tseq:L2Seq) {
-				GlobalParam.SCAN_POSITION.get(context.getInstanceConfig().getName()).updateLSeqPos(
-						Common.getLseq(seq, tseq), String.valueOf(position));  
+				GlobalParam.TASK_STATE.updateLSeqPos(context.getInstanceConfig().getName(), l1seq, tseq, String.valueOf(position));			
 			}
-			Common.saveTaskInfo(context.getInstanceConfig().getName(), seq, storeId,GlobalParam.JOB_INCREMENTINFO_PATH);
+			GlobalParam.TASK_STATE.saveTaskInfo(context.getInstanceConfig().getName(), l1seq, storeId,GlobalParam.JOB_INCREMENTINFO_PATH);
 		}
 	}
 }

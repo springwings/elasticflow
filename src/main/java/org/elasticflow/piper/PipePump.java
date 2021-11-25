@@ -28,6 +28,7 @@ import org.elasticflow.model.reader.ReaderState;
 import org.elasticflow.node.CPU;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.handler.ReaderHandler;
+import org.elasticflow.task.TaskStateControl;
 import org.elasticflow.task.TaskThread;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
@@ -50,6 +51,8 @@ import org.slf4j.LoggerFactory;
 public final class PipePump extends Instruction {
 
 	private final static Logger log = LoggerFactory.getLogger("PipePump");
+	
+	private TaskStateControl taskStateControl;
 
 	public static PipePump getInstance(ReaderFlowSocket reader, ComputerFlowSocket computer,
 			List<WriterFlowSocket> writer, InstanceConfig instanceConfig) {
@@ -59,6 +62,7 @@ public final class PipePump extends Instruction {
 	private PipePump(ReaderFlowSocket reader, ComputerFlowSocket computer, List<WriterFlowSocket> writer,
 			InstanceConfig instanceConfig) {
 		CPU.prepare(getID(), instanceConfig, writer, reader, computer);
+		taskStateControl = new TaskStateControl();
 		try {
 			if (instanceConfig.getReadParams().getHandler() != null) {
 				try {
@@ -251,16 +255,15 @@ public final class PipePump extends Instruction {
 		if (pageNum == 0) {
 			if (task.getInstanceConfig().getPipeParams().getLogLevel() == 0)
 				log.info(Common.formatLog("start", "Complete " + task.getJobType().name(), instanceId, storeId,
-						task.getL2seq(), 0, "", GlobalParam.SCAN_POSITION.get(task.getInstance())
-								.getLSeqPos(Common.getLseq(task.getL1seq(), task.getL2seq())),
+						task.getL2seq(), 0, "", GlobalParam.TASK_STATE.getLSeqPos(task.getInstance(),task.getL1seq(), task.getL2seq()),
 						0, " no data!"));
 		} else {
 			if (task.getInstanceConfig().getPipeParams().getLogLevel() < 2)
 				log.info(Common.formatLog("start",
 						(getInstanceConfig().getPipeParams().isMultiThread() ? "MultiThread" : "SingleThread")
 								+ " Start " + task.getJobType().name(),
-						instanceId, storeId, task.getL1seq(), 0, "", GlobalParam.SCAN_POSITION.get(task.getInstance())
-								.getLSeqPos(Common.getLseq(task.getL1seq(), task.getL2seq())),
+						instanceId, storeId, task.getL1seq(), 0, "",
+						GlobalParam.TASK_STATE.getLSeqPos(task.getInstance(),task.getL1seq(), task.getL2seq()),
 						0, ",totalpage:" + pageNum));
 
 			long start = Common.getNow();
@@ -283,10 +286,9 @@ public final class PipePump extends Instruction {
 				log.info(
 						Common.formatLog("complete", "Complete " + task.getJobType().name(), instanceId, storeId,
 								task.getL2seq(), total.get(), "",
-								GlobalParam.SCAN_POSITION.get(task.getInstance())
-										.getLSeqPos(Common.getLseq(task.getL1seq(), task.getL2seq())),
+								GlobalParam.TASK_STATE.getLSeqPos(task.getInstance(),task.getL1seq(), task.getL2seq()),
 								Common.getNow() - start, ""));
-			if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination))
+			if (GlobalParam.TASK_STATE.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination))
 				throw new EFException(
 						task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
 		}
@@ -318,7 +320,7 @@ public final class PipePump extends Instruction {
 					processPos + "/" + pageList.size());
 			String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(), PipeUtil.getScanParam(
 					task.getL2seq(), startId, dataBoundary, task.getStartTime(), task.getEndTime(), scanField));
-			if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination)) {
+			if (GlobalParam.TASK_STATE.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination)) {
 				break;
 			} else {
 				DataPage pagedata = this.getPageData(
@@ -336,14 +338,11 @@ public final class PipePump extends Instruction {
 				total.getAndAdd(rState.getCount());
 				startId = dataBoundary;
 			}
-
-			if (PipeUtil.scanPosCompare(rState.getReaderScanStamp(), GlobalParam.SCAN_POSITION.get(task.getInstance())
-					.getLSeqPos(Common.getLseq(task.getL1seq(), task.getL2seq())))) {
-				GlobalParam.SCAN_POSITION.get(task.getInstance())
-						.updateLSeqPos(Common.getLseq(task.getL1seq(), task.getL2seq()), rState.getReaderScanStamp());
-			}
+			
+			taskStateControl.setScanPosition(task, rState.getReaderScanStamp()); 
+			 
 			if (task.getJobType() == JOB_TYPE.INCREMENT) {
-				Common.saveTaskInfo(task.getInstance(), task.getL1seq(), storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
+				GlobalParam.TASK_STATE.saveTaskInfo(task.getInstance(), task.getL1seq(), storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
 			}
 		}
 	}
@@ -438,7 +437,7 @@ public final class PipePump extends Instruction {
 				String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(),
 						PipeUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
 								task.getEndTime(), task.getScanParam().getScanField()));
-				if (Common.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(),
+				if (GlobalParam.TASK_STATE.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(),
 						STATUS.Termination)) {
 					Resource.ThreadPools.cleanWaitJob(getId());
 					Common.LOG.warn(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
@@ -462,21 +461,16 @@ public final class PipePump extends Instruction {
 						if (rState == null || rState.isStatus() == false) {
 							Common.LOG.warn("read data exception!");
 							return;
-						}
-						Common.setFlowStatus(task.getInstance(), task.getL1seq(), GlobalParam.JOB_TYPE.FULL.name(),
+						}						
+						GlobalParam.TASK_STATE.setFlowStatus(task.getInstance(), task.getL1seq(), GlobalParam.JOB_TYPE.FULL.name(),
 								STATUS.Blank, STATUS.Ready, getInstanceConfig().getPipeParams().showInfoLog());
 					}
 					total.addAndGet(rState.getCount());
 					startId = dataBoundary;
 				}
-
-				if (rState.getReaderScanStamp().compareTo(GlobalParam.SCAN_POSITION.get(task.getInstance())
-						.getLSeqPos(Common.getLseq(task.getL1seq(), task.getL2seq()))) > 0) {
-					GlobalParam.SCAN_POSITION.get(task.getInstance()).updateLSeqPos(
-							Common.getLseq(task.getL1seq(), task.getL2seq()), rState.getReaderScanStamp());
-				}
+				taskStateControl.setScanPosition(task, rState.getReaderScanStamp()); 
 				if (task.getJobType() == JOB_TYPE.INCREMENT) {
-					Common.saveTaskInfo(task.getInstance(), task.getL1seq(), storeId,
+					GlobalParam.TASK_STATE.saveTaskInfo(task.getInstance(), task.getL1seq(), storeId,
 							GlobalParam.JOB_INCREMENTINFO_PATH);
 				}
 			}

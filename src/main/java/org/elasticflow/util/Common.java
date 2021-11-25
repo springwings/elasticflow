@@ -30,10 +30,8 @@ import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.FIELD_PARSE_TYPE;
-import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.KEY_PARAM;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
-import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.EFResponse;
@@ -41,10 +39,7 @@ import org.elasticflow.model.EFSearchRequest;
 import org.elasticflow.model.FormatProperties;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.model.NMRequest;
-import org.elasticflow.model.reader.ScanPosition;
-import org.elasticflow.node.CPU;
 import org.elasticflow.param.warehouse.WarehouseParam;
-import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.yarn.Resource;
@@ -237,31 +232,7 @@ public final class Common {
 	}
  
 
-	/**
-	 * seq for split data
-	 * 
-	 * @param indexname
-	 * @param L1seq,for
-	 *            series data source fetch
-	 * @return
-	 */
-	public static String getTaskStorePath(String instanceName, String L1seq,String location) {
-		return GlobalParam.INSTANCE_PATH + "/" + instanceName + "/" + ((L1seq != null && L1seq.length() > 0) ? L1seq + "/" : "")
-				+location;
-	}
 
-	/**
-	 * 
-	 * @param instance
-	 * @param L1seq
-	 * @param storeId
-	 * @param location
-	 */
-	public static void saveTaskInfo(String instance, String L1seq,String storeId,String location) {
-		GlobalParam.SCAN_POSITION.get(instance).updateStoreId(storeId);
-		EFDataStorer.setData(getTaskStorePath(instance, L1seq,location),
-				GlobalParam.SCAN_POSITION.get(instance).getString());
-	}  
 	
 	public static String getLseq(String L1seq, String L2seq) {
 		return L1seq+"."+L2seq;
@@ -281,6 +252,19 @@ public final class Common {
 		}
 
 	}
+	
+	public static String getFullStartInfo(String instance, String L1seq) {
+		String info = "0";
+		String path = Common.getTaskStorePath(instance, L1seq,GlobalParam.JOB_FULLINFO_PATH);
+		byte[] b = EFDataStorer.getData(path,true); 
+		if (b != null && b.length > 0) {
+			String str = new String(b); 
+			if (str.length() > 1) {
+				info = str;
+			}
+		}
+		return info;
+	} 
 
 	/** 
 	 * @param L1seq
@@ -297,6 +281,19 @@ public final class Common {
 		} 
 	}
 	
+	/**
+	 * seq for split data
+	 * 
+	 * @param indexname
+	 * @param L1seq,for
+	 *            series data source fetch
+	 * @return
+	 */
+	public static String getTaskStorePath(String instanceName, String L1seq,String location) {
+		return GlobalParam.INSTANCE_PATH + "/" + instanceName + "/" + ((L1seq != null && L1seq.length() > 0) ? L1seq + "/" : "")
+				+location;
+	}
+	
 	public static String getResourceTag(String instance,String L1seq,String tag,boolean ignoreSeq) {
 		StringBuilder tags = new StringBuilder();
 		if (!ignoreSeq && L1seq != null && L1seq.length()>0) {
@@ -307,100 +304,7 @@ public final class Common {
 		return tags.append(tag).toString();
 	}
 	
-	public static String getFullStartInfo(String instance, String L1seq) {
-		String info = "0";
-		String path = Common.getTaskStorePath(instance, L1seq,GlobalParam.JOB_FULLINFO_PATH);
-		byte[] b = EFDataStorer.getData(path,true); 
-		if (b != null && b.length > 0) {
-			String str = new String(b); 
-			if (str.length() > 1) {
-				info = str;
-			}
-		}
-		return info;
-	} 
-	
-	/**
-	 * for Master/slave job get and set LastUpdateTime
-	 * @param instance
-	 * @param L1seq
-	 * @param storeId  Master store id
-	 */
-	public static void setAndGetScanInfo(String instance, String L1seq,String storeId) {
-		synchronized (GlobalParam.SCAN_POSITION) {
-			if(!GlobalParam.SCAN_POSITION.containsKey(instance)) {
-				String path = Common.getTaskStorePath(instance, L1seq,GlobalParam.JOB_INCREMENTINFO_PATH);
-				byte[] b = EFDataStorer.getData(path,true);
-				if (b != null && b.length > 0) {
-					String str = new String(b); 
-					GlobalParam.SCAN_POSITION.put(instance, new ScanPosition(str,instance,storeId));  
-				}else {
-					GlobalParam.SCAN_POSITION.put(instance, new ScanPosition(instance,storeId));
-				}
-				saveTaskInfo(instance, L1seq,storeId,GlobalParam.JOB_INCREMENTINFO_PATH);
-			}
-		}
-		
-	}
-
-	/**
-	 * get increment store tag name and will auto create new one with some conditions.
-	 * 
-	 * @param isIncrement
-	 * @param reCompute
-	 *            force to get storeid recompute from destination engine
-	 * @param L1seq
-	 *            for series data source sequence
-	 * @param instance
-	 *            data source main tag name
-	 * @return String
-	 * @throws EFException 
-	 */
-	public static String getStoreId(String instance, String L1seq, PipePump transDataFlow, boolean isIncrement,
-			boolean reCompute){
-		try {
-			if (isIncrement) { 
-				return getIncrementStoreId(instance,L1seq,transDataFlow,reCompute);
-			} else {
-				return (String) CPU.RUN(transDataFlow.getID(), "Pond", "getNewStoreId",true, getInstanceId(instance, L1seq), false);
-			}
-		} catch (EFException e) {
-			Common.LOG.error("getStoreId",e);
-			Resource.FlOW_CENTER.removeInstance(instance, true, true);
-			processErrorLevel(e);
-		}
-		return null;		
-	} 
-	
-	private static synchronized String getIncrementStoreId(String instance, String L1seq, PipePump transDataFlow,boolean reCompute) throws EFException {
-		String storeId = getStoreId(instance,L1seq,true); 
-		if (storeId.length() == 0 || reCompute) {
-			storeId = (String) CPU.RUN(transDataFlow.getID(), "Pond", "getNewStoreId",false, getInstanceId(instance, L1seq), true); 
-			if (storeId == null)
-				storeId = "a";
-			saveTaskInfo(instance,L1seq,storeId,GlobalParam.JOB_INCREMENTINFO_PATH);
-		}
-		return storeId;
-	}
-	/**
-	 * get store tag name
-	 * @param instanceName
-	 * @param L1seq 
-	 * @return String
-	 */
-	public static String getStoreId(String instance, String L1seq,boolean reload) { 
-		if(reload) {
-			String path = Common.getTaskStorePath(instance, L1seq,GlobalParam.JOB_INCREMENTINFO_PATH);
-			byte[] b = EFDataStorer.getData(path, true);
-			if (b != null && b.length > 0) {
-				String str = new String(b);
-				GlobalParam.SCAN_POSITION.put(instance, new ScanPosition(str,instance,L1seq));  
-			}else {
-				GlobalParam.SCAN_POSITION.put(instance, new ScanPosition(instance,L1seq));
-			}
-		}  
-		return GlobalParam.SCAN_POSITION.get(instance).getStoreId();
-	}
+ 
 	
 	/**
 	 * get read data source seq flags
@@ -493,35 +397,7 @@ public final class Common {
 		}
 		return res;
 	} 
-	
-	/**
-	 * 
-	 * @param instance
-	 * @param seq
-	 * @param type tag for flow status,with job_type
-	 * @param needState equal 0 no need check
-	 * @param plusState
-	 * @param removeState
-	 * @return boolean,lock status
-	 */
-	public static boolean setFlowStatus(String instance,String L1seq,String type,STATUS needState, STATUS setState,boolean showLog) {
-		synchronized (Resource.FLOW_STATUS.get(instance, L1seq, type)) {
-			if (needState.equals(STATUS.Blank) || (Resource.FLOW_STATUS.get(instance, L1seq, type).get() == needState.getVal())) {
-				Resource.FLOW_STATUS.get(instance, L1seq, type).set(setState.getVal()); 
-				return true;
-			} else {
-				if(showLog)
-					LOG.info("{} {} not in {} state!",instance,type,needState.name());
-				return false;
-			}
-		}
-	}  
-	
-	public static boolean checkFlowStatus(String instance,String seq,JOB_TYPE type,STATUS state) {
-		if((Resource.FLOW_STATUS.get(instance, seq, type.name()).get() & state.getVal())>0)
-			return true; 
-		return false;
-	} 
+	  
 	
 	public static Object parseFieldValue(Object v, EFField fd,FIELD_PARSE_TYPE parsetype) throws EFException {
 		if (fd == null)

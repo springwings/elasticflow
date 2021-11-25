@@ -11,9 +11,8 @@ import java.net.InetAddress;
 import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 
-import org.elasticflow.model.reader.ScanPosition;
+import org.elasticflow.task.TaskStateControl;
 import org.elasticflow.util.Common;
 /**
  * global node data store position  
@@ -48,6 +47,8 @@ public final class GlobalParam {
 	public static NODE_TYPE node_type;
 	
 	public static boolean DISTRIBUTE_RUN = false;
+	
+	public static TaskStateControl TASK_STATE;
 	 
 	/**Task Running status define*/
 	public static enum STATUS {  
@@ -160,7 +161,7 @@ public final class GlobalParam {
 	public static enum FLOWINFO{
 		MASTER,FULL_STATE,FULL_STOREID,INCRE_STOREID,FULL_JOBS
 	} 
-	public final static ConcurrentHashMap<String,ScanPosition> SCAN_POSITION = new ConcurrentHashMap<>(); 
+	
 	public final static String DEFAULT_SEQ = "_DFAUTL";
 	public final static String JOB_INCREMENTINFO_PATH = "batch";  
 	public final static String JOB_FULLINFO_PATH = "full_info"; 

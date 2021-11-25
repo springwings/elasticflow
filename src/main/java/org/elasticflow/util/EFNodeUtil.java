@@ -10,10 +10,10 @@ package org.elasticflow.util;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.NODE_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.util.instance.EFDataStorer;
-import org.elasticflow.yarn.Resource;
 
 /**
  * system running control
@@ -34,16 +34,16 @@ public final class EFNodeUtil {
 		String instance = instanceConfig.getName();
 		String[] L1seqs = Common.getL1seqs(instanceConfig, true);
 		for (String L1seq : L1seqs) {
-			Resource.FLOW_STATUS.set(instance, L1seq, GlobalParam.JOB_TYPE.FULL.name(), new AtomicInteger(1));
-			Resource.FLOW_STATUS.set(instance, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(), new AtomicInteger(1));
+			GlobalParam.TASK_STATE.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.FULL.name(), new AtomicInteger(1));
+			GlobalParam.TASK_STATE.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(), new AtomicInteger(1));
 			String path = Common.getTaskStorePath(instance, L1seq, GlobalParam.JOB_INCREMENTINFO_PATH);
 			byte[] b = EFDataStorer.getData(path, true);
 			if (b != null && b.length > 0) {
 				String str = new String(b);
-				GlobalParam.SCAN_POSITION.put(instance,
+				GlobalParam.TASK_STATE.putScanPosition(instance,
 						new ScanPosition(str, instance, L1seq));
 			} else {
-				GlobalParam.SCAN_POSITION.put(instance, new ScanPosition(instance, L1seq));
+				GlobalParam.TASK_STATE.putScanPosition(instance, new ScanPosition(instance, L1seq));
 			}
 		}
 	}
@@ -63,5 +63,13 @@ public final class EFNodeUtil {
 				pc.destroy();
 			}
 		}
+	} 
+	
+	public static boolean isMaster() {
+		if(GlobalParam.DISTRIBUTE_RUN==false || 
+				(GlobalParam.DISTRIBUTE_RUN==true && GlobalParam.node_type==NODE_TYPE.master)) {
+			return true;
+		}
+		return false;
 	}
 }

@@ -15,7 +15,7 @@ public class ScanPosition {
 	
 	private String instance;
 	private String storeId;
-	/**L2seq Scan switch point location information which in Piper configuration file*/
+	/**L2seq Scan switch point location information which in Piper configuration file,Lseq is seq l1 + l2*/
 	private ConcurrentHashMap<String, String> LseqPos = new ConcurrentHashMap<>();
 	private String JOB_STATE_SPERATOR = ":";
 	private String JOB_SEQ_SPERATOR = ",";

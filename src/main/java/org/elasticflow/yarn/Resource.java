@@ -8,7 +8,6 @@
 package org.elasticflow.yarn;
 
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.config.NodeConfig;
 import org.elasticflow.model.EFState;
@@ -44,8 +43,7 @@ public final class Resource {
 	public static NodeConfig nodeConfig;
 	
 	public static Run EFLOWS;
-	/**FLOW_STATUS store current flow running control status*/
-	public final static EFState<AtomicInteger> FLOW_STATUS = new EFState<>();
+	
 	/**FLOW_INFOS store current flow running state information*/
 	public final static EFState<HashMap<String,String>> FLOW_INFOS = new EFState<HashMap<String,String>>();
 
