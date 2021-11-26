@@ -64,7 +64,7 @@ public class FlowCenter{
 		try {
 			if (instanceConfig.openTrans() == false)
 				return false;   
-			String[] L1seqs = Common.getL1seqs(instanceConfig,true);  
+			String[] L1seqs = Common.getL1seqs(instanceConfig);  
 			for (String L1seq : L1seqs) {
 				if (L1seq == null)
 					continue;
@@ -102,7 +102,7 @@ public class FlowCenter{
 		if(configMap.containsKey(instance)){
 			try{
 				InstanceConfig instanceConfig = configMap.get(instance);
-				String[] L1seqs = Common.getL1seqs(instanceConfig,true);
+				String[] L1seqs = Common.getL1seqs(instanceConfig);
 				for (String L1seq : L1seqs) {
 					if (L1seq == null)
 						continue;  
@@ -128,7 +128,7 @@ public class FlowCenter{
 	public void addFlowGovern(String instanceName, InstanceConfig instanceConfig,boolean needClear) { 
 		if (instanceConfig.checkStatus()==false || instanceConfig.openTrans() == false)
 			return;
-		String[] L1seqs = Common.getL1seqs(instanceConfig,true);  
+		String[] L1seqs = Common.getL1seqs(instanceConfig);  
 		try {
 			for (String L1seq : L1seqs) {
 				if (L1seq == null)

@@ -211,28 +211,23 @@ public class EFMonitorUtil {
 			JSONObject Searcher = new JSONObject();
 			JSONObject Task = new JSONObject();
 			if((type&1)>0) {
-				if (Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()) != null) {
-					WarehouseParam ws = Resource.nodeConfig.getWarehouse()
-							.get(config.getPipeParams().getReadFrom());
-					String poolname = "";
-					if (ws.getL1seq().length > 0) {
-						for (String seq : ws.getL1seq()) {
-							poolname = Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom())
-									.getPoolName(seq);
-							Reader.put("Seq(" + seq + ") Pool Status", EFConnectionPool.getStatus(poolname));
-						}
-					} else {
-						poolname = Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom())
-								.getPoolName(null);
-						Reader.put("Pool Status", EFConnectionPool.getStatus(poolname));
-					}
+				if (Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()) != null) {	
+					WarehouseParam wp = Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom());
+					JSONObject poolstatus = new JSONObject();
+					for(String seq:wp.getL1seq()) {
+						poolstatus.put(seq, EFConnectionPool.getStatus(wp.getPoolName(seq)));
+					}					
+					Reader.put("Pool Status", poolstatus);
 				}
 				
 
 				if (Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getWriteTo()) != null) {
-					String poolname = Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getWriteTo())
-							.getPoolName(null);
-					Writer.put("Pool Status", EFConnectionPool.getStatus(poolname));
+					WarehouseParam wp = Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getWriteTo());
+					JSONObject poolstatus = new JSONObject();
+					for(String seq:wp.getL1seq()) {
+						poolstatus.put(seq, EFConnectionPool.getStatus(wp.getPoolName(seq)));
+					}						
+					Writer.put("Pool Status", poolstatus);
 				}
 
 				if ((GlobalParam.SERVICE_LEVEL & 1) > 0) {
@@ -244,14 +239,14 @@ public class EFMonitorUtil {
 					} else {
 						searcherInfo = "Pool Status";
 					}					
-					String poolname = Resource.nodeConfig.getWarehouse().get(searchFrom).getPoolName(null);
+					String poolname = Resource.nodeConfig.getWarehouse().get(searchFrom).getPoolName(GlobalParam.DEFAULT_RESOURCE_SEQ);
 					Searcher.put(searcherInfo, EFConnectionPool.getStatus(poolname));
 					
 				}
 			}
 			
 			if((type&2)>0) {
-				String[] L1seqs = Common.getL1seqs(config, true);
+				String[] L1seqs = Common.getL1seqs(config);
 				for (String seq : L1seqs) {
 					PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(config.getName(), seq, false,
 							GlobalParam.FLOW_TAG._DEFAULT.name());
@@ -290,7 +285,7 @@ public class EFMonitorUtil {
 							for (String str : strs.split(",")) {
 								String update;
 								String[] dstr = str.split(":");
-								if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
+								if (dstr.length >1 && dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
 									update = dstr[0] + ":"
 											+ (SDF.format(dstr[1].length() < 12 ? Long.valueOf(dstr[1] + "000")
 													: Long.valueOf(dstr[1])))

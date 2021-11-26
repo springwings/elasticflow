@@ -252,7 +252,7 @@ public class FlowTask {
 		for (String job : nextJobs) {
 			InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(job);
 			if (instanceConfig.openTrans()) {
-				String[] _seqs = Common.getL1seqs(instanceConfig, true);
+				String[] _seqs = Common.getL1seqs(instanceConfig);
 				for (String seq : _seqs) {
 					if (seq == null)
 						continue;

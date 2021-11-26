@@ -32,7 +32,7 @@ public final class EFNodeUtil {
 	 */
 	public static void initParams(InstanceConfig instanceConfig) {
 		String instance = instanceConfig.getName();
-		String[] L1seqs = Common.getL1seqs(instanceConfig, true);
+		String[] L1seqs = Common.getL1seqs(instanceConfig);
 		for (String L1seq : L1seqs) {
 			GlobalParam.TASK_STATE.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.FULL.name(), new AtomicInteger(1));
 			GlobalParam.TASK_STATE.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(), new AtomicInteger(1));

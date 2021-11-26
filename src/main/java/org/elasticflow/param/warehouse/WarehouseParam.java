@@ -7,6 +7,7 @@
  */
 package org.elasticflow.param.warehouse;
 
+import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.DATA_SOURCE_TYPE;
 
 import com.alibaba.fastjson.JSONObject;
@@ -141,8 +142,16 @@ public class WarehouseParam {
 	public void setAlias(String alias) {
 		this.alias = alias;
 	}
-
+	
+	/**
+	 * get read data source seq flags
+	 * @param instanceName
+	 * @param if empty fill with system default blank seq
+	 * @return
+	 */
 	public String[] getL1seq() {
+		if(this.L1seq.length==0)
+			this.L1seq = new String[] {GlobalParam.DEFAULT_RESOURCE_SEQ};
 		return this.L1seq;
 	}
 

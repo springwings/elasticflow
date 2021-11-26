@@ -33,7 +33,7 @@ public class TaskControl extends Instruction{
 		int start = Integer.parseInt(args[0].toString());
 		int days = Integer.parseInt(args[1].toString());
 		int ride = Integer.parseInt(args[2].toString());
-		String[] L1seqs = Common.getL1seqs(context.getInstanceConfig(),true);  
+		String[] L1seqs = Common.getL1seqs(context.getInstanceConfig());  
 		for(String L1seq:L1seqs) {
 			String info = Common.getFullStartInfo(context.getInstanceConfig().getName(), L1seq);
 			String saveInfo="";
@@ -58,7 +58,7 @@ public class TaskControl extends Instruction{
 			return ;
 		} 		
 		int position = Integer.parseInt(args[0].toString());
-		String[] l1seqs = Common.getL1seqs(context.getInstanceConfig(),true);  
+		String[] l1seqs = Common.getL1seqs(context.getInstanceConfig());  
 		for(String l1seq:l1seqs) {  
 			List<String> L2Seq = context.getInstanceConfig().getReadParams().getL2Seq();
 			PipePump transDataFlow = Resource.SOCKET_CENTER.getPipePump(context.getInstanceConfig().getName(), l1seq, false,GlobalParam.FLOW_TAG._DEFAULT.name());

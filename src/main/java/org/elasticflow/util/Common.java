@@ -312,17 +312,13 @@ public final class Common {
 	 * @param fillDefault if empty fill with system default blank seq
 	 * @return
 	 */
-	public static String[] getL1seqs(InstanceConfig instanceConfig,boolean fillDefault){
+	public static String[] getL1seqs(InstanceConfig instanceConfig){
 		String[] seqs = {};
-		WarehouseParam whParam = Resource.nodeConfig.getWarehouse().get(
+		WarehouseParam wp = Resource.nodeConfig.getWarehouse().get(
 				instanceConfig.getPipeParams().getReadFrom());
-		if (null != whParam) {
-			seqs = whParam.getL1seq();
-		}  
-		if (fillDefault && seqs.length == 0) {
-			seqs = new String[1];
-			seqs[0] = GlobalParam.DEFAULT_RESOURCE_SEQ;
-		} 
+		if (null != wp) {
+			seqs = wp.getL1seq();
+		}   
 		return seqs;
 	} 
 	
