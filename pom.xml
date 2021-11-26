@@ -6,7 +6,7 @@
 	<groupId>org.elasticflow</groupId>
 	<artifactId>elasticflow</artifactId>
 	<packaging>jar</packaging>
-	<version>5.2.0</version>
+	<version>5.3.0</version>
 	<name>elasticflow</name>
 	<description>ElasticFlow是一个开源数据流系统，支持在任意类型数据端之间以及数据与用户之间通过建立可计算流通道，进行可定时定量多渠道方式交换数据服务。可用于数据交换、通用搜索引擎、数据发布服务等项目。</description>
 	<url>https://github.com/springwings/elasticflow/tree/master</url>
@@ -64,7 +64,7 @@
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
-			<version>2.3.2</version>
+			<version>${quartz.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -475,5 +475,6 @@
 		<configPath>src/main/resources</configPath>
 		<spring.version>4.0.4.RELEASE</spring.version>
 		<elasticsearch.version>7.10.1</elasticsearch.version>
+		<quartz.version>2.3.2</quartz.version>
 	</properties>
 </project>

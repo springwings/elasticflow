@@ -117,6 +117,9 @@ public class EFResponse {
 		response.put("createTime", SDF.format(System.currentTimeMillis()));
 		response.put("__SOURCE", GlobalParam.PROJ);
 		response.put("__VERSION", GlobalParam.VERSION);
+		response.put("__NODEID", GlobalParam.NODEID);
+		response.put("__DISTRIBUTE_RUN", GlobalParam.DISTRIBUTE_RUN);
+		response.put("__NODETYPE", GlobalParam.node_type.name());
 		response.put("__ENV", GlobalParam.RUN_ENV);
 		response.put("__IS_DEBUG", GlobalParam.DEBUG);
 		response.put("__SYS_START_TIME", SDF.format(GlobalParam.SYS_START_TIME));
