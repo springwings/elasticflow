@@ -34,16 +34,17 @@ public final class EFNodeUtil {
 		String instance = instanceConfig.getName();
 		String[] L1seqs = Common.getL1seqs(instanceConfig);
 		for (String L1seq : L1seqs) {
-			GlobalParam.TASK_STATE.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.FULL.name(), new AtomicInteger(1));
-			GlobalParam.TASK_STATE.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(), new AtomicInteger(1));
+			GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.FULL.name(), new AtomicInteger(1));
+			GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(), new AtomicInteger(1));
+			GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.MASTER.name(), new AtomicInteger(1));
 			String path = Common.getTaskStorePath(instance, L1seq, GlobalParam.JOB_INCREMENTINFO_PATH);
 			byte[] b = EFDataStorer.getData(path, true);
 			if (b != null && b.length > 0) {
 				String str = new String(b);
-				GlobalParam.TASK_STATE.putScanPosition(instance,
+				GlobalParam.TASK_COORDER.putScanPosition(instance,
 						new ScanPosition(str, instance, L1seq));
 			} else {
-				GlobalParam.TASK_STATE.putScanPosition(instance, new ScanPosition(instance, L1seq));
+				GlobalParam.TASK_COORDER.putScanPosition(instance, new ScanPosition(instance, L1seq));
 			}
 		}
 	}
@@ -65,11 +66,22 @@ public final class EFNodeUtil {
 		}
 	} 
 	
+	/**
+	 * Non distributed default master mode startup
+	 * @return
+	 */
 	public static boolean isMaster() {
-		if(GlobalParam.DISTRIBUTE_RUN==false || 
-				(GlobalParam.DISTRIBUTE_RUN==true && GlobalParam.node_type==NODE_TYPE.master)) {
+		if(GlobalParam.DISTRIBUTE_RUN==false ||(GlobalParam.DISTRIBUTE_RUN==true && GlobalParam.node_type==NODE_TYPE.master)) {
 			return true;
 		}
 		return false;
 	}
+	
+	public static boolean isSlave() {
+		if(GlobalParam.DISTRIBUTE_RUN==true && GlobalParam.node_type==NODE_TYPE.slave) {
+			return true;
+		}
+		return false;
+	}
+	 
 }

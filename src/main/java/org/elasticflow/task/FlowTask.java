@@ -7,8 +7,6 @@
  */
 package org.elasticflow.task;
 
-import java.util.HashMap;
-
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.GlobalParam.STATUS;
@@ -71,7 +69,7 @@ public class FlowTask {
 	public void optimizeInstance() throws EFException {
 		String storeName = Common.getInstanceId(instance, L1seq);
 		CPU.RUN(transDataFlow.getID(), "Pond", "optimizeInstance", true, storeName,
-				GlobalParam.TASK_STATE.getStoreId(instance, L1seq, transDataFlow, true, false));
+				GlobalParam.TASK_COORDER.getStoreId(instance, L1seq, transDataFlow, true, false));
 	}
 	
 	
@@ -83,33 +81,30 @@ public class FlowTask {
 	 * slave instance full job
 	 */
 	public void runFull() {
-		if (!breaker.isOn() && GlobalParam.TASK_STATE.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running,
+		if (!breaker.isOn() && GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running,
 				transDataFlow.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try { 
 				String storeId=null;
-				if (writeInSamePosition && Resource.FLOW_INFOS.containsKey(transDataFlow.getInstanceConfig().getPipeParams().getInstanceName(),
-						GlobalParam.FLOWINFO.MASTER.name())) {
-					storeId = Resource.FLOW_INFOS
-							.get(transDataFlow.getInstanceConfig().getPipeParams().getInstanceName(),
-									GlobalParam.FLOWINFO.MASTER.name())
-							.get(GlobalParam.FLOWINFO.FULL_STOREID.name()); 
+				if (writeInSamePosition) {
+					storeId = GlobalParam.TASK_COORDER.getStoreId(transDataFlow.getInstanceConfig().getPipeParams().getInstanceName(), 
+							L1seq, transDataFlow, false, false);					
 				} else {
-					storeId = GlobalParam.TASK_STATE.getStoreId(instance, L1seq, transDataFlow, false, false);
+					storeId = GlobalParam.TASK_COORDER.getStoreId(instance, L1seq, transDataFlow, false, false);
 					CPU.RUN(transDataFlow.getID(), "Pond", "createStorePosition", true,
 							Common.getInstanceId(instance, L1seq), storeId);
 				}
 				if(storeId!=null) {
-					GlobalParam.TASK_STATE.scanPositionkeepCurrentPos(instance);
+					GlobalParam.TASK_COORDER.scanPositionkeepCurrentPos(instance);
 					transDataFlow.run(instance, storeId, L1seq, true,
 							writeInSamePosition);
-					GlobalParam.TASK_STATE.scanPositionRecoverKeep(instance); 
-					GlobalParam.TASK_STATE.saveTaskInfo(instance, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
+					GlobalParam.TASK_COORDER.scanPositionRecoverKeep(instance); 
+					GlobalParam.TASK_COORDER.saveTaskInfo(instance, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
 				} 
 			} catch (Exception e) {
 				breaker.log();
 				log.error(instance + " Full Exception", e);
 			} finally {
-				GlobalParam.TASK_STATE.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready,
+				GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready,
 						transDataFlow.getInstanceConfig().getPipeParams().showInfoLog());
 			}
 		} else {
@@ -122,34 +117,27 @@ public class FlowTask {
 	 * Primary virtual node full task running
 	 */
 	public void runMasterFull() {
-		if (GlobalParam.TASK_STATE.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running,
+		if (GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running,
 				transDataFlow.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
-				String storeId = GlobalParam.TASK_STATE.getStoreId(instance, L1seq, transDataFlow, false, false); 
+				String storeId;
 				String destination = instance;
-				if(writeInSamePosition) 
+				if(writeInSamePosition) {
 					destination = transDataFlow.getInstanceConfig().getPipeParams().getInstanceName(); 
-				
-				if (!Resource.FLOW_INFOS.containsKey(destination, GlobalParam.FLOWINFO.MASTER.name())) 
-					Resource.FLOW_INFOS.set(destination, GlobalParam.FLOWINFO.MASTER.name(),
-						new HashMap<String, String>());
-				Resource.FLOW_INFOS.get(destination, 
-						GlobalParam.FLOWINFO.MASTER.name()).put(GlobalParam.FLOWINFO.FULL_STOREID.name(), storeId);
+				} 
+				storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, transDataFlow, false, false); 
 
 				CPU.RUN(transDataFlow.getID(), "Pond", "createStorePosition", true,
 						Common.getInstanceId(instance, L1seq), storeId);
-
-				Resource.FLOW_INFOS.get(destination, GlobalParam.FLOWINFO.MASTER.name()).put(
-						GlobalParam.FLOWINFO.FULL_JOBS.name(),
-						getNextJobs(transDataFlow.getInstanceConfig().getPipeParams().getNextJob()));
-				
+				GlobalParam.TASK_COORDER.setFlowInfo(destination,GlobalParam.JOB_TYPE.MASTER.name(),GlobalParam.FLOWINFO.FULL_JOBS.name(),
+						getNextJobs(transDataFlow.getInstanceConfig().getPipeParams().getNextJob()));	
 				for (String slave : transDataFlow.getInstanceConfig().getPipeParams().getNextJob()) { 
 					Resource.FlOW_CENTER.runInstanceNow(slave, "full",transDataFlow.getInstanceConfig().getPipeParams().isAsync());
 				}
 			} catch (Exception e) {
 				log.error(instance + " Full Exception", e);
 			} finally {
-				GlobalParam.TASK_STATE.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready,
+				GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready,
 						transDataFlow.getInstanceConfig().getPipeParams().showInfoLog());
 			}
 		} else {
@@ -163,25 +151,19 @@ public class FlowTask {
 	 * @throws EFException 
 	 */
 	public void runMasterIncrement() throws EFException {
-		if (GlobalParam.TASK_STATE.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
+		if (GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
 				transDataFlow.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
-				String storeId = GlobalParam.TASK_STATE.getStoreId(instance, L1seq, transDataFlow, true, recompute); 
+				String storeId = GlobalParam.TASK_COORDER.getStoreId(instance, L1seq, transDataFlow, true, recompute); 
 				String destination = instance;
 				if(writeInSamePosition)
-					destination = transDataFlow.getInstanceConfig().getPipeParams().getInstanceName();
-				
-				if (!Resource.FLOW_INFOS.containsKey(destination, GlobalParam.FLOWINFO.MASTER.name())) 
-					Resource.FLOW_INFOS.set(destination, GlobalParam.FLOWINFO.MASTER.name(),
-						new HashMap<String, String>());
-				Resource.FLOW_INFOS.get(destination, 
-						GlobalParam.FLOWINFO.MASTER.name()).put(GlobalParam.FLOWINFO.INCRE_STOREID.name(), storeId);
-				
+					destination = transDataFlow.getInstanceConfig().getPipeParams().getInstanceName();				
+				GlobalParam.TASK_COORDER.setFlowInfo(destination, GlobalParam.JOB_TYPE.MASTER.name(), GlobalParam.FLOWINFO.INCRE_STOREID.name(), storeId); 				
 				for (String slave : transDataFlow.getInstanceConfig().getPipeParams().getNextJob()) {
 					Resource.FlOW_CENTER.runInstanceNow(slave, "increment",transDataFlow.getInstanceConfig().getPipeParams().isAsync());
 				}
 			} finally {
-				GlobalParam.TASK_STATE.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
+				GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
 						transDataFlow.getInstanceConfig().getPipeParams().showInfoLog());  
 				recompute = false;
 			}
@@ -195,21 +177,21 @@ public class FlowTask {
 	 * slave instance increment job
 	 */
 	public void runIncrement() {  
-		if (!breaker.isOn() && GlobalParam.TASK_STATE.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
+		if (!breaker.isOn() && GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
 				transDataFlow.getInstanceConfig().getPipeParams().showInfoLog())) {
 			String storeId;
-			if (writeInSamePosition) {
-				storeId = Resource.FLOW_INFOS.get(transDataFlow.getInstanceConfig().getPipeParams().getInstanceName(),
-						GlobalParam.FLOWINFO.MASTER.name()).get(GlobalParam.FLOWINFO.INCRE_STOREID.name());
-				GlobalParam.TASK_STATE.setAndGetScanInfo(instance, L1seq, storeId);
+			if (writeInSamePosition) {				
+				storeId = GlobalParam.TASK_COORDER.getStoreId(transDataFlow.getInstanceConfig().getPipeParams().getInstanceName()
+						, L1seq, transDataFlow, true, false);
+				GlobalParam.TASK_COORDER.setAndGetScanInfo(instance, L1seq, storeId);
 			} else {
-				storeId = GlobalParam.TASK_STATE.getStoreId(instance, L1seq, transDataFlow, true, recompute);
+				storeId = GlobalParam.TASK_COORDER.getStoreId(instance, L1seq, transDataFlow, true, recompute);
 			} 
 			try {
 				transDataFlow.run(instance, storeId, L1seq, false, writeInSamePosition); 
 			} catch (EFException e) {
 				if (!writeInSamePosition && e.getErrorType()==ETYPE.WRITE_POS_NOT_FOUND) { 
-					storeId = GlobalParam.TASK_STATE.getStoreId(instance, L1seq, transDataFlow, true, true);
+					storeId = GlobalParam.TASK_COORDER.getStoreId(instance, L1seq, transDataFlow, true, true);
 					log.warn("try to rebuild "+instance+" storage location！");
 					try {
 						transDataFlow.run(instance, storeId,L1seq, false, writeInSamePosition);
@@ -222,7 +204,7 @@ public class FlowTask {
 				log.error(instance + " IncrementJob Exception", e);
 			} finally {
 				recompute = this.checkReCompute(storeId);
-				GlobalParam.TASK_STATE.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
+				GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
 						transDataFlow.getInstanceConfig().getPipeParams().showInfoLog()); 
 			}
 		} else {

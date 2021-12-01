@@ -62,13 +62,13 @@ public class TaskControl extends Instruction{
 		for(String l1seq:l1seqs) {  
 			List<String> L2Seq = context.getInstanceConfig().getReadParams().getL2Seq();
 			PipePump transDataFlow = Resource.SOCKET_CENTER.getPipePump(context.getInstanceConfig().getName(), l1seq, false,GlobalParam.FLOW_TAG._DEFAULT.name());
-			String storeId = GlobalParam.TASK_STATE.getStoreId(context.getInstanceConfig().getName(), l1seq, transDataFlow, true, false);
+			String storeId = GlobalParam.TASK_COORDER.getStoreId(context.getInstanceConfig().getName(), l1seq, transDataFlow, true, false);
 			if(storeId==null)
 				break;
 			for(String tseq:L2Seq) {
-				GlobalParam.TASK_STATE.updateLSeqPos(context.getInstanceConfig().getName(), l1seq, tseq, String.valueOf(position));			
+				GlobalParam.TASK_COORDER.updateLSeqPos(context.getInstanceConfig().getName(), l1seq, tseq, String.valueOf(position));			
 			}
-			GlobalParam.TASK_STATE.saveTaskInfo(context.getInstanceConfig().getName(), l1seq, storeId,GlobalParam.JOB_INCREMENTINFO_PATH);
+			GlobalParam.TASK_COORDER.saveTaskInfo(context.getInstanceConfig().getName(), l1seq, storeId,GlobalParam.JOB_INCREMENTINFO_PATH);
 		}
 	}
 }

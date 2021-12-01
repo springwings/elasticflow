@@ -134,13 +134,13 @@ public class EFMonitorUtil {
 		StringBuilder sb = new StringBuilder();
 		for (String seq : seqs) {
 			sb.append(seq.length() == 0 ? "MAIN " : seq + ":");
-			if (GlobalParam.TASK_STATE.checkFlowStatus(instance, seq, type, STATUS.Stop))
+			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, STATUS.Stop))
 				sb.append("Stop,");
-			if (GlobalParam.TASK_STATE.checkFlowStatus(instance, seq, type, STATUS.Ready))
+			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, STATUS.Ready))
 				sb.append("Ready,");
-			if (GlobalParam.TASK_STATE.checkFlowStatus(instance, seq, type, STATUS.Running))
+			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, STATUS.Running))
 				sb.append("Running,");
-			if (GlobalParam.TASK_STATE.checkFlowStatus(instance, seq, type, STATUS.Termination))
+			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, STATUS.Termination))
 				sb.append("Termination,");
 			sb.append(" ;");
 		}
@@ -168,9 +168,9 @@ public class EFMonitorUtil {
 			int waittime = 0;
 			String[] seqs = EFMonitorUtil.getInstanceL1seqs(instance);
 			for (String seq : seqs) {
-				if (GlobalParam.TASK_STATE.checkFlowStatus(inst, seq, controlType, STATUS.Running)) {
-					GlobalParam.TASK_STATE.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
-					while (!GlobalParam.TASK_STATE.checkFlowStatus(inst, seq, controlType, STATUS.Ready)) {
+				if (GlobalParam.TASK_COORDER.checkFlowStatus(inst, seq, controlType, STATUS.Running)) {
+					GlobalParam.TASK_COORDER.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
+					while (!GlobalParam.TASK_COORDER.checkFlowStatus(inst, seq, controlType, STATUS.Ready)) {
 						try {
 							waittime++;
 							Thread.sleep(300);
@@ -182,8 +182,8 @@ public class EFMonitorUtil {
 						}
 					}
 				}
-				GlobalParam.TASK_STATE.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
-				if (GlobalParam.TASK_STATE.setFlowStatus(inst, seq, controlType.name(), STATUS.Termination, state, true)) {
+				GlobalParam.TASK_COORDER.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
+				if (GlobalParam.TASK_COORDER.setFlowStatus(inst, seq, controlType.name(), STATUS.Termination, state, true)) {
 					Common.LOG.info("Instance {} success set state {}.",inst,state);
 				} else {
 					Common.LOG.info("Instance {} fail set state {}.",inst,state);
@@ -275,11 +275,11 @@ public class EFMonitorUtil {
 						StringBuilder sb = new StringBuilder();
 						StringBuilder fullstate = new StringBuilder();
 						for (String seq : wsp.getL1seq()) {
-							String strs = GlobalParam.TASK_STATE.getscanPositionString(instance);
+							String strs = GlobalParam.TASK_COORDER.getscanPositionString(instance);
 							if (strs == null)
 								continue;
 							sb.append("\r\n;(" + seq + ") "
-									+ GlobalParam.TASK_STATE.getStoreId(instance)
+									+ GlobalParam.TASK_COORDER.getStoreId(instance)
 									+ ":");
 
 							for (String str : strs.split(",")) {
@@ -301,7 +301,7 @@ public class EFMonitorUtil {
 						Task.put("Incremental storage status", sb);
 						Task.put("Full storage status", fullstate);
 					} else {
-						String strs = GlobalParam.TASK_STATE.getscanPositionString(instance);
+						String strs = GlobalParam.TASK_COORDER.getscanPositionString(instance);
 						if (strs.length() > 0) {
 							StringBuilder stateStr = new StringBuilder();
 							if (strs.split(",").length > 0) {
@@ -319,7 +319,7 @@ public class EFMonitorUtil {
 								}
 							}
 							Task.put("Incremental storage status",
-									GlobalParam.TASK_STATE.getStoreId(instance)
+									GlobalParam.TASK_COORDER.getStoreId(instance)
 											+ ":" + stateStr.toString());
 						}
 						Task.put("Full storage status", Common.getFullStartInfo(instance, null));

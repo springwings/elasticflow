@@ -418,8 +418,8 @@ public final class NodeMonitor {
 					val = rq.getParameter("set_value");
 				String[] L1seqs = EFMonitorUtil.getInstanceL1seqs(instance);
 				for (String L1seq : L1seqs) {
-					GlobalParam.TASK_STATE.batchUpdateSeqPos(instance,val);
-					GlobalParam.TASK_STATE.saveTaskInfo(instance, L1seq, GlobalParam.TASK_STATE.getStoreId(instance, L1seq, false),
+					GlobalParam.TASK_COORDER.batchUpdateSeqPos(instance,val);
+					GlobalParam.TASK_COORDER.saveTaskInfo(instance, L1seq, GlobalParam.TASK_COORDER.getStoreId(instance, L1seq, false),
 							GlobalParam.JOB_INCREMENTINFO_PATH);
 				}
 				setResponse(RESPONSE_STATUS.Success, rq.getParameter("instance") + " reset Success!", null);
@@ -584,11 +584,7 @@ public final class NodeMonitor {
 	 */
 	public void stopInstance(Request rq) {
 		if (EFMonitorUtil.checkParams(this, rq, "instance,type")) {
-			if (rq.getParameter("type").toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
-				EFMonitorUtil.controlInstanceState(rq.getParameter("instance"), STATUS.Stop, false);
-			} else {
-				EFMonitorUtil.controlInstanceState(rq.getParameter("instance"), STATUS.Stop, true);
-			}
+			GlobalParam.INSTANCE_COORDER.stopInstance(rq.getParameter("instance"),rq.getParameter("type"));
 			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have stopped!", null);
 		}
 	}
@@ -600,11 +596,7 @@ public final class NodeMonitor {
 	 */
 	public void resumeInstance(Request rq) {
 		if (EFMonitorUtil.checkParams(this, rq, "instance,type")) {
-			if (rq.getParameter("type").toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
-				EFMonitorUtil.controlInstanceState(rq.getParameter("instance"), STATUS.Ready, false);
-			} else {
-				EFMonitorUtil.controlInstanceState(rq.getParameter("instance"), STATUS.Ready, true);
-			}
+			GlobalParam.INSTANCE_COORDER.resumeInstance(rq.getParameter("instance"),rq.getParameter("type"));
 			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have resumed!", null);
 		}
 	}
@@ -660,19 +652,11 @@ public final class NodeMonitor {
 	 */
 	public void addInstance(Request rq) {
 		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
-			Resource.nodeConfig.loadConfig(rq.getParameter("instance"), false);
-			String tmp[] = rq.getParameter("instance").split(":");
-			String instanceName = rq.getParameter("instance");
-			if (tmp.length > 1)
-				instanceName = tmp[0];
-			InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instanceName);
-			if (instanceConfig.checkStatus())
-				EFNodeUtil.initParams(instanceConfig);
-			EFMonitorUtil.rebuildFlowGovern(rq.getParameter("instance"));
+			GlobalParam.INSTANCE_COORDER.addInstance(rq.getParameter("instance"));
 			EFMonitorUtil.addConfigInstances(rq.getParameter("instance"));
 			try {
 				EFMonitorUtil.saveNodeConfig();
-				setResponse(RESPONSE_STATUS.Success, instanceName + " add to node " + GlobalParam.IP + " Success!",
+				setResponse(RESPONSE_STATUS.Success, rq.getParameter("instance") + " add to node " + GlobalParam.IP + " Success!",
 						null);
 			} catch (Exception e) {
 				setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
@@ -713,7 +697,7 @@ public final class NodeMonitor {
 								instance, L1seq, tags);
 						wfs.PREPARE(false, false);
 						if (wfs.ISLINK()) {
-							wfs.removeInstance(instance, GlobalParam.TASK_STATE.getStoreId(instance, L1seq, true));
+							wfs.removeInstance(instance, GlobalParam.TASK_COORDER.getStoreId(instance, L1seq, true));
 							wfs.REALEASE(false, false);
 						}
 					}
@@ -797,14 +781,7 @@ public final class NodeMonitor {
 	 * @param instance
 	 */
 	private void removeInstance(String instance) {
-		EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
-		if (Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType() > 0) {
-			Resource.FLOW_INFOS.remove(instance, JOB_TYPE.FULL.name());
-			Resource.FLOW_INFOS.remove(instance, JOB_TYPE.INCREMENT.name());
-		}
-		Resource.nodeConfig.getInstanceConfigs().remove(instance);
-		Resource.FlOW_CENTER.removeInstance(instance, true, true);
-		EFMonitorUtil.removeConfigInstance(instance);
+		GlobalParam.INSTANCE_COORDER.removeInstance(instance);
 		try {
 			EFMonitorUtil.saveNodeConfig();
 		} catch (Exception e) {

@@ -318,7 +318,9 @@ public final class Common {
 				instanceConfig.getPipeParams().getReadFrom());
 		if (null != wp) {
 			seqs = wp.getL1seq();
-		}   
+		}else {
+			LOG.warn("{} resource is null.",instanceConfig.getPipeParams().getReadFrom());
+		}
 		return seqs;
 	} 
 	

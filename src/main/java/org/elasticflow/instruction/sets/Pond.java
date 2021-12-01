@@ -127,10 +127,10 @@ public class Pond extends Instruction {
 		mainName = Common.getInstanceId(String.valueOf(args[0]),String.valueOf(args[1]));
 		storeId = String.valueOf(args[2]); 
 		int waittime=0; 
-		if(GlobalParam.TASK_STATE.checkFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT,STATUS.Running)) {
-			GlobalParam.TASK_STATE.setFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT.name(), STATUS.Blank, STATUS.Termination,
+		if(GlobalParam.TASK_COORDER.checkFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT,STATUS.Running)) {
+			GlobalParam.TASK_COORDER.setFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT.name(), STATUS.Blank, STATUS.Termination,
 					context.getInstanceConfig().getPipeParams().showInfoLog());
-			while (!GlobalParam.TASK_STATE.checkFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready)) {
+			while (!GlobalParam.TASK_COORDER.checkFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready)) {
 				try {
 					waittime++;
 					Thread.sleep(2000);
@@ -142,7 +142,7 @@ public class Pond extends Instruction {
 				}
 			}  
 		} 
-		GlobalParam.TASK_STATE.setFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT.name(), STATUS.Blank, STATUS.Termination,
+		GlobalParam.TASK_COORDER.setFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT.name(), STATUS.Blank, STATUS.Termination,
 				context.getInstanceConfig().getPipeParams().showInfoLog()); 
 		context.getWriter().PREPARE(false, false);  
 		if (context.getWriter().ISLINK()) {
@@ -162,8 +162,8 @@ public class Pond extends Instruction {
 			} catch (Exception e) {
 				log.error("switchInstance Exception", e);
 			} finally { 
-				GlobalParam.TASK_STATE.saveTaskInfo(String.valueOf(args[0]), String.valueOf(args[1]), storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
-				GlobalParam.TASK_STATE.setFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
+				GlobalParam.TASK_COORDER.saveTaskInfo(String.valueOf(args[0]), String.valueOf(args[1]), storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
+				GlobalParam.TASK_COORDER.setFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
 						context.getInstanceConfig().getPipeParams().showInfoLog());
 				context.getWriter().REALEASE(false,false); 
 			}

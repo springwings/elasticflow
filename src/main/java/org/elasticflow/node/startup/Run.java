@@ -8,6 +8,7 @@
 package org.elasticflow.node.startup;
 
 import java.io.File;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
@@ -29,7 +30,6 @@ import org.elasticflow.reader.service.HttpReaderService;
 import org.elasticflow.searcher.service.SearcherService;
 import org.elasticflow.service.EFMonitorService;
 import org.elasticflow.task.FlowTask;
-import org.elasticflow.task.TaskStateControl;
 import org.elasticflow.task.schedule.TaskJobCenter;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFLoc;
@@ -37,8 +37,13 @@ import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.email.EFEmailSender;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.util.instance.ZKUtil;
+import org.elasticflow.yarn.EFRPCClient;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.ThreadPools;
+import org.elasticflow.yarn.coord.DiscoveryCoord;
+import org.elasticflow.yarn.coord.TaskStateCoord;
+import org.elasticflow.yarn.coorder.InstanceCoorder;
+import org.elasticflow.yarn.coorder.TaskStateCoorder;
 import org.elasticflow.yarn.monitor.ResourceMonitor;
 import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,6 +104,8 @@ public final class Run {
 		GlobalParam.DISTRIBUTE_RUN = GlobalParam.StartConfig.getProperty("distribute_run").equals("false") ? false : true;
 		GlobalParam.MASTER_HOST = GlobalParam.StartConfig.getProperty("master_host");
 		GlobalParam.SERVICE_LEVEL = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
+		if(!GlobalParam.StartConfig.get("node_ip").equals(""))
+			GlobalParam.IP = GlobalParam.StartConfig.get("node_ip").toString();
 		
 		switch(GlobalParam.StartConfig.getProperty("node_type")) {
 		case "master":
@@ -111,8 +118,7 @@ public final class Run {
 			GlobalParam.node_type = NODE_TYPE.slave;
 		}
 		 			
-		Resource.scheduler = scheduler;
-		GlobalParam.TASK_STATE = new TaskStateControl();
+		Resource.scheduler = scheduler;		
 		Resource.mailSender = new EFEmailSender();
 		Resource.tasks = new HashMap<String, FlowTask>();
 		Resource.taskJobCenter = new TaskJobCenter();
@@ -120,25 +126,51 @@ public final class Run {
 		Resource.FlOW_CENTER = new FlowCenter();;
 		Resource.nodeMonitor = new NodeMonitor(); 
 		
-		int openThreadPools = 0;
-		if (initInstance && EFNodeUtil.isMaster()) {
-			Resource.nodeConfig = NodeConfig.getInstance(GlobalParam.StartConfig.getProperty("pond"), GlobalParam.StartConfig.getProperty("instructions"));
-			Resource.nodeConfig.init(GlobalParam.StartConfig.getProperty("instances"),GlobalParam.SERVICE_LEVEL);
-			Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
-			for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {
-				InstanceConfig instanceConfig = entry.getValue();
-				if (instanceConfig.checkStatus())
-					EFNodeUtil.initParams(instanceConfig);
-				if(instanceConfig.getPipeParams().isMultiThread())
-					openThreadPools +=1;
-			}
+		if(!EFNodeUtil.isSlave()) {
+			GlobalParam.TASK_COORDER = new TaskStateCoorder();
+			GlobalParam.INSTANCE_COORDER = new InstanceCoorder();
 		}
-		if(openThreadPools>0) {
+		
+		int openThreadPools = 0;
+		if (initInstance) {
+			Resource.nodeConfig = NodeConfig.getInstance(GlobalParam.StartConfig.getProperty("pond"), GlobalParam.StartConfig.getProperty("instructions"));
+			Resource.nodeConfig.init(GlobalParam.StartConfig.getProperty("instances"));
+			if(EFNodeUtil.isMaster()) {				
+				Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
+				for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {
+					InstanceConfig instanceConfig = entry.getValue();
+					if (instanceConfig.checkStatus())
+						EFNodeUtil.initParams(instanceConfig);
+					if(instanceConfig.getPipeParams().isMultiThread())
+						openThreadPools +=1;
+				}
+			}						
+		}
+		if(openThreadPools>0 && GlobalParam.DISTRIBUTE_RUN==false) {
 			Resource.ThreadPools = new ThreadPools(openThreadPools,true);
 			Resource.ThreadPools.start();
 		}else {
 			Resource.ThreadPools = new ThreadPools(Integer.parseInt(GlobalParam.StartConfig.getProperty("default_threadpool_size")),false);
 		}
+		
+		if(EFNodeUtil.isSlave()) {
+			Resource.ThreadPools.execute(() -> {
+				boolean redo = true;
+				while (redo) {
+					try {
+						GlobalParam.TASK_COORDER = EFRPCClient.getRemoteProxyObj(TaskStateCoord.class, 
+								new InetSocketAddress(GlobalParam.StartConfig.getProperty("master_host"), GlobalParam.NODE_DATA_SYN_PORT));			
+						GlobalParam.DISCOVERY_COORDER = EFRPCClient.getRemoteProxyObj(DiscoveryCoord.class, 
+								new InetSocketAddress(GlobalParam.StartConfig.getProperty("master_host"), GlobalParam.NODE_DATA_SYN_PORT));
+						redo = false;
+					} catch (Exception e) { 
+						GlobalParam.TASK_COORDER = null;
+						GlobalParam.DISCOVERY_COORDER = null;
+					}
+				}
+			});
+		}
+		
 	}
 	 
 	/**
@@ -156,13 +188,10 @@ public final class Run {
 				computerService.start(); 
 			if ((GlobalParam.SERVICE_LEVEL & 8) > 0)
 				Resource.FlOW_CENTER.startInstructionsJob(); 
-		} 
-		if(GlobalParam.DISTRIBUTE_RUN==false && (GlobalParam.SERVICE_LEVEL & 2) > 0) {			
-			Resource.FlOW_CENTER.buildRWFlow();
-		}	 		
+			new EFMonitorService().start();
+		} 		
 		if ((GlobalParam.SERVICE_LEVEL & 4) > 0)
 			httpReaderService.start();
-		new EFMonitorService().start();
 	}
 
 	public void loadGlobalConfig(String path, boolean fromZk) {
@@ -219,7 +248,12 @@ public final class Run {
 	    	Common.LOG.error("Init System Exception", e);
 	    	Common.stopSystem();
 	    } 
-		Common.LOG.info("ElasticFlow Start Success!");
+		if(GlobalParam.DISTRIBUTE_RUN) {
+			Common.LOG.info("ElasticFlow {} Start Success!",GlobalParam.StartConfig.get("node_type"));
+		}else {
+			Common.LOG.info("ElasticFlow standalone mode Start Success!");
+		}
+		
 	} 
 
 	public static void main(String[] args) throws Exception {

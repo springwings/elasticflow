@@ -33,16 +33,7 @@ public class FlowCenter{
 	private String not_run_cron = "0 0 0 1 1 ? 2099";
 	
 	private HashSet<String> cron_exists=new HashSet<String>();
-
-	/**
-	 * build reader-writer flow
-	 */
-	public void buildRWFlow() { 
-		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
-		for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) { 
-			addFlowGovern(entry.getKey(), entry.getValue(),false); 
-		} 
-	}
+ 
 	
 	public void startInstructionsJob() {
 		Map<String, InstructionParam> instructions = Resource.nodeConfig.getInstructions();
@@ -70,19 +61,19 @@ public class FlowCenter{
 					continue;
 				
 				if(GlobalParam.JOB_TYPE.FULL.name().equals(type.toUpperCase())) {
-					if (GlobalParam.TASK_STATE.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready))
+					if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready))
 						state = jobAction(Common.getInstanceId(instance, L1seq), GlobalParam.JOB_TYPE.FULL.name(), "run") && state;
 						if(state && !asyn) {
 							Thread.sleep(1000);//waiting to start job
-							while(GlobalParam.TASK_STATE.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready)==false)
+							while(GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready)==false)
 								Thread.sleep(1000);
 						} 
 				}else {
-					if (GlobalParam.TASK_STATE.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready))
+					if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready))
 						state = jobAction(Common.getInstanceId(instance, L1seq), GlobalParam.JOB_TYPE.INCREMENT.name(), "run") && state;
 						if(state && asyn) {
 							Thread.sleep(1000);//waiting to start job
-							while(GlobalParam.TASK_STATE.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready)==false)
+							while(GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready)==false)
 								Thread.sleep(1000);
 						} 
 				}

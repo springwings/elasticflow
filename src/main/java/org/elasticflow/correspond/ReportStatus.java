@@ -9,48 +9,65 @@ package org.elasticflow.correspond;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.instance.EFDataStorer;
- 
+import org.elasticflow.yarn.Resource;
+
 /**
  * Report EF machine node status.
+ * 
  * @author chengwen
  * @version 2.0
  * @date 2018-11-21 15:43
  */
-public final class ReportStatus {  
-	 
-	public static void jobState() {
-		 
+public final class ReportStatus {
+
+	static int heartBeatTime = 3000;
+
+	public static void heartBeat() {
+		if (EFNodeUtil.isMaster() == false) {
+			Resource.ThreadPools.execute(() -> {
+				while (true) {
+					try {
+						Thread.sleep(heartBeatTime);
+						GlobalParam.DISCOVERY_COORDER.report(GlobalParam.IP, GlobalParam.NODEID);						
+					} catch (Exception e) {
+						Common.LOG.warn("master node cannot connect.");
+					}
+				}
+			});
+		}
 	}
-	
-	public static void nodeConfigs(){
+
+	public static void nodeConfigs() {
 		try {
-			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH)==false) {
+			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH) == false) {
 				String path = "";
 				for (String str : GlobalParam.CONFIG_PATH.split("/")) {
 					path += "/" + str;
-					EFDataStorer.createPath(path,false);
-				} 
+					EFDataStorer.createPath(path, false);
+				}
 			}
-			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH+"/INSTANCES")==false)
-				EFDataStorer.createPath(GlobalParam.CONFIG_PATH+"/INSTANCES",false);
-			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH+"/instructions.xml")==false)
-				EFDataStorer.createPath(GlobalParam.CONFIG_PATH+"/instructions.xml",true);
-			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH+"/resource.xml")==false) 
-				EFDataStorer.createPath(GlobalParam.CONFIG_PATH+"/resource.xml",true);
-			
-			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES")==false) {
-				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES",false);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/INSTANCES") == false)
+				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/INSTANCES", false);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/instructions.xml") == false)
+				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/instructions.xml", true);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/resource.xml") == false)
+				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/resource.xml", true);
+
+			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES") == false) {
+				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES", false);
 			}
-			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID)==false) {
-				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID,false);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID) == false) {
+				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID, false);
 			}
-			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs")==false) {
-				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs",true);
+			if (EFDataStorer
+					.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs") == false) {
+				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs", true);
 			}
 		} catch (Exception e) {
 			Common.LOG.error("environmentCheck Exception", e);
 		}
 	}
-	
+
 }

@@ -124,7 +124,7 @@ public class HttpReaderService {
 							if (RR.getParam("type").equals("full") && RR.getParam("storeid") != null) {
 								storeid = (String) RR.getParam("storeid");
 							} else {
-								storeid = GlobalParam.TASK_STATE.getStoreId(instance, seq, pipePump, true, false);
+								storeid = GlobalParam.TASK_COORDER.getStoreId(instance, seq, pipePump, true, false);
 							}
 							boolean isUpdate = false;
 
@@ -162,7 +162,7 @@ public class HttpReaderService {
 						if (RR.getParam("instance") != null && RR.getParam("seq") != null) {
 							PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(String.valueOf(RR.getParam("instance")),
 									String.valueOf(RR.getParam("seq")), false, "");
-							String storeid = GlobalParam.TASK_STATE.getStoreId(String.valueOf(RR.getParam("instance")), String.valueOf(RR.getParam("seq")), pipePump,
+							String storeid = GlobalParam.TASK_COORDER.getStoreId(String.valueOf(RR.getParam("instance")), String.valueOf(RR.getParam("seq")), pipePump,
 									false, false);
 							CPU.RUN(pipePump.getID(), "Pond", "createStorePosition", true, RR.getParam("instance"),
 									storeid);
@@ -180,7 +180,7 @@ public class HttpReaderService {
 							if (RR.getParam("storeid") != null) {
 								storeid = (String) RR.getParam("storeid");
 							} else {
-								storeid = GlobalParam.TASK_STATE.getStoreId(instance, seq, pipePump, false, false);
+								storeid = GlobalParam.TASK_COORDER.getStoreId(instance, seq, pipePump, false, false);
 								CPU.RUN(pipePump.getID(), "Pond", "createStorePosition", true, instance, storeid);
 							}
 							CPU.RUN(pipePump.getID(), "Pond", "switchInstance", true, instance, seq, storeid);
@@ -203,7 +203,7 @@ public class HttpReaderService {
 								rps.setStatus("Writer get Error,Instance and seq Error!", RESPONSE_STATUS.DataErr);
 								break;
 							}
-							String storeid = GlobalParam.TASK_STATE.getStoreId(instance, seq, transFlow, true, true);
+							String storeid = GlobalParam.TASK_COORDER.getStoreId(instance, seq, transFlow, true, true);
 							WarehouseParam param = Resource.SOCKET_CENTER
 									.getWHP(transFlow.getInstanceConfig().getPipeParams().getWriteTo());
 							switch (param.getType()) {

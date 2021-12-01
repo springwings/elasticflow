@@ -30,14 +30,14 @@ public class TaskJobCenter{
 		CronTrigger trigger = (CronTrigger) Resource.scheduler.getTrigger(triggerKey);
 
 		if (trigger == null) {
-			Common.LOG.info("Add Schedule Job " + job.getJobName());			
+			Common.LOG.info("Add Instance Task " + job.getJobName());			
 			JobDetail jobDetail = JobBuilder.newJob(JobRunFactory.class).withIdentity(job.getJobName()).build();
 			jobDetail.getJobDataMap().put(GlobalParam.FLOW_TAG._DEFAULT.name(), job); 
 			CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule(job.getCron());
 			trigger = TriggerBuilder.newTrigger().withIdentity(job.getJobName(),job.getJobName()).withSchedule(scheduleBuilder).build();
 			Resource.scheduler.scheduleJob(jobDetail, trigger);
 		} else {
-			Common.LOG.info("Modify Schedule Job " + job.getJobName());
+			Common.LOG.info("Modify Instance Task " + job.getJobName());
 			CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule(job.getCron());
 			trigger = trigger.getTriggerBuilder().withIdentity(triggerKey).withSchedule(scheduleBuilder).build();
 			Resource.scheduler.rescheduleJob(triggerKey, trigger);
@@ -50,7 +50,7 @@ public class TaskJobCenter{
 		try { 
 			Resource.scheduler.pauseJob(jobKey);
 		} catch (Exception e) {
-			Common.LOG.error("Stop Job Exception",e);
+			Common.LOG.error("Stop Task Exception",e);
 			return false;
 		} 	 
 		return true;
@@ -61,7 +61,7 @@ public class TaskJobCenter{
 		try {
 			Resource.scheduler.triggerJob(jobKey);
 		} catch (Exception e) {
-			Common.LOG.error("SchedulerException start do Job now",e);
+			Common.LOG.error("start task exception",e);
 			return false;
 		}
 		return true;
@@ -72,7 +72,7 @@ public class TaskJobCenter{
 		try {
 			Resource.scheduler.resumeJob(jobKey);
 		} catch (Exception e) {
-			Common.LOG.error("SchedulerException restart Job",e);
+			Common.LOG.error("restart task exception",e);
 			return false;
 		}
 		return true;
@@ -83,7 +83,7 @@ public class TaskJobCenter{
 		try {
 			Resource.scheduler.deleteJob(jobKey);
 		} catch (Exception e) {
-			Common.LOG.error("SchedulerException delete Job",e);
+			Common.LOG.error("delete task exception",e);
 			return false;
 		} 
 		return true;

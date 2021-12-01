@@ -1,5 +1,14 @@
-package org.elasticflow.task;
+/*
+ * Copyright ElasticFlow B.V. and/or licensed to ElasticFlow B.V. under one
+ * or more contributor license agreements. Licensed under the ElasticFlow License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+package org.elasticflow.yarn.coorder;
 
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -16,10 +25,19 @@ import org.elasticflow.util.EFException;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.util.instance.PipeUtil;
 import org.elasticflow.yarn.Resource;
-import org.elasticflow.yarn.coordinate.TaskStateCoord;
+import org.elasticflow.yarn.coord.TaskStateCoord;
 
-public class TaskStateControl implements TaskStateCoord{
-	
+/**
+ * Running task status cluster Coordinator
+ * 
+ * @author chengwen
+ * @version 0.1
+ * @create_time 2021-07-30
+ */
+public class TaskStateCoorder implements TaskStateCoord,Serializable{
+
+	private static final long serialVersionUID = 6182329757414086104L;
+
 	final static ConcurrentHashMap<String,ScanPosition> SCAN_POSITION = new ConcurrentHashMap<>(); 
 	
 	/**FLOW_STATUS store current flow running control status*/
@@ -86,15 +104,17 @@ public class TaskStateControl implements TaskStateCoord{
 		return SCAN_POSITION.get(instance).getStoreId();
 	}
 	
-	public synchronized String getIncrementStoreId(String instance, String L1seq, PipePump transDataFlow,boolean reCompute) throws EFException {
-		String storeId = getStoreId(instance,L1seq,true); 
-		if (storeId.length() == 0 || reCompute) {
-			storeId = (String) CPU.RUN(transDataFlow.getID(), "Pond", "getNewStoreId",false, Common.getInstanceId(instance, L1seq), true); 
-			if (storeId == null)
-				storeId = "a";
-			saveTaskInfo(instance,L1seq,storeId,GlobalParam.JOB_INCREMENTINFO_PATH);
+	public String getIncrementStoreId(String instance, String L1seq, PipePump transDataFlow,boolean reCompute) throws EFException {
+		synchronized(this) {
+			String storeId = getStoreId(instance,L1seq,true); 
+			if (storeId.length() == 0 || reCompute) {
+				storeId = (String) CPU.RUN(transDataFlow.getID(), "Pond", "getNewStoreId",false, Common.getInstanceId(instance, L1seq), true); 
+				if (storeId == null)
+					storeId = "a";
+				saveTaskInfo(instance,L1seq,storeId,GlobalParam.JOB_INCREMENTINFO_PATH);
+			}
+			return storeId;
 		}
-		return storeId;
 	}
 	
 	/**
@@ -199,5 +219,19 @@ public class TaskStateControl implements TaskStateCoord{
 	 */
 	public String getStoreId(String instance) {
 		return SCAN_POSITION.get(instance).getStoreId();
+	}
+	
+	public void setFlowInfo(String formKeyVal1,String formKeyVal2,String key,String data) {
+		if(!Resource.FLOW_INFOS.containsKey(formKeyVal1,formKeyVal2))
+			Resource.FLOW_INFOS.set(formKeyVal1,formKeyVal2, new HashMap<String, String>());
+		Resource.FLOW_INFOS.get(formKeyVal1,formKeyVal2).put(key,data);
+	}
+	
+	public void resetFlowInfo(String formKeyVal1,String formKeyVal2) {
+		Resource.FLOW_INFOS.get(formKeyVal1,formKeyVal2).clear();
+	}
+	
+	public HashMap<String, String> getFlowInfo(String formKeyVal1,String formKeyVal2) {
+		return Resource.FLOW_INFOS.get(formKeyVal1,formKeyVal2);
 	}
 }

@@ -3,9 +3,29 @@ package org.elasticflow.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 
+/**
+ * 
+ * @author chengwen
+ * @version 1.0
+ * @date 2018-11-07 14:12
+ */
 public class EFFileUtil { 
-
+	
+	public static String readText(String filePath,String encoding) { 
+		File file = new File(filePath);
+		Long filelength = file.length();
+		byte[] filecontent = new byte[filelength.intValue()];
+		try (FileInputStream in = new FileInputStream(file)) { 
+			in.read(filecontent); 
+			return new String(filecontent, encoding);
+		} catch (Exception e) {
+			Common.LOG.warn(" read text Exception",e); 
+		}  
+		return null;
+	}
+	
 	public static void renameFile(String filePath, String oldName, String newName){
 		if(!oldName.equals(newName)){
 			File oldFile = new File(filePath+"/"+oldName);
@@ -29,6 +49,36 @@ public class EFFileUtil {
         }catch(Exception e){
             return false;
         }
+	}
+	
+	public static boolean createFile(String content, String fileDest) { 
+		FileWriter writer = null;
+		try {
+			File file = new File(fileDest);
+			if (!file.exists()) {
+				File parentFile = file.getParentFile();
+				if (parentFile.exists()) {
+					file.createNewFile();
+				} else {
+					parentFile.mkdirs();
+					file.createNewFile();
+				}
+			}
+			writer = new FileWriter(file, false); 
+			writer.write(content);
+		} catch (Exception e) {
+			Common.LOG.warn("create File Exception",e);
+			return false;
+		} finally {
+			try {
+				if(writer!=null)
+					writer.close(); 
+			} catch (Exception e) {
+				Common.LOG.warn("writer close Exception",e);
+				return false;
+			}
+		} 
+		return true;
 	}
 
 	public static boolean copyFile(String sourcePath, String destPath) {

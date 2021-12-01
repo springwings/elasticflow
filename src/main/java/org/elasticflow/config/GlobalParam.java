@@ -12,8 +12,10 @@ import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Properties;
 
-import org.elasticflow.task.TaskStateControl;
 import org.elasticflow.util.Common;
+import org.elasticflow.yarn.coord.DiscoveryCoord;
+import org.elasticflow.yarn.coord.InstanceCoord;
+import org.elasticflow.yarn.coord.TaskStateCoord;
 /**
  * global node data store position  
  * @author chengwen
@@ -38,6 +40,10 @@ public final class GlobalParam {
 	
 	public static int CONNECTION_POOL_SIZE = 5;
 	
+	public static int NODE_DATA_SYN_PORT = 8618;
+	
+	public static int NODE_INSTANCE_SYN_PORT = 8619;
+	
 	public static String NODEID = System.getProperty("nodeid");;
 	
 	public static final String PROJ = "ElasticFlow";
@@ -48,7 +54,11 @@ public final class GlobalParam {
 	
 	public static boolean DISTRIBUTE_RUN = false;
 	
-	public static TaskStateControl TASK_STATE;
+	public static TaskStateCoord TASK_COORDER;
+	
+	public static InstanceCoord INSTANCE_COORDER;
+	
+	public static DiscoveryCoord DISCOVERY_COORDER;
 	 
 	/**Task Running status define*/
 	public static enum STATUS {  
@@ -156,10 +166,10 @@ public final class GlobalParam {
 	public final static String DEFAULT_FIELD = "SYSTEM_UPDATE_TIME"; 
 	public final static String DEFAULT_RESOURCE_SEQ = ""; 
 	public static enum JOB_TYPE {
-		FULL,INCREMENT,OPTIMIZE,INSTRUCTION
+		MASTER,FULL,INCREMENT,OPTIMIZE,INSTRUCTION
 	} 
 	public static enum FLOWINFO{
-		MASTER,FULL_STATE,FULL_STOREID,INCRE_STOREID,FULL_JOBS
+		FULL_STATE,FULL_STOREID,INCRE_STOREID,FULL_JOBS
 	} 
 	
 	public final static String DEFAULT_SEQ = "_DFAUTL";

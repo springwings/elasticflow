@@ -3,12 +3,12 @@ package org.elasticflow.yarn.model;
 import org.elasticflow.util.Common;
 
 /**
-* @description 
-* @author chengwen
-* @version 1.0
-* @date 2018-11-13 10:53
-*/
-
+ * 
+ * 
+ * @author chengwen
+ * @version 0.1
+ * @create_time 2021-07-30
+ */
 public class EFNode {
 	
 	private String ip;

@@ -20,6 +20,7 @@ import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
 import org.elasticflow.param.pipe.InstructionParam;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -57,38 +58,38 @@ public class NodeConfig {
 		return o;
 	}
 
-	public void init(String instances, int SERVICE_LEVEL) {
-		loadConfig(instances, true);
-		if ((SERVICE_LEVEL & 1) > 0) {
-			for (Map.Entry<String, InstanceConfig> e : this.instanceConfigs.entrySet()) {
-				this.searchConfigMap.put(e.getValue().getAlias(), e.getValue());
-			}
-		} 
+	public void init(String instanceSettings) {
+		loadConfig(instanceSettings, true); 
 	}
 
-	public void loadConfig(String instances, boolean reset) {
+	public void loadConfig(String instanceSettings, boolean reset) {
 		if (reset) {
 			this.instanceConfigs.clear();
+			this.searchConfigMap.clear();
 			parsePondFile(GlobalParam.CONFIG_PATH + "/" + this.pondFile);
 			parseInstructionsFile(GlobalParam.CONFIG_PATH + "/" + this.instructionsFile);
-		}
-		if (instances.trim().length() < 1)
+		} 
+		if(EFNodeUtil.isMaster())
+			loadInstanceConfig(instanceSettings);
+	}
+	
+	public void loadInstanceConfig(String instanceSettings) {  
+		if (instanceSettings.trim().length() < 1)
 			return;
-		for (String inst : instances.split(",")) {
+		for (String inst : instanceSettings.split(",")) {
 			String[] strs = inst.split(":");
-			if (strs.length <= 0 || strs[0].length() < 1)
+			if (strs.length < 1)
 				continue;
 			int instanceType = INSTANCE_TYPE.Blank.getVal();
 			String name = strs[0].trim();
 			if (strs.length == 2) {
 				instanceType = Integer.parseInt(strs[1].strip());
-			}
-			String filename = GlobalParam.INSTANCE_PATH + "/" + name + "/task.xml";
+			} 
 			InstanceConfig nconfig;
 			if (this.instanceConfigs.containsKey(name)) {
 				nconfig = this.instanceConfigs.get(name);
 			} else {
-				nconfig = new InstanceConfig(filename, instanceType);
+				nconfig = new InstanceConfig(getInstancePath(name)[1], instanceType);
 				this.instanceConfigs.put(name, nconfig);
 			}
 			nconfig.init();
@@ -98,6 +99,13 @@ public class NodeConfig {
 			nconfig.setName(name);
 			this.searchConfigMap.put(nconfig.getAlias(), nconfig);
 		}
+	}
+	
+	public static String[] getInstancePath(String instance) {
+		String[] dt = new String[2];
+		dt[0] = GlobalParam.INSTANCE_PATH + "/" + instance + "/batch";
+		dt[1] = GlobalParam.INSTANCE_PATH + "/" + instance + "/task.xml";
+		return dt;
 	}
 
 	public Map<String, InstructionParam> getInstructions() {
