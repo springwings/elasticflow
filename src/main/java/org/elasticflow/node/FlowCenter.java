@@ -115,8 +115,15 @@ public class FlowCenter{
 		}
 		return state;
 	}
- 
-	public void addFlowGovern(String instanceName, InstanceConfig instanceConfig,boolean needClear) { 
+	
+	/**
+	 * Add flow pipeline management
+	 * @param instanceName
+	 * @param instanceConfig
+	 * @param needClear
+	 * @param createSchedule
+	 */
+	public void addFlowGovern(String instanceName, InstanceConfig instanceConfig,boolean needClear,boolean createSchedule) { 
 		if (instanceConfig.checkStatus()==false || instanceConfig.openTrans() == false)
 			return;
 		String[] L1seqs = Common.getL1seqs(instanceConfig);  
@@ -128,7 +135,8 @@ public class FlowCenter{
 					Resource.tasks.put(Common.getInstanceId(instanceName, L1seq), FlowTask.createTask(instanceName,
 					Resource.SOCKET_CENTER.getPipePump(instanceName, L1seq,needClear,GlobalParam.FLOW_TAG._DEFAULT.name()), L1seq));
 				}  
-				createFlowScheduleJob(Common.getInstanceId(instanceName, L1seq), Resource.tasks.get(Common.getInstanceId(instanceName, L1seq)),
+				if(createSchedule)
+					createFlowScheduleJob(Common.getInstanceId(instanceName, L1seq), Resource.tasks.get(Common.getInstanceId(instanceName, L1seq)),
 						instanceConfig,needClear);
 			}
 		} catch (Exception e) {

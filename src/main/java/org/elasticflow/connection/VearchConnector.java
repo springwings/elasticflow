@@ -152,6 +152,9 @@ public class VearchConnector {
 		rooter_post.addHeader("Content-Type", "application/json;charset=UTF-8");
 		StringBuffer sb = new StringBuffer();
 		int i = 0;
+		if(datas.size()%2!=0) {
+			throw new EFException("Dirty data Exception.");
+		}
 		while (i < datas.size()) {
 			sb.append("\n" + String.valueOf(datas.get(i)) + "\n");
 			sb.append(datas.get(i + 1).toString());

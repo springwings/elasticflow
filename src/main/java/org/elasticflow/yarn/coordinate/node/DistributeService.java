@@ -31,16 +31,17 @@ import org.elasticflow.yarn.coorder.TaskStateCoorder;
 public class DistributeService {
 
 	public void start() {
-		if (GlobalParam.DISTRIBUTE_RUN == false) {
+		if(EFNodeUtil.isMaster()) {
+			boolean createSchedule = !GlobalParam.DISTRIBUTE_RUN;
 			if ((GlobalParam.SERVICE_LEVEL & 2) > 0) {
 				Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 				for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {
-					Resource.FlOW_CENTER.addFlowGovern(entry.getKey(), entry.getValue(), false);
+					Resource.FlOW_CENTER.addFlowGovern(entry.getKey(), entry.getValue(), false,createSchedule);
 				}
 			}
-		} else {
-			instanceCoordStart();
 		}
+		if (GlobalParam.DISTRIBUTE_RUN) 
+			instanceCoordStart();		
 	}
 
 	public void instanceCoordStart() {

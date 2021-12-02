@@ -88,12 +88,12 @@ public class EFMonitorUtil {
 	}
 
 	
-	public static void rebuildFlowGovern(String instanceSettting) {
+	public static void rebuildFlowGovern(String instanceSettting,boolean createSchedule) {
 		for (String inst : instanceSettting.split(",")) {
 			String[] strs = inst.split(":");
 			if (strs.length < 1)
 				continue;
-			Resource.FlOW_CENTER.addFlowGovern(strs[0], Resource.nodeConfig.getInstanceConfigs().get(strs[0]), true);
+			Resource.FlOW_CENTER.addFlowGovern(strs[0], Resource.nodeConfig.getInstanceConfigs().get(strs[0]), true,createSchedule);
 		}
 	}
 	

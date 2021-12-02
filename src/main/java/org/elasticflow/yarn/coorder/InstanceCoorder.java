@@ -59,7 +59,7 @@ public class InstanceCoorder implements InstanceCoord{
 		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instanceName);
 		if (instanceConfig.checkStatus())
 			EFNodeUtil.initParams(instanceConfig);
-		EFMonitorUtil.rebuildFlowGovern(instanceSettting);		
+		EFMonitorUtil.rebuildFlowGovern(instanceSettting,true);		
 	}
 	
 	public void addNode(String ip,String nodeId) {
@@ -82,10 +82,12 @@ public class InstanceCoorder implements InstanceCoord{
 				if(Integer.parseInt(strs[1])>0) {
 					Integer nodeid = i/nodeSize+1;
 					instanceNode.put(_instances[i],nodeid);
-					if(!instanceCoord.contains(nodeid)) {
-						instanceCoord.put(nodeid, EFRPCClient.getRemoteProxyObj(InstanceCoord.class, 
-							new InetSocketAddress(nodes.get(nodeid).getIp(), GlobalParam.NODE_INSTANCE_SYN_PORT)));
-					} 
+					synchronized(instanceCoord) {
+						if(!instanceCoord.contains(nodeid)) {
+							instanceCoord.put(nodeid, EFRPCClient.getRemoteProxyObj(InstanceCoord.class, 
+								new InetSocketAddress(nodes.get(nodeid).getIp(), GlobalParam.NODE_INSTANCE_SYN_PORT)));
+						} 
+					}					
 					String[] paths = NodeConfig.getInstancePath(strs[0]); 
 					instanceCoord.get(nodeid).sendInstanceData(EFFileUtil.readText(paths[0], "utf-8"),
 							EFFileUtil.readText(paths[1], "utf-8"),strs[0]);

@@ -629,7 +629,7 @@ public final class NodeMonitor {
 				Resource.nodeConfig.loadConfig(instanceConfig, false);
 				Resource.FlOW_CENTER.removeInstance(rq.getParameter("instance"), true, true);
 			}
-			EFMonitorUtil.rebuildFlowGovern(instanceConfig);
+			EFMonitorUtil.rebuildFlowGovern(instanceConfig,!GlobalParam.DISTRIBUTE_RUN);
 			EFMonitorUtil.controlInstanceState(rq.getParameter("instance"), STATUS.Ready, true);
 			setResponse(RESPONSE_STATUS.Success, rq.getParameter("instance") + " reload Config Success!", null);
 		}

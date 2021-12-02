@@ -211,8 +211,10 @@ public final class Run {
 		}
 		GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");
 		GlobalParam.USE_ZK = Boolean.valueOf(GlobalParam.StartConfig.getProperty("use_zk"));
+		if(GlobalParam.USE_ZK)
+			ZKUtil.setZkHost(GlobalParam.StartConfig.getProperty("zkhost"));
 		GlobalParam.INSTANCE_PATH = (GlobalParam.CONFIG_PATH+"/INSTANCES").intern();
-		ZKUtil.setZkHost(GlobalParam.StartConfig.getProperty("zkhost"));
+		
 	}
 	
 	private void loadPlugins(String plugin) {
