@@ -20,6 +20,7 @@ ElasticFlow就是为解决该问题而生。
     数据推断服务 
 	...
 综上任务都可以通过ElasticFlow，使用其可控的可计算流管道来实现。
+ElasticFlow可以以分布式系统(Master/Slave)或者单节点两种运行，其中分布式部署将支持自动对实例级进行任务负载均衡，以实现大规模的弹性流任务构建。
 
 # Versions
 	version 5.x
@@ -74,3 +75,4 @@ ElasticFlow就是为解决该问题而生。
 
 # develop plan
 1 Support external computing Libraries such as so/dll
+2 optimize distribute running.

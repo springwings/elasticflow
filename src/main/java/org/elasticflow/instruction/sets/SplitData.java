@@ -5,7 +5,7 @@ import org.elasticflow.instruction.Instruction;
 import org.elasticflow.util.Common;
 
 /**
- * 
+ * Split Datas Instruction sets
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:25

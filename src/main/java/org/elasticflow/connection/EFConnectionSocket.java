@@ -13,7 +13,9 @@ public abstract class EFConnectionSocket<T>{
 	
 	protected volatile ConnectParams connectParams;
 	
-	private boolean isShare = false; 
+	private boolean isShare = false;
+	
+	private String infos="";
 	
 	protected abstract boolean connect(END_TYPE endType); 
 	
@@ -37,5 +39,15 @@ public abstract class EFConnectionSocket<T>{
 	
 	public ConnectParams getConnectParams(){
 		return this.connectParams;
+	}
+	
+	public void setInfos(String infos) {
+		this.infos = infos;
+	}
+	
+	public String getInfos() {
+		String tmp = this.infos;
+		this.infos = "";
+		return tmp;
 	}
 }

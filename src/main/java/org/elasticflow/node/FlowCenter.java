@@ -14,10 +14,12 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.param.pipe.InstructionParam;
+import org.elasticflow.piper.PipePump;
 import org.elasticflow.task.FlowTask;
 import org.elasticflow.task.InstructionTask;
 import org.elasticflow.task.schedule.JobModel;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.yarn.Resource;
 import org.quartz.SchedulerException;
 
@@ -122,6 +124,7 @@ public class FlowCenter{
 	 * @param instanceConfig
 	 * @param needClear
 	 * @param createSchedule
+	 * @param contextId
 	 */
 	public void addFlowGovern(String instanceName, InstanceConfig instanceConfig,boolean needClear,boolean createSchedule) { 
 		if (instanceConfig.checkStatus()==false || instanceConfig.openTrans() == false)
@@ -132,8 +135,14 @@ public class FlowCenter{
 				if (L1seq == null)
 					continue; 
 				if(!Resource.tasks.containsKey(Common.getInstanceId(instanceName, L1seq)) || needClear){
+					PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instanceName, L1seq,needClear,GlobalParam.FLOW_TAG._DEFAULT.name());
+					if(EFNodeUtil.isSlave()) {
+						String newRunId = GlobalParam.TASK_COORDER.getContextId(instanceName, L1seq,GlobalParam.FLOW_TAG._DEFAULT.name());
+						CPU.reIndexContexts(pipePump.getID(), newRunId);
+						pipePump.setID(newRunId);						
+					}
 					Resource.tasks.put(Common.getInstanceId(instanceName, L1seq), FlowTask.createTask(instanceName,
-					Resource.SOCKET_CENTER.getPipePump(instanceName, L1seq,needClear,GlobalParam.FLOW_TAG._DEFAULT.name()), L1seq));
+							pipePump, L1seq));
 				}  
 				if(createSchedule)
 					createFlowScheduleJob(Common.getInstanceId(instanceName, L1seq), Resource.tasks.get(Common.getInstanceId(instanceName, L1seq)),

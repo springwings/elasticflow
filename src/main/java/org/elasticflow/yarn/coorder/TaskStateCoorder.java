@@ -16,10 +16,8 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.model.EFState;
-import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.node.CPU;
-import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.instance.EFDataStorer;
@@ -28,95 +26,113 @@ import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coord.TaskStateCoord;
 
 /**
- * Running task status cluster Coordinator
+ * Running task status cluster Coordinator Coordinate pipeline status and
+ * information
  * 
  * @author chengwen
  * @version 0.1
  * @create_time 2021-07-30
  */
-public class TaskStateCoorder implements TaskStateCoord,Serializable{
+public class TaskStateCoorder implements TaskStateCoord, Serializable {
 
 	private static final long serialVersionUID = 6182329757414086104L;
 
-	final static ConcurrentHashMap<String,ScanPosition> SCAN_POSITION = new ConcurrentHashMap<>(); 
-	
-	/**FLOW_STATUS store current flow running control status*/
+	final static ConcurrentHashMap<String, ScanPosition> SCAN_POSITION = new ConcurrentHashMap<>();
+
+	/** FLOW_STATUS store current flow running control status */
 	final static EFState<AtomicInteger> FLOW_STATUS = new EFState<>();
-	
-	public void setFlowStatus(String instance, String L1seq,String tag,AtomicInteger ai) {
-		FLOW_STATUS.set(instance, L1seq, tag,ai);
+
+	public String getContextId(String instance, String L1seq, String tag) {
+		return Resource.SOCKET_CENTER.getContextId(instance, L1seq, tag);
 	}
-	
-	public void setScanPosition(Task task,String scanStamp) {
-		if (PipeUtil.scanPosCompare(scanStamp, SCAN_POSITION.get(task.getInstance())
-				.getLSeqPos(Common.getLseq(task.getL1seq(), task.getL2seq())))) {
-			SCAN_POSITION.get(task.getInstance())
-			.updateLSeqPos(Common.getLseq(task.getL1seq(), task.getL2seq()),scanStamp);
-		}		
+
+	public void setFlowStatus(String instance, String L1seq, String tag, AtomicInteger ai) {
+		FLOW_STATUS.set(instance, L1seq, tag, ai);
 	}
-	
-	public boolean checkFlowStatus(String instance,String seq,JOB_TYPE type,STATUS state) {
-		if((FLOW_STATUS.get(instance, seq, type.name()).get() & state.getVal())>0)
-			return true; 
+
+	public void setScanPosition(String instance, String L1seq, String L2seq, String scanStamp) {
+		synchronized (SCAN_POSITION) {
+			if (!SCAN_POSITION.containsKey(instance)) {
+				SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), scanStamp);
+			} else if (PipeUtil.scanPosCompare(scanStamp,
+					SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq)))) {
+				SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), scanStamp);
+			}
+		}
+	}
+
+	public boolean checkFlowStatus(String instance, String seq, JOB_TYPE type, STATUS state) {
+		if ((FLOW_STATUS.get(instance, seq, type.name()).get() & state.getVal()) > 0)
+			return true;
 		return false;
-	} 
-	
+	}
+
 	/**
 	 * 
 	 * @param instance
 	 * @param seq
-	 * @param type tag for flow status,with job_type
-	 * @param needState equal 0 no need check
+	 * @param type        tag for flow status,with job_type
+	 * @param needState   equal 0 no need check
 	 * @param plusState
 	 * @param removeState
 	 * @return boolean,lock status
 	 */
-	public boolean setFlowStatus(String instance,String L1seq,String type,STATUS needState, STATUS setState,boolean showLog) {
+	public boolean setFlowStatus(String instance, String L1seq, String type, STATUS needState, STATUS setState,
+			boolean showLog) {
 		synchronized (FLOW_STATUS.get(instance, L1seq, type)) {
-			if (needState.equals(STATUS.Blank) || (FLOW_STATUS.get(instance, L1seq, type).get() == needState.getVal())) {
-				FLOW_STATUS.get(instance, L1seq, type).set(setState.getVal()); 
+			if (needState.equals(STATUS.Blank)
+					|| (FLOW_STATUS.get(instance, L1seq, type).get() == needState.getVal())) {
+				FLOW_STATUS.get(instance, L1seq, type).set(setState.getVal());
 				return true;
 			} else {
-				if(showLog)
-					Common.LOG.info("{} {} not in {} state!",instance,type,needState.name());
+				if (showLog)
+					Common.LOG.info("{} {} not in {} state!", instance, type, needState.name());
 				return false;
 			}
 		}
 	}
-	
+
 	/**
-	 * get store tag name
+	 * get store tag name from save file
+	 * 
 	 * @param instanceName
-	 * @param L1seq 
+	 * @param L1seq
 	 * @return String
 	 */
-	public String getStoreId(String instance, String L1seq,boolean reload) { 
-		if(reload) {
-			String path = Common.getTaskStorePath(instance, L1seq,GlobalParam.JOB_INCREMENTINFO_PATH);
+	public String getStoreIdFromSave(String instance, String L1seq, boolean reload) {
+		if (reload) {
+			String path = Common.getTaskStorePath(instance, L1seq, GlobalParam.JOB_INCREMENTINFO_PATH);
 			byte[] b = EFDataStorer.getData(path, true);
 			if (b != null && b.length > 0) {
 				String str = new String(b);
-				SCAN_POSITION.put(instance, new ScanPosition(str,instance,L1seq));  
-			}else {
-				SCAN_POSITION.put(instance, new ScanPosition(instance,L1seq));
+				SCAN_POSITION.put(instance, new ScanPosition(str, instance, GlobalParam.DEFAULT_RESOURCE_SEQ));
+			} else {
+				SCAN_POSITION.put(instance, new ScanPosition(instance, GlobalParam.DEFAULT_RESOURCE_SEQ));
 			}
-		}  
+		}
 		return SCAN_POSITION.get(instance).getStoreId();
 	}
-	
-	public String getIncrementStoreId(String instance, String L1seq, PipePump transDataFlow,boolean reCompute) throws EFException {
-		synchronized(this) {
-			String storeId = getStoreId(instance,L1seq,true); 
+
+	public String getIncrementStoreId(String instance, String L1seq, String contextId, boolean reCompute)
+			throws EFException {
+		synchronized (this) {
+			String storeId = getStoreIdFromSave(instance, L1seq, true);
 			if (storeId.length() == 0 || reCompute) {
-				storeId = (String) CPU.RUN(transDataFlow.getID(), "Pond", "getNewStoreId",false, Common.getInstanceId(instance, L1seq), true); 
+				storeId = getNewStoreId(contextId, instance, L1seq, true);
 				if (storeId == null)
 					storeId = "a";
-				saveTaskInfo(instance,L1seq,storeId,GlobalParam.JOB_INCREMENTINFO_PATH);
+				saveTaskInfo(instance, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
 			}
 			return storeId;
 		}
 	}
-	
+
+	public String getNewStoreId(String contextId, String instance, String L1seq, boolean isIncrement)
+			throws EFException {
+		return (String) CPU.RUN(contextId, "Pond", "getNewStoreId", false, Common.getInstanceId(instance, L1seq),
+				isIncrement);
+	}
+
 	/**
 	 * 
 	 * @param instance
@@ -124,114 +140,111 @@ public class TaskStateCoorder implements TaskStateCoord,Serializable{
 	 * @param storeId
 	 * @param location
 	 */
-	public void saveTaskInfo(String instance, String L1seq,String storeId,String location) {
+	public void saveTaskInfo(String instance, String L1seq, String storeId, String location) {
 		SCAN_POSITION.get(instance).updateStoreId(storeId);
-		EFDataStorer.setData(Common.getTaskStorePath(instance, L1seq,location),
+		EFDataStorer.setData(Common.getTaskStorePath(instance, L1seq, location),
 				SCAN_POSITION.get(instance).getString());
-	}  
-	
+	}
+
 	/**
 	 * for Master/slave job get and set LastUpdateTime
+	 * 
 	 * @param instance
 	 * @param L1seq
 	 * @param storeId  Master store id
 	 */
-	public void setAndGetScanInfo(String instance, String L1seq,String storeId) {
+	public void setAndGetScanInfo(String instance, String L1seq, String storeId) {
 		synchronized (SCAN_POSITION) {
-			if(!SCAN_POSITION.containsKey(instance)) {
-				String path = Common.getTaskStorePath(instance, L1seq,GlobalParam.JOB_INCREMENTINFO_PATH);
-				byte[] b = EFDataStorer.getData(path,true);
+			if (!SCAN_POSITION.containsKey(instance)) {
+				String path = Common.getTaskStorePath(instance, L1seq, GlobalParam.JOB_INCREMENTINFO_PATH);
+				byte[] b = EFDataStorer.getData(path, true);
 				if (b != null && b.length > 0) {
-					String str = new String(b); 
-					SCAN_POSITION.put(instance, new ScanPosition(str,instance,storeId));  
-				}else {
-					SCAN_POSITION.put(instance, new ScanPosition(instance,storeId));
+					String str = new String(b);
+					SCAN_POSITION.put(instance, new ScanPosition(str, instance, storeId));
+				} else {
+					SCAN_POSITION.put(instance, new ScanPosition(instance, storeId));
 				}
-				saveTaskInfo(instance, L1seq,storeId,GlobalParam.JOB_INCREMENTINFO_PATH);
+				saveTaskInfo(instance, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
 			}
 		}
-		
+
 	}
 
 	/**
-	 * get increment store tag name and will auto create new one with some conditions.
+	 * get increment store tag name and will auto create new one with some
+	 * conditions.
 	 * 
 	 * @param isIncrement
-	 * @param reCompute
-	 *            force to get storeid recompute from destination engine
-	 * @param L1seq
-	 *            for series data source sequence
-	 * @param instance
-	 *            data source main tag name
+	 * @param reCompute   force to get storeid recompute from destination engine
+	 * @param L1seq       for series data source sequence
+	 * @param instance    data source main tag name
 	 * @return String
-	 * @throws EFException 
+	 * @throws EFException
 	 */
-	public String getStoreId(String instance, String L1seq, PipePump transDataFlow, boolean isIncrement,
-			boolean reCompute){
+	public String getStoreId(String instance, String L1seq, String contextId, boolean isIncrement, boolean reCompute) {
 		try {
-			if (isIncrement) { 
-				return getIncrementStoreId(instance,L1seq,transDataFlow,reCompute);
+			if (isIncrement) {
+				return getIncrementStoreId(instance, L1seq, contextId, reCompute);
 			} else {
-				return (String) CPU.RUN(transDataFlow.getID(), "Pond", "getNewStoreId",true, Common.getInstanceId(instance, L1seq), false);
+				return getNewStoreId(contextId, instance, L1seq, false);
 			}
 		} catch (EFException e) {
-			Common.LOG.error("getStoreId",e);
+			Common.LOG.error("getStoreId", e);
 			Resource.FlOW_CENTER.removeInstance(instance, true, true);
 			Common.processErrorLevel(e);
 		}
-		return null;		
-	} 
-	
+		return null;
+	}
+
 	public void scanPositionkeepCurrentPos(String instance) {
 		SCAN_POSITION.get(instance).keepCurrentPos();
 	}
-	
+
 	public void scanPositionRecoverKeep(String instance) {
 		SCAN_POSITION.get(instance).recoverKeep();
 	}
-	
+
 	public String getscanPositionString(String instance) {
-		return SCAN_POSITION.get(instance)
-				.getPositionString();
+		return SCAN_POSITION.get(instance).getPositionString();
 	}
-	
-	public void putScanPosition(String instance,ScanPosition scanPosition) {
+
+	public void putScanPosition(String instance, ScanPosition scanPosition) {
 		SCAN_POSITION.put(instance, scanPosition);
 	}
-	
-	public String getLSeqPos(String instance,String L1seq,String L2seq) {
+
+	public String getLSeqPos(String instance, String L1seq, String L2seq) {
 		return SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq));
 	}
-	
-	public void updateLSeqPos(String instance,String L1seq,String L2seq,String position){
-		SCAN_POSITION.get(instance).updateLSeqPos(
-				Common.getLseq(L1seq, L2seq), position);  
+
+	public void updateLSeqPos(String instance, String L1seq, String L2seq, String position) {
+		SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), position);
 	}
-	
-	public void batchUpdateSeqPos(String instance,String val) {
+
+	public void batchUpdateSeqPos(String instance, String val) {
 		SCAN_POSITION.get(instance).batchUpdateSeqPos(val);
 	}
-	
+
 	/**
 	 * from SCAN_POSITION get store id
+	 * 
 	 * @param instance
 	 * @return
 	 */
 	public String getStoreId(String instance) {
 		return SCAN_POSITION.get(instance).getStoreId();
 	}
-	
-	public void setFlowInfo(String formKeyVal1,String formKeyVal2,String key,String data) {
-		if(!Resource.FLOW_INFOS.containsKey(formKeyVal1,formKeyVal2))
-			Resource.FLOW_INFOS.set(formKeyVal1,formKeyVal2, new HashMap<String, String>());
-		Resource.FLOW_INFOS.get(formKeyVal1,formKeyVal2).put(key,data);
+
+	public void setFlowInfo(String formKeyVal1, String formKeyVal2, String key, String data) {
+		if (!Resource.FLOW_INFOS.containsKey(formKeyVal1, formKeyVal2))
+			Resource.FLOW_INFOS.set(formKeyVal1, formKeyVal2, new HashMap<String, String>());
+		Resource.FLOW_INFOS.get(formKeyVal1, formKeyVal2).put(key, data);
 	}
-	
-	public void resetFlowInfo(String formKeyVal1,String formKeyVal2) {
-		Resource.FLOW_INFOS.get(formKeyVal1,formKeyVal2).clear();
+
+	public void resetFlowInfo(String formKeyVal1, String formKeyVal2) {
+		Resource.FLOW_INFOS.get(formKeyVal1, formKeyVal2).clear();
 	}
-	
-	public HashMap<String, String> getFlowInfo(String formKeyVal1,String formKeyVal2) {
-		return Resource.FLOW_INFOS.get(formKeyVal1,formKeyVal2);
+
+	public HashMap<String, String> getFlowInfo(String formKeyVal1, String formKeyVal2) {
+		return Resource.FLOW_INFOS.get(formKeyVal1, formKeyVal2);
 	}
 }

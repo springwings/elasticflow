@@ -37,7 +37,6 @@ import org.elasticflow.util.instance.PipeUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.writer.handler.WriterHandler;
 import org.elasticflow.yarn.Resource;
-import org.elasticflow.yarn.coorder.TaskStateCoorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,8 +53,6 @@ public final class PipePump extends Instruction implements Serializable{
 
 	private final static Logger log = LoggerFactory.getLogger("PipePump");
 	
-	private TaskStateCoorder taskStateControl;
-
 	public static PipePump getInstance(ReaderFlowSocket reader, ComputerFlowSocket computer,
 			List<WriterFlowSocket> writer, InstanceConfig instanceConfig) {
 		return new PipePump(reader, computer, writer, instanceConfig);
@@ -63,8 +60,7 @@ public final class PipePump extends Instruction implements Serializable{
 
 	private PipePump(ReaderFlowSocket reader, ComputerFlowSocket computer, List<WriterFlowSocket> writer,
 			InstanceConfig instanceConfig) {
-		CPU.prepare(getID(), instanceConfig, writer, reader, computer);
-		taskStateControl = new TaskStateCoorder();
+		CPU.prepare(getID(), instanceConfig, writer, reader, computer);	
 		try {
 			if (instanceConfig.getReadParams().getHandler() != null) {
 				try {
@@ -306,8 +302,7 @@ public final class PipePump extends Instruction implements Serializable{
 		String keyField = task.getScanParam().getKeyField();
 		String dataBoundary;
 		int pageNum = pageList.size();
-
-		boolean isUpdate = getInstanceConfig().getPipeParams().getWriteType().equals("increment") ? true : false;
+		boolean isupdate = getInstanceConfig().getPipeParams().isUpdateWriteType();
 
 		while (!pageList.isEmpty()) {
 			dataBoundary = pageList.poll();
@@ -327,16 +322,13 @@ public final class PipePump extends Instruction implements Serializable{
 				}
 				rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
 						writeInstanceName, storeId, task.getL2seq(), pagedata, ",L1seq:"+task.getL1seq()+
-						",process:" + processPos + "/" + pageNum,
-						isUpdate, false);
+						",process:" + processPos + "/" + pageNum,isupdate, false);
 				if (rState.isStatus() == false)
 					throw new EFException("writeDataSet data exception!");
 				total.getAndAdd(rState.getCount());
 				startId = dataBoundary;
-			}
-			
-			taskStateControl.setScanPosition(task, rState.getReaderScanStamp()); 
-			 
+			}			
+			GlobalParam.TASK_COORDER.setScanPosition(task.getInstance(),task.getL1seq(),task.getL2seq(),rState.getReaderScanStamp());			 
 			if (task.getJobType() == JOB_TYPE.INCREMENT) {
 				GlobalParam.TASK_COORDER.saveTaskInfo(task.getInstance(), task.getL1seq(), storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
 			}
@@ -388,6 +380,7 @@ public final class PipePump extends Instruction implements Serializable{
 		final String writeInstanceName;
 		final String storeId;
 		final AtomicInteger total;
+		boolean isUpdate = false;
 
 		Task task;
 		CountDownLatch taskSingal;
@@ -396,7 +389,6 @@ public final class PipePump extends Instruction implements Serializable{
 		String startId = "0";
 		ConcurrentLinkedDeque<String> pageList;
 		InstanceConfig instanceConfig;
-		boolean isUpdate = false;
 
 		public PumpThread(CountDownLatch taskSingal, Task task, String storeId, ConcurrentLinkedDeque<String> pageList,
 				String writeInstanceName, AtomicInteger total,InstanceConfig instanceConfig) {
@@ -407,9 +399,8 @@ public final class PipePump extends Instruction implements Serializable{
 			this.pageSize = pageList.size();
 			this.total = total;
 			this.task = task;
-			this.instanceConfig = instanceConfig;
-			if(instanceConfig.getPipeParams().getWriteType().equals("increment"))
-				isUpdate = true;
+			this.instanceConfig = instanceConfig;		
+			this.isUpdate = instanceConfig.getPipeParams().isUpdateWriteType();
 		}
 		
 		@Override
@@ -449,7 +440,7 @@ public final class PipePump extends Instruction implements Serializable{
 						}
 						rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
 								writeInstanceName, storeId, task.getL2seq(), pagedata,
-								",L1seq:"+task.getL1seq()+",process:" + processPos + "/" + pageSize, isUpdate, false);
+								",L1seq:"+task.getL1seq()+",process:" + processPos + "/" + pageSize,this.isUpdate, false);
 					} catch (EFException e) {
 						log.error("PumpThread", e);
 						task.taskState.setEfException(e);
@@ -464,7 +455,7 @@ public final class PipePump extends Instruction implements Serializable{
 					total.addAndGet(rState.getCount());
 					startId = dataBoundary;
 				}
-				taskStateControl.setScanPosition(task, rState.getReaderScanStamp()); 
+				GlobalParam.TASK_COORDER.setScanPosition(task.getInstance(),task.getL1seq(),task.getL2seq(),rState.getReaderScanStamp());
 				if (task.getJobType() == JOB_TYPE.INCREMENT) {
 					GlobalParam.TASK_COORDER.saveTaskInfo(task.getInstance(), task.getL1seq(), storeId,
 							GlobalParam.JOB_INCREMENTINFO_PATH);

@@ -26,18 +26,20 @@ public class ScanPosition implements Serializable{
 	
 	public ScanPosition(String info,String instance,String storeId) {
 		String[] tmp = info.split(INFO_SPERATOR);
-		if(tmp.length!=3) {
+		if(tmp.length<2) {
 			this.instance = instance;
 			this.storeId = storeId;
 		}else {
 			this.instance = tmp[0];
 			this.storeId = tmp[1];
-			String[] L2seqs = tmp[2].split(JOB_SEQ_SPERATOR);
-			String[] row;
-			for(String seq:L2seqs) {
-				row = seq.split(JOB_STATE_SPERATOR);
-				LseqPos.put(row[0], row[1]);
-			}
+			if(tmp.length==3) {
+				String[] L2seqs = tmp[2].split(JOB_SEQ_SPERATOR);
+				String[] row;
+				for(String seq:L2seqs) {
+					row = seq.split(JOB_STATE_SPERATOR);
+					LseqPos.put(row[0], row[1]);
+				}
+			}			
 		}
 	}
 	

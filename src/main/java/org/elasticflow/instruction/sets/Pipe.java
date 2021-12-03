@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ * Pipe operation Instruction sets
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:25
@@ -94,7 +94,7 @@ public class Pipe extends Instruction {
 		
 		if (dataPage.size() == 0)
 			return rstate;
-		WriterFlowSocket writer = context.getWriter();
+		WriterFlowSocket writer = context.getWriter();		
 		if(writer.getWriteHandler()!=null)
 			dataPage = writer.getWriteHandler().handleData(context, dataPage);
 		DataSetReader DSReader = new DataSetReader();

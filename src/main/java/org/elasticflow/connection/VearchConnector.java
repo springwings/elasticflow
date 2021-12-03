@@ -66,10 +66,10 @@ public class VearchConnector {
 			if (Integer.valueOf(String.valueOf(jr.get("code"))) == 200) {
 				return true;
 			} else {
-				log.error("delete Space Exception," + jr.get("msg"));
+				log.warn("delete Space Exception," + jr.get("msg"));
 			}
 		} catch (Exception e) {
-			log.error("delete Space Exception", e);
+			log.warn("delete Space Exception", e);
 		}
 		return false;
 	}

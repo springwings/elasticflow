@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ * Machine learning running Instruction sets
  * @author chengwen
  * @version 1.0
  * @date 2018-05-22 09:08

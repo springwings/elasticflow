@@ -8,9 +8,9 @@
 package org.elasticflow.yarn.monitor;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.correspond.ReportStatus;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.instance.EFDataStorer;
+import org.elasticflow.yarn.coord.ReportStatus;
 import org.elasticflow.yarn.coordinate.node.DistributeService;
 
 import com.alibaba.fastjson.JSON;

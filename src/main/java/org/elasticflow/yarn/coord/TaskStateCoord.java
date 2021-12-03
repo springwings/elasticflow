@@ -12,9 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.STATUS;
-import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.ScanPosition;
-import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.EFException;
 
 /**
@@ -26,24 +24,28 @@ import org.elasticflow.util.EFException;
  */
 public interface TaskStateCoord extends Coordination{
 	
+	public String getContextId(String instance, String L1seq,String tag);
+	
 	public void setFlowStatus(String instance, String L1seq,String tag,AtomicInteger ai);
 	
-	public void setScanPosition(Task task,String scanStamp) ;
+	public void setScanPosition(String instance, String L1seq,String L2seq,String scanStamp);
 	
 	public boolean checkFlowStatus(String instance,String seq,JOB_TYPE type,STATUS state);
 	
 	public boolean setFlowStatus(String instance,String L1seq,String type,STATUS needState, STATUS setState,boolean showLog);
 	
-	public String getStoreId(String instance, String L1seq,boolean reload);
+	public String getStoreIdFromSave(String instance, String L1seq,boolean reload);
 	
-	public String getIncrementStoreId(String instance, String L1seq, PipePump transDataFlow,boolean reCompute) throws EFException;
+	public String getIncrementStoreId(String instance, String L1seq, String contextId,boolean reCompute) throws EFException;
 	
 	public void saveTaskInfo(String instance, String L1seq,String storeId,String location);
 	
 	public void setAndGetScanInfo(String instance, String L1seq,String storeId);
 	
-	public String getStoreId(String instance, String L1seq, PipePump transDataFlow, boolean isIncrement,
+	public String getStoreId(String instance, String L1seq, String contextId, boolean isIncrement,
 			boolean reCompute);
+	
+	public String getNewStoreId(String contextId,String instance, String L1seq,boolean isIncrement) throws EFException;
 	
 	public void scanPositionkeepCurrentPos(String instance);
 	

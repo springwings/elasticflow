@@ -16,6 +16,7 @@ public final class EsConnector {
 	private volatile RestHighLevelClient client;
 	private volatile BulkProcessor bulkProcessor;
 	private AtomicBoolean bulkRunState  = new AtomicBoolean(true);
+	private String infos="";
 	
 	public RestHighLevelClient getClient() {
 		return client;
@@ -34,6 +35,16 @@ public final class EsConnector {
 	}
 	public void setBulkProcessor(BulkProcessor bulkProcessor) {
 		this.bulkProcessor = bulkProcessor;
+	}
+	
+	public void setInfos(String infos) {
+		this.infos = infos;
+	}
+	
+	public String getInfos() {
+		String tmp = this.infos;
+		this.infos = "";
+		return tmp;
 	}
 	
 }

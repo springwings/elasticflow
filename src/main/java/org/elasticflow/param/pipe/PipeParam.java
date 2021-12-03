@@ -42,7 +42,7 @@ public class PipeParam {
 	/** slave node deep control by master **/
 	private boolean isMasterControl = false;
 	/**data write into type,full create new record,increment update part of data*/
-	private String writeType="full";
+	private boolean writeType = false;
 	private MECHANISM writeMechanism = MECHANISM.NORM;
 	/**if MECHANISM.Time,keepNums is used for keep max store data instances*/
 	private String keepNums = "30d";
@@ -147,7 +147,7 @@ public class PipeParam {
 		return this.searchFrom;
 	} 
 	
-	public String getWriteType() {
+	public boolean isUpdateWriteType() {
 		return writeType;
 	} 
 	
@@ -229,8 +229,8 @@ public class PipeParam {
 	}
 	
 	public void setWriteType(String writeType) {
-		if(writeType.length()>0 && (writeType.equals("full") || writeType.equals("increment")))
-			this.writeType = writeType;
+		if(writeType.length()>0 && writeType.equals("increment"))
+			this.writeType = true;
 		
 	}
 	public void setWriteMechanism(String writeMechanism) {

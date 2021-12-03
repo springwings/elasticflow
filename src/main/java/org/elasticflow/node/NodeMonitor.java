@@ -419,7 +419,7 @@ public final class NodeMonitor {
 				String[] L1seqs = EFMonitorUtil.getInstanceL1seqs(instance);
 				for (String L1seq : L1seqs) {
 					GlobalParam.TASK_COORDER.batchUpdateSeqPos(instance,val);
-					GlobalParam.TASK_COORDER.saveTaskInfo(instance, L1seq, GlobalParam.TASK_COORDER.getStoreId(instance, L1seq, false),
+					GlobalParam.TASK_COORDER.saveTaskInfo(instance, L1seq, GlobalParam.TASK_COORDER.getStoreIdFromSave(instance, L1seq, false),
 							GlobalParam.JOB_INCREMENTINFO_PATH);
 				}
 				setResponse(RESPONSE_STATUS.Success, rq.getParameter("instance") + " reset Success!", null);
@@ -697,7 +697,7 @@ public final class NodeMonitor {
 								instance, L1seq, tags);
 						wfs.PREPARE(false, false);
 						if (wfs.ISLINK()) {
-							wfs.removeInstance(instance, GlobalParam.TASK_COORDER.getStoreId(instance, L1seq, true));
+							wfs.removeInstance(instance, GlobalParam.TASK_COORDER.getStoreIdFromSave(instance, L1seq, true));
 							wfs.REALEASE(false, false);
 						}
 					}

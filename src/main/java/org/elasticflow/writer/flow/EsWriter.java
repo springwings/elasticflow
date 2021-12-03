@@ -202,7 +202,7 @@ public class EsWriter extends WriterFlowSocket {
 			} 
 			if (getESC().getRunState() == false) {
 				getESC().setRunState(true);
-				throw new EFException("BulkProcessor Exception!Need Redo!");
+				throw new EFException(getESC().getInfos());
 			}
 		}
 	}

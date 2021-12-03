@@ -41,13 +41,18 @@ import org.elasticflow.yarn.Resource;
 public final class SocketCenter {
 
 	/** for special data transfer **/
-	private Map<String, Searcher> searcherMap = new ConcurrentHashMap<>(); 
+	private Map<String, Searcher> searcherMap = new ConcurrentHashMap<>();
 	/** for normal transfer **/
 	private Map<String, PipePump> pipePumpMap = new ConcurrentHashMap<>();
 	private Map<String, WriterFlowSocket> writerSocketMap = new ConcurrentHashMap<>();
 	private Map<String, ComputerFlowSocket> computerSocketMap = new ConcurrentHashMap<>();
 	private Map<String, ReaderFlowSocket> readerSocketMap = new ConcurrentHashMap<>();
 	private Map<String, SearcherFlowSocket> searcherSocketMap = new ConcurrentHashMap<>();
+
+	public String getContextId(String instance, String L1seq,String tag) {
+		String tags = Common.getResourceTag(instance, L1seq, tag, false);
+		return pipePumpMap.get(tags).getID();
+	} 
 
 	/**
 	 * 
@@ -63,34 +68,35 @@ public final class SocketCenter {
 			String tags = Common.getResourceTag(instance, L1seq, tag, false);
 			if (!pipePumpMap.containsKey(tags) || needReset) {
 				List<WriterFlowSocket> wfs = new ArrayList<>();
-				//Balanced write to multiple targets
+				// Balanced write to multiple targets
 				String[] writeDests = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
 						.getWriteTo().split(",");
-				if(writeDests.length<1)
+				if (writeDests.length < 1)
 					Common.LOG.error("build write pipe socket error!Misconfiguration writer destination!");
 				for (String dest : writeDests) {
 					wfs.add(getWriterSocket(dest, instance, L1seq, tag));
 				}
-				PipePump transDataFlow = PipePump
+				PipePump pipePump = PipePump
 						.getInstance(
 								getReaderSocket(Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
-										.getReadFrom(), instance, L1seq, tag),	 
-								(Resource.nodeConfig.getInstanceConfigs().get(instance).openCompute()? 
-										getComputerSocket(instance, tags, needReset) :null),
+										.getReadFrom(), instance, L1seq, tag),
+								(Resource.nodeConfig.getInstanceConfigs().get(instance).openCompute()
+										? getComputerSocket(instance, tags, needReset)
+										: null),
 								wfs, Resource.nodeConfig.getInstanceConfigs().get(instance));
-				pipePumpMap.put(tags, transDataFlow);
+				pipePumpMap.put(tags, pipePump);
 			}
 			return pipePumpMap.get(tags);
 		}
-	} 
+	}
 
 	public Searcher getSearcher(String instance, String L1seq, String tag, boolean reload) {
 		synchronized (searcherMap) {
 			if (reload || !searcherMap.containsKey(instance)) {
 				if (!Resource.nodeConfig.getSearchConfigs().containsKey(instance)) {
-					Common.LOG.error(instance+"  not exist!");
+					Common.LOG.error(instance + "  not exist!");
 					return null;
-				} 
+				}
 				InstanceConfig instanceConfig = Resource.nodeConfig.getSearchConfigs().get(instance);
 				Searcher searcher = Searcher.getInstance(instance, instanceConfig,
 						getSearcherSocket(
@@ -135,9 +141,9 @@ public final class SocketCenter {
 			if (!readerSocketMap.containsKey(tags)) {
 				WarehouseParam whp = getWHP(resourceName);
 				if (whp == null) {
-					Common.LOG.error(resourceName+" resource not exist!");
+					Common.LOG.error(resourceName + " resource not exist!");
 					Common.stopSystem();
-				}					
+				}
 				readerSocketMap.put(tags, ReaderFlowSocketFactory.getInstance(
 						ConnectParams.getInstance(whp, L1seq, Resource.nodeConfig.getInstanceConfigs().get(instance),
 								null),
@@ -147,15 +153,15 @@ public final class SocketCenter {
 			return readerSocketMap.get(tags);
 		}
 	}
-	
+
 	public ComputerFlowSocket getComputerSocket(String instance, String tag, boolean reload) {
 		synchronized (computerSocketMap) {
 			if (reload || !computerSocketMap.containsKey(instance)) {
-				computerSocketMap.put(instance, ComputerFlowSocketFactory.getInstance(ConnectParams.getInstance(null, null, 
-						Resource.nodeConfig.getInstanceConfigs().get(instance),null))); 
+				computerSocketMap.put(instance, ComputerFlowSocketFactory.getInstance(ConnectParams.getInstance(null,
+						null, Resource.nodeConfig.getInstanceConfigs().get(instance), null)));
 			}
 		}
-		return computerSocketMap.get(instance);	
+		return computerSocketMap.get(instance);
 	}
 
 	public WriterFlowSocket getWriterSocket(String resourceName, String instance, String L1seq, String tag) {
@@ -172,9 +178,9 @@ public final class SocketCenter {
 			if (!writerSocketMap.containsKey(tags)) {
 				WarehouseParam whp = getWHP(resourceName);
 				if (whp == null) {
-					Common.LOG.error(resourceName+" resource not exist!");
+					Common.LOG.error(resourceName + " resource not exist!");
 					Common.stopSystem();
-				}  
+				}
 				writerSocketMap.put(tags, WriterSocketFactory.getInstance(
 						ConnectParams.getInstance(whp, L1seq, Resource.nodeConfig.getInstanceConfigs().get(instance),
 								null),
@@ -200,9 +206,9 @@ public final class SocketCenter {
 			if (reload || !searcherSocketMap.containsKey(tags)) {
 				WarehouseParam whp = getWHP(resourceName);
 				if (whp == null) {
-					Common.LOG.error(resourceName+" resource not exist!");
+					Common.LOG.error(resourceName + " resource not exist!");
 					Common.stopSystem();
-				} 
+				}
 				SearcherFlowSocket searcher = SearcherSocketFactory
 						.getInstance(
 								ConnectParams.getInstance(whp, L1seq,
@@ -218,7 +224,7 @@ public final class SocketCenter {
 		WarehouseParam param = null;
 		if (Resource.nodeConfig.getWarehouse().containsKey(destination)) {
 			param = Resource.nodeConfig.getWarehouse().get(destination);
-		} 
+		}
 		return param;
 	}
 }

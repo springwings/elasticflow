@@ -5,7 +5,7 @@
  * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
  * Side Public License, v 1.
  */
-package org.elasticflow.correspond;
+package org.elasticflow.yarn.coord;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.util.Common;

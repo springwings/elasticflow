@@ -35,6 +35,11 @@ public class CPU {
 		Contexts.put(runId, Context.initContext(instanceConfig, writer,reader,computer));
 	}
 	
+	public static void reIndexContexts(String runId,String newRunId) {
+		Contexts.put(newRunId, Contexts.get(runId));
+		Contexts.remove(runId);
+	}
+	
 	public static Context getContext(String runId) {
 		return Contexts.get(runId);
 	}

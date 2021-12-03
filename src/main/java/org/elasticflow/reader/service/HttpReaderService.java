@@ -94,8 +94,8 @@ public class HttpReaderService {
 				}
 				EFSearchRequest RR = Common.getRequest(sb.toString());
 				EFResponse rps = EFResponse.getInstance();
-				rps.setRequest(RR.getParams()); 
-				RR.setPipe(rq.getPathInfo().substring(1)); 
+				rps.setRequest(RR.getParams());
+				RR.setPipe(rq.getPathInfo().substring(1));
 				if (RR.getPipe().length() < 1) {
 					rps.setStatus("The writer destination is empty!", RESPONSE_STATUS.ParameterErr);
 				} else if (RR.getParam("ac") != null && RR.getParam("code") != null
@@ -124,7 +124,8 @@ public class HttpReaderService {
 							if (RR.getParam("type").equals("full") && RR.getParam("storeid") != null) {
 								storeid = (String) RR.getParam("storeid");
 							} else {
-								storeid = GlobalParam.TASK_COORDER.getStoreId(instance, seq, pipePump, true, false);
+								storeid = GlobalParam.TASK_COORDER.getStoreId(instance, seq, pipePump.getID(), true,
+										false);
 							}
 							boolean isUpdate = false;
 
@@ -135,16 +136,15 @@ public class HttpReaderService {
 								String writeTo = pipePump.getInstanceConfig().getPipeParams().getInstanceName();
 								if (writeTo == null) {
 									writeTo = Common.getInstanceId(instance, seq);
-								} 
+								}
 								DataPage pagedata = this.getPageData(RR.getParam("data"), keycolumn, updatecolumn,
 										pipePump.getInstanceConfig().getWriteFields());
 								if (pipePump.getInstanceConfig().openCompute()) {
-									pagedata = (DataPage) CPU.RUN(pipePump.getID(), "ML", "compute", false, pipePump.getID(),"add",
-											writeTo, pagedata); 				
-								} 
+									pagedata = (DataPage) CPU.RUN(pipePump.getID(), "ML", "compute", false,
+											pipePump.getID(), "add", writeTo, pagedata);
+								}
 								CPU.RUN(pipePump.getID(), "Pipe", "writeDataSet", false, "HTTP PUT", writeTo, storeid,
-										"", pagedata,
-										"", isUpdate, monopoly);
+										"", pagedata, "", isUpdate, monopoly);
 							} catch (Exception e) {
 								Common.LOG.error("Http Write Exception,", e);
 								rps.setStatus("Write failure data error!", RESPONSE_STATUS.DataErr);
@@ -160,10 +160,12 @@ public class HttpReaderService {
 						break;
 					case "get_new_storeid":
 						if (RR.getParam("instance") != null && RR.getParam("seq") != null) {
-							PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(String.valueOf(RR.getParam("instance")),
-									String.valueOf(RR.getParam("seq")), false, "");
-							String storeid = GlobalParam.TASK_COORDER.getStoreId(String.valueOf(RR.getParam("instance")), String.valueOf(RR.getParam("seq")), pipePump,
-									false, false);
+							PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(
+									String.valueOf(RR.getParam("instance")), String.valueOf(RR.getParam("seq")), false,
+									GlobalParam.FLOW_TAG._DEFAULT.name());
+							String storeid = GlobalParam.TASK_COORDER.getStoreId(
+									String.valueOf(RR.getParam("instance")), String.valueOf(RR.getParam("seq")),
+									pipePump.getID(), false, false);
 							CPU.RUN(pipePump.getID(), "Pond", "createStorePosition", true, RR.getParam("instance"),
 									storeid);
 						} else {
@@ -180,7 +182,8 @@ public class HttpReaderService {
 							if (RR.getParam("storeid") != null) {
 								storeid = (String) RR.getParam("storeid");
 							} else {
-								storeid = GlobalParam.TASK_COORDER.getStoreId(instance, seq, pipePump, false, false);
+								storeid = GlobalParam.TASK_COORDER.getStoreId(instance, seq, pipePump.getID(), false,
+										false);
 								CPU.RUN(pipePump.getID(), "Pond", "createStorePosition", true, instance, storeid);
 							}
 							CPU.RUN(pipePump.getID(), "Pond", "switchInstance", true, instance, seq, storeid);
@@ -203,7 +206,8 @@ public class HttpReaderService {
 								rps.setStatus("Writer get Error,Instance and seq Error!", RESPONSE_STATUS.DataErr);
 								break;
 							}
-							String storeid = GlobalParam.TASK_COORDER.getStoreId(instance, seq, transFlow, true, true);
+							String storeid = GlobalParam.TASK_COORDER.getStoreId(instance, seq, transFlow.getID(), true,
+									true);
 							WarehouseParam param = Resource.SOCKET_CENTER
 									.getWHP(transFlow.getInstanceConfig().getPipeParams().getWriteTo());
 							switch (param.getType()) {
@@ -259,7 +263,7 @@ public class HttpReaderService {
 					if (k.getKey().equals(updatecolumn)) {
 						updateFieldValue = String.valueOf(k.getValue());
 					}
-					PipeDataUnit.addFieldValue(k.getKey(), k.getValue(), transParams,u);
+					PipeDataUnit.addFieldValue(k.getKey(), k.getValue(), transParams, u);
 				}
 				datas.add(u);
 			}

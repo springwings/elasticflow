@@ -112,8 +112,8 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 							@Override
 							public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
 								if (response.hasFailures()) {
-									log.error("BulkProcessor error," + response.buildFailureMessage());
-									ESC.setRunState(false);
+									ESC.setRunState(false); 
+									ESC.setInfos(response.buildFailureMessage());					
 								}
 							}
 
@@ -121,7 +121,7 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 							public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
 								if (failure != null) {
 									ESC.setRunState(false);
-									log.error("BulkProcessor error," + failure.getMessage());
+									ESC.setInfos(failure.getMessage());
 								}
 							}
 						})

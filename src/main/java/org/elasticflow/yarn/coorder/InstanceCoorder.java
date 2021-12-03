@@ -12,10 +12,10 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.config.NodeConfig;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.STATUS;
+import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.config.NodeConfig;
 import org.elasticflow.node.Node;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFFileUtil;
@@ -28,7 +28,7 @@ import org.elasticflow.yarn.coord.InstanceCoord;
 
 /**
  * Run task instance cluster coordination operation
- * 
+ * The code runs on the client
  * @author chengwen
  * @version 0.1
  * @create_time 2021-07-30
@@ -50,6 +50,7 @@ public class InstanceCoorder implements InstanceCoord{
 		sendData(content0, paths[0]);
 		sendData(content1, paths[1]);
 	}
+ 
 	
 	public void addInstance(String instanceSettting) {
 		Resource.nodeConfig.loadConfig(instanceSettting, false);
@@ -58,9 +59,9 @@ public class InstanceCoorder implements InstanceCoord{
 		String instanceName = tmp[0];
 		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instanceName);
 		if (instanceConfig.checkStatus())
-			EFNodeUtil.initParams(instanceConfig);
-		EFMonitorUtil.rebuildFlowGovern(instanceSettting,true);		
-	}
+			EFNodeUtil.initParams(instanceConfig); 
+		EFMonitorUtil.rebuildFlowGovern(instanceSettting,true);	
+	} 
 	
 	public void addNode(String ip,String nodeId) {
 		Integer id = Integer.parseInt(nodeId);
