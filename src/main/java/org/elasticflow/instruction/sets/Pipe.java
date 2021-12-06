@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Pipe extends Instruction {
 
-	private final static Logger log = LoggerFactory.getLogger("Pipe");
+	private final static Logger log = LoggerFactory.getLogger("Pipe----");
 
 	/**
 	 * @param args

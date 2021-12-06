@@ -5,7 +5,7 @@
  * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
  * Side Public License, v 1.
  */
-package org.elasticflow.yarn.coordinate.node;
+package org.elasticflow.yarn.coordinator.node;
 
 import java.util.Map;
 
@@ -16,10 +16,12 @@ import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coord.DiscoveryCoord;
 import org.elasticflow.yarn.coord.InstanceCoord;
+import org.elasticflow.yarn.coord.NodeCoord;
 import org.elasticflow.yarn.coord.TaskStateCoord;
-import org.elasticflow.yarn.coorder.DiscoveryCoorder;
-import org.elasticflow.yarn.coorder.InstanceCoorder;
-import org.elasticflow.yarn.coorder.TaskStateCoorder;
+import org.elasticflow.yarn.coordinator.DiscoveryCoordinator;
+import org.elasticflow.yarn.coordinator.InstanceCoordinator;
+import org.elasticflow.yarn.coordinator.NodeCoordinator;
+import org.elasticflow.yarn.coordinator.TaskStateCoordinator;
 
 /**
  * Rebalance Tasks over all nodes.
@@ -50,12 +52,13 @@ public class DistributeService {
 				try {
 					DataReceiver dataReceiver;
 					if(EFNodeUtil.isMaster()) {
-						dataReceiver = new DataReceiver(GlobalParam.NODE_DATA_SYN_PORT);
-						dataReceiver.register(TaskStateCoord.class, TaskStateCoorder.class);
-						dataReceiver.register(DiscoveryCoord.class, DiscoveryCoorder.class);
+						dataReceiver = new DataReceiver(GlobalParam.MASTER_SYN_PORT);
+						dataReceiver.register(TaskStateCoord.class, TaskStateCoordinator.class);
+						dataReceiver.register(DiscoveryCoord.class, DiscoveryCoordinator.class);
 					}else {
-						dataReceiver = new DataReceiver(GlobalParam.NODE_INSTANCE_SYN_PORT);
-						dataReceiver.register(InstanceCoord.class, InstanceCoorder.class);						
+						dataReceiver = new DataReceiver(GlobalParam.SLAVE_SYN_PORT);
+						dataReceiver.register(InstanceCoord.class, InstanceCoordinator.class);
+						dataReceiver.register(NodeCoord.class, NodeCoordinator.class);	
 					}
 					dataReceiver.start();
 				} catch (Exception e) {

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
  * Side Public License, v 1.
  */
-package org.elasticflow.yarn.coorder;
+package org.elasticflow.yarn.coordinator;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -33,7 +33,7 @@ import org.elasticflow.yarn.coord.TaskStateCoord;
  * @version 0.1
  * @create_time 2021-07-30
  */
-public class TaskStateCoorder implements TaskStateCoord, Serializable {
+public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 
 	private static final long serialVersionUID = 6182329757414086104L;
 

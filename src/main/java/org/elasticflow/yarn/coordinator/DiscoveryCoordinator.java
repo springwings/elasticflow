@@ -5,7 +5,7 @@
  * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
  * Side Public License, v 1.
  */
-package org.elasticflow.yarn.coorder;
+package org.elasticflow.yarn.coordinator;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.yarn.coord.DiscoveryCoord;
@@ -16,10 +16,14 @@ import org.elasticflow.yarn.coord.DiscoveryCoord;
  * @version 0.1
  * @create_time 2021-07-30
  */
-public class DiscoveryCoorder implements DiscoveryCoord{
+public class DiscoveryCoordinator implements DiscoveryCoord{
 	
 	public void report(String ip,String nodeId) { 
-		GlobalParam.INSTANCE_COORDER.addNode(ip, nodeId);
+		GlobalParam.INSTANCE_COORDER.updateNode(ip, Integer.parseInt(nodeId));
+	}
+	
+	public void leaveCluster(String ip,String nodeId) {
+		GlobalParam.INSTANCE_COORDER.removeNode(ip, Integer.parseInt(nodeId));
 	}
 	
 }

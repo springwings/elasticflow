@@ -47,7 +47,7 @@ public class VearchConnector {
 
 	final String createDb = "/db/_create";
 
-	private final static Logger log = LoggerFactory.getLogger(VearchConnector.class);
+	private final static Logger log = LoggerFactory.getLogger("VearchConnector");
 
 	public VearchConnector(String master, String rooter, String dbName) {
 		this.MASTER = master;

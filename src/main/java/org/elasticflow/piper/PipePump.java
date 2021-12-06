@@ -317,8 +317,13 @@ public final class PipePump extends Instruction implements Serializable{
 				DataPage pagedata = this.getPageData(
 						Page.getInstance(keyField, scanField, startId, dataBoundary, getInstanceConfig(), dataScanDSL));
 				if (getInstanceConfig().openCompute()) {
+					long start = Common.getNow();
 					pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(), task.getJobType().name(),
 							writeInstanceName, pagedata);
+					log.info(Common.formatLog("onepage"," -- " + task.getJobType().name() + " conepage ", 
+							writeInstanceName, storeId, task.getL2seq(), pagedata.getData().size(),
+							pagedata.getDataBoundary(), pagedata.getScanStamp(), Common.getNow() - start, 
+							",process:" + processPos + "/" + pageNum));
 				}
 				rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
 						writeInstanceName, storeId, task.getL2seq(), pagedata, ",L1seq:"+task.getL1seq()+
@@ -373,9 +378,8 @@ public final class PipePump extends Instruction implements Serializable{
 	 * @date 2019-01-11 10:45
 	 * @modify 2019-01-11 10:45
 	 */
-	class PumpThread implements TaskThread {
-		long start = Common.getNow();
-		final int pageSize;
+	class PumpThread implements TaskThread {		
+		final int pageNum;
 		final String ID = CPU.getUUID();
 		final String writeInstanceName;
 		final String storeId;
@@ -396,7 +400,7 @@ public final class PipePump extends Instruction implements Serializable{
 			this.writeInstanceName = writeInstanceName;
 			this.storeId = storeId;
 			this.taskSingal = taskSingal;
-			this.pageSize = pageList.size();
+			this.pageNum = pageList.size();
 			this.total = total;
 			this.task = task;
 			this.instanceConfig = instanceConfig;		
@@ -410,7 +414,7 @@ public final class PipePump extends Instruction implements Serializable{
 		
 		@Override
 		public int needThreads() {
-			return PipeUtil.estimateThreads(this.pageSize);
+			return PipeUtil.estimateThreads(this.pageNum);
 		}
 
 		@Override
@@ -420,7 +424,7 @@ public final class PipePump extends Instruction implements Serializable{
 				dataBoundary = pageList.poll();
 				processPos.incrementAndGet();
 				GlobalParam.TASK_COORDER.setFlowInfo(task.getInstance(), task.getJobType().name(),task.getId() + task.getL2seq(),
-						processPos + "/" + this.pageSize);	
+						processPos + "/" + this.pageNum);	
 				String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(),
 						PipeUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
 								task.getEndTime(), task.getScanParam().getScanField()));
@@ -435,12 +439,17 @@ public final class PipePump extends Instruction implements Serializable{
 									startId, dataBoundary, getInstanceConfig(), dataScanDSL));
 					try {
 						if (getInstanceConfig().openCompute()) {
+							long start = Common.getNow();
 							pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(),
 									task.getJobType().name(), writeInstanceName, pagedata);
+							log.info(Common.formatLog("onepage"," -- " + task.getJobType().name() + " conepage ", 
+									writeInstanceName, storeId, task.getL2seq(), pagedata.getData().size(),
+									pagedata.getDataBoundary(), pagedata.getScanStamp(), Common.getNow() - start, 
+									",process:" + processPos + "/" + pageNum));
 						}
 						rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
 								writeInstanceName, storeId, task.getL2seq(), pagedata,
-								",L1seq:"+task.getL1seq()+",process:" + processPos + "/" + pageSize,this.isUpdate, false);
+								",L1seq:"+task.getL1seq()+",process:" + processPos + "/" + pageNum,this.isUpdate, false);
 					} catch (EFException e) {
 						log.error("PumpThread", e);
 						task.taskState.setEfException(e);

@@ -28,8 +28,8 @@ public interface InstanceCoord extends Coordination{
 	
 	public void removeInstance(String instance);
 	
-	public void addNode(String ip,String nodeId);
+	public void updateNode(String ip, Integer nodeId);
 	
-	public void rebalanceInstances();
+	public void removeNode(String ip, Integer nodeId);
 	
 }

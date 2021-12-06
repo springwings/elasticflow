@@ -40,9 +40,13 @@ public final class GlobalParam {
 	
 	public static int CONNECTION_POOL_SIZE = 5;
 	
-	public static int NODE_DATA_SYN_PORT = 8618;
+	public static int MASTER_SYN_PORT = 8618;
 	
-	public static int NODE_INSTANCE_SYN_PORT = 8619;
+	public static int SLAVE_SYN_PORT = 8619;
+	
+	public static final long NODE_LIVE_TIME = 6000;
+	
+	public static int CLUSTER_MIN_NODES;
 	
 	public static String NODEID = System.getProperty("nodeid");;
 	

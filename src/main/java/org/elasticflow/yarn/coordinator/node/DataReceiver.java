@@ -5,7 +5,7 @@
  * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
  * Side Public License, v 1.
  */
-package org.elasticflow.yarn.coordinate.node;
+package org.elasticflow.yarn.coordinator.node;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

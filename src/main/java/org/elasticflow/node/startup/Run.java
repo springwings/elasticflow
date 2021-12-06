@@ -37,13 +37,13 @@ import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.email.EFEmailSender;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.util.instance.ZKUtil;
-import org.elasticflow.yarn.EFRPCClient;
+import org.elasticflow.yarn.EFRPCService;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.ThreadPools;
 import org.elasticflow.yarn.coord.DiscoveryCoord;
 import org.elasticflow.yarn.coord.TaskStateCoord;
-import org.elasticflow.yarn.coorder.InstanceCoorder;
-import org.elasticflow.yarn.coorder.TaskStateCoorder;
+import org.elasticflow.yarn.coordinator.InstanceCoordinator;
+import org.elasticflow.yarn.coordinator.TaskStateCoordinator;
 import org.elasticflow.yarn.monitor.ResourceMonitor;
 import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,30 +94,9 @@ public final class Run {
 	 * @param initInstance
 	 */
 	public void init(boolean initInstance) {
-		GlobalParam.RUN_ENV = String.valueOf(GlobalParam.StartConfig.get("run_environment"));
-		GlobalParam.VERSION = version;
-		GlobalParam.GROUPID = groupId;
-		GlobalParam.DEBUG = debug;
-		GlobalParam.CONNECTION_POOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("pool_size"));
-		GlobalParam.WRITE_BATCH = GlobalParam.StartConfig.getProperty("write_batch").equals("false") ? false : true;
-		GlobalParam.SEND_EMAIL = GlobalParam.StartConfig.getProperty("send_mail").equals("false") ? false : true;
-		GlobalParam.DISTRIBUTE_RUN = GlobalParam.StartConfig.getProperty("distribute_run").equals("false") ? false : true;
-		GlobalParam.MASTER_HOST = GlobalParam.StartConfig.getProperty("master_host");
-		GlobalParam.SERVICE_LEVEL = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
-		if(!GlobalParam.StartConfig.get("node_ip").equals(""))
-			GlobalParam.IP = GlobalParam.StartConfig.get("node_ip").toString();
 		
-		switch(GlobalParam.StartConfig.getProperty("node_type")) {
-		case "master":
-			GlobalParam.node_type = NODE_TYPE.master;
-			break;
-		case "backup":
-			GlobalParam.node_type = NODE_TYPE.backup;
-			break;
-		default:
-			GlobalParam.node_type = NODE_TYPE.slave;
-		}
-		 			
+		this.refreshGlobalParam();
+		
 		Resource.scheduler = scheduler;		
 		Resource.mailSender = new EFEmailSender();
 		Resource.tasks = new HashMap<String, FlowTask>();
@@ -127,8 +106,8 @@ public final class Run {
 		Resource.nodeMonitor = new NodeMonitor(); 
 		
 		if(!EFNodeUtil.isSlave()) {
-			GlobalParam.TASK_COORDER = new TaskStateCoorder();
-			GlobalParam.INSTANCE_COORDER = new InstanceCoorder();
+			GlobalParam.TASK_COORDER = new TaskStateCoordinator();
+			GlobalParam.INSTANCE_COORDER = new InstanceCoordinator();
 		}
 		
 		int openThreadPools = 0;
@@ -158,10 +137,10 @@ public final class Run {
 				boolean redo = true;
 				while (redo) {
 					try {
-						GlobalParam.TASK_COORDER = EFRPCClient.getRemoteProxyObj(TaskStateCoord.class, 
-								new InetSocketAddress(GlobalParam.StartConfig.getProperty("master_host"), GlobalParam.NODE_DATA_SYN_PORT));			
-						GlobalParam.DISCOVERY_COORDER = EFRPCClient.getRemoteProxyObj(DiscoveryCoord.class, 
-								new InetSocketAddress(GlobalParam.StartConfig.getProperty("master_host"), GlobalParam.NODE_DATA_SYN_PORT));
+						GlobalParam.TASK_COORDER = EFRPCService.getRemoteProxyObj(TaskStateCoord.class, 
+								new InetSocketAddress(GlobalParam.StartConfig.getProperty("master_host"), GlobalParam.MASTER_SYN_PORT));			
+						GlobalParam.DISCOVERY_COORDER = EFRPCService.getRemoteProxyObj(DiscoveryCoord.class, 
+								new InetSocketAddress(GlobalParam.StartConfig.getProperty("master_host"), GlobalParam.MASTER_SYN_PORT));
 						redo = false;
 					} catch (Exception e) { 
 						GlobalParam.TASK_COORDER = null;
@@ -172,7 +151,34 @@ public final class Run {
 		}
 		
 	}
-	 
+	
+	private void refreshGlobalParam() {
+		GlobalParam.RUN_ENV = String.valueOf(GlobalParam.StartConfig.get("run_environment"));
+		GlobalParam.VERSION = version;
+		GlobalParam.GROUPID = groupId;
+		GlobalParam.DEBUG = debug;
+		GlobalParam.CONNECTION_POOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("pool_size"));
+		GlobalParam.WRITE_BATCH = GlobalParam.StartConfig.getProperty("write_batch").equals("false") ? false : true;
+		GlobalParam.SEND_EMAIL = GlobalParam.StartConfig.getProperty("send_mail").equals("false") ? false : true;
+		GlobalParam.DISTRIBUTE_RUN = GlobalParam.StartConfig.getProperty("distribute_run").equals("false") ? false : true;
+		GlobalParam.MASTER_HOST = GlobalParam.StartConfig.getProperty("master_host");
+		GlobalParam.SERVICE_LEVEL = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
+		if(!GlobalParam.StartConfig.get("node_ip").equals(""))
+			GlobalParam.IP = GlobalParam.StartConfig.get("node_ip").toString();
+		GlobalParam.CLUSTER_MIN_NODES = Integer.parseInt(GlobalParam.StartConfig.getProperty("min_nodes"));
+		
+		switch(GlobalParam.StartConfig.getProperty("node_type")) {
+		case "master":
+			GlobalParam.node_type = NODE_TYPE.master;
+			break;
+		case "backup":
+			GlobalParam.node_type = NODE_TYPE.backup;
+			break;
+		default:
+			GlobalParam.node_type = NODE_TYPE.slave;
+		}
+	}
+	
 	/**
 	 * distribute on:
 	 * 			Master, Monitoring cluster and distribution tasks

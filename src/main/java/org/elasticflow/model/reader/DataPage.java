@@ -22,6 +22,12 @@ public class DataPage extends HashMap<String, Object> {
 
 	private static final long serialVersionUID = 8764060758588207664L;
 	
+	public String getScanStamp() {
+		if(this.containsKey(GlobalParam.READER_LAST_STAMP))
+			return String.valueOf(this.get(GlobalParam.READER_LAST_STAMP));
+		return "";
+	}
+	
 	public DataPage() {
 		this.put(GlobalParam.READER_STATUS,true);
 	}

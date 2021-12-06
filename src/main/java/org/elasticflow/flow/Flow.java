@@ -49,7 +49,7 @@ public abstract class Flow {
 	
 	protected AtomicInteger retainer = new AtomicInteger(0);
 	
-	private final static Logger log = LoggerFactory.getLogger(Flow.class);
+	private final static Logger log = LoggerFactory.getLogger("EF-Flow");
 	
 	public abstract void INIT(ConnectParams connectParams);
 	

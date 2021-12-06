@@ -18,4 +18,6 @@ public interface DiscoveryCoord extends Coordination{
 	
 	public void report(String ip,String nodeId);
 	
+	public void leaveCluster(String ip,String nodeId);
+	
 }

@@ -32,8 +32,7 @@ public class DataSetReader{
 			this.keyColumn =  String.valueOf(DP.get(GlobalParam.READER_KEY));
 			this.IncrementColumn = String.valueOf(DP.get(GlobalParam.READER_SCAN_KEY));
 			this.dataBoundary = DP.getDataBoundary();
-			if(DP.containsKey(GlobalParam.READER_LAST_STAMP))
-				this.READER_LAST_STAMP = String.valueOf(DP.get(GlobalParam.READER_LAST_STAMP));
+			this.READER_LAST_STAMP = DP.getScanStamp();
 			if(DP.containsKey(GlobalParam.READER_STATUS))
 				this.status = (boolean) DP.get(GlobalParam.READER_STATUS);
 			this.datas = (ConcurrentLinkedQueue<PipeDataUnit>) DP.getData();

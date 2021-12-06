@@ -15,7 +15,7 @@ import java.net.Socket;
  * @version 1.0
  * @date 2018-11-19 15:33
  */
-public class EFRPCClient<T> {
+public class EFRPCService<T> {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T getRemoteProxyObj(final Class<?> serviceInterface, final InetSocketAddress addr) { 
