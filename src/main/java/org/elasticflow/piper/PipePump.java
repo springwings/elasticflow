@@ -318,11 +318,14 @@ public final class PipePump extends Instruction implements Serializable{
 						Page.getInstance(keyField, scanField, startId, dataBoundary, getInstanceConfig(), dataScanDSL));
 				if (getInstanceConfig().openCompute()) {
 					long start = Common.getNow();
+					int dataSize = pagedata.getData().size();
+					String datab = pagedata.getDataBoundary();
+					String scanStamp = pagedata.getScanStamp();
 					pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(), task.getJobType().name(),
 							writeInstanceName, pagedata);
-					log.info(Common.formatLog("onepage"," -- " + task.getJobType().name() + " conepage ", 
-							writeInstanceName, storeId, task.getL2seq(), pagedata.getData().size(),
-							pagedata.getDataBoundary(), pagedata.getScanStamp(), Common.getNow() - start, 
+					log.info(Common.formatLog("onepage"," -- " + task.getJobType().name() + " Compute", 
+							writeInstanceName, storeId, task.getL2seq(), dataSize,
+							datab, scanStamp, Common.getNow() - start, 
 							",process:" + processPos + "/" + pageNum));
 				}
 				rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
@@ -440,11 +443,14 @@ public final class PipePump extends Instruction implements Serializable{
 					try {
 						if (getInstanceConfig().openCompute()) {
 							long start = Common.getNow();
+							int dataSize = pagedata.getData().size();
+							String datab = pagedata.getDataBoundary();
+							String scanStamp = pagedata.getScanStamp();
 							pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(),
 									task.getJobType().name(), writeInstanceName, pagedata);
-							log.info(Common.formatLog("onepage"," -- " + task.getJobType().name() + " conepage ", 
-									writeInstanceName, storeId, task.getL2seq(), pagedata.getData().size(),
-									pagedata.getDataBoundary(), pagedata.getScanStamp(), Common.getNow() - start, 
+							log.info(Common.formatLog("onepage"," -- " + task.getJobType().name() + " Compute", 
+									writeInstanceName, storeId, task.getL2seq(),dataSize,
+									datab, scanStamp, Common.getNow() - start, 
 									",process:" + processPos + "/" + pageNum));
 						}
 						rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
