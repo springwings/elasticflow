@@ -23,7 +23,7 @@ public class DiscoveryCoordinator implements DiscoveryCoord{
 	}
 	
 	public void leaveCluster() {
-		GlobalParam.INSTANCE_COORDER.removeNode(GlobalParam.IP, Integer.parseInt(GlobalParam.NODEID));	
+		GlobalParam.INSTANCE_COORDER.removeNode(GlobalParam.IP, Integer.parseInt(GlobalParam.NODEID),true);	
 	}
 	
 }

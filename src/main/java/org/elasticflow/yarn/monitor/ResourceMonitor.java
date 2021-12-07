@@ -24,10 +24,12 @@ import com.alibaba.fastjson.JSON;
 
 public class ResourceMonitor {   
 	
+	static DistributeService distributeService = new DistributeService();
+	
 	public static void start() { 
 		ReportStatus.nodeConfigs();
 		EFDataStorer.setData(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs", JSON.toJSONString(GlobalParam.StartConfig)); 
-		new DistributeService().start();
+		distributeService.start();
 		if(EFNodeUtil.isSlave()) {
 			ReportStatus.openHeartBeat();
 		}
@@ -37,5 +39,6 @@ public class ResourceMonitor {
 		if(EFNodeUtil.isSlave()) {
 			ReportStatus.closeHeartBeat();
 		}
+		distributeService.stop();
 	}
 }

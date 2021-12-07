@@ -30,8 +30,10 @@ public interface InstanceCoord extends Coordination{
 	
 	public void updateNode(String ip, Integer nodeId);
 	
-	public void removeNode(String ip, Integer nodeId);
+	public void removeNode(String ip, Integer nodeId,boolean rebalace);
 	
 	public void stopNodes();
+	
+	public void clusterScan();
 	
 }

@@ -32,39 +32,58 @@ import org.elasticflow.yarn.coordinator.TaskStateCoordinator;
  */
 public class DistributeService {
 
+	DataReceiver dataReceiver;
+
 	public void start() {
-		if(EFNodeUtil.isMaster()) {
+		if (EFNodeUtil.isMaster()) {
 			boolean createSchedule = !GlobalParam.DISTRIBUTE_RUN;
 			if ((GlobalParam.SERVICE_LEVEL & 2) > 0) {
 				Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 				for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {
-					Resource.FlOW_CENTER.addFlowGovern(entry.getKey(), entry.getValue(), false,createSchedule);
+					Resource.FlOW_CENTER.addFlowGovern(entry.getKey(), entry.getValue(), false, createSchedule);
 				}
 			}
 		}
-		if (GlobalParam.DISTRIBUTE_RUN) 
+		if (GlobalParam.DISTRIBUTE_RUN)
 			instanceCoordStart();		
+
 	}
 
-	public void instanceCoordStart() {
-		new Thread(new Runnable() {
-			public void run() {
+	public void stop() {
+		if (GlobalParam.DISTRIBUTE_RUN)
+			dataReceiver.stop();
+	}
+
+	private void monitorNodes() {
+		Resource.ThreadPools.execute(() -> {
+			while (true) {
 				try {
-					DataReceiver dataReceiver;
-					if(EFNodeUtil.isMaster()) {
-						dataReceiver = new DataReceiver(GlobalParam.MASTER_SYN_PORT);
-						dataReceiver.register(TaskStateCoord.class, TaskStateCoordinator.class);
-						dataReceiver.register(DiscoveryCoord.class, DiscoveryCoordinator.class);
-					}else {
-						dataReceiver = new DataReceiver(GlobalParam.SLAVE_SYN_PORT);
-						dataReceiver.register(InstanceCoord.class, InstanceCoordinator.class);
-						dataReceiver.register(NodeCoord.class, NodeCoordinator.class);	
-					}
-					dataReceiver.start();
+					Thread.sleep(GlobalParam.NODE_LIVE_TIME * 2);
+					GlobalParam.INSTANCE_COORDER.clusterScan();
 				} catch (Exception e) {
-					Common.LOG.error("Instance Coord Exception", e);
+					Common.LOG.warn("monitor modes exception",e);
 				}
 			}
-		}).start();
+		});
+	}
+
+	private void instanceCoordStart() {
+		Resource.ThreadPools.execute(() -> {
+			try {
+				if (EFNodeUtil.isMaster()) {
+					dataReceiver = new DataReceiver(GlobalParam.MASTER_SYN_PORT);
+					dataReceiver.register(TaskStateCoord.class, TaskStateCoordinator.class);
+					dataReceiver.register(DiscoveryCoord.class, DiscoveryCoordinator.class);
+					monitorNodes();
+				} else {
+					dataReceiver = new DataReceiver(GlobalParam.SLAVE_SYN_PORT);
+					dataReceiver.register(InstanceCoord.class, InstanceCoordinator.class);
+					dataReceiver.register(NodeCoord.class, NodeCoordinator.class);
+				}
+				dataReceiver.start();
+			} catch (Exception e) {
+				Common.LOG.error("Instance Coord Exception", e);
+			}
+		});
 	}
 }

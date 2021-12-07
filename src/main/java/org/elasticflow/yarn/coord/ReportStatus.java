@@ -21,8 +21,6 @@ import org.elasticflow.yarn.Resource;
  * @date 2018-11-21 15:43
  */
 public final class ReportStatus {
-
-	static int heartBeatTime = 3000;
 	
 	static boolean openHeartBeat = true;
 	
@@ -36,7 +34,7 @@ public final class ReportStatus {
 			Resource.ThreadPools.execute(() -> {
 				while (openHeartBeat) {
 					try {
-						Thread.sleep(heartBeatTime);
+						Thread.sleep(GlobalParam.NODE_LIVE_TIME/2);
 						GlobalParam.DISCOVERY_COORDER.reportStatus();						
 					} catch (Exception e) {
 						Common.LOG.warn("master node cannot connect.");

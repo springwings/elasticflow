@@ -19,7 +19,7 @@ import org.elasticflow.yarn.coord.NodeCoord;
 public class Node {
 
 	private String ip;
-	private boolean isLive;
+	private boolean isLive=true;
 	private int nodeId;
 	/**instance Coordinator**/
 	private InstanceCoord instanceCoord;
