@@ -24,6 +24,7 @@ import org.elasticflow.config.NodeConfig;
 import org.elasticflow.node.FlowCenter;
 import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.node.RecoverMonitor;
+import org.elasticflow.node.SafeShutDown;
 import org.elasticflow.node.SocketCenter;
 import org.elasticflow.reader.service.HttpReaderService;
 import org.elasticflow.searcher.service.SearcherService;
@@ -265,6 +266,7 @@ public final class Run {
 	public static void main(String[] args) throws Exception {
 		Resource.EFLOWS = (Run) EFLoc.getBean("EFLOWS");
 		Resource.EFLOWS.start();
+		Runtime.getRuntime().addShutdownHook(new SafeShutDown());
 	}
 
 }

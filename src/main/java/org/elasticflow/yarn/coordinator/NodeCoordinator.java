@@ -1,7 +1,9 @@
 package org.elasticflow.yarn.coordinator;
 
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.yarn.coord.NodeCoord;
+import org.elasticflow.yarn.monitor.ResourceMonitor;
 
 /**
  * Cluster node operation control Coordinator
@@ -14,6 +16,9 @@ public class NodeCoordinator implements NodeCoord{
 
 	@Override
 	public void stopNode() {
+		if(EFNodeUtil.isSlave()) {
+			ResourceMonitor.stop();
+		}
 		Common.stopSystem();		
 	}
 

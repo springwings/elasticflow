@@ -16,8 +16,8 @@ package org.elasticflow.yarn.coord;
  */
 public interface DiscoveryCoord extends Coordination{
 	
-	public void report(String ip,String nodeId);
+	public void reportStatus();
 	
-	public void leaveCluster(String ip,String nodeId);
+	public void leaveCluster();
 	
 }

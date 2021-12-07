@@ -282,7 +282,7 @@ public final class PipePump extends Instruction implements Serializable{
 								Common.getNow() - start, ""));
 			if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(), STATUS.Termination))
 				throw new EFException(
-						task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
+						task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!",ELEVEL.Dispose,ETYPE.EXTINTERRUPT);
 		}
 	}
 

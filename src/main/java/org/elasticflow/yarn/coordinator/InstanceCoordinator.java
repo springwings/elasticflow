@@ -101,6 +101,13 @@ public class InstanceCoordinator implements InstanceCoord {
 		}
 	}
 	
+	public void stopNodes() {
+		nodes.forEach(n -> {
+			n.stopAllInstance();
+			n.getNodeCoord().stopNode();
+        });
+	}
+	
 	public void stopInstance(String instance, String jobtype) {
 		if (jobtype.toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
 			EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, false);
@@ -195,7 +202,8 @@ public class InstanceCoordinator implements InstanceCoord {
 	}
 	
 	private int avgInstanceNum() {
-		return totalInstanceNum/nodes.size();
+		int avg = totalInstanceNum/nodes.size();
+		return (avg<1)?1:avg;
 	}	
 	
 	private Node getNode(Integer nodeId) {

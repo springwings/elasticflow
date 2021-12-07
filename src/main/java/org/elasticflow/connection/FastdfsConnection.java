@@ -4,7 +4,6 @@ import java.util.Properties;
 
 import org.csource.fastdfs.ClientGlobal;
 import org.csource.fastdfs.StorageClient;
-import org.csource.fastdfs.StorageServer;
 import org.csource.fastdfs.TrackerClient;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;

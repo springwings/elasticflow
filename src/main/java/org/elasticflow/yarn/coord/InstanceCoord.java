@@ -32,4 +32,6 @@ public interface InstanceCoord extends Coordination{
 	
 	public void removeNode(String ip, Integer nodeId);
 	
+	public void stopNodes();
+	
 }

@@ -23,14 +23,21 @@ import org.elasticflow.yarn.Resource;
 public final class ReportStatus {
 
 	static int heartBeatTime = 3000;
+	
+	static boolean openHeartBeat = true;
+	
+	public static void closeHeartBeat() {
+		openHeartBeat = false;
+	}
 
-	public static void heartBeat() {
+	public static void openHeartBeat() {
 		if (EFNodeUtil.isMaster() == false) {
+			openHeartBeat = true;
 			Resource.ThreadPools.execute(() -> {
-				while (true) {
+				while (openHeartBeat) {
 					try {
 						Thread.sleep(heartBeatTime);
-						GlobalParam.DISCOVERY_COORDER.report(GlobalParam.IP, GlobalParam.NODEID);						
+						GlobalParam.DISCOVERY_COORDER.reportStatus();						
 					} catch (Exception e) {
 						Common.LOG.warn("master node cannot connect.");
 					}

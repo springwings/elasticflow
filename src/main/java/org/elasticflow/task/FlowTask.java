@@ -192,12 +192,14 @@ public class FlowTask {
 			} catch (EFException e) {
 				if (!writeInSamePosition && e.getErrorType()==ETYPE.WRITE_POS_NOT_FOUND) { 
 					storeId = GlobalParam.TASK_COORDER.getStoreId(instance, L1seq, pipePump.getID(), true, true);
-					log.warn("try to rebuild "+instance+" storage location！");
+					log.warn("try to rebuild {} storage location！",instance);
 					try {
 						pipePump.run(instance, storeId,L1seq, false, writeInSamePosition);
 					} catch (EFException ex) {
-						log.error(instance + " Increment Exception", ex);
+						log.error("try to rebuild {} storage location exception,", instance,ex);
 					}
+				}else if (e.getErrorType()==ETYPE.EXTINTERRUPT){
+					log.warn("{} increment external interrupt!",instance);
 				}else {
 					breaker.log();
 				}

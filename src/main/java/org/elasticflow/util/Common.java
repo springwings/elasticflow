@@ -39,6 +39,7 @@ import org.elasticflow.model.EFSearchRequest;
 import org.elasticflow.model.FormatProperties;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.model.NMRequest;
+import org.elasticflow.node.SafeShutDown;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.instance.EFDataStorer;
@@ -563,6 +564,8 @@ public final class Common {
 	
 	public static void stopSystem() {
 		LOG.info("Internal serious error, the system stops automatically!");
+		SafeShutDown.stopAllInstances();
 		System.exit(0);
-	}
+	} 
+	
 }

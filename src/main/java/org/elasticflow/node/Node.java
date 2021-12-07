@@ -92,8 +92,12 @@ public class Node {
 	
 	public String popInstance() {
 		String instanceSetting = this.bindInstances.poll();
-		String[] strs = instanceSetting.split(":");
-		this.instanceCoord.removeInstance(strs[0]);
+		if(instanceSetting!=null) {
+			String[] strs = instanceSetting.split(":");
+			this.instanceCoord.stopInstance(strs[0], GlobalParam.JOB_TYPE.INCREMENT.name());
+			this.instanceCoord.stopInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());
+			this.instanceCoord.removeInstance(strs[0]);
+		}		
 		return instanceSetting;
 	}
 
@@ -105,5 +109,10 @@ public class Node {
 				EFFileUtil.readText(paths[1], "utf-8"), strs[0]);
 		this.instanceCoord.addInstance(instanceSetting);
 	}
-
+	
+	public void stopAllInstance() { 
+		while(!this.bindInstances.isEmpty()) {
+			popInstance();
+		}
+	}
 }
