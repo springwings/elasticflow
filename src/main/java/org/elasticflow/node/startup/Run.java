@@ -21,7 +21,6 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.NODE_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.config.NodeConfig;
-import org.elasticflow.model.FormatProperties;
 import org.elasticflow.node.FlowCenter;
 import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.node.RecoverMonitor;
@@ -203,7 +202,6 @@ public final class Run {
 	public void loadGlobalConfig(String path, boolean fromZk) {
 		try {			
 			if (fromZk) {
-				GlobalParam.StartConfig = new FormatProperties();
 				JSONObject _JO = (JSONObject) JSON.parse(EFDataStorer.getData(path, false));
 				for (Map.Entry<String, Object> row : _JO.entrySet()) {
 					GlobalParam.StartConfig.setProperty(row.getKey(), String.valueOf(row.getValue()));

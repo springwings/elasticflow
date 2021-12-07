@@ -94,7 +94,7 @@ public abstract class Flow {
 	
 	public void REALEASE(boolean isMonopoly,boolean releaseConn) { 
 		if(isMonopoly==false || releaseConn) { 
-			synchronized(retainer){ 
+			synchronized(this.retainer){ 
 				if(releaseConn) {
 					this.stopTask();
 					retainer.set(0);

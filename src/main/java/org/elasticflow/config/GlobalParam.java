@@ -12,6 +12,7 @@ import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Properties;
 
+import org.elasticflow.model.FormatProperties;
 import org.elasticflow.util.Common;
 import org.elasticflow.yarn.coord.DiscoveryCoord;
 import org.elasticflow.yarn.coord.InstanceCoord;
@@ -117,7 +118,7 @@ public final class GlobalParam {
 	/** CONNECT_EXPIRED is milliseconds time */
 	public static int CONNECT_EXPIRED = 7200000;   
 	
-	public static Properties StartConfig; 
+	public static Properties StartConfig = new FormatProperties(); 
 	
 	/**configure file local path*/
 	public static final String configPath = System.getProperty("config");

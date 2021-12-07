@@ -16,8 +16,6 @@ public class FastdfsConnection extends EFConnectionSocket<StorageClient> {
 	
 	private StorageClient conn = null;
 	
-	private StorageServer storageServer=null;
-	
 	private final static Logger log = LoggerFactory.getLogger(EsConnection.class);
 	
 	public static EFConnectionSocket<?> getInstance(ConnectParams connectParams){
@@ -35,7 +33,7 @@ public class FastdfsConnection extends EFConnectionSocket<StorageClient> {
 				props.put(ClientGlobal.PROP_KEY_TRACKER_SERVERS,wnp.getHost());
 				try {
 					ClientGlobal.initByProperties(props);  
-					this.conn = new StorageClient(new TrackerClient().getTrackerServer(), storageServer);
+					this.conn = new StorageClient(new TrackerClient().getTrackerServer(), null);
 				} catch (Exception e) {
 					log.error("Fastdfs connect Exception,", e);
 					return false;

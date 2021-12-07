@@ -1,7 +1,6 @@
 package org.elasticflow.searcher;
 
 import org.elasticflow.config.GlobalParam.DATA_SOURCE_TYPE;
-import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.flow.Flow;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherResult;
@@ -15,9 +14,7 @@ import org.elasticflow.util.EFException;
  * @version 3.0
  * @date 2019-01-09 15:02
  */
-public abstract class SearcherFlowSocket extends Flow {
- 
-	protected InstanceConfig instanceConfig;
+public abstract class SearcherFlowSocket extends Flow { 
 
 	@Override
 	public void INIT(ConnectParams connectParams) {

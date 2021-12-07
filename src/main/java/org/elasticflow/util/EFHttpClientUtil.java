@@ -67,7 +67,7 @@ public class EFHttpClientUtil {
 						}
 					}
 				}
-				return keepTime * 1000;
+				return keepTime * 1000L;
 			}
 		}).setConnectionManager(connectionPools).build();
 	}
