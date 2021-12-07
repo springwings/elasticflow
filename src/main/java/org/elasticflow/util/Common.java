@@ -344,29 +344,32 @@ public final class Common {
 			long useTime, String moreinfo) {
 		String useTimeFormat = Common.seconds2time(useTime);
 		if(L1seq.length()<1)
-			L1seq = "None";
-		StringBuilder str = new StringBuilder("["+heads+" "+instanceName + "_" + storeId+"] "+(" L1seq:" + L1seq));
+			L1seq = "None"; 
 		String update;
 		if(lastUpdateTime.length()>9 && lastUpdateTime.matches("[0-9]+")){ 
 			update = SDF.format(lastUpdateTime.length()<12?Long.valueOf(lastUpdateTime+"000"):Long.valueOf(lastUpdateTime));
 		}else{
 			update = lastUpdateTime;
 		} 
+		StringBuilder sb = new StringBuilder();
 		switch (types) {
 		case "complete":
-			str.append(" Docs:" + total);
-			str.append(" scanAt:" + update);
-			str.append(" useTime:" + useTimeFormat);
+			sb.append("[Complete "+heads+" "+instanceName + "_" + storeId+"] "+(" L1seq:" + L1seq));
+			sb.append(" Docs:" + total);
+			sb.append(" scanAt:" + update);
+			sb.append(" useTime:" + useTimeFormat);
 			break;
 		case "start": 
-			str.append(" scanAt:" + update);
+			sb.append("[Start "+heads+" "+instanceName + "_" + storeId+"] "+(" L1seq:" + L1seq));
+			sb.append(" scanAt:" + update);
 			break;
 		default:
-			str.append(" Docs:" + total+ (total==0 || dataBoundary.length()<1 ? "" : " dataBoundary:" + dataBoundary)
+			sb.append("[ -- "+heads+" "+instanceName + "_" + storeId+"] "+(" L1seq:" + L1seq));
+			sb.append(" Docs:" + total+ (total==0 || dataBoundary.length()<1 ? "" : " dataBoundary:" + dataBoundary)
 			+ " scanAt:" + update + " useTime:"	+ useTimeFormat);
 			break;
 		} 
-		return str.append(moreinfo).toString();
+		return sb.append(moreinfo).toString();
 	}
  
 	public static ArrayList<InstructionTree> compileCodes(String code,String contextId){

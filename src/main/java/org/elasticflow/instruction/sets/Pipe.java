@@ -122,7 +122,7 @@ public class Pipe extends Instruction {
 				writer.setPerformance((long) ((num+1.)/(Common.getNow()-start+1.)));
 				context.getReader().flush();
 				writer.flush();
-				log.info(Common.formatLog("onepage"," -- " + id + " Write", instance, storeId, L2seq, num,
+				log.info(Common.formatLog("onepage",id + " Write", instance, storeId, L2seq, num,
 						DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));
 			} catch (EFException e) {
 				Common.processErrorLevel(e);

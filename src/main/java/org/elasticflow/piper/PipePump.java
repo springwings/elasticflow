@@ -246,14 +246,14 @@ public final class PipePump extends Instruction implements Serializable{
 		int pageNum = pageList.size();
 		if (pageNum == 0) {
 			if (task.getInstanceConfig().getPipeParams().getLogLevel() == 0)
-				log.info(Common.formatLog("start", "Complete " + task.getJobType().name(), instanceId, storeId,
+				log.info(Common.formatLog("start", task.getJobType().name(), instanceId, storeId,
 						task.getL2seq(), 0, "", GlobalParam.TASK_COORDER.getLSeqPos(task.getInstance(),task.getL1seq(), task.getL2seq()),
 						0, " no data!"));
 		} else {
 			if (task.getInstanceConfig().getPipeParams().getLogLevel() < 2)
 				log.info(Common.formatLog("start",
 						(getInstanceConfig().getPipeParams().isMultiThread() ? "MultiThread" : "SingleThread")
-								+ " Start " + task.getJobType().name(),
+								+ " " + task.getJobType().name(),
 						instanceId, storeId, task.getL1seq(), 0, "",
 						GlobalParam.TASK_COORDER.getLSeqPos(task.getInstance(),task.getL1seq(), task.getL2seq()),
 						0, ",totalpage:" + pageNum));
@@ -276,7 +276,7 @@ public final class PipePump extends Instruction implements Serializable{
 			}
 			if (task.getInstanceConfig().getPipeParams().getLogLevel() < 2)
 				log.info(
-						Common.formatLog("complete", "Complete " + task.getJobType().name(), instanceId, storeId,
+						Common.formatLog("complete", task.getJobType().name(), instanceId, storeId,
 								task.getL2seq(), total.get(), "",
 								GlobalParam.TASK_COORDER.getLSeqPos(task.getInstance(),task.getL1seq(), task.getL2seq()),
 								Common.getNow() - start, ""));
@@ -323,7 +323,7 @@ public final class PipePump extends Instruction implements Serializable{
 					String scanStamp = pagedata.getScanStamp();
 					pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(), task.getJobType().name(),
 							writeInstanceName, pagedata);
-					log.info(Common.formatLog("onepage"," -- " + task.getJobType().name() + " Compute", 
+					log.info(Common.formatLog("onepage",task.getJobType().name() + " Compute", 
 							writeInstanceName, storeId, task.getL2seq(), dataSize,
 							datab, scanStamp, Common.getNow() - start, 
 							",process:" + processPos + "/" + pageNum));
@@ -448,7 +448,7 @@ public final class PipePump extends Instruction implements Serializable{
 							String scanStamp = pagedata.getScanStamp();
 							pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(),
 									task.getJobType().name(), writeInstanceName, pagedata);
-							log.info(Common.formatLog("onepage"," -- " + task.getJobType().name() + " Compute", 
+							log.info(Common.formatLog("onepage",task.getJobType().name() + " Compute", 
 									writeInstanceName, storeId, task.getL2seq(),dataSize,
 									datab, scanStamp, Common.getNow() - start, 
 									",process:" + processPos + "/" + pageNum));
