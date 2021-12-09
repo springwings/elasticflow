@@ -41,10 +41,10 @@ public final class EFNodeUtil {
 			byte[] b = EFDataStorer.getData(path, true);
 			if (b != null && b.length > 0) {
 				String str = new String(b);
-				GlobalParam.TASK_COORDER.putScanPosition(instance,
+				GlobalParam.TASK_COORDER.initPutDatas(instance,
 						new ScanPosition(str, instance, L1seq));
 			} else {
-				GlobalParam.TASK_COORDER.putScanPosition(instance, new ScanPosition(instance, L1seq));
+				GlobalParam.TASK_COORDER.initPutDatas(instance, new ScanPosition(instance, L1seq));
 			}
 		}
 	}

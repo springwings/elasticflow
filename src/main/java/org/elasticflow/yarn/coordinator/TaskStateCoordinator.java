@@ -37,7 +37,10 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 
 	private static final long serialVersionUID = 6182329757414086104L;
 
-	final static ConcurrentHashMap<String, ScanPosition> SCAN_POSITION = new ConcurrentHashMap<>();
+	private final static ConcurrentHashMap<String, ScanPosition> SCAN_POSITION = new ConcurrentHashMap<>();
+	
+	/**Store intermediate calculation result data**/
+	private final static ConcurrentHashMap<String,Object> TMP_STORE_DATA = new ConcurrentHashMap<>();
 
 	/** FLOW_STATUS store current flow running control status */
 	final static EFState<AtomicInteger> FLOW_STATUS = new EFState<>();
@@ -49,12 +52,20 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	public void setFlowStatus(String instance, String L1seq, String tag, AtomicInteger ai) {
 		FLOW_STATUS.set(instance, L1seq, tag, ai);
 	}
+	
+	public void updateStoreData(String instance,Object data) {
+		synchronized (TMP_STORE_DATA.get(instance)) {
+			TMP_STORE_DATA.put(instance, data);
+		}
+	}
+	
+	public Object getStoreData(String instance) {
+		return TMP_STORE_DATA.get(instance);
+	}
 
 	public void setScanPosition(String instance, String L1seq, String L2seq, String scanStamp) {
-		synchronized (SCAN_POSITION) {
-			if (!SCAN_POSITION.containsKey(instance)) {
-				SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), scanStamp);
-			} else if (PipeUtil.scanPosCompare(scanStamp,
+		synchronized (SCAN_POSITION.get(instance)) {
+			if (PipeUtil.scanPosCompare(scanStamp,
 					SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq)))) {
 				SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), scanStamp);
 			}
@@ -100,31 +111,31 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	 * @return String
 	 */
 	public String getStoreIdFromSave(String instance, String L1seq, boolean reload) {
-		if (reload) {
+		if (reload) { 
 			String path = Common.getTaskStorePath(instance, L1seq, GlobalParam.JOB_INCREMENTINFO_PATH);
 			byte[] b = EFDataStorer.getData(path, true);
-			if (b != null && b.length > 0) {
-				String str = new String(b);
-				SCAN_POSITION.put(instance, new ScanPosition(str, instance, GlobalParam.DEFAULT_RESOURCE_SEQ));
-			} else {
-				SCAN_POSITION.put(instance, new ScanPosition(instance, GlobalParam.DEFAULT_RESOURCE_SEQ));
-			}
+			synchronized (SCAN_POSITION.get(instance)) {
+				if (b != null && b.length > 0) {
+					String str = new String(b);
+					SCAN_POSITION.put(instance, new ScanPosition(str, instance, GlobalParam.DEFAULT_RESOURCE_SEQ));
+				} else {
+					SCAN_POSITION.put(instance, new ScanPosition(instance, GlobalParam.DEFAULT_RESOURCE_SEQ));
+				}
+			}			
 		}
 		return SCAN_POSITION.get(instance).getStoreId();
 	}
 
 	public String getIncrementStoreId(String instance, String L1seq, String contextId, boolean reCompute)
-			throws EFException {
-		synchronized (this) {
-			String storeId = getStoreIdFromSave(instance, L1seq, true);
-			if (storeId.length() == 0 || reCompute) {
-				storeId = getNewStoreId(contextId, instance, L1seq, true);
-				if (storeId == null)
-					storeId = "a";
-				saveTaskInfo(instance, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
-			}
-			return storeId;
+			throws EFException { 
+		String storeId = getStoreIdFromSave(instance, L1seq, true);
+		if (storeId.length() == 0 || reCompute) {
+			storeId = getNewStoreId(contextId, instance, L1seq, true);
+			if (storeId == null)
+				storeId = "a";
+			saveTaskInfo(instance, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
 		}
+		return storeId;
 	}
 
 	public String getNewStoreId(String contextId, String instance, String L1seq, boolean isIncrement)
@@ -141,7 +152,9 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	 * @param location
 	 */
 	public void saveTaskInfo(String instance, String L1seq, String storeId, String location) {
-		SCAN_POSITION.get(instance).updateStoreId(storeId);
+		synchronized(SCAN_POSITION.get(instance)) {
+			SCAN_POSITION.get(instance).updateStoreId(storeId);
+		}
 		EFDataStorer.setData(Common.getTaskStorePath(instance, L1seq, location),
 				SCAN_POSITION.get(instance).getString());
 	}
@@ -154,20 +167,17 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	 * @param storeId  Master store id
 	 */
 	public void setAndGetScanInfo(String instance, String L1seq, String storeId) {
-		synchronized (SCAN_POSITION) {
-			if (!SCAN_POSITION.containsKey(instance)) {
-				String path = Common.getTaskStorePath(instance, L1seq, GlobalParam.JOB_INCREMENTINFO_PATH);
-				byte[] b = EFDataStorer.getData(path, true);
-				if (b != null && b.length > 0) {
-					String str = new String(b);
-					SCAN_POSITION.put(instance, new ScanPosition(str, instance, storeId));
-				} else {
-					SCAN_POSITION.put(instance, new ScanPosition(instance, storeId));
-				}
-				saveTaskInfo(instance, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
+		String path = Common.getTaskStorePath(instance, L1seq, GlobalParam.JOB_INCREMENTINFO_PATH);
+		byte[] b = EFDataStorer.getData(path, true);
+		synchronized (SCAN_POSITION.get(instance)) {			
+			if (b != null && b.length > 0) {
+				String str = new String(b);
+				SCAN_POSITION.put(instance, new ScanPosition(str, instance, storeId));
+			} else {
+				SCAN_POSITION.put(instance, new ScanPosition(instance, storeId));
 			}
+			saveTaskInfo(instance, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
 		}
-
 	}
 
 	/**
@@ -208,8 +218,11 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 		return SCAN_POSITION.get(instance).getPositionString();
 	}
 
-	public void putScanPosition(String instance, ScanPosition scanPosition) {
-		SCAN_POSITION.put(instance, scanPosition);
+	public void initPutDatas(String instance, ScanPosition scanPosition) {
+		synchronized(SCAN_POSITION) {
+			SCAN_POSITION.put(instance, scanPosition);
+			TMP_STORE_DATA.put(instance, null);
+		}		
 	}
 
 	public String getLSeqPos(String instance, String L1seq, String L2seq) {
@@ -217,11 +230,15 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	}
 
 	public void updateLSeqPos(String instance, String L1seq, String L2seq, String position) {
-		SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), position);
+		synchronized(SCAN_POSITION.get(instance)) {
+			SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), position);
+		}		
 	}
 
 	public void batchUpdateSeqPos(String instance, String val) {
-		SCAN_POSITION.get(instance).batchUpdateSeqPos(val);
+		synchronized(SCAN_POSITION.get(instance)) {
+			SCAN_POSITION.get(instance).batchUpdateSeqPos(val);
+		}
 	}
 
 	/**

@@ -177,7 +177,8 @@ public class MysqlReader extends ReaderFlowSocket{
 			throw new EFException(e);
 		}
 		if (LAST_STAMP==null){ 
-			this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis()); 
+			if(this.dataUnit.size()>0)
+				this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis()); 
 		}else{
 			this.dataPage.put(GlobalParam.READER_LAST_STAMP, LAST_STAMP); 
 		}

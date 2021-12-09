@@ -53,7 +53,7 @@ public interface TaskStateCoord extends Coordination{
 	
 	public String getscanPositionString(String instance);
 	
-	public void putScanPosition(String instance,ScanPosition scanPosition);
+	public void initPutDatas(String instance,ScanPosition scanPosition);
 	
 	public String getLSeqPos(String instance,String L1seq,String L2seq);
 	
@@ -68,5 +68,9 @@ public interface TaskStateCoord extends Coordination{
 	public void resetFlowInfo(String formKeyVal1,String formKeyVal2);
 	
 	public HashMap<String, String> getFlowInfo(String formKeyVal1,String formKeyVal2);
+	
+	public void updateStoreData(String instance,Object data);
+	
+	public Object getStoreData(String instance);
 	
 }
