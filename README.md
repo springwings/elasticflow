@@ -52,7 +52,7 @@ ElasticFlow可以以分布式系统(Master/Slave)或者单节点两种运行，�
       <dependency>
         <groupId>org.elasticflow</groupId>
         <artifactId>elasticflow</artifactId>
-        <version>5.1.0</version>
+        <version>5.3.0</version>
       </dependency>
    ```
    2. testunit代码，例如：
