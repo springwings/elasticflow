@@ -95,7 +95,8 @@ public class InstanceCoordinator implements InstanceCoord {
 					nodes.forEach(n -> {
 						n.getNodeCoord().stopNode();
 					});
-					Common.stopSystem();
+					isOnStart = true;
+					Common.LOG.warn("The cluster does not meet the conditions, all slave node tasks will be automatically closed.");
 				} else {
 					if (rebalace)
 						this.rebalanceOnNodeLeave(node.getBindInstances());
@@ -240,10 +241,8 @@ public class InstanceCoordinator implements InstanceCoord {
 			}
 		}
 		Node node = null;
-		if (removeNode > 0) {
-			node = nodes.get(removeNode);
-			nodes.remove(removeNode);
-		}
+		node = nodes.get(removeNode);
+		nodes.remove(removeNode);
 		return node;
 	}
 

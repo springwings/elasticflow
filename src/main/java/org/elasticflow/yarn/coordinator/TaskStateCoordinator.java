@@ -221,7 +221,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	public void initPutDatas(String instance, ScanPosition scanPosition) {
 		synchronized(SCAN_POSITION) {
 			SCAN_POSITION.put(instance, scanPosition);
-			TMP_STORE_DATA.put(instance, null);
+			TMP_STORE_DATA.put(instance, "");
 		}		
 	}
 
