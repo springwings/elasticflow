@@ -7,6 +7,7 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.NodeConfig;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFFileUtil;
+import org.elasticflow.yarn.coord.EFMonitorCoord;
 import org.elasticflow.yarn.coord.InstanceCoord;
 import org.elasticflow.yarn.coord.NodeCoord;
 
@@ -23,6 +24,8 @@ public class Node {
 	private int nodeId;
 	/**instance Coordinator**/
 	private InstanceCoord instanceCoord;
+	/**node monitor Coordinator**/
+	private EFMonitorCoord monitorCoord;
 	/**node Coordinator**/
 	private NodeCoord nodeCoord;
 	/**node instances summarize **/
@@ -76,6 +79,14 @@ public class Node {
 
 	public void setInstanceCoord(InstanceCoord instanceCoord) {
 		this.instanceCoord = instanceCoord;
+	}
+	
+	public void setEFMonitorCoord(EFMonitorCoord monitorCoord) {
+		this.monitorCoord = monitorCoord;
+	}
+	
+	public EFMonitorCoord getEFMonitorCoord() {
+		return monitorCoord;
 	}
 
 	public NodeCoord getNodeCoord() {

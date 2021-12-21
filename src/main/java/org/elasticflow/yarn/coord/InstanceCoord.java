@@ -20,6 +20,8 @@ public interface InstanceCoord extends Coordination{
 	
 	public void reloadResource();
 	
+	public String getConnectionStatus(String instance,String poolName);
+	
 	public void sendInstanceData(String content0,String content1, String instance);
 	
 	public void addInstance(String instanceSettting);
@@ -35,6 +37,8 @@ public interface InstanceCoord extends Coordination{
 	public void removeNode(String ip, Integer nodeId,boolean rebalace);
 	
 	public void stopNodes();
+	
+	public void updateAllNodesResource();
 	
 	public void clusterScan();
 	

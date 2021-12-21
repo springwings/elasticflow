@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
@@ -25,6 +27,7 @@ import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.yarn.EFRPCService;
 import org.elasticflow.yarn.Resource;
+import org.elasticflow.yarn.coord.EFMonitorCoord;
 import org.elasticflow.yarn.coord.InstanceCoord;
 import org.elasticflow.yarn.coord.NodeCoord;
 
@@ -42,6 +45,8 @@ public class InstanceCoordinator implements InstanceCoord {
 	private int avgInstanceNum;
 
 	private boolean isOnStart = true;
+		
+	private Lock rebalaceLock = new ReentrantLock();
 
 	volatile CopyOnWriteArrayList<Node> nodes = new CopyOnWriteArrayList<>();
 
@@ -74,6 +79,20 @@ public class InstanceCoordinator implements InstanceCoord {
 		if (instanceConfig.checkStatus())
 			EFNodeUtil.initParams(instanceConfig);
 		EFMonitorUtil.rebuildFlowGovern(instanceSettting, true);
+	} 
+	
+	public void updateAllNodesResource() {
+		nodes.forEach(n -> {
+			n.pushResource();
+		});
+	}
+	
+	public String getConnectionStatus(String instance,String poolName) {
+		for (Node node : nodes) { 
+			if(node.getBindInstances().offer(instance))
+				return node.getEFMonitorCoord().getStatus(poolName);
+		}
+		return "";
 	}
 
 	public void updateNode(String ip, Integer nodeId) {
@@ -84,15 +103,19 @@ public class InstanceCoordinator implements InstanceCoord {
 						new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)));
 				node.setInstanceCoord(EFRPCService.getRemoteProxyObj(InstanceCoord.class,
 						new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)));
+				node.setEFMonitorCoord(EFRPCService.getRemoteProxyObj(EFMonitorCoord.class,
+						new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)));
 				node.pushResource();
 				nodes.add(node);
-				if (nodes.size() >= GlobalParam.CLUSTER_MIN_NODES && isOnStart) {
+			}
+			if(nodes.size() >= GlobalParam.CLUSTER_MIN_NODES) {
+				if (isOnStart) {
 					isOnStart = false;
 					this.rebalanceOnStart();
 				} else {
 					this.rebalanceOnNewNodeJoin();
 				}
-			}
+			}	
 		} else {
 			this.getNode(nodeId).refresh();
 		}
@@ -167,9 +190,11 @@ public class InstanceCoordinator implements InstanceCoord {
 
 	private void rebalanceOnNodeLeave(Queue<String> bindInstances) {
 		Common.LOG.info("node leave, start rebalance on {} nodes.", nodes.size());
+		rebalaceLock.lock();
 		int addNums = avgInstanceNum() - this.avgInstanceNum;
 		if (addNums == 0)
 			addNums = 1;
+		Common.LOG.info("start NodeLeave distributing instance task.");
 		while (!bindInstances.isEmpty()) {
 			for (Node node : nodes) {
 				node.pushInstance(bindInstances.poll());
@@ -177,42 +202,44 @@ public class InstanceCoordinator implements InstanceCoord {
 					break;
 			}
 		}
+		rebalaceLock.unlock();
+		Common.LOG.info("finish NodeLeave distributing instance task.");
 	}
 
 	private void rebalanceOnNewNodeJoin() {
 		Common.LOG.info("node join, start rebalance on {} nodes.", nodes.size());
+		rebalaceLock.lock();
 		int avgInstanceNum = avgInstanceNum();
 		this.avgInstanceNum = avgInstanceNum;
-		int needNums = avgInstanceNum;
 		Queue<String> idleInstances = new LinkedList<>();
 		ArrayList<Node> addInstanceNodes = new ArrayList<>();
 		for (Node node : nodes) {
-			if (needNums == 0)
-				break;
-			if (node.getBindInstances().size() - avgInstanceNum < 0) {
+			if (node.getBindInstances().size() < avgInstanceNum) {
 				addInstanceNodes.add(node);
 			} else {
-				while (node.getBindInstances().size() - avgInstanceNum > 0) {
+				while (node.getBindInstances().size() > avgInstanceNum) {
 					idleInstances.offer(node.popInstance());
-					needNums--;
-					if (needNums == 0)
-						break;
 				}
 			}
 		}
 		// re-balance nodes
+		Common.LOG.info("start NewNodeJoin distributing instance task.");
 		for (Node node : addInstanceNodes) {
 			if (idleInstances.isEmpty())
 				break;
-			while (node.getBindInstances().size() - avgInstanceNum < 0) {
+			while (node.getBindInstances().size() < avgInstanceNum) {
 				node.pushInstance(idleInstances.poll());
 			}
 		}
+		rebalaceLock.unlock();
+		Common.LOG.info("finish NewNodeJoin distributing instance task.");
 	}
 
 	private void rebalanceOnStart() {
 		Common.LOG.info("start rebalance on {} nodes.", nodes.size());
+		rebalaceLock.lock();
 		String[] instances = GlobalParam.StartConfig.getProperty("instances").split(",");
+		Common.LOG.info("start OnStart distributing instance task.");
 		for (int i = 0; i < instances.length; i++) {
 			String[] strs = instances[i].split(":");
 			if (strs.length <= 0 || strs[0].length() < 1)
@@ -228,6 +255,8 @@ public class InstanceCoordinator implements InstanceCoord {
 			}
 		}
 		this.avgInstanceNum = avgInstanceNum();
+		rebalaceLock.unlock();
+		Common.LOG.info("finish OnStart distributing instance task.");
 	}
 
 	private int avgInstanceNum() {

@@ -25,7 +25,7 @@ public class ScanPosition implements Serializable{
 	private String keep="";
 	
 	public ScanPosition(String info,String instance,String storeId) {
-		String[] tmp = info.strip().split(INFO_SPERATOR);
+		String[] tmp = info.trim().split(INFO_SPERATOR);
 		if(tmp.length<2) {
 			this.instance = instance;
 			this.storeId = storeId;

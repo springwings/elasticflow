@@ -83,7 +83,7 @@ public class NodeConfig {
 			int instanceType = INSTANCE_TYPE.Blank.getVal();
 			String name = strs[0].trim();
 			if (strs.length == 2) {
-				instanceType = Integer.parseInt(strs[1].strip());
+				instanceType = Integer.parseInt(strs[1].trim());
 			} 
 			InstanceConfig nconfig;
 			if (this.instanceConfigs.containsKey(name)) {

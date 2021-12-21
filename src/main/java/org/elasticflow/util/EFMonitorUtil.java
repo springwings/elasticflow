@@ -192,6 +192,14 @@ public class EFMonitorUtil {
 		}
 	}
 	
+	public static String getConnectionStatus(String instance,String poolName) {
+		if(GlobalParam.DISTRIBUTE_RUN) {
+			return GlobalParam.INSTANCE_COORDER.getConnectionStatus(instance,poolName);
+		}else {
+			return EFConnectionPool.getStatus(poolName);
+		}
+	}
+	
 /**
  * get instance detail informations.
  * @param instance
@@ -215,7 +223,7 @@ public class EFMonitorUtil {
 					WarehouseParam wp = Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom());
 					JSONObject poolstatus = new JSONObject();
 					for(String seq:wp.getL1seq()) {
-						poolstatus.put(seq, EFConnectionPool.getStatus(wp.getPoolName(seq)));
+						poolstatus.put(seq, getConnectionStatus(instance,wp.getPoolName(seq)));
 					}					
 					Reader.put("Pool Status", poolstatus);
 				}
@@ -225,7 +233,7 @@ public class EFMonitorUtil {
 					WarehouseParam wp = Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getWriteTo());
 					JSONObject poolstatus = new JSONObject();
 					for(String seq:wp.getL1seq()) {
-						poolstatus.put(seq, EFConnectionPool.getStatus(wp.getPoolName(seq)));
+						poolstatus.put(seq, getConnectionStatus(instance,wp.getPoolName(seq)));
 					}						
 					Writer.put("Pool Status", poolstatus);
 				}
@@ -240,7 +248,7 @@ public class EFMonitorUtil {
 						searcherInfo = "Pool Status";
 					}					
 					String poolname = Resource.nodeConfig.getWarehouse().get(searchFrom).getPoolName(GlobalParam.DEFAULT_RESOURCE_SEQ);
-					Searcher.put(searcherInfo, EFConnectionPool.getStatus(poolname));
+					Searcher.put(searcherInfo, getConnectionStatus(instance,poolname));
 					
 				}
 			}

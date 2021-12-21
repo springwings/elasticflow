@@ -15,10 +15,12 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coord.DiscoveryCoord;
+import org.elasticflow.yarn.coord.EFMonitorCoord;
 import org.elasticflow.yarn.coord.InstanceCoord;
 import org.elasticflow.yarn.coord.NodeCoord;
 import org.elasticflow.yarn.coord.TaskStateCoord;
 import org.elasticflow.yarn.coordinator.DiscoveryCoordinator;
+import org.elasticflow.yarn.coordinator.EFMonitorCoordinator;
 import org.elasticflow.yarn.coordinator.InstanceCoordinator;
 import org.elasticflow.yarn.coordinator.NodeCoordinator;
 import org.elasticflow.yarn.coordinator.TaskStateCoordinator;
@@ -79,6 +81,7 @@ public class DistributeService {
 					dataReceiver = new DataReceiver(GlobalParam.SLAVE_SYN_PORT);
 					dataReceiver.register(InstanceCoord.class, InstanceCoordinator.class);
 					dataReceiver.register(NodeCoord.class, NodeCoordinator.class);
+					dataReceiver.register(EFMonitorCoord.class, EFMonitorCoordinator.class);
 				}
 				dataReceiver.start();
 			} catch (Exception e) {
