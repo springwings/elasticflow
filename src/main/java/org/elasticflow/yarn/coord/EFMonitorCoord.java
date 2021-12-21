@@ -1,5 +1,7 @@
 package org.elasticflow.yarn.coord;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * EFMonitor interface
  * 
@@ -10,5 +12,7 @@ package org.elasticflow.yarn.coord;
 public interface EFMonitorCoord extends Coordination{
 	
 	public String getStatus(String poolName);
+	
+	public JSONObject getPipeEndStatus(String instance, String L1seq);
 	
 }

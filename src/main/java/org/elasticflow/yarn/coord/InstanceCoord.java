@@ -7,6 +7,8 @@
  */
 package org.elasticflow.yarn.coord;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * Run task instance cluster coordination interface
  * 
@@ -21,6 +23,8 @@ public interface InstanceCoord extends Coordination{
 	public void reloadResource();
 	
 	public String getConnectionStatus(String instance,String poolName);
+	
+	public JSONObject getPipeEndStatus(String instance,String L1seq);
 	
 	public void sendInstanceData(String content0,String content1, String instance);
 	

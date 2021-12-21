@@ -200,6 +200,28 @@ public class EFMonitorUtil {
 		}
 	}
 	
+	/**
+	 * get Pipe End Status
+	 * @param instance
+	 * @param L1seq
+	 * @return
+	 */
+	public static JSONObject getPipeEndStatus(String instance, String L1seq) {
+		PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instance, L1seq, false,
+				GlobalParam.FLOW_TAG._DEFAULT.name());
+		JSONObject res = new JSONObject();
+		res.put("ReaderLoad", pipePump.getReader().getLoad());
+		res.put("ReaderPerformance", pipePump.getReader().getPerformance());
+		
+		res.put("ComputerLoad", pipePump.getComputer().getLoad());
+		res.put("ComputerPerformance", pipePump.getComputer().getPerformance());
+		res.put("ComputerBlockedTime", pipePump.getComputer().getBlockTime());
+		
+		res.put("WriterLoad", pipePump.getWriter().getLoad());
+		res.put("WriterPerformance", pipePump.getWriter().getPerformance());
+		return res;
+	}
+	
 /**
  * get instance detail informations.
  * @param instance
@@ -215,6 +237,7 @@ public class EFMonitorUtil {
 			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
 			JSONObject Reader = new JSONObject();
 			JSONObject Writer = new JSONObject();
+			JSONObject nodeInfo = new JSONObject();
 			JSONObject Computer = new JSONObject();
 			JSONObject Searcher = new JSONObject();
 			JSONObject Task = new JSONObject();
@@ -255,24 +278,30 @@ public class EFMonitorUtil {
 			
 			if((type&2)>0) {
 				String[] L1seqs = Common.getL1seqs(config);
-				for (String seq : L1seqs) {
-					PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(config.getName(), seq, false,
-							GlobalParam.FLOW_TAG._DEFAULT.name());
+				for (String L1seq : L1seqs) {	 
 					String appendPipe = "";
-					if (seq != "") {
-						appendPipe = "Seq(" + seq + ") ";
+					if (L1seq != "") {
+						appendPipe = "Seq(" + L1seq + ") ";
 					}
-					Reader.put(appendPipe + "Load", pipePump.getReader().getLoad());
-					Reader.put(appendPipe + "Performance", pipePump.getReader().getPerformance());
+					JSONObject tmp;
+					if(GlobalParam.DISTRIBUTE_RUN) {
+						tmp = GlobalParam.INSTANCE_COORDER.getPipeEndStatus(config.getName(), L1seq);						
+					} else {
+						tmp = getPipeEndStatus(config.getName(), L1seq);
+					} 
+					Reader.put(appendPipe + "Load", tmp.get("ReaderLoad"));
+					Reader.put(appendPipe + "Performance", tmp.get("ReaderPerformance"));
 					if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {
-						Computer.put(appendPipe + "Load", pipePump.getComputer().getLoad());
-						Computer.put(appendPipe + "Performance", pipePump.getComputer().getPerformance());
-						Computer.put(appendPipe + "Blocked Time", pipePump.getComputer().getBlockTime());
+						Computer.put(appendPipe + "Load", tmp.get("ComputerLoad"));
+						Computer.put(appendPipe + "Performance", tmp.get("ComputerPerformance"));
+						Computer.put(appendPipe + "Blocked Time", tmp.get("ComputerBlockedTime"));
 					}
 					if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
-						Writer.put(appendPipe + "Load", pipePump.getWriter().getLoad());
-						Writer.put(appendPipe + "Performance", pipePump.getWriter().getPerformance());
+						Writer.put(appendPipe + "Load", tmp.get("WriterLoad"));
+						Writer.put(appendPipe + "Performance", tmp.get("WriterPerformance"));
 					}
+					nodeInfo.put(appendPipe+"nodeIP", tmp.get("nodeIP"));
+					nodeInfo.put(appendPipe+"nodeID", tmp.get("nodeID"));
 				}
 			}			
 				
@@ -354,6 +383,7 @@ public class EFMonitorUtil {
 			JO.put("Writer", Writer);
 			JO.put("Searcher", Searcher);
 			JO.put("Task", Task);
+			JO.put("NodeInfo", nodeInfo);
 		} 		
 		return JO;
 	}

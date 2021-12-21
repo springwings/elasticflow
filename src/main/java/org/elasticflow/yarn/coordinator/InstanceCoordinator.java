@@ -31,6 +31,8 @@ import org.elasticflow.yarn.coord.EFMonitorCoord;
 import org.elasticflow.yarn.coord.InstanceCoord;
 import org.elasticflow.yarn.coord.NodeCoord;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * Run task instance cluster coordination operation The code runs on the client
  * 
@@ -93,6 +95,18 @@ public class InstanceCoordinator implements InstanceCoord {
 				return node.getEFMonitorCoord().getStatus(poolName);
 		}
 		return "";
+	}
+	
+	public JSONObject getPipeEndStatus(String instance,String L1seq) {
+		for (Node node : nodes) { 
+			if(node.getBindInstances().offer(instance)) {
+				JSONObject jo = node.getEFMonitorCoord().getPipeEndStatus(instance,L1seq);
+				jo.put("nodeIP", node.getIp());
+				jo.put("nodeID", node.getNodeId());
+				return jo;
+			}
+		}
+		return new JSONObject();
 	}
 
 	public void updateNode(String ip, Integer nodeId) {

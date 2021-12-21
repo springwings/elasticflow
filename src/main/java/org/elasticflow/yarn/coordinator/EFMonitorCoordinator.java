@@ -1,7 +1,10 @@
 package org.elasticflow.yarn.coordinator;
 
 import org.elasticflow.connection.EFConnectionPool;
+import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.yarn.coord.EFMonitorCoord;
+
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * EFMonitor Coordinator
@@ -16,5 +19,8 @@ public class EFMonitorCoordinator implements EFMonitorCoord{
 		return EFConnectionPool.getStatus(poolName);
 	}
  
+	public JSONObject getPipeEndStatus(String instance, String L1seq) {
+		return EFMonitorUtil.getPipeEndStatus(instance, L1seq);
+	}
 
 }
