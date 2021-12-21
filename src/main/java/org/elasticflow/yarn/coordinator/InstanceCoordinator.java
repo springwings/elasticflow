@@ -45,14 +45,24 @@ public class InstanceCoordinator implements InstanceCoord {
 
 	volatile CopyOnWriteArrayList<Node> nodes = new CopyOnWriteArrayList<>();
 
-	public void sendData(String content, String destination) {
-		EFFileUtil.createFile(content, destination);
+	public void sendData(String content, String destination,boolean relative) {
+		if(relative) {
+			EFFileUtil.createFile(content, GlobalParam.CONFIG_PATH + destination);
+		}else {
+			EFFileUtil.createFile(content, destination);
+		}		
 	}
+	
+	public void reloadResource() {
+		Resource.nodeConfig.parsePondFile(GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond"));
+		Resource.nodeConfig.parseInstructionsFile(GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("instructions"));
+	}
+	
 
 	public void sendInstanceData(String content0, String content1, String instance) {
 		String[] paths = NodeConfig.getInstancePath(instance);
-		sendData(content0, paths[0]);
-		sendData(content1, paths[1]);
+		sendData(content0, paths[0],false);
+		sendData(content1, paths[1],false);
 	}
 
 	public void addInstance(String instanceSettting) {
@@ -74,6 +84,7 @@ public class InstanceCoordinator implements InstanceCoord {
 						new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)));
 				node.setInstanceCoord(EFRPCService.getRemoteProxyObj(InstanceCoord.class,
 						new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)));
+				node.pushResource();
 				nodes.add(node);
 				if (nodes.size() >= GlobalParam.CLUSTER_MIN_NODES && isOnStart) {
 					isOnStart = false;

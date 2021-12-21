@@ -8,6 +8,7 @@
 package org.elasticflow.node.startup;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -224,10 +225,15 @@ public final class Run {
 	
 	private void loadPlugins(String plugin) {
 		if(plugin!=null && plugin.length()>1) {
-			List<File> jars = Arrays.asList(new File(plugin).listFiles());
+			List<File> jars = Arrays.asList(new File(plugin).listFiles(new FilenameFilter() {
+	            @Override
+	            public boolean accept(File dir, String name) {
+	                return name.toLowerCase().endsWith(".jar");
+	            }
+	        }));
 			URL[] urls = new URL[jars.size()];
 			for (int i = 0; i < jars.size(); i++) {
-			    try {
+			    try { 
 			        urls[i] = jars.get(i).toURI().toURL();
 			    } catch (Exception e) {
 			    	Common.LOG.error("load Plugins Exception", e);

@@ -145,7 +145,7 @@ public class NodeConfig {
 		}
 	}
 
-	private void parseInstructionsFile(String src) {
+	public void parseInstructionsFile(String src) {
 		InputStream in = null;
 		try {
 			byte[] bt = EFDataStorer.getData(src, false);
@@ -173,7 +173,7 @@ public class NodeConfig {
 		}
 	}
 
-	private void parsePondFile(String src) {
+	public void parsePondFile(String src) {
 		InputStream in = null;
 		try {
 			byte[] bt = EFDataStorer.getData(src, false);

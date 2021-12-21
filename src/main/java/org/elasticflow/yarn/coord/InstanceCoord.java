@@ -16,7 +16,9 @@ package org.elasticflow.yarn.coord;
  */
 public interface InstanceCoord extends Coordination{
 	
-	public void sendData(String content, String destination);
+	public void sendData(String content, String destination,boolean relative);
+	
+	public void reloadResource();
 	
 	public void sendInstanceData(String content0,String content1, String instance);
 	

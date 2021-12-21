@@ -110,6 +110,14 @@ public class Node {
 		this.instanceCoord.addInstance(instanceSetting);
 	}
 	
+	public void pushResource() {
+		String resource = GlobalParam.CONFIG_PATH + "/"+GlobalParam.StartConfig.getProperty("pond");
+		String instructions = GlobalParam.CONFIG_PATH + "/"+GlobalParam.StartConfig.getProperty("instructions");
+		this.instanceCoord.sendData(EFFileUtil.readText(resource, "utf-8"), "/"+GlobalParam.StartConfig.getProperty("pond"),true);
+		this.instanceCoord.sendData(EFFileUtil.readText(instructions, "utf-8"), "/"+GlobalParam.StartConfig.getProperty("instructions"),true);
+		this.instanceCoord.reloadResource();
+	} 
+	
 	public void stopAllInstance() { 
 		while(!this.bindInstances.isEmpty()) {
 			popInstance();
