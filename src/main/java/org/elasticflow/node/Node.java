@@ -18,18 +18,18 @@ import org.elasticflow.yarn.coord.NodeCoord;
  * @version 1.0
  */
 public class Node {
-
+	
 	private String ip;
 	private boolean isLive=true;
 	private int nodeId;
-	/**instance Coordinator**/
+	/**slave instance Coordinator**/
 	private InstanceCoord instanceCoord;
-	/**node monitor Coordinator**/
+	/**slave node monitor Coordinator**/
 	private EFMonitorCoord monitorCoord;
-	/**node Coordinator**/
+	/**slave node Coordinator**/
 	private NodeCoord nodeCoord;
 	/**node instances summarize **/
-	private Queue<String> bindInstances = new LinkedList<String>();
+	private volatile Queue<String> bindInstances = new LinkedList<String>();
 	private long lastLiveTime;
 
 	public static Node getInstance(String ip, Integer nodeId) {

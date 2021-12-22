@@ -13,9 +13,9 @@ import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.elasticflow.computer.service.ComputerService;
 import org.elasticflow.config.GlobalParam;
@@ -100,13 +100,13 @@ public final class Run {
 		
 		Resource.scheduler = scheduler;		
 		Resource.mailSender = new EFEmailSender();
-		Resource.tasks = new HashMap<String, FlowTask>();
+		Resource.tasks = new ConcurrentHashMap<String, FlowTask>();
 		Resource.taskJobCenter = new TaskJobCenter();
 		Resource.SOCKET_CENTER =  new SocketCenter();;
 		Resource.FlOW_CENTER = new FlowCenter();;
 		Resource.nodeMonitor = new NodeMonitor(); 
 		
-		if(!EFNodeUtil.isSlave()) {
+		if(!EFNodeUtil.isSlave()) {//for master
 			GlobalParam.TASK_COORDER = new TaskStateCoordinator();
 			GlobalParam.INSTANCE_COORDER = new InstanceCoordinator();
 		}

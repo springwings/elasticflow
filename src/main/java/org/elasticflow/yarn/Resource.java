@@ -8,6 +8,7 @@
 package org.elasticflow.yarn;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.elasticflow.config.NodeConfig;
 import org.elasticflow.model.EFState;
@@ -47,7 +48,7 @@ public final class Resource {
 	/**FLOW_INFOS store current flow running state information*/
 	public final static EFState<HashMap<String,String>> FLOW_INFOS = new EFState<HashMap<String,String>>();
 
-	public static HashMap<String, FlowTask> tasks; 
+	public static ConcurrentHashMap<String, FlowTask> tasks; 
 	
 	public static ThreadPools ThreadPools;
 	

@@ -130,27 +130,30 @@ public class FlowCenter{
 		if (instanceConfig.checkStatus()==false || instanceConfig.openTrans() == false)
 			return;
 		String[] L1seqs = Common.getL1seqs(instanceConfig);  
-		try {
-			for (String L1seq : L1seqs) {
-				if (L1seq == null)
-					continue; 
-				if(!Resource.tasks.containsKey(Common.getInstanceId(instanceName, L1seq)) || needClear){
-					PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instanceName, L1seq,needClear,GlobalParam.FLOW_TAG._DEFAULT.name());
-					if(EFNodeUtil.isSlave()) {
-						String newRunId = GlobalParam.TASK_COORDER.getContextId(instanceName, L1seq,GlobalParam.FLOW_TAG._DEFAULT.name());
-						CPU.reIndexContexts(pipePump.getID(), newRunId);
-						pipePump.setID(newRunId);						
-					}
-					Resource.tasks.put(Common.getInstanceId(instanceName, L1seq), FlowTask.createTask(instanceName,
-							pipePump, L1seq));
-				}  
-				if(createSchedule)
-					createFlowScheduleJob(Common.getInstanceId(instanceName, L1seq), Resource.tasks.get(Common.getInstanceId(instanceName, L1seq)),
-						instanceConfig,needClear);
-			}
-		} catch (Exception e) {
-			Common.LOG.error("Add Flow Govern "+instanceName+" Exception", e);
+		synchronized(Resource.tasks) {
+			try {
+				for (String L1seq : L1seqs) {
+					if (L1seq == null)
+						continue; 
+					if(!Resource.tasks.containsKey(Common.getInstanceId(instanceName, L1seq)) || needClear){
+						PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instanceName, L1seq,needClear,GlobalParam.FLOW_TAG._DEFAULT.name());
+						if(EFNodeUtil.isSlave()) {
+							String newRunId = GlobalParam.TASK_COORDER.getContextId(instanceName, L1seq,GlobalParam.FLOW_TAG._DEFAULT.name());
+							CPU.reIndexContexts(pipePump.getID(), newRunId);
+							pipePump.setID(newRunId);						
+						}
+						Resource.tasks.put(Common.getInstanceId(instanceName, L1seq), FlowTask.createTask(instanceName,
+								pipePump, L1seq));
+					}  
+					if(createSchedule)
+						createFlowScheduleJob(Common.getInstanceId(instanceName, L1seq), Resource.tasks.get(Common.getInstanceId(instanceName, L1seq)),
+							instanceConfig,needClear);
+				}
+			} catch (Exception e) {
+				Common.LOG.error("Add Flow Govern "+instanceName+" Exception", e);
+			}	
 		}
+		
 	}
 
 	public boolean jobAction(String mainName, String type, String actype) {

@@ -34,7 +34,7 @@ import org.elasticflow.yarn.coord.NodeCoord;
 import com.alibaba.fastjson.JSONObject;
 
 /**
- * Run task instance cluster coordination operation The code runs on the client
+ * Run task instance cluster coordination operation The code runs on the slave/master
  * 
  * @author chengwen
  * @version 0.1
@@ -51,7 +51,10 @@ public class InstanceCoordinator implements InstanceCoord {
 	private Lock rebalaceLock = new ReentrantLock();
 
 	volatile CopyOnWriteArrayList<Node> nodes = new CopyOnWriteArrayList<>();
-
+	
+	/**
+	 * local running method
+	 */
 	public void sendData(String content, String destination,boolean relative) {
 		if(relative) {
 			EFFileUtil.createFile(content, GlobalParam.CONFIG_PATH + destination);
@@ -60,18 +63,26 @@ public class InstanceCoordinator implements InstanceCoord {
 		}		
 	}
 	
+	/**
+	 * local running method
+	 */
 	public void reloadResource() {
 		Resource.nodeConfig.parsePondFile(GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond"));
 		Resource.nodeConfig.parseInstructionsFile(GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("instructions"));
 	}
 	
-
+	/**
+	 * local running method	
+	 */
 	public void sendInstanceData(String content0, String content1, String instance) {
 		String[] paths = NodeConfig.getInstancePath(instance);
 		sendData(content0, paths[0],false);
 		sendData(content1, paths[1],false);
 	}
 
+	/**
+	 * local running method	
+	 */
 	public void addInstance(String instanceSettting) {
 		Resource.nodeConfig.loadConfig(instanceSettting, false);
 		Resource.nodeConfig.loadInstanceConfig(instanceSettting);
@@ -83,12 +94,54 @@ public class InstanceCoordinator implements InstanceCoord {
 		EFMonitorUtil.rebuildFlowGovern(instanceSettting, true);
 	} 
 	
+	/**
+	 * local running method
+	 */
+	public void stopInstance(String instance, String jobtype) {
+		if (jobtype.toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
+			EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, false);
+		} else {
+			EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
+		}
+	}
+	
+	/**
+	 * local running method
+	 */
+	public void resumeInstance(String instance, String jobtype) {
+		if (jobtype.toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
+			EFMonitorUtil.controlInstanceState(instance, STATUS.Ready, false);
+		} else {
+			EFMonitorUtil.controlInstanceState(instance, STATUS.Ready, true);
+		}
+	}
+	
+	/**
+	 * local running method
+	 */
+	public void removeInstance(String instance) {
+		EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
+		if (Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType() > 0) {
+			Resource.FLOW_INFOS.remove(instance, JOB_TYPE.FULL.name());
+			Resource.FLOW_INFOS.remove(instance, JOB_TYPE.INCREMENT.name());
+		}		
+		Resource.FlOW_CENTER.removeInstance(instance, true, true);
+		EFMonitorUtil.removeConfigInstance(instance);
+		Resource.nodeConfig.getInstanceConfigs().remove(instance);
+	}
+	
+	/**
+	 * master method	
+	 */
 	public void updateAllNodesResource() {
 		nodes.forEach(n -> {
 			n.pushResource();
 		});
 	}
 	
+	/**
+	 * master method	
+	 */	
 	public String getConnectionStatus(String instance,String poolName) {
 		for (Node node : nodes) { 
 			if(node.getBindInstances().offer(instance))
@@ -97,6 +150,9 @@ public class InstanceCoordinator implements InstanceCoord {
 		return "";
 	}
 	
+	/**
+	 * master method	
+	 */
 	public JSONObject getPipeEndStatus(String instance,String L1seq) {
 		for (Node node : nodes) { 
 			if(node.getBindInstances().offer(instance)) {
@@ -109,6 +165,9 @@ public class InstanceCoordinator implements InstanceCoord {
 		return new JSONObject();
 	}
 
+	/**
+	 * master method	
+	 */
 	public void updateNode(String ip, Integer nodeId) {
 		if (!this.containsNode(nodeId)) {
 			synchronized (nodes) {
@@ -135,6 +194,9 @@ public class InstanceCoordinator implements InstanceCoord {
 		}
 	}
 
+	/**
+	 * master method	
+	 */
 	public void removeNode(String ip, Integer nodeId, boolean rebalace) {
 		synchronized (nodes) {
 			if (this.containsNode(nodeId)) {
@@ -153,6 +215,9 @@ public class InstanceCoordinator implements InstanceCoord {
 		}
 	}
 
+	/**
+	 * master method	
+	 */
 	public void stopNodes() {
 		nodes.forEach(n -> {
 			n.stopAllInstance();
@@ -160,6 +225,9 @@ public class InstanceCoordinator implements InstanceCoord {
 		});
 	}
 
+	/**
+	 * master method	
+	 */
 	public void clusterScan() {
 		Queue<String> bindInstances = new LinkedList<String>();
 		synchronized (nodes) {
@@ -173,34 +241,7 @@ public class InstanceCoordinator implements InstanceCoord {
 				this.rebalanceOnNodeLeave(bindInstances);
 		}
 
-	}
-
-	public void stopInstance(String instance, String jobtype) {
-		if (jobtype.toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
-			EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, false);
-		} else {
-			EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
-		}
-	}
-
-	public void resumeInstance(String instance, String jobtype) {
-		if (jobtype.toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
-			EFMonitorUtil.controlInstanceState(instance, STATUS.Ready, false);
-		} else {
-			EFMonitorUtil.controlInstanceState(instance, STATUS.Ready, true);
-		}
-	}
-
-	public void removeInstance(String instance) {
-		EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
-		if (Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType() > 0) {
-			Resource.FLOW_INFOS.remove(instance, JOB_TYPE.FULL.name());
-			Resource.FLOW_INFOS.remove(instance, JOB_TYPE.INCREMENT.name());
-		}
-		Resource.nodeConfig.getInstanceConfigs().remove(instance);
-		Resource.FlOW_CENTER.removeInstance(instance, true, true);
-		EFMonitorUtil.removeConfigInstance(instance);
-	}
+	} 
 
 	private void rebalanceOnNodeLeave(Queue<String> bindInstances) {
 		Common.LOG.info("node leave, start rebalance on {} nodes.", nodes.size());

@@ -42,7 +42,6 @@ import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFLoader;
 import org.elasticflow.util.EFMonitorUtil;
-import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.PipeXMLUtil;
 import org.elasticflow.util.SystemInfoUtil;
 import org.elasticflow.util.instance.EFDataStorer;
@@ -269,13 +268,7 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void restartNode(Request rq) {
-		Thread thread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				EFNodeUtil.runShell(GlobalParam.StartConfig.getProperty("restart_shell"));
-			}
-		});
-		thread.start();
+		EFMonitorUtil.restartSystem();
 		setResponse(RESPONSE_STATUS.CodeException, "current node is in restarting...", null);
 	}
 

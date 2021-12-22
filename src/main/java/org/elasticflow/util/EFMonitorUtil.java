@@ -387,4 +387,14 @@ public class EFMonitorUtil {
 		} 		
 		return JO;
 	}
+	
+	public static void restartSystem() {
+		Thread thread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				EFNodeUtil.runShell(GlobalParam.StartConfig.getProperty("restart_shell"));
+			}
+		});
+		thread.start();
+	}
 }
