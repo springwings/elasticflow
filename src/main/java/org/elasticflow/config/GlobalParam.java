@@ -25,14 +25,18 @@ import org.elasticflow.yarn.coord.TaskStateCoord;
  */
 public final class GlobalParam {
 	
+	/**------------system global information------------*/
+	public static final String PROJ = "ElasticFlow";
+	
 	public static long SYS_START_TIME = System.currentTimeMillis();
 	
+	/**------------system Runtime Environment------------*/	
 	public static boolean DEBUG;
 	
-	/**send error mail or not **/
+	/**send error mail or not*/
 	public static boolean SEND_EMAIL = false;
 	
-	/**system Runtime Environment*/
+	/**system run environment alpha beta or product...*/
 	public static String RUN_ENV; 
 	
 	public static String VERSION;
@@ -41,6 +45,32 @@ public final class GlobalParam {
 	
 	public static int CONNECTION_POOL_SIZE = 5;
 	
+	public static boolean WRITE_BATCH = false;
+	/**#1 searcher service  2 writer service 4 http reader service 8 instruction service 16 compute service*/
+	public static int SERVICE_LEVEL;
+	/**store zookeeper data path*/
+	public static String CONFIG_PATH;
+	
+	/**use zookeeper to store config contents***/
+	public static boolean USE_ZK;
+	
+	public static String INSTANCE_PATH;
+	
+	public static String IP; 
+	 
+	/** CONNECT_EXPIRED is milliseconds time */
+	public static int CONNECT_EXPIRED = 7200000;   
+	
+	public static Properties StartConfig = new FormatProperties(); 
+	
+	/**configure file local path*/
+	public static final String configPath = System.getProperty("config");
+	
+	/**configure plugin local path*/
+	public static final String pluginPath = System.getProperty("plugin");
+	public static volatile URLClassLoader PLUGIN_CLASS_LOADER;
+	
+	/**------------system distribute running configure------------*/	
 	public static int MASTER_SYN_PORT = 8618;
 	
 	public static int SLAVE_SYN_PORT = 8619;
@@ -49,9 +79,7 @@ public final class GlobalParam {
 	
 	public static int CLUSTER_MIN_NODES;
 	
-	public static String NODEID = System.getProperty("nodeid");;
-	
-	public static final String PROJ = "ElasticFlow";
+	public static String NODEID = System.getProperty("nodeid");	
 	
 	public static String MASTER_HOST = ""; 
 	
@@ -64,7 +92,20 @@ public final class GlobalParam {
 	public static InstanceCoord INSTANCE_COORDER;
 	
 	public static DiscoveryCoord DISCOVERY_COORDER;
-	 
+	
+	/**master,slave,backup*/
+	public static enum NODE_TYPE{
+		master,slave,backup
+	};
+	
+	/**------------instance parameters------------*/
+	public static enum END_TYPE{
+		reader,computer,writer,searcher
+	}
+	
+	public static enum RESOURCE_TYPE{
+		WAREHOUSE,INSTRUCTION
+	}
 	/**Task Running status define*/
 	public static enum STATUS {  
 		Blank(0),Ready(1),Running(2),Termination(4),Stop(8),Waiting(16);
@@ -76,7 +117,43 @@ public final class GlobalParam {
 	        return v;  
 	    } 
 	} 
-	/**External API call feedback Response status define*/
+	
+	public static enum DATA_SOURCE_TYPE{
+		MYSQL, ORACLE, HIVE, ES, SOLR, HBASE,ZOOKEEPER,UNKNOWN,H2,FILES,NEO4J,KAFKA,VEARCH,HDFS,FASTDFS
+	}  
+	public static enum FLOW_TAG {
+		_DEFAULT,_MOP
+	}
+	public final static String DEFAULT_FIELD = "SYSTEM_UPDATE_TIME"; 
+	public final static String DEFAULT_RESOURCE_SEQ = ""; 
+	public static enum JOB_TYPE {
+		MASTER,FULL,INCREMENT,OPTIMIZE,INSTRUCTION
+	} 
+	public static enum FLOWINFO{
+		FULL_STATE,FULL_STOREID,INCRE_STOREID,FULL_JOBS
+	} 
+	
+	public final static String DEFAULT_SEQ = "_DFAUTL";
+	public final static String JOB_INCREMENTINFO_PATH = "batch";  
+	public final static String JOB_FULLINFO_PATH = "full_info"; 
+	
+	/**writer parameters Mechanism: AB Active/standby switching mode,
+	 * Time Build instance in time steps, NORM Keep only a single instance mode*/
+	public static enum MECHANISM{
+		AB,Time,NORM
+	}
+	public static enum INSTANCE_TYPE {  
+		Blank(0),Trans(1),WithCompute(2);
+		private int v;
+		private INSTANCE_TYPE(int val) {   
+		    this.v = val;  
+		}
+		public int getVal() {  
+	        return v;  
+	    } 
+	} 
+	
+	/**------------External API call feedback Response status define------------*/
 	public static enum RESPONSE_STATUS {  
 		Success(0),DataErr(100),CodeException(200),ParameterErr(300),Unknown(400),ExternErr(500);
 		private int v;
@@ -100,93 +177,22 @@ public final class GlobalParam {
 		public Object getMsg() {
 			return MSG.get(this.v);
 		}
-	}
-	
-	public static boolean WRITE_BATCH = false;
-	/**#1 searcher service  2 writer service 4 http reader service 8 instruction service 16 compute service*/
-	public static int SERVICE_LEVEL;
-	/**store zookeeper data path*/
-	public static String CONFIG_PATH;
-	
-	/**use zookeeper to store config contents***/
-	public static boolean USE_ZK;
-	
-	public static String INSTANCE_PATH;
-	
-	public static String IP; 
-	
-	/** CONNECT_EXPIRED is milliseconds time */
-	public static int CONNECT_EXPIRED = 7200000;   
-	
-	public static Properties StartConfig = new FormatProperties(); 
-	
-	/**configure file local path*/
-	public static final String configPath = System.getProperty("config");
-	
-	/**configure plugin local path*/
-	public static final String pluginPath = System.getProperty("plugin");
-	public static volatile URLClassLoader PLUGIN_CLASS_LOADER;
-	
-	public static enum END_TYPE{
-		reader,computer,writer,searcher
-	}
-	
+	}   
 	public static enum FIELD_PARSE_TYPE{
 		valueOf,parse
-	}
-	
-	/**master,slave,backup*/
-	public static enum NODE_TYPE{
-		master,slave,backup
-	};
-	
-	public static enum RESOURCE_TYPE{
-		WAREHOUSE,INSTRUCTION
-	};
-	 
-	/**writer parameters Mechanism: AB Active/standby switching mode,
-	 * Time Build instance in time steps, NORM Keep only a single instance mode*/
-	public static enum MECHANISM{
-		AB,Time,NORM
-	};
-	public static enum INSTANCE_TYPE {  
-		Blank(0),Trans(1),WithCompute(2);
-		private int v;
-		private INSTANCE_TYPE(int val) {   
-		    this.v = val;  
-		}
-		public int getVal() {  
-	        return v;  
-	    } 
 	} 
+	
 	public static enum KEY_PARAM {
 		start, count, sort, facet, detail, facet_count,group,fl,__storeid
 	}  
-	public static enum DATA_SOURCE_TYPE{
-		MYSQL, ORACLE, HIVE, ES, SOLR, HBASE,ZOOKEEPER,UNKNOWN,H2,FILES,NEO4J,KAFKA,VEARCH,HDFS,FASTDFS
-	}  
-	public static enum FLOW_TAG {
-		_DEFAULT,_MOP
-	}
-	public final static String DEFAULT_FIELD = "SYSTEM_UPDATE_TIME"; 
-	public final static String DEFAULT_RESOURCE_SEQ = ""; 
-	public static enum JOB_TYPE {
-		MASTER,FULL,INCREMENT,OPTIMIZE,INSTRUCTION
-	} 
-	public static enum FLOWINFO{
-		FULL_STATE,FULL_STOREID,INCRE_STOREID,FULL_JOBS
-	} 
+
 	
-	public final static String DEFAULT_SEQ = "_DFAUTL";
-	public final static String JOB_INCREMENTINFO_PATH = "batch";  
-	public final static String JOB_FULLINFO_PATH = "full_info"; 
-	
-	//computer parameters
+	/**------------computer parameters------------*/
 	public static enum COMPUTER_STAGE{
 		TRAIN,PREDICT,TEST
 	} 
 	
-	//searcher parameters
+	/**------------searcher parameters------------*/
 	public final static String CLOSE_REQUEST_RESPONSE = "__request_not_return";
 	public final static int SEARCH_MAX_WINDOW=20000; 
 	public final static int SEARCH_MAX_PAGE=2000;
@@ -219,7 +225,7 @@ public final class GlobalParam {
 		BOOLEAN_QUERY, DISJUNCTION_QUERY 
 	}    
 
-	//reader parameters
+	/**------------reader parameters------------*/
 	public static final String _start = "#{page_start}";
 	public static final String _end = "#{page_end}"; 
 	public static final String _seq = "#{seq}"; 
@@ -234,7 +240,7 @@ public final class GlobalParam {
 	public static final String READER_LAST_STAMP = "lastUpdateTime";
 	public static final String READER_STATUS = "_reader_status"; 
 	
-	
+	/**------------static init------------*/
 	static {
 		try {
 			IP = InetAddress.getLocalHost().getHostAddress();

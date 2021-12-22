@@ -18,6 +18,8 @@ import com.alibaba.fastjson.JSONObject;
  */
 public interface InstanceCoord extends Coordination{
 	
+	public void initNode();
+	
 	public void sendData(String content, String destination,boolean relative);
 	
 	public void reloadResource();

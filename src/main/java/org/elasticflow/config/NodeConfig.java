@@ -36,7 +36,8 @@ import org.w3c.dom.NodeList;
  * @date 2018-10-11 14:50
  */
 public class NodeConfig {
-
+	
+	/**instance,instance-config map*/
 	private final Map<String, InstanceConfig> instanceConfigs = new HashMap<>();
 	private final Map<String, InstanceConfig> searchConfigMap = new HashMap<>();
 	private final Map<String, WarehouseParam> warehouse = new HashMap<>();

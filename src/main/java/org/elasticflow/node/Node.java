@@ -42,6 +42,14 @@ public class Node {
 		setIp(ip);
 		setNodeId(nodeId);
 	}
+	
+	
+	public void init(NodeCoord nodeCoord,InstanceCoord instanceCoord,EFMonitorCoord monitorCoord) {
+		this.nodeCoord = nodeCoord;
+		this.instanceCoord = instanceCoord;
+		this.monitorCoord = monitorCoord;
+		this.instanceCoord.initNode();
+	}
 
 	public String getIp() {
 		return ip;
@@ -76,14 +84,6 @@ public class Node {
 	public InstanceCoord getInstanceCoord() {
 		return instanceCoord;
 	}
-
-	public void setInstanceCoord(InstanceCoord instanceCoord) {
-		this.instanceCoord = instanceCoord;
-	}
-	
-	public void setEFMonitorCoord(EFMonitorCoord monitorCoord) {
-		this.monitorCoord = monitorCoord;
-	}
 	
 	public EFMonitorCoord getEFMonitorCoord() {
 		return monitorCoord;
@@ -91,10 +91,6 @@ public class Node {
 
 	public NodeCoord getNodeCoord() {
 		return nodeCoord;
-	}
-
-	public void setNodeCoord(NodeCoord nodeCoord) {
-		this.nodeCoord = nodeCoord;
 	}
 
 	public Queue<String> getBindInstances() {
@@ -120,6 +116,7 @@ public class Node {
 				EFFileUtil.readText(paths[1], "utf-8"), strs[0]);
 		this.instanceCoord.addInstance(instanceSetting);
 	}
+
 	
 	public void pushResource() {
 		String resource = GlobalParam.CONFIG_PATH + "/"+GlobalParam.StartConfig.getProperty("pond");

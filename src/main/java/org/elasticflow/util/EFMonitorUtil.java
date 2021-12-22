@@ -3,6 +3,7 @@ package org.elasticflow.util;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
@@ -38,7 +39,7 @@ public class EFMonitorUtil {
 		} 
 		return true;
 	}	
-	
+	 
 
 	public static void saveNodeConfig() throws Exception {
 		OutputStream os = null;
@@ -94,6 +95,13 @@ public class EFMonitorUtil {
 			if (strs.length < 1)
 				continue;
 			Resource.FlOW_CENTER.addFlowGovern(strs[0], Resource.nodeConfig.getInstanceConfigs().get(strs[0]), true,createSchedule);
+		}
+	}
+	
+	public static void cleanAllInstance() {
+		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
+		for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {
+			GlobalParam.INSTANCE_COORDER.removeInstance(entry.getKey());
 		}
 	}
 	

@@ -39,9 +39,8 @@ public final class ReportStatus {
 						GlobalParam.DISCOVERY_COORDER.reportStatus(GlobalParam.IP, GlobalParam.NODEID);						
 					} catch (Exception e) {
 						Common.LOG.warn("master node cannot connect.");
-						if(Resource.tasks.size()>0) {
-							EFMonitorUtil.restartSystem();
-						}
+						if(Resource.tasks.size()>0)
+							EFMonitorUtil.cleanAllInstance();
 					}
 				}
 			});
