@@ -40,7 +40,7 @@ public final class ReportStatus {
 					} catch (Exception e) {
 						Common.LOG.warn("master node cannot connect.");
 						if(Resource.tasks.size()>0)
-							EFMonitorUtil.cleanAllInstance();
+							EFMonitorUtil.cleanAllInstance(false);
 					}
 				}
 			});

@@ -56,8 +56,11 @@ public class InstanceCoordinator implements InstanceCoord {
 	//----------------local running method-------------------//
 	
 	public void initNode() {
-		if(Resource.tasks.size()>0)
-			EFMonitorUtil.cleanAllInstance();
+		boolean wait = true;
+		while(Resource.tasks.size()>0) {
+			EFMonitorUtil.cleanAllInstance(wait);
+			wait = false;
+		}			
 	}
 	
 	public void sendData(String content, String destination,boolean relative) {
@@ -106,15 +109,15 @@ public class InstanceCoordinator implements InstanceCoord {
 		}
 	}
 
-	public void removeInstance(String instance) {
-		EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
+	public void removeInstance(String instance,boolean waitComplete) {
+		if(waitComplete)
+			EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
 		if (Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType() > 0) {
 			Resource.FLOW_INFOS.remove(instance, JOB_TYPE.FULL.name());
 			Resource.FLOW_INFOS.remove(instance, JOB_TYPE.INCREMENT.name());
 		}		
 		Resource.FlOW_CENTER.removeInstance(instance, true, true);
 		EFMonitorUtil.removeConfigInstance(instance);
-		Resource.nodeConfig.getInstanceConfigs().remove(instance);
 	} 
 	
 	//----------------master control running method-------------------//
@@ -134,7 +137,7 @@ public class InstanceCoordinator implements InstanceCoord {
 	
 	public JSONObject getPipeEndStatus(String instance,String L1seq) {
 		for (Node node : nodes) { 
-			if(node.getBindInstances().offer(instance)) {
+			if(node.getBindInstances().contains(instance)) {
 				JSONObject jo = node.getEFMonitorCoord().getPipeEndStatus(instance,L1seq);
 				jo.put("nodeIP", node.getIp());
 				jo.put("nodeID", node.getNodeId());

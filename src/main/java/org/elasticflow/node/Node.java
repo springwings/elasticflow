@@ -103,7 +103,7 @@ public class Node {
 			String[] strs = instanceSetting.split(":");
 			this.instanceCoord.stopInstance(strs[0], GlobalParam.JOB_TYPE.INCREMENT.name());
 			this.instanceCoord.stopInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());
-			this.instanceCoord.removeInstance(strs[0]);
+			this.instanceCoord.removeInstance(strs[0],true);
 		}		
 		return instanceSetting;
 	}

@@ -114,6 +114,7 @@ public class FlowCenter{
 				Common.LOG.error("remove Instance "+instance+" Exception", e);
 				return false;
 			} 
+			configMap.remove(instance);
 		}
 		return state;
 	}

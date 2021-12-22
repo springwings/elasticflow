@@ -36,7 +36,7 @@ public interface InstanceCoord extends Coordination{
 	
 	public void resumeInstance(String instance,String jobtype);
 	
-	public void removeInstance(String instance);
+	public void removeInstance(String instance,boolean waitComplete);
 	
 	public void updateNode(String ip, Integer nodeId);
 	

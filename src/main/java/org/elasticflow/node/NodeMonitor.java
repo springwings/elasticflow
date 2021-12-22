@@ -774,7 +774,7 @@ public final class NodeMonitor {
 	 * @param instance
 	 */
 	private void removeInstance(String instance) {
-		GlobalParam.INSTANCE_COORDER.removeInstance(instance);
+		GlobalParam.INSTANCE_COORDER.removeInstance(instance,true);
 		try {
 			EFMonitorUtil.saveNodeConfig();
 		} catch (Exception e) {

@@ -98,10 +98,10 @@ public class EFMonitorUtil {
 		}
 	}
 	
-	public static void cleanAllInstance() {
+	public static void cleanAllInstance(boolean waitComplete) {
 		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 		for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {
-			GlobalParam.INSTANCE_COORDER.removeInstance(entry.getKey());
+			GlobalParam.INSTANCE_COORDER.removeInstance(entry.getKey(),waitComplete);
 		}
 	}
 	
