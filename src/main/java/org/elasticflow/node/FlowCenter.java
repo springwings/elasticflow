@@ -185,12 +185,15 @@ public class FlowCenter{
 	private boolean removeFlowScheduleJob(String instance,InstanceConfig instanceConfig)throws SchedulerException {
 		boolean state = true;
 		if (instanceConfig.getPipeParams().getFullCron() != null) { 
-			state= jobAction(instance, GlobalParam.JOB_TYPE.FULL.name(), "remove") && state;
+			jobAction(instance, GlobalParam.JOB_TYPE.FULL.name(), "stop");
+			state = jobAction(instance, GlobalParam.JOB_TYPE.FULL.name(), "remove") && state;
 		}
 		if(instanceConfig.getPipeParams().getFullCron() == null || instanceConfig.getPipeParams().getOptimizeCron()!=null){
+			jobAction(instance, GlobalParam.JOB_TYPE.OPTIMIZE.name(), "stop");
 			state = jobAction(instance, GlobalParam.JOB_TYPE.OPTIMIZE.name(), "remove") && state;
 		}
 		if(instanceConfig.getPipeParams().getDeltaCron() != null){
+			jobAction(instance, GlobalParam.JOB_TYPE.INCREMENT.name(), "stop");
 			state = jobAction(instance, GlobalParam.JOB_TYPE.INCREMENT.name(), "remove") && state;
 		}
 		return state;

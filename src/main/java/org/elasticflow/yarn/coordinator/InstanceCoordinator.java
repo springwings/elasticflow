@@ -20,7 +20,7 @@ import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.config.NodeConfig;
-import org.elasticflow.node.Node;
+import org.elasticflow.node.EFNode;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFMonitorUtil;
@@ -51,7 +51,7 @@ public class InstanceCoordinator implements InstanceCoord {
 		
 	private Lock rebalaceLock = new ReentrantLock();
 
-	volatile CopyOnWriteArrayList<Node> nodes = new CopyOnWriteArrayList<>();
+	volatile CopyOnWriteArrayList<EFNode> nodes = new CopyOnWriteArrayList<>();
 	
 	//----------------local running method-------------------//
 	
@@ -128,7 +128,7 @@ public class InstanceCoordinator implements InstanceCoord {
 	}
 
 	public String getConnectionStatus(String instance,String poolName) {
-		for (Node node : nodes) { 
+		for (EFNode node : nodes) { 
 			if(node.containInstace(instance))
 				return node.getEFMonitorCoord().getStatus(poolName);
 		}
@@ -136,7 +136,7 @@ public class InstanceCoordinator implements InstanceCoord {
 	}
 	
 	public JSONObject getPipeEndStatus(String instance,String L1seq) {
-		for (Node node : nodes) { 
+		for (EFNode node : nodes) { 
 			if(node.containInstace(instance)) {
 				JSONObject jo = node.getEFMonitorCoord().getPipeEndStatus(instance,L1seq);
 				jo.put("nodeIP", node.getIp());
@@ -150,7 +150,7 @@ public class InstanceCoordinator implements InstanceCoord {
 	public void updateNode(String ip, Integer nodeId) {
 		if (!this.containsNode(nodeId)) {
 			synchronized (nodes) { 
-				Node node = Node.getInstance(ip, nodeId);
+				EFNode node = EFNode.getInstance(ip, nodeId);
 				node.init(isOnStart,EFRPCService.getRemoteProxyObj(NodeCoord.class,
 						new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)), 
 						EFRPCService.getRemoteProxyObj(InstanceCoord.class,
@@ -176,7 +176,7 @@ public class InstanceCoordinator implements InstanceCoord {
 	public void removeNode(String ip, Integer nodeId, boolean rebalace) {
 		synchronized (nodes) {
 			if (this.containsNode(nodeId)) {
-				Node node = this.removeNode(nodeId);
+				EFNode node = this.removeNode(nodeId);
 				if (nodes.size() < GlobalParam.CLUSTER_MIN_NODES) {
 					nodes.forEach(n -> {
 						n.getNodeCoord().stopNode();
@@ -201,7 +201,7 @@ public class InstanceCoordinator implements InstanceCoord {
 	public Queue<String> clusterScan(boolean startRebalace) {
 		Queue<String> bindInstances = new LinkedList<String>();
 		synchronized (nodes) {
-			for (Node n : nodes) {
+			for (EFNode n : nodes) {
 				if (!n.isLive()) {
 					removeNode(n.getIp(), n.getNodeId(), false);
 					bindInstances.addAll(n.getBindInstances());
@@ -222,7 +222,7 @@ public class InstanceCoordinator implements InstanceCoord {
 			addNums = 1;
 		Common.LOG.info("start NodeLeave distributing instance task.");
 		while (!bindInstances.isEmpty()) {
-			for (Node node : nodes) {
+			for (EFNode node : nodes) {
 				node.pushInstance(bindInstances.poll(),this);
 				if (bindInstances.isEmpty())
 					break;
@@ -237,8 +237,8 @@ public class InstanceCoordinator implements InstanceCoord {
 		rebalaceLock.lock();
 		int avgInstanceNum = avgInstanceNum();
 		this.avgInstanceNum = avgInstanceNum;
-		ArrayList<Node> addInstanceNodes = new ArrayList<>();
-		for (Node node : nodes) {
+		ArrayList<EFNode> addInstanceNodes = new ArrayList<>();
+		for (EFNode node : nodes) {
 			if (node.getBindInstances().size() < avgInstanceNum) {
 				addInstanceNodes.add(node);
 			} else {
@@ -249,7 +249,7 @@ public class InstanceCoordinator implements InstanceCoord {
 		}
 		// re-balance nodes
 		Common.LOG.info("start NewNodeJoin distributing instance task.");
-		for (Node node : addInstanceNodes) {
+		for (EFNode node : addInstanceNodes) {
 			if (idleInstances.isEmpty())
 				break;
 			while (node.getBindInstances().size() < avgInstanceNum) { 
@@ -266,7 +266,7 @@ public class InstanceCoordinator implements InstanceCoord {
 		String[] instances = GlobalParam.StartConfig.getProperty("instances").split(",");
 		Common.LOG.info("start OnStart distributing instance task.");
 		for (int i = 0; i < instances.length;) {
-			for (Node node : nodes) {
+			for (EFNode node : nodes) {
 				String[] strs = instances[i].split(":");
 				if (strs.length > 1 && strs[0].length() > 1) { 
 					if (Integer.parseInt(strs[1]) > 0) {
@@ -289,8 +289,8 @@ public class InstanceCoordinator implements InstanceCoord {
 		return (avg < 1) ? 1 : avg;
 	}
 
-	private Node getNode(Integer nodeId) {
-		for (Node node : nodes) {
+	private EFNode getNode(Integer nodeId) {
+		for (EFNode node : nodes) {
 			if (node.getNodeId() == nodeId)
 				return node;
 		}
@@ -299,7 +299,7 @@ public class InstanceCoordinator implements InstanceCoord {
 	
 	
 
-	private Node removeNode(Integer nodeId) {
+	private EFNode removeNode(Integer nodeId) {
 		int removeNode = -1;
 		for (int i = 0; i < nodes.size(); i++) {
 			if (nodes.get(i).getNodeId() == nodeId) {
@@ -307,14 +307,14 @@ public class InstanceCoordinator implements InstanceCoord {
 				break;
 			}
 		}
-		Node node = null;
+		EFNode node = null;
 		node = nodes.get(removeNode);
 		nodes.remove(removeNode);
 		return node;
 	}
 
 	private boolean containsNode(Integer nodeId) {
-		for (Node node : nodes) {
+		for (EFNode node : nodes) {
 			if (node.getNodeId() == nodeId)
 				return true;
 		}

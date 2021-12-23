@@ -14,11 +14,11 @@ import org.elasticflow.yarn.coordinator.InstanceCoordinator;
 
 /**
  * Node Model
- * 
+ * It is mainly used for distributed node control
  * @author chengwen
  * @version 1.0
  */
-public class Node {
+public class EFNode {
 
 	private String ip;
 	private boolean isLive = true;
@@ -33,13 +33,13 @@ public class Node {
 	private volatile Queue<String> bindInstances = new LinkedList<String>();
 	private long lastLiveTime;
 
-	public static Node getInstance(String ip, Integer nodeId) {
-		Node n = new Node(ip, nodeId);
+	public static EFNode getInstance(String ip, Integer nodeId) {
+		EFNode n = new EFNode(ip, nodeId);
 		n.lastLiveTime = Common.getNow();
 		return n;
 	}
 
-	public Node(String ip, Integer nodeId) {
+	public EFNode(String ip, Integer nodeId) {
 		setIp(ip);
 		setNodeId(nodeId);
 	}
