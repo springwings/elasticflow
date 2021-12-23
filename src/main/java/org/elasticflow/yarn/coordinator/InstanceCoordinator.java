@@ -265,19 +265,19 @@ public class InstanceCoordinator implements InstanceCoord {
 		rebalaceLock.lock();
 		String[] instances = GlobalParam.StartConfig.getProperty("instances").split(",");
 		Common.LOG.info("start OnStart distributing instance task.");
-		for (int i = 0; i < instances.length; i++) {
-			String[] strs = instances[i].split(":");
-			if (strs.length <= 0 || strs[0].length() < 1)
-				continue;
-			if (Integer.parseInt(strs[1]) > 0) {
-				for (Node node : nodes) {
-					totalInstanceNum++;
-					node.pushInstance(instances[i],this);
-					i++;
-					if (i > instances.length - 1)
-						break;
-				}
-			}
+		for (int i = 0; i < instances.length;) {
+			for (Node node : nodes) {
+				String[] strs = instances[i].split(":");
+				if (strs.length > 1 && strs[0].length() > 1) { 
+					if (Integer.parseInt(strs[1]) > 0) {
+						totalInstanceNum++;
+						node.pushInstance(instances[i],this);
+						if (i > instances.length - 1)
+							break;
+					}	
+				}	
+				i++;
+			}			
 		}
 		this.avgInstanceNum = avgInstanceNum();
 		rebalaceLock.unlock();

@@ -11,8 +11,8 @@ import org.elasticflow.node.Node;
 
 public class InstanceNode {
 
-	String instace;
-	Node node;
+	private String instace;
+	private Node node;
 
 	public String getInstace() {
 		return instace;
