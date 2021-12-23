@@ -57,7 +57,7 @@ public class ML extends Instruction {
 				} 		
 				context.getComputer().setLoad((long)(dataNums+1./(start-context.getComputer().lastGetPageTime+1.)));		
 				context.getComputer().lastGetPageTime = start;
-				context.getComputer().setPerformance((long) (dataNums+1./(Common.getNow()-start+1.)));
+				context.getComputer().setPerformance((long) ((dataNums+1.)/(Common.getNow()-start+1.)));
 			} catch (EFException e) {
 				log.error("batch Compute Exception", e);
 				Common.processErrorLevel(e);
