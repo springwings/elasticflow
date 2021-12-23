@@ -7,6 +7,8 @@
  */
 package org.elasticflow.yarn.coord;
 
+import java.util.Queue;
+
 import com.alibaba.fastjson.JSONObject;
 
 /**
@@ -18,7 +20,7 @@ import com.alibaba.fastjson.JSONObject;
  */
 public interface InstanceCoord extends Coordination{
 	
-	public void initNode();
+	public void initNode(boolean isOnStart);
 	
 	public void sendData(String content, String destination,boolean relative);
 	
@@ -46,6 +48,6 @@ public interface InstanceCoord extends Coordination{
 	
 	public void updateAllNodesResource();
 	
-	public void clusterScan();
+	public Queue<String> clusterScan(boolean startRebalace);
 	
 }

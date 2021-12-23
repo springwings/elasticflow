@@ -10,6 +10,7 @@ import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.yarn.coord.EFMonitorCoord;
 import org.elasticflow.yarn.coord.InstanceCoord;
 import org.elasticflow.yarn.coord.NodeCoord;
+import org.elasticflow.yarn.coordinator.InstanceCoordinator;
 
 /**
  * Node Model
@@ -18,17 +19,17 @@ import org.elasticflow.yarn.coord.NodeCoord;
  * @version 1.0
  */
 public class Node {
-	
+
 	private String ip;
-	private boolean isLive=true;
+	private boolean isLive = true;
 	private int nodeId;
-	/**slave instance Coordinator**/
+	/** slave instance Coordinator **/
 	private InstanceCoord instanceCoord;
-	/**slave node monitor Coordinator**/
+	/** slave node monitor Coordinator **/
 	private EFMonitorCoord monitorCoord;
-	/**slave node Coordinator**/
+	/** slave node Coordinator **/
 	private NodeCoord nodeCoord;
-	/**node instances summarize **/
+	/** node instances configure summarize **/
 	private volatile Queue<String> bindInstances = new LinkedList<String>();
 	private long lastLiveTime;
 
@@ -42,13 +43,12 @@ public class Node {
 		setIp(ip);
 		setNodeId(nodeId);
 	}
-	
-	
-	public void init(NodeCoord nodeCoord,InstanceCoord instanceCoord,EFMonitorCoord monitorCoord) {
+
+	public void init(boolean isOnStart,NodeCoord nodeCoord, InstanceCoord instanceCoord, EFMonitorCoord monitorCoord) {
 		this.nodeCoord = nodeCoord;
 		this.instanceCoord = instanceCoord;
 		this.monitorCoord = monitorCoord;
-		this.instanceCoord.initNode();
+		this.instanceCoord.initNode(isOnStart);
 	}
 
 	public String getIp() {
@@ -84,7 +84,7 @@ public class Node {
 	public InstanceCoord getInstanceCoord() {
 		return instanceCoord;
 	}
-	
+
 	public EFMonitorCoord getEFMonitorCoord() {
 		return monitorCoord;
 	}
@@ -96,38 +96,49 @@ public class Node {
 	public Queue<String> getBindInstances() {
 		return bindInstances;
 	}
-	
+
+	public boolean containInstace(String instance) {
+		for (String instanceSetting : bindInstances) {
+			if (instanceSetting.split(":")[0].equals(instance))
+				return true;
+		}
+		return false;
+	}
+
 	public String popInstance() {
 		String instanceSetting = this.bindInstances.poll();
-		if(instanceSetting!=null) {
+		if (instanceSetting != null) {
 			String[] strs = instanceSetting.split(":");
 			this.instanceCoord.stopInstance(strs[0], GlobalParam.JOB_TYPE.INCREMENT.name());
 			this.instanceCoord.stopInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());
-			this.instanceCoord.removeInstance(strs[0],true);
-		}		
+			this.instanceCoord.removeInstance(strs[0], true);
+		}
 		return instanceSetting;
 	}
 
-	public void pushInstance(String instanceSetting) {
+	public void pushInstance(String instanceSetting,InstanceCoordinator instanceCoordinator) {
 		this.bindInstances.offer(instanceSetting);
 		String[] strs = instanceSetting.split(":");
 		String[] paths = NodeConfig.getInstancePath(strs[0]);
 		this.instanceCoord.sendInstanceData(EFFileUtil.readText(paths[0], "utf-8"),
 				EFFileUtil.readText(paths[1], "utf-8"), strs[0]);
 		this.instanceCoord.addInstance(instanceSetting);
+		instanceCoordinator.resumeInstance(strs[0], GlobalParam.JOB_TYPE.INCREMENT.name());
+		instanceCoordinator.resumeInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());
 	}
 
-	
 	public void pushResource() {
-		String resource = GlobalParam.CONFIG_PATH + "/"+GlobalParam.StartConfig.getProperty("pond");
-		String instructions = GlobalParam.CONFIG_PATH + "/"+GlobalParam.StartConfig.getProperty("instructions");
-		this.instanceCoord.sendData(EFFileUtil.readText(resource, "utf-8"), "/"+GlobalParam.StartConfig.getProperty("pond"),true);
-		this.instanceCoord.sendData(EFFileUtil.readText(instructions, "utf-8"), "/"+GlobalParam.StartConfig.getProperty("instructions"),true);
+		String resource = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
+		String instructions = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("instructions");
+		this.instanceCoord.sendData(EFFileUtil.readText(resource, "utf-8"),
+				"/" + GlobalParam.StartConfig.getProperty("pond"), true);
+		this.instanceCoord.sendData(EFFileUtil.readText(instructions, "utf-8"),
+				"/" + GlobalParam.StartConfig.getProperty("instructions"), true);
 		this.instanceCoord.reloadResource();
-	} 
-	
-	public void stopAllInstance() { 
-		while(!this.bindInstances.isEmpty()) {
+	}
+
+	public void stopAllInstance() {
+		while (!this.bindInstances.isEmpty()) {
 			popInstance();
 		}
 	}

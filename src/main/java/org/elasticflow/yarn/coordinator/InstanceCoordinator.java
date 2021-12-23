@@ -55,8 +55,8 @@ public class InstanceCoordinator implements InstanceCoord {
 	
 	//----------------local running method-------------------//
 	
-	public void initNode() {
-		boolean wait = true;
+	public void initNode(boolean isOnStart) {
+		boolean wait = isOnStart;
 		while(Resource.tasks.size()>0) {
 			EFMonitorUtil.cleanAllInstance(wait);
 			wait = false;
@@ -129,7 +129,7 @@ public class InstanceCoordinator implements InstanceCoord {
 
 	public String getConnectionStatus(String instance,String poolName) {
 		for (Node node : nodes) { 
-			if(node.getBindInstances().contains(instance))
+			if(node.containInstace(instance))
 				return node.getEFMonitorCoord().getStatus(poolName);
 		}
 		return "";
@@ -137,7 +137,7 @@ public class InstanceCoordinator implements InstanceCoord {
 	
 	public JSONObject getPipeEndStatus(String instance,String L1seq) {
 		for (Node node : nodes) { 
-			if(node.getBindInstances().contains(instance)) {
+			if(node.containInstace(instance)) {
 				JSONObject jo = node.getEFMonitorCoord().getPipeEndStatus(instance,L1seq);
 				jo.put("nodeIP", node.getIp());
 				jo.put("nodeID", node.getNodeId());
@@ -151,7 +151,7 @@ public class InstanceCoordinator implements InstanceCoord {
 		if (!this.containsNode(nodeId)) {
 			synchronized (nodes) { 
 				Node node = Node.getInstance(ip, nodeId);
-				node.init(EFRPCService.getRemoteProxyObj(NodeCoord.class,
+				node.init(isOnStart,EFRPCService.getRemoteProxyObj(NodeCoord.class,
 						new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)), 
 						EFRPCService.getRemoteProxyObj(InstanceCoord.class,
 								new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)),
@@ -159,12 +159,13 @@ public class InstanceCoordinator implements InstanceCoord {
 								new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)));	
 				nodes.add(node);
 			}
+			Queue<String> bindInstances = clusterScan(false);
 			if(nodes.size() >= GlobalParam.CLUSTER_MIN_NODES) {
 				if (isOnStart) {
 					isOnStart = false;
 					this.rebalanceOnStart();
 				} else {
-					this.rebalanceOnNewNodeJoin();
+					this.rebalanceOnNewNodeJoin(bindInstances);
 				}
 			}	
 		} else {
@@ -197,7 +198,7 @@ public class InstanceCoordinator implements InstanceCoord {
 		});
 	}
 
-	public void clusterScan() {
+	public Queue<String> clusterScan(boolean startRebalace) {
 		Queue<String> bindInstances = new LinkedList<String>();
 		synchronized (nodes) {
 			for (Node n : nodes) {
@@ -206,10 +207,10 @@ public class InstanceCoordinator implements InstanceCoord {
 					bindInstances.addAll(n.getBindInstances());
 				}
 			}
-			if (!bindInstances.isEmpty())
+			if (!bindInstances.isEmpty() && startRebalace)
 				this.rebalanceOnNodeLeave(bindInstances);
 		}
-
+		return bindInstances;
 	} 
 
 	//----------------other-------------------//
@@ -222,7 +223,7 @@ public class InstanceCoordinator implements InstanceCoord {
 		Common.LOG.info("start NodeLeave distributing instance task.");
 		while (!bindInstances.isEmpty()) {
 			for (Node node : nodes) {
-				node.pushInstance(bindInstances.poll());
+				node.pushInstance(bindInstances.poll(),this);
 				if (bindInstances.isEmpty())
 					break;
 			}
@@ -231,18 +232,17 @@ public class InstanceCoordinator implements InstanceCoord {
 		Common.LOG.info("finish NodeLeave distributing instance task.");
 	}
 
-	private void rebalanceOnNewNodeJoin() {
+	private void rebalanceOnNewNodeJoin(Queue<String> idleInstances) {
 		Common.LOG.info("node join, start rebalance on {} nodes.", nodes.size());
 		rebalaceLock.lock();
 		int avgInstanceNum = avgInstanceNum();
 		this.avgInstanceNum = avgInstanceNum;
-		Queue<String> idleInstances = new LinkedList<>();
 		ArrayList<Node> addInstanceNodes = new ArrayList<>();
 		for (Node node : nodes) {
 			if (node.getBindInstances().size() < avgInstanceNum) {
 				addInstanceNodes.add(node);
 			} else {
-				while (node.getBindInstances().size() > avgInstanceNum) {
+				while (node.getBindInstances().size() > avgInstanceNum) {					
 					idleInstances.offer(node.popInstance());
 				}
 			}
@@ -252,8 +252,8 @@ public class InstanceCoordinator implements InstanceCoord {
 		for (Node node : addInstanceNodes) {
 			if (idleInstances.isEmpty())
 				break;
-			while (node.getBindInstances().size() < avgInstanceNum) {
-				node.pushInstance(idleInstances.poll());
+			while (node.getBindInstances().size() < avgInstanceNum) { 
+				node.pushInstance(idleInstances.poll(),this);
 			}
 		}
 		rebalaceLock.unlock();
@@ -272,7 +272,7 @@ public class InstanceCoordinator implements InstanceCoord {
 			if (Integer.parseInt(strs[1]) > 0) {
 				for (Node node : nodes) {
 					totalInstanceNum++;
-					node.pushInstance(instances[i]);
+					node.pushInstance(instances[i],this);
 					i++;
 					if (i > instances.length - 1)
 						break;
@@ -296,6 +296,8 @@ public class InstanceCoordinator implements InstanceCoord {
 		}
 		return null;
 	}
+	
+	
 
 	private Node removeNode(Integer nodeId) {
 		int removeNode = -1;
@@ -317,5 +319,5 @@ public class InstanceCoordinator implements InstanceCoord {
 				return true;
 		}
 		return false;
-	}
+	} 
 }

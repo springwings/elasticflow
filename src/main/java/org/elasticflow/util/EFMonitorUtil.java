@@ -217,16 +217,20 @@ public class EFMonitorUtil {
 	public static JSONObject getPipeEndStatus(String instance, String L1seq) {
 		PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instance, L1seq, false,
 				GlobalParam.FLOW_TAG._DEFAULT.name());
-		JSONObject res = new JSONObject();
-		res.put("ReaderLoad", pipePump.getReader().getLoad());
-		res.put("ReaderPerformance", pipePump.getReader().getPerformance());
+		InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
+		JSONObject res = new JSONObject();  
+		if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
+			res.put("ReaderLoad", pipePump.getReader().getLoad());
+			res.put("ReaderPerformance", pipePump.getReader().getPerformance());
+			res.put("WriterLoad", pipePump.getWriter().getLoad());
+			res.put("WriterPerformance", pipePump.getWriter().getPerformance());
+		}
 		
-		res.put("ComputerLoad", pipePump.getComputer().getLoad());
-		res.put("ComputerPerformance", pipePump.getComputer().getPerformance());
-		res.put("ComputerBlockedTime", pipePump.getComputer().getBlockTime());
-		
-		res.put("WriterLoad", pipePump.getWriter().getLoad());
-		res.put("WriterPerformance", pipePump.getWriter().getPerformance());
+		if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {
+			res.put("ComputerLoad", pipePump.getComputer().getLoad());
+			res.put("ComputerPerformance", pipePump.getComputer().getPerformance());
+			res.put("ComputerBlockedTime", pipePump.getComputer().getBlockTime());			
+		}
 		return res;
 	}
 	

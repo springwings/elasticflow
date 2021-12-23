@@ -102,8 +102,8 @@ public final class Run {
 		Resource.mailSender = new EFEmailSender();
 		Resource.tasks = new ConcurrentHashMap<String, FlowTask>();
 		Resource.taskJobCenter = new TaskJobCenter();
-		Resource.SOCKET_CENTER =  new SocketCenter();;
-		Resource.FlOW_CENTER = new FlowCenter();;
+		Resource.SOCKET_CENTER =  new SocketCenter();
+		Resource.FlOW_CENTER = new FlowCenter();
 		Resource.nodeMonitor = new NodeMonitor(); 
 		
 		if(!EFNodeUtil.isSlave()) {//for master
