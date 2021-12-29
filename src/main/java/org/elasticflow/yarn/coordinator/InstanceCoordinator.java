@@ -53,14 +53,17 @@ public class InstanceCoordinator implements InstanceCoord {
 
 	volatile CopyOnWriteArrayList<EFNode> nodes = new CopyOnWriteArrayList<>();
 	
-	//----------------local running method-------------------//
-	
+	//----------------local running method-------------------//	
 	public void initNode(boolean isOnStart) {
 		boolean wait = isOnStart;
 		while(Resource.tasks.size()>0) {
 			EFMonitorUtil.cleanAllInstance(wait);
 			wait = false;
 		}			
+	}
+	
+	public int onlineTasksNum() {
+		return Resource.tasks.size();
 	}
 	
 	public void sendData(String content, String destination,boolean relative) {
@@ -169,6 +172,7 @@ public class InstanceCoordinator implements InstanceCoord {
 				}
 			}	
 		} else {
+			this.getNode(nodeId).recoverInstance(this);
 			this.getNode(nodeId).refresh();
 		}
 	}
@@ -223,7 +227,7 @@ public class InstanceCoordinator implements InstanceCoord {
 		Common.LOG.info("start NodeLeave distributing instance task.");
 		while (!bindInstances.isEmpty()) {
 			for (EFNode node : nodes) {
-				node.pushInstance(bindInstances.poll(),this);
+				node.pushInstance(bindInstances.poll(),this,true);
 				if (bindInstances.isEmpty())
 					break;
 			}
@@ -253,7 +257,7 @@ public class InstanceCoordinator implements InstanceCoord {
 			if (idleInstances.isEmpty())
 				break;
 			while (node.getBindInstances().size() < avgInstanceNum) { 
-				node.pushInstance(idleInstances.poll(),this);
+				node.pushInstance(idleInstances.poll(),this,true);
 			}
 		}
 		rebalaceLock.unlock();
@@ -271,7 +275,7 @@ public class InstanceCoordinator implements InstanceCoord {
 				if (strs.length > 1 && strs[0].length() > 1) { 
 					if (Integer.parseInt(strs[1]) > 0) {
 						totalInstanceNum++;
-						node.pushInstance(instances[i],this);
+						node.pushInstance(instances[i],this,true);
 						if (i > instances.length - 1)
 							break;
 					}	

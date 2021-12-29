@@ -115,9 +115,18 @@ public class EFNode {
 		}
 		return instanceSetting;
 	}
+	
+	public void recoverInstance(InstanceCoordinator instanceCoordinator) {
+		if(this.instanceCoord.onlineTasksNum()==0) {
+			for(String instanceSetting : this.bindInstances) {
+				this.pushInstance(instanceSetting, instanceCoordinator, false);
+			}
+		}		
+	}
 
-	public void pushInstance(String instanceSetting,InstanceCoordinator instanceCoordinator) {
-		this.bindInstances.offer(instanceSetting);
+	public void pushInstance(String instanceSetting,InstanceCoordinator instanceCoordinator,boolean updateBindInstances) {
+		if(updateBindInstances)
+			this.bindInstances.offer(instanceSetting);
 		String[] strs = instanceSetting.split(":");
 		String[] paths = NodeConfig.getInstancePath(strs[0]);
 		this.instanceCoord.sendInstanceData(EFFileUtil.readText(paths[0], "utf-8"),

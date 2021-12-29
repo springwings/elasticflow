@@ -26,6 +26,8 @@ public interface InstanceCoord extends Coordination{
 	
 	public void reloadResource();
 	
+	public int onlineTasksNum();
+	
 	public String getConnectionStatus(String instance,String poolName);
 	
 	public JSONObject getPipeEndStatus(String instance,String L1seq);
