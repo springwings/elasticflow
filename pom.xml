@@ -85,7 +85,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.16</version>
+			<version>${mysql.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.alibaba</groupId>
@@ -157,17 +157,17 @@
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka-clients</artifactId>
-			<version>2.5.1</version>
+			<version>${kafka.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-jdbc-driver</artifactId>
-			<version>3.5.1</version>
+			<version>${neo4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-client</artifactId>
-			<version>3.1.1</version>
+			<version>${hadoop.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.hadoop</groupId>
@@ -293,7 +293,7 @@
 		<dependency>
 			<groupId>org.csource</groupId>
 			<artifactId>fastdfs-client-java</artifactId>
-			<version>1.29-SNAPSHOT</version>
+			<version>${fastdfs.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.annotation</groupId>
@@ -307,6 +307,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
@@ -366,6 +367,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.2.1</version>
 				<configuration>
 					<filters>
 						<filter>
@@ -474,8 +476,13 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<configPath>src/main/resources</configPath>
 		<spring.version>4.0.4.RELEASE</spring.version>
-		<elasticsearch.version>7.10.1</elasticsearch.version>
 		<quartz.version>2.3.2</quartz.version>
-		<log4j.version>2.17.0</log4j.version>
+		<log4j.version>2.17.1</log4j.version>
+		<kafka.version>2.5.1</kafka.version>
+		<elasticsearch.version>7.10.1</elasticsearch.version>
+		<mysql.version>8.0.16</mysql.version>
+		<neo4j.version>3.5.1</neo4j.version>
+		<fastdfs.version>1.29-SNAPSHOT</fastdfs.version>
+		<hadoop.version>3.1.1</hadoop.version>
 	</properties>
 </project>
