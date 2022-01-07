@@ -62,7 +62,8 @@ public class EFMonitorService {
 				if(rq.getParameter("ac") !=null){
 					Resource.nodeMonitor.ac(rq,rps); 
 				}else{  
-					rps.setStatus("action failed!parameter ac or code error!", RESPONSE_STATUS.ParameterErr); 
+					rps.setStatus("parameter error!", RESPONSE_STATUS.ParameterErr); 
+					rps.setPayload("example: /efm.doaction?ac=getInstanceInfo&instance=demo");
 				}
 			}
 				break;   
@@ -71,6 +72,7 @@ public class EFMonitorService {
 				break;
 			default:
 				rps.setStatus("action rooter not exist!", RESPONSE_STATUS.ParameterErr); 
+				rps.setPayload("example: /efm.doaction  or  /_version");
 				break;
 			}
 			response.getWriter().println(rps.getResponse(true));

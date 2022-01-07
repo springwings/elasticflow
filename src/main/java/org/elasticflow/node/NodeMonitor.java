@@ -451,23 +451,28 @@ public final class NodeMonitor {
 					if(params.length!=2)
 						throw new EFException("param.name Must be within two levels.");
 					Class<?> cls = null;
+					Object obj = null;
 					switch(params[0]) {
 					case "TransParam":
 						cls = tmp.getPipeParams().getClass();
+						obj = tmp.getPipeParams();
 						break;
 					case "ReadParam":
 						cls = tmp.getReadParams().getClass();
+						obj = tmp.getReadParams();
 						break;
 					case "ComputeParam":
 						cls = tmp.getComputeParams().getClass();
+						obj = tmp.getComputeParams();
 						break;
 					case "WriteParam":
 						cls = tmp.getWriterParams().getClass();
+						obj = tmp.getWriterParams();
 						break;	
 					}  
-					Common.setConfigObj(tmp.getPipeParams(), cls, params[1], rq.getParameter("param.value"));	
+					Common.setConfigObj(obj, cls, params[1], rq.getParameter("param.value"));	
 					if(GlobalParam.DISTRIBUTE_RUN)
-						GlobalParam.INSTANCE_COORDER.updateNodeConfigs(rq.getParameter("instance"), cls, 
+						GlobalParam.INSTANCE_COORDER.updateNodeConfigs(rq.getParameter("instance"), params[0], 
 								params[1], rq.getParameter("param.value"));
 					String xmlPath = GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("instance")+"/task.xml";					
 					try {
@@ -644,13 +649,17 @@ public final class NodeMonitor {
 	}
 
 	/**
-	 * add instance into system and add to configure also.
+	 * add instance setting into system and add it to configure file also.
 	 * 
 	 * @param rq instance parameter example,instanceName:1
 	 */
 	public void addInstance(Request rq) {
 		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
-			GlobalParam.INSTANCE_COORDER.addInstance(rq.getParameter("instance"));
+			if(GlobalParam.DISTRIBUTE_RUN) {
+				GlobalParam.INSTANCE_COORDER.pushInstanceToCluster(rq.getParameter("instance"));
+			}else {
+				GlobalParam.INSTANCE_COORDER.addInstance(rq.getParameter("instance"));
+			}
 			EFMonitorUtil.addConfigInstances(rq.getParameter("instance"));
 			try {
 				EFMonitorUtil.saveNodeConfig();
@@ -779,7 +788,11 @@ public final class NodeMonitor {
 	 * @param instance
 	 */
 	private void removeInstance(String instance) {
-		GlobalParam.INSTANCE_COORDER.removeInstance(instance,true);
+		if(GlobalParam.DISTRIBUTE_RUN) {
+			GlobalParam.INSTANCE_COORDER.removeInstanceFromCluster(instance);
+		}else {
+			GlobalParam.INSTANCE_COORDER.removeInstance(instance,true);
+		}		
 		try {
 			EFMonitorUtil.saveNodeConfig();
 		} catch (Exception e) {

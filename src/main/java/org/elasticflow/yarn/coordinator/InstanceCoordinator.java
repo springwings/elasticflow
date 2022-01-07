@@ -62,10 +62,30 @@ public class InstanceCoordinator implements InstanceCoord {
 		}			
 	}
 	
-	public void updateInstanceConfig(String instance,Class<?> cls,String fieldName,String value) {
+	public void updateInstanceConfig(String instance,String end,String fieldName,String value) {
 		InstanceConfig tmp = Resource.nodeConfig.getInstanceConfigs().get(instance);
 		try {
-			Common.setConfigObj(tmp.getPipeParams(), cls, fieldName,value);
+			Class<?> cls = null;
+			Object obj = null;
+			switch(end) {
+			case "TransParam":
+				cls = tmp.getPipeParams().getClass();
+				obj = tmp.getPipeParams();
+				break;
+			case "ReadParam":
+				cls = tmp.getReadParams().getClass();
+				obj = tmp.getReadParams();
+				break;
+			case "ComputeParam":
+				cls = tmp.getComputeParams().getClass();
+				obj = tmp.getComputeParams();
+				break;
+			case "WriteParam":
+				cls = tmp.getWriterParams().getClass();
+				obj = tmp.getWriterParams();
+				break;	
+			}  
+			Common.setConfigObj(obj, cls, fieldName,value);
 		} catch (Exception e) {
 			Common.LOG.error("update Instance Config Exception",e);
 		}	
@@ -133,10 +153,10 @@ public class InstanceCoordinator implements InstanceCoord {
 	} 
 	
 	//----------------master control running method-------------------//
-	public void updateNodeConfigs(String instance,Class<?> cls,String fieldName,String value) {
+	public void updateNodeConfigs(String instance,String end,String fieldName,String value) {
 		nodes.forEach(n -> {
 			if(n.containInstace(instance)) {
-				n.getInstanceCoord().updateInstanceConfig(instance, cls, fieldName, value);
+				n.getInstanceCoord().updateInstanceConfig(instance, end, fieldName, value);
 			}
 		});
 	}
@@ -219,6 +239,9 @@ public class InstanceCoordinator implements InstanceCoord {
 		});
 	}
 
+	/**
+	 * Check cluster health
+	 */
 	public Queue<String> clusterScan(boolean startRebalace) {
 		Queue<String> bindInstances = new LinkedList<String>();
 		synchronized (nodes) {
@@ -233,7 +256,32 @@ public class InstanceCoordinator implements InstanceCoord {
 		}
 		return bindInstances;
 	} 
-
+	
+	public synchronized void pushInstanceToCluster(String instanceSettting) {
+		EFNode addNode=null;
+		for (EFNode node : nodes) {
+			if(addNode==null) {
+				addNode = node;
+			}else {
+				if(node.getBindInstances().size()<addNode.getBindInstances().size()) {
+					addNode = node;
+				}					
+			}
+		} 
+		addNode.pushInstance(instanceSettting, this, false);
+		totalInstanceNum += 1;
+	}
+	
+	public synchronized void removeInstanceFromCluster(String instance) {
+		for (EFNode node : nodes) {
+			if(node.containInstace(instance)) {
+				node.popInstance(instance);
+				totalInstanceNum -= 1;
+				break;
+			}
+		} 
+	}
+	
 	//----------------other-------------------//
 	private void rebalanceOnNodeLeave(Queue<String> bindInstances) {
 		Common.LOG.info("node leave, start rebalance on {} nodes.", nodes.size());

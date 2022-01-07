@@ -107,12 +107,19 @@ public class EFNode {
 
 	public String popInstance() {
 		String instanceSetting = this.bindInstances.poll();
-		if (instanceSetting != null) {
-			String[] strs = instanceSetting.split(":");
-			this.instanceCoord.stopInstance(strs[0], GlobalParam.JOB_TYPE.INCREMENT.name());
-			this.instanceCoord.stopInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());
-			this.instanceCoord.removeInstance(strs[0], true);
+		this.removeInstance(instanceSetting);
+		return instanceSetting;
+	}
+	
+	public String popInstance(String instance) { 
+		String instanceSetting;
+		while(true) {
+			instanceSetting = this.bindInstances.poll();
+			if (instanceSetting.split(":")[0].equals(instance))
+				break;
+			this.bindInstances.offer(instanceSetting);
 		}
+		this.removeInstance(instanceSetting);
 		return instanceSetting;
 	}
 	
@@ -123,9 +130,9 @@ public class EFNode {
 			}
 		}		
 	}
-
+	
 	public void pushInstance(String instanceSetting,InstanceCoordinator instanceCoordinator,boolean updateBindInstances) {
-		if(updateBindInstances)
+		if(updateBindInstances)//for recover
 			this.bindInstances.offer(instanceSetting);
 		String[] strs = instanceSetting.split(":");
 		String[] paths = NodeConfig.getInstancePath(strs[0]);
@@ -149,6 +156,15 @@ public class EFNode {
 	public void stopAllInstance() {
 		while (!this.bindInstances.isEmpty()) {
 			popInstance();
+		}
+	}
+		
+	private void removeInstance(String instanceSetting) {
+		if (instanceSetting != null) {
+			String[] strs = instanceSetting.split(":");
+			this.instanceCoord.stopInstance(strs[0], GlobalParam.JOB_TYPE.INCREMENT.name());
+			this.instanceCoord.stopInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());
+			this.instanceCoord.removeInstance(strs[0], true);
 		}
 	}
 }
