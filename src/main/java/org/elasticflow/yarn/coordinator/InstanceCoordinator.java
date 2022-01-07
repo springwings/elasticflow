@@ -62,6 +62,15 @@ public class InstanceCoordinator implements InstanceCoord {
 		}			
 	}
 	
+	public void updateInstanceConfig(String instance,Class<?> cls,String fieldName,String value) {
+		InstanceConfig tmp = Resource.nodeConfig.getInstanceConfigs().get(instance);
+		try {
+			Common.setConfigObj(tmp.getPipeParams(), cls, fieldName,value);
+		} catch (Exception e) {
+			Common.LOG.error("update Instance Config Exception",e);
+		}	
+	}
+	
 	public int onlineTasksNum() {
 		return Resource.tasks.size();
 	}
@@ -124,6 +133,14 @@ public class InstanceCoordinator implements InstanceCoord {
 	} 
 	
 	//----------------master control running method-------------------//
+	public void updateNodeConfigs(String instance,Class<?> cls,String fieldName,String value) {
+		nodes.forEach(n -> {
+			if(n.containInstace(instance)) {
+				n.getInstanceCoord().updateInstanceConfig(instance, cls, fieldName, value);
+			}
+		});
+	}
+	
 	public void updateAllNodesResource() {
 		nodes.forEach(n -> {
 			n.pushResource();

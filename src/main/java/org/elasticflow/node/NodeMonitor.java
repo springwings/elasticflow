@@ -438,6 +438,10 @@ public final class NodeMonitor {
 		}
 	}
 	
+	/**
+	 * eg instance=inscance_name&param.name=TransParam.multiThread&param.value=true
+	 * @param rq
+	 */
 	public void setInstancePipeConfig(Request rq) {
 		if (EFMonitorUtil.checkParams(this, rq, "instance,param.name,param.value")) {
 			if (Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance"))){
@@ -460,11 +464,12 @@ public final class NodeMonitor {
 					case "WriteParam":
 						cls = tmp.getWriterParams().getClass();
 						break;	
-					}
-					
+					}  
 					Common.setConfigObj(tmp.getPipeParams(), cls, params[1], rq.getParameter("param.value"));	
-					String xmlPath = GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("instance")+"/task.xml";
-					
+					if(GlobalParam.DISTRIBUTE_RUN)
+						GlobalParam.INSTANCE_COORDER.updateNodeConfigs(rq.getParameter("instance"), cls, 
+								params[1], rq.getParameter("param.value"));
+					String xmlPath = GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("instance")+"/task.xml";					
 					try {
 						PipeXMLUtil.ModifyNode(xmlPath, params[0]+".param", params[1], rq.getParameter("param.value"));
 					} catch (EFException e) {

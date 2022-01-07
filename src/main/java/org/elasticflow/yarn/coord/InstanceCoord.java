@@ -22,6 +22,10 @@ public interface InstanceCoord extends Coordination{
 	
 	public void initNode(boolean isOnStart);
 	
+	public void updateInstanceConfig(String instance,Class<?> cls,String fieldName,String value);
+	
+	public void updateNodeConfigs(String instance,Class<?> cls,String fieldName,String value);
+	
 	public void sendData(String content, String destination,boolean relative);
 	
 	public void reloadResource();
