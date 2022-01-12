@@ -63,7 +63,7 @@ ElasticFlow可以以分布式系统(Master/Slave)或者单节点两种运行，�
         <version>5.3.0</version>
       </dependency>
    ```
-   2. testunit代码，例如：
+   2. plugin开发测试代码，例如：
    ```java
         @Before
         public void setUp() {
@@ -82,5 +82,5 @@ ElasticFlow可以以分布式系统(Master/Slave)或者单节点两种运行，�
        
 
 # develop plan
-1 Support external computing Libraries such as so/dll
-2 optimize searcher Resource scheduling.
+    - Support external computing Libraries such as so/dll
+    - optimize searcher Resource scheduling.
