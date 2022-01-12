@@ -1,5 +1,5 @@
 # ElasticFlow
-Elasticflow can be used for the construction of computational flow，support jobs like Inference,DataTrasfer,Data Searcher etc...
+Elasticflow 可用于构建可计算流，数据交换、通用搜索、定时任务等工作...
 
 ![image](https://github.com/springwings/elasticflow/blob/master/architecture.jpg)
 
@@ -17,16 +17,17 @@ ElasticFlow就是为解决该问题而生。
 	原始大数据进入机器学习中间数据层
 	机器学习数据进入用户展示层
 	通用搜索服务
-    数据推断服务 
+    定时调度任务 
 	...
 综上任务都可以通过ElasticFlow，使用其可控的可计算流管道来实现。
-ElasticFlow可以以分布式系统(Master/Slave)或者单节点两种运行，其中分布式部署将支持自动对实例级进行任务负载均衡，以实现大规模的弹性流任务构建。
+ElasticFlow可以以分布式系统(Master/Slave)增强其运行性能也可以单节点方式运行，
+其中分布式部署将支持自动对实例级进行任务负载均衡，以实现大规模的弹性流任务构建。
 
 # Versions
 	version 5.x
 	Java>=1.8
 
-# Features
+# 特性
     - Distributed task scheduling
     - Multilevel concurrency mechanism
     - Support DAG tasks
@@ -54,7 +55,7 @@ ElasticFlow可以以分布式系统(Master/Slave)或者单节点两种运行，�
 # Changes
 5.0 版本对之前版本在架构上全新升级，不再通过Java原生支持深度学习，计算流通过调用外部推断服务rest接口实现数据计算服务。
 
-# EF Plugin develop
+# EF 插件开发
    1. pom入包：
    ```xml
       <dependency>
@@ -81,6 +82,6 @@ ElasticFlow可以以分布式系统(Master/Slave)或者单节点两种运行，�
    ```
        
 
-# develop plan
-    - Support external computing Libraries such as so/dll
-    - optimize searcher Resource scheduling.
+# 开发计划
+    - 支持外部计算库，如so/dll
+    - 优化搜索资源调度。
