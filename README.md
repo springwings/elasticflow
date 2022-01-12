@@ -83,4 +83,4 @@ ElasticFlow可以以分布式系统(Master/Slave)或者单节点两种运行，�
 
 # develop plan
 1 Support external computing Libraries such as so/dll
-2 optimize distribute running.
+2 optimize searcher Resource scheduling.
