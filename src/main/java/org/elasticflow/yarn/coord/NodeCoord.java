@@ -10,8 +10,8 @@ package org.elasticflow.yarn.coord;
 
 public interface NodeCoord extends Coordination{
 
-	public void stopNode();
+	public void stopNode();	
 	
-	public void restartNode();
+	public double[] summaryResource();
 	
 }

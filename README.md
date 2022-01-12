@@ -26,6 +26,14 @@ ElasticFlow可以以分布式系统(Master/Slave)或者单节点两种运行，�
 	version 5.x
 	Java>=1.8
 
+# Features
+    - Distributed task scheduling
+    - Multilevel concurrency mechanism
+    - Support DAG tasks
+    - Support task priority operation
+    - Tasks that support configuration control tasks
+    - Support data migration and Computing
+
 # Reader Support
 	Hbase 1.2.1
 	Kafka 2.1.1

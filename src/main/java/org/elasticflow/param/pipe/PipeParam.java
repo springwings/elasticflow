@@ -39,27 +39,35 @@ public class PipeParam {
 	private boolean isMaster = false;
 	/** control each slave instance run in Concurrent mode or not **/
 	private boolean async = false;
-	/** slave node deep control by master **/
-	private boolean isMasterControl = false;
 	/**data write into type,full create new record,increment update part of data*/
 	private boolean writeType = false;
 	private MECHANISM writeMechanism = MECHANISM.NORM;
 	/**if MECHANISM.Time,keepNums is used for keep max store data instances*/
 	private String keepNums = "30d";
 	private boolean multiThread = false;
+	/**Task priority control**/
+	private int priority = 9;
 	
 	public boolean isTransactionControl() {
 		return transactionControl;
 	}
+	
 	public void setTransactionControl(String transactionControl) {
 		this.transactionControl = Boolean.valueOf(transactionControl);;
 	}
+	
 	public String getWriteTo() {
 		return writeTo;
 	}
+	
 	public int getReadPageSize() {
 		return readPageSize;
 	}
+	
+	public int getPriority() {
+		return priority;
+	}
+	
 	public int getLogLevel() {
 		return logLevel;
 	}
@@ -121,6 +129,10 @@ public class PipeParam {
 		this.logLevel = Integer.valueOf(logLevel);
 	}
 	
+	public void setPriority(String priority) {
+		this.priority = Integer.valueOf(priority);
+	}
+	
 	public void setWriteTo(String writeTo) {
 		this.writeTo = writeTo;
 	}
@@ -162,10 +174,6 @@ public class PipeParam {
 	public boolean isReaderPoolShareAlias() {
 		return readerPoolShareAlias;
 	} 
-	
-	public boolean isMasterControl() {
-		return isMasterControl;
-	}
 
 	public boolean isSearcherShareAlias() {
 		return searcherShareAlias;
@@ -221,11 +229,6 @@ public class PipeParam {
 	public void setAsync(String async) {
 		if(async.length()>0 && async.toLowerCase().equals("true"))
 			this.async = true;
-	}
-	
-	public void setIsMasterControl(String isMasterControl) { 
-		if(isMasterControl.length()>0 && isMasterControl.toLowerCase().equals("true"))
-			this.isMasterControl = true;
 	}
 	
 	public void setWriteType(String writeType) {

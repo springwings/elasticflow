@@ -10,6 +10,7 @@ package org.elasticflow.yarn.coordinator;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
@@ -50,6 +51,10 @@ public class InstanceCoordinator implements InstanceCoord {
 	private boolean isOnStart = true;
 		
 	private Lock rebalaceLock = new ReentrantLock();
+	
+	/**Threshold at which resources fall into scheduling**/
+	private double cpuUsage = 85.;
+	private double memUsage = 85.;
 
 	volatile CopyOnWriteArrayList<EFNode> nodes = new CopyOnWriteArrayList<>();
 	
@@ -249,6 +254,8 @@ public class InstanceCoordinator implements InstanceCoord {
 				if (!n.isLive()) {
 					removeNode(n.getIp(), n.getNodeId(), false);
 					bindInstances.addAll(n.getBindInstances());
+				}else {
+					n.refresh();
 				}
 			}
 			if (!bindInstances.isEmpty() && startRebalace)
@@ -268,8 +275,33 @@ public class InstanceCoordinator implements InstanceCoord {
 				}					
 			}
 		} 
+		addNode = this.demotionCheck(addNode);
 		addNode.pushInstance(instanceSettting, this, false);
 		totalInstanceNum += 1;
+	}
+	
+	private EFNode demotionCheck(EFNode node) {
+		EFNode _node = node;
+		if(node.getCpuUsed()>this.cpuUsage || node.getMemUsed()>this.memUsage) {	
+			Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
+			String lowestIntance="";
+			int lowestPriority = Integer.MAX_VALUE;
+			for (Map.Entry<String, InstanceConfig> ents : configMap.entrySet()) {
+				if(ents.getValue().getPipeParams().getPriority()<lowestPriority) {
+					lowestPriority = ents.getValue().getPipeParams().getPriority();
+					lowestIntance = ents.getKey();
+				}
+			}
+			String pagesize = String.valueOf(Resource.nodeConfig.getInstanceConfigs().get(lowestIntance).getPipeParams().getReadPageSize()/2);
+			Resource.nodeConfig.getInstanceConfigs().get(lowestIntance).getPipeParams().setReadPageSize(pagesize);
+			for (EFNode n : nodes) {
+				if(n.containInstace(lowestIntance)) {
+					n.getInstanceCoord().updateInstanceConfig(lowestIntance, "TransParam", "readPageSize", pagesize);
+					_node = n;
+				}
+			}
+		}
+		return _node;
 	}
 	
 	public synchronized void removeInstanceFromCluster(String instance) {

@@ -2,6 +2,7 @@ package org.elasticflow.yarn.coordinator;
 
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFNodeUtil;
+import org.elasticflow.util.SystemInfoUtil;
 import org.elasticflow.yarn.coord.NodeCoord;
 import org.elasticflow.yarn.monitor.ResourceMonitor;
 
@@ -21,11 +22,18 @@ public class NodeCoordinator implements NodeCoord{
 		}
 		Common.stopSystem();		
 	}
-
-	@Override
-	public void restartNode() {
-		// TODO Auto-generated method stub
-		
+	
+	public double[] summaryResource() {
+		double[] sum = new double[2];
+		try {
+			sum[0] = SystemInfoUtil.getCpuUsage();
+			sum[1] = SystemInfoUtil.getMemUsage();
+		} catch (Exception e) {
+			Common.LOG.error(" summary Resource Exception ", e);
+			sum[0] = 80.;
+			sum[1] = 80.;
+		}
+		return sum;
 	}
 
 }

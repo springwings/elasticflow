@@ -23,6 +23,8 @@ public class EFNode {
 	private String ip;
 	private boolean isLive = true;
 	private int nodeId;
+	private double cpuUsed = 80.;
+	private double memUsed = 80.;
 	/** slave instance Coordinator **/
 	private InstanceCoord instanceCoord;
 	/** slave node monitor Coordinator **/
@@ -67,6 +69,9 @@ public class EFNode {
 
 	public void refresh() {
 		this.lastLiveTime = Common.getNow();
+		double tmp[] = nodeCoord.summaryResource();
+		this.cpuUsed = tmp[0];
+		this.memUsed = tmp[1];
 	}
 
 	public void setStatus(boolean isLive) {
@@ -83,6 +88,22 @@ public class EFNode {
 
 	public InstanceCoord getInstanceCoord() {
 		return instanceCoord;
+	} 
+	
+	public double getCpuUsed() {
+		return cpuUsed;
+	}
+
+	public void setCpuUsed(double cpuUsed) {
+		this.cpuUsed = cpuUsed;
+	}
+
+	public double getMemUsed() {
+		return memUsed;
+	}
+
+	public void setMemUsed(double memUsed) {
+		this.memUsed = memUsed;
 	}
 
 	public EFMonitorCoord getEFMonitorCoord() {

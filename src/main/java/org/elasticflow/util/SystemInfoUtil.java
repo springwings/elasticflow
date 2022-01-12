@@ -3,6 +3,8 @@ package org.elasticflow.util;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import org.elasticflow.config.GlobalParam;
+
 /**
  * get system info
  * 
@@ -11,62 +13,57 @@ import java.io.InputStreamReader;
  * @date 2018-10-26 09:14
  */
 public class SystemInfoUtil {
-	public static String getCpuUsage() throws Exception {
+	
+	public static double getCpuUsage() throws Exception {
 		double cpuUsed = 0;
 		Runtime rt = Runtime.getRuntime();
-		Process p = rt.exec("top -b -n 1");
+		Process p = rt.exec("ps aux");
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
 			String str = null;
 			String[] strArray = null;
 			while ((str = in.readLine()) != null) {
 				int m = 0;
-				if (str.contains("java")) {
+				if (str.contains(GlobalParam.PROJ.toLowerCase())) {
 					strArray = str.split(" ");
 					for (String tmp : strArray) {
 						if (tmp.trim().length() == 0)
 							continue;
-						if (++m == 9) {
-							cpuUsed += Double.parseDouble(tmp);
+						if (++m == 3) {
+							cpuUsed = Double.parseDouble(tmp);
 						}
 					}
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw e;
 		}
-		return String.valueOf(cpuUsed);
+		return cpuUsed;
 	}
 
-	public static String getMemUsage() throws Exception {
-		int menUsed = 0;
-		int menTotal = 0;
+	public static double getMemUsage() throws Exception {
+		double memUsed = 0;
 		Runtime rt = Runtime.getRuntime();
-		Process p = rt.exec("free -m");
+		Process p = rt.exec("ps aux");
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
 			String str = null;
 			String[] strArray = null;
 			while ((str = in.readLine()) != null) {
 				int m = 0;
-				if (str.contains("Mem")) {
+				if (str.contains(GlobalParam.PROJ.toLowerCase())) {
 					strArray = str.split(" ");
 					for (String tmp : strArray) {
-						if(tmp.length()<1){
+						if (tmp.trim().length() == 0)
 							continue;
-						}
-						m++;
-						if (m == 2) {
-							menTotal = Integer.parseInt(tmp);
-						}
-						if (m == 3) {
-							menUsed = Integer.parseInt(tmp);
+						if (++m == 4) {
+							memUsed = Double.parseDouble(tmp);
 						}
 					}
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw e;
 		}
-		return String.valueOf(menUsed*100/(menTotal+0.0d));  
+		return memUsed;
 	}
 
 	/***
