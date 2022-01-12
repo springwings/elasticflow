@@ -24,30 +24,31 @@ ElasticFlow可以以分布式系统(Master/Slave)增强其运行性能也可以�
 其中分布式部署将支持自动对实例级进行任务负载均衡，以实现大规模的弹性流任务构建。
 
 # Versions
-	version 5.x
-	Java>=1.8
+    - version 5.x
+    - Java>=1.8
 
 # 特性
-    - Distributed task scheduling
-    - Multilevel concurrency mechanism
-    - Support DAG tasks
-    - Support task priority operation
-    - Tasks that support configuration control tasks
-    - Support data migration and Computing
+    - 支持分布式或者单节点运行
+    - 分布式任务调度
+    - 多层级并发执行策略
+    - 支持DAG任务
+    - 支持任务优先级调度
+    - 支持控制任务的抽象级任务
+    - 支持数据集成与计算
 
 # Reader Support
-	Hbase 1.2.1
-	Kafka 2.1.1
-	Mysql
-	Oracle
+    - Hbase 1.2.1
+    - Kafka 2.1.1
+    - Mysql
+    - Oracle
 
 # Writer Support
-	ElasticSearch 7.x
-	Mysql
-	Neo4j 3.5.1
-	Vearch
-	Solr 5.5.0
-	Hbase 1.2.1
+    - ElasticSearch 7.x
+    - Mysql
+    - Neo4j 3.5.1
+    - Vearch
+    - Solr 5.5.0
+    - Hbase 1.2.1
 
 # Document
 ==>>[详细文档参照wiki](https://github.com/springwings/elasticflow/wiki)  
