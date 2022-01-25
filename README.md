@@ -62,7 +62,7 @@ ElasticFlow可以以分布式系统(Master/Slave)增强其运行性能也可以�
       <dependency>
         <groupId>org.elasticflow</groupId>
         <artifactId>elasticflow</artifactId>
-        <version>5.3.0</version>
+        <version>5.3.1</version>
       </dependency>
    ```
    2. plugin开发测试代码，例如：
