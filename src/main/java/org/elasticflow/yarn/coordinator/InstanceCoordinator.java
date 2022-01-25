@@ -372,12 +372,12 @@ public class InstanceCoordinator implements InstanceCoord {
 				if (strs.length > 1 && strs[0].length() > 1) { 
 					if (Integer.parseInt(strs[1]) > 0) {
 						totalInstanceNum++;
-						node.pushInstance(instances[i],this,true);
-						if (i > instances.length - 1)
-							break;
+						node.pushInstance(instances[i],this,true);						
 					}	
-				}	
+				}
 				i++;
+				if (i >= instances.length)
+					break;
 			}			
 		}
 		this.avgInstanceNum = avgInstanceNum();
