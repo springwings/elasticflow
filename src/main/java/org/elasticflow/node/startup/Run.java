@@ -110,9 +110,9 @@ public final class Run {
 		
 		int openThreadPools = 0;
 		if (initInstance) {
-			Resource.nodeConfig = NodeConfig.getInstance(GlobalParam.StartConfig.getProperty("pond"), GlobalParam.StartConfig.getProperty("instructions"));
-			Resource.nodeConfig.init(GlobalParam.StartConfig.getProperty("instances"));
-			if(EFNodeUtil.isMaster()) {				
+			Resource.nodeConfig = NodeConfig.getInstance(GlobalParam.StartConfig.getProperty("pond"), GlobalParam.StartConfig.getProperty("instructions"));			
+			if(EFNodeUtil.isMaster()) {	
+				Resource.nodeConfig.init(GlobalParam.StartConfig.getProperty("instances"));
 				Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 				for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {
 					InstanceConfig instanceConfig = entry.getValue();

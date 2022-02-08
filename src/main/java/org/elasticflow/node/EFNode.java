@@ -51,6 +51,7 @@ public class EFNode {
 		this.instanceCoord = instanceCoord;
 		this.monitorCoord = monitorCoord;
 		this.instanceCoord.initNode(isOnStart);
+		this.pushResource();
 	}
 
 	public String getIp() {

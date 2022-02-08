@@ -148,6 +148,7 @@ public class NodeConfig {
 
 	public void parseInstructionsFile(String src) {
 		InputStream in = null;
+		instructions.clear();
 		try {
 			byte[] bt = EFDataStorer.getData(src, false);
 			if (bt.length <= 0)
@@ -176,6 +177,7 @@ public class NodeConfig {
 
 	public void parsePondFile(String src) {
 		InputStream in = null;
+		warehouse.clear();
 		try {
 			byte[] bt = EFDataStorer.getData(src, false);
 			if (bt.length <= 0)
@@ -188,7 +190,6 @@ public class NodeConfig {
 
 			paramlist = doc.getElementsByTagName("socket");
 			parseNode(paramlist, WarehouseParam.class);
-
 		} catch (Exception e) {
 			Common.LOG.error("parse (" + src + ") error,", e);
 		} finally {
