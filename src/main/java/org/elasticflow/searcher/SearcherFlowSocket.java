@@ -20,7 +20,7 @@ public abstract class SearcherFlowSocket extends Flow {
 	public void INIT(ConnectParams connectParams) {
 		this.connectParams = connectParams;
 		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq());
-		this.instanceConfig = connectParams.getInstanceConfig(); 
+		this.instanceConfig = connectParams.getInstanceConfig();
 	} 
 
 	public abstract SearcherResult Search(SearcherModel<?, ?, ?> query, String instance, SearcherHandler handler)

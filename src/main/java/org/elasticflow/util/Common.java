@@ -172,6 +172,10 @@ public final class Common {
 	public static long getNow() {
 		return System.currentTimeMillis() / 1000;
 	}
+	
+	public static long getNowZero() {
+		 return getNow() /(3600*24)*(3600*24) - TimeZone.getDefault().getRawOffset();
+	}
 
 	public static String seconds2time(long second) {
 		long h = 0;

@@ -14,6 +14,7 @@ import org.elasticflow.computer.handler.ComputerHandler;
 import org.elasticflow.field.EFField;
 import org.elasticflow.flow.Flow;
 import org.elasticflow.instruction.Context;
+import org.elasticflow.model.FlowState;
 import org.elasticflow.model.computer.SamplePoint;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;

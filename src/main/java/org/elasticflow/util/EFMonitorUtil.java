@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Map;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
@@ -220,16 +221,10 @@ public class EFMonitorUtil {
 		InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
 		JSONObject res = new JSONObject();  
 		if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
-			res.put("ReaderLoad", pipePump.getReader().getLoad());
-			res.put("ReaderPerformance", pipePump.getReader().getPerformance());
-			res.put("WriterLoad", pipePump.getWriter().getLoad());
-			res.put("WriterPerformance", pipePump.getWriter().getPerformance());
-		}
-		
-		if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {
-			res.put("ComputerLoad", pipePump.getComputer().getLoad());
-			res.put("ComputerPerformance", pipePump.getComputer().getPerformance());
-			res.put("ComputerBlockedTime", pipePump.getComputer().getBlockTime());			
+			return pipePump.getReader().flowState.getFlowAllStatus();
+		}		
+		if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {	
+			return pipePump.getComputer().flowState.getFlowAllStatus();
 		}
 		return res;
 	}
@@ -283,8 +278,7 @@ public class EFMonitorUtil {
 						searcherInfo = "Pool Status";
 					}					
 					String poolname = Resource.nodeConfig.getWarehouse().get(searchFrom).getPoolName(GlobalParam.DEFAULT_RESOURCE_SEQ);
-					Searcher.put(searcherInfo, getConnectionStatus(instance,poolname));
-					
+					Searcher.put(searcherInfo, getConnectionStatus(instance,poolname));					
 				}
 			}
 			
@@ -301,16 +295,12 @@ public class EFMonitorUtil {
 					} else {
 						tmp = getPipeEndStatus(config.getName(), L1seq);
 					} 
-					Reader.put(appendPipe + "Load", tmp.get("ReaderLoad"));
-					Reader.put(appendPipe + "Performance", tmp.get("ReaderPerformance"));
+					Reader.put(appendPipe + "FlowState", tmp.get(END_TYPE.reader.name()));
 					if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {
-						Computer.put(appendPipe + "Load", tmp.get("ComputerLoad"));
-						Computer.put(appendPipe + "Performance", tmp.get("ComputerPerformance"));
-						Computer.put(appendPipe + "Blocked Time", tmp.get("ComputerBlockedTime"));
+						Computer.put(appendPipe + "FlowState", tmp.get(END_TYPE.computer.name()));
 					}
 					if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
-						Writer.put(appendPipe + "Load", tmp.get("WriterLoad"));
-						Writer.put(appendPipe + "Performance", tmp.get("WriterPerformance"));
+						Writer.put(appendPipe + "FlowState", tmp.get(END_TYPE.writer.name()));
 					}
 					nodeInfo.put(appendPipe+"nodeIP", tmp.get("nodeIP"));
 					nodeInfo.put(appendPipe+"nodeID", tmp.get("nodeID"));

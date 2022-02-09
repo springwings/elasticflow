@@ -147,8 +147,7 @@ public final class Run {
 					}
 				}
 			});
-		}
-		
+		}		
 	}
 	
 	private void refreshGlobalParam() {

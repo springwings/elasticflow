@@ -10,10 +10,13 @@ package org.elasticflow.flow;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.connection.EFConnectionSocket;
+import org.elasticflow.model.FlowState;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory; 
@@ -31,19 +34,12 @@ public abstract class Flow {
 	protected String poolName; 
 	
 	protected InstanceConfig instanceConfig;
-	
-	/** Average load of the flow,the amount of data processed per second**/
-	protected long LOAD=-1;
-	
-	/**Transient performance,the amount of data processed per second in batch**/
-	protected long PERFORMANCE=-1;
-	
-	/**Batch processing blocking statistics**/
-	protected long BLOCKTIME = 0;
-	
+
 	private int clearConnNum = 0; 
 	
 	public long lastGetPageTime = Common.getNow();
+	
+	public FlowState flowState;
 	
 	protected ConnectParams connectParams;
 	
@@ -75,8 +71,9 @@ public abstract class Flow {
 		return this.EFConn;
 	}
 	
-	public void setInstanceConfig(InstanceConfig instanceConfig) {
-		this.instanceConfig = instanceConfig;
+	public void setInstanceConfig(InstanceConfig instanceConfig,END_TYPE endType) {
+		this.instanceConfig = instanceConfig;		
+		this.flowState = new FlowState(EFFileUtil.getInstancePath(instanceConfig.getName())[2],endType);
 	}
 	
 	public InstanceConfig getInstanceConfig() {
@@ -118,36 +115,7 @@ public abstract class Flow {
 		if(this.EFConn==null) 
 			return false;
 		return true;
-	}  
-	
-	public long getLoad() {
-		return this.LOAD;
-	}
-	
-	public long getPerformance() {
-		return this.PERFORMANCE;
-	}
-	
-	public long getBlockTime() {
-		return this.BLOCKTIME;
-	} 
-	
-	public void setLoad(long load) {
-		this.LOAD = load;
-	}
-	
-	public void setPerformance(long performance) {
-		if(performance>this.PERFORMANCE)
-			this.PERFORMANCE = performance;
-	}
-	
-	public void resetBlockTime() {
-		this.BLOCKTIME = 0;
-	}
-	
-	public void incrementBlockTime() {
-		this.BLOCKTIME+=1;
-	}
+	}	
 	 
 	public void clearPool() {
 		this.stopTask();

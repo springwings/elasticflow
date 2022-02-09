@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.NodeConfig;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.yarn.coord.EFMonitorCoord;
@@ -157,9 +156,9 @@ public class EFNode {
 		if(updateBindInstances)//for recover
 			this.bindInstances.offer(instanceSetting);
 		String[] strs = instanceSetting.split(":");
-		String[] paths = NodeConfig.getInstancePath(strs[0]);
-		this.instanceCoord.sendInstanceData(EFFileUtil.readText(paths[0], "utf-8"),
-				EFFileUtil.readText(paths[1], "utf-8"), strs[0]);
+		String[] paths = EFFileUtil.getInstancePath(strs[0]);
+		this.instanceCoord.sendInstanceData(EFFileUtil.readText(paths[0], GlobalParam.ENCODING,false),
+				EFFileUtil.readText(paths[1], GlobalParam.ENCODING,false), strs[0]);
 		this.instanceCoord.addInstance(instanceSetting);
 		instanceCoordinator.resumeInstance(strs[0], GlobalParam.JOB_TYPE.INCREMENT.name());
 		instanceCoordinator.resumeInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());
@@ -168,9 +167,9 @@ public class EFNode {
 	public void pushResource() {
 		String resource = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
 		String instructions = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("instructions");
-		this.instanceCoord.sendData(EFFileUtil.readText(resource, "utf-8"),
+		this.instanceCoord.sendData(EFFileUtil.readText(resource,GlobalParam.ENCODING,false),
 				"/" + GlobalParam.StartConfig.getProperty("pond"), true);
-		this.instanceCoord.sendData(EFFileUtil.readText(instructions, "utf-8"),
+		this.instanceCoord.sendData(EFFileUtil.readText(instructions, GlobalParam.ENCODING,false),
 				"/" + GlobalParam.StartConfig.getProperty("instructions"), true);
 		this.instanceCoord.reloadResource();
 	}

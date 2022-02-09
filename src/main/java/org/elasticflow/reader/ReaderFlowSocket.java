@@ -38,7 +38,7 @@ public abstract class ReaderFlowSocket extends Flow{
 	@Override
 	public void INIT(ConnectParams connectParams) {
 		this.connectParams = connectParams; 
-		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq()); 		
+		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq());		
 	} 
 	
 	public void setReaderHandler(ReaderHandler readHandler) {

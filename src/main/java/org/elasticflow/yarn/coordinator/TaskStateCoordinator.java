@@ -20,6 +20,8 @@ import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.node.CPU;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFFileUtil;
+import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.util.instance.PipeUtil;
 import org.elasticflow.yarn.Resource;
@@ -68,6 +70,15 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 			if (PipeUtil.scanPosCompare(scanStamp,
 					SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq)))) {
 				SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), scanStamp);
+				//update flow status,Distributed environment synchronization status
+				if(GlobalParam.DISTRIBUTE_RUN) {
+					EFFileUtil.createAndSave(GlobalParam.INSTANCE_COORDER.getPipeEndStatus(instance, L1seq).toJSONString(), 
+							EFFileUtil.getInstancePath(instance)[2]);
+				} else {
+					EFFileUtil.createAndSave(EFMonitorUtil.getPipeEndStatus(instance, L1seq).toJSONString(), 
+							EFFileUtil.getInstancePath(instance)[2]);
+				} 
+				
 			}
 		}
 	}

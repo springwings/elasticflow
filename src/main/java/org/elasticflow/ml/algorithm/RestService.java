@@ -114,7 +114,7 @@ public class RestService extends ComputerFlowSocket {
 					ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();					 
 					try {
 						if(this.apiBlockingQueue.isEmpty())
-							this.incrementBlockTime();
+							this.flowState.incrementBlockTime();
 						String api = this.apiBlockingQueue.take();
 						Resource.ThreadPools.execute(() -> {						
 							JSONObject tmp = null;	
@@ -146,7 +146,7 @@ public class RestService extends ComputerFlowSocket {
 				ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();
 				try {
 					if(this.apiBlockingQueue.isEmpty())
-						this.incrementBlockTime();
+						this.flowState.incrementBlockTime();
 					String api = this.apiBlockingQueue.take();
 					Resource.ThreadPools.execute(() -> {						
 						try {

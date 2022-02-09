@@ -20,7 +20,6 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.config.NodeConfig;
 import org.elasticflow.node.EFNode;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFFileUtil;
@@ -102,9 +101,9 @@ public class InstanceCoordinator implements InstanceCoord {
 	
 	public void sendData(String content, String destination,boolean relative) {
 		if(relative) {
-			EFFileUtil.createFile(content, GlobalParam.CONFIG_PATH + destination);
+			EFFileUtil.createAndSave(content, GlobalParam.CONFIG_PATH + destination);
 		}else {
-			EFFileUtil.createFile(content, destination);
+			EFFileUtil.createAndSave(content, destination);
 		}		
 	}
 
@@ -114,7 +113,7 @@ public class InstanceCoordinator implements InstanceCoord {
 	}
 	
 	public void sendInstanceData(String content0, String content1, String instance) {
-		String[] paths = NodeConfig.getInstancePath(instance);
+		String[] paths = EFFileUtil.getInstancePath(instance);
 		sendData(content0, paths[0],false);
 		sendData(content1, paths[1],false);
 	}

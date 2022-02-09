@@ -20,6 +20,7 @@ import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
 import org.elasticflow.param.pipe.InstructionParam;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.w3c.dom.Document;
@@ -90,7 +91,7 @@ public class NodeConfig {
 			if (this.instanceConfigs.containsKey(name)) {
 				nconfig = this.instanceConfigs.get(name);
 			} else {
-				nconfig = new InstanceConfig(getInstancePath(name)[1], instanceType);
+				nconfig = new InstanceConfig(EFFileUtil.getInstancePath(name)[1], instanceType);
 				this.instanceConfigs.put(name, nconfig);
 			}
 			nconfig.init();
@@ -100,13 +101,6 @@ public class NodeConfig {
 			nconfig.setName(name);
 			this.searchConfigMap.put(nconfig.getAlias(), nconfig);
 		}
-	}
-	
-	public static String[] getInstancePath(String instance) {
-		String[] dt = new String[2];
-		dt[0] = GlobalParam.INSTANCE_PATH + "/" + instance + "/batch";
-		dt[1] = GlobalParam.INSTANCE_PATH + "/" + instance + "/task.xml";
-		return dt;
 	}
 
 	public Map<String, InstructionParam> getInstructions() {

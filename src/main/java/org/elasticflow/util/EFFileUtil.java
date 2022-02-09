@@ -2,8 +2,11 @@ package org.elasticflow.util;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+
+import org.elasticflow.config.GlobalParam;
 
 /**
  * 
@@ -11,18 +14,32 @@ import java.io.FileWriter;
  * @version 1.0
  * @date 2018-11-07 14:12
  */
-public class EFFileUtil { 
+public class EFFileUtil { 	
 	
-	public static String readText(String filePath,String encoding) { 
+	public static String[] getInstancePath(String instance) {
+		String[] dt = new String[3];
+		dt[0] = GlobalParam.INSTANCE_PATH + "/" + instance + "/batch";
+		dt[1] = GlobalParam.INSTANCE_PATH + "/" + instance + "/task.xml";
+		dt[2] = GlobalParam.INSTANCE_PATH + "/" + instance + "/stat";
+		return dt;
+	}
+	
+	public static String readText(String filePath,String encoding,boolean create) { 
 		File file = new File(filePath);
 		Long filelength = file.length();
 		byte[] filecontent = new byte[filelength.intValue()];
 		try (FileInputStream in = new FileInputStream(file)) { 
 			in.read(filecontent); 
 			return new String(filecontent, encoding);
-		} catch (Exception e) {
-			Common.LOG.warn(" read text Exception",e); 
-		}  
+		} catch (FileNotFoundException e1) {
+			if(create) { 
+				createAndSave("",filePath);
+			}else {
+				Common.LOG.warn("read text Exception",e1); 
+			}			
+		}catch(Exception e2) {
+			Common.LOG.warn("read text Exception",e2); 
+		}
 		return null;
 	}
 	
@@ -51,7 +68,7 @@ public class EFFileUtil {
         }
 	}
 	
-	public static boolean createFile(String content, String fileDest) { 
+	public static boolean createAndSave(String content, String fileDest) { 
 		FileWriter writer = null;
 		try {
 			File file = new File(fileDest);
