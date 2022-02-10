@@ -51,20 +51,21 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import net.sf.json.JSONObject; 
+import net.sf.json.JSONObject;
 
 /**
  * Common Utils Package
+ * 
  * @author chengwen
  * @version 1.2
  * @date 2018-10-11 11:00
  */
 public final class Common {
-	
+
 	public static FastDateFormat SDF = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
-	
+
 	public final static Logger LOG = LoggerFactory.getLogger("Elasticflow");
- 
+
 	private static Set<String> defaultParamSet = new HashSet<String>() {
 		private static final long serialVersionUID = 1L;
 		{
@@ -78,25 +79,26 @@ public final class Common {
 			add(KEY_PARAM.detail.toString());
 		}
 	};
-	
+
 	/**
 	 * Convert the first letter to uppercase or lowercase
+	 * 
 	 * @param str
 	 * @return
 	 */
-	public static String changeFirstCase(String str){
-        char[] chars = str.toCharArray();
-        chars[0]^= 32;
-        return String.valueOf(chars);
+	public static String changeFirstCase(String str) {
+		char[] chars = str.toCharArray();
+		chars[0] ^= 32;
+		return String.valueOf(chars);
 	}
-	
+
 	public static boolean isDefaultParam(String p) {
 		if (defaultParamSet.contains(p))
 			return true;
 		else
 			return false;
 	}
-	
+
 	public static FormatProperties loadProperties(String path) {
 		FormatProperties fp = new FormatProperties();
 		String replaceStr = System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") == -1
@@ -109,31 +111,32 @@ public final class Common {
 		}
 		return fp;
 	}
-	
-	public static void getXmlParam(Object Obj,Node param, Class<?> c) throws Exception {
-		Element element = (Element) param; 
-		setConfigObj(Obj,c,element.getElementsByTagName("name").item(0).getTextContent(),element.getElementsByTagName("value").item(0).getTextContent()); 
+
+	public static void getXmlParam(Object Obj, Node param, Class<?> c) throws Exception {
+		Element element = (Element) param;
+		setConfigObj(Obj, c, element.getElementsByTagName("name").item(0).getTextContent(),
+				element.getElementsByTagName("value").item(0).getTextContent());
 	}
-	
+
 	public static String formatXml(Object xmlContent) {
-        try { 
-        	OutputFormat formater = OutputFormat.createPrettyPrint(); 
-            formater.setEncoding("utf-8"); 
-            StringWriter out = new StringWriter(); 
-            XMLWriter writer = new XMLWriter(out, formater); 
-            writer.write(xmlContent); 
-            writer.close(); 
-            return out.toString();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-	} 
-	
+		try {
+			OutputFormat formater = OutputFormat.createPrettyPrint();
+			formater.setEncoding("utf-8");
+			StringWriter out = new StringWriter();
+			XMLWriter writer = new XMLWriter(out, formater);
+			writer.write(xmlContent);
+			writer.close();
+			return out.toString();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public static Object getXmlObj(Node param, Class<?> c) throws Exception {
-		Element element = (Element) param; 
+		Element element = (Element) param;
 		Constructor<?> cons = c.getConstructor();
-		Object o = cons.newInstance(); 
-		Field[] fields = c.getDeclaredFields(); 
+		Object o = cons.newInstance();
+		Field[] fields = c.getDeclaredFields();
 		for (int f = 0; f < fields.length; f++) {
 			Field field = fields[f];
 			String value = null;
@@ -150,31 +153,31 @@ public final class Common {
 			if (param.getNodeName().equals(fieldName)) {
 				value = param.getTextContent();
 			}
-			setConfigObj(o,c,fieldName,value); 
+			setConfigObj(o, c, fieldName, value);
 		}
 		return o;
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public static void setConfigObj(Object Obj,Class<?> c,String fieldName,String value) throws Exception {
+	public static void setConfigObj(Object Obj, Class<?> c, String fieldName, String value) throws Exception {
 		if (Obj instanceof HashMap) {
-			((HashMap<String,String>) Obj).put(fieldName, value);
-		}else {
+			((HashMap<String, String>) Obj).put(fieldName, value);
+		} else {
 			if (value != null && value.length() > 0) {
-				String setMethodName = "set" + fieldName.substring(0, 1).toUpperCase()
-						+ fieldName.substring(1);
+				String setMethodName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 				Method setMethod = c.getMethod(setMethodName, new Class[] { String.class });
 				setMethod.invoke(Obj, new Object[] { value });
 			}
-		}		
+		}
 	}
- 
+
 	public static long getNow() {
 		return System.currentTimeMillis() / 1000;
 	}
-	
+
 	public static long getNowZero() {
-		 return getNow() /(3600*24)*(3600*24) - TimeZone.getDefault().getRawOffset();
+		return (System.currentTimeMillis() / (1000 * 3600 * 24) * (1000 * 3600 * 24)
+				- TimeZone.getDefault().getRawOffset()) / 1000;
 	}
 
 	public static String seconds2time(long second) {
@@ -220,33 +223,36 @@ public final class Common {
 		return ret;
 	}
 
-	public static List<String> stringToList(String str, String seperator) { 
+	public static List<String> stringToList(String str, String seperator) {
 		return Arrays.asList(str.split(seperator));
 	}
-	
+
 	public static String arrayToString(String[] strs, String seperator) {
 		StringBuilder sf = new StringBuilder();
-		if (strs.length > 0) { 
+		if (strs.length > 0) {
 			for (String s : strs) {
 				sf.append(",");
 				sf.append(s);
 			}
 			return sf.substring(1);
-		} 
+		}
 		return sf.toString();
 	}
- 
-
-
 	
-	public static String getLseq(String L1seq, String L2seq) {
-		return L1seq+"."+L2seq;
+	//get hashmap min key
+	public static Object getMinKey(Set<String> keySets) {
+		Object[] obj = keySets.toArray();
+		Arrays.sort(obj);
+		return obj[0];
 	}
-	
+
+	public static String getLseq(String L1seq, String L2seq) {
+		return L1seq + "." + L2seq;
+	}
+
 	/**
-	 * @param instanceName
-	 *            data source main tag name
-	 * @param storeId a/b or time mechanism tags
+	 * @param instanceName data source main tag name
+	 * @param storeId      a/b or time mechanism tags
 	 * @return String
 	 */
 	public static String getStoreName(String instanceName, String storeId) {
@@ -257,84 +263,79 @@ public final class Common {
 		}
 
 	}
-	
+
 	public static String getFullStartInfo(String instance, String L1seq) {
 		String info = "0";
-		String path = Common.getTaskStorePath(instance, L1seq,GlobalParam.JOB_FULLINFO_PATH);
-		byte[] b = EFDataStorer.getData(path,true); 
+		String path = Common.getTaskStorePath(instance, L1seq, GlobalParam.JOB_FULLINFO_PATH);
+		byte[] b = EFDataStorer.getData(path, true);
 		if (b != null && b.length > 0) {
-			String str = new String(b); 
+			String str = new String(b);
 			if (str.length() > 1) {
 				info = str;
 			}
 		}
 		return info;
-	} 
+	}
 
-	/** 
-	 * @param L1seq
-	 *            for data source sequence tag 
-	 * @param instance
-	 *            data source main tag name 
+	/**
+	 * @param L1seq    for data source sequence tag
+	 * @param instance data source main tag name
 	 * @return String
 	 */
 	public static String getInstanceId(String instance, String L1seq) {
-		if (L1seq != null && L1seq.length()>0) {
+		if (L1seq != null && L1seq.length() > 0) {
 			return instance + L1seq;
 		} else {
 			return instance;
-		} 
+		}
 	}
-	
+
 	/**
 	 * seq for split data
 	 * 
 	 * @param indexname
-	 * @param L1seq,for
-	 *            series data source fetch
+	 * @param L1seq,for series data source fetch
 	 * @return
 	 */
-	public static String getTaskStorePath(String instanceName, String L1seq,String location) {
-		return GlobalParam.INSTANCE_PATH + "/" + instanceName + "/" + ((L1seq != null && L1seq.length() > 0) ? L1seq + "/" : "")
-				+location;
+	public static String getTaskStorePath(String instanceName, String L1seq, String location) {
+		return GlobalParam.INSTANCE_PATH + "/" + instanceName + "/"
+				+ ((L1seq != null && L1seq.length() > 0) ? L1seq + "/" : "") + location;
 	}
-	
-	public static String getResourceTag(String instance,String L1seq,String tag,boolean ignoreSeq) {
+
+	public static String getResourceTag(String instance, String L1seq, String tag, boolean ignoreSeq) {
 		StringBuilder tags = new StringBuilder();
-		if (!ignoreSeq && L1seq != null && L1seq.length()>0) {
+		if (!ignoreSeq && L1seq != null && L1seq.length() > 0) {
 			tags.append(instance).append(L1seq);
 		} else {
 			tags.append(instance).append(GlobalParam.DEFAULT_RESOURCE_SEQ);
-		} 
+		}
 		return tags.append(tag).toString();
 	}
-	
- 
-	
+
 	/**
 	 * get read data source seq flags
+	 * 
 	 * @param instanceName
-	 * @param fillDefault if empty fill with system default blank seq
+	 * @param fillDefault  if empty fill with system default blank seq
 	 * @return
 	 */
-	public static String[] getL1seqs(InstanceConfig instanceConfig){
+	public static String[] getL1seqs(InstanceConfig instanceConfig) {
 		String[] seqs = {};
-		WarehouseParam wp = Resource.nodeConfig.getWarehouse().get(
-				instanceConfig.getPipeParams().getReadFrom());
+		WarehouseParam wp = Resource.nodeConfig.getWarehouse().get(instanceConfig.getPipeParams().getReadFrom());
 		if (null != wp) {
 			seqs = wp.getL1seq();
-		}else {
-			LOG.warn("{} resource is null.",instanceConfig.getPipeParams().getReadFrom());
+		} else {
+			LOG.warn("{} resource is null.", instanceConfig.getPipeParams().getReadFrom());
 		}
 		return seqs;
-	} 
-	
+	}
+
 	/**
 	 * 
 	 * @param heads
 	 * @param instanceName
 	 * @param storeId
-	 * @param seq table seq
+	 * @param seq            table seq
 	 * @param total
 	 * @param dataBoundary
 	 * @param lastUpdateTime
@@ -342,108 +343,107 @@ public final class Common {
 	 * @param types
 	 * @param moreinfo
 	 */
-	
-	public static String formatLog(String types,String heads,String instanceName, String storeId,
-			String L1seq, int total, String dataBoundary, String lastUpdateTime,
-			long useTime, String moreinfo) {
+
+	public static String formatLog(String types, String heads, String instanceName, String storeId, String L1seq,
+			int total, String dataBoundary, String lastUpdateTime, long useTime, String moreinfo) {
 		String useTimeFormat = Common.seconds2time(useTime);
-		if(L1seq.length()<1)
-			L1seq = "None"; 
+		if (L1seq.length() < 1)
+			L1seq = "None";
 		String update;
-		if(lastUpdateTime.length()>9 && lastUpdateTime.matches("[0-9]+")){ 
-			update = SDF.format(lastUpdateTime.length()<12?Long.valueOf(lastUpdateTime+"000"):Long.valueOf(lastUpdateTime));
-		}else{
+		if (lastUpdateTime.length() > 9 && lastUpdateTime.matches("[0-9]+")) {
+			update = SDF.format(
+					lastUpdateTime.length() < 12 ? Long.valueOf(lastUpdateTime + "000") : Long.valueOf(lastUpdateTime));
+		} else {
 			update = lastUpdateTime;
-		} 
+		}
 		StringBuilder sb = new StringBuilder();
 		switch (types) {
 		case "complete":
-			sb.append("[Complete "+heads+" "+instanceName + "_" + storeId+"] "+(" L1seq:" + L1seq));
+			sb.append("[Complete " + heads + " " + instanceName + "_" + storeId + "] " + (" L1seq:" + L1seq));
 			sb.append(" Docs:" + total);
 			sb.append(" scanAt:" + update);
 			sb.append(" useTime:" + useTimeFormat);
 			break;
-		case "start": 
-			sb.append("[Start "+heads+" "+instanceName + "_" + storeId+"] "+(" L1seq:" + L1seq));
+		case "start":
+			sb.append("[Start " + heads + " " + instanceName + "_" + storeId + "] " + (" L1seq:" + L1seq));
 			sb.append(" scanAt:" + update);
 			break;
 		default:
-			sb.append("[ -- "+heads+" "+instanceName + "_" + storeId+"] "+(" L1seq:" + L1seq));
-			sb.append(" Docs:" + total+ (total==0 || dataBoundary.length()<1 ? "" : " dataBoundary:" + dataBoundary)
-			+ " scanAt:" + update + " useTime:"	+ useTimeFormat);
+			sb.append("[ -- " + heads + " " + instanceName + "_" + storeId + "] " + (" L1seq:" + L1seq));
+			sb.append(
+					" Docs:" + total + (total == 0 || dataBoundary.length() < 1 ? "" : " dataBoundary:" + dataBoundary)
+							+ " scanAt:" + update + " useTime:" + useTimeFormat);
 			break;
-		} 
+		}
 		return sb.append(moreinfo).toString();
 	}
- 
-	public static ArrayList<InstructionTree> compileCodes(String code,String contextId){
+
+	public static ArrayList<InstructionTree> compileCodes(String code, String contextId) {
 		ArrayList<InstructionTree> res = new ArrayList<>();
-		for(String line:code.trim().split("\\n")) {  
-			InstructionTree instructionTree=null; 
-			InstructionTree.Node tmp=null;
-			if(line.indexOf("//")>-1)
-				line=line.substring(0, line.indexOf("//"));
-			for(String str:line.trim().split("->")) {  
-				if(instructionTree==null) {
-					instructionTree = new InstructionTree(str,contextId);
+		for (String line : code.trim().split("\\n")) {
+			InstructionTree instructionTree = null;
+			InstructionTree.Node tmp = null;
+			if (line.indexOf("//") > -1)
+				line = line.substring(0, line.indexOf("//"));
+			for (String str : line.trim().split("->")) {
+				if (instructionTree == null) {
+					instructionTree = new InstructionTree(str, contextId);
 					tmp = instructionTree.getRoot();
-				}else { 
+				} else {
 					String[] params = str.trim().split(",");
-					for(int i=0;i<params.length;i++) {
-						if(i==params.length-1) {
+					for (int i = 0; i < params.length; i++) {
+						if (i == params.length - 1) {
 							tmp = instructionTree.addNode(params[i], tmp);
-						}else {
+						} else {
 							instructionTree.addNode(params[i], tmp);
 						}
 					}
-					 
-				} 
-			} 
+
+				}
+			}
 			res.add(instructionTree);
 		}
 		return res;
-	} 
-	  
-	
-	public static Object parseFieldValue(Object v, EFField fd,FIELD_PARSE_TYPE parsetype) throws EFException {
+	}
+
+	public static Object parseFieldValue(Object v, EFField fd, FIELD_PARSE_TYPE parsetype) throws EFException {
 		if (fd == null)
-			return v; 
-		if (v==null) {
+			return v;
+		if (v == null) {
 			return fd.getDefaultvalue();
-		}else {
+		} else {
 			Class<?> c;
 			try {
-				if(fd.getParamtype().startsWith(GlobalParam.GROUPID) || fd.getParamtype().startsWith("java.lang")) {
-					c = Class.forName(fd.getParamtype());	
-				}else {
-					c = Class.forName(fd.getParamtype(),true,GlobalParam.PLUGIN_CLASS_LOADER);
+				if (fd.getParamtype().startsWith(GlobalParam.GROUPID) || fd.getParamtype().startsWith("java.lang")) {
+					c = Class.forName(fd.getParamtype());
+				} else {
+					c = Class.forName(fd.getParamtype(), true, GlobalParam.PLUGIN_CLASS_LOADER);
 				}
 				Method method;
-				if(fd.getParamtype().equals("java.lang.Double")) {
+				if (fd.getParamtype().equals("java.lang.Double")) {
 					method = c.getMethod(parsetype.name(), String.class);
-				}else {
+				} else {
 					method = c.getMethod(parsetype.name(), Object.class);
 				}
 				if (fd.getSeparator() != null) {
 					String[] vs = String.valueOf(v).split(fd.getSeparator());
-					if(!fd.getParamtype().equals("java.lang.String")) {
+					if (!fd.getParamtype().equals("java.lang.String")) {
 						Object[] _vs = new Object[vs.length];
-						for(int j=0;j<vs.length;j++) 
-							_vs[j] = method.invoke(c,vs[j]); 
+						for (int j = 0; j < vs.length; j++)
+							_vs[j] = method.invoke(c, vs[j]);
 						return _vs;
 					}
 					return vs;
-				 }else {			
-					 return method.invoke(c,v);
-				 }
+				} else {
+					return method.invoke(c, v);
+				}
 			} catch (Exception e) {
-				throw new EFException(e.getMessage()+",Field "+fd.getName(), ELEVEL.Dispose);
-			}			
-		}		
+				throw new EFException(e.getMessage() + ",Field " + fd.getName(), ELEVEL.Dispose);
+			}
+		}
 	}
-	
-	
-	public static boolean exceptionCheckContain(Exception ex,String key) {
+
+	public static boolean exceptionCheckContain(Exception ex, String key) {
 		StringBuffer sb = new StringBuffer();
 		StackTraceElement[] trace = ex.getStackTrace();
 		for (StackTraceElement s : trace) {
@@ -451,128 +451,132 @@ public final class Common {
 		}
 		return sb.toString().contains(key);
 	}
-	
-	public static EFSearchRequest getEFRequest(Request rq,EFResponse rps) {
+
+	public static EFSearchRequest getEFRequest(Request rq, EFResponse rps) {
 		EFSearchRequest RR = null;
-		String ctype = rq.getHeader("Content-type"); 
-		if(ctype!=null && ctype.contentEquals("application/json")) {
+		String ctype = rq.getHeader("Content-type");
+		if (ctype != null && ctype.contentEquals("application/json")) {
 			try (BufferedReader _br = new BufferedReader(new InputStreamReader(rq.getInputStream(), "UTF-8"));) {
 				String line = null;
 				StringBuilder sb = new StringBuilder();
 				while ((line = _br.readLine()) != null) {
 					sb.append(line);
 				}
-				RR = Common.getRequest(sb.toString()); 
-				RR.setPipe(rq.getPathInfo().substring(1)); 
+				RR = Common.getRequest(sb.toString());
+				RR.setPipe(rq.getPathInfo().substring(1));
 			} catch (Exception e) {
-				rps.setStatus(e.getMessage(), RESPONSE_STATUS.ParameterErr); 
-			} 
-		}else {
+				rps.setStatus(e.getMessage(), RESPONSE_STATUS.ParameterErr);
+			}
+		} else {
 			RR = Common.getRequest(rq);
 		}
 		return RR;
 	}
-	
+
 	/**
 	 * json request convert to EFLOWSRequest
+	 * 
 	 * @param input
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
 	public static EFSearchRequest getRequest(String jsonInput) {
-		EFSearchRequest rr = EFSearchRequest.getInstance(); 
+		EFSearchRequest rr = EFSearchRequest.getInstance();
 		JSONObject jsonObject = JSONObject.fromObject(jsonInput);
 		Iterator<?> iter = jsonObject.entrySet().iterator();
-        while (iter.hasNext()) {
-        	Map.Entry entry = (Map.Entry) iter.next(); 
-            rr.addParam(entry.getKey().toString(), entry.getValue()); 
-        }  
-        return rr;
+		while (iter.hasNext()) {
+			Map.Entry entry = (Map.Entry) iter.next();
+			rr.addParam(entry.getKey().toString(), entry.getValue());
+		}
+		return rr;
 	}
-	
+
 	/**
 	 * jetty request convert to EFLOWSRequest
+	 * 
 	 * @param input
 	 * @return
 	 */
 	public static EFSearchRequest getRequest(Request input) {
-		EFSearchRequest rr = EFSearchRequest.getInstance(); 
+		EFSearchRequest rr = EFSearchRequest.getInstance();
 		Request rq = (Request) input;
 		String path = rq.getPathInfo();
-		String pipe = path.substring(1); 
-		rr.setPipe(pipe);  
+		String pipe = path.substring(1);
+		rr.setPipe(pipe);
 		@SuppressWarnings("unchecked")
-		Iterator<Map.Entry<String,String>> iter = rq.getParameterMap().entrySet().iterator();
-		while (iter.hasNext()) { 
-			Map.Entry<String,String> entry = iter.next();
+		Iterator<Map.Entry<String, String>> iter = rq.getParameterMap().entrySet().iterator();
+		while (iter.hasNext()) {
+			Map.Entry<String, String> entry = iter.next();
 			String key = (String) entry.getKey();
 			String value = rq.getParameter(key);
 			rr.addParam(key, value);
 		}
 		return rr;
 	}
-	
+
 	/**
 	 * jetty request convert to Node Monitor Request
+	 * 
 	 * @param input
 	 * @return
 	 */
 	public static NMRequest getNMRequest(Request input) {
-		NMRequest rr = NMRequest.getInstance(); 
-		Request rq = (Request) input; 
+		NMRequest rr = NMRequest.getInstance();
+		Request rq = (Request) input;
 		@SuppressWarnings("unchecked")
-		Iterator<Map.Entry<String,String>> iter = rq.getParameterMap().entrySet().iterator();
-		while (iter.hasNext()) { 
-			Map.Entry<String,String> entry = iter.next();
+		Iterator<Map.Entry<String, String>> iter = rq.getParameterMap().entrySet().iterator();
+		while (iter.hasNext()) {
+			Map.Entry<String, String> entry = iter.next();
 			String key = (String) entry.getKey();
 			String value = rq.getParameter(key);
 			rr.addParam(key, value);
 		}
 		return rr;
 	}
-	
+
 	/**
 	 * Gets the start time stamp of the current month
+	 * 
 	 * @param timeStamp
-	 * @param timeZone GMT+8:00
+	 * @param timeZone  GMT+8:00
 	 * @return
 	 */
 	public static Long getMonthStartTime(Long timeStamp, String timeZone) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeZone(TimeZone.getTimeZone(timeZone));
-        calendar.setTimeInMillis(timeStamp);
-        calendar.add(Calendar.YEAR, 0);
-        calendar.add(Calendar.MONTH, 0);
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        return calendar.getTimeInMillis();
-    }
-	
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeZone(TimeZone.getTimeZone(timeZone));
+		calendar.setTimeInMillis(timeStamp);
+		calendar.add(Calendar.YEAR, 0);
+		calendar.add(Calendar.MONTH, 0);
+		calendar.set(Calendar.DAY_OF_MONTH, 1);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		return calendar.getTimeInMillis();
+	}
+
 	public static EFException getException(Exception e) {
 		Throwable except = e.getCause();
-		if(except instanceof EFException) { 
-			return (EFException)except;
-		}else {
+		if (except instanceof EFException) {
+			return (EFException) except;
+		} else {
 			return new EFException(e);
 		}
 	}
-	
+
 	public static void processErrorLevel(EFException e) {
-		if(e.getErrorLevel().equals(ELEVEL.Termination)) {
+		if (e.getErrorLevel().equals(ELEVEL.Termination)) {
 			Thread.currentThread().interrupt();
 			LOG.info("A error has occurred and the current thread has been interrupted automatically!");
-		}else if (e.getErrorLevel().equals(ELEVEL.Stop)) {
+		} else if (e.getErrorLevel().equals(ELEVEL.Stop)) {
 			stopSystem();
-		}  
+		}
 	}
-	
+
 	public static void stopSystem() {
 		LOG.info("Internal serious error, the system stops automatically!");
 		SafeShutDown.stopAllInstances();
 		System.exit(0);
-	} 
-	
+	}
+
 }

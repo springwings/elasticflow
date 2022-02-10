@@ -64,10 +64,10 @@ public class Pipe extends Instruction {
 		ReaderFlowSocket RFS = (ReaderFlowSocket) args[1]; 
 		long start = Common.getNow();
 		DataPage tmp = (DataPage) RFS.getPageData(page,context.getInstanceConfig().getPipeParams().getReadPageSize());	
-		RFS.flowState.setLoad((long)((tmp.getData().size()+1.)/(start-RFS.lastGetPageTime+1.)));
-		RFS.flowState.incrementCurrentTimeProcess(tmp.getData().size());
+		RFS.flowState.setLoad((long)((tmp.getData().size()+1.)/(start-RFS.lastGetPageTime+1.)));		
 		RFS.lastGetPageTime = start;
 		RFS.flowState.setPerformance((long) ((tmp.getData().size()+1.)/(Common.getNow()-start+1.)));
+		RFS.flowState.incrementCurrentTimeProcess(tmp.getData().size());
 		return (DataPage) tmp.clone();
 	} 
 
@@ -117,11 +117,11 @@ public class Pipe extends Instruction {
 					num++;
 				}
 				rstate.setReaderScanStamp(DSReader.getScanStamp());
-				rstate.setCount(num);
-				writer.flowState.incrementCurrentTimeProcess(num);
+				rstate.setCount(num);				
 				writer.flowState.setLoad((long)((num+1.)/(start-writer.lastGetPageTime+1.)));		
 				writer.lastGetPageTime = start;
 				writer.flowState.setPerformance((long) ((num+1.)/(Common.getNow()-start+1.)));
+				writer.flowState.incrementCurrentTimeProcess(num);
 				context.getReader().flush();
 				writer.flush();
 				log.info(Common.formatLog("onepage",id + " Write", instance, storeId, L2seq, num,

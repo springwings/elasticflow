@@ -221,10 +221,11 @@ public class EFMonitorUtil {
 		InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
 		JSONObject res = new JSONObject();  
 		if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
-			return pipePump.getReader().flowState.getFlowAllStatus();
+			res.put(END_TYPE.reader.name(), pipePump.getReader().flowState.get());
+			res.put(END_TYPE.writer.name(), pipePump.getWriter().flowState.get());
 		}		
 		if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {	
-			return pipePump.getComputer().flowState.getFlowAllStatus();
+			res.put(END_TYPE.computer.name(), pipePump.getComputer().flowState.get());
 		}
 		return res;
 	}
@@ -295,6 +296,7 @@ public class EFMonitorUtil {
 					} else {
 						tmp = getPipeEndStatus(config.getName(), L1seq);
 					} 
+					Searcher.put(appendPipe + "FlowState", tmp.get(END_TYPE.searcher.name()));
 					Reader.put(appendPipe + "FlowState", tmp.get(END_TYPE.reader.name()));
 					if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {
 						Computer.put(appendPipe + "FlowState", tmp.get(END_TYPE.computer.name()));

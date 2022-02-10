@@ -17,6 +17,8 @@ import com.alibaba.fastjson.JSONObject;
  * @date 2018-11-08 16:49
  */
 final public class FlowState {
+	
+	private int keepPeriod = 7;
 
 	/** Batch processing blocking statistics **/
 	protected long BLOCKTIME = 0;
@@ -33,12 +35,10 @@ final public class FlowState {
 	/** Real time statistics of current time period **/
 	private long currentTimeProcess = 0;
 
-	/** Amount of data processed yesterday **/
-	private long yesterdayProcess = -1;
+	/** Amount of data processed history **/
+	private JSONObject historyProcess;
 	
 	private long flowStartTime = Common.getNow();
-	
-	private JSONObject flowStoreStatus;
 	
 	private HashMap<String, Object> flowEndStatus;
 		
@@ -50,39 +50,20 @@ final public class FlowState {
 		String content = EFFileUtil.readText(path, GlobalParam.ENCODING, true);
 		this.endType = endType; 
 		if (content!=null && content.length()>0) {			
-			this.flowStoreStatus = JSONObject.parseObject(content);	
-			if(this.flowStoreStatus.containsKey(this.endType.name())) {
-				JSONObject JO = this.flowStoreStatus.getJSONObject(this.endType.name());
+			JSONObject flowStoreStatus = JSONObject.parseObject(content);	
+			if(flowStoreStatus.containsKey(this.endType.name())) {
+				JSONObject JO = flowStoreStatus.getJSONObject(this.endType.name());
 				this.totalProcess = JO.getLong("totalProcess");
 				this.currentTimeProcess = JO.getLong("currentTimeProcess");
 				this.flowStartTime = JO.getLong("flowStartTime");
-				this.yesterdayProcess = JO.getLong("yesterdayProcess");	
-				this.init(false);
-			}else {
-				this.init(true);
+				this.historyProcess = JO.getJSONObject("historyProcess");					
 			}
-		}else {
-			this.flowStoreStatus = new JSONObject();
-			this.init(true);
-		} 
+		}
+		this.flowEndStatus = toHashObject();
 	} 
 	
-	private void init(boolean fill) {		
-		this.flowEndStatus = toHashObject(); 
-		if(fill) {
-			this.flowStoreStatus.put(END_TYPE.reader.name(),
-					this.endType==END_TYPE.reader?this.flowEndStatus:this.flowEndStatus.clone());
-			this.flowStoreStatus.put(END_TYPE.writer.name(),
-					this.endType==END_TYPE.writer?this.flowEndStatus:this.flowEndStatus.clone());
-			this.flowStoreStatus.put(END_TYPE.computer.name(),
-					this.endType==END_TYPE.computer?this.flowEndStatus:this.flowEndStatus.clone());
-		}else {			
-			this.flowStoreStatus.put(this.endType.name(),this.flowEndStatus);
-		}		
-	}
-		
-	public JSONObject getFlowAllStatus() {
-		return this.flowStoreStatus;
+	public HashMap<String, Object> get() {		
+		return this.flowEndStatus;
 	}
 	
 	private HashMap<String, Object> toHashObject() {
@@ -95,7 +76,7 @@ final public class FlowState {
 		JO.put("totalProcess", this.totalProcess);
 		JO.put("currentTimeProcess", this.currentTimeProcess);
 		JO.put("flowStartTime", this.flowStartTime);
-		JO.put("yesterdayProcess", this.yesterdayProcess);
+		JO.put("historyProcess", this.historyProcess==null?"":this.historyProcess);
 		JO.put("performance", this.PERFORMANCE);
 		JO.put("avgload", this.LOAD);
 		JO.put("blocktime", this.BLOCKTIME);
@@ -141,11 +122,16 @@ final public class FlowState {
 	public long getTotalProcess() {
 		return totalProcess;
 	} 
- 
-
+	
 	public void incrementCurrentTimeProcess(int delta) {
 		if(Common.getNow()>this.todayZero+86400) { 
-			this.yesterdayProcess = this.currentTimeProcess;
+			if(this.historyProcess == null)
+				this.historyProcess = new JSONObject();
+			this.historyProcess.put(String.valueOf(this.todayZero), this.currentTimeProcess);
+			if(this.historyProcess.size()>keepPeriod) {
+				String minkey = (String) Common.getMinKey(this.historyProcess.keySet());
+				this.historyProcess.remove(minkey);
+			}
 			this.currentTimeProcess = delta;
 		}else {
 			this.currentTimeProcess += delta;

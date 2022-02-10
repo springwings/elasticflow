@@ -54,11 +54,11 @@ public class ML extends Instruction {
 					res = context.getComputer().predict(context, DSReader);
 				}else if(context.getInstanceConfig().getComputeParams().getStage().equals(GlobalParam.COMPUTER_STAGE.TRAIN.name()))  {
 					res = context.getComputer().train(context, DSReader, context.getInstanceConfig().getWriteFields());
-				}
-				context.getComputer().flowState.incrementCurrentTimeProcess(dataNums);
+				}				
 				context.getComputer().flowState.setLoad((long)(dataNums+1./(start-context.getComputer().lastGetPageTime+1.)));		
 				context.getComputer().lastGetPageTime = start;
 				context.getComputer().flowState.setPerformance((long) ((dataNums+1.)/(Common.getNow()-start+1.)));
+				context.getComputer().flowState.incrementCurrentTimeProcess(dataNums);
 			} catch (EFException e) {
 				log.error("batch Compute Exception", e);
 				Common.processErrorLevel(e);
