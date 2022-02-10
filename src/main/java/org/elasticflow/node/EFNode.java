@@ -158,7 +158,8 @@ public class EFNode {
 		String[] strs = instanceSetting.split(":");
 		String[] paths = EFFileUtil.getInstancePath(strs[0]);
 		this.instanceCoord.sendInstanceData(EFFileUtil.readText(paths[0], GlobalParam.ENCODING,false),
-				EFFileUtil.readText(paths[1], GlobalParam.ENCODING,false), strs[0]);
+				EFFileUtil.readText(paths[1], GlobalParam.ENCODING,false),
+				EFFileUtil.readText(paths[2], GlobalParam.ENCODING,false),strs[0]);
 		this.instanceCoord.addInstance(instanceSetting);
 		instanceCoordinator.resumeInstance(strs[0], GlobalParam.JOB_TYPE.INCREMENT.name());
 		instanceCoordinator.resumeInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());
