@@ -189,7 +189,11 @@ public class InstanceCoordinator implements InstanceCoord {
 				return jo;
 			}
 		}
-		return new JSONObject();
+		JSONObject jo = new JSONObject();
+		jo.put("nodeIP", "-");
+		jo.put("nodeID", "-");
+		jo.put("status", "offline");
+		return jo;
 	}
 
 	public void updateNode(String ip, Integer nodeId) {

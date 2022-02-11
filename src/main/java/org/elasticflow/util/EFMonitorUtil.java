@@ -222,6 +222,7 @@ public class EFMonitorUtil {
 		res.put(END_TYPE.reader.name(), "Not started!");
 		res.put(END_TYPE.computer.name(), "Not started!");
 		res.put(END_TYPE.computer.name(), "Not started!");
+		res.put("status", "offline");
 		if(pipePump!=null) {
 			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
 			if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
@@ -231,6 +232,7 @@ public class EFMonitorUtil {
 			if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {	
 				res.put(END_TYPE.computer.name(), pipePump.getComputer().flowState.get());
 			}
+			res.put("status", "online");
 		}
 		return res;
 	}
@@ -311,6 +313,7 @@ public class EFMonitorUtil {
 					}
 					nodeInfo.put(appendPipe+"nodeIP", tmp.get("nodeIP"));
 					nodeInfo.put(appendPipe+"nodeID", tmp.get("nodeID"));
+					nodeInfo.put(appendPipe+"status", tmp.get("status"));
 				}
 			}			
 				
