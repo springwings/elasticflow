@@ -218,14 +218,19 @@ public class EFMonitorUtil {
 	public static JSONObject getPipeEndStatus(String instance, String L1seq) {
 		PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instance, L1seq, false,
 				GlobalParam.FLOW_TAG._DEFAULT.name());
-		InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
 		JSONObject res = new JSONObject();  
-		if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
-			res.put(END_TYPE.reader.name(), pipePump.getReader().flowState.get());
-			res.put(END_TYPE.writer.name(), pipePump.getWriter().flowState.get());
-		}		
-		if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {	
-			res.put(END_TYPE.computer.name(), pipePump.getComputer().flowState.get());
+		res.put(END_TYPE.reader.name(), "Not started!");
+		res.put(END_TYPE.computer.name(), "Not started!");
+		res.put(END_TYPE.computer.name(), "Not started!");
+		if(pipePump!=null) {
+			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
+			if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
+				res.put(END_TYPE.reader.name(), pipePump.getReader().flowState.get());
+				res.put(END_TYPE.writer.name(), pipePump.getWriter().flowState.get());
+			}		
+			if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {	
+				res.put(END_TYPE.computer.name(), pipePump.getComputer().flowState.get());
+			}
 		}
 		return res;
 	}
