@@ -33,7 +33,7 @@ final public class FlowState {
 	private long totalProcess = 0;
 
 	/** Real time statistics of current time period **/
-	private long currentTimeProcess = 0;
+	private long currentTimeProcess;
 
 	/** Amount of data processed history **/
 	private JSONObject historyProcess;
@@ -44,7 +44,7 @@ final public class FlowState {
 		
 	private END_TYPE endType;
 	
-	private long todayZero = Common.getNowZero();
+	private String todayZero = String.valueOf(Common.getNowZero());
 
 	public FlowState(String path,END_TYPE endType) {
 		String content = EFFileUtil.readText(path, GlobalParam.ENCODING, true);
@@ -60,6 +60,13 @@ final public class FlowState {
 			}
 		}
 		this.flowEndStatus = toHashObject();
+		if(this.historyProcess == null)
+			this.historyProcess = new JSONObject();
+		if(this.historyProcess.containsKey(todayZero)) {
+			this.currentTimeProcess = this.historyProcess.getLongValue(todayZero);
+		}else {
+			this.currentTimeProcess = 0;
+		}
 	} 
 	
 	public HashMap<String, Object> get() {		
@@ -124,10 +131,8 @@ final public class FlowState {
 	} 
 	
 	public void incrementCurrentTimeProcess(int delta) {
-		if(Common.getNow()>this.todayZero+86400) { 
-			if(this.historyProcess == null)
-				this.historyProcess = new JSONObject();
-			this.historyProcess.put(String.valueOf(this.todayZero), this.currentTimeProcess);
+		todayZero = String.valueOf(Common.getNowZero());
+		if(!this.historyProcess.containsKey(todayZero)) { 
 			if(this.historyProcess.size()>keepPeriod) {
 				String minkey = (String) Common.getMinKey(this.historyProcess.keySet());
 				this.historyProcess.remove(minkey);
@@ -137,6 +142,7 @@ final public class FlowState {
 			this.currentTimeProcess += delta;
 		}
 		this.totalProcess += delta;
+		this.historyProcess.put(todayZero, this.currentTimeProcess);
 		this.updateDatas(this.flowEndStatus);
 	}
 }
