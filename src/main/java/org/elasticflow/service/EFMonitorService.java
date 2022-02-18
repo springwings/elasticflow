@@ -19,6 +19,7 @@ import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.model.EFSearchRequest;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
@@ -40,7 +41,11 @@ public class EFMonitorService {
 		serviceParams.put("port", "8617");
 		serviceParams.put("thread_pool", "3");
 		serviceParams.put("httpHandle", new httpHandle());
-		HttpService.getInstance(serviceParams).start();		
+		try {
+			HttpService.getInstance(serviceParams).start();
+		} catch (EFException e) {
+			Common.stopSystem();
+		}
 	}
 	
 	public class httpHandle extends AbstractHandler {

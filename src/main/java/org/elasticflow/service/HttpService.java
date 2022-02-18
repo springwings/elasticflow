@@ -9,6 +9,8 @@ package org.elasticflow.service;
 
 import java.util.HashMap;
 
+import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ELEVEL;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.HandlerCollection;
@@ -24,7 +26,9 @@ import org.slf4j.LoggerFactory;
  * @date 2018-10-26 09:23
  */
 public class HttpService implements EFService {
-
+	
+	private boolean status;
+	
 	private HashMap<String, Object> serviceParams;
 
 	private Server server;
@@ -70,6 +74,7 @@ public class HttpService implements EFService {
 	@Override
 	public void close() {
 		try {
+			this.status = false;
 			server.stop();
 		} catch (Exception e) {
 			log.error("close Exception,",e);
@@ -77,11 +82,19 @@ public class HttpService implements EFService {
 	}
 
 	@Override
-	public void start() {
+	public void start() throws EFException{
 		try {
 			server.start(); 
+			this.status = true;
 		} catch (Exception e) {
+			this.status = false;
 			log.error("start Exception,",e);
+			throw new EFException(e.getMessage(), ELEVEL.Stop);
 		} 
+	}
+
+	@Override
+	public boolean status() {		
+		return this.status;
 	} 
 }

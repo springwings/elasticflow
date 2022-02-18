@@ -61,7 +61,7 @@ public class DistributeService {
 			while (true) {
 				try {
 					Thread.sleep(GlobalParam.NODE_LIVE_TIME * 2);
-					GlobalParam.INSTANCE_COORDER.clusterScan(true);
+					GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder().clusterScan(true);
 				} catch (Exception e) {
 					Common.LOG.warn("monitor modes exception",e);
 				}
@@ -86,6 +86,7 @@ public class DistributeService {
 				dataReceiver.start();
 			} catch (Exception e) {
 				Common.LOG.error("Instance Coord Exception", e);
+				Common.stopSystem();
 			}
 		});
 	}

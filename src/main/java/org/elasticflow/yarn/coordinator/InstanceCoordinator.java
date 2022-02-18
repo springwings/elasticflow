@@ -7,57 +7,38 @@
  */
 package org.elasticflow.yarn.coordinator;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.node.EFNode;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.EFNodeUtil;
-import org.elasticflow.yarn.EFRPCService;
 import org.elasticflow.yarn.Resource;
-import org.elasticflow.yarn.coord.EFMonitorCoord;
 import org.elasticflow.yarn.coord.InstanceCoord;
-import org.elasticflow.yarn.coord.NodeCoord;
-
-import com.alibaba.fastjson.JSONObject;
 
 /**
  * Run task instance cluster coordination operation The code runs on the slave/master
- * 
+ * local running method
  * @author chengwen
  * @version 0.1
  * @create_time 2021-07-30
  */
-public class InstanceCoordinator implements InstanceCoord {
-
-	private int totalInstanceNum;
-
-	private int avgInstanceNum;
+public class InstanceCoordinator implements InstanceCoord { 
 	
-	/**Check whether the system is initialized*/
-	private boolean isOnStart = true;
-		
-	private Lock rebalaceLock = new ReentrantLock();
+	//master control
+	private DistributeInstanceCoorder distributeInstanceCoorder;
 	
-	/**Threshold at which resources fall into scheduling**/
-	private double cpuUsage = 85.;
-	private double memUsage = 85.;
-
-	volatile CopyOnWriteArrayList<EFNode> nodes = new CopyOnWriteArrayList<>();
+	public InstanceCoordinator() {
+		if(!EFNodeUtil.isSlave())
+			distributeInstanceCoorder = new DistributeInstanceCoorder();
+	}
 	
-	//----------------local running method-------------------//	
+	public DistributeInstanceCoorder distributeInstanceCoorder() {
+		return this.distributeInstanceCoorder;
+	}
+	
 	public void initNode(boolean isOnStart) {
 		boolean wait = isOnStart;
 		while(Resource.tasks.size()>0) {
@@ -157,272 +138,9 @@ public class InstanceCoordinator implements InstanceCoord {
 		EFMonitorUtil.removeConfigInstance(instance);
 	} 
 	
-	//----------------master control running method-------------------//
-	public void updateNodeConfigs(String instance,String end,String fieldName,String value) {
-		nodes.forEach(n -> {
-			if(n.containInstace(instance)) {
-				n.getInstanceCoord().updateInstanceConfig(instance, end, fieldName, value);
-			}
-		});
-	}
-	
-	public void updateAllNodesResource() {
-		nodes.forEach(n -> {
-			n.pushResource();
-		});
-	}
-
-	public String getConnectionStatus(String instance,String poolName) {
-		for (EFNode node : nodes) { 
-			if(node.containInstace(instance))
-				return node.getEFMonitorCoord().getStatus(poolName);
-		}
-		return "";
-	}
-	
-	public JSONObject getPipeEndStatus(String instance,String L1seq) {
-		for (EFNode node : nodes) { 
-			if(node.containInstace(instance)) {
-				JSONObject jo = node.getEFMonitorCoord().getPipeEndStatus(instance,L1seq);
-				jo.put("nodeIP", node.getIp());
-				jo.put("nodeID", node.getNodeId());
-				return jo;
-			}
-		}
-		JSONObject jo = new JSONObject();
-		jo.put("nodeIP", "-");
-		jo.put("nodeID", "-");
-		jo.put("status", "offline");
-		return jo;
-	}
-
-	public void updateNode(String ip, Integer nodeId) {
-		if (!this.containsNode(nodeId)) {
-			synchronized (nodes) { 
-				EFNode node = EFNode.getInstance(ip, nodeId);
-				node.init(isOnStart,EFRPCService.getRemoteProxyObj(NodeCoord.class,
-						new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)), 
-						EFRPCService.getRemoteProxyObj(InstanceCoord.class,
-								new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)),
-						EFRPCService.getRemoteProxyObj(EFMonitorCoord.class,
-								new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)));	
-				nodes.add(node);
-			}
-			Queue<String> bindInstances = clusterScan(false);
-			if(nodes.size() >= GlobalParam.CLUSTER_MIN_NODES) {
-				if (isOnStart) {
-					isOnStart = false;
-					this.rebalanceOnStart();
-				} else {
-					this.rebalanceOnNewNodeJoin(bindInstances);
-				}
-			}	
-		} else {
-			this.getNode(nodeId).recoverInstance(this);
-			this.getNode(nodeId).refresh();
-		}
-	}
-
-	public void removeNode(String ip, Integer nodeId, boolean rebalace) {
-		synchronized (nodes) {
-			if (this.containsNode(nodeId)) {
-				EFNode node = this.removeNode(nodeId);
-				if (nodes.size() < GlobalParam.CLUSTER_MIN_NODES) {
-					nodes.forEach(n -> {
-						n.getNodeCoord().stopNode();
-					});
-					isOnStart = true;
-					Common.LOG.warn("The cluster does not meet the conditions, all slave node tasks will be automatically closed.");
-				} else {
-					if (rebalace)
-						this.rebalanceOnNodeLeave(node.getBindInstances());
-				}
-			}
-		}
-	}
-
-	public void stopNodes() {
-		nodes.forEach(n -> {
-			n.stopAllInstance();
-			n.getNodeCoord().stopNode();
-		});
-	}
-
-	/**
-	 * Check cluster health
-	 */
-	public Queue<String> clusterScan(boolean startRebalace) {
-		Queue<String> bindInstances = new LinkedList<String>();
-		synchronized (nodes) {
-			for (EFNode n : nodes) {
-				if (!n.isLive()) {
-					removeNode(n.getIp(), n.getNodeId(), false);
-					bindInstances.addAll(n.getBindInstances());
-				}else {
-					n.refresh();
-				}
-			}
-			if (!bindInstances.isEmpty() && startRebalace)
-				this.rebalanceOnNodeLeave(bindInstances);
-		}
-		return bindInstances;
-	} 
-	
-	public synchronized void pushInstanceToCluster(String instanceSettting) {
-		EFNode addNode=null;
-		for (EFNode node : nodes) {
-			if(addNode==null) {
-				addNode = node;
-			}else {
-				if(node.getBindInstances().size()<addNode.getBindInstances().size()) {
-					addNode = node;
-				}					
-			}
-		} 
-		addNode = this.demotionCheck(addNode);
-		addNode.pushInstance(instanceSettting, this, false);
-		totalInstanceNum += 1;
-	}
-	
-	private EFNode demotionCheck(EFNode node) {
-		EFNode _node = node;
-		if(node.getCpuUsed()>this.cpuUsage || node.getMemUsed()>this.memUsage) {	
-			Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
-			String lowestIntance="";
-			int lowestPriority = Integer.MAX_VALUE;
-			for (Map.Entry<String, InstanceConfig> ents : configMap.entrySet()) {
-				if(ents.getValue().getPipeParams().getPriority()<lowestPriority) {
-					lowestPriority = ents.getValue().getPipeParams().getPriority();
-					lowestIntance = ents.getKey();
-				}
-			}
-			String pagesize = String.valueOf(Resource.nodeConfig.getInstanceConfigs().get(lowestIntance).getPipeParams().getReadPageSize()/2);
-			Resource.nodeConfig.getInstanceConfigs().get(lowestIntance).getPipeParams().setReadPageSize(pagesize);
-			for (EFNode n : nodes) {
-				if(n.containInstace(lowestIntance)) {
-					n.getInstanceCoord().updateInstanceConfig(lowestIntance, "TransParam", "readPageSize", pagesize);
-					_node = n;
-				}
-			}
-		}
-		return _node;
-	}
-	
-	public synchronized void removeInstanceFromCluster(String instance) {
-		for (EFNode node : nodes) {
-			if(node.containInstace(instance)) {
-				node.popInstance(instance);
-				totalInstanceNum -= 1;
-				break;
-			}
-		} 
-	}
-	
-	//----------------other-------------------//
-	private void rebalanceOnNodeLeave(Queue<String> bindInstances) {
-		Common.LOG.info("node leave, start rebalance on {} nodes.", nodes.size());
-		rebalaceLock.lock();
-		int addNums = avgInstanceNum() - this.avgInstanceNum;
-		if (addNums == 0)
-			addNums = 1;
-		Common.LOG.info("start NodeLeave distributing instance task.");
-		while (!bindInstances.isEmpty()) {
-			for (EFNode node : nodes) {
-				node.pushInstance(bindInstances.poll(),this,true);
-				if (bindInstances.isEmpty())
-					break;
-			}
-		}
-		rebalaceLock.unlock();
-		Common.LOG.info("finish NodeLeave distributing instance task.");
-	}
-
-	private void rebalanceOnNewNodeJoin(Queue<String> idleInstances) {
-		Common.LOG.info("node join, start rebalance on {} nodes.", nodes.size());
-		rebalaceLock.lock();
-		int avgInstanceNum = avgInstanceNum();
-		this.avgInstanceNum = avgInstanceNum;
-		ArrayList<EFNode> addInstanceNodes = new ArrayList<>();
-		for (EFNode node : nodes) {
-			if (node.getBindInstances().size() < avgInstanceNum) {
-				addInstanceNodes.add(node);
-			} else {
-				while (node.getBindInstances().size() > avgInstanceNum) {					
-					idleInstances.offer(node.popInstance());
-				}
-			}
-		}
-		// re-balance nodes
-		Common.LOG.info("start NewNodeJoin distributing instance task.");
-		for (EFNode node : addInstanceNodes) {
-			if (idleInstances.isEmpty())
-				break;
-			while (node.getBindInstances().size() < avgInstanceNum) { 
-				node.pushInstance(idleInstances.poll(),this,true);
-			}
-		}
-		rebalaceLock.unlock();
-		Common.LOG.info("finish NewNodeJoin distributing instance task.");
-	}
-
-	private void rebalanceOnStart() {
-		Common.LOG.info("start rebalance on {} nodes.", nodes.size());
-		rebalaceLock.lock();
-		String[] instances = GlobalParam.StartConfig.getProperty("instances").split(",");
-		Common.LOG.info("start OnStart distributing instance task.");
-		for (int i = 0; i < instances.length;) {
-			for (EFNode node : nodes) {
-				String[] strs = instances[i].split(":");
-				if (strs.length > 1 && strs[0].length() > 1) { 
-					if (Integer.parseInt(strs[1]) > 0) {
-						totalInstanceNum++;
-						node.pushInstance(instances[i],this,true);						
-					}	
-				}
-				i++;
-				if (i >= instances.length)
-					break;
-			}			
-		}
-		this.avgInstanceNum = avgInstanceNum();
-		rebalaceLock.unlock();
-		Common.LOG.info("finish OnStart distributing instance task.");
-	}
-
-	private int avgInstanceNum() {
-		int avg = totalInstanceNum / nodes.size();
-		return (avg < 1) ? 1 : avg;
-	}
-
-	private EFNode getNode(Integer nodeId) {
-		for (EFNode node : nodes) {
-			if (node.getNodeId() == nodeId)
-				return node;
-		}
-		return null;
+	public boolean runInstanceNow(String instance,String type) {
+		return Resource.FlOW_CENTER.runInstanceNow(instance, type, true);
 	}
 	
 	
-
-	private EFNode removeNode(Integer nodeId) {
-		int removeNode = -1;
-		for (int i = 0; i < nodes.size(); i++) {
-			if (nodes.get(i).getNodeId() == nodeId) {
-				removeNode = i;
-				break;
-			}
-		}
-		EFNode node = null;
-		node = nodes.get(removeNode);
-		nodes.remove(removeNode);
-		return node;
-	}
-
-	private boolean containsNode(Integer nodeId) {
-		for (EFNode node : nodes) {
-			if (node.getNodeId() == nodeId)
-				return true;
-		}
-		return false;
-	} 
 }

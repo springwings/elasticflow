@@ -57,7 +57,7 @@ public class MysqlReader extends ReaderFlowSocket{
 				} 
 			} catch (Exception e) {
 				this.dataPage.put(GlobalParam.READER_STATUS,false);
-				log.error("get data Page Exception", e);
+				log.error("get dataPage ResultSet Exception", e);
 			} 
 		} catch (SQLException e){ 
 			this.dataPage.put(GlobalParam.READER_STATUS,false);

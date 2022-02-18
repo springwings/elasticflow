@@ -72,7 +72,8 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 				SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), scanStamp);
 				//update flow status,Distributed environment synchronization status
 				if(GlobalParam.DISTRIBUTE_RUN) {
-					EFFileUtil.createAndSave(GlobalParam.INSTANCE_COORDER.getPipeEndStatus(instance, L1seq).toJSONString(), 
+					EFFileUtil.createAndSave(GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder()
+							.getPipeEndStatus(instance, L1seq).toJSONString(), 
 							EFFileUtil.getInstancePath(instance)[2]);
 				} else {
 					EFFileUtil.createAndSave(EFMonitorUtil.getPipeEndStatus(instance, L1seq).toJSONString(), 

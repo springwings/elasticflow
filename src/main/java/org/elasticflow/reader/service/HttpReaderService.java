@@ -65,7 +65,11 @@ public class HttpReaderService {
 		serviceParams.put("thread_pool", GlobalParam.StartConfig.get("reader_service_thread_pool"));
 		serviceParams.put("httpHandle", new httpHandle());
 		FS = HttpService.getInstance(serviceParams);
-		FS.start();
+		try {
+			FS.start();
+		} catch (EFException e) {
+			Common.stopSystem();
+		}
 		return true;
 	}
 

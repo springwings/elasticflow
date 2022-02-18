@@ -9,7 +9,7 @@ import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.yarn.coord.EFMonitorCoord;
 import org.elasticflow.yarn.coord.InstanceCoord;
 import org.elasticflow.yarn.coord.NodeCoord;
-import org.elasticflow.yarn.coordinator.InstanceCoordinator;
+import org.elasticflow.yarn.coordinator.DistributeInstanceCoorder;
 
 /**
  * Node Model
@@ -31,6 +31,7 @@ public class EFNode {
 	/** slave node Coordinator **/
 	private NodeCoord nodeCoord;
 	/** node instances configure summarize **/
+	private volatile DistributeInstanceCoorder masterInstanceCoorder;
 	private volatile Queue<String> bindInstances = new LinkedList<String>();
 	private long lastLiveTime;
 
@@ -45,11 +46,13 @@ public class EFNode {
 		setNodeId(nodeId);
 	}
 
-	public void init(boolean isOnStart,NodeCoord nodeCoord, InstanceCoord instanceCoord, EFMonitorCoord monitorCoord) {
+	public void init(boolean isOnStart,NodeCoord nodeCoord, InstanceCoord instanceCoord, 
+			EFMonitorCoord monitorCoord,DistributeInstanceCoorder masterInstanceCoorder) {
 		this.nodeCoord = nodeCoord;
 		this.instanceCoord = instanceCoord;
 		this.monitorCoord = monitorCoord;
 		this.instanceCoord.initNode(isOnStart);
+		this.masterInstanceCoorder = masterInstanceCoorder;
 		this.pushResource();
 	}
 
@@ -144,15 +147,15 @@ public class EFNode {
 		return instanceSetting;
 	}
 	
-	public void recoverInstance(InstanceCoordinator instanceCoordinator) {
+	public void recoverInstance() {
 		if(this.instanceCoord.onlineTasksNum()==0) {
 			for(String instanceSetting : this.bindInstances) {
-				this.pushInstance(instanceSetting, instanceCoordinator, false);
+				this.pushInstance(instanceSetting,false);
 			}
 		}		
 	}
 	
-	public void pushInstance(String instanceSetting,InstanceCoordinator instanceCoordinator,boolean updateBindInstances) {
+	public void pushInstance(String instanceSetting,boolean updateBindInstances) {
 		if(updateBindInstances)//for recover
 			this.bindInstances.offer(instanceSetting);
 		String[] strs = instanceSetting.split(":");
@@ -161,8 +164,9 @@ public class EFNode {
 				EFFileUtil.readText(paths[1], GlobalParam.ENCODING,false),
 				EFFileUtil.readText(paths[2], GlobalParam.ENCODING,false),strs[0]);
 		this.instanceCoord.addInstance(instanceSetting);
-		instanceCoordinator.resumeInstance(strs[0], GlobalParam.JOB_TYPE.INCREMENT.name());
-		instanceCoordinator.resumeInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());
+		this.instanceCoord.resumeInstance(strs[0], GlobalParam.JOB_TYPE.INCREMENT.name());
+		this.instanceCoord.resumeInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());
+		this.masterInstanceCoorder.resumeInstance(strs[0]);
 	}
 
 	public void pushResource() {
@@ -180,12 +184,21 @@ public class EFNode {
 			popInstance();
 		}
 	}
+	
+	public boolean runInstanceNow(String instance,String jobtype) {
+		return this.instanceCoord.runInstanceNow(instance, jobtype);
+	}
+	
+	public void stopInstance(String instance) {
+		this.instanceCoord.stopInstance(instance, GlobalParam.JOB_TYPE.INCREMENT.name());
+		this.instanceCoord.stopInstance(instance, GlobalParam.JOB_TYPE.FULL.name());
+		this.masterInstanceCoorder.stopInstance(instance);
+	}
 		
 	private void removeInstance(String instanceSetting) {
 		if (instanceSetting != null) {
 			String[] strs = instanceSetting.split(":");
-			this.instanceCoord.stopInstance(strs[0], GlobalParam.JOB_TYPE.INCREMENT.name());
-			this.instanceCoord.stopInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());
+			this.stopInstance(strs[0]);
 			this.instanceCoord.removeInstance(strs[0], true);
 		}
 	}

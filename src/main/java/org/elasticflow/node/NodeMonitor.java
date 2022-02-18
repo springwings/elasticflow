@@ -11,7 +11,6 @@ import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -81,37 +80,37 @@ public final class NodeMonitor {
 
 	private Object response_data;
 
-	private HashSet<String> actions = new HashSet<String>() {
+	private HashMap<String,String> actions = new HashMap<String,String>() {
 		private static final long serialVersionUID = -8313429841889556616L;
 		{
 			// node manage
-			add("addResource");
-			add("removeResource");
-			add("getNodeConfig");
-			add("setNodeConfig");
-			add("getStatus");
-			add("getInstances");
-			add("startSearcherService");
-			add("stopSearcherService");
-			add("startHttpReaderServiceService");
-			add("stopHttpReaderServiceService");
-			add("restartNode");
-			add("loadHandler");
+			put("addresource","addResource");
+			put("removeresource","removeResource");
+			put("getnodeconfig","getNodeConfig");
+			put("setnodeconfig","setNodeConfig");
+			put("getstatus","getStatus");
+			put("getinstances","getInstances");
+			put("startsearcherservice","startSearcherService");
+			put("stopsearcherservice","stopSearcherService");
+			put("starthttpreaderserviceservice","startHttpReaderServiceService");
+			put("stopHttpreaderserviceservice","stopHttpReaderServiceService");
+			put("restartnode","restartNode");
+			put("loadhandler","loadHandler");
+			put("runcode","runCode");
 			// instance manage
-			add("cloneInstance");
-			add("resetInstanceState");
-			add("getInstanceSeqs");
-			add("reloadInstanceConfig");
-			add("runNow");
-			add("addInstance");
-			add("stopInstance");
-			add("resumeInstance");
-			add("removeInstance");
-			add("deleteInstanceData");
-			add("getInstanceInfo");
-			add("runCode");
+			put("cloneinstance","cloneInstance");
+			put("resetinstancestate","resetInstanceState");
+			put("getinstanceseqs","getInstanceSeqs");
+			put("reloadinstanceconfig","reloadInstanceConfig");
+			put("runnow","runNow");
+			put("addinstance","addInstance");
+			put("stopinstance","stopInstance");
+			put("resumeinstance","resumeInstance");
+			put("removeinstance","removeInstance");
+			put("deleteinstancedata","deleteInstanceData");
+			put("getinstanceinfo","getInstanceInfo");			
 			//pipe xml-config manage
-			add("setInstancePipeConfig");
+			put("setinstancepipeconfig","setInstancePipeConfig");
 		}
 	};
 
@@ -128,12 +127,13 @@ public final class NodeMonitor {
 
 	public void ac(Request rq, EFResponse RS) {
 		try {  
-			if (this.actions.contains(rq.getParameter("ac"))) {
-				Method m = NodeMonitor.class.getMethod(rq.getParameter("ac"), Request.class);
+			if (this.actions.containsKey(rq.getParameter("ac").toLowerCase())) {
+				Method m = NodeMonitor.class.getMethod(this.actions.get(rq.getParameter("ac").toLowerCase()), Request.class);
 				m.invoke(this, rq);
 				RS.setStatus(this.response_info, this.response_status);
 				RS.setPayload(this.response_data);
 			} else {
+				RS.setPayload(this.actions);
 				RS.setStatus("Actions Not Exists!", RESPONSE_STATUS.ParameterErr);
 			}
 		} catch (Exception e) {
@@ -472,7 +472,7 @@ public final class NodeMonitor {
 					}  
 					Common.setConfigObj(obj, cls, params[1], rq.getParameter("param.value"));	
 					if(GlobalParam.DISTRIBUTE_RUN)
-						GlobalParam.INSTANCE_COORDER.updateNodeConfigs(rq.getParameter("instance"), params[0], 
+						GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder().updateNodeConfigs(rq.getParameter("instance"), params[0], 
 								params[1], rq.getParameter("param.value"));
 					String xmlPath = GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("instance")+"/task.xml";					
 					try {
@@ -557,8 +557,15 @@ public final class NodeMonitor {
 		if (EFMonitorUtil.checkParams(this, rq, "instance,jobtype")) {
 			if (Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance"))
 					&& Resource.nodeConfig.getInstanceConfigs().get(rq.getParameter("instance")).openTrans()) {
-				boolean state = Resource.FlOW_CENTER.runInstanceNow(rq.getParameter("instance"),
-						rq.getParameter("jobtype"), true);
+				boolean state;
+				if(GlobalParam.DISTRIBUTE_RUN) {
+					state = GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder().runClusterInstanceNow(rq.getParameter("instance"),
+							rq.getParameter("jobtype"));
+				}else {
+					state = Resource.FlOW_CENTER.runInstanceNow(rq.getParameter("instance"),
+							rq.getParameter("jobtype"), true);
+				}
+				
 				if (state) {
 					setResponse(RESPONSE_STATUS.Success,
 							"Writer " + rq.getParameter("instance") + " job has been started now!", null);
@@ -656,7 +663,7 @@ public final class NodeMonitor {
 	public void addInstance(Request rq) {
 		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
 			if(GlobalParam.DISTRIBUTE_RUN) {
-				GlobalParam.INSTANCE_COORDER.pushInstanceToCluster(rq.getParameter("instance"));
+				GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder().pushInstanceToCluster(rq.getParameter("instance"));
 			}else {
 				GlobalParam.INSTANCE_COORDER.addInstance(rq.getParameter("instance"));
 			}
@@ -789,7 +796,7 @@ public final class NodeMonitor {
 	 */
 	private void removeInstance(String instance) {
 		if(GlobalParam.DISTRIBUTE_RUN) {
-			GlobalParam.INSTANCE_COORDER.removeInstanceFromCluster(instance);
+			GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder().removeInstanceFromCluster(instance);
 		}else {
 			GlobalParam.INSTANCE_COORDER.removeInstance(instance,true);
 		}		

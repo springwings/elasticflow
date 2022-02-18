@@ -9,6 +9,8 @@ package org.elasticflow.service;
 
 import java.util.HashMap;
 
+import org.elasticflow.util.EFException;
+
 /**
  * 
  * @author chengwen
@@ -18,5 +20,6 @@ import java.util.HashMap;
 public interface EFService {
 	public void init(HashMap<String, Object> serviceParams);
 	public void close();
-	public void start();
+	public void start() throws EFException;
+	public boolean status();
 }

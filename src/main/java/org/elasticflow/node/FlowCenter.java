@@ -78,8 +78,7 @@ public class FlowCenter{
 							while(GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready)==false)
 								Thread.sleep(1000);
 						} 
-				}
-				
+				}				
 			}
 		} catch (Exception e) {
 			Common.LOG.error("runInstanceNow "+instance+" Exception", e);

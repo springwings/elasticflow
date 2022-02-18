@@ -203,7 +203,7 @@ public class EFMonitorUtil {
 	
 	public static String getConnectionStatus(String instance,String poolName) {
 		if(GlobalParam.DISTRIBUTE_RUN) {
-			return GlobalParam.INSTANCE_COORDER.getConnectionStatus(instance,poolName);
+			return GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder().getConnectionStatus(instance,poolName);
 		}else {
 			return EFConnectionPool.getStatus(poolName);
 		}
@@ -299,7 +299,7 @@ public class EFMonitorUtil {
 					}
 					JSONObject tmp;
 					if(GlobalParam.DISTRIBUTE_RUN) {
-						tmp = GlobalParam.INSTANCE_COORDER.getPipeEndStatus(config.getName(), L1seq);						
+						tmp = GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder().getPipeEndStatus(config.getName(), L1seq);						
 					} else {
 						tmp = getPipeEndStatus(config.getName(), L1seq);
 					} 

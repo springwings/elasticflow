@@ -23,6 +23,7 @@ import org.elasticflow.model.EFSearchRequest;
 import org.elasticflow.service.EFService;
 import org.elasticflow.service.HttpService;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
@@ -46,7 +47,11 @@ public class SearcherService{
 		serviceParams.put("thread_pool", GlobalParam.StartConfig.get("searcher_service_thread_pool"));
 		serviceParams.put("httpHandle", new httpHandle());
 		FS=HttpService.getInstance(serviceParams);		
-		FS.start();
+		try {
+			FS.start();
+		} catch (EFException e) {
+			Common.stopSystem();
+		}
 		return true;
 	}
 	

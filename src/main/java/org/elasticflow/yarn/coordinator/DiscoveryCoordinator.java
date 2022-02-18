@@ -19,11 +19,11 @@ import org.elasticflow.yarn.coord.DiscoveryCoord;
 public class DiscoveryCoordinator implements DiscoveryCoord{
 	
 	public void reportStatus(String ip,String nodeId) { 
-		GlobalParam.INSTANCE_COORDER.updateNode(ip, Integer.parseInt(nodeId));
+		GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder().updateNode(ip, Integer.parseInt(nodeId));
 	}
 	
 	public void leaveCluster(String ip,String nodeId) {
-		GlobalParam.INSTANCE_COORDER.removeNode(ip, Integer.parseInt(nodeId),true);	
+		GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder().removeNode(ip, Integer.parseInt(nodeId),true);	
 	}
 	
 }

@@ -23,6 +23,7 @@ import org.elasticflow.model.EFResponse;
 import org.elasticflow.service.EFService;
 import org.elasticflow.service.HttpService;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
@@ -47,7 +48,11 @@ public class ComputerService {
 		serviceParams.put("thread_pool", GlobalParam.StartConfig.get("computer_service_thread_pool"));
 		serviceParams.put("httpHandle", new httpHandle());
 		FS=HttpService.getInstance(serviceParams);		
-		FS.start();
+		try {
+			FS.start();
+		} catch (EFException e) {
+			Common.stopSystem();
+		}
 		return true;
 	}
 	public boolean close(){

@@ -7,9 +7,7 @@
  */
 package org.elasticflow.yarn.coord;
 
-import java.util.Queue;
-
-import com.alibaba.fastjson.JSONObject;
+import org.elasticflow.yarn.coordinator.DistributeInstanceCoorder;
 
 /**
  * Run task instance cluster coordination interface
@@ -23,41 +21,25 @@ public interface InstanceCoord extends Coordination{
 	public void initNode(boolean isOnStart);
 	
 	public void updateInstanceConfig(String instance,String end,String fieldName,String value);
-	
-	public void updateNodeConfigs(String instance,String end,String fieldName,String value);
-	
+		
 	public void sendData(String content, String destination,boolean relative);
 	
 	public void reloadResource();
 	
 	public int onlineTasksNum();
-	
-	public String getConnectionStatus(String instance,String poolName);
-	
-	public JSONObject getPipeEndStatus(String instance,String L1seq);
-	
+		
 	public void sendInstanceData(String content0,String content1,String content2, String instance);
 	
 	public void addInstance(String instanceSettting);
 	
 	public void stopInstance(String instance,String jobtype);
 	
+	public boolean runInstanceNow(String instance,String type);
+		
 	public void resumeInstance(String instance,String jobtype);
 	
 	public void removeInstance(String instance,boolean waitComplete);
 	
-	public void updateNode(String ip, Integer nodeId);
-	
-	public void removeNode(String ip, Integer nodeId,boolean rebalace);
-	
-	public void stopNodes();
-	
-	public void updateAllNodesResource();
-	
-	public Queue<String> clusterScan(boolean startRebalace);
-	
-	public void pushInstanceToCluster(String instanceSettting);
-	
-	public void removeInstanceFromCluster(String instance);
+	public DistributeInstanceCoorder distributeInstanceCoorder();
 	
 }
