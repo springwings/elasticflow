@@ -170,11 +170,19 @@ public final class Common {
 			}
 		}
 	}
-
+	
+	/**
+	 * 	 * Second timestamp of now
+	 * @return
+	 */
 	public static long getNow() {
 		return System.currentTimeMillis() / 1000;
 	}
-
+	
+	/**
+	 * Second timestamp of the current zero point
+	 * @return
+	 */
 	public static long getNowZero() {
 		return (System.currentTimeMillis() / (1000 * 3600 * 24) * (1000 * 3600 * 24)
 				- TimeZone.getDefault().getRawOffset()) / 1000;

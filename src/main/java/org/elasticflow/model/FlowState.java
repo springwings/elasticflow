@@ -33,7 +33,7 @@ final public class FlowState {
 	private long totalProcess = 0;
 
 	/** Real time statistics of current time period **/
-	private long currentTimeProcess;
+	private long currentTimeProcess = 0;
 
 	/** Amount of data processed history **/
 	private JSONObject historyProcess;
@@ -54,7 +54,6 @@ final public class FlowState {
 			if(flowStoreStatus.containsKey(this.endType.name())) {
 				JSONObject JO = flowStoreStatus.getJSONObject(this.endType.name());
 				this.totalProcess = JO.getLong("totalProcess");
-				this.currentTimeProcess = JO.getLong("currentTimeProcess");
 				this.flowStartTime = JO.getLong("flowStartTime");
 				this.historyProcess = JO.getJSONObject("historyProcess");					
 			}
@@ -64,8 +63,6 @@ final public class FlowState {
 			this.historyProcess = new JSONObject();
 		if(this.historyProcess.containsKey(todayZero)) {
 			this.currentTimeProcess = this.historyProcess.getLongValue(todayZero);
-		}else {
-			this.currentTimeProcess = 0;
 		}
 	} 
 	
