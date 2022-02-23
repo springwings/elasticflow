@@ -124,11 +124,9 @@ public final class Run {
 			}						
 		}
 		
+		Resource.ThreadPools = new ThreadPools(Integer.parseInt(GlobalParam.StartConfig.getProperty("default_threadpool_size")));
 		if(openThreadPools>0 && GlobalParam.DISTRIBUTE_RUN==false) {
-			Resource.ThreadPools = new ThreadPools(openThreadPools,true);
 			Resource.ThreadPools.start();
-		}else {
-			Resource.ThreadPools = new ThreadPools(Integer.parseInt(GlobalParam.StartConfig.getProperty("default_threadpool_size")),false);
 		}
 		
 		if(EFNodeUtil.isSlave()) {

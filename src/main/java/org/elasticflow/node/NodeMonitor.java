@@ -127,14 +127,14 @@ public final class NodeMonitor {
 
 	public void ac(Request rq, EFResponse RS) {
 		try {  
-			if (this.actions.containsKey(rq.getParameter("ac").toLowerCase())) {
+			if (rq.getParameter("ac")!=null && this.actions.containsKey(rq.getParameter("ac").toLowerCase())) {
 				Method m = NodeMonitor.class.getMethod(this.actions.get(rq.getParameter("ac").toLowerCase()), Request.class);
 				m.invoke(this, rq);
 				RS.setStatus(this.response_info, this.response_status);
 				RS.setPayload(this.response_data);
 			} else {
 				RS.setPayload(this.actions);
-				RS.setStatus("Actions Not Exists!", RESPONSE_STATUS.ParameterErr);
+				RS.setStatus("Example: /efm.doaction?ac=getStatus", RESPONSE_STATUS.ParameterErr);
 			}
 		} catch (Exception e) {
 			RS.setStatus("Actions Exception!", RESPONSE_STATUS.CodeException);
@@ -369,6 +369,9 @@ public final class NodeMonitor {
 		dt.put("STATUS", "running");
 		dt.put("VERSION", GlobalParam.VERSION);
 		dt.put("TASKS", Resource.tasks.size());
+		dt.put("THREAD_POOL_SIZE", Resource.ThreadPools.getPoolSize());
+		dt.put("THREAD_ACTIVE_COUNT", Resource.ThreadPools.getActiveCount());
+		dt.put("DISTRIBUTE_RUN", GlobalParam.DISTRIBUTE_RUN);
 		try {
 			dt.put("CPU", SystemInfoUtil.getCpuUsage());
 			dt.put("MEMORY", SystemInfoUtil.getMemUsage());

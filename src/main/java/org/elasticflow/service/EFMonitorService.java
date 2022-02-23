@@ -15,9 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
-import org.elasticflow.model.EFSearchRequest;
 import org.elasticflow.model.EFResponse;
+import org.elasticflow.model.EFSearchRequest;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.yarn.Resource;
@@ -37,7 +36,7 @@ public class EFMonitorService {
 	public void start() {
 		HashMap<String, Object> serviceParams = new HashMap<String, Object>();
 		serviceParams.put("confident_port", "8601");
-		serviceParams.put("max_idle_time", "20000");
+		serviceParams.put("max_idle_time", "30000");
 		serviceParams.put("port", "8617");
 		serviceParams.put("thread_pool", "3");
 		serviceParams.put("httpHandle", new httpHandle());
@@ -64,20 +63,17 @@ public class EFMonitorService {
 			rps.setRequest(RR.getParams());
 			switch (dataTo) {  
 			case "efm.doaction":{
-				if(rq.getParameter("ac") !=null){
-					Resource.nodeMonitor.ac(rq,rps); 
-				}else{  
-					rps.setStatus("parameter error!", RESPONSE_STATUS.ParameterErr); 
-					rps.setPayload("example: /efm.doaction?ac=getInstanceInfo&instance=demo");
-				}
+				Resource.nodeMonitor.ac(rq,rps);				
 			}
 				break;   
 			case "_version": 
 				rps.setInfo(GlobalParam.VERSION);  
 				break;
 			default:
-				rps.setStatus("action rooter not exist!", RESPONSE_STATUS.ParameterErr); 
-				rps.setPayload("example: /efm.doaction  or  /_version");
+				HashMap<String, Object> info = new HashMap<>();
+				info.put("Method", new String[] {"/efm.doaction","/_version"});
+				info.put("Example", " /efm.doaction?ac=getInstanceInfo&instance=demo");
+				rps.setPayload(info);
 				break;
 			}
 			response.getWriter().println(rps.getResponse(true));

@@ -30,29 +30,22 @@ public class ThreadPools {
 	private LinkedBlockingQueue<TaskThread> waitTask;
 
 	private ThreadPoolExecutor cachedThreadPool;
-	
-	private static int maxnum = 60;
-	
-	public ThreadPools(int instanceNum,boolean autoNum) {
+		
+	public ThreadPools(int instanceNum) {
 		waitTask = new LinkedBlockingQueue<>();
-		if(autoNum) {
-			this.autoNum(instanceNum);
-		}else {
-			this.init(instanceNum);
-		}		
+		this.init(instanceNum);	
 	}
 	
-	public void autoNum(int instanceNum) {
-		int maxthread = instanceNum*3;
-		if(maxthread>maxnum)
-			maxthread = maxnum;
-		cachedThreadPool = new ThreadPoolExecutor(instanceNum+2, maxthread+3,
-	            1L, TimeUnit.SECONDS,
-	            new ArrayBlockingQueue<Runnable>(maxthread*10));
+	public int getPoolSize() {
+		return cachedThreadPool.getPoolSize();
 	}
 	
+	public int getActiveCount() {
+		return cachedThreadPool.getActiveCount();
+	}
+ 
 	public void init(int minthread) {  
-		cachedThreadPool = new ThreadPoolExecutor(minthread, minthread+5,
+		cachedThreadPool = new ThreadPoolExecutor(minthread, minthread+10,
 	            1L, TimeUnit.SECONDS,
 	            new ArrayBlockingQueue<Runnable>(minthread*5));
 	}
