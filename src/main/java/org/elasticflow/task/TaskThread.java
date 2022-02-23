@@ -8,8 +8,8 @@
 package org.elasticflow.task;
 
 /**
- * Running Task interface
- * 
+ * Running Task Page interface
+ * Support multi-threading after automatic task splitting
  * @author chengwen
  * @version 1.0
  * @date 2018-11-13 10:54 
