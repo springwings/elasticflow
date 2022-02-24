@@ -24,7 +24,7 @@ public class KafkaWriter extends WriterFlowSocket {
 
 	public static KafkaWriter getInstance(ConnectParams connectParams) {
 		KafkaWriter o = new KafkaWriter();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	} 
 

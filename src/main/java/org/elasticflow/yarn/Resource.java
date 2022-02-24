@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.elasticflow.config.NodeConfig;
+import org.elasticflow.connection.EFConnectionSocket;
 import org.elasticflow.model.EFState;
 import org.elasticflow.node.FlowCenter;
 import org.elasticflow.node.NodeMonitor;
@@ -20,6 +21,8 @@ import org.elasticflow.task.FlowTask;
 import org.elasticflow.task.schedule.TaskJobCenter;
 import org.elasticflow.util.email.EFEmailSender;
 import org.quartz.Scheduler;
+
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * Statistics current node resources
@@ -47,6 +50,10 @@ public final class Resource {
 	
 	/**FLOW_INFOS store current flow running state information*/
 	public final static EFState<HashMap<String,String>> FLOW_INFOS = new EFState<HashMap<String,String>>();
+	
+	public final static ConcurrentHashMap<String, JSONObject> FLOW_STAT = new ConcurrentHashMap<>();
+	
+	public volatile static HashMap<String, EFConnectionSocket<?>> EFCONNS = new HashMap<>();
 
 	public static ConcurrentHashMap<String, FlowTask> tasks; 
 	

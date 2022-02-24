@@ -25,10 +25,10 @@ public final class Task {
 	private JOB_TYPE jobType;
 	public TaskState taskState;
 
-	public static Task getInstance(String id,String instance, String L1seq, JOB_TYPE jobType, InstanceConfig instanceConfig,
+	public static Task getInstance(String instance, String L1seq, JOB_TYPE jobType, InstanceConfig instanceConfig,
 			String additional) {
 		Task o = new Task();
-		o.id = id;
+		o.id = Common.getInstanceRunId(instance, L1seq);
 		o.instance = instance;
 		o.L1seq = L1seq;
 		o.instanceConfig = instanceConfig;

@@ -32,14 +32,18 @@ public abstract class ReaderFlowSocket extends Flow{
 	
 	protected ConcurrentLinkedQueue<PipeDataUnit> dataUnit = new ConcurrentLinkedQueue<>(); 
 	
-	public final Lock lock = new ReentrantLock(); 	
-	
+	public final Lock lock = new ReentrantLock(); 		
 	
 	@Override
-	public void INIT(ConnectParams connectParams) {
+	public void initConn(ConnectParams connectParams) {
 		this.connectParams = connectParams; 
 		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq());		
 	} 
+	
+	@Override
+	public void initFlow() {
+		//auto invoke in flow prepare
+	}
 	
 	public void setReaderHandler(ReaderHandler readHandler) {
 		this.readHandler = readHandler;

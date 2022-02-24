@@ -34,7 +34,6 @@ public class FlowTask {
 	private boolean recompute = true;
 	/**Used to control multiple tasks to write data to the same place*/
 	private boolean writeInSamePosition = false;
-	private String instance;
 	private PipePump pipePump;
 	private Breaker breaker;
 	/**
@@ -44,16 +43,15 @@ public class FlowTask {
  
 	private final static Logger log = LoggerFactory.getLogger(FlowTask.class);
 
-	public static FlowTask createTask(String instanceName, PipePump transDataFlow) {
-		return new FlowTask(instanceName, transDataFlow, GlobalParam.DEFAULT_RESOURCE_SEQ);
+	public static FlowTask createTask(PipePump pipePump) {
+		return new FlowTask(pipePump, GlobalParam.DEFAULT_RESOURCE_SEQ);
 	}
 
-	public static FlowTask createTask(String instanceName, PipePump transDataFlow, String L1seq) {
-		return new FlowTask(instanceName, transDataFlow, L1seq);
+	public static FlowTask createTask(PipePump pipePump, String L1seq) {
+		return new FlowTask(pipePump, L1seq);
 	}
 
-	private FlowTask(String instance, PipePump pipePump, String L1seq) {
-		this.instance = instance;
+	private FlowTask(PipePump pipePump, String L1seq) {
 		this.pipePump = pipePump;
 		this.L1seq = L1seq;
 		if (pipePump.getInstanceConfig().getPipeParams().getInstanceName() != null)
@@ -67,9 +65,9 @@ public class FlowTask {
 	 * @throws EFException 
 	 */
 	public void optimizeInstance() throws EFException {
-		String storeName = Common.getInstanceId(instance, L1seq);
+		String storeName = Common.getInstanceRunId(pipePump.getInstanceID(), L1seq);
 		CPU.RUN(pipePump.getID(), "Pond", "optimizeInstance", true, storeName,
-				GlobalParam.TASK_COORDER.getStoreId(instance, L1seq, pipePump.getID(), true, false));
+				GlobalParam.TASK_COORDER.getStoreId(pipePump.getInstanceID(), L1seq, pipePump.getID(), true, false));
 	}
 	
 	
@@ -81,35 +79,34 @@ public class FlowTask {
 	 * slave instance full job
 	 */
 	public void runFull() {
-		if (!breaker.isOn() && GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running,
-				pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
+		if (!breaker.isOn() && GlobalParam.TASK_COORDER.setFlowStatus(pipePump.getInstanceID(),L1seq,GlobalParam.JOB_TYPE.FULL.name(),
+				STATUS.Ready,STATUS.Running,pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try { 
 				String storeId=null;
 				if (writeInSamePosition) {
 					storeId = GlobalParam.TASK_COORDER.getStoreId(pipePump.getInstanceConfig().getPipeParams().getInstanceName(), 
 							L1seq, pipePump.getID(), false, false);					
 				} else {
-					storeId = GlobalParam.TASK_COORDER.getStoreId(instance, L1seq, pipePump.getID(), false, false);
+					storeId = GlobalParam.TASK_COORDER.getStoreId(pipePump.getInstanceID(), L1seq, pipePump.getID(), false, false);
 					CPU.RUN(pipePump.getID(), "Pond", "createStorePosition", true,
-							Common.getInstanceId(instance, L1seq), storeId);
+							Common.getInstanceRunId(pipePump.getInstanceID(), L1seq), storeId);
 				}
 				if(storeId!=null) {
-					GlobalParam.TASK_COORDER.scanPositionkeepCurrentPos(instance);
-					pipePump.run(instance, storeId, L1seq, true,
-							writeInSamePosition);
-					GlobalParam.TASK_COORDER.scanPositionRecoverKeep(instance); 
-					GlobalParam.TASK_COORDER.saveTaskInfo(instance, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
+					GlobalParam.TASK_COORDER.scanPositionkeepCurrentPos(pipePump.getInstanceID());
+					pipePump.run(storeId, L1seq, true,writeInSamePosition);
+					GlobalParam.TASK_COORDER.scanPositionRecoverKeep(pipePump.getInstanceID()); 
+					GlobalParam.TASK_COORDER.saveTaskInfo(pipePump.getInstanceID(), L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
 				} 
 			} catch (Exception e) {
 				breaker.log();
-				log.error(instance + " Full Exception", e);
+				log.error(pipePump.getInstanceID() + " Full Exception", e);
 			} finally {
-				GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready,
+				GlobalParam.TASK_COORDER.setFlowStatus(pipePump.getInstanceID(),L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready,
 						pipePump.getInstanceConfig().getPipeParams().showInfoLog());
 			}
 		} else {
 			if(pipePump.getInstanceConfig().getPipeParams().getLogLevel()==0)
-				log.info(instance + " current start full computational task has been breaked!");
+				log.info(pipePump.getInstanceID() + " current start full computational task has been breaked!");
 		}
 	}
 
@@ -117,32 +114,32 @@ public class FlowTask {
 	 * Primary virtual node full task running
 	 */
 	public void runMasterFull() {
-		if (GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running,
+		if (GlobalParam.TASK_COORDER.setFlowStatus(pipePump.getInstanceID(),L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running,
 				pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
 				String storeId;
-				String destination = instance;
+				String destination = pipePump.getInstanceID();
 				if(writeInSamePosition) {
 					destination = pipePump.getInstanceConfig().getPipeParams().getInstanceName(); 
 				} 
 				storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), false, false); 
 
 				CPU.RUN(pipePump.getID(), "Pond", "createStorePosition", true,
-						Common.getInstanceId(instance, L1seq), storeId);
+						Common.getInstanceRunId(pipePump.getInstanceID(), L1seq), storeId);
 				GlobalParam.TASK_COORDER.setFlowInfo(destination,GlobalParam.JOB_TYPE.MASTER.name(),GlobalParam.FLOWINFO.FULL_JOBS.name(),
 						getNextJobs(pipePump.getInstanceConfig().getPipeParams().getNextJob()));	
 				for (String slave : pipePump.getInstanceConfig().getPipeParams().getNextJob()) { 
 					Resource.FlOW_CENTER.runInstanceNow(slave, "full",pipePump.getInstanceConfig().getPipeParams().isAsync());
 				}
 			} catch (Exception e) {
-				log.error(instance + " Full Exception", e);
+				log.error(pipePump.getInstanceID() + " Full Exception", e);
 			} finally {
-				GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready,
+				GlobalParam.TASK_COORDER.setFlowStatus(pipePump.getInstanceID(),L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready,
 						pipePump.getInstanceConfig().getPipeParams().showInfoLog());
 			}
 		} else {
 			if(pipePump.getInstanceConfig().getPipeParams().getLogLevel()==0)
-				log.info(instance + " Current Master Full flow has been breaked!");
+				log.info(pipePump.getInstanceID() + " Current Master Full flow has been breaked!");
 		}
 	}
 	
@@ -151,11 +148,11 @@ public class FlowTask {
 	 * @throws EFException 
 	 */
 	public void runMasterIncrement() throws EFException {
-		if (GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
+		if (GlobalParam.TASK_COORDER.setFlowStatus(pipePump.getInstanceID(),L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
 				pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
-				String storeId = GlobalParam.TASK_COORDER.getStoreId(instance, L1seq, pipePump.getID(), true, recompute); 
-				String destination = instance;
+				String storeId = GlobalParam.TASK_COORDER.getStoreId(pipePump.getInstanceID(), L1seq, pipePump.getID(), true, recompute); 
+				String destination = pipePump.getInstanceID();
 				if(writeInSamePosition)
 					destination = pipePump.getInstanceConfig().getPipeParams().getInstanceName();				
 				GlobalParam.TASK_COORDER.setFlowInfo(destination, GlobalParam.JOB_TYPE.MASTER.name(), GlobalParam.FLOWINFO.INCRE_STOREID.name(), storeId); 				
@@ -163,13 +160,13 @@ public class FlowTask {
 					Resource.FlOW_CENTER.runInstanceNow(slave, "increment",pipePump.getInstanceConfig().getPipeParams().isAsync());
 				}
 			} finally {
-				GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
+				GlobalParam.TASK_COORDER.setFlowStatus(pipePump.getInstanceID(),L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
 						pipePump.getInstanceConfig().getPipeParams().showInfoLog());  
 				recompute = false;
 			}
 		} else {
 			if(pipePump.getInstanceConfig().getPipeParams().getLogLevel()==0)
-				log.info(instance + " Current Master Increment flow has been breaked!");
+				log.info(pipePump.getInstanceID() + " Current Master Increment flow has been breaked!");
 		}
 	}
 
@@ -177,41 +174,41 @@ public class FlowTask {
 	 * slave instance increment job
 	 */
 	public void runIncrement() {  
-		if (!breaker.isOn() && GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
+		if (!breaker.isOn() && GlobalParam.TASK_COORDER.setFlowStatus(pipePump.getInstanceID(),L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
 				pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			String storeId;
 			if (writeInSamePosition) {				
 				storeId = GlobalParam.TASK_COORDER.getStoreId(pipePump.getInstanceConfig().getPipeParams().getInstanceName()
 						, L1seq, pipePump.getID(), true, false);
-				GlobalParam.TASK_COORDER.setAndGetScanInfo(instance, L1seq, storeId);
+				GlobalParam.TASK_COORDER.setAndGetScanInfo(pipePump.getInstanceID(), L1seq, storeId);
 			} else {
-				storeId = GlobalParam.TASK_COORDER.getStoreId(instance, L1seq, pipePump.getID(), true, recompute);
+				storeId = GlobalParam.TASK_COORDER.getStoreId(pipePump.getInstanceID(), L1seq, pipePump.getID(), true, recompute);
 			} 
 			try {
-				pipePump.run(instance, storeId, L1seq, false, writeInSamePosition); 
+				pipePump.run(storeId, L1seq, false, writeInSamePosition); 
 			} catch (EFException e) {
 				if (!writeInSamePosition && e.getErrorType()==ETYPE.WRITE_POS_NOT_FOUND) { 
-					storeId = GlobalParam.TASK_COORDER.getStoreId(instance, L1seq, pipePump.getID(), true, true);
-					log.warn("try to rebuild {} storage location！",instance);
+					storeId = GlobalParam.TASK_COORDER.getStoreId(pipePump.getInstanceID(), L1seq, pipePump.getID(), true, true);
+					log.warn("try to rebuild {} storage location！",pipePump.getInstanceID());
 					try {
-						pipePump.run(instance, storeId,L1seq, false, writeInSamePosition);
+						pipePump.run(storeId,L1seq, false, writeInSamePosition);
 					} catch (EFException ex) {
-						log.error("try to rebuild {} storage location exception,", instance,ex);
+						log.error("try to rebuild {} storage location exception,", pipePump.getInstanceID(),ex);
 					}
 				}else if (e.getErrorType()==ETYPE.EXTINTERRUPT){
-					log.warn("{} increment external interrupt!",instance);
+					log.warn("{} increment external interrupt!",pipePump.getInstanceID());
 				}else {
 					breaker.log();
 				}
-				log.error(instance + " IncrementJob Exception", e);
+				log.error(pipePump.getInstanceID() + " IncrementJob Exception", e);
 			} finally {
 				recompute = this.checkReCompute(storeId);
-				GlobalParam.TASK_COORDER.setFlowStatus(instance,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
+				GlobalParam.TASK_COORDER.setFlowStatus(pipePump.getInstanceID(),L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
 						pipePump.getInstanceConfig().getPipeParams().showInfoLog()); 
 			}
 		} else {
 			if(pipePump.getInstanceConfig().getPipeParams().getLogLevel()==0)
-				log.info(instance + " The last round is not over, and the new increment is aborted!");
+				log.info(pipePump.getInstanceID() + " The last round is not over, and the new increment is aborted!");
 		}
 	}
 	
@@ -240,7 +237,7 @@ public class FlowTask {
 				for (String seq : _seqs) {
 					if (seq == null)
 						continue;
-					sf.append(Common.getInstanceId(job, seq) + " ");
+					sf.append(Common.getInstanceRunId(job, seq) + " ");
 				}
 			}
 		}

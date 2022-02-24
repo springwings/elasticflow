@@ -290,7 +290,7 @@ public final class Common {
 	 * @param instance data source main tag name
 	 * @return String
 	 */
-	public static String getInstanceId(String instance, String L1seq) {
+	public static String getInstanceRunId(String instance, String L1seq) {
 		if (L1seq != null && L1seq.length() > 0) {
 			return instance + L1seq;
 		} else {
@@ -352,11 +352,11 @@ public final class Common {
 	 * @param moreinfo
 	 */
 
-	public static String formatLog(String types, String heads, String instanceName, String storeId, String L1seq,
+	public static String formatLog(String types, String heads, String instanceName, String storeId, String L2seq,
 			int total, String dataBoundary, String lastUpdateTime, long useTime, String moreinfo) {
 		String useTimeFormat = Common.seconds2time(useTime);
-		if (L1seq.length() < 1)
-			L1seq = "None";
+		if (L2seq.length() < 1)
+			L2seq = "None";
 		String update;
 		if (lastUpdateTime.length() > 9 && lastUpdateTime.matches("[0-9]+")) {
 			update = SDF.format(
@@ -367,17 +367,17 @@ public final class Common {
 		StringBuilder sb = new StringBuilder();
 		switch (types) {
 		case "complete":
-			sb.append("[Complete " + heads + " " + instanceName + "_" + storeId + "] " + (" L1seq:" + L1seq));
+			sb.append("[Complete " + heads + " " + instanceName + "_" + storeId + "] " + (" L2seq:" + L2seq));
 			sb.append(" Docs:" + total);
 			sb.append(" scanAt:" + update);
 			sb.append(" useTime:" + useTimeFormat);
 			break;
 		case "start":
-			sb.append("[Start " + heads + " " + instanceName + "_" + storeId + "] " + (" L1seq:" + L1seq));
+			sb.append("[Start " + heads + " " + instanceName + "_" + storeId + "] " + (" L2seq:" + L2seq));
 			sb.append(" scanAt:" + update);
 			break;
 		default:
-			sb.append("[ -- " + heads + " " + instanceName + "_" + storeId + "] " + (" L1seq:" + L1seq));
+			sb.append("[ -- " + heads + " " + instanceName + "_" + storeId + "] " + (" L2seq:" + L2seq));
 			sb.append(
 					" Docs:" + total + (total == 0 || dataBoundary.length() < 1 ? "" : " dataBoundary:" + dataBoundary)
 							+ " scanAt:" + update + " useTime:" + useTimeFormat);

@@ -42,7 +42,7 @@ public class VearchWriter extends WriterFlowSocket {
 	
 	public static VearchWriter getInstance(ConnectParams connectParams) {
 		VearchWriter o = new VearchWriter();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	}	
 	

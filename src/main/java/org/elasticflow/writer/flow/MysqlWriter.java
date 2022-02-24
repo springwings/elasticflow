@@ -40,7 +40,7 @@ public class MysqlWriter extends WriterFlowSocket {
 
 	public static MysqlWriter getInstance(ConnectParams connectParams) {
 		MysqlWriter o = new MysqlWriter();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	}
 	

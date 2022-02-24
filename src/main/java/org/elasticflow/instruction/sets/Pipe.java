@@ -10,6 +10,7 @@ package org.elasticflow.instruction.sets;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.model.Page;
+import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.ReaderState;
 import org.elasticflow.reader.ReaderFlowSocket;
@@ -87,7 +88,7 @@ public class Pipe extends Instruction {
 		String id = String.valueOf(args[0]);
 		String instance = String.valueOf(args[1]);
 		String storeId = String.valueOf(args[2]);
-		String L2seq = String.valueOf(args[3]);
+		Task task = (Task) args[3];
 		DataPage dataPage = (DataPage) args[4];
 		String info = String.valueOf(args[5]);
 		boolean isUpdate = (boolean) args[6];
@@ -124,7 +125,9 @@ public class Pipe extends Instruction {
 				writer.flowState.incrementCurrentTimeProcess(num);
 				context.getReader().flush();
 				writer.flush();
-				log.info(Common.formatLog("onepage",id + " Write", instance, storeId, L2seq, num,
+				
+				log.info(Common.formatLog("onepage",id + " Write", task.getId(), 
+						storeId, task.getL2seq(), num,
 						DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));
 			} catch (EFException e) {
 				Common.processErrorLevel(e);

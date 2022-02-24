@@ -19,9 +19,12 @@ import org.elasticflow.task.FlowTask;
 import org.elasticflow.task.InstructionTask;
 import org.elasticflow.task.schedule.JobModel;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.yarn.Resource;
 import org.quartz.SchedulerException;
+
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * read to write flow build center
@@ -64,7 +67,7 @@ public class FlowCenter{
 				
 				if(GlobalParam.JOB_TYPE.FULL.name().equals(type.toUpperCase())) {
 					if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready))
-						state = jobAction(Common.getInstanceId(instance, L1seq), GlobalParam.JOB_TYPE.FULL.name(), "run") && state;
+						state = jobAction(Common.getInstanceRunId(instance, L1seq), GlobalParam.JOB_TYPE.FULL.name(), "run") && state;
 						if(state && !asyn) {
 							Thread.sleep(1000);//waiting to start job
 							while(GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready)==false)
@@ -72,7 +75,7 @@ public class FlowCenter{
 						} 
 				}else {
 					if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready))
-						state = jobAction(Common.getInstanceId(instance, L1seq), GlobalParam.JOB_TYPE.INCREMENT.name(), "run") && state;
+						state = jobAction(Common.getInstanceRunId(instance, L1seq), GlobalParam.JOB_TYPE.INCREMENT.name(), "run") && state;
 						if(state && asyn) {
 							Thread.sleep(1000);//waiting to start job
 							while(GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready)==false)
@@ -98,9 +101,9 @@ public class FlowCenter{
 				for (String L1seq : L1seqs) {
 					if (L1seq == null)
 						continue;  
-					if(removeTask && Resource.tasks.containsKey(Common.getInstanceId(instance, L1seq))) {
-						Resource.tasks.remove(Common.getInstanceId(instance, L1seq));
-						state = removeFlowScheduleJob(Common.getInstanceId(instance, L1seq),instanceConfig) && state;
+					if(removeTask && Resource.tasks.containsKey(Common.getInstanceRunId(instance, L1seq))) {
+						Resource.tasks.remove(Common.getInstanceRunId(instance, L1seq));
+						state = removeFlowScheduleJob(Common.getInstanceRunId(instance, L1seq),instanceConfig) && state;
 					} 
 					
 					if(removePipe) {
@@ -126,31 +129,38 @@ public class FlowCenter{
 	 * @param createSchedule
 	 * @param contextId
 	 */
-	public void addFlowGovern(String instanceName, InstanceConfig instanceConfig,boolean needClear,boolean createSchedule) { 
+	public void addFlowGovern(String instanceID, InstanceConfig instanceConfig,boolean needClear,boolean createSchedule) { 
 		if (instanceConfig.checkStatus()==false || instanceConfig.openTrans() == false)
 			return;
 		String[] L1seqs = Common.getL1seqs(instanceConfig);  
+		if(!Resource.FLOW_STAT.containsKey(instanceID)) {
+			String content = EFFileUtil.readText(EFFileUtil.getInstancePath(instanceID)[2], GlobalParam.ENCODING, true);
+			if (content!=null && content.length()>0) {
+				Resource.FLOW_STAT.put(instanceID, JSONObject.parseObject(content));
+			}else {
+				Resource.FLOW_STAT.put(instanceID,new JSONObject());
+			}
+		}
 		synchronized(Resource.tasks) {
 			try {
 				for (String L1seq : L1seqs) {
 					if (L1seq == null)
 						continue; 
-					if(!Resource.tasks.containsKey(Common.getInstanceId(instanceName, L1seq)) || needClear){
-						PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instanceName, L1seq,needClear,GlobalParam.FLOW_TAG._DEFAULT.name());
+					if(!Resource.tasks.containsKey(Common.getInstanceRunId(instanceID, L1seq)) || needClear){
+						PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instanceID, L1seq,needClear,GlobalParam.FLOW_TAG._DEFAULT.name());
 						if(EFNodeUtil.isSlave()) {
-							String newRunId = GlobalParam.TASK_COORDER.getContextId(instanceName, L1seq,GlobalParam.FLOW_TAG._DEFAULT.name());
+							String newRunId = GlobalParam.TASK_COORDER.getContextId(instanceID, L1seq,GlobalParam.FLOW_TAG._DEFAULT.name());
 							CPU.reIndexContexts(pipePump.getID(), newRunId);
 							pipePump.setID(newRunId);						
 						}
-						Resource.tasks.put(Common.getInstanceId(instanceName, L1seq), FlowTask.createTask(instanceName,
-								pipePump, L1seq));
+						Resource.tasks.put(Common.getInstanceRunId(instanceID, L1seq), FlowTask.createTask(pipePump, L1seq));
 					}  
 					if(createSchedule)
-						createFlowScheduleJob(Common.getInstanceId(instanceName, L1seq), Resource.tasks.get(Common.getInstanceId(instanceName, L1seq)),
+						createFlowScheduleJob(Common.getInstanceRunId(instanceID, L1seq), Resource.tasks.get(Common.getInstanceRunId(instanceID, L1seq)),
 							instanceConfig,needClear);
 				}
 			} catch (Exception e) {
-				Common.LOG.error("Add Flow Govern "+instanceName+" Exception", e);
+				Common.LOG.error("Add "+instanceID+" Flow Govern Exception", e);
 			}	
 		}
 		

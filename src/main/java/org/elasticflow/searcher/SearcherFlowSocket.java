@@ -17,11 +17,16 @@ import org.elasticflow.util.EFException;
 public abstract class SearcherFlowSocket extends Flow { 
 
 	@Override
-	public void INIT(ConnectParams connectParams) {
+	public void initConn(ConnectParams connectParams) {
 		this.connectParams = connectParams;
 		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq());
 		this.instanceConfig = connectParams.getInstanceConfig();
 	} 
+	
+	@Override
+	public void initFlow() {
+		//auto invoke in flow prepare
+	}
 
 	public abstract SearcherResult Search(SearcherModel<?, ?, ?> query, String instance, SearcherHandler handler)
 			throws EFException; 

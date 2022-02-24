@@ -25,7 +25,7 @@ public class LogisticRegression extends Regression {
 	
 	public static LogisticRegression getInstance(final ConnectParams connectParams) {
 		LogisticRegression o = new LogisticRegression();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	}
 	

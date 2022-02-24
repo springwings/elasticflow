@@ -16,6 +16,7 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.model.EFState;
+import org.elasticflow.model.FlowState;
 import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.node.CPU;
 import org.elasticflow.util.Common;
@@ -70,16 +71,17 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 			if (PipeUtil.scanPosCompare(scanStamp,
 					SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq)))) {
 				SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), scanStamp);
-				//update flow status,Distributed environment synchronization status
+				//update flow status,Distributed environment synchronization status				
 				if(GlobalParam.DISTRIBUTE_RUN) {
-					EFFileUtil.createAndSave(GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder()
-							.getPipeEndStatus(instance, L1seq).toJSONString(), 
-							EFFileUtil.getInstancePath(instance)[2]);
+					Resource.FLOW_STAT.get(instance).put(FlowState.getStoreKey(L1seq), 
+							GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder()
+							.getPipeEndStatus(instance, L1seq));
 				} else {
-					EFFileUtil.createAndSave(EFMonitorUtil.getPipeEndStatus(instance, L1seq).toJSONString(), 
-							EFFileUtil.getInstancePath(instance)[2]);
+					Resource.FLOW_STAT.get(instance).put(FlowState.getStoreKey(L1seq), 
+							EFMonitorUtil.getPipeEndStatus(instance, L1seq));					
 				} 
-				
+				EFFileUtil.createAndSave(Resource.FLOW_STAT.get(instance).toJSONString(), 
+						EFFileUtil.getInstancePath(instance)[2]);
 			}
 		}
 	}
@@ -152,7 +154,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 
 	public String getNewStoreId(String contextId, String instance, String L1seq, boolean isIncrement)
 			throws EFException {
-		return (String) CPU.RUN(contextId, "Pond", "getNewStoreId", false, Common.getInstanceId(instance, L1seq),
+		return (String) CPU.RUN(contextId, "Pond", "getNewStoreId", false, Common.getInstanceRunId(instance, L1seq),
 				isIncrement);
 	}
 

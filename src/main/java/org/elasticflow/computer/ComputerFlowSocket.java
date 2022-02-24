@@ -37,9 +37,14 @@ public abstract class ComputerFlowSocket extends Flow{
 	protected ConcurrentLinkedQueue<PipeDataUnit> dataUnit = new ConcurrentLinkedQueue<>(); 
 	
 	@Override
-	public void INIT(ConnectParams connectParams) {
+	public void initConn(ConnectParams connectParams) {
 		this.connectParams = connectParams; 
 	}  
+	
+	@Override
+	public void initFlow() {
+		//auto invoke in flow prepare
+	}
 	
 	public DataPage getDataPage() {
 		return dataPage;

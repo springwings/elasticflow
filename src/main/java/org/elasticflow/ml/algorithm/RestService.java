@@ -49,7 +49,7 @@ public class RestService extends ComputerFlowSocket {
 
 	public static RestService getInstance(final ConnectParams connectParams) {
 		RestService o = new RestService();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	}
 

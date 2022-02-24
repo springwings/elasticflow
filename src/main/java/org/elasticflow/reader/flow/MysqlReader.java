@@ -33,7 +33,7 @@ public class MysqlReader extends ReaderFlowSocket{
 
 	public static MysqlReader getInstance(final ConnectParams connectParams) {
 		MysqlReader o = new MysqlReader();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	}  
  

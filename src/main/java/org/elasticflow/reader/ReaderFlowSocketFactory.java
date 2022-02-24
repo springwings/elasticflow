@@ -38,7 +38,7 @@ public final class ReaderFlowSocketFactory implements Socket<ReaderFlowSocket> {
 		} 
 		try {					
 			Class<?> clz = Class.forName(_class_name); 
-			Method m = clz.getMethod("getInstance", ConnectParams.class);  
+			Method m = clz.getMethod("getInstance", ConnectParams.class); 
 			return (ReaderFlowSocket) m.invoke(null,connectParams);
 		}catch (Exception e) { 
 			if(readerFlowhandler!=null) {

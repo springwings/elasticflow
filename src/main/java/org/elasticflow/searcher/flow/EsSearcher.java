@@ -40,7 +40,7 @@ public final class EsSearcher extends SearcherFlowSocket {
 	 
 	public static EsSearcher getInstance(ConnectParams connectParams) {
 		EsSearcher o = new EsSearcher();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	} 
  

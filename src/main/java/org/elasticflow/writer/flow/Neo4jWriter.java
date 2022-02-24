@@ -26,7 +26,7 @@ public class Neo4jWriter extends WriterFlowSocket {
 	
 	public static Neo4jWriter getInstance(ConnectParams connectParams) {
 		Neo4jWriter o = new Neo4jWriter();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	}
 

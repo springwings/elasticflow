@@ -63,12 +63,12 @@ public class SolrWriter extends WriterFlowSocket{
 	
 	public static SolrWriter getInstance(ConnectParams connectParams) {
 		SolrWriter o = new SolrWriter();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	}
 	
 	@Override
-	public void INIT(ConnectParams connectParams) {
+	public void initConn(ConnectParams connectParams) {
 		this.connectParams = connectParams; 
 		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq());
 		this.isBatch = GlobalParam.WRITE_BATCH;

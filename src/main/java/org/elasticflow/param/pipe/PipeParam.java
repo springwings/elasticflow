@@ -21,7 +21,7 @@ public class PipeParam {
 	private int logLevel = 0;
 	private String writeTo;
 	private String customWriter;
-	private boolean writerPoolShareAlias = true;
+	private boolean writerPoolShareAlias = false;
 	private String searchFrom;
 	private String customSearcher;
 	private boolean searcherShareAlias = true;

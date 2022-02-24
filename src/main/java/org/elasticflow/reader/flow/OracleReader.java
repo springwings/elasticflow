@@ -33,7 +33,7 @@ public class OracleReader extends ReaderFlowSocket{
 
 	public static OracleReader getInstance(final ConnectParams connectParams) {
 		OracleReader o = new OracleReader();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	} 
  

@@ -29,12 +29,12 @@ public class VearchSearcher extends SearcherFlowSocket{
 
 	public static VearchSearcher getInstance(ConnectParams connectParams) {
 		VearchSearcher o = new VearchSearcher();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	}
 	
 	@Override
-	public void INIT(ConnectParams connectParams) {
+	public void initConn(ConnectParams connectParams) {
 		this.connectParams = connectParams;
 		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq());
 		this.instanceConfig = connectParams.getInstanceConfig(); 

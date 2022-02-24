@@ -64,7 +64,7 @@ public class Track extends Instruction {
 				Resource.SOCKET_CENTER.getReaderSocket(
 						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadFrom(), instance,
 						L1seq, ""),
-				Resource.SOCKET_CENTER.getComputerSocket(instance, instance, false));
+				Resource.SOCKET_CENTER.getComputerSocket(instance, L1seq,"",false));
 		return true;
 
 	}

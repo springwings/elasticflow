@@ -98,7 +98,7 @@ public class NodeConfig {
 			if (nconfig.getAlias().equals("")) {
 				nconfig.setAlias(name);
 			}
-			nconfig.setName(name);
+			nconfig.setInstanceID(name);
 			this.searchConfigMap.put(nconfig.getAlias(), nconfig);
 		}
 	}

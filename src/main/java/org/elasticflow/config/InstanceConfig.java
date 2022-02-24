@@ -31,11 +31,12 @@ import org.w3c.dom.NodeList;
  * @date 2018-10-11 15:13
  */
 public class InstanceConfig {
-
-	private String filename;
+	
 	private String alias = "";
 	private boolean status = true;
-	private String name;
+	private String configPath;
+	/**Use the configured file name**/
+	private String instanceID;
 	/**Domain configuration when data at each end is written to the virtual channel*/
 	private volatile Map<String, EFField> readFields; 
 	private volatile Map<String, EFField> writeFields; 
@@ -49,8 +50,8 @@ public class InstanceConfig {
 	private int instanceType = INSTANCE_TYPE.Blank.getVal(); 
 	private boolean hasFullJob = true;
 
-	public InstanceConfig(String fileName, int instanceType) {
-		this.filename = fileName; 
+	public InstanceConfig(String configPath, int instanceType) {
+		this.configPath = configPath; 
 		this.instanceType = instanceType;
 	}
 
@@ -64,11 +65,11 @@ public class InstanceConfig {
 		this.computeParams = new ComputerParam();
 		this.writerParams = new WriterParam();
 		loadInstanceConfig();
-		Common.LOG.info(filename + " config loaded");
+		Common.LOG.info(configPath + " config loaded");
 	}
 
 	public void reload() {
-		Common.LOG.info("starting reload " + filename);
+		Common.LOG.info("starting reload " + configPath);
 		init();
 	}  
 
@@ -149,12 +150,12 @@ public class InstanceConfig {
 		return this.alias;
 	} 
 	
-	public void setName(String name) {
-		this.name = name;
+	public void setInstanceID(String instanceID) {
+		this.instanceID = instanceID;
 	}
 
-	public String getName() {
-		return this.name;
+	public String getInstanceID() {
+		return this.instanceID;
 	} 
  
 	public boolean checkStatus() {
@@ -168,7 +169,7 @@ public class InstanceConfig {
 	private void loadInstanceConfig() {
 		InputStream in;
 		try {
-			byte[] bt = EFDataStorer.getData(this.filename,false);
+			byte[] bt = EFDataStorer.getData(this.configPath,false);
 			if (bt.length <= 0)
 				return;
 			in = new ByteArrayInputStream(bt, 0, bt.length);
@@ -205,7 +206,7 @@ public class InstanceConfig {
 				if (params!=null) {
 					parseNode(params.getElementsByTagName("param"), "pipeParam", PipeParam.class);
 				}else{
-					Common.LOG.error(this.filename+" config setting not correct");
+					Common.LOG.error(this.configPath+" file not correct");
 					return;
 				}
 				
@@ -268,7 +269,7 @@ public class InstanceConfig {
 			
 		} catch (Exception e) {
 			setStatus(false);
-			Common.LOG.error(this.filename+" configParse error,",e);
+			Common.LOG.error(this.configPath+" Parse error,",e);
 		}
 	}
 	

@@ -37,12 +37,12 @@ public class HbaseWriter extends WriterFlowSocket {
 	
 	public static HbaseWriter getInstance(ConnectParams connectParams) {
 		HbaseWriter o = new HbaseWriter();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	}
 	
 	@Override
-	public void INIT(ConnectParams connectParams) {
+	public void initConn(ConnectParams connectParams) {
 		this.connectParams = connectParams;  
 		String tableColumnFamily = connectParams.getWhp().getDefaultValue().getString(DEFAULT_KEY);
 		if (tableColumnFamily != null && tableColumnFamily.length() > 0) {

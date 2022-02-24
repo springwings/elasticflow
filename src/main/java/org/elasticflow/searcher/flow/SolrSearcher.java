@@ -47,12 +47,12 @@ public class SolrSearcher extends SearcherFlowSocket {
 
 	public static SolrSearcher getInstance(ConnectParams connectParams) {
 		SolrSearcher o = new SolrSearcher();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	}
 	
 	@Override
-	public void INIT(ConnectParams connectParams) {
+	public void initConn(ConnectParams connectParams) {
 		this.connectParams = connectParams;
 		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq());
 		this.instanceConfig = connectParams.getInstanceConfig(); 

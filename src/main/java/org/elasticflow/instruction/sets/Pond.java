@@ -70,7 +70,7 @@ public class Pond extends Instruction {
 				String storeId = String.valueOf(args[0]);
 				String keyColumn = String.valueOf(args[1]); 
 				String keyVal = String.valueOf(args[2]);
-				context.getWriter().delete(context.getInstanceConfig().getName(),storeId,keyColumn,keyVal);
+				context.getWriter().delete(context.getInstanceConfig().getInstanceID(),storeId,keyColumn,keyVal);
 			} catch (Exception e) {
 				log.error("deleteByKey Exception", e);
 				freeConn = true;
@@ -124,7 +124,7 @@ public class Pond extends Instruction {
 		}
 		String removeId = ""; 
 		String mainName,storeId; 
-		mainName = Common.getInstanceId(String.valueOf(args[0]),String.valueOf(args[1]));
+		mainName = Common.getInstanceRunId(String.valueOf(args[0]),String.valueOf(args[1]));
 		storeId = String.valueOf(args[2]); 
 		int waittime=0; 
 		if(GlobalParam.TASK_COORDER.checkFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT,STATUS.Running)) {

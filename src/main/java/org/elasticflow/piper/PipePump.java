@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.computer.handler.ComputerHandler;
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
@@ -53,15 +52,28 @@ public final class PipePump extends Instruction implements Serializable {
 	private static final long serialVersionUID = 3783841547316513634L;
 
 	private final static Logger log = LoggerFactory.getLogger("PipePump");
+	
+	private Task fullTask;
+	
+	private Task incrementTask;
+	
+	private String instanceID;
 
-	public static PipePump getInstance(ReaderFlowSocket reader, ComputerFlowSocket computer,
-			List<WriterFlowSocket> writer, InstanceConfig instanceConfig) {
-		return new PipePump(reader, computer, writer, instanceConfig);
+	public static PipePump getInstance(String instance,ReaderFlowSocket reader, ComputerFlowSocket computer,
+			List<WriterFlowSocket> writer, InstanceConfig instanceConfig,String L1seq) {
+		return new PipePump(instance,reader, computer, writer, instanceConfig,L1seq);
+	}
+	
+	public String getInstanceID() {
+		return this.instanceID;
 	}
 
-	private PipePump(ReaderFlowSocket reader, ComputerFlowSocket computer, List<WriterFlowSocket> writer,
-			InstanceConfig instanceConfig) {
+	private PipePump(String instanceID,ReaderFlowSocket reader, ComputerFlowSocket computer, List<WriterFlowSocket> writer,
+			InstanceConfig instanceConfig,String L1seq) {
 		CPU.prepare(getID(), instanceConfig, writer, reader, computer);
+		this.instanceID = instanceID;
+		fullTask = Task.getInstance(instanceID, L1seq, JOB_TYPE.FULL, instanceConfig, null);
+		incrementTask = Task.getInstance(instanceID, L1seq, JOB_TYPE.INCREMENT, instanceConfig, null);
 		try {
 			if (instanceConfig.getReadParams().getHandler() != null) {
 				try {
@@ -78,8 +90,7 @@ public final class PipePump extends Instruction implements Serializable {
 						throw new EFException(e, ELEVEL.Termination);
 					}
 				}
-			}
-			reader.setInstanceConfig(instanceConfig,END_TYPE.reader);
+			} 
 			if (computer != null) {
 				if (instanceConfig.getComputeParams().getHandler() != null) {
 					try {
@@ -98,7 +109,6 @@ public final class PipePump extends Instruction implements Serializable {
 						}
 					}
 				}
-				computer.setInstanceConfig(instanceConfig,END_TYPE.computer);
 			}
 
 			for (WriterFlowSocket wfs : writer) {
@@ -118,7 +128,6 @@ public final class PipePump extends Instruction implements Serializable {
 						}
 					}
 				}
-				wfs.setInstanceConfig(instanceConfig,END_TYPE.writer);
 			}
 
 		} catch (Exception e) {
@@ -137,26 +146,27 @@ public final class PipePump extends Instruction implements Serializable {
 	 * @param writeInSamePosition
 	 * @throws EFException
 	 */
-	public void run(String instance, String storeId, String L1seq, boolean isFull, boolean writeInSamePosition)
+	public void run(String storeId, String L1seq, boolean isFull, boolean writeInSamePosition)
 			throws EFException {
 		JOB_TYPE job_type;
-		String instanceId = Common.getInstanceId(instance, L1seq);
+		String instanceRunId = Common.getInstanceRunId(instanceID, L1seq);
 		String writeInstanceName = writeInSamePosition ? getInstanceConfig().getPipeParams().getInstanceName()
-				: instance;
+				: instanceID;
+		Task task;
 		if (isFull) {
 			job_type = JOB_TYPE.FULL;
+			task = fullTask;
 		} else {
 			job_type = JOB_TYPE.INCREMENT;
-		}
-		Task task = Task.getInstance(instanceId, instance, L1seq, job_type, getInstanceConfig(), null);
-
+			task = incrementTask;
+		}		 
 		List<String> L2seqs = getInstanceConfig().getReadParams().getL2Seq().size() > 0
 				? getInstanceConfig().getReadParams().getL2Seq()
 				: Arrays.asList("");
-		GlobalParam.TASK_COORDER.setFlowInfo(instance, job_type.name(), instanceId + " L2seqs nums",
+		GlobalParam.TASK_COORDER.setFlowInfo(instanceID, job_type.name(), instanceRunId + " L2seqs nums",
 				String.valueOf(L2seqs.size()));
-		processFlow(task, instance, storeId, L2seqs, writeInstanceName, writeInSamePosition);
-		GlobalParam.TASK_COORDER.resetFlowInfo(instance, job_type.name());
+		processFlow(task, storeId, L2seqs, writeInstanceName, writeInSamePosition);
+		GlobalParam.TASK_COORDER.resetFlowInfo(instanceID, job_type.name());
 		if (isFull) {
 			if (writeInSamePosition) {
 				String destination = getInstanceConfig().getPipeParams().getInstanceName();
@@ -164,15 +174,15 @@ public final class PipePump extends Instruction implements Serializable {
 					String remainJobs = GlobalParam.TASK_COORDER
 							.getFlowInfo(destination, GlobalParam.JOB_TYPE.MASTER.name())
 							.get(GlobalParam.FLOWINFO.FULL_JOBS.name());
-					remainJobs = remainJobs.replace(instance, "").trim();
+					remainJobs = remainJobs.replace(instanceID, "").trim();
 					GlobalParam.TASK_COORDER.setFlowInfo(destination, GlobalParam.JOB_TYPE.MASTER.name(),
 							GlobalParam.FLOWINFO.FULL_JOBS.name(), remainJobs);
 					if (remainJobs.length() == 0) {
-						CPU.RUN(getID(), "Pond", "switchInstance", true, instance, L1seq, storeId);
+						CPU.RUN(getID(), "Pond", "switchInstance", true, instanceID, L1seq, storeId);
 					}
 				}
 			} else {
-				CPU.RUN(getID(), "Pond", "switchInstance", true, instance, L1seq, storeId);
+				CPU.RUN(getID(), "Pond", "switchInstance", true, instanceID, L1seq, storeId);
 			}
 		}
 	}
@@ -208,7 +218,7 @@ public final class PipePump extends Instruction implements Serializable {
 	 * @param masterControl
 	 * @throws EFException
 	 */
-	private void processFlow(Task task, String instance, String storeId, List<String> L2seqs, String writeInstanceName,
+	private void processFlow(Task task, String storeId, List<String> L2seqs, String writeInstanceName,
 			boolean writeInSamePosition) throws EFException {
 		for (String L2seq : L2seqs) {
 			try {
@@ -225,7 +235,7 @@ public final class PipePump extends Instruction implements Serializable {
 						getWriter().PREPARE(false, false);
 						if (getWriter().ISLINK()) {
 							try {
-								getWriter().removeInstance(instance, storeId);
+								getWriter().removeInstance(instanceID, storeId);
 							} finally {
 								getWriter().REALEASE(false, false);
 							}
@@ -236,9 +246,9 @@ public final class PipePump extends Instruction implements Serializable {
 				if (e.getErrorType().equals(ETYPE.WRITE_POS_NOT_FOUND)) {
 					throw e;
 				} else {
-					log.error("[" + task.getJobType().name() + " " + instance + L2seq + "_" + storeId + " ERROR]", e);
+					log.error("[" + task.getJobType().name() + " " + instanceID + L2seq + "_" + storeId + " ERROR]", e);
 					Resource.mailSender.sendHtmlMailBySynchronizationMode(" [EFLOWS] " + GlobalParam.RUN_ENV,
-							"Job " + instance + " " + task.getJobType().name() + " Has stopped!");
+							"Job " + instanceID + " " + task.getJobType().name() + " Has stopped!");
 				}
 				Common.processErrorLevel(e);
 			}
@@ -247,11 +257,11 @@ public final class PipePump extends Instruction implements Serializable {
 
 	private void processListsPages(Task task, String writeInstanceName, ConcurrentLinkedDeque<String> pageList,
 			String storeId) throws EFException {
-		String instanceId = Common.getInstanceId(task.getInstance(), task.getL1seq());
+		String instanceRunId = Common.getInstanceRunId(task.getInstance(), task.getL1seq());
 		int pageNum = pageList.size();
 		if (pageNum == 0) {
 			if (task.getInstanceConfig().getPipeParams().getLogLevel() == 0)
-				log.info(Common.formatLog("start", task.getJobType().name(), instanceId, storeId, task.getL2seq(), 0,
+				log.info(Common.formatLog("start", task.getJobType().name(), instanceRunId, storeId, task.getL2seq(), 0,
 						"", GlobalParam.TASK_COORDER.getLSeqPos(task.getInstance(), task.getL1seq(), task.getL2seq()),
 						0, " no data!"));
 		} else {
@@ -259,7 +269,7 @@ public final class PipePump extends Instruction implements Serializable {
 				log.info(Common.formatLog("start",
 						(getInstanceConfig().getPipeParams().isMultiThread() ? "MultiThread" : "SingleThread") + " "
 								+ task.getJobType().name(),
-						instanceId, storeId, task.getL1seq(), 0, "",
+								instanceRunId, storeId, task.getL2seq(), 0, "",
 						GlobalParam.TASK_COORDER.getLSeqPos(task.getInstance(), task.getL1seq(), task.getL2seq()), 0,
 						",totalpage:" + pageNum));
 
@@ -280,7 +290,7 @@ public final class PipePump extends Instruction implements Serializable {
 				currentThreadRun(task, storeId, pageList, writeInstanceName, total);
 			}
 			if (task.getInstanceConfig().getPipeParams().getLogLevel() < 2)
-				log.info(Common.formatLog("complete", task.getJobType().name(), instanceId, storeId, task.getL2seq(),
+				log.info(Common.formatLog("complete", task.getJobType().name(), instanceRunId, storeId, task.getL2seq(),
 						total.get(), "",
 						GlobalParam.TASK_COORDER.getLSeqPos(task.getInstance(), task.getL1seq(), task.getL2seq()),
 						Common.getNow() - start, ""));
@@ -329,12 +339,13 @@ public final class PipePump extends Instruction implements Serializable {
 					String scanStamp = pagedata.getScanStamp();
 					pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(), task.getJobType().name(),
 							writeInstanceName, pagedata);
-					log.info(Common.formatLog("onepage", task.getJobType().name() + " Compute", writeInstanceName,
+					log.info(Common.formatLog("onepage", task.getJobType().name() + " Compute", 
+							task.getId(),
 							storeId, task.getL2seq(), dataSize, datab, scanStamp, Common.getNow() - start,
 							",process:" + processPos + "/" + pageNum));
 				}
 				rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
-						writeInstanceName, storeId, task.getL2seq(), pagedata,
+						writeInstanceName, storeId, task, pagedata,
 						",L1seq:" + task.getL1seq() + ",process:" + processPos + "/" + pageNum, isupdate, false);
 				if (rState.isStatus() == false)
 					throw new EFException("writeDataSet data exception!");
@@ -456,11 +467,11 @@ public final class PipePump extends Instruction implements Serializable {
 							pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(),
 									task.getJobType().name(), writeInstanceName, pagedata);
 							log.info(Common.formatLog("onepage", task.getJobType().name() + " Compute",
-									writeInstanceName, storeId, task.getL2seq(), dataSize, datab, scanStamp,
+									task.getId(), storeId, task.getL2seq(), dataSize, datab, scanStamp,
 									Common.getNow() - start, ",process:" + processPos + "/" + pageNum));
 						}
 						rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
-								writeInstanceName, storeId, task.getL2seq(), pagedata,
+								task.getId(), storeId, task, pagedata,
 								",L1seq:" + task.getL1seq() + ",process:" + processPos + "/" + pageNum, this.isUpdate,
 								false);
 					} catch (EFException e) {

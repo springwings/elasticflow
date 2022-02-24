@@ -2,10 +2,8 @@ package org.elasticflow.model;
 
 import java.util.HashMap;
 
-import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.EFFileUtil;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -41,22 +39,39 @@ final public class FlowState {
 	private long flowStartTime = Common.getNow();
 	
 	private HashMap<String, Object> flowEndStatus;
-		
-	private END_TYPE endType;
 	
 	private String todayZero = String.valueOf(Common.getNowZero());
-
-	public FlowState(String path,END_TYPE endType) {
-		String content = EFFileUtil.readText(path, GlobalParam.ENCODING, true);
-		this.endType = endType; 
-		if (content!=null && content.length()>0) {			
-			JSONObject flowStoreStatus = JSONObject.parseObject(content);	
-			if(flowStoreStatus.containsKey(this.endType.name())) {
-				JSONObject JO = flowStoreStatus.getJSONObject(this.endType.name());
-				this.totalProcess = JO.getLong("totalProcess");
-				this.flowStartTime = JO.getLong("flowStartTime");
-				this.historyProcess = JO.getJSONObject("historyProcess");					
-			}
+	
+	public static String getStoreKey(String L1seq) {
+		String storeKey;
+		if(L1seq!=null && L1seq.length()>0) {
+			storeKey = L1seq; 
+		}else {
+			storeKey = "__"; 
+		} 
+		return storeKey;
+	}
+	
+	/**
+	 * example
+	 * {
+	 *   "seq":{"reader":{},"computer":{}},
+	 *   "__":{"reader":{},"computer":{}},
+	 * }
+	 * @param stat
+	 * @param endType
+	 * @param L1seq
+	 */
+	public FlowState(JSONObject stat,END_TYPE endType,String L1seq) {
+		String storeKey = getStoreKey(L1seq);
+		if(stat.containsKey(storeKey)) {
+			JSONObject JO = stat.getJSONObject(storeKey);
+			if(JO.containsKey(endType.name())) {
+				JSONObject _JO = JO.getJSONObject(endType.name());
+				this.totalProcess = _JO.getLong("totalProcess");
+				this.flowStartTime = _JO.getLong("flowStartTime");
+				this.historyProcess = _JO.getJSONObject("historyProcess");	
+			}							
 		}
 		this.flowEndStatus = toHashObject();
 		if(this.historyProcess == null)

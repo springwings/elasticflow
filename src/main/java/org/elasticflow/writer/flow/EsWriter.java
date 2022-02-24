@@ -67,7 +67,7 @@ public class EsWriter extends WriterFlowSocket {
 
 	public static EsWriter getInstance(ConnectParams connectParams) {
 		EsWriter o = new EsWriter();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	}
 

@@ -28,7 +28,7 @@ public class FilesReader extends ReaderFlowSocket {
 
 	public static FilesReader getInstance(ConnectParams connectParams) {
 		FilesReader o = new FilesReader();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	}
 

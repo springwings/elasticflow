@@ -139,7 +139,7 @@ public class HttpReaderService {
 							try {
 								String writeTo = pipePump.getInstanceConfig().getPipeParams().getInstanceName();
 								if (writeTo == null) {
-									writeTo = Common.getInstanceId(instance, seq);
+									writeTo = Common.getInstanceRunId(instance, seq);
 								}
 								DataPage pagedata = this.getPageData(RR.getParam("data"), keycolumn, updatecolumn,
 										pipePump.getInstanceConfig().getWriteFields());
@@ -191,7 +191,7 @@ public class HttpReaderService {
 								CPU.RUN(pipePump.getID(), "Pond", "createStorePosition", true, instance, storeid);
 							}
 							CPU.RUN(pipePump.getID(), "Pond", "switchInstance", true, instance, seq, storeid);
-							pipePump.run(instance, storeid, seq, true,
+							pipePump.run(storeid, seq, true,
 									pipePump.getInstanceConfig().getPipeParams().getInstanceName() == null ? false
 											: true);
 						} else {

@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.computer.ComputerFlowSocketFactory;
 import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.piper.PipePump;
@@ -77,13 +78,13 @@ public final class SocketCenter {
 					wfs.add(getWriterSocket(dest, instance, L1seq, tag));
 				}
 				PipePump pipePump = PipePump
-						.getInstance(
+						.getInstance(instance,
 								getReaderSocket(Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
 										.getReadFrom(), instance, L1seq, tag),
 								(Resource.nodeConfig.getInstanceConfigs().get(instance).openCompute()
-										? getComputerSocket(instance, tags, needReset)
+										? getComputerSocket(instance, L1seq, tag, needReset)
 										: null),
-								wfs, Resource.nodeConfig.getInstanceConfigs().get(instance));
+								wfs, Resource.nodeConfig.getInstanceConfigs().get(instance),L1seq);
 				pipePumpMap.put(tags, pipePump);
 			}
 			return pipePumpMap.get(tags);
@@ -149,32 +150,27 @@ public final class SocketCenter {
 								null),
 						L1seq,
 						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getCustomReader()));
+				readerSocketMap.get(tags).prepareFlow(Resource.nodeConfig.getInstanceConfigs().get(instance),END_TYPE.reader,L1seq);
 			}
 			return readerSocketMap.get(tags);
 		}
 	}
 
-	public ComputerFlowSocket getComputerSocket(String instance, String tag, boolean reload) {
+	public ComputerFlowSocket getComputerSocket(String instance, String L1seq, String tag, boolean reload) {
+		String tags = Common.getResourceTag(instance, L1seq, tag, false);
 		synchronized (computerSocketMap) {
-			if (reload || !computerSocketMap.containsKey(instance)) {
-				computerSocketMap.put(instance, ComputerFlowSocketFactory.getInstance(ConnectParams.getInstance(null,
+			if (reload || !computerSocketMap.containsKey(tags)) {
+				computerSocketMap.put(tags, ComputerFlowSocketFactory.getInstance(ConnectParams.getInstance(null,
 						null, Resource.nodeConfig.getInstanceConfigs().get(instance), null)));
+				computerSocketMap.get(tags).prepareFlow(Resource.nodeConfig.getInstanceConfigs().get(instance),END_TYPE.computer,L1seq);
 			}
 		}
-		return computerSocketMap.get(instance);
+		return computerSocketMap.get(tags);
 	}
 
 	public WriterFlowSocket getWriterSocket(String resourceName, String instance, String L1seq, String tag) {
-		synchronized (writerSocketMap) {
-			boolean ignoreSeqUseAlias = false;
-			if (Resource.nodeConfig.getInstanceConfigs().get(instance) != null)
-				ignoreSeqUseAlias = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
-						.isWriterPoolShareAlias();
-			String tagInstance = instance;
-			if (ignoreSeqUseAlias)
-				tagInstance = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
-			String tags = Common.getResourceTag(tagInstance, L1seq, tag, ignoreSeqUseAlias);
-
+		synchronized (writerSocketMap) { 
+			String tags = Common.getResourceTag(instance, L1seq, tag, false);
 			if (!writerSocketMap.containsKey(tags)) {
 				WarehouseParam whp = getWHP(resourceName);
 				if (whp == null) {
@@ -186,6 +182,7 @@ public final class SocketCenter {
 								null),
 						L1seq,
 						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getCustomWriter()));
+				writerSocketMap.get(tags).prepareFlow(Resource.nodeConfig.getInstanceConfigs().get(instance),END_TYPE.writer,L1seq);
 			}
 			return writerSocketMap.get(tags);
 		}

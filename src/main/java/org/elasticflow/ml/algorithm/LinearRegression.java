@@ -23,7 +23,7 @@ public class LinearRegression extends Regression {
 	 
 	public static LinearRegression getInstance(final ConnectParams connectParams) {
 		LinearRegression o = new LinearRegression();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		return o;
 	}
   
@@ -119,7 +119,7 @@ public class LinearRegression extends Regression {
 	}
 
 	@Override
-	public void INIT(ConnectParams connectParams) {
+	public void initConn(ConnectParams connectParams) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -45,11 +45,10 @@ public class KafkaReader extends ReaderFlowSocket {
 	private final static Logger log = LoggerFactory.getLogger(KafkaReader.class);
 	
 	private KafkaConsumer<String, String> conn = null;
-	
-	
+		
 	public static KafkaReader getInstance(final ConnectParams connectParams) {
 		KafkaReader o = new KafkaReader();
-		o.INIT(connectParams);
+		o.initConn(connectParams);
 		if(connectParams.getWhp().getCustomParams()!=null) {
 			if(connectParams.getWhp().getCustomParams().containsKey("max.poll.interval.ms"))
 				o.readms = connectParams.getWhp().getCustomParams().getIntValue("max.poll.interval.ms");
@@ -60,16 +59,16 @@ public class KafkaReader extends ReaderFlowSocket {
 				}
 			} 
 		}  
-		o.initconn();
 		return o;
-	}
+	} 
 	
 	@SuppressWarnings("unchecked")
-	private void initconn() {
+	@Override
+	public void initFlow() {
 		PREPARE(true, false);
 		this.conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader);
 	}
-
+	 
 	@Override
 	public DataPage getPageData(final Page page, int pageSize) {
 		if (this.records == null) {
@@ -118,7 +117,7 @@ public class KafkaReader extends ReaderFlowSocket {
 			releaseConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS, false);
 			REALEASE(false, releaseConn);
-			this.initconn();
+			this.initFlow();
 			log.error("get Page Data Exception so free connection,details ", e);
 		}  
 		return this.dataPage;
@@ -161,9 +160,10 @@ public class KafkaReader extends ReaderFlowSocket {
 			releaseConn = true;
 			page.clear();
 			REALEASE(false, releaseConn);
-			this.initconn();
+			this.initFlow();
 			log.error("Error in getting Kafka data, the connection will be cleared automatically.", e);
 		}  
 		return page;
 	}
+
 }

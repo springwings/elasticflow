@@ -40,11 +40,16 @@ public abstract class WriterFlowSocket extends Flow{
 	protected Boolean isBatch = true;   
 	
 	@Override
-	public void INIT(ConnectParams connectParams) {
+	public void initConn(ConnectParams connectParams) {
 		this.connectParams = connectParams;
 		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq());
 		this.isBatch = GlobalParam.WRITE_BATCH; 
 	}    
+	
+	@Override
+	public void initFlow() {
+		//auto invoke in flow prepare
+	}
 	
 	public void setWriteHandler(WriterHandler writeHandler) {
 		this.writeHandler = writeHandler;

@@ -225,7 +225,7 @@ public class EFMonitorUtil {
 		res.put("status", "offline");
 		if(pipePump!=null) {
 			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
-			if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
+			if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) { 
 				res.put(END_TYPE.reader.name(), pipePump.getReader().flowState.get());
 				res.put(END_TYPE.writer.name(), pipePump.getWriter().flowState.get());
 			}		
@@ -299,9 +299,9 @@ public class EFMonitorUtil {
 					}
 					JSONObject tmp;
 					if(GlobalParam.DISTRIBUTE_RUN) {
-						tmp = GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder().getPipeEndStatus(config.getName(), L1seq);						
+						tmp = GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder().getPipeEndStatus(config.getInstanceID(), L1seq);						
 					} else {
-						tmp = getPipeEndStatus(config.getName(), L1seq);
+						tmp = getPipeEndStatus(config.getInstanceID(), L1seq);
 					} 
 					Searcher.put(appendPipe + "FlowState", tmp.get(END_TYPE.searcher.name()));
 					Reader.put(appendPipe + "FlowState", tmp.get(END_TYPE.reader.name()));
@@ -392,7 +392,7 @@ public class EFMonitorUtil {
 			}
 			JO.put("Reader", Reader);
 			JO.put("Computer", Computer);
-			JO.put("Writer", Writer);
+			JO.put("Writer", Writer); 
 			JO.put("Searcher", Searcher);
 			JO.put("Task", Task);
 			JO.put("NodeInfo", nodeInfo);
