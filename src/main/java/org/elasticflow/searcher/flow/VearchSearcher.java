@@ -3,6 +3,7 @@ package org.elasticflow.searcher.flow;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.connection.VearchConnector;
@@ -18,8 +19,8 @@ import org.elasticflow.util.EFException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 public class VearchSearcher extends SearcherFlowSocket{
 		
@@ -61,22 +62,21 @@ public class VearchSearcher extends SearcherFlowSocket{
 			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.searcher);  
 			JSONObject qu = new JSONObject();
 			qu.put("size", query.getCount());
-			qu.put("query", JSONObject.fromObject(query.getFq()));
+			qu.put("query", JSONObject.parse(query.getFq()));
 			qu.put("fields", query.getFl().split(","));
 			JSONObject JO = conn.search(table, qu.toString());
 			if(JO.getJSONObject("hits").containsKey("total")) {
 				List<ResponseDataUnit> unitSet = new ArrayList<ResponseDataUnit>();
-				int total = JO.getJSONObject("hits").getInt("total");
+				int total = JO.getJSONObject("hits").getIntValue("total");
 				if(total>0) {
 					JSONArray hits = JO.getJSONObject("hits").getJSONArray("hits");
 					for(int i=0;i<hits.size();i++) {
 						ResponseDataUnit rn = ResponseDataUnit.getInstance();
-						JSONObject row = hits.getJSONObject(i).getJSONObject("_source");
-						@SuppressWarnings("unchecked")
-						Iterator<String> it = row.keys();
+						JSONObject row = hits.getJSONObject(i).getJSONObject("_source"); 
+						Iterator<Entry<String, Object>> it = row.entrySet().iterator();
 						while (it.hasNext()) {
-							String k = it.next();
-							rn.addObject(k, row.get(k));
+							Entry<String, Object> entry = it.next();
+							rn.addObject(entry.getKey(), entry.getValue());
 				        } 
 						rn.addObject("_score", hits.getJSONObject(i).get("_score"));
 						unitSet.add(rn);

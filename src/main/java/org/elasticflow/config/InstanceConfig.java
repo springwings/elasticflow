@@ -41,7 +41,6 @@ public class InstanceConfig {
 	private volatile Map<String, EFField> readFields; 
 	private volatile Map<String, EFField> writeFields; 
 	private volatile Map<String, EFField> computeFields;
-	private volatile Map<String, String> externConfigs;
 	private volatile Map<String,SearcherParam> searcherParams;
 	private volatile WriterParam writerParams;
 	private volatile PipeParam pipeParams;
@@ -61,7 +60,6 @@ public class InstanceConfig {
 		this.computeFields = new HashMap<>();
 		this.readFields = new HashMap<>();
 		this.searcherParams = new HashMap<>();
-		this.externConfigs = new HashMap<>();
 		this.computeParams = new ComputerParam();
 		this.writerParams = new WriterParam();
 		loadInstanceConfig();
@@ -97,10 +95,6 @@ public class InstanceConfig {
 		return this.pipeParams;
 	}
 	 
-	public Map<String, String> getExternConfigs() {
-		return this.externConfigs;
-	} 
-	
 	public Map<String, EFField> getWriteFields() {
 		return this.writeFields;
 	}
@@ -229,12 +223,6 @@ public class InstanceConfig {
 					}					
 				} 
 				
-				params = (Element) dataflow.getElementsByTagName("ExternConfig").item(0);
-				if(params!=null) { 
-					parseNode(params.getElementsByTagName("param"), "common",
-							String.class);
-				} 
-				
 				params = (Element) dataflow.getElementsByTagName("ComputeParam").item(0);   
 				if (params!=null) {
 					parseNode(params.getElementsByTagName("param"), "computeParam", ComputerParam.class);
@@ -301,9 +289,6 @@ public class InstanceConfig {
 						break;
 					case "pipeParam":
 						Common.getXmlParam(pipeParams, param, c);  
-						break; 
-					case "common": 
-						Common.getXmlParam(externConfigs, param, c);
 						break; 
 					case "readParam": 
 						Common.getXmlParam(readParams, param, c);

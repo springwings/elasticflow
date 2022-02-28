@@ -23,6 +23,8 @@ public class WriterParam {
 		unique key update single record
 	*/
 	private String keyType;
+	/**Storage structure, such as table structure, index instance parameters**/
+	private JSONObject storageStructure;
 	/**user define field,pass custom value**/
 	private JSONObject customParams;
 	/** dsl parse method  normal/condition**/
@@ -41,6 +43,10 @@ public class WriterParam {
 	public JSONObject getCustomParams() {
 		return customParams;
 	}
+	
+	public JSONObject getStorageStructure() {
+		return storageStructure;
+	}	
 
 	public String getDslParse() {
 		return dslParse;
@@ -61,6 +67,11 @@ public class WriterParam {
 		case "customParams":
 			if(v!=null) {
 				wp.customParams = JSONObject.parseObject(v);
+			}	
+			break;
+		case "storageStructure":
+			if(v!=null) {
+				wp.storageStructure = JSONObject.parseObject(v);
 			}	
 			break;
 		case "dslparse":

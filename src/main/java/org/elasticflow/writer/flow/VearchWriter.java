@@ -18,7 +18,7 @@ import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.sf.json.JSONObject;
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * Vearch Flow Writer Manager
@@ -218,37 +218,43 @@ public class VearchWriter extends WriterFlowSocket {
 	}
 	
 	
-	private JSONObject getTableMeta(String tableName,InstanceConfig instanceConfig) {
+	private JSONObject getTableMeta(String tableName,InstanceConfig instanceConfig) {		
 		JSONObject tableMeta = new JSONObject();
-		tableMeta.put("name", tableName);
-		tableMeta.put("partition_num", 1);
-		tableMeta.put("replica_num", 1);
-		
-		JSONObject engine = new JSONObject();
-		engine.put("name","gamma");
-		engine.put("index_size",200000);
-		engine.put("id_type","String");
-		engine.put("retrieval_type","IVFPQ");
-		
-		JSONObject retrieval_param = new JSONObject();
-		retrieval_param.put("metric_type","L2");
-		retrieval_param.put("ncentroids",2048);
-		retrieval_param.put("nsubvector",32);
-		engine.put("retrieval_param",retrieval_param);
-		
-		tableMeta.put("engine", engine);
+		if(instanceConfig.getWriterParams().getStorageStructure() != null && 
+				instanceConfig.getWriterParams().getStorageStructure().size()>0) {
+			tableMeta = instanceConfig.getWriterParams().getStorageStructure();
+			tableMeta.put("name", tableName);
+		}else {			
+			tableMeta.put("name", tableName);
+			tableMeta.put("partition_num", 1);
+			tableMeta.put("replica_num", 1);
+			
+			JSONObject engine = new JSONObject();
+			engine.put("name","gamma");
+			engine.put("index_size",200000);
+			engine.put("id_type","String");
+			engine.put("retrieval_type","IVFPQ");
+			
+			JSONObject retrieval_param = new JSONObject();
+			retrieval_param.put("metric_type","L2");
+			retrieval_param.put("ncentroids",2048);
+			retrieval_param.put("nsubvector",32);
+			engine.put("retrieval_param",retrieval_param);
+			
+			tableMeta.put("engine", engine);			
+		}
 		JSONObject properties = new JSONObject();
 		Map<String, EFField> writefields = instanceConfig.getWriteFields();
 		for (Map.Entry<String, EFField> entry : writefields.entrySet()) {
 			if(entry.getValue().getDsl()!=null) {
-				properties.put(entry.getKey(),entry.getValue().getDsl());
+				properties.put(entry.getKey(),JSONObject.parse(entry.getValue().getDsl()));
 			}else { 
-				StringBuilder sb = new StringBuilder();
-				sb.append("\"type\":\""+entry.getValue().getIndextype()+"\"");
+				JSONObject fields = new JSONObject();
+				fields.put("type", entry.getValue().getIndextype());
 				if(entry.getValue().getIndexed().equals("true")) {
-					sb.append(",\"index\":true");
+					fields.put("index", true);
 				}
-				properties.put(entry.getKey(),"{"+sb.toString()+"}");
+				properties.put(entry.getKey(),fields);
 			}			
 		} 
 		tableMeta.put("properties", properties);

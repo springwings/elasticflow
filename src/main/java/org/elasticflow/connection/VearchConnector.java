@@ -19,8 +19,8 @@ import org.elasticflow.util.EFHttpClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * Vector retrieval system vearch Writer Manager
@@ -62,7 +62,7 @@ public class VearchConnector {
 			String response = EFHttpClientUtil.process(
 					this.method + this.MASTER + "/space/" + this.dbName + "/" + space, HttpDelete.METHOD_NAME,
 					EFHttpClientUtil.DEFAULT_CONTENT_TYPE);
-			JSONObject jr = JSONObject.fromObject(response);
+			JSONObject jr = JSONObject.parseObject(response);
 			if (Integer.valueOf(String.valueOf(jr.get("code"))) == 200) {
 				return true;
 			} else {
@@ -78,7 +78,7 @@ public class VearchConnector {
 		try {
 			String response = EFHttpClientUtil.process(this.method + this.MASTER + "/list/space?db=" + this.dbName,
 					HttpGet.METHOD_NAME, EFHttpClientUtil.DEFAULT_CONTENT_TYPE);
-			JSONObject jr = JSONObject.fromObject(response);
+			JSONObject jr = JSONObject.parseObject(response);
 			if (Integer.valueOf(String.valueOf(jr.get("code"))) == 200) {
 				JSONArray jArray = jr.getJSONArray("data");
 				for (int i = 0; i < jArray.size(); i++) {
@@ -97,7 +97,7 @@ public class VearchConnector {
 		try {
 			String response = EFHttpClientUtil.process(this.method + this.MASTER + "/space/" + this.dbName + "/_create",
 					tableMeta.toString(), HttpPut.METHOD_NAME, EFHttpClientUtil.DEFAULT_CONTENT_TYPE, 3000);
-			JSONObject jr = JSONObject.fromObject(response);
+			JSONObject jr = JSONObject.parseObject(response);
 			if (Integer.valueOf(String.valueOf(jr.get("code"))) == 200)
 				return true;
 			else if (Integer.valueOf(String.valueOf(jr.get("code"))) == 564) {
@@ -115,7 +115,7 @@ public class VearchConnector {
 	public void writeSingle(String table, JSONObject datas) throws Exception {
 		String response = EFHttpClientUtil.process(this.method + this.ROOTER + "/" + this.dbName + "/" + table,
 				datas.toString());
-		JSONObject jr = JSONObject.fromObject(response);
+		JSONObject jr = JSONObject.parseObject(response);
 		if (Integer.valueOf(String.valueOf(jr.get("status"))) == 200)
 			return;
 		else {
@@ -144,7 +144,7 @@ public class VearchConnector {
 				HttpPost.METHOD_NAME,
 				EFHttpClientUtil.DEFAULT_CONTENT_TYPE,
 				query); 
-		return JSONObject.fromObject(response);	 
+		return JSONObject.parseObject(response);	 
 	}
 
 	public void writeBatch(String table, CopyOnWriteArrayList<Object> datas) throws Exception {
@@ -172,13 +172,13 @@ public class VearchConnector {
         }
 		JSONArray ja;
 		if(sb.substring(0, 1).equals("[")) {
-			ja = JSONArray.fromObject(sb.toString());
+			ja = JSONArray.parseArray(sb.toString());
 		}else {
-			ja = JSONArray.fromObject("["+sb.toString()+"]");
+			ja = JSONArray.parseArray("["+sb.toString()+"]");
 		}
 		
 		for (int j = 0; j < ja.size(); j++) {
-			JSONObject jo = JSONObject.fromObject(ja.get(j));
+			JSONObject jo = JSONObject.parseObject(ja.getString(j));
 			if (Integer.valueOf(String.valueOf(jo.get("status"))) != 200)
 				throw new EFException("write data Exception," + jo.get("error"));
 		}
@@ -192,9 +192,8 @@ public class VearchConnector {
 		try {
 			String response = EFHttpClientUtil.process(this.method + this.MASTER + listDb, HttpGet.METHOD_NAME,
 					EFHttpClientUtil.DEFAULT_CONTENT_TYPE);
-			JSONObject jr = JSONObject.fromObject(response);
-			JSONArray jsonArr = JSONArray.fromObject(jr.get("data"));
-			@SuppressWarnings("unchecked")
+			JSONObject jr = JSONObject.parseObject(response);
+			JSONArray jsonArr = JSONArray.parseArray(jr.getString("data"));
 			Iterator<Object> it = jsonArr.iterator();
 			while (it.hasNext()) {
 				JSONObject jsonObj = (JSONObject) it.next();
