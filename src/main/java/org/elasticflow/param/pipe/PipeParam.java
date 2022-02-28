@@ -19,6 +19,8 @@ import org.elasticflow.config.GlobalParam.MECHANISM;
 public class PipeParam { 
 	private int readPageSize = GlobalParam.READ_PAGE_SIZE;
 	private int logLevel = 0;
+	private int failFreq = 5;
+	private int maxFailTime = 100;
 	private String writeTo;
 	private String customWriter;
 	private boolean writerPoolShareAlias = false;
@@ -70,6 +72,14 @@ public class PipeParam {
 	
 	public int getLogLevel() {
 		return logLevel;
+	}
+	
+	public int getFailFreq() {
+		return failFreq;
+	}
+	
+	public int getMaxFailTime() {
+		return maxFailTime;
 	}
 	
 	public boolean showInfoLog() {
@@ -127,6 +137,14 @@ public class PipeParam {
 	
 	public void setLogLevel(String logLevel) {
 		this.logLevel = Integer.valueOf(logLevel);
+	}
+	
+	public void setFailFreq(String failFreq) {
+		this.failFreq = Integer.valueOf(failFreq);
+	}
+	
+	public void setMaxFailTime(String maxFailTime) {
+		this.maxFailTime = Integer.valueOf(maxFailTime);
 	}
 	
 	public void setPriority(String priority) {

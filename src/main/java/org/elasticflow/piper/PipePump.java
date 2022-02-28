@@ -243,7 +243,7 @@ public final class PipePump extends Instruction implements Serializable {
 						}
 					}
 				}
-				if (e.getErrorType().equals(ETYPE.WRITE_POS_NOT_FOUND)) {
+				if (e.getErrorType()==ETYPE.WRITE_POS_NOT_FOUND || e.getErrorType()==ETYPE.EXTINTERRUPT) {
 					throw e;
 				} else {
 					log.error("[" + task.getJobType().name() + " " + instanceID + L2seq + "_" + storeId + " ERROR]", e);

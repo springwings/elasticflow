@@ -135,7 +135,7 @@ public final class GlobalParam {
 		FULL_STATE,FULL_STOREID,INCRE_STOREID,FULL_JOBS
 	} 
 	
-	public final static String DEFAULT_SEQ = "_DFAUTL";
+	public final static String DEFAULT_SEQ = "__";
 	public final static String JOB_INCREMENTINFO_PATH = "batch";  
 	public final static String JOB_FULLINFO_PATH = "full_info"; 
 	

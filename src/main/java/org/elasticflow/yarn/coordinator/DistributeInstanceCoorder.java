@@ -234,11 +234,10 @@ public class DistributeInstanceCoorder {
 	private void rebalanceOnNodeLeave(Queue<String> bindInstances) {
 		synchronized (nodes) {
 			int newAvgNum = avgInstanceNum();
-			Common.LOG.info("node leave, start rebalance on {} nodes,avgInstanceNum {}.", nodes.size(),newAvgNum);
+			Common.LOG.info("NodeLeave,start rebalance on {} nodes,avgInstanceNum {}...", nodes.size(),newAvgNum);
 			int addNums = newAvgNum - this.avgInstanceNum;
 			if (addNums == 0)
-				addNums = 1;
-			Common.LOG.info("start NodeLeave distributing instance task.");
+				addNums = 1; 
 			while (!bindInstances.isEmpty()) {
 				for (EFNode node : nodes) {
 					node.pushInstance(bindInstances.poll(),true);
@@ -247,14 +246,14 @@ public class DistributeInstanceCoorder {
 				}
 			}
 			this.avgInstanceNum = newAvgNum; 
-			Common.LOG.info("finish NodeLeave distributing instance task.");
+			Common.LOG.info("NodeLeave,finish rebalance instance!");
 		}
 	}
  
 	private void rebalanceOnNewNodeJoin(Queue<String> idleInstances) {
 		synchronized (nodes) {
 			this.avgInstanceNum = avgInstanceNum();
-			Common.LOG.info("node join, start rebalance on {} nodes, avgInstanceNum {}.", nodes.size(),avgInstanceNum);		
+			Common.LOG.info("NewNodeJoin,start rebalance on {} nodes, avgInstanceNum {}...", nodes.size(),avgInstanceNum);		
 			ArrayList<EFNode> addInstanceNodes = new ArrayList<>();
 			for (EFNode node : nodes) {
 				if (node.getBindInstances().size() < avgInstanceNum) {
@@ -266,7 +265,6 @@ public class DistributeInstanceCoorder {
 				}
 			}
 			// re-balance nodes
-			Common.LOG.info("start NewNodeJoin distributing instance task.");
 			for (EFNode node : addInstanceNodes) {
 				if (idleInstances.isEmpty())
 					break;
@@ -275,13 +273,13 @@ public class DistributeInstanceCoorder {
 				}
 			} 
 		}
-		Common.LOG.info("finish NewNodeJoin distributing instance task.");
+		Common.LOG.info("NewNodeJoin,finish rebalance instance!");
 	}
 
 	private void rebalanceOnStart() {
 		synchronized (nodes) {
 			String[] instances = GlobalParam.StartConfig.getProperty("instances").split(",");
-			Common.LOG.info("on start,start rebalance on {} nodes,total Instance Num {}", nodes.size(),instances.length);
+			Common.LOG.info("cluster init,start rebalance on {} nodes,total Instance Num {}...", nodes.size(),instances.length);
 			for (int i = 0; i < instances.length;) {
 				for (EFNode node : nodes) {
 					String[] strs = instances[i].split(":");
@@ -297,7 +295,7 @@ public class DistributeInstanceCoorder {
 				}
 			}
 			this.avgInstanceNum = avgInstanceNum();
-			Common.LOG.info("finish OnStart distributing instance task.");
+			Common.LOG.info("cluster init,finish rebalance instance!");
 		}
 	}
 

@@ -9,6 +9,9 @@ package org.elasticflow.piper;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import org.elasticflow.model.FIFOQueue;
+import org.elasticflow.util.Common;
+
 /**
  * pipe end connect breaker control
  * When a serious error occurs, temporarily interrupt the operation
@@ -20,40 +23,55 @@ import javax.annotation.concurrent.NotThreadSafe;
 @NotThreadSafe
 public class Breaker {
 
-	private volatile long earlyFail;
-
-	private volatile long checkFail;
+	private long earlyFailTime;
 
 	private int failTimes;
 	
-	private int failSpan = 300;
+	//per-fail use time in last period
+	private int perFailTime = 200;
 	
-	private int recheckSpan = 60000;
+	//Maximum fail times
+	private int maxFailTime = 1000;
 	
-	public void init() {
+	private FIFOQueue<Long> queue = new FIFOQueue<>(6);
+	
+	private String instance;
+	
+	public void init(String instance,int failFreq,int maxFailTime) {		
+		this.instance = instance;
+		this.perFailTime = 1000/failFreq;
+		this.maxFailTime = maxFailTime;
+		this.reset();
+	}
+	
+	private void reset() {
 		this.failTimes = 0;
-		this.earlyFail = 0;
-		this.checkFail = 0;
+		this.earlyFailTime = 0;
 	}
 
 	public void log() {
-		if (this.earlyFail == 0)
-			this.earlyFail = System.currentTimeMillis();
+		if (this.earlyFailTime == 0)
+			this.earlyFailTime = System.currentTimeMillis();
+		queue.addLastSafe(System.currentTimeMillis());
 		this.failTimes++;
 	}
-
+	
+	public long failInterval() {
+		if(queue.size()>3) {
+			return queue.getLast() - queue.getFirst();
+		}else {
+			return Integer.MAX_VALUE;
+		}		
+	}
+	
 	public boolean isOn() {
 		long current = System.currentTimeMillis();
-		if (this.failTimes > 2 && current - earlyFail > failSpan ) {
-			this.failTimes = 0;
-			this.earlyFail = 0;
-			this.checkFail = current;
+		if (this.failTimes >= maxFailTime || failInterval()<=perFailTime) {
+			reset();			
+			this.earlyFailTime = current;
+			Common.LOG.warn("{} is auto breaked!",instance);
 			return true;
-		}
-		
-		if (current - checkFail < recheckSpan)
-			return true;
-		
+		}		
 		return false;
 	}
 }

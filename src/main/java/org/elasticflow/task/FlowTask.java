@@ -57,7 +57,9 @@ public class FlowTask {
 		if (pipePump.getInstanceConfig().getPipeParams().getInstanceName() != null)
 			writeInSamePosition = true;
 		breaker = new Breaker();
-		breaker.init();
+		breaker.init(pipePump.getInstanceConfig().getInstanceID(),
+				pipePump.getInstanceConfig().getPipeParams().getFailFreq(),
+				pipePump.getInstanceConfig().getPipeParams().getMaxFailTime());
 	}
 
 	/**
@@ -199,8 +201,8 @@ public class FlowTask {
 					log.warn("{} increment external interrupt!",pipePump.getInstanceID());
 				}else {
 					breaker.log();
-				}
-				log.error(pipePump.getInstanceID() + " IncrementJob Exception", e);
+					log.error(pipePump.getInstanceID() + " IncrementJob Exception", e);
+				}				
 			} finally {
 				recompute = this.checkReCompute(storeId);
 				GlobalParam.TASK_COORDER.setFlowStatus(pipePump.getInstanceID(),L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
