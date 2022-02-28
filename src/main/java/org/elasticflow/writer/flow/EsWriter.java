@@ -46,9 +46,8 @@ import org.elasticsearch.script.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 /**
  * ElasticSearch Writer Manager
  * 
@@ -135,7 +134,7 @@ public class EsWriter extends WriterFlowSocket {
 						if (vs.length == 2)
 							cbuilder.latlon(field, Double.parseDouble(vs[0]), Double.parseDouble(vs[1]));					
 					} else if (transParam.getIndextype().equals("nested")) {
-						cbuilder.array(transParam.getAlias(), JSONArray.fromObject(value));
+						cbuilder.array(transParam.getAlias(), JSONArray.parse(String.valueOf(value)));
 					} else {
 						cbuilder.field(transParam.getAlias(), value);		
 					}						
@@ -295,11 +294,10 @@ public class EsWriter extends WriterFlowSocket {
 
 	private Map<String, Object> JsonToMap(JSONObject j) {
 		Map<String, Object> map = new HashMap<>();
-		Iterator<?> iterator = j.keys();
+		Iterator<Entry<String, Object>> iterator = j.entrySet().iterator();
 		while (iterator.hasNext()) {
-			String key = (String) iterator.next();
-			Object value = j.get(key);
-			map.put(key, value);
+			Entry<String, Object> dt = iterator.next();
+			map.put(dt.getKey(), dt.getValue());
 		}
 		return map;
 	}
@@ -319,7 +317,7 @@ public class EsWriter extends WriterFlowSocket {
 					map.put("store", true);
 				}
 				if (p.getDsl() != null) {
-					map.putAll(JsonToMap(JSONObject.fromObject(p.getDsl())));
+					map.putAll(JsonToMap(JSONObject.parseObject(p.getDsl())));
 				}
 				if (p.getIndexed().toLowerCase().equals("true")) {
 					if (p.getAnalyzer().length() > 0) {

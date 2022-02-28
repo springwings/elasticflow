@@ -51,7 +51,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import net.sf.json.JSONObject;
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * Common Utils Package
@@ -490,7 +490,7 @@ public final class Common {
 	@SuppressWarnings("rawtypes")
 	public static EFSearchRequest getRequest(String jsonInput) {
 		EFSearchRequest rr = EFSearchRequest.getInstance();
-		JSONObject jsonObject = JSONObject.fromObject(jsonInput);
+		JSONObject jsonObject = JSONObject.parseObject(jsonInput);
 		Iterator<?> iter = jsonObject.entrySet().iterator();
 		while (iter.hasNext()) {
 			Map.Entry entry = (Map.Entry) iter.next();

@@ -42,8 +42,8 @@ import org.mortbay.jetty.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * Reader open http port support data read
@@ -251,15 +251,14 @@ public class HttpReaderService {
 			DP.put(GlobalParam.READER_KEY, keycolumn);
 			DP.put(GlobalParam.READER_SCAN_KEY, updatecolumn);
 			DP.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis());
-			JSONArray jr = JSONArray.fromObject(data);
+			JSONArray jr = JSONArray.parseArray(String.valueOf(data));
 			String dataBoundary = null;
 			String updateFieldValue = null;
 			for (int j = 0; j < jr.size(); j++) {
 				PipeDataUnit u = PipeDataUnit.getInstance();
 				JSONObject jo = jr.getJSONObject(j);
-				@SuppressWarnings("unchecked")
-				Set<Entry<String, String>> itr = jo.entrySet();
-				for (Entry<String, String> k : itr) {
+				Set<Entry<String, Object>> itr = jo.entrySet();
+				for (Entry<String, Object> k : itr) {
 					if (k.getKey().equals(DP.get(keycolumn))) {
 						u.setReaderKeyVal(k.getValue());
 						dataBoundary = String.valueOf(k.getValue());
