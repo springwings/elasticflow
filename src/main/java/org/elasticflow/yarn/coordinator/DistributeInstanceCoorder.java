@@ -1,3 +1,10 @@
+/*
+ * Copyright ElasticFlow B.V. and/or licensed to ElasticFlow B.V. under one
+ * or more contributor license agreements. Licensed under the ElasticFlow License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
+ * Side Public License, v 1.
+ */
 package org.elasticflow.yarn.coordinator;
 
 import java.net.InetSocketAddress;
@@ -298,8 +305,7 @@ public class DistributeInstanceCoorder {
 	}
 
 	private int avgInstanceNum() {
-		int avg = totalInstanceNum / nodes.size();
-		return (avg < 1) ? 1 : avg;
+		return (int) Math.ceil(totalInstanceNum / (nodes.size()+0.0));
 	}
 
 	private EFNode getNode(Integer nodeId) {
