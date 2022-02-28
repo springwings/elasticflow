@@ -234,10 +234,11 @@ public class DistributeInstanceCoorder {
 	}
 
 	// ----------------other-------------------//
-	private void rebalanceOnNodeLeave(Queue<String> bindInstances) {
-		Common.LOG.info("node leave, start rebalance on {} nodes.", nodes.size());
+	private void rebalanceOnNodeLeave(Queue<String> bindInstances) {		
 		rebalaceLock.lock();
-		int addNums = avgInstanceNum() - this.avgInstanceNum;
+		int newAvgNum = avgInstanceNum();
+		Common.LOG.info("node leave, start rebalance on {} nodes,avgInstanceNum {}.", nodes.size(),newAvgNum);
+		int addNums = newAvgNum - this.avgInstanceNum;
 		if (addNums == 0)
 			addNums = 1;
 		Common.LOG.info("start NodeLeave distributing instance task.");
@@ -248,15 +249,15 @@ public class DistributeInstanceCoorder {
 					break;
 			}
 		}
+		this.avgInstanceNum = newAvgNum;
 		rebalaceLock.unlock();
 		Common.LOG.info("finish NodeLeave distributing instance task.");
 	}
  
 	private void rebalanceOnNewNodeJoin(Queue<String> idleInstances) {
-		Common.LOG.info("node join, start rebalance on {} nodes.", nodes.size());
-		rebalaceLock.lock();
-		int avgInstanceNum = avgInstanceNum();
-		this.avgInstanceNum = avgInstanceNum;
+		rebalaceLock.lock(); 
+		this.avgInstanceNum = avgInstanceNum();
+		Common.LOG.info("node join, start rebalance on {} nodes, avgInstanceNum {}.", nodes.size(),avgInstanceNum);		
 		ArrayList<EFNode> addInstanceNodes = new ArrayList<>();
 		for (EFNode node : nodes) {
 			if (node.getBindInstances().size() < avgInstanceNum) {
