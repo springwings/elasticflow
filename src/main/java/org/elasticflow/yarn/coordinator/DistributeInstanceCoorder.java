@@ -12,8 +12,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
@@ -43,13 +42,11 @@ public class DistributeInstanceCoorder {
 	/** Check whether the system is initialized */
 	private boolean isOnStart = true;
 
-	private Lock rebalaceLock = new ReentrantLock();
-
 	/** Threshold at which resources fall into scheduling **/
 	private double cpuUsage = 85.;
 	private double memUsage = 85.;
 
-	private ArrayList<EFNode> nodes = new ArrayList<>();
+	private CopyOnWriteArrayList<EFNode> nodes = new CopyOnWriteArrayList<>();
 			
 	public void resumeInstance(String instance) {
 		GlobalParam.INSTANCE_COORDER.resumeInstance(instance, GlobalParam.JOB_TYPE.INCREMENT.name());
@@ -234,75 +231,74 @@ public class DistributeInstanceCoorder {
 	}
 
 	// ----------------other-------------------//
-	private void rebalanceOnNodeLeave(Queue<String> bindInstances) {		
-		rebalaceLock.lock();
-		int newAvgNum = avgInstanceNum();
-		Common.LOG.info("node leave, start rebalance on {} nodes,avgInstanceNum {}.", nodes.size(),newAvgNum);
-		int addNums = newAvgNum - this.avgInstanceNum;
-		if (addNums == 0)
-			addNums = 1;
-		Common.LOG.info("start NodeLeave distributing instance task.");
-		while (!bindInstances.isEmpty()) {
-			for (EFNode node : nodes) {
-				node.pushInstance(bindInstances.poll(),true);
-				if (bindInstances.isEmpty())
-					break;
+	private void rebalanceOnNodeLeave(Queue<String> bindInstances) {
+		synchronized (nodes) {
+			int newAvgNum = avgInstanceNum();
+			Common.LOG.info("node leave, start rebalance on {} nodes,avgInstanceNum {}.", nodes.size(),newAvgNum);
+			int addNums = newAvgNum - this.avgInstanceNum;
+			if (addNums == 0)
+				addNums = 1;
+			Common.LOG.info("start NodeLeave distributing instance task.");
+			while (!bindInstances.isEmpty()) {
+				for (EFNode node : nodes) {
+					node.pushInstance(bindInstances.poll(),true);
+					if (bindInstances.isEmpty())
+						break;
+				}
 			}
+			this.avgInstanceNum = newAvgNum; 
+			Common.LOG.info("finish NodeLeave distributing instance task.");
 		}
-		this.avgInstanceNum = newAvgNum;
-		rebalaceLock.unlock();
-		Common.LOG.info("finish NodeLeave distributing instance task.");
 	}
  
 	private void rebalanceOnNewNodeJoin(Queue<String> idleInstances) {
-		rebalaceLock.lock(); 
-		this.avgInstanceNum = avgInstanceNum();
-		Common.LOG.info("node join, start rebalance on {} nodes, avgInstanceNum {}.", nodes.size(),avgInstanceNum);		
-		ArrayList<EFNode> addInstanceNodes = new ArrayList<>();
-		for (EFNode node : nodes) {
-			if (node.getBindInstances().size() < avgInstanceNum) {
-				addInstanceNodes.add(node);
-			} else {
-				while (node.getBindInstances().size() > avgInstanceNum) {
-					idleInstances.offer(node.popInstance());
+		synchronized (nodes) {
+			this.avgInstanceNum = avgInstanceNum();
+			Common.LOG.info("node join, start rebalance on {} nodes, avgInstanceNum {}.", nodes.size(),avgInstanceNum);		
+			ArrayList<EFNode> addInstanceNodes = new ArrayList<>();
+			for (EFNode node : nodes) {
+				if (node.getBindInstances().size() < avgInstanceNum) {
+					addInstanceNodes.add(node);
+				} else {
+					while (node.getBindInstances().size() > avgInstanceNum) {
+						idleInstances.offer(node.popInstance());
+					}
 				}
 			}
+			// re-balance nodes
+			Common.LOG.info("start NewNodeJoin distributing instance task.");
+			for (EFNode node : addInstanceNodes) {
+				if (idleInstances.isEmpty())
+					break;
+				while (node.getBindInstances().size() < avgInstanceNum) {
+					node.pushInstance(idleInstances.poll(), true);
+				}
+			} 
 		}
-		// re-balance nodes
-		Common.LOG.info("start NewNodeJoin distributing instance task.");
-		for (EFNode node : addInstanceNodes) {
-			if (idleInstances.isEmpty())
-				break;
-			while (node.getBindInstances().size() < avgInstanceNum) {
-				node.pushInstance(idleInstances.poll(), true);
-			}
-		}
-		rebalaceLock.unlock();
 		Common.LOG.info("finish NewNodeJoin distributing instance task.");
 	}
 
 	private void rebalanceOnStart() {
-		Common.LOG.info("start rebalance on {} nodes.", nodes.size());
-		rebalaceLock.lock();
-		String[] instances = GlobalParam.StartConfig.getProperty("instances").split(",");
-		Common.LOG.info("start OnStart distributing instance task.");
-		for (int i = 0; i < instances.length;) {
-			for (EFNode node : nodes) {
-				String[] strs = instances[i].split(":");
-				if (strs.length > 1 && strs[0].length() > 1) {
-					if (Integer.parseInt(strs[1]) > 0) {
-						totalInstanceNum++;
-						node.pushInstance(instances[i], true);
+		synchronized (nodes) {
+			String[] instances = GlobalParam.StartConfig.getProperty("instances").split(",");
+			Common.LOG.info("on start,start rebalance on {} nodes,total Instance Num {}", nodes.size(),instances.length);
+			for (int i = 0; i < instances.length;) {
+				for (EFNode node : nodes) {
+					String[] strs = instances[i].split(":");
+					if (strs.length > 1 && strs[0].length() > 1) {
+						if (Integer.parseInt(strs[1]) > 0) {
+							totalInstanceNum++;
+							node.pushInstance(instances[i], true);
+						}
 					}
+					i++;
+					if (i >= instances.length)
+						break;
 				}
-				i++;
-				if (i >= instances.length)
-					break;
 			}
+			this.avgInstanceNum = avgInstanceNum();
+			Common.LOG.info("finish OnStart distributing instance task.");
 		}
-		this.avgInstanceNum = avgInstanceNum();
-		rebalaceLock.unlock();
-		Common.LOG.info("finish OnStart distributing instance task.");
 	}
 
 	private int avgInstanceNum() {
