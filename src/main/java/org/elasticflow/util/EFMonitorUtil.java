@@ -176,10 +176,10 @@ public class EFMonitorUtil {
 			Common.LOG.info("Instance {} waitting set state {} ...",inst,state);
 			int waittime = 0;
 			String[] seqs = EFMonitorUtil.getInstanceL1seqs(instance);
-			for (String seq : seqs) {
-				if (GlobalParam.TASK_COORDER.checkFlowStatus(inst, seq, controlType, STATUS.Running)) {
-					GlobalParam.TASK_COORDER.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
-					while (!GlobalParam.TASK_COORDER.checkFlowStatus(inst, seq, controlType, STATUS.Ready)) {
+			for (String L1seq : seqs) {
+				if (GlobalParam.TASK_COORDER.checkFlowStatus(inst, L1seq, controlType, STATUS.Running)) {
+					GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
+					while (!GlobalParam.TASK_COORDER.checkFlowStatus(inst, L1seq, controlType, STATUS.Ready)) {
 						try {
 							waittime++;
 							Thread.sleep(300);
@@ -191,9 +191,9 @@ public class EFMonitorUtil {
 						}
 					}
 				}
-				GlobalParam.TASK_COORDER.setFlowStatus(inst, seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
-				if (GlobalParam.TASK_COORDER.setFlowStatus(inst, seq, controlType.name(), STATUS.Termination, state, true)) {
-					Common.LOG.info("Instance {} success set state {}.",inst,state);
+				GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
+				if (GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), STATUS.Termination, state, true)) {
+					Common.LOG.info("Instance {} L1seq {} success set state {}.",inst,L1seq,state);
 				} else {
 					Common.LOG.info("Instance {} fail set state {}.",inst,state);
 				}
