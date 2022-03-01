@@ -25,7 +25,7 @@ ElasticFlow可以以分布式系统(Master/Slave)增强其运行性能也可以�
 
 # Versions
     - version 5.x
-    - Java>=1.8
+    - Java>=11
 
 # 特性
     - 支持分布式或者单节点运行
