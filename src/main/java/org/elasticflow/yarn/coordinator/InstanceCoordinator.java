@@ -28,17 +28,19 @@ import org.elasticflow.yarn.coord.InstanceCoord;
 public class InstanceCoordinator implements InstanceCoord { 
 	
 	//master control
-	private DistributeInstanceCoorder distributeInstanceCoorder;
+	private DistributeCoorder distributeCoorder;
 	
 	public InstanceCoordinator() {
 		if(!EFNodeUtil.isSlave())
-			distributeInstanceCoorder = new DistributeInstanceCoorder();
+			distributeCoorder = new DistributeCoorder();
 	}
 	
-	public DistributeInstanceCoorder distributeInstanceCoorder() {
-		return this.distributeInstanceCoorder;
+	@Override
+	public DistributeCoorder distributeCoorder() {
+		return this.distributeCoorder;
 	}
 	
+	@Override
 	public void initNode(boolean isOnStart) {
 		boolean wait = isOnStart;
 		while(Resource.tasks.size()>0) {
@@ -47,6 +49,7 @@ public class InstanceCoordinator implements InstanceCoord {
 		}			
 	}
 	
+	@Override
 	public void updateInstanceConfig(String instance,String end,String fieldName,String value) {
 		InstanceConfig tmp = Resource.nodeConfig.getInstanceConfigs().get(instance);
 		try {
@@ -76,10 +79,12 @@ public class InstanceCoordinator implements InstanceCoord {
 		}	
 	}
 	
+	@Override
 	public int onlineTasksNum() {
 		return Resource.tasks.size();
 	}
 	
+	@Override
 	public void sendData(String content, String destination,boolean relative) {
 		if(relative) {
 			EFFileUtil.createAndSave(content, GlobalParam.CONFIG_PATH + destination);
@@ -88,11 +93,13 @@ public class InstanceCoordinator implements InstanceCoord {
 		}		
 	}
 
+	@Override
 	public void reloadResource() {
 		Resource.nodeConfig.parsePondFile(GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond"));
 		Resource.nodeConfig.parseInstructionsFile(GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("instructions"));
 	}
 	
+	@Override
 	public void sendInstanceData(String content0, String content1,String content2,String instance) {
 		String[] paths = EFFileUtil.getInstancePath(instance);
 		sendData(content0, paths[0],false);
@@ -100,6 +107,7 @@ public class InstanceCoordinator implements InstanceCoord {
 		sendData(content2, paths[2],false);
 	}
 
+	@Override
 	public void addInstance(String instanceSettting) {
 		Resource.nodeConfig.loadConfig(instanceSettting, false);
 		Resource.nodeConfig.loadInstanceConfig(instanceSettting);
@@ -111,6 +119,7 @@ public class InstanceCoordinator implements InstanceCoord {
 		EFMonitorUtil.rebuildFlowGovern(instanceSettting, true);
 	} 
 
+	@Override
 	public void stopInstance(String instance, String jobtype) {
 		if (jobtype.toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
 			EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, false);
@@ -119,6 +128,7 @@ public class InstanceCoordinator implements InstanceCoord {
 		}
 	}
 
+	@Override
 	public void resumeInstance(String instance, String jobtype) {
 		if (jobtype.toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
 			EFMonitorUtil.controlInstanceState(instance, STATUS.Ready, false);
@@ -127,6 +137,7 @@ public class InstanceCoordinator implements InstanceCoord {
 		}
 	}
 
+	@Override
 	public void removeInstance(String instance,boolean waitComplete) {
 		if(waitComplete)
 			EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
@@ -138,9 +149,9 @@ public class InstanceCoordinator implements InstanceCoord {
 		EFMonitorUtil.removeConfigInstance(instance);
 	} 
 	
+	@Override
 	public boolean runInstanceNow(String instance,String type) {
 		return Resource.FlOW_CENTER.runInstanceNow(instance, type, true);
-	}
-	
+	}	
 	
 }

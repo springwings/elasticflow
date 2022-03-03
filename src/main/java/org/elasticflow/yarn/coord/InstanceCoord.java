@@ -7,7 +7,7 @@
  */
 package org.elasticflow.yarn.coord;
 
-import org.elasticflow.yarn.coordinator.DistributeInstanceCoorder;
+import org.elasticflow.yarn.coordinator.DistributeCoorder;
 
 /**
  * Run task instance cluster coordination interface
@@ -40,6 +40,6 @@ public interface InstanceCoord extends Coordination{
 	
 	public void removeInstance(String instance,boolean waitComplete);
 	
-	public DistributeInstanceCoorder distributeInstanceCoorder();
+	public DistributeCoorder distributeCoorder();
 	
 }

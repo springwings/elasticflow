@@ -9,7 +9,7 @@ import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.yarn.coord.EFMonitorCoord;
 import org.elasticflow.yarn.coord.InstanceCoord;
 import org.elasticflow.yarn.coord.NodeCoord;
-import org.elasticflow.yarn.coordinator.DistributeInstanceCoorder;
+import org.elasticflow.yarn.coordinator.DistributeCoorder;
 
 /**
  * Node Model
@@ -31,7 +31,7 @@ public class EFNode {
 	/** slave node Coordinator **/
 	private NodeCoord nodeCoord;
 	/** node instances configure summarize **/
-	private volatile DistributeInstanceCoorder masterInstanceCoorder;
+	private volatile DistributeCoorder masterInstanceCoorder;
 	private volatile Queue<String> bindInstances = new LinkedList<String>();
 	private long lastLiveTime;
 
@@ -47,7 +47,7 @@ public class EFNode {
 	}
 
 	public void init(boolean isOnStart,NodeCoord nodeCoord, InstanceCoord instanceCoord, 
-			EFMonitorCoord monitorCoord,DistributeInstanceCoorder masterInstanceCoorder) {
+			EFMonitorCoord monitorCoord,DistributeCoorder masterInstanceCoorder) {
 		this.nodeCoord = nodeCoord;
 		this.instanceCoord = instanceCoord;
 		this.monitorCoord = monitorCoord;

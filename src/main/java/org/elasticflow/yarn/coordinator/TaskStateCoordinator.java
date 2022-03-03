@@ -74,7 +74,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 				//update flow status,Distributed environment synchronization status				
 				if(GlobalParam.DISTRIBUTE_RUN) {
 					Resource.FLOW_STAT.get(instance).put(FlowState.getStoreKey(L1seq), 
-							GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder()
+							GlobalParam.INSTANCE_COORDER.distributeCoorder()
 							.getPipeEndStatus(instance, L1seq));
 				} else {
 					Resource.FLOW_STAT.get(instance).put(FlowState.getStoreKey(L1seq), 

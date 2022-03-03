@@ -9,6 +9,7 @@ package org.elasticflow.yarn.coordinator;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -27,13 +28,13 @@ import org.elasticflow.yarn.coord.NodeCoord;
 import com.alibaba.fastjson.JSONObject;
 
 /**
- * master control running method
- * 
+ * master control center
+ * Control and acquisition sub node
  * @author chengwen
  * @version 0.1
  * @create_time 2021-07-30
  */
-public class DistributeInstanceCoorder {
+public class DistributeCoorder {
 
 	private int totalInstanceNum;
 
@@ -43,8 +44,8 @@ public class DistributeInstanceCoorder {
 	private boolean isOnStart = true;
 
 	/** Threshold at which resources fall into scheduling **/
-	private double cpuUsage = 85.;
-	private double memUsage = 85.;
+	private double cpuUsage = 90.;
+	private double memUsage = 90.;
 
 	private CopyOnWriteArrayList<EFNode> nodes = new CopyOnWriteArrayList<>();
 			
@@ -71,11 +72,19 @@ public class DistributeInstanceCoorder {
 			n.pushResource();
 		});
 	}
+	
+	public HashMap<String, Object> getNodeStatus() {
+		HashMap<String, Object> res = new HashMap<>();
+		for (EFNode node : nodes) {
+			res.put(node.getIp(), node.getEFMonitorCoord().getNodeStatus());
+		}
+		return res;
+	}
 
 	public String getConnectionStatus(String instance, String poolName) {
 		for (EFNode node : nodes) {
 			if (node.containInstace(instance))
-				return node.getEFMonitorCoord().getStatus(poolName);
+				return node.getEFMonitorCoord().getPoolStatus(poolName);
 		}
 		return "";
 	}

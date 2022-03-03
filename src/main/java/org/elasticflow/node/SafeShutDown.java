@@ -15,7 +15,7 @@ public class SafeShutDown extends Thread{
 	public void run(){
 		if(GlobalParam.DISTRIBUTE_RUN) {
 			if(EFNodeUtil.isMaster()) {
-				GlobalParam.INSTANCE_COORDER.distributeInstanceCoorder().stopNodes();
+				GlobalParam.INSTANCE_COORDER.distributeCoorder().stopNodes();
 			}else {
 				try {
 					GlobalParam.DISCOVERY_COORDER.leaveCluster(GlobalParam.IP, GlobalParam.NODEID);
