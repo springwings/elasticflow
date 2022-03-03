@@ -213,11 +213,13 @@ public class EsWriter extends WriterFlowSocket {
 			log.info("create Instance " + iName);
 			if (!this.storePositionExists(iName)) {
 				CreateIndexRequest _CIR = new CreateIndexRequest(iName);
-				_CIR.settings(Settings.builder()
-						.put("index.number_of_shards",
-								instanceConfig.getWriterParams().getStorageStructure().getInteger("number_of_shards"))
-						.put("index.number_of_replicas",
-								instanceConfig.getWriterParams().getStorageStructure().getInteger("number_of_replicas"))); 
+				if(instanceConfig.getWriterParams().getStorageStructure().containsKey("number_of_shards")) {
+					_CIR.settings(Settings.builder()
+							.put("index.number_of_shards",
+									instanceConfig.getWriterParams().getStorageStructure().getInteger("number_of_shards"))
+							.put("index.number_of_replicas",
+									instanceConfig.getWriterParams().getStorageStructure().getInteger("number_of_replicas"))); 
+				}				
 				_CIR.mapping(this.getSettingMap(instanceConfig));
 				CreateIndexResponse createIndexResponse = getESC().getClient().indices().create(_CIR,
 						RequestOptions.DEFAULT);

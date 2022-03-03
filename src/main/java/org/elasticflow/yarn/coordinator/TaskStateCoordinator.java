@@ -213,7 +213,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 				return getNewStoreId(contextId, instance, L1seq, false);
 			}
 		} catch (EFException e) {
-			Common.LOG.error("getStoreId", e);
+			Common.LOG.error("instance {},L1seq {},getStoreId exception!",instance,L1seq, e);
 			Resource.FlOW_CENTER.removeInstance(instance, true, true);
 			Common.processErrorLevel(e);
 		}

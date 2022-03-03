@@ -575,14 +575,14 @@ public final class Common {
 	public static void processErrorLevel(EFException e) {
 		if (e.getErrorLevel().equals(ELEVEL.Termination)) {
 			Thread.currentThread().interrupt();
-			LOG.info("A error has occurred and the current thread has been interrupted automatically!");
+			LOG.error("A error has occurred, the current thread automatically interrupted!");
 		} else if (e.getErrorLevel().equals(ELEVEL.Stop)) {
 			stopSystem();
 		}
 	}
 
 	public static void stopSystem() {
-		LOG.info("Internal serious error, the system stops automatically!");
+		LOG.error("Internal serious error, the system stops automatically!");
 		SafeShutDown.stopAllInstances();
 		System.exit(0);
 	}
