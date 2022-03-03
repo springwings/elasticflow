@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sets>
+<instruction>
+	<id>test_clean</id>
+	<cron>0 1/2 * * * ?</cron> 
+	<code> 
+	Track.cpuPrepare->test_instance
+	Track.store->splitCondition,SplitDataFlow.getSplitPoint->91
+	Pond.deleteByQuery->update_time,Track.get->splitCondition
+	Track.cpuFree
+	</code>
+</instruction>
+</sets>

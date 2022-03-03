@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<SQL>
+		<socket>
+			<name>testexample</name>
+			<type>mysql</type>
+			<host>192.168.6.8</host>
+			<port>3306</port>
+			<user>user</user>
+			<password>pass</password> 
+			<dbname>ai_kg</dbname>
+		</socket> 
+</SQL>
+
+<NOSQL> 
+	<socket>
+		<name>testname</name>
+		<type>es</type>
+		<path>192.168.6.188</path>
+		<defaultValue>kg</defaultValue>
+	</socket>
+</NOSQL>
+</config>
