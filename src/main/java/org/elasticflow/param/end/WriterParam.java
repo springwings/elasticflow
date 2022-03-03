@@ -24,9 +24,9 @@ public class WriterParam {
 	*/
 	private String keyType;
 	/**Storage structure, such as table structure, index instance parameters**/
-	private JSONObject storageStructure;
+	private JSONObject storageStructure = new JSONObject();
 	/**user define field,pass custom value**/
-	private JSONObject customParams;
+	private JSONObject customParams = new JSONObject();
 	/** dsl parse method  normal/condition**/
 	private String dslParse = "normal";
 	

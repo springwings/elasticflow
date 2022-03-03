@@ -25,13 +25,13 @@ public class ComputerParam {
 	private String algorithm;
 	private volatile CopyOnWriteArrayList<String> api = new CopyOnWriteArrayList<>();
 	/**reader and request fields map*/
-	private JSONObject apiRequest;
+	private JSONObject apiRequest = new JSONObject();
 	/** api max send data nums per request**/
 	private int apiRequestMaxDatas = 30;
 	/**writer and response fields map*/
-	private JSONObject apiResponse;
+	private JSONObject apiResponse = new JSONObject();
 	/**User defined JSON parameters can be used to extend the plugin*/
-	private JSONObject customParams;
+	private JSONObject customParams = new JSONObject();
 	protected String keyField;
 	/** value= int or string */
 	protected String keyFieldType;

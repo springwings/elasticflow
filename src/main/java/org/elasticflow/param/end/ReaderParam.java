@@ -39,7 +39,7 @@ public class ReaderParam {
 	protected List<String> L2seqs = new ArrayList<String>();
 	
 	/**User defined JSON parameters can be used to extend the plugin*/
-	private JSONObject customParams;
+	private JSONObject customParams = new JSONObject();
 	
 	
 	public JSONObject getCustomParams() {

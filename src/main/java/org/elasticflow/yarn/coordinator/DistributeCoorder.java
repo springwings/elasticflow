@@ -295,7 +295,7 @@ public class DistributeCoorder {
 					if (strs.length > 1 && strs[0].length() > 1) {
 						if (Integer.parseInt(strs[1]) > 0) {
 							totalInstanceNum++;
-							node.pushInstance(instances[i], false);
+							node.pushInstance(instances[i], true);
 						}
 					}
 					i++;
