@@ -79,10 +79,6 @@ public final class Run {
 
 	private String startConfigPath;
 
-	public Run() {
-
-	}
-
 	public Run(String startConfigPath) {
 		this.startConfigPath = startConfigPath;
 	}

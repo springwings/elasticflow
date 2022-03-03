@@ -152,6 +152,6 @@ public class InstanceCoordinator implements InstanceCoord {
 	@Override
 	public boolean runInstanceNow(String instance,String type) {
 		return Resource.FlOW_CENTER.runInstanceNow(instance, type, true);
-	}	
+	}
 	
 }
