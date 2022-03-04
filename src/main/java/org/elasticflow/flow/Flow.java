@@ -127,7 +127,7 @@ public abstract class Flow {
 					try {
 						EFConnectionPool.freeConn(this.EFConn, this.poolName,releaseConn);  
 					}catch(Exception e) {
-						log.error("freeConn exception",e);
+						log.error("free {} connection exception",this.poolName,e);
 					}					
 					this.EFConn = null;
 					retainer.set(0); 
