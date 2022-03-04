@@ -124,11 +124,7 @@ public abstract class Flow {
 					retainer.set(0);
 				}					
 				if(retainer.decrementAndGet()<=0){
-					try {
-						EFConnectionPool.freeConn(this.EFConn, this.poolName,releaseConn);  
-					}catch(Exception e) {
-						log.error("free {} connection exception",this.poolName,e);
-					}					
+					EFConnectionPool.freeConn(this.EFConn, this.poolName,releaseConn); 				
 					this.EFConn = null;
 					retainer.set(0); 
 				}else{
