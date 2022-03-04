@@ -33,6 +33,7 @@ import org.w3c.dom.NodeList;
 public class InstanceConfig {
 	
 	private String alias = "";
+	/**Instance Config load success**/
 	private boolean status = true;
 	private String configPath;
 	/**Use the configured file name**/
@@ -62,8 +63,7 @@ public class InstanceConfig {
 		this.searcherParams = new HashMap<>();
 		this.computeParams = new ComputerParam();
 		this.writerParams = new WriterParam();
-		loadInstanceConfig();
-		Common.LOG.info(configPath + " config loaded");
+		loadInstanceConfig();		
 	}
 
 	public void reload() {
@@ -167,12 +167,13 @@ public class InstanceConfig {
 			if (bt.length <= 0)
 				return;
 			in = new ByteArrayInputStream(bt, 0, bt.length);
-			configParse(in);
+			configParse(in);	
 			in.close();
+			Common.LOG.info(configPath + " config load success!");
 		} catch (Exception e) {
 			in = null;
 			setStatus(false);
-			Common.LOG.error("load Instance Config error,",e);
+			Common.LOG.error("load {} config exception",this.configPath,e);
 		}
 	}
 	
@@ -180,85 +181,79 @@ public class InstanceConfig {
 	 * node xml config parse
 	 * searchparams store in readParamTypes all can for search
 	 */
-	private void configParse(InputStream in) {
-		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document doc = db.parse(in);
+	private void configParse(InputStream in) throws Exception{
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.parse(in);
+	 
+		Element params;
+		NodeList paramlist; 
 		 
-			Element params;
-			NodeList paramlist; 
-			 
-			Element dataflow = (Element) doc.getElementsByTagName("dataflow").item(0);
+		Element dataflow = (Element) doc.getElementsByTagName("dataflow").item(0);
 
-			if (dataflow!=null) {  
-				if (!dataflow.getAttribute("alias").equals("")) {
-					this.alias = dataflow.getAttribute("alias");
-				}  
-				
-				params = (Element) dataflow.getElementsByTagName("TransParam").item(0); 
-				if (params!=null) {
-					parseNode(params.getElementsByTagName("param"), "pipeParam", PipeParam.class);
-				}else{
-					Common.LOG.error(this.configPath+" file not correct");
-					return;
-				}
-				
-				params = (Element) dataflow.getElementsByTagName("ReadParam").item(0);
-				if(params!=null) {
-					readParams = new ReaderParam();
-					if(Resource.nodeConfig.getWarehouse().containsKey(pipeParams.getReadFrom())) { 
-						readParams.setNoSql(false);
-						parseNode(params.getElementsByTagName("param"), "readParam",
-								ReaderParam.class);  
-					}else { 
-						readParams.setNoSql(true);
-						parseNode(params.getElementsByTagName("param"), "readParam",
-								ReaderParam.class);
-					}   
-					params = (Element) params.getElementsByTagName("fields").item(0);
-					if(params != null) {
-						paramlist = params.getElementsByTagName("field");
-						parseNode(paramlist, "readFields", EFField.class); 
-					}					
-				} 
-				
-				params = (Element) dataflow.getElementsByTagName("ComputeParam").item(0);   
-				if (params!=null) {
-					parseNode(params.getElementsByTagName("param"), "computeParam", ComputerParam.class);
-					params = (Element) params.getElementsByTagName("fields").item(0);
-					if(params != null) {
-						paramlist = params.getElementsByTagName("field");
-						parseNode(paramlist, "computeFields", EFField.class); 
-					}					
-				} 
-				
-				params = (Element) dataflow.getElementsByTagName("WriteParam").item(0);   
-				if (params!=null) { 
-					parseNode(params.getElementsByTagName("param"), "writerParam", BasicParam.class);
-					if(writerParams.getWriteKey()==null) {
-						WriterParam.setKeyValue(writerParams,"writekey",readParams.getKeyField());
-						WriterParam.setKeyValue(writerParams,"keytype","unique"); 
-					}
-					params = (Element) params.getElementsByTagName("fields").item(0);
-					if(params != null) {
-						paramlist = params.getElementsByTagName("field");
-						parseNode(paramlist, "writeFields", EFField.class); 
-					}					
-				}
-				
-				params = (Element) dataflow.getElementsByTagName("SearchParam").item(0);   
-				if (params!=null) {
-					paramlist = params.getElementsByTagName("param");
-					parseNode(paramlist, "SearchParam", SearcherParam.class);
-				} 
-				
+		if (dataflow!=null) {  
+			if (!dataflow.getAttribute("alias").equals("")) {
+				this.alias = dataflow.getAttribute("alias");
+			}  
+			
+			params = (Element) dataflow.getElementsByTagName("TransParam").item(0); 
+			if (params!=null) {
+				parseNode(params.getElementsByTagName("param"), "pipeParam", PipeParam.class);
+			}else{
+				Common.LOG.error(this.configPath+" file not correct");
+				return;
+			}
+			
+			params = (Element) dataflow.getElementsByTagName("ReadParam").item(0);
+			if(params!=null) {
+				readParams = new ReaderParam();
+				if(Resource.nodeConfig.getWarehouse().containsKey(pipeParams.getReadFrom())) { 
+					readParams.setNoSql(false);
+					parseNode(params.getElementsByTagName("param"), "readParam",
+							ReaderParam.class);  
+				}else { 
+					readParams.setNoSql(true);
+					parseNode(params.getElementsByTagName("param"), "readParam",
+							ReaderParam.class);
+				}   
+				params = (Element) params.getElementsByTagName("fields").item(0);
+				if(params != null) {
+					paramlist = params.getElementsByTagName("field");
+					parseNode(paramlist, "readFields", EFField.class); 
+				}					
 			} 
 			
-		} catch (Exception e) {
-			setStatus(false);
-			Common.LOG.error(this.configPath+" Parse error,",e);
-		}
+			params = (Element) dataflow.getElementsByTagName("ComputeParam").item(0);   
+			if (params!=null) {
+				parseNode(params.getElementsByTagName("param"), "computeParam", ComputerParam.class);
+				params = (Element) params.getElementsByTagName("fields").item(0);
+				if(params != null) {
+					paramlist = params.getElementsByTagName("field");
+					parseNode(paramlist, "computeFields", EFField.class); 
+				}					
+			} 
+			
+			params = (Element) dataflow.getElementsByTagName("WriteParam").item(0);   
+			if (params!=null) { 
+				parseNode(params.getElementsByTagName("param"), "writerParam", BasicParam.class);
+				if(writerParams.getWriteKey()==null) {
+					WriterParam.setKeyValue(writerParams,"writekey",readParams.getKeyField());
+					WriterParam.setKeyValue(writerParams,"keytype","unique"); 
+				}
+				params = (Element) params.getElementsByTagName("fields").item(0);
+				if(params != null) {
+					paramlist = params.getElementsByTagName("field");
+					parseNode(paramlist, "writeFields", EFField.class); 
+				}					
+			}
+			
+			params = (Element) dataflow.getElementsByTagName("SearchParam").item(0);   
+			if (params!=null) {
+				paramlist = params.getElementsByTagName("param");
+				parseNode(paramlist, "SearchParam", SearcherParam.class);
+			} 
+			
+		} 
 	}
 	
 	private void parseNode(NodeList paramlist, String type, Class<?> c)

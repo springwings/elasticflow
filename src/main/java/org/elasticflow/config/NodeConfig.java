@@ -95,11 +95,15 @@ public class NodeConfig {
 				this.instanceConfigs.put(name, nconfig);
 			}
 			nconfig.init();
-			if (nconfig.getAlias().equals("")) {
-				nconfig.setAlias(name);
-			}
-			nconfig.setInstanceID(name);
-			this.searchConfigMap.put(nconfig.getAlias(), nconfig);
+			if(nconfig.checkStatus()) {
+				if (nconfig.getAlias().equals("")) {
+					nconfig.setAlias(name);
+				}
+				nconfig.setInstanceID(name);
+				this.searchConfigMap.put(nconfig.getAlias(), nconfig);
+			}else {
+				Common.stopSystem(false);
+			}			
 		}
 	}
 
