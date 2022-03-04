@@ -117,6 +117,7 @@ public class DistributeCoorder {
 						EFRPCService.getRemoteProxyObj(EFMonitorCoord.class,
 								new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)),this);
 				nodes.add(node);
+				Common.LOG.info("{} join cluster, current number of nodes {}.",ip,nodes.size());
 			}
 			Queue<String> bindInstances = clusterScan(false);
 			if (nodes.size() >= GlobalParam.CLUSTER_MIN_NODES) {
