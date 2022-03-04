@@ -69,7 +69,7 @@ public class WriterParam {
 				wp.customParams = JSONObject.parseObject(v);
 			}	
 			break;
-		case "storageStructure":
+		case "storagestructure":
 			if(v!=null) {
 				wp.storageStructure = JSONObject.parseObject(v);
 			}	
