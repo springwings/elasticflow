@@ -574,7 +574,7 @@ public final class Common {
 
 	public static void processErrorLevel(EFException e) {
 		if (e.getErrorLevel().equals(ELEVEL.Termination)) {
-			LOG.error("The current thread will automatically interrupte!",e);
+			LOG.error("The current thread will automatically interrupt!",e);
 			Thread.currentThread().interrupt();			
 		} else if (e.getErrorLevel().equals(ELEVEL.Stop)) {
 			stopSystem(true);
@@ -582,7 +582,7 @@ public final class Common {
 	}
 
 	public static void stopSystem(boolean soft) {
-		LOG.error("Internal serious error, the system stops automatically!");
+		LOG.error("System is stopped automatically!");
 		if(soft)
 			SafeShutDown.stopAllInstances();
 		System.exit(0);
