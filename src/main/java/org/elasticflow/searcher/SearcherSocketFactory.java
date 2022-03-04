@@ -43,7 +43,7 @@ public class SearcherSocketFactory implements Socket<SearcherFlowSocket>{
 			return (SearcherFlowSocket) m.invoke(null,connectParams);
 		}catch (Exception e) { 
 			Common.LOG.error("the "+connectParams.getWhp().getType()+" SearcherFlowSocket does not exist!",e); 
-			Common.stopSystem();
+			Common.stopSystem(false);
 		} 
 		return null;
 	}

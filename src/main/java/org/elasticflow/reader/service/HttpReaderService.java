@@ -68,7 +68,7 @@ public class HttpReaderService {
 		try {
 			FS.start();
 		} catch (EFException e) {
-			Common.stopSystem();
+			Common.stopSystem(false);
 		}
 		return true;
 	}

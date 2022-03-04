@@ -577,13 +577,14 @@ public final class Common {
 			Thread.currentThread().interrupt();
 			LOG.error("A error has occurred, the current thread automatically interrupted!");
 		} else if (e.getErrorLevel().equals(ELEVEL.Stop)) {
-			stopSystem();
+			stopSystem(true);
 		}
 	}
 
-	public static void stopSystem() {
+	public static void stopSystem(boolean soft) {
 		LOG.error("Internal serious error, the system stops automatically!");
-		SafeShutDown.stopAllInstances();
+		if(soft)
+			SafeShutDown.stopAllInstances();
 		System.exit(0);
 	}
 

@@ -57,7 +57,7 @@ public class WriterSocketFactory implements Socket<WriterFlowSocket> {
 			}else { 
 				Common.LOG.error("the "+connectParams.getWhp().getType()+" WriterFlowSocket does not exist!",e); 
 			}
-			Common.stopSystem();
+			Common.stopSystem(false);
 		}
 		return null;
 	}

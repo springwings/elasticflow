@@ -43,7 +43,7 @@ public class EFMonitorService {
 		try {
 			HttpService.getInstance(serviceParams).start();
 		} catch (EFException e) {
-			Common.stopSystem();
+			Common.stopSystem(false);
 		}
 	}
 	

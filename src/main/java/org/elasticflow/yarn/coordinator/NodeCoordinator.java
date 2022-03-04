@@ -20,7 +20,7 @@ public class NodeCoordinator implements NodeCoord{
 		if(EFNodeUtil.isSlave()) {
 			ResourceMonitor.stop();
 		}
-		Common.stopSystem();		
+		Common.stopSystem(true);		
 	}
 	
 	public double[] summaryResource() {

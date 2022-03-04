@@ -143,7 +143,7 @@ public final class SocketCenter {
 				WarehouseParam whp = getWHP(resourceName);
 				if (whp == null) {
 					Common.LOG.error(resourceName + " resource not exist!");
-					Common.stopSystem();
+					Common.stopSystem(false);
 				}
 				readerSocketMap.put(tags, ReaderFlowSocketFactory.getInstance(
 						ConnectParams.getInstance(whp, L1seq, Resource.nodeConfig.getInstanceConfigs().get(instance),
@@ -175,7 +175,7 @@ public final class SocketCenter {
 				WarehouseParam whp = getWHP(resourceName);
 				if (whp == null) {
 					Common.LOG.error(resourceName + " resource not exist!");
-					Common.stopSystem();
+					Common.stopSystem(false);
 				}
 				writerSocketMap.put(tags, WriterSocketFactory.getInstance(
 						ConnectParams.getInstance(whp, L1seq, Resource.nodeConfig.getInstanceConfigs().get(instance),
@@ -204,7 +204,7 @@ public final class SocketCenter {
 				WarehouseParam whp = getWHP(resourceName);
 				if (whp == null) {
 					Common.LOG.error(resourceName + " resource not exist!");
-					Common.stopSystem();
+					Common.stopSystem(false);
 				}
 				SearcherFlowSocket searcher = SearcherSocketFactory
 						.getInstance(

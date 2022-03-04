@@ -46,7 +46,7 @@ public final class ReaderFlowSocketFactory implements Socket<ReaderFlowSocket> {
 			}else { 
 				Common.LOG.error("the "+connectParams.getWhp().getType()+" ReaderFlowSocket does not exist!",e); 
 			}			
-			Common.stopSystem();
+			Common.stopSystem(false);
 		}  
 		return null;
 	}  

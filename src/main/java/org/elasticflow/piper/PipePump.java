@@ -132,7 +132,7 @@ public final class PipePump extends Instruction implements Serializable {
 
 		} catch (Exception e) {
 			log.error("PipePump init Exception,", e);
-			Common.stopSystem();
+			Common.stopSystem(false);
 		}
 	}
 

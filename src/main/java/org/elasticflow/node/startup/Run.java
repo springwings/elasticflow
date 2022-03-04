@@ -204,7 +204,7 @@ public final class Run {
 			}
 		} catch (Exception e) { 
 			Common.LOG.error("load Global Properties Config Exception", e);
-			Common.stopSystem();
+			Common.stopSystem(false);
 		}
 		GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");
 		GlobalParam.USE_ZK = Boolean.valueOf(GlobalParam.StartConfig.getProperty("use_zk"));
@@ -250,7 +250,7 @@ public final class Run {
 			}
 		} catch (Exception e) {
 	    	Common.LOG.error("Init System Exception", e);
-	    	Common.stopSystem();
+	    	Common.stopSystem(false);
 	    } 
 		if(GlobalParam.DISTRIBUTE_RUN) {
 			Common.LOG.info("ElasticFlow {} Start Success!",GlobalParam.StartConfig.get("node_type"));

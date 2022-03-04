@@ -86,7 +86,7 @@ public class DistributeService {
 				dataReceiver.start();
 			} catch (Exception e) {
 				Common.LOG.error("Instance Coord Exception", e);
-				Common.stopSystem();
+				Common.stopSystem(false);
 			}
 		});
 	}

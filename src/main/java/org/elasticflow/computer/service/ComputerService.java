@@ -51,7 +51,7 @@ public class ComputerService {
 		try {
 			FS.start();
 		} catch (EFException e) {
-			Common.stopSystem();
+			Common.stopSystem(false);
 		}
 		return true;
 	}
