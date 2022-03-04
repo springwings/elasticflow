@@ -141,7 +141,7 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 			}
 			this.connectParams = null;
 		} catch (Exception e) {
-			log.error("free connect Exception,", e);
+			log.error("free connection Exception!", e);
 			return false;
 		}
 		return true;
