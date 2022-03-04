@@ -45,9 +45,9 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 		WarehouseParam wnp = this.connectParams.getWhp();
 		if (wnp.getHost() != null) {
 			if (!status()) { 			
-				if(endType.equals(END_TYPE.reader))
+				if(endType==END_TYPE.reader)
 					this.genConsumer(wnp);
-				if(endType.equals(END_TYPE.writer))
+				else if(endType==END_TYPE.writer)
 					this.genProducer(wnp);
 			}
 		} else {
@@ -65,7 +65,7 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
         props.put("max.poll.records",GlobalParam.READ_PAGE_SIZE);
         props.put("max.partition.fetch.bytes", MAX_FETCH_BYTES);
         props.put("enable.auto.commit", "false");
-        props.put("session.timeout.ms", "15000");
+        props.put("session.timeout.ms", "30000");
         props.put("heartbeat.interval.ms", "3000");
         if(wnp.getCustomParams()!=null) {
         	if(wnp.getCustomParams().containsKey("max.poll.records"))
