@@ -53,7 +53,7 @@ public class FilesConnection extends EFConnectionSocket<RandomAccessFile> {
 				this.conn.close();
 			this.conn = null;
 		} catch (Exception e) {
-			 log.error("free connect Exception,",e);
+			 log.warn("free connect Exception,",e);
 		}
 		return false;
 	} 

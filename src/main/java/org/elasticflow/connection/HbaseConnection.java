@@ -118,7 +118,7 @@ public class HbaseConnection extends EFConnectionSocket<Table>{
 							TableName.valueOf(strs[0])); 
 				} 
 			} catch (Exception e) {
-				log.error("HBase connect Exception,", e);
+				log.warn("HBase connect Exception,", e);
 				return false;
 			}
 		}

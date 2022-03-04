@@ -86,7 +86,7 @@ public class OracleConnection extends EFConnectionSocket<Connection> {
 				return true;
 			}
 		} catch (Exception e) {
-			log.error("get status Exception,", e);
+			log.warn("get status Exception,", e);
 		}
 		return false;
 	}

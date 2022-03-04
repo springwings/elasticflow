@@ -74,7 +74,7 @@ public class MysqlConnection extends EFConnectionSocket<Connection> {
 			this.conn = null;
 			this.connectParams = null;
 		} catch (Exception e) {
-			log.error("free connect Exception,", e);
+			log.warn("free connect Exception,", e);
 			return false;
 		}
 		return true;
