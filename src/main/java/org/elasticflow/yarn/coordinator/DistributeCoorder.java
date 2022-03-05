@@ -182,14 +182,15 @@ public class DistributeCoorder {
 
 	public synchronized void stopNodes() {
 		if(clusterStatus!=1) {
-			Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed."); 
-			DistributeService.closeMonitor();
 			clusterStatus = 1;
-			Resource.ThreadPools.execute(() -> {
+			Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed."); 
+			DistributeService.closeMonitor(); 
+			Resource.ThreadPools.execute(() -> { 
 				nodes.forEach(n -> { 
 					n.getNodeCoord().stopNode();
 					n.stopAllInstance();
 				});
+				nodes.clear();
 				isOnStart = true;
 				DistributeService.openMonitor();
 				clusterStatus = 2;
@@ -204,14 +205,16 @@ public class DistributeCoorder {
 		Queue<String> bindInstances = new LinkedList<String>();
 		synchronized (nodes) {
 			for (EFNode n : nodes) {
-				if (!n.isLive()) {
-					removeNode(n.getIp(), n.getNodeId(), false);
-					bindInstances.addAll(n.getBindInstances());
-				} else {
-					n.refresh();
-				}
+				if(DistributeService.isOpenMonitor()) {
+					if (!n.isLive()) {
+						removeNode(n.getIp(), n.getNodeId(), false);
+						bindInstances.addAll(n.getBindInstances());
+					} else {
+						n.refresh();
+					}
+				} 
 			}
-			if (!bindInstances.isEmpty() && startRebalace)
+			if (DistributeService.isOpenMonitor() && !bindInstances.isEmpty() && startRebalace)
 				this.rebalanceOnNodeLeave(bindInstances);
 		}
 		return bindInstances;

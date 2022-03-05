@@ -46,6 +46,10 @@ public class DistributeService {
 		openMonitor = true;
 	}
 	
+	public static boolean isOpenMonitor() {
+		return openMonitor;
+	}
+	
 	public void start() {
 		if (EFNodeUtil.isMaster()) {
 			boolean createSchedule = !GlobalParam.DISTRIBUTE_RUN;
