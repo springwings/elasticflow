@@ -17,8 +17,9 @@ public class SafeShutDown extends Thread{
 	public void run(){
 		if(GlobalParam.DISTRIBUTE_RUN) {
 			if(EFNodeUtil.isMaster()) {
-				Common.LOG.warn("cluster master is closed,system will try to stop slaves."); 
-				GlobalParam.INSTANCE_COORDER.distributeCoorder().stopNodes();
+				Common.LOG.warn("cluster master is closed."); 
+				GlobalParam.INSTANCE_COORDER.distributeCoorder().stopNodes(true);
+				Common.stopSystem(false);
 			}else {
 				if(ReportStatus.heartBeatIsOn()) {
 					try {
@@ -28,7 +29,7 @@ public class SafeShutDown extends Thread{
 						Common.LOG.info("leave cluser success.");
 					} catch (Exception e) {
 						Common.LOG.warn("leave cluster failed, master is offline.");					
-					}
+					} 
 					Common.stopSystem(false);
 				} 
 			}

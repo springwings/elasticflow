@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -172,7 +173,7 @@ public class DistributeCoorder {
 				node.stopAllInstance();
 				if (!clusterConditionMatch()) {
 					Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed."); 
-					stopNodes();
+					stopNodes(false);
 				} else {
 					if (rebalace)
 						Resource.ThreadPools.execute(() -> {
@@ -183,14 +184,17 @@ public class DistributeCoorder {
 		}
 	}
 
-	public synchronized void stopNodes() {
+	public synchronized void stopNodes(boolean wait) {
 		if(clusterStatus.get()!=1) {
 			clusterStatus.set(1);			
 			DistributeService.closeMonitor(); 
+			CountDownLatch singal = new CountDownLatch(nodes.size());
 			Resource.ThreadPools.execute(() -> { 
 				nodes.forEach(n -> { 
+					Common.LOG.info("node {},nodeId {}, is stopped!",n.getIp(),n.getNodeId());
 					n.stopAllInstance();
-					n.getNodeCoord().stopNode();					
+					n.getNodeCoord().stopNode();
+					singal.countDown();
 				});
 				nodes.clear();
 				isOnStart.set(true);
@@ -198,6 +202,12 @@ public class DistributeCoorder {
 				clusterStatus.set(2);
 				Common.LOG.info("cluster all slave nodes are offline.");
 			});
+			if(wait) {
+				try {
+					singal.await();
+				} catch (Exception e) {  
+				}
+			}
 		}
 	}
 
@@ -288,22 +298,23 @@ public class DistributeCoorder {
 		synchronized (nodes) {
 			if(!clusterConditionMatch()) {
 				Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed."); 
-				stopNodes();
-			}
-			int newAvgNum = avgInstanceNum();
-			Common.LOG.info("NodeLeave,start rebalance on {} nodes,avgInstanceNum {}...", nodes.size(),newAvgNum);
-			int addNums = newAvgNum - this.avgInstanceNum;
-			if (addNums == 0)
-				addNums = 1; 
-			while (!bindInstances.isEmpty()) {
-				for (EFNode node : nodes) {
-					node.pushInstance(bindInstances.poll(),true);
-					if (bindInstances.isEmpty())
-						break;
+				stopNodes(false);
+			}else {
+				int newAvgNum = avgInstanceNum();
+				Common.LOG.info("NodeLeave,start rebalance on {} nodes,avgInstanceNum {}...", nodes.size(),newAvgNum);
+				int addNums = newAvgNum - this.avgInstanceNum;
+				if (addNums == 0)
+					addNums = 1; 
+				while (!bindInstances.isEmpty()) {
+					for (EFNode node : nodes) {
+						node.pushInstance(bindInstances.poll(),true);
+						if (bindInstances.isEmpty())
+							break;
+					}
 				}
+				this.avgInstanceNum = newAvgNum; 
+				Common.LOG.info("NodeLeave,finish rebalance instance!");
 			}
-			this.avgInstanceNum = newAvgNum; 
-			Common.LOG.info("NodeLeave,finish rebalance instance!");
 		}
 	}
  
