@@ -9,6 +9,8 @@ import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import org.elasticflow.util.Common;
+
 
 /**
  * @author chengwen
@@ -36,7 +38,7 @@ public class EFRPCService<T> {
                             input = new ObjectInputStream(socket.getInputStream());
                             return input.readObject();
                         }catch (IOException e) {
-                        	 throw e;
+                        	throw e;
                         }finally {
                             if (socket != null) socket.close();
                             if (output != null) output.close();

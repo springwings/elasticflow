@@ -172,17 +172,17 @@ public class EFMonitorUtil {
 		if (isIncrement)
 			controlType = GlobalParam.JOB_TYPE.INCREMENT;
 
-		for (String inst : instance.split(",")) {
-			Common.LOG.info("Instance {} waitting set state {} ...",inst,state);
+		for (String inst : instance.split(",")) { 
 			int waittime = 0;
 			String[] seqs = EFMonitorUtil.getInstanceL1seqs(instance);
+			Common.LOG.info("Instance {} seq nums {},job type {},waitting set state {} ...",inst,seqs.length,controlType.name(),state);
 			for (String L1seq : seqs) {
 				if (GlobalParam.TASK_COORDER.checkFlowStatus(inst, L1seq, controlType, STATUS.Running)) {
 					GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
 					while (!GlobalParam.TASK_COORDER.checkFlowStatus(inst, L1seq, controlType, STATUS.Ready)) {
 						try {
 							waittime++;
-							Thread.sleep(300);
+							Thread.sleep(100);
 							if (waittime > 200) {
 								break;
 							}
