@@ -35,7 +35,13 @@ import org.elasticflow.yarn.coordinator.TaskStateCoordinator;
 public class DistributeService {
 
 	DataReceiver dataReceiver;
-
+	
+	private static boolean openMonitor = true; 
+	
+	public static void closeMonitor() {
+		openMonitor = false;
+	}
+	
 	public void start() {
 		if (EFNodeUtil.isMaster()) {
 			boolean createSchedule = !GlobalParam.DISTRIBUTE_RUN;
@@ -58,12 +64,12 @@ public class DistributeService {
 
 	private void monitorNodes() {
 		Resource.ThreadPools.execute(() -> {
-			while (true) {
+			while (openMonitor) {
 				try {
 					Thread.sleep(GlobalParam.NODE_LIVE_TIME * 2);
 					GlobalParam.INSTANCE_COORDER.distributeCoorder().clusterScan(true);
 				} catch (Exception e) {
-					Common.LOG.warn("monitor modes exception",e);
+					Common.LOG.warn("monitor exception",e);
 				}
 			}
 		});

@@ -24,6 +24,7 @@ import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coord.EFMonitorCoord;
 import org.elasticflow.yarn.coord.InstanceCoord;
 import org.elasticflow.yarn.coord.NodeCoord;
+import org.elasticflow.yarn.coordinator.node.DistributeService;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -39,6 +40,9 @@ public class DistributeCoorder {
 	private int totalInstanceNum;
 
 	private int avgInstanceNum;
+	
+	/**cluster status**/
+	private boolean clusterStatus = true;
 
 	/** Check whether the system is initialized */
 	private boolean isOnStart = true;
@@ -120,7 +124,8 @@ public class DistributeCoorder {
 				Common.LOG.info("{} join cluster, current number of nodes {}.",ip,nodes.size());
 			}
 			Queue<String> bindInstances = clusterScan(false);
-			if (nodes.size() >= GlobalParam.CLUSTER_MIN_NODES) {
+			if (clusterConditionMatch()) {
+				clusterStatus = true;
 				if (isOnStart) {
 					isOnStart = false;
 					this.rebalanceOnStart();
@@ -133,6 +138,13 @@ public class DistributeCoorder {
 			this.getNode(nodeId).refresh();
 		}
 	}
+	
+	private boolean clusterConditionMatch() {
+		if (nodes.size() < GlobalParam.CLUSTER_MIN_NODES) { 
+			return false;
+		}
+		return true;
+	}
 
 	public void removeNode(String ip, Integer nodeId, boolean rebalace) {
 		synchronized (nodes) {
@@ -142,10 +154,8 @@ public class DistributeCoorder {
 				instances.addAll(node.getBindInstances()); 
 				Common.LOG.warn("ip {},nodeId {},leave cluster!",ip,nodeId); 
 				node.stopAllInstance();
-				if (nodes.size() < GlobalParam.CLUSTER_MIN_NODES) { 
+				if (!clusterConditionMatch()) { 
 					stopNodes();
-					Common.LOG.warn(
-							"The cluster does not meet the conditions, all slave node tasks automatically closed.");
 				} else {
 					if (rebalace)
 						Resource.ThreadPools.execute(() -> {
@@ -157,13 +167,19 @@ public class DistributeCoorder {
 	}
 
 	public synchronized void stopNodes() {
-		Resource.ThreadPools.execute(() -> {
-			nodes.forEach(n -> {
-				n.stopAllInstance();
-				n.getNodeCoord().stopNode();
+		if(clusterStatus) {
+			Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed."); 
+			DistributeService.closeMonitor();
+			clusterStatus = false;
+			Resource.ThreadPools.execute(() -> {
+				nodes.forEach(n -> {
+					n.stopAllInstance();
+					n.getNodeCoord().stopNode();
+				});
+				isOnStart = true;
+				DistributeService.closeMonitor();
 			});
-			isOnStart = true;
-		});
+		}
 	}
 
 	/**
@@ -249,6 +265,8 @@ public class DistributeCoorder {
 	// ----------------other-------------------//
 	private void rebalanceOnNodeLeave(Queue<String> bindInstances) {
 		synchronized (nodes) {
+			if(!clusterConditionMatch())
+				stopNodes();
 			int newAvgNum = avgInstanceNum();
 			Common.LOG.info("NodeLeave,start rebalance on {} nodes,avgInstanceNum {}...", nodes.size(),newAvgNum);
 			int addNums = newAvgNum - this.avgInstanceNum;

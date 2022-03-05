@@ -24,7 +24,7 @@ import com.alibaba.fastjson.JSON;
 
 public class ResourceMonitor {   
 	
-	static DistributeService distributeService = new DistributeService();
+	static DistributeService distributeService = new DistributeService(); 
 	
 	public static void start() { 
 		ReportStatus.nodeConfigs();
