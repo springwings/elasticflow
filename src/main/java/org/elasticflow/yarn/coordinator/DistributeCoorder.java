@@ -14,6 +14,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.elasticflow.config.GlobalParam;
@@ -43,10 +45,10 @@ public class DistributeCoorder {
 	private int avgInstanceNum;
 	
 	/**cluster status :0 normal 1 freeze 2 down**/
-	private int clusterStatus = 2;
+	private AtomicInteger clusterStatus = new AtomicInteger(2);
 
 	/** Check whether the system is initialized */
-	private boolean isOnStart = true;
+	private AtomicBoolean isOnStart = new AtomicBoolean(true);
 
 	/** Threshold at which resources fall into scheduling **/
 	private double cpuUsage = 90.;
@@ -118,7 +120,7 @@ public class DistributeCoorder {
 		if (!this.containsNode(nodeId)) {
 			synchronized (nodes) {
 				EFNode node = EFNode.getInstance(ip, nodeId);
-				node.init(isOnStart,
+				node.init(isOnStart.get(),
 						EFRPCService.getRemoteProxyObj(NodeCoord.class,
 								new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)),
 						EFRPCService.getRemoteProxyObj(InstanceCoord.class,
@@ -129,14 +131,14 @@ public class DistributeCoorder {
 				Common.LOG.info("{} join cluster, current number of nodes {}.",ip,nodes.size());
 			} 
 			if (clusterConditionMatch()) { 
-				clusterStatus = 0;  
+				clusterStatus.set(0);
 				if(rebalanceQueue.size()<2) {
 					rebalanceQueue.add(true);
 					rebalanceLocker.lock();
 					while(!rebalanceQueue.isEmpty()) { 
 						Queue<String> bindInstances = clusterScan(false);
-						if (isOnStart) {
-							isOnStart = false;
+						if (isOnStart.get()) {
+							isOnStart.set(false);
 							this.rebalanceOnStart();
 						} else {
 							this.rebalanceOnNewNodeJoin(bindInstances);
@@ -168,7 +170,8 @@ public class DistributeCoorder {
 				instances.addAll(node.getBindInstances()); 
 				Common.LOG.warn("ip {},nodeId {},leave cluster!",ip,nodeId); 
 				node.stopAllInstance();
-				if (!clusterConditionMatch()) { 
+				if (!clusterConditionMatch()) {
+					Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed."); 
 					stopNodes();
 				} else {
 					if (rebalace)
@@ -181,19 +184,19 @@ public class DistributeCoorder {
 	}
 
 	public synchronized void stopNodes() {
-		if(clusterStatus!=1) {
-			clusterStatus = 1;
-			Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed."); 
+		if(clusterStatus.get()!=1) {
+			clusterStatus.set(1);			
 			DistributeService.closeMonitor(); 
 			Resource.ThreadPools.execute(() -> { 
 				nodes.forEach(n -> { 
-					n.getNodeCoord().stopNode();
 					n.stopAllInstance();
+					n.getNodeCoord().stopNode();					
 				});
 				nodes.clear();
-				isOnStart = true;
+				isOnStart.set(true);
 				DistributeService.openMonitor();
-				clusterStatus = 2;
+				clusterStatus.set(2);
+				Common.LOG.info("cluster all slave nodes are offline.");
 			});
 		}
 	}
@@ -283,8 +286,10 @@ public class DistributeCoorder {
 	// ----------------other-------------------//
 	private void rebalanceOnNodeLeave(Queue<String> bindInstances) {
 		synchronized (nodes) {
-			if(!clusterConditionMatch())
+			if(!clusterConditionMatch()) {
+				Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed."); 
 				stopNodes();
+			}
 			int newAvgNum = avgInstanceNum();
 			Common.LOG.info("NodeLeave,start rebalance on {} nodes,avgInstanceNum {}...", nodes.size(),newAvgNum);
 			int addNums = newAvgNum - this.avgInstanceNum;
@@ -331,7 +336,7 @@ public class DistributeCoorder {
 	private void rebalanceOnStart() {
 		synchronized (nodes) {
 			String[] instances = GlobalParam.StartConfig.getProperty("instances").split(",");
-			Common.LOG.info("cluster init,start rebalance on {} nodes,total Instance Num {}...", nodes.size(),instances.length);
+			Common.LOG.info("cluster INIT,start rebalance on {} nodes,total Instance Num {}...", nodes.size(),instances.length);
 			for (int i = 0; i < instances.length;) {
 				for (EFNode node : nodes) {
 					String[] strs = instances[i].split(":");
@@ -347,7 +352,7 @@ public class DistributeCoorder {
 				}
 			}
 			this.avgInstanceNum = avgInstanceNum();
-			Common.LOG.info("cluster init,finish rebalance instance!");
+			Common.LOG.info("cluster INIT,finish rebalance!");
 		}
 	}
 

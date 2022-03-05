@@ -40,7 +40,8 @@ public final class ReportStatus {
 				while (openHeartBeat) {
 					try {
 						Thread.sleep(GlobalParam.NODE_LIVE_TIME/2);
-						GlobalParam.DISCOVERY_COORDER.reportStatus(GlobalParam.IP, GlobalParam.NODEID);						
+						if(openHeartBeat)
+							GlobalParam.DISCOVERY_COORDER.reportStatus(GlobalParam.IP, GlobalParam.NODEID);						
 					} catch (Exception e) {
 						Common.LOG.warn("master node cannot connect.");
 						if(Resource.tasks.size()>0)
