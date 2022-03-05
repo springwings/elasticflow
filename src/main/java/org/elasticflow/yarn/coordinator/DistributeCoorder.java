@@ -115,8 +115,6 @@ public class DistributeCoorder {
 	}
 
 	public void updateNode(String ip, Integer nodeId) {
-		if(clusterStatus==1)
-			return;
 		if (!this.containsNode(nodeId)) {
 			synchronized (nodes) {
 				EFNode node = EFNode.getInstance(ip, nodeId);
@@ -188,12 +186,12 @@ public class DistributeCoorder {
 			DistributeService.closeMonitor();
 			clusterStatus = 1;
 			Resource.ThreadPools.execute(() -> {
-				nodes.forEach(n -> {
-					n.stopAllInstance();
+				nodes.forEach(n -> { 
 					n.getNodeCoord().stopNode();
+					n.stopAllInstance();
 				});
 				isOnStart = true;
-				DistributeService.closeMonitor();
+				DistributeService.openMonitor();
 				clusterStatus = 2;
 			});
 		}

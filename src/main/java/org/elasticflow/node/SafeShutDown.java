@@ -36,6 +36,9 @@ public class SafeShutDown extends Thread{
 		}
 	}
 	
+	/**
+	 * stop local run
+	 */
 	public static void stopAllInstances() {
 		String[] instances = GlobalParam.StartConfig.getProperty("instances").split(","); 
 		for (int i = 0; i < instances.length; i++) {
