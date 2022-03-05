@@ -201,7 +201,7 @@ public class FlowTask {
 					log.warn("{} increment external interrupt!",pipePump.getInstanceID());
 				}else {
 					breaker.log();
-					log.error(pipePump.getInstanceID() + " IncrementJob Exception", e);
+					log.error(pipePump.getInstanceID() + " IncrementJob Exception,{}",e.getTrack(),e);
 				}				
 			} finally {
 				recompute = this.checkReCompute(storeId);

@@ -9,6 +9,7 @@ package org.elasticflow.util;
 public class EFException extends Exception {
 
 	private static final long serialVersionUID = 1L;
+	
 
 	/**
 	 * Ignore continue running with warning 
@@ -21,16 +22,27 @@ public class EFException extends Exception {
 	}
 
 	public static enum ETYPE {
-		WRITE_POS_NOT_FOUND,RESOURCE_ERROR,PARAMETER_ERROR,RESOURCE_FAILURE,UNKNOWN,EXTINTERRUPT;
+		WRITE_POS_NOT_FOUND,RESOURCE_ERROR,PARAMETER_ERROR,RESOURCE_FAILURE,UNKNOWN,EXTINTERRUPT,DATA_ERROR;
 	}
 
 	private ELEVEL e_level = ELEVEL.Ignore;
 
 	private ETYPE e_type = ETYPE.UNKNOWN;
+	
+	private StringBuffer SB = new StringBuffer();
 
 	public EFException(String msg) {
 		super(msg);
 	} 
+	
+	public void track(String info) {
+		SB.append(info);
+		SB.append(" > ");
+	}
+	
+	public String getTrack() {
+		return "TRACK INFOS:"+SB.toString();
+	}
 	
 	public EFException(Exception e) {
 		super(e);
@@ -51,7 +63,7 @@ public class EFException extends Exception {
 		e_level = elevel;
 		e_type = etype;
 	}
-
+	
 
 	public EFException(String msg, ELEVEL elevel, ETYPE etype) {
 		super(msg);

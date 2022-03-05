@@ -243,14 +243,8 @@ public final class PipePump extends Instruction implements Serializable {
 						}
 					}
 				}
-				if (e.getErrorType()==ETYPE.WRITE_POS_NOT_FOUND || e.getErrorType()==ETYPE.EXTINTERRUPT) {
-					throw e;
-				} else {
-					log.error("[" + task.getJobType().name() + " " + instanceID + L2seq + "_" + storeId + " ERROR]", e);
-					Resource.mailSender.sendHtmlMailBySynchronizationMode(" [EFLOWS] " + GlobalParam.RUN_ENV,
-							"Job " + instanceID + " " + task.getJobType().name() + " Has stopped!");
-				}
-				Common.processErrorLevel(e);
+				e.track("[" + task.getJobType().name() + " " + instanceID + L2seq + "_" + storeId + " ERROR]");
+				throw e;
 			}
 		}
 	}
@@ -376,14 +370,14 @@ public final class PipePump extends Instruction implements Serializable {
 	}
 
 	// thread safe get page data
-	private DataPage getPageData(Page pager) {
+	private DataPage getPageData(Page pager) throws EFException {
 		getReader().lock.lock();
 		DataPage pagedata = null;
 		try {
 			pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchPage", false, pager, getReader());
 			getReader().freeJobPage();
-		} catch (Exception e) {
-			log.error("get Page Data Exception]", e);
+		} catch (Exception e) { 
+			throw new EFException(e,ELEVEL.Dispose,ETYPE.DATA_ERROR);
 		} finally {
 			getReader().lock.unlock();
 		}
@@ -454,11 +448,11 @@ public final class PipePump extends Instruction implements Serializable {
 					Resource.ThreadPools.cleanWaitJob(getId());
 					Common.LOG.warn(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
 					break;
-				} else {
-					DataPage pagedata = getPageData(
-							Page.getInstance(task.getScanParam().getKeyField(), task.getScanParam().getScanField(),
-									startId, dataBoundary, getInstanceConfig(), dataScanDSL));
+				} else {					
 					try {
+						DataPage pagedata = getPageData(
+								Page.getInstance(task.getScanParam().getKeyField(), task.getScanParam().getScanField(),
+										startId, dataBoundary, getInstanceConfig(), dataScanDSL));
 						if (getInstanceConfig().openCompute()) {
 							long start = Common.getNow();
 							int dataSize = pagedata.getData().size();

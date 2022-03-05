@@ -131,7 +131,7 @@ public class Pipe extends Instruction {
 						DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));
 			} catch (EFException e) {
 				Common.processErrorLevel(e);
-				if (!e.getErrorType().equals(ETYPE.WRITE_POS_NOT_FOUND)) { 
+				if (e.getErrorType()==ETYPE.RESOURCE_ERROR) { 
 					freeConn = true;
 				}
 				throw e;

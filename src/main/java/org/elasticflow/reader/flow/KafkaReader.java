@@ -134,7 +134,7 @@ public class KafkaReader extends ReaderFlowSocket {
 			try {
 				((KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader)).commitSync();
 			} catch (Exception e) {
-				throw new EFException(e, ELEVEL.Termination);
+				throw new EFException(e, ELEVEL.Dispose);
 			}
 		}	
 	}
