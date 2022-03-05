@@ -9,7 +9,7 @@ import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 
 
 /**
@@ -37,8 +37,10 @@ public class EFRPCService<T> {
                             output.writeObject(args);  
                             input = new ObjectInputStream(socket.getInputStream());
                             return input.readObject();
-                        }catch (IOException e) {
-                        	throw e;
+                        }catch (IOException e) { 
+                        	EFException exp = new EFException(e);
+                        	exp.track(addr.toString());
+                        	throw exp;
                         }finally {
                             if (socket != null) socket.close();
                             if (output != null) output.close();
