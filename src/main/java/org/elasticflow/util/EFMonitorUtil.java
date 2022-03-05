@@ -165,12 +165,21 @@ public class EFMonitorUtil {
 	 * @param isIncrement control thread type
 	 */
 	public static void controlInstanceState(String instance, STATUS state, boolean isIncrement) {
+		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instance);
 		if ((GlobalParam.SERVICE_LEVEL & 6) == 0) {
 			return;
 		}
-		JOB_TYPE controlType = GlobalParam.JOB_TYPE.FULL;
-		if (isIncrement)
+		JOB_TYPE controlType;
+		if (isIncrement) {
+			if(instanceConfig.getPipeParams().getDeltaCron() == null)
+				return;
 			controlType = GlobalParam.JOB_TYPE.INCREMENT;
+		}else {
+			if(instanceConfig.getPipeParams().getFullCron() == null)
+				return;
+			controlType = GlobalParam.JOB_TYPE.FULL;
+		}
+			
 
 		for (String inst : instance.split(",")) { 
 			int waittime = 0;
