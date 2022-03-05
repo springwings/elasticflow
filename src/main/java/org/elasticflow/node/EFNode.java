@@ -128,25 +128,7 @@ public class EFNode {
 				return true;
 		}
 		return false;
-	}
-
-	public String popInstance() {
-		String instanceSetting = this.bindInstances.poll();
-		this.removeInstance(instanceSetting);
-		return instanceSetting;
-	}
-	
-	public String popInstance(String instance) { 
-		String instanceSetting;
-		while(true) {
-			instanceSetting = this.bindInstances.poll();
-			if (instanceSetting.split(":")[0].equals(instance))
-				break;
-			this.bindInstances.offer(instanceSetting);
-		}
-		this.removeInstance(instanceSetting);
-		return instanceSetting;
-	}
+	} 
 	
 	public void recoverInstance() {
 		if(this.instanceCoord.onlineTasksNum()==0) {
@@ -179,7 +161,25 @@ public class EFNode {
 				"/" + GlobalParam.StartConfig.getProperty("instructions"), true);
 		this.instanceCoord.reloadResource();
 	}
-
+	
+	public String popInstance() {
+		String instanceSetting = this.bindInstances.poll();
+		this.removeInstance(instanceSetting);
+		return instanceSetting;
+	}
+	
+	public String popInstance(String instance) { 
+		String instanceSetting;
+		while(true) {
+			instanceSetting = this.bindInstances.poll();
+			if (instanceSetting.split(":")[0].equals(instance))
+				break;
+			this.bindInstances.offer(instanceSetting);
+		}
+		this.removeInstance(instanceSetting);
+		return instanceSetting;
+	}
+	
 	public void stopAllInstance() {
 		while (!this.bindInstances.isEmpty()) {
 			popInstance();

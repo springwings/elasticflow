@@ -20,8 +20,8 @@ public class SafeShutDown extends Thread{
 			}else {
 				try {
 					Common.LOG.info("start leave cluser..."); 
-					GlobalParam.DISCOVERY_COORDER.leaveCluster(GlobalParam.IP, GlobalParam.NODEID);
 					ResourceMonitor.stop();
+					GlobalParam.DISCOVERY_COORDER.leaveCluster(GlobalParam.IP, GlobalParam.NODEID);					
 					Common.LOG.info("leave cluser success.");
 				} catch (Exception e) {
 					Common.LOG.warn("leave cluster failed, master is offline.");					

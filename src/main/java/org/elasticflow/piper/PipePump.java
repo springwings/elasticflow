@@ -288,10 +288,15 @@ public final class PipePump extends Instruction implements Serializable {
 						total.get(), "",
 						GlobalParam.TASK_COORDER.getLSeqPos(task.getInstance(), task.getL1seq(), task.getL2seq()),
 						Common.getNow() - start, ""));
-			if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(),
-					STATUS.Termination))
-				throw new EFException(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!",
-						ELEVEL.Dispose, ETYPE.EXTINTERRUPT);
+			this.breakCheck(task);
+		}
+	}
+	
+	private void breakCheck(Task task) throws EFException {
+		if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(),
+				STATUS.Termination)) {
+			throw new EFException(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!",
+					ELEVEL.Dispose, ETYPE.EXTINTERRUPT);
 		}
 	}
 
@@ -320,33 +325,34 @@ public final class PipePump extends Instruction implements Serializable {
 					task.getId() + task.getL2seq(), processPos + "/" + pageList.size());
 			String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(), PipeUtil.getScanParam(
 					task.getL2seq(), startId, dataBoundary, task.getStartTime(), task.getEndTime(), scanField));
-			if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(),
-					STATUS.Termination)) {
-				throw new EFException(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!",
-						ELEVEL.Dispose, ETYPE.EXTINTERRUPT);
-			} else {
-				DataPage pagedata = this.getPageData(
-						Page.getInstance(keyField, scanField, startId, dataBoundary, getInstanceConfig(), dataScanDSL));
-				if (getInstanceConfig().openCompute()) {
-					long start = Common.getNow();
-					int dataSize = pagedata.getData().size();
-					String datab = pagedata.getDataBoundary();
-					String scanStamp = pagedata.getScanStamp();
-					pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(), task.getJobType().name(),
-							writeInstanceName, pagedata);
-					log.info(Common.formatLog("onepage", task.getJobType().name() + " Compute", 
-							task.getId(),
-							storeId, task.getL2seq(), dataSize, datab, scanStamp, Common.getNow() - start,
-							",process:" + processPos + "/" + pageNum));
-				}
-				rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
-						writeInstanceName, storeId, task, pagedata,
-						",L1seq:" + task.getL1seq() + ",process:" + processPos + "/" + pageNum, isupdate, false);
-				if (rState.isStatus() == false)
-					throw new EFException("writeDataSet data exception!");
-				total.getAndAdd(rState.getCount());
-				startId = dataBoundary;
+		    
+			this.breakCheck(task);
+			
+			DataPage pagedata = this.getPageData(
+					Page.getInstance(keyField, scanField, startId, dataBoundary, getInstanceConfig(), dataScanDSL));
+			if (getInstanceConfig().openCompute()) {
+				long start = Common.getNow();
+				int dataSize = pagedata.getData().size();
+				String datab = pagedata.getDataBoundary();
+				String scanStamp = pagedata.getScanStamp();
+				pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(), task.getJobType().name(),
+						writeInstanceName, pagedata);
+				log.info(Common.formatLog("onepage", task.getJobType().name() + " Compute", 
+						task.getId(),
+						storeId, task.getL2seq(), dataSize, datab, scanStamp, Common.getNow() - start,
+						",process:" + processPos + "/" + pageNum));
 			}
+			
+			this.breakCheck(task);
+			
+			rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
+					writeInstanceName, storeId, task, pagedata,
+					",L1seq:" + task.getL1seq() + ",process:" + processPos + "/" + pageNum, isupdate, false);
+			if (rState.isStatus() == false)
+				throw new EFException("writeDataSet data exception!");
+			total.getAndAdd(rState.getCount());
+			startId = dataBoundary;
+
 			GlobalParam.TASK_COORDER.setScanPosition(task.getInstance(), task.getL1seq(), task.getL2seq(),
 					rState.getReaderScanStamp());
 			if (task.getJobType() == JOB_TYPE.INCREMENT) {
@@ -431,7 +437,7 @@ public final class PipePump extends Instruction implements Serializable {
 		@Override
 		public int needThreads() {
 			return PipeUtil.estimateThreads(this.pageNum);
-		}
+		} 
 
 		@Override
 		public void run() {
@@ -443,47 +449,54 @@ public final class PipePump extends Instruction implements Serializable {
 						task.getId() + task.getL2seq(), processPos + "/" + this.pageNum);
 				String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(),
 						PipeUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
-								task.getEndTime(), task.getScanParam().getScanField()));
+								task.getEndTime(), task.getScanParam().getScanField())); 
 				if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(),
 						STATUS.Termination)) {
 					Resource.ThreadPools.cleanWaitJob(getId());
 					Common.LOG.warn(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
 					break;
-				} else {					
-					try {
-						DataPage pagedata = getPageData(
-								Page.getInstance(task.getScanParam().getKeyField(), task.getScanParam().getScanField(),
-										startId, dataBoundary, getInstanceConfig(), dataScanDSL));
-						if (getInstanceConfig().openCompute()) {
-							long start = Common.getNow();
-							int dataSize = pagedata.getData().size();
-							String datab = pagedata.getDataBoundary();
-							String scanStamp = pagedata.getScanStamp();
-							pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(),
-									task.getJobType().name(), writeInstanceName, pagedata);
-							log.info(Common.formatLog("onepage", task.getJobType().name() + " Compute",
-									task.getId(), storeId, task.getL2seq(), dataSize, datab, scanStamp,
-									Common.getNow() - start, ",process:" + processPos + "/" + pageNum));
-						}
-						rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
-								task.getId(), storeId, task, pagedata,
-								",L1seq:" + task.getL1seq() + ",process:" + processPos + "/" + pageNum, this.isUpdate,
-								false);
-					} catch (EFException e) {
-						log.error("PumpThread", e);
-						task.taskState.setEfException(e);
-					} finally {
-						if (rState == null || rState.isStatus() == false) {
-							Common.LOG.warn("read data exception!");
-							return;
-						}
-						GlobalParam.TASK_COORDER.setFlowStatus(task.getInstance(), task.getL1seq(),
-								GlobalParam.JOB_TYPE.FULL.name(), STATUS.Blank, STATUS.Ready,
-								getInstanceConfig().getPipeParams().showInfoLog());
+				} 
+				
+				try {
+					DataPage pagedata = getPageData(
+							Page.getInstance(task.getScanParam().getKeyField(), task.getScanParam().getScanField(),
+									startId, dataBoundary, getInstanceConfig(), dataScanDSL));
+					if (getInstanceConfig().openCompute()) {
+						long start = Common.getNow();
+						int dataSize = pagedata.getData().size();
+						String datab = pagedata.getDataBoundary();
+						String scanStamp = pagedata.getScanStamp();
+						pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(),
+								task.getJobType().name(), writeInstanceName, pagedata);
+						log.info(Common.formatLog("onepage", task.getJobType().name() + " Compute",
+								task.getId(), storeId, task.getL2seq(), dataSize, datab, scanStamp,
+								Common.getNow() - start, ",process:" + processPos + "/" + pageNum));
 					}
-					total.addAndGet(rState.getCount());
-					startId = dataBoundary;
+					if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(),
+							STATUS.Termination)) {
+						Resource.ThreadPools.cleanWaitJob(getId());
+						Common.LOG.warn(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
+						break;
+					} 
+					rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
+							task.getId(), storeId, task, pagedata,
+							",L1seq:" + task.getL1seq() + ",process:" + processPos + "/" + pageNum, this.isUpdate,
+							false);
+				} catch (EFException e) {
+					log.error("PumpThread", e);
+					task.taskState.setEfException(e);
+				} finally {
+					if (rState == null || rState.isStatus() == false) {
+						Common.LOG.warn("read data exception!");
+						return;
+					}
+					GlobalParam.TASK_COORDER.setFlowStatus(task.getInstance(), task.getL1seq(),
+							GlobalParam.JOB_TYPE.FULL.name(), STATUS.Blank, STATUS.Ready,
+							getInstanceConfig().getPipeParams().showInfoLog());
 				}
+				total.addAndGet(rState.getCount());
+				startId = dataBoundary;
+				
 				GlobalParam.TASK_COORDER.setScanPosition(task.getInstance(), task.getL1seq(), task.getL2seq(),
 						rState.getReaderScanStamp());
 				if (task.getJobType() == JOB_TYPE.INCREMENT) {

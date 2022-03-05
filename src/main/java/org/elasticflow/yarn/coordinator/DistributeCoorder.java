@@ -141,15 +141,9 @@ public class DistributeCoorder {
 				Queue<String> instances = new LinkedList<String>();
 				instances.addAll(node.getBindInstances());
 				node.stopAllInstance();
-				Common.LOG.warn("ip {},nodeId {},leave cluster!",ip,nodeId);
-				
-				if (nodes.size() < GlobalParam.CLUSTER_MIN_NODES) {
-					Resource.ThreadPools.execute(() -> {
-						nodes.forEach(n -> {
-							n.getNodeCoord().stopNode();
-						});
-						isOnStart = true;
-					});					
+				Common.LOG.warn("ip {},nodeId {},leave cluster!",ip,nodeId); 
+				if (nodes.size() < GlobalParam.CLUSTER_MIN_NODES) { 
+					stopNodes();
 					Common.LOG.warn(
 							"The cluster does not meet the conditions, all slave node tasks automatically closed.");
 				} else {
@@ -162,10 +156,13 @@ public class DistributeCoorder {
 		}
 	}
 
-	public void stopNodes() {
-		nodes.forEach(n -> {
-			n.stopAllInstance();
-			n.getNodeCoord().stopNode();
+	public synchronized void stopNodes() {
+		Resource.ThreadPools.execute(() -> {
+			nodes.forEach(n -> {
+				n.stopAllInstance();
+				n.getNodeCoord().stopNode();
+			});
+			isOnStart = true;
 		});
 	}
 
