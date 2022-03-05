@@ -138,16 +138,25 @@ public class DistributeCoorder {
 		synchronized (nodes) {
 			if (this.containsNode(nodeId)) {
 				EFNode node = this.removeNode(nodeId);
+				Queue<String> instances = new LinkedList<String>();
+				instances.addAll(node.getBindInstances());
+				node.stopAllInstance();
+				Common.LOG.warn("ip {},nodeId {},leave cluster!",ip,nodeId);
+				
 				if (nodes.size() < GlobalParam.CLUSTER_MIN_NODES) {
-					nodes.forEach(n -> {
-						n.getNodeCoord().stopNode();
-					});
-					isOnStart = true;
+					Resource.ThreadPools.execute(() -> {
+						nodes.forEach(n -> {
+							n.getNodeCoord().stopNode();
+						});
+						isOnStart = true;
+					});					
 					Common.LOG.warn(
-							"The cluster does not meet the conditions, all slave node tasks will be automatically closed.");
+							"The cluster does not meet the conditions, all slave node tasks automatically closed.");
 				} else {
 					if (rebalace)
-						this.rebalanceOnNodeLeave(node.getBindInstances());
+						Resource.ThreadPools.execute(() -> {
+							this.rebalanceOnNodeLeave(instances);
+						});
 				}
 			}
 		}

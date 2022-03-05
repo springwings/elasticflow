@@ -322,7 +322,8 @@ public final class PipePump extends Instruction implements Serializable {
 					task.getL2seq(), startId, dataBoundary, task.getStartTime(), task.getEndTime(), scanField));
 			if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(),
 					STATUS.Termination)) {
-				break;
+				throw new EFException(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!",
+						ELEVEL.Dispose, ETYPE.EXTINTERRUPT);
 			} else {
 				DataPage pagedata = this.getPageData(
 						Page.getInstance(keyField, scanField, startId, dataBoundary, getInstanceConfig(), dataScanDSL));

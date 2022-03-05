@@ -584,9 +584,11 @@ public final class Common {
 	public static void stopSystem(boolean soft) {
 		LOG.error("system will automatically stop...");
 		if(soft)
-			SafeShutDown.stopAllInstances();
+			SafeShutDown.stopAllInstances(); 
 		LOG.error("system stop success!");
-		System.exit(0);
+		Resource.ThreadPools.execute(() -> {
+				System.exit(0);
+		}); 
 	}
 
 }

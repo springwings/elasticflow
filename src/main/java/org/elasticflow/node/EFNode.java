@@ -200,7 +200,7 @@ public class EFNode {
 		if (instanceSetting != null) {
 			String[] strs = instanceSetting.split(":");
 			this.stopInstance(strs[0]);
-			this.instanceCoord.removeInstance(strs[0], true);
+			this.instanceCoord.removeInstance(strs[0], false);
 		}
 	}
 }

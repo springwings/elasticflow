@@ -10,6 +10,7 @@ package org.elasticflow.yarn.monitor;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.instance.EFDataStorer;
+import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coord.ReportStatus;
 import org.elasticflow.yarn.coordinator.node.DistributeService;
 
@@ -38,7 +39,8 @@ public class ResourceMonitor {
 	public static void stop() {
 		if(EFNodeUtil.isSlave()) {
 			ReportStatus.closeHeartBeat();
+		}else {
+			distributeService.stop();
 		}
-		distributeService.stop();
 	}
 }
