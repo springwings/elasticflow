@@ -29,7 +29,7 @@ public class KafkaWriter extends WriterFlowSocket {
 	} 
 
 	@SuppressWarnings("unchecked")
-	private KafkaProducer<String, String> getconn() {
+	private KafkaProducer<String, String> getconn() throws EFException {
 		return (KafkaProducer<String, String>) GETSOCKET().getConnection(END_TYPE.writer);
 	}
 	

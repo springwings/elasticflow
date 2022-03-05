@@ -38,7 +38,7 @@ public class MysqlReader extends ReaderFlowSocket{
 	}  
  
 	@Override
-	public DataPage getPageData(final Page page,int pageSize) {  
+	public DataPage getPageData(final Page page,int pageSize) throws EFException {  
 		boolean releaseConn = false;
 		PREPARE(false,false); 
 		if(!ISLINK())
@@ -56,16 +56,20 @@ public class MysqlReader extends ReaderFlowSocket{
 					getAllData(rs,page.getInstanceConfig().getReadFields()); 
 				} 
 			} catch (Exception e) {
-				this.dataPage.put(GlobalParam.READER_STATUS,false);
-				log.error("get dataPage ResultSet Exception", e);
+				this.dataPage.put(GlobalParam.READER_STATUS,false); 
+				log.error("get dataPage ResultSet Exception");
+				throw new EFException(e);	
 			} 
 		} catch (SQLException e){ 
 			this.dataPage.put(GlobalParam.READER_STATUS,false);
-			log.error(page.getAdditional() + " get dataPage SQLException", e);
+			EFException err = new EFException(e);
+			err.track(page.getAdditional());
+			throw err; 
 		} catch (Exception e) { 
 			releaseConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS,false);
-			log.error("get Page Data Exception so free connection,details ", e);
+			log.error("get dataPage Exception will auto free connection!");
+			throw new EFException(e);	
 		}finally{
 			REALEASE(false,releaseConn);
 		} 
@@ -73,7 +77,7 @@ public class MysqlReader extends ReaderFlowSocket{
 	} 
 	
 	@Override
-	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) {
+	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) throws EFException {
 		String sql;
 		if(task.getScanParam().getPageScanDSL()!=null){
 			sql = " select "+GlobalParam._page_field+" as id,(@a:=@a+1) AS EF_ROW_ID from ("
@@ -132,18 +136,22 @@ public class MysqlReader extends ReaderFlowSocket{
 			} 
 		}catch(SQLException e){
 			page = null;
-			log.error("get dataPage SQLException "+sql, e);
+			EFException err = new EFException(e);
+			err.track(sql);
+			throw err;
 		}catch (Exception e) {
 			releaseConn = true;
 			page = null;
-			log.error("get dataPage Exception so free connection,details ", e);
+			log.error("get page splits exception will auto free connection!");
+			throw new EFException(e);
 		}finally{ 
 			try {
 				statement.close();
 				rs.close();
 			} catch (Exception e) {
 				releaseConn = true;
-				log.error("close connection resource Exception", e);
+				log.error("close connection resource Exception!");
+				throw new EFException(e);
 			} 
 			REALEASE(false,releaseConn);  
 		}  
@@ -173,8 +181,9 @@ public class MysqlReader extends ReaderFlowSocket{
 				this.dataUnit.add(u);
 			}
 			rs.close();
-		} catch (Exception e) {
-			throw new EFException(e);
+		} catch (Exception e) { 
+			log.error("get page data exception!");
+			throw new EFException(e);	
 		}
 		if (LAST_STAMP==null){ 
 			if(this.dataUnit.size()>0)

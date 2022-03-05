@@ -7,9 +7,7 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FilesConnection extends EFConnectionSocket<RandomAccessFile> {
-	
-	private RandomAccessFile conn;
+public class FilesConnection extends EFConnectionSocket<RandomAccessFile> { 
 
 	private final static Logger log = LoggerFactory.getLogger("File Socket");
  
@@ -31,13 +29,7 @@ public class FilesConnection extends EFConnectionSocket<RandomAccessFile> {
 		} 
 		return false;
 	}
-	
-	@Override
-	public RandomAccessFile getConnection(END_TYPE endType) {
-		connect(endType);
-		return conn;
-	}
-
+	 
 	@Override
 	public boolean status() {
 		if(this.conn != null) {

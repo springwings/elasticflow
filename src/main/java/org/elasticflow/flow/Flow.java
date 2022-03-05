@@ -16,6 +16,7 @@ import org.elasticflow.connection.EFConnectionSocket;
 import org.elasticflow.model.FlowState;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory; 
@@ -52,9 +53,9 @@ public abstract class Flow {
 	
 	public abstract void initConn(ConnectParams connectParams);
 	
-	public abstract void initFlow();
+	public abstract void initFlow() throws EFException;
 	
-	public void prepareFlow(InstanceConfig instanceConfig,END_TYPE endType,String L1seq) {
+	public void prepareFlow(InstanceConfig instanceConfig,END_TYPE endType,String L1seq) throws EFException {
 		this.instanceConfig = instanceConfig;
 		this.L1seq = L1seq;
 		this.flowState = new FlowState(Resource.FLOW_STAT.get(instanceConfig.getInstanceID()),endType,L1seq);

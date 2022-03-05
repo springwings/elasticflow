@@ -13,6 +13,7 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
+import org.elasticflow.util.EFException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,7 @@ public class FilesReader extends ReaderFlowSocket {
 	}
 
 	@Override
-	public DataPage getPageData(final Page page,int pageSize) {
+	public DataPage getPageData(final Page page,int pageSize) throws EFException {
 		PREPARE(false, false);
 		try {
 			if (!ISLINK())
@@ -55,7 +56,7 @@ public class FilesReader extends ReaderFlowSocket {
 			this.dataPage.putData(this.dataUnit);
 			this.dataPage.put(GlobalParam.READER_STATUS,true);
 		} catch (Exception e) {
-			log.error("get dataPage Exception", e);
+			throw new EFException(e);	
 		} finally {
 			REALEASE(false, true);
 		}
@@ -63,7 +64,7 @@ public class FilesReader extends ReaderFlowSocket {
 	}
 
 	@Override
-	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) {
+	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) throws EFException {
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>(); 
 		boolean releaseConn = false;
 		PREPARE(false, false);
@@ -81,7 +82,9 @@ public class FilesReader extends ReaderFlowSocket {
 	        page.push(String.valueOf(lineNo));
 		} catch (Exception e) {
 			releaseConn = true;
-			log.error("getPageSplit Exception", e);
+			this.dataPage.put(GlobalParam.READER_STATUS,false);
+			log.error("get dataPage Exception will auto free connection!");
+			throw new EFException(e);	
 		} finally {
 			REALEASE(false, releaseConn);
 		}

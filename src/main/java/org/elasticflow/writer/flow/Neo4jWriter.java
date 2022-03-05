@@ -85,7 +85,7 @@ public class Neo4jWriter extends WriterFlowSocket {
 		
 	}
 	
-	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) { 
+	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) throws EFException { 
 		if (isIncrement)
 			return "a";
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);

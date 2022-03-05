@@ -18,6 +18,7 @@ import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.node.CPU;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.yarn.Resource;
 
@@ -33,7 +34,7 @@ public class Track extends Instruction {
 
 	static HashMap<String, HashMap<String, Object>> tmpStore = new HashMap<>();
 
-	public static boolean cpuPrepare(Context context, Object[] args) {
+	public static boolean cpuPrepare(Context context, Object[] args) throws EFException {
 		if (context != null)
 			return true;
 		String L1seq = null;

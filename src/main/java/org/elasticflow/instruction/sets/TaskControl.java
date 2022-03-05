@@ -14,6 +14,7 @@ import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.yarn.Resource;
 
@@ -53,7 +54,7 @@ public class TaskControl extends Instruction {
 		}
 	}
 
-	public static void setIncrementPosition(Context context, Object[] args) {
+	public static void setIncrementPosition(Context context, Object[] args) throws EFException {
 		if (!isValid(1, args)) {
 			Common.LOG.error("moveFullPosition parameter not match!");
 			return;

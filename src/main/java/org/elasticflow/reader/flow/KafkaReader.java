@@ -64,13 +64,13 @@ public class KafkaReader extends ReaderFlowSocket {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void initFlow() {
+	public void initFlow() throws EFException {
 		PREPARE(true, false);
 		this.conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader);
 	}
 	 
 	@Override
-	public DataPage getPageData(final Page page, int pageSize) {
+	public DataPage getPageData(final Page page, int pageSize) throws EFException {
 		if (this.records == null) {
 			return this.dataPage;
 		}
@@ -117,8 +117,13 @@ public class KafkaReader extends ReaderFlowSocket {
 			releaseConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS, false);
 			REALEASE(false, releaseConn);
-			this.initFlow();
-			log.error("get Page Data Exception so free connection,details ", e);
+			try {
+				this.initFlow();
+			} catch (EFException e1) {
+				throw e1;
+			}
+			log.error("get dataPage Exception will auto free connection!");
+			throw new EFException(e);
 		}  
 		return this.dataPage;
 	}
@@ -140,7 +145,7 @@ public class KafkaReader extends ReaderFlowSocket {
 	}
 	
 	@Override
-	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) {
+	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) throws EFException {
 		boolean releaseConn = false;
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>(); 
 		try {
@@ -160,8 +165,13 @@ public class KafkaReader extends ReaderFlowSocket {
 			releaseConn = true;
 			page.clear();
 			REALEASE(false, releaseConn);
-			this.initFlow();
-			log.error("Error in getting Kafka data, the connection will be cleared automatically.", e);
+			try {
+				this.initFlow();
+			} catch (EFException e1) {
+				throw e1;
+			}
+			log.error("get page splits exception will auto free connection!");
+			throw new EFException(e);	
 		}  
 		return page;
 	}

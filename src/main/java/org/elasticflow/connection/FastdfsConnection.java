@@ -11,9 +11,7 @@ import org.elasticflow.param.warehouse.WarehouseParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FastdfsConnection extends EFConnectionSocket<StorageClient> {
-	
-	private StorageClient conn = null;
+public class FastdfsConnection extends EFConnectionSocket<StorageClient> { 
 	
 	private final static Logger log = LoggerFactory.getLogger(EsConnection.class);
 	
@@ -42,21 +40,7 @@ public class FastdfsConnection extends EFConnectionSocket<StorageClient> {
 			return false;
 		}
 		return true;
-	}
-
-	@Override
-	public StorageClient getConnection(END_TYPE endtype) {
-		int tryTime = 0;
-		try {
-			while (tryTime < 5 && !connect(endtype)) {
-				tryTime++;
-				Thread.sleep(2000);
-			}
-		} catch (Exception e) {
-			log.error("try to get Connection Exception,", e);
-		}
-		return this.conn;
-	}
+	} 
 
 	@Override
 	public boolean status() {
@@ -65,8 +49,9 @@ public class FastdfsConnection extends EFConnectionSocket<StorageClient> {
 				return true;
 			}
 		} catch (Exception e) {
-			log.error("get status Exception,", e);
+			log.error("get status Exception", e);
 		}
+		this.conn = null;
 		return false;
 	}
 

@@ -2,6 +2,7 @@ package org.elasticflow.connection;
 
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
+import org.elasticflow.util.EFException;
 
 /** 
  * @author chengwen
@@ -17,9 +18,9 @@ public abstract class EFConnectionSocket<T>{
 	
 	private String infos="";
 	
-	protected abstract boolean connect(END_TYPE endType); 
+	protected T conn;
 	
-	public abstract T getConnection(END_TYPE endtype);
+	protected abstract boolean connect(END_TYPE endType); 
 	
 	public abstract boolean status();
 	
@@ -39,6 +40,19 @@ public abstract class EFConnectionSocket<T>{
 	
 	public ConnectParams getConnectParams(){
 		return this.connectParams;
+	}
+	
+	public T getConnection(END_TYPE endType) throws EFException{
+		int tryTime = 0;
+		while (tryTime < 5 && !connect(endType)) {
+			tryTime++;
+			try {
+				Thread.sleep(1000+tryTime*500);
+			} catch (InterruptedException e) {
+				throw new EFException(e);
+			}
+		}
+		return this.conn;
 	}
 	
 	public void setInfos(String infos) {

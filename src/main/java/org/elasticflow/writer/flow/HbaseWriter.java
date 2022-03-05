@@ -52,12 +52,6 @@ public class HbaseWriter extends WriterFlowSocket {
 		}
 		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq());
 	} 
-	
-	
-	private Table getTable() { 
-		return (Table) GETSOCKET().getConnection(END_TYPE.writer);
-	}
-
 	 
 	@Override
 	public void write(InstanceConfig instanceConfig,PipeDataUnit unit,String instantcName, String storeId,boolean isUpdate) throws EFException { 
@@ -147,6 +141,10 @@ public class HbaseWriter extends WriterFlowSocket {
 	@Override
 	public boolean storePositionExists(String storeName) {
 		return true;
+	}
+	
+	private Table getTable() throws EFException { 
+		return (Table) GETSOCKET().getConnection(END_TYPE.writer);
 	}
  
 }

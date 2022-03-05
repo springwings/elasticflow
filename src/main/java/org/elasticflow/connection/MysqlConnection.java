@@ -17,8 +17,6 @@ import org.slf4j.LoggerFactory;
  */
 public class MysqlConnection extends EFConnectionSocket<Connection> {
 
-	private Connection conn = null;
-
 	private final static Logger log = LoggerFactory.getLogger("Mysql Socket");
 
 	static {
@@ -50,20 +48,6 @@ public class MysqlConnection extends EFConnectionSocket<Connection> {
 			log.error(this.connectParams.getWhp().getHost() + " connect Exception,", e);
 			return false;
 		}
-	}
-
-	@Override
-	public Connection getConnection(END_TYPE endType) {
-		int tryTime = 0;
-		try {
-			while (tryTime < 5 && !connect(endType)) {
-				tryTime++;
-				Thread.sleep(2000);
-			}
-		} catch (Exception e) {
-			log.error("try to get Connection Exception,", e);
-		}
-		return this.conn;
 	}
 
 	@Override

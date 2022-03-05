@@ -72,15 +72,6 @@ public class MysqlWriter extends WriterFlowSocket {
 		}
 	}
 
-	private void insertDb(String sql) {
-		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
-		try (PreparedStatement statement = conn.prepareStatement(sql);) {
-			statement.execute();
-		} catch (Exception e) {
-			log.error("PreparedStatement Exception", e);
-		}
-	} 
-
 	@Override
 	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) throws EFException{
 		String name = Common.getStoreName(mainName, storeId);
@@ -110,7 +101,7 @@ public class MysqlWriter extends WriterFlowSocket {
 	}
 
 	@Override
-	public void removeInstance(String instance, String storeId) {
+	public void removeInstance(String instance, String storeId) throws EFException {
 		String name = Common.getStoreName(instance, storeId);
 		PREPARE(false, false);
 		if (!ISLINK())
@@ -137,9 +128,24 @@ public class MysqlWriter extends WriterFlowSocket {
 		// TODO Auto-generated method stub
 
 	}
+	
+	@Override
+	public boolean storePositionExists(String storeName) throws EFException {
+		String checkdatabase = "show databases like \"" + storeName + "\"";
+		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
+		try (PreparedStatement stat = conn.prepareStatement(checkdatabase);) {
+			ResultSet resultSet = stat.executeQuery();
+			if (resultSet.next()) {
+				return true;
+			}
+		} catch (Exception e) {
+			log.error("store Position check Exception", e);
+		}
+		return false;
+	}
 
 	@Override
-	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
+	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) throws EFException {
 		String select = "b";
 		boolean releaseConn = false;
 		PREPARE(false, false);
@@ -190,20 +196,15 @@ public class MysqlWriter extends WriterFlowSocket {
 				+ instanceConfig.getWriterParams().getWriteKey() + "`) USING BTREE ");
 		String tmp = sf.substring(0, sf.length() - 1);
 		return tmp + ");";
-	}
+	} 
 
-	@Override
-	public boolean storePositionExists(String storeName) {
-		String checkdatabase = "show databases like \"" + storeName + "\"";
+	private void insertDb(String sql) throws EFException {
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
-		try (PreparedStatement stat = conn.prepareStatement(checkdatabase);) {
-			ResultSet resultSet = stat.executeQuery();
-			if (resultSet.next()) {
-				return true;
-			}
+		try (PreparedStatement statement = conn.prepareStatement(sql);) {
+			statement.execute();
 		} catch (Exception e) {
-			log.error("store Position check Exception", e);
+			log.error("PreparedStatement Exception", e);
 		}
-		return false;
-	}
+	} 
+
 }

@@ -108,10 +108,10 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 		try {
 			while (tryTime < 5 && !connect(endType)) {
 				tryTime++;
-				Thread.sleep(2000);
+				Thread.sleep(1000+tryTime*500);
 			}
 		} catch (Exception e) {
-			log.error("try to get Connection Exception,", e);
+			log.error("get connection exception", e);
 		}
 		if(endType==END_TYPE.reader) {
 			return this.cconn;

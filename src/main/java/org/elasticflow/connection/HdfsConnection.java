@@ -21,8 +21,6 @@ public class HdfsConnection extends EFConnectionSocket<FileSystem> {
 	
 	final String DEFAULT_KEY = "username";
 	
-	private FileSystem conn = null;
-	
 	private final static Logger log = LoggerFactory.getLogger("Hdfs Socket");
 	
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
@@ -52,19 +50,6 @@ public class HdfsConnection extends EFConnectionSocket<FileSystem> {
 		return true;
 	}
 
-	@Override
-	public FileSystem getConnection(END_TYPE endtype) {
-		int tryTime = 0;
-		try {
-			while (tryTime < 5 && !connect(endtype)) {
-				tryTime++;
-				Thread.sleep(2000);
-			}
-		} catch (Exception e) {
-			log.error("try to get Connection Exception,", e);
-		}
-		return this.conn;		
-	}
 
 	@Override
 	public boolean status() {

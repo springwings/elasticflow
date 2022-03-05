@@ -39,7 +39,7 @@ public class OracleReader extends ReaderFlowSocket{
  
 
 	@Override
-	public DataPage getPageData(final Page page,int pageSize) {
+	public DataPage getPageData(final Page page,int pageSize) throws EFException {
 		boolean releaseConn = false;
 		PREPARE(false,false); 
 		if(!ISLINK())
@@ -58,13 +58,16 @@ public class OracleReader extends ReaderFlowSocket{
 				} 
 				this.dataPage.put(GlobalParam.READER_STATUS,true);
 			} catch (Exception e) {
-				log.error("get data Page Exception", e);
+				throw new EFException(e);
 			} 
-		} catch (SQLException e){ 
-			log.error(page.getAdditional() + " get dataPage SQLException", e);
+		} catch (SQLException e){  
+			EFException err = new EFException(e);
+			err.track(page.getAdditional());
+			throw err;
 		} catch (Exception e) { 
 			releaseConn = true;
-			log.error("get dataPage Exception so free connection,details ", e);
+			log.error("get dataPage Exception will auto free connection!");
+			throw new EFException(e);
 		}finally{
 			REALEASE(false,releaseConn);
 		} 
@@ -72,7 +75,7 @@ public class OracleReader extends ReaderFlowSocket{
 	}
 
 	@Override
-	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) {
+	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) throws EFException {
 		String sql;
 		if(task.getScanParam().getPageScanDSL()!=null){
 			sql = " select "+GlobalParam._page_field+" as id,ROWNUM AS EF_ROW_ID from ("
@@ -131,18 +134,22 @@ public class OracleReader extends ReaderFlowSocket{
 			} 
 		}catch(SQLException e){
 			page = null;
-			log.error("get dataPage SQLException "+sql, e);
+			EFException err = new EFException(e);
+			err.track(sql);
+			throw err;
 		}catch (Exception e) {
 			releaseConn = true;
 			page = null;
-			log.error("get dataPage Exception so free connection,details ", e);
+			log.error("get page splits exception will auto free connection!");
+			throw new EFException(e);			
 		}finally{ 
 			try {
 				statement.close();
 				rs.close();
 			} catch (Exception e) {
-				releaseConn = true;
-				log.error("close connection resource Exception", e);
+				releaseConn = true; 
+				log.error("close connection resource Exception!");
+				throw new EFException(e);	
 			} 
 			REALEASE(false,releaseConn);  
 		}  
@@ -173,9 +180,11 @@ public class OracleReader extends ReaderFlowSocket{
 				this.dataUnit.add(u);
 			}
 			rs.close();
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			this.dataPage.put(GlobalParam.READER_STATUS,false);
-			log.error("get page data SQLException,", e);
+			EFException err = new EFException(e);
+			err.track("get page data exception");
+			throw err;
 		}
 		if (LAST_STAMP==null){ 
 			this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis()); 

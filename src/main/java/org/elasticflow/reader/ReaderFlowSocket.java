@@ -41,7 +41,7 @@ public abstract class ReaderFlowSocket extends Flow{
 	} 
 	
 	@Override
-	public void initFlow() {
+	public void initFlow() throws EFException{
 		//auto invoke in flow prepare
 	}
 	
@@ -61,9 +61,9 @@ public abstract class ReaderFlowSocket extends Flow{
 		return dataPage;
 	}
 	 
-	public abstract DataPage getPageData(final Page page,int pageSize);
+	public abstract DataPage getPageData(final Page page,int pageSize) throws EFException;
 
-	public abstract ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize);
+	public abstract ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) throws EFException;
 	
 	/**
 	 * Transaction confirmation

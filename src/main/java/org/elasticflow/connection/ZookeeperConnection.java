@@ -18,8 +18,6 @@ public class ZookeeperConnection extends EFConnectionSocket<ZooKeeper> {
 
 	private final static int CONNECTION_TIMEOUT = 50000; 
 	
-	private ZooKeeper conn; 
-	
 	private final static Logger log = LoggerFactory
 			.getLogger("Zookeeper Socket");
 
@@ -42,20 +40,6 @@ public class ZookeeperConnection extends EFConnectionSocket<ZooKeeper> {
 			}
 		}
 		return true;
-	}
-
-	@Override
-	public ZooKeeper getConnection(END_TYPE endType) {
-		int tryTime = 0;
-		try {
-			while (tryTime < 5 && !connect(endType)) {
-				tryTime++;
-				Thread.sleep(2000);
-			}
-		} catch (Exception e) {
-			log.error("try to get Connection Exception,", e);
-		}
-		return this.conn;
 	}
 
 	@Override

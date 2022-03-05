@@ -14,6 +14,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.elasticflow.config.GlobalParam;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFHttpClientUtil;
 import org.slf4j.Logger;
@@ -150,22 +151,22 @@ public class VearchConnector {
 	public void writeBatch(String table, CopyOnWriteArrayList<Object> datas) throws Exception {
 		HttpPost rooter_post = new HttpPost(this.method + this.ROOTER + "/" + this.dbName + "/" + table + "/_bulk");
 		rooter_post.addHeader("Content-Type", "application/json;charset=UTF-8");
-		StringBuffer sb = new StringBuffer();
+		StringBuffer dt = new StringBuffer();
 		int i = 0;
 		if(datas.size()%2!=0) {
 			throw new EFException("Dirty data Exception.");
 		}
 		while (i < datas.size()) {
-			sb.append("\n" + String.valueOf(datas.get(i)) + "\n");
-			sb.append(datas.get(i + 1).toString());
+			dt.append("\n" + String.valueOf(datas.get(i)) + "\n");
+			dt.append(datas.get(i + 1).toString());
 			i += 2;
 		}
-		StringEntity params = new StringEntity(sb.toString().trim());
+		StringEntity params = new StringEntity(dt.toString().trim());
 		params.setContentEncoding("UTF-8");
 		rooter_post.setEntity(params);
 		HttpResponse response = this.httpClient.execute(rooter_post);
 		String str = "";
-		sb = new StringBuffer();
+		StringBuffer sb = new StringBuffer();
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 		while ((str=rd.readLine())!=null) {
 			sb.append(str);
@@ -179,8 +180,11 @@ public class VearchConnector {
 		
 		for (int j = 0; j < ja.size(); j++) {
 			JSONObject jo = JSONObject.parseObject(ja.getString(j));
-			if (Integer.valueOf(String.valueOf(jo.get("status"))) != 200)
+			if (Integer.valueOf(String.valueOf(jo.get("status"))) != 200) {
+				if(GlobalParam.DEBUG)
+					log.warn(dt.toString());
 				throw new EFException("write data Exception," + jo.get("error"));
+			}				
 		}
 	}
 

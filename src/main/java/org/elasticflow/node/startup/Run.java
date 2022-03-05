@@ -202,8 +202,9 @@ public final class Run {
 			} else {
 				GlobalParam.StartConfig = Common.loadProperties(path);				
 			}
+			Common.LOG.info("load {} Config success!", path);
 		} catch (Exception e) { 
-			Common.LOG.error("load Global Properties Config Exception", e);
+			Common.LOG.error("load {} Config Exception", path,e);
 			Common.stopSystem(false);
 		}
 		GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");

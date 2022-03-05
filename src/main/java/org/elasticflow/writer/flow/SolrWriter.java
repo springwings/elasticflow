@@ -238,7 +238,17 @@ public class SolrWriter extends WriterFlowSocket{
 			log.error("index " + name + " optimize failed.",e); 
 		} 
 	} 
-
+	
+	@Override
+	public boolean storePositionExists(String storeName) {
+		SolrQuery qb = new SolrQuery();
+		try {
+			getSolrConn().query(storeName, qb);
+			return true;
+		} catch (Exception e) {
+			return false;
+		} 
+	}
 	
 	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
 		String b = Common.getStoreName(mainName, "b");
@@ -449,25 +459,13 @@ public class SolrWriter extends WriterFlowSocket{
 				log.error("zk close Exception,",e); 
 			}
 		} 
-	}
-	 
+	} 
 	
-	private CloudSolrClient getSolrConn() { 
+	private CloudSolrClient getSolrConn() throws EFException { 
 		synchronized (this) {
 			if(this.CONNS==null)
 				this.CONNS = (CloudSolrClient) GETSOCKET().getConnection(END_TYPE.writer);
 			return this.CONNS;
-		} 
-	}
-
-	@Override
-	public boolean storePositionExists(String storeName) {
-		SolrQuery qb = new SolrQuery();
-		try {
-			getSolrConn().query(storeName, qb);
-			return true;
-		} catch (Exception e) {
-			return false;
 		} 
 	}
 }

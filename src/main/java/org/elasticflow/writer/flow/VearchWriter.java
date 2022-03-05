@@ -70,7 +70,7 @@ public class VearchWriter extends WriterFlowSocket {
 
 
 	@Override
-	public boolean storePositionExists(String storeName) {		
+	public boolean storePositionExists(String storeName) throws EFException {		
 		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 		return conn.checkSpaceExists(storeName);
 	}
@@ -146,7 +146,7 @@ public class VearchWriter extends WriterFlowSocket {
 	}
 
 	@Override
-	public void removeInstance(String instance, String storeId) {
+	public void removeInstance(String instance, String storeId) throws EFException {
 		String name = Common.getStoreName(instance, storeId);
 		PREPARE(false, false);
 		if (!ISLINK())

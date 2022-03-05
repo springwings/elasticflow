@@ -23,7 +23,6 @@ public class HbaseConnection extends EFConnectionSocket<Table>{
 	final String DEFAULT_KEY = "tableColumnFamily";
 	private Configuration hbaseConfig;
 	private Connection Hconn;
-	private Table conn;
 
 	public static EFConnectionSocket<?> getInstance(ConnectParams connectParams) {
 		EFConnectionSocket<?> o = new HbaseConnection();
@@ -61,20 +60,6 @@ public class HbaseConnection extends EFConnectionSocket<Table>{
 			} 
 			this.hbaseConfig.set("hbase.client.write.buffer", "5242880");
 		}
-	}
-
-	@Override
-	public Table getConnection(END_TYPE endType) {
-		int tryTime = 0;
-		try {
-			while (tryTime < 5 && !connect(endType)) {
-				tryTime++;
-				Thread.sleep(2000);
-			}
-		} catch (Exception e) {
-			log.error("try to get Connection Exception,", e);
-		}
-		return this.conn;
 	}
 
 	@Override

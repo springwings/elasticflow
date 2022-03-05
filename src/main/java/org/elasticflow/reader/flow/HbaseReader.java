@@ -24,6 +24,7 @@ import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
+import org.elasticflow.util.EFException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +60,7 @@ public class HbaseReader extends ReaderFlowSocket {
 	}
  
 	@Override
-	public DataPage getPageData(final Page page,int pageSize) { 
+	public DataPage getPageData(final Page page,int pageSize) throws EFException { 
 		PREPARE(false,false);
 		boolean releaseConn = false;
 		try {
@@ -118,11 +119,13 @@ public class HbaseReader extends ReaderFlowSocket {
 			} catch (Exception e) {
 				releaseConn = true;
 				this.dataPage.put(GlobalParam.READER_LAST_STAMP, -1);
-				log.error("SqlReader init Exception", e);
+				log.error("get dataPage Exception will auto free connection!");
+				throw new EFException(e);
 			} 
 		} catch (Exception e) {
 			releaseConn = true;
-			log.error("get dataPage Exception", e);
+			log.error("get dataPage Exception will auto free connection!");
+			throw new EFException(e);
 		}finally{
 			REALEASE(false,releaseConn);
 		} 
@@ -130,7 +133,7 @@ public class HbaseReader extends ReaderFlowSocket {
 	}
 
 	@Override
-	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) {
+	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) throws EFException {
 		int i = 0;
 		ConcurrentLinkedDeque<String> dt = new ConcurrentLinkedDeque<>(); 
 		PREPARE(false,false);
@@ -162,7 +165,8 @@ public class HbaseReader extends ReaderFlowSocket {
 			}
 		} catch (Exception e) {
 			releaseConn = true;
-			log.error("getPageSplit Exception", e);
+			log.error("get page splits exception will auto free connection!");
+			throw new EFException(e);
 		}finally{ 
 			REALEASE(false,releaseConn);
 		}

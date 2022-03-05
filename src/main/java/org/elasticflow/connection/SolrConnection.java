@@ -16,8 +16,7 @@ import org.slf4j.LoggerFactory;
 public class SolrConnection extends EFConnectionSocket<CloudSolrClient> {
 
 	private final static int zkClientTimeout = 180000;
-	private final static int zkConnectTimeout = 60000;
-	private CloudSolrClient conn = null;
+	private final static int zkConnectTimeout = 60000; 
 
 	private final static Logger log = LoggerFactory.getLogger("Solr Socket");
 
@@ -40,21 +39,7 @@ public class SolrConnection extends EFConnectionSocket<CloudSolrClient> {
 			return false;
 		}
 		return true;
-	}
-
-	@Override
-	public CloudSolrClient getConnection(END_TYPE endType) {
-		int tryTime = 0;
-		try {
-			while (tryTime < 5 && !connect(endType)) {
-				tryTime++;
-				Thread.sleep(2000);
-			}
-		} catch (Exception e) {
-			log.error("try to get Connection Exception,", e);
-		}
-		return this.conn;
-	}
+	} 
 
 	@Override
 	public boolean status() {

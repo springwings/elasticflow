@@ -109,7 +109,7 @@ public abstract class WriterFlowSocket extends Flow{
 	/**Create storage instance*/
 	public abstract boolean create(String mainName, String storeId, InstanceConfig instanceConfig) throws EFException;
 	
-	public abstract boolean storePositionExists(String storeName);
+	public abstract boolean storePositionExists(String storeName) throws EFException;
 	
 	/**write one row data **/
 	public abstract void write(InstanceConfig instanceConfig,PipeDataUnit unit,String instance, String storeId,boolean isUpdate) throws EFException;
@@ -117,11 +117,11 @@ public abstract class WriterFlowSocket extends Flow{
 	/**Delete a single record through the key id*/ 
 	public abstract void delete(String instance, String storeId,String keyColumn,String keyVal) throws EFException;
   
-	public abstract void removeInstance(String instance, String storeId);
+	public abstract void removeInstance(String instance, String storeId)  throws EFException;
 	
 	protected abstract String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) throws EFException;
 	
-	public abstract void setAlias(String instance, String storeId, String aliasName); 
+	public abstract void setAlias(String instance, String storeId, String aliasName)  throws EFException; 
 	
 	/**
 	 * Transaction confirmation

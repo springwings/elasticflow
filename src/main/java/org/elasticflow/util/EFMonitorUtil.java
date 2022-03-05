@@ -216,13 +216,18 @@ public class EFMonitorUtil {
 	 * @return
 	 */
 	public static JSONObject getPipeEndStatus(String instance, String L1seq) {
-		PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instance, L1seq, false,
-				GlobalParam.FLOW_TAG._DEFAULT.name());
 		JSONObject res = new JSONObject();  
 		res.put(END_TYPE.reader.name(), "Not started!");
 		res.put(END_TYPE.computer.name(), "Not started!");
 		res.put(END_TYPE.computer.name(), "Not started!");
 		res.put("status", "offline");
+		PipePump pipePump = null;
+		try {
+			pipePump = Resource.SOCKET_CENTER.getPipePump(instance, L1seq, false,
+					GlobalParam.FLOW_TAG._DEFAULT.name());
+		} catch (EFException e) {
+			Common.LOG.error("",e);
+		} 
 		if(pipePump!=null) {
 			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
 			if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) { 

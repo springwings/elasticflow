@@ -411,33 +411,34 @@ public class EsWriter extends WriterFlowSocket {
 		}
 		return select;
 	}
-
-	private long getDocumentNums(String instance, String storeId) throws IOException {
+ 
+	@Override
+	public boolean storePositionExists(String storeName) throws EFException {
+		try {
+			return getESC().getClient().indices().exists(new GetIndexRequest(storeName),
+					RequestOptions.DEFAULT);
+		} catch (IOException e) {
+			throw new EFException(e);
+		} catch (EFException e) {
+			throw e;
+		}
+	}
+	
+	private long getDocumentNums(String instance, String storeId) throws Exception {
 		String iName = Common.getStoreName(instance, storeId);
 		CountRequest countRequest = new CountRequest(iName);
 		CountResponse response = getESC().getClient().count(countRequest, RequestOptions.DEFAULT);
 		return response.getCount();
 	}
 
-	private boolean getIndexAlias(String instanceName, String storeId, String alias) throws IOException {
+	private boolean getIndexAlias(String instanceName, String storeId, String alias) throws Exception {
 		String iName = Common.getStoreName(instanceName, storeId);
 		GetIndexRequest request = new GetIndexRequest(iName);
 		boolean exists = getESC().getClient().indices().exists(request, RequestOptions.DEFAULT);
 		return exists;
 	}
-
-	@Override
-	public boolean storePositionExists(String storeName) {
-		try {
-			return getESC().getClient().indices().exists(new GetIndexRequest(storeName),
-					RequestOptions.DEFAULT);
-		} catch (IOException e) {
-			log.error("store Position check IOException", e);
-		}
-		return false;
-	}
 	
-	private synchronized EsConnector getESC() {
+	private synchronized EsConnector getESC() throws EFException {
 		if (this.CONNS == null || reconn) {
 			reconn = false;
 			this.CONNS = (EsConnector) GETSOCKET().getConnection(END_TYPE.writer);

@@ -711,15 +711,20 @@ public final class NodeMonitor {
 					EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
 					for (String L1seq : L1seqs) {
 						String tags = Common.getResourceTag(instance, L1seq, GlobalParam.FLOW_TAG._DEFAULT.name(),
-								false);
-						WriterFlowSocket wfs = Resource.SOCKET_CENTER.getWriterSocket(
-								Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getWriteTo(),
-								instance, L1seq, tags);
-						wfs.PREPARE(false, false);
-						if (wfs.ISLINK()) {
-							wfs.removeInstance(instance, GlobalParam.TASK_COORDER.getStoreIdFromSave(instance, L1seq, true));
-							wfs.REALEASE(false, false);
-						}
+								false); 
+						try {
+							WriterFlowSocket wfs = Resource.SOCKET_CENTER.getWriterSocket(
+									Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getWriteTo(),
+									instance, L1seq, tags);
+							wfs.PREPARE(false, false);
+							if (wfs.ISLINK()) {
+								wfs.removeInstance(instance, GlobalParam.TASK_COORDER.getStoreIdFromSave(instance, L1seq, true));
+								wfs.REALEASE(false, false);
+							}
+						} catch (EFException e) {
+							state = false;
+							Common.LOG.error("delete Instance Data",e);
+						} 
 					}
 					EFMonitorUtil.controlInstanceState(instance, STATUS.Ready, true);
 				}

@@ -55,8 +55,9 @@ public class Pipe extends Instruction {
 	/**
 	 * @param args
 	 *            parameter order is: Page page,ReaderFlowSocket RFS
+	 * @throws EFException 
 	 */
-	public static DataPage fetchPage(Context context, Object[] args) { 
+	public static DataPage fetchPage(Context context, Object[] args) throws EFException { 
 		if (!isValid(2, args)) {
 			log.error("fetchPage parameter not match!");
 			return null;

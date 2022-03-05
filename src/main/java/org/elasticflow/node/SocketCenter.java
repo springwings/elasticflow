@@ -25,6 +25,7 @@ import org.elasticflow.searcher.Searcher;
 import org.elasticflow.searcher.SearcherFlowSocket;
 import org.elasticflow.searcher.SearcherSocketFactory;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.writer.WriterSocketFactory;
 import org.elasticflow.yarn.Resource;
@@ -63,8 +64,9 @@ public final class SocketCenter {
 	 * @param instance  data source main tag name
 	 * @param needReset for reset resource
 	 * @param tag       Marking resource
+	 * @throws EFException 
 	 */
-	public PipePump getPipePump(String instance, String L1seq, boolean needReset, String tag) {
+	public PipePump getPipePump(String instance, String L1seq, boolean needReset, String tag) throws EFException {
 		synchronized (pipePumpMap) {
 			String tags = Common.getResourceTag(instance, L1seq, tag, false);
 			if (!pipePumpMap.containsKey(tags) || needReset) {
@@ -128,7 +130,7 @@ public final class SocketCenter {
 		}
 	}
 
-	public ReaderFlowSocket getReaderSocket(String resourceName, String instance, String L1seq, String tag) {
+	public ReaderFlowSocket getReaderSocket(String resourceName, String instance, String L1seq, String tag) throws EFException {
 		synchronized (readerSocketMap) {
 			boolean ignoreSeqUseAlias = false;
 			if (Resource.nodeConfig.getInstanceConfigs().get(instance) != null)
@@ -156,7 +158,7 @@ public final class SocketCenter {
 		}
 	}
 
-	public ComputerFlowSocket getComputerSocket(String instance, String L1seq, String tag, boolean reload) {
+	public ComputerFlowSocket getComputerSocket(String instance, String L1seq, String tag, boolean reload) throws EFException {
 		String tags = Common.getResourceTag(instance, L1seq, tag, false);
 		synchronized (computerSocketMap) {
 			if (reload || !computerSocketMap.containsKey(tags)) {
@@ -168,7 +170,7 @@ public final class SocketCenter {
 		return computerSocketMap.get(tags);
 	}
 
-	public WriterFlowSocket getWriterSocket(String resourceName, String instance, String L1seq, String tag) {
+	public WriterFlowSocket getWriterSocket(String resourceName, String instance, String L1seq, String tag) throws EFException {
 		synchronized (writerSocketMap) { 
 			String tags = Common.getResourceTag(instance, L1seq, tag, false);
 			if (!writerSocketMap.containsKey(tags)) {
