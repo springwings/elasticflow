@@ -202,9 +202,9 @@ public class EFMonitorUtil {
 				}
 				GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
 				if (GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), STATUS.Termination, state, true)) {
-					Common.LOG.info("Instance {} L1seq {} success set state {}.",inst,(L1seq.length()==0?GlobalParam.DEFAULT_SEQ:L1seq),state);
+					Common.LOG.info("Instance {} L1seq {},job type {} success set state {}.",inst,(L1seq.length()==0?GlobalParam.DEFAULT_SEQ:L1seq),controlType.name(),state);
 				} else {
-					Common.LOG.info("Instance {} L1seq {} fail set state {}.",inst,(L1seq.length()==0?GlobalParam.DEFAULT_SEQ:L1seq),state);
+					Common.LOG.info("Instance {} L1seq {},job type {} fail set state {}.",inst,(L1seq.length()==0?GlobalParam.DEFAULT_SEQ:L1seq),controlType.name(),state);
 				}
 			}
 		}
