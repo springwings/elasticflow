@@ -3,6 +3,7 @@ package org.elasticflow.node;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFNodeUtil;
+import org.elasticflow.yarn.coord.ReportStatus;
 import org.elasticflow.yarn.monitor.ResourceMonitor;
 
 /**
@@ -18,15 +19,17 @@ public class SafeShutDown extends Thread{
 			if(EFNodeUtil.isMaster()) {
 				GlobalParam.INSTANCE_COORDER.distributeCoorder().stopNodes();
 			}else {
-				try {
-					Common.LOG.info("start leave cluser..."); 
-					ResourceMonitor.stop();
-					GlobalParam.DISCOVERY_COORDER.leaveCluster(GlobalParam.IP, GlobalParam.NODEID);					
-					Common.LOG.info("leave cluser success.");
-				} catch (Exception e) {
-					Common.LOG.warn("leave cluster failed, master is offline.");					
-				}
-				Common.stopSystem(false);
+				if(ReportStatus.heartBeatIsOn()) {
+					try {
+						Common.LOG.info("start leave cluser..."); 
+						ResourceMonitor.stop();
+						GlobalParam.DISCOVERY_COORDER.leaveCluster(GlobalParam.IP, GlobalParam.NODEID);					
+						Common.LOG.info("leave cluser success.");
+					} catch (Exception e) {
+						Common.LOG.warn("leave cluster failed, master is offline.");					
+					}
+					Common.stopSystem(false);
+				} 
 			}
 		}else {
 			stopAllInstances();

@@ -23,10 +23,14 @@ import org.elasticflow.yarn.Resource;
  */
 public final class ReportStatus {
 	
-	static boolean openHeartBeat = true;
+	private static boolean openHeartBeat = true;
 	
 	public static void closeHeartBeat() {
 		openHeartBeat = false;
+	}
+	
+	public static boolean heartBeatIsOn() {
+		return openHeartBeat;
 	}
 
 	public static void openHeartBeat() {

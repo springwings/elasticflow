@@ -139,9 +139,9 @@ public class DistributeCoorder {
 			if (this.containsNode(nodeId)) {
 				EFNode node = this.removeNode(nodeId);
 				Queue<String> instances = new LinkedList<String>();
-				instances.addAll(node.getBindInstances());
-				node.stopAllInstance();
+				instances.addAll(node.getBindInstances()); 
 				Common.LOG.warn("ip {},nodeId {},leave cluster!",ip,nodeId); 
+				node.stopAllInstance();
 				if (nodes.size() < GlobalParam.CLUSTER_MIN_NODES) { 
 					stopNodes();
 					Common.LOG.warn(
