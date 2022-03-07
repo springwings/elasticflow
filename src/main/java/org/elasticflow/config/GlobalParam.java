@@ -50,12 +50,9 @@ public final class GlobalParam {
 	public static boolean WRITE_BATCH = false;
 	/**#1 searcher service  2 writer service 4 http reader service 8 instruction service 16 compute service*/
 	public static int SERVICE_LEVEL;
-	/**store zookeeper data path*/
+
 	public static String CONFIG_PATH;
-	
-	/**use zookeeper to store config contents***/
-	public static boolean USE_ZK;
-	
+		
 	public static String INSTANCE_PATH;
 	
 	public static String IP; 
@@ -121,7 +118,7 @@ public final class GlobalParam {
 	} 
 	
 	public static enum DATA_SOURCE_TYPE{
-		MYSQL, ORACLE, HIVE, ES, SOLR, HBASE,ZOOKEEPER,UNKNOWN,H2,FILES,NEO4J,KAFKA,VEARCH,HDFS,FASTDFS
+		MYSQL, ORACLE, HIVE, ES, SOLR, HBASE,UNKNOWN,H2,FILES,NEO4J,KAFKA,VEARCH,HDFS,FASTDFS
 	}  
 	public static enum FLOW_TAG {
 		_DEFAULT,_MOP

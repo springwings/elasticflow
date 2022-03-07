@@ -36,7 +36,6 @@ import org.elasticflow.util.EFLoc;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.email.EFEmailSender;
 import org.elasticflow.util.instance.EFDataStorer;
-import org.elasticflow.util.instance.ZKUtil;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.ThreadPools;
 import org.elasticflow.yarn.coordinator.InstanceCoordinator;
@@ -190,9 +189,6 @@ public final class Run {
 			Common.stopSystem(false);
 		}
 		GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");
-		GlobalParam.USE_ZK = Boolean.valueOf(GlobalParam.StartConfig.getProperty("use_zk"));
-		if(GlobalParam.USE_ZK)
-			ZKUtil.setZkHost(GlobalParam.StartConfig.getProperty("zkhost"));
 		GlobalParam.INSTANCE_PATH = (GlobalParam.CONFIG_PATH+"/INSTANCES").intern();
 		
 	}
