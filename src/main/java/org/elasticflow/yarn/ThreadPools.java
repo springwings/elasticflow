@@ -31,9 +31,9 @@ public class ThreadPools {
 
 	private ThreadPoolExecutor cachedThreadPool;
 		
-	public ThreadPools(int instanceNum) {
+	public ThreadPools(int minthread) {
 		waitTask = new LinkedBlockingQueue<>();
-		this.init(instanceNum);	
+		this.init(minthread);	
 	}
 	
 	public int getPoolSize() {

@@ -59,18 +59,19 @@ public final class PipePump extends Instruction implements Serializable {
 	
 	private String instanceID;
 
-	public static PipePump getInstance(String instance,ReaderFlowSocket reader, ComputerFlowSocket computer,
+	public static PipePump getInstance(String contextID,String instance,ReaderFlowSocket reader, ComputerFlowSocket computer,
 			List<WriterFlowSocket> writer, InstanceConfig instanceConfig,String L1seq) {
-		return new PipePump(instance,reader, computer, writer, instanceConfig,L1seq);
+		return new PipePump(contextID,instance,reader, computer, writer, instanceConfig,L1seq);
 	}
 	
 	public String getInstanceID() {
 		return this.instanceID;
 	}
 
-	private PipePump(String instanceID,ReaderFlowSocket reader, ComputerFlowSocket computer, List<WriterFlowSocket> writer,
+	private PipePump(String contextID,String instanceID,ReaderFlowSocket reader, ComputerFlowSocket computer, List<WriterFlowSocket> writer,
 			InstanceConfig instanceConfig,String L1seq) {
-		CPU.prepare(getID(), instanceConfig, writer, reader, computer);
+		setID(contextID);
+		CPU.prepare(contextID, instanceConfig, writer, reader, computer);		
 		this.instanceID = instanceID;
 		fullTask = Task.getInstance(instanceID, L1seq, JOB_TYPE.FULL, instanceConfig, null);
 		incrementTask = Task.getInstance(instanceID, L1seq, JOB_TYPE.INCREMENT, instanceConfig, null);

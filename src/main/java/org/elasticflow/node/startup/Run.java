@@ -9,7 +9,6 @@ package org.elasticflow.node.startup;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
@@ -38,11 +37,8 @@ import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.email.EFEmailSender;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.util.instance.ZKUtil;
-import org.elasticflow.yarn.EFRPCService;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.ThreadPools;
-import org.elasticflow.yarn.coord.DiscoveryCoord;
-import org.elasticflow.yarn.coord.TaskStateCoord;
 import org.elasticflow.yarn.coordinator.InstanceCoordinator;
 import org.elasticflow.yarn.coordinator.TaskStateCoordinator;
 import org.elasticflow.yarn.monitor.ResourceMonitor;
@@ -126,21 +122,7 @@ public final class Run {
 		}
 		
 		if(EFNodeUtil.isSlave()) {
-			Resource.ThreadPools.execute(() -> {
-				boolean redo = true;
-				while (redo) {
-					try {
-						GlobalParam.TASK_COORDER = EFRPCService.getRemoteProxyObj(TaskStateCoord.class, 
-								new InetSocketAddress(GlobalParam.StartConfig.getProperty("master_host"), GlobalParam.MASTER_SYN_PORT));			
-						GlobalParam.DISCOVERY_COORDER = EFRPCService.getRemoteProxyObj(DiscoveryCoord.class, 
-								new InetSocketAddress(GlobalParam.StartConfig.getProperty("master_host"), GlobalParam.MASTER_SYN_PORT));
-						redo = false;
-					} catch (Exception e) { 
-						GlobalParam.TASK_COORDER = null;
-						GlobalParam.DISCOVERY_COORDER = null;
-					}
-				}
-			});
+			EFNodeUtil.initSlaveCoorder();
 		}		
 	}
 	

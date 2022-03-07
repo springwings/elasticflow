@@ -35,11 +35,6 @@ public class CPU {
 		Contexts.put(runId, Context.initContext(instanceConfig, writer,reader,computer));
 	}
 	
-	public static void reIndexContexts(String runId,String newRunId) {
-		Contexts.put(newRunId, Contexts.get(runId));
-		Contexts.remove(runId);
-	}
-	
 	public static Context getContext(String runId) {
 		return Contexts.get(runId);
 	}
@@ -65,7 +60,7 @@ public class CPU {
 			}else if(Contexts.containsKey(runId)) {
 				rs = m.invoke(null,Contexts.get(runId),args);
 			}else {
-				Common.LOG.error("CPU not ready to run!");
+				Common.LOG.error("{} context is not exists!",runId);
 			}
 		}catch (Exception e) {
 			throw Common.getException(e);

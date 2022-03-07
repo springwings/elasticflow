@@ -23,6 +23,7 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFMonitorUtil;
+import org.elasticflow.util.EFPipeUtil;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.util.instance.PipeUtil;
 import org.elasticflow.yarn.Resource;
@@ -214,7 +215,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 			}
 		} catch (EFException e) {
 			Common.LOG.error("instance {},L1seq {},getStoreId exception!",instance,L1seq, e);
-			Resource.FlOW_CENTER.removeInstance(instance, true, true);
+			EFPipeUtil.removeInstance(instance, true, true);
 			Common.processErrorLevel(e);
 		}
 		return null;

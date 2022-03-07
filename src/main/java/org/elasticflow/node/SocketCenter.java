@@ -52,8 +52,7 @@ public final class SocketCenter {
 	private Map<String, SearcherFlowSocket> searcherSocketMap = new ConcurrentHashMap<>();
 
 	public String getContextId(String instance, String L1seq,String tag) {
-		String tags = Common.getResourceTag(instance, L1seq, tag, false);
-		return pipePumpMap.get(tags).getID();
+		return Common.getResourceTag(instance, L1seq, tag, false);
 	} 
 
 	/**
@@ -80,7 +79,7 @@ public final class SocketCenter {
 					wfs.add(getWriterSocket(dest, instance, L1seq, tag));
 				}
 				PipePump pipePump = PipePump
-						.getInstance(instance,
+						.getInstance(tags,instance,
 								getReaderSocket(Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
 										.getReadFrom(), instance, L1seq, tag),
 								(Resource.nodeConfig.getInstanceConfigs().get(instance).openCompute()

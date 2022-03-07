@@ -41,6 +41,7 @@ import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFLoader;
 import org.elasticflow.util.EFMonitorUtil;
+import org.elasticflow.util.EFPipeUtil;
 import org.elasticflow.util.PipeXMLUtil;
 import org.elasticflow.util.SystemInfoUtil;
 import org.elasticflow.util.instance.EFDataStorer;
@@ -643,7 +644,7 @@ public final class NodeMonitor {
 				String alias = Resource.nodeConfig.getInstanceConfigs().get(rq.getParameter("instance")).getAlias();
 				Resource.nodeConfig.getSearchConfigs().remove(alias);
 				Resource.nodeConfig.loadConfig(instanceConfig, false);
-				Resource.FlOW_CENTER.removeInstance(rq.getParameter("instance"), true, true);
+				EFPipeUtil.removeInstance(rq.getParameter("instance"), true, true);
 			}
 			EFMonitorUtil.rebuildFlowGovern(instanceConfig,!GlobalParam.DISTRIBUTE_RUN);
 			EFMonitorUtil.controlInstanceState(rq.getParameter("instance"), STATUS.Ready, true);

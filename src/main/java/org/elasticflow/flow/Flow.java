@@ -36,8 +36,6 @@ public abstract class Flow {
 	protected String poolName; 
 	
 	protected InstanceConfig instanceConfig;
-
-	private int clearConnNum = 0; 
 	
 	private String EFConnKey;
 	
@@ -108,20 +106,10 @@ public abstract class Flow {
 		return this.instanceConfig;
 	}
 	
-	private void stopTask() {
-		clearConnNum+=1;
-		if(clearConnNum>2) {
-			clearConnNum = 0;
-			log.warn("The resource is unstable. Try to stop the task of "+this.instanceConfig.getInstanceID());
-			Resource.FlOW_CENTER.removeInstance(this.instanceConfig.getInstanceID(), true, true);
-		}
-	}
-	
 	public void REALEASE(boolean isMonopoly,boolean releaseConn) { 
 		if(isMonopoly==false || releaseConn) { 
 			synchronized(this.retainer){ 
 				if(releaseConn) {
-					this.stopTask();
 					retainer.set(0);
 				}					
 				if(retainer.decrementAndGet()<=0){
@@ -146,7 +134,6 @@ public abstract class Flow {
 	}	
 	 
 	public void clearPool() {
-		this.stopTask();
 		EFConnectionPool.clearPool(this.poolName);
 	}
 }

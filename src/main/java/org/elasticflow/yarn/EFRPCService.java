@@ -1,6 +1,5 @@
 package org.elasticflow.yarn;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationHandler;
@@ -20,15 +19,14 @@ import org.elasticflow.util.EFException;
 public class EFRPCService<T> {
 
 	@SuppressWarnings("unchecked")
-	public static <T> T getRemoteProxyObj(final Class<?> serviceInterface, final InetSocketAddress addr) { 
+	public static <T> T getRemoteProxyObj(final Class<?> serviceInterface, final InetSocketAddress addr) { 		
         return (T) Proxy.newProxyInstance(serviceInterface.getClassLoader(), new Class<?>[]{serviceInterface},
                 new InvocationHandler() {
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        Socket socket = null;
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
+                        Socket socket = new Socket();
                         ObjectOutputStream output = null;
                         ObjectInputStream input = null;
-                        try { 
-                            socket = new Socket();
+                        try {
                             socket.connect(addr); 
                             output = new ObjectOutputStream(socket.getOutputStream());
                             output.writeUTF(serviceInterface.getName());
@@ -37,14 +35,18 @@ public class EFRPCService<T> {
                             output.writeObject(args);  
                             input = new ObjectInputStream(socket.getInputStream());
                             return input.readObject();
-                        }catch (IOException e) { 
-                        	EFException exp = new EFException(e);
-                        	exp.track(addr.toString());
-                        	throw exp;
+                        }catch (Exception e) { 
+                        	throw new EFException(e);
                         }finally {
-                            if (socket != null) socket.close();
-                            if (output != null) output.close();
-                            if (input != null) input.close();
+                            if(socket.isConnected()) {
+                            	try {
+                            		socket.close();
+                                	output.close();
+                                	input.close();
+                            	}catch (Exception e) {
+                                	throw new EFException(e);
+                            	}                            	
+                            }
                         }
                     }
                 });

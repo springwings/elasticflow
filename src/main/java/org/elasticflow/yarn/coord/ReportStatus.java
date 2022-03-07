@@ -7,9 +7,11 @@
  */
 package org.elasticflow.yarn.coord;
 
+import java.util.Map;
+
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.yarn.Resource;
@@ -44,8 +46,11 @@ public final class ReportStatus {
 							GlobalParam.DISCOVERY_COORDER.reportStatus(GlobalParam.IP, GlobalParam.NODEID);						
 					} catch (Exception e) {
 						Common.LOG.warn("master node cannot connect.");
-						if(Resource.tasks.size()>0)
-							EFMonitorUtil.cleanAllInstance(false);
+						Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
+						if(configMap.size()>0) {
+							closeHeartBeat();
+							Common.stopSystem(false);
+						}
 					}
 				}
 			});

@@ -15,6 +15,7 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.EFNodeUtil;
+import org.elasticflow.util.EFPipeUtil;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coord.InstanceCoord;
 
@@ -145,7 +146,7 @@ public class InstanceCoordinator implements InstanceCoord {
 			Resource.FLOW_INFOS.remove(instance, JOB_TYPE.FULL.name());
 			Resource.FLOW_INFOS.remove(instance, JOB_TYPE.INCREMENT.name());
 		}		
-		Resource.FlOW_CENTER.removeInstance(instance, true, true);
+		EFPipeUtil.removeInstance(instance, true, true);
 		EFMonitorUtil.removeConfigInstance(instance);
 	} 
 	

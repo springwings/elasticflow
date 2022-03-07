@@ -7,6 +7,7 @@
  */
 package org.elasticflow.util;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.config.GlobalParam;
@@ -14,6 +15,10 @@ import org.elasticflow.config.GlobalParam.NODE_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.util.instance.EFDataStorer;
+import org.elasticflow.yarn.EFRPCService;
+import org.elasticflow.yarn.Resource;
+import org.elasticflow.yarn.coord.DiscoveryCoord;
+import org.elasticflow.yarn.coord.TaskStateCoord;
 
 /**
  * system running control
@@ -83,5 +88,25 @@ public final class EFNodeUtil {
 		}
 		return false;
 	}
-	 
+	
+	/**
+	 * init slave Coorder
+	 */
+	public static void initSlaveCoorder() {
+		Resource.ThreadPools.execute(() -> {
+			boolean redo = true;
+			while (redo) {
+				try {
+					GlobalParam.TASK_COORDER = EFRPCService.getRemoteProxyObj(TaskStateCoord.class, 
+							new InetSocketAddress(GlobalParam.StartConfig.getProperty("master_host"), GlobalParam.MASTER_SYN_PORT));			
+					GlobalParam.DISCOVERY_COORDER = EFRPCService.getRemoteProxyObj(DiscoveryCoord.class, 
+							new InetSocketAddress(GlobalParam.StartConfig.getProperty("master_host"), GlobalParam.MASTER_SYN_PORT));
+					redo = false;
+				} catch (Exception e) { 
+					GlobalParam.TASK_COORDER = null;
+					GlobalParam.DISCOVERY_COORDER = null;
+				}
+			}
+		});
+	} 
 }
