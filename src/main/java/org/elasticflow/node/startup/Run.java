@@ -232,9 +232,10 @@ public final class Run {
 	    	Common.stopSystem(false);
 	    } 
 		if(GlobalParam.DISTRIBUTE_RUN) {
-			Common.LOG.info("ElasticFlow {} {} Start Success!",GlobalParam.VERSION,GlobalParam.StartConfig.get("node_type"));
+			Common.LOG.info("ElasticFlow {} {}, nodeID {} Start Success!",GlobalParam.VERSION,
+					GlobalParam.StartConfig.get("node_type"),GlobalParam.NODEID);
 		}else {
-			Common.LOG.info("ElasticFlow {} standalone mode Start Success!",GlobalParam.VERSION);
+			Common.LOG.info("ElasticFlow {} nodeID {} standalone mode Start Success!",GlobalParam.VERSION,GlobalParam.NODEID);
 		}
 		
 	} 
