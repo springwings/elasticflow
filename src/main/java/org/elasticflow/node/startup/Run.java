@@ -108,7 +108,7 @@ public final class Run {
 				for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {
 					InstanceConfig instanceConfig = entry.getValue();
 					if (instanceConfig.checkStatus())
-						EFNodeUtil.initParams(instanceConfig);
+						EFNodeUtil.loadInstanceDatas(instanceConfig);
 					if(instanceConfig.getPipeParams().isMultiThread())
 						openThreadPools +=1;
 				}

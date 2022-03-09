@@ -58,9 +58,5 @@ public final class Resource {
 	public static ConcurrentHashMap<String, FlowTask> tasks; 
 	
 	public static ThreadPools ThreadPools;
-	
-	public void collectNodeResource() {
-		
-	}
 	 
 }

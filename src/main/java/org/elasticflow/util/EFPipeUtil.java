@@ -64,9 +64,9 @@ public class EFPipeUtil {
 			break;
 		}
 		if(state){
-			Common.LOG.info("Success " + actype + " Job " + jobname);
+			Common.LOG.info("success " + actype + " task " + jobname);
 		}else{
-			Common.LOG.info("Fail " + actype + " Job " + jobname);
+			Common.LOG.info("fail " + actype + " task " + jobname);
 		} 
 		return state;
 	} 

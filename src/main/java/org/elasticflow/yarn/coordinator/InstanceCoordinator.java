@@ -116,7 +116,7 @@ public class InstanceCoordinator implements InstanceCoord {
 		String instanceName = tmp[0];
 		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instanceName);
 		if (instanceConfig.checkStatus())
-			EFNodeUtil.initParams(instanceConfig);
+			EFNodeUtil.loadInstanceDatas(instanceConfig);
 		EFMonitorUtil.rebuildFlowGovern(instanceSettting, true);
 	} 
 

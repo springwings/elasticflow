@@ -35,7 +35,7 @@ public final class EFNodeUtil {
 	 * 
 	 * @param instanceConfig
 	 */
-	public static void initParams(InstanceConfig instanceConfig) {
+	public static void loadInstanceDatas(InstanceConfig instanceConfig) {
 		String instance = instanceConfig.getInstanceID();
 		String[] L1seqs = Common.getL1seqs(instanceConfig);
 		for (String L1seq : L1seqs) {

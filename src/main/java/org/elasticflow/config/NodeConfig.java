@@ -66,13 +66,19 @@ public class NodeConfig {
 
 	public void loadConfig(String instanceSettings, boolean reset) {
 		if (reset) {
-			this.instanceConfigs.clear();
-			this.searchConfigMap.clear();
+			this.reset();
 			parsePondFile(GlobalParam.CONFIG_PATH + "/" + this.pondFile);
 			parseInstructionsFile(GlobalParam.CONFIG_PATH + "/" + this.instructionsFile);
 		} 
 		if(EFNodeUtil.isMaster())
 			loadInstanceConfig(instanceSettings);
+	}
+	
+	public void reset() {
+		this.instanceConfigs.clear();
+		this.searchConfigMap.clear();
+		this.warehouse.clear();
+		this.instructions.clear();
 	}
 	
 	public void loadInstanceConfig(String instanceSettings) {  

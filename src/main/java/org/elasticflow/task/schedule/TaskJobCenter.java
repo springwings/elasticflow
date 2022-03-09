@@ -22,7 +22,7 @@ public class TaskJobCenter{
 
 	public boolean addJob(JobModel job) throws SchedulerException {
 		if (job == null){
-			Common.LOG.error("Job is null nothing to add!");
+			Common.LOG.error("task is null,add nothing!");
 			return false;
 		} 
 
@@ -30,14 +30,14 @@ public class TaskJobCenter{
 		CronTrigger trigger = (CronTrigger) Resource.scheduler.getTrigger(triggerKey);
 
 		if (trigger == null) {
-			Common.LOG.info("Add Instance Task {}",job.getJobName());			
+			Common.LOG.info("success add task {}",job.getJobName());			
 			JobDetail jobDetail = JobBuilder.newJob(JobRunFactory.class).withIdentity(job.getJobName()).build();
 			jobDetail.getJobDataMap().put(GlobalParam.FLOW_TAG._DEFAULT.name(), job); 
 			CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule(job.getCron());
 			trigger = TriggerBuilder.newTrigger().withIdentity(job.getJobName(),job.getJobName()).withSchedule(scheduleBuilder).build();
 			Resource.scheduler.scheduleJob(jobDetail, trigger);
 		} else {
-			Common.LOG.info("Modify Instance Task {}",job.getJobName());
+			Common.LOG.info("success modify task {}",job.getJobName());
 			CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule(job.getCron());
 			trigger = trigger.getTriggerBuilder().withIdentity(triggerKey).withSchedule(scheduleBuilder).build();
 			Resource.scheduler.rescheduleJob(triggerKey, trigger);
