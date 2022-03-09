@@ -40,8 +40,8 @@ public class EFHttpClientUtil {
 	public static CloseableHttpClient httpClient;
 	public static final String DEFAULT_CONTENT_TYPE = "application/json;charset=UTF-8";
 	private static final int DEFAUL_TIME_OUT = 30000;
-	private static final int count = 32;
-	private static final int totalCount = 1000;
+	private static final int count = 10;
+	private static final int totalCount = 1200;
 	private static final int Http_Default_Keep_Time = 30000;
 	private static Logger logger = LoggerFactory.getLogger(EFHttpClientUtil.class);
 
