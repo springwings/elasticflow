@@ -65,72 +65,51 @@ public final class SocketCenter {
 	 * @param tag       Marking resource
 	 * @throws EFException 
 	 */
-	public PipePump getPipePump(String instance, String L1seq, boolean needReset, String tag) throws EFException {
-		synchronized (pipePumpMap) {
-			String tags = Common.getResourceTag(instance, L1seq, tag, false);
-			if (!pipePumpMap.containsKey(tags) || needReset) {
-				List<WriterFlowSocket> wfs = new ArrayList<>();
-				// Balanced write to multiple targets
-				String[] writeDests = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
-						.getWriteTo().split(",");
-				if (writeDests.length < 1)
-					Common.LOG.error("build write pipe socket error!Misconfiguration writer destination!");
-				for (String dest : writeDests) {
-					wfs.add(getWriterSocket(dest, instance, L1seq, tag));
-				}
-				PipePump pipePump = PipePump
-						.getInstance(tags,instance,
-								getReaderSocket(Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
-										.getReadFrom(), instance, L1seq, tag),
-								(Resource.nodeConfig.getInstanceConfigs().get(instance).openCompute()
-										? getComputerSocket(instance, L1seq, tag, needReset)
-										: null),
-								wfs, Resource.nodeConfig.getInstanceConfigs().get(instance),L1seq);
-				pipePumpMap.put(tags, pipePump);
+	public synchronized PipePump getPipePump(String instance, String L1seq, boolean needReset, String tag) throws EFException {
+		String tags = Common.getResourceTag(instance, L1seq, tag, false);
+		if (!pipePumpMap.containsKey(tags) || needReset) {
+			List<WriterFlowSocket> wfs = new ArrayList<>();
+			// Balanced write to multiple targets
+			String[] writeDests = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
+					.getWriteTo().split(",");
+			if (writeDests.length < 1)
+				Common.LOG.error("build write pipe socket error!Misconfiguration writer destination!");
+			for (String dest : writeDests) {
+				wfs.add(getWriterSocket(dest, instance, L1seq, tag));
 			}
-			return pipePumpMap.get(tags);
+			PipePump pipePump = PipePump
+					.getInstance(tags,instance,
+							getReaderSocket(Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
+									.getReadFrom(), instance, L1seq, tag),
+							(Resource.nodeConfig.getInstanceConfigs().get(instance).openCompute()
+									? getComputerSocket(instance, L1seq, tag, needReset)
+									: null),
+							wfs, Resource.nodeConfig.getInstanceConfigs().get(instance),L1seq);
+			pipePumpMap.put(tags, pipePump);
 		}
+		return pipePumpMap.get(tags);
 	}
 
-	public Searcher getSearcher(String instance, String L1seq, String tag, boolean reload) {
-		synchronized (searcherMap) {
-			if (reload || !searcherMap.containsKey(instance)) {
-				if (!Resource.nodeConfig.getSearchConfigs().containsKey(instance)) {
-					Common.LOG.error(instance + "  not exist!");
-					return null;
-				}
-				InstanceConfig instanceConfig = Resource.nodeConfig.getSearchConfigs().get(instance);
-				Searcher searcher = Searcher.getInstance(instance, instanceConfig,
-						getSearcherSocket(
-								Resource.nodeConfig.getSearchConfigs().get(instance).getPipeParams().getSearchFrom(),
-								instance, L1seq, tag, reload));
-				searcherMap.put(instance, searcher);
+	public synchronized Searcher getSearcher(String instance, String L1seq, String tag, boolean reload) {
+		if (reload || !searcherMap.containsKey(instance)) {
+			if (!Resource.nodeConfig.getSearchConfigs().containsKey(instance)) {
+				Common.LOG.error(instance + "  not exist!");
+				return null;
 			}
-			return searcherMap.get(instance);
+			InstanceConfig instanceConfig = Resource.nodeConfig.getSearchConfigs().get(instance);
+			Searcher searcher = Searcher.getInstance(instance, instanceConfig,
+					getSearcherSocket(
+							Resource.nodeConfig.getSearchConfigs().get(instance).getPipeParams().getSearchFrom(),
+							instance, L1seq, tag, reload));
+			searcherMap.put(instance, searcher);
 		}
+		return searcherMap.get(instance);
 	}
 
-	public void clearPipePump(String instance, String L1seq, String tag) {
-		synchronized (this) {
-			String tags = Common.getResourceTag(instance, L1seq, tag, false);
-			if (pipePumpMap.containsKey(tags)) {
-				pipePumpMap.remove(tags);
-				boolean ignoreSeqUseAlias = false;
-				if (Resource.nodeConfig.getInstanceConfigs().get(instance) != null)
-					ignoreSeqUseAlias = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
-							.isReaderPoolShareAlias();
-				String tagInstance = instance;
-				if (ignoreSeqUseAlias)
-					tagInstance = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
-				tags = Common.getResourceTag(tagInstance, L1seq, tag, ignoreSeqUseAlias);
-				readerSocketMap.remove(tags);
-				writerSocketMap.remove(tags);
-			}
-		}
-	}
-
-	public ReaderFlowSocket getReaderSocket(String resourceName, String instance, String L1seq, String tag) throws EFException {
-		synchronized (readerSocketMap) {
+	public synchronized void clearPipePump(String instance, String L1seq, String tag) {
+		String tags = Common.getResourceTag(instance, L1seq, tag, false);
+		if (pipePumpMap.containsKey(tags)) {
+			pipePumpMap.remove(tags);
 			boolean ignoreSeqUseAlias = false;
 			if (Resource.nodeConfig.getInstanceConfigs().get(instance) != null)
 				ignoreSeqUseAlias = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
@@ -138,84 +117,91 @@ public final class SocketCenter {
 			String tagInstance = instance;
 			if (ignoreSeqUseAlias)
 				tagInstance = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
-			String tags = Common.getResourceTag(tagInstance, L1seq, tag, ignoreSeqUseAlias);
-
-			if (!readerSocketMap.containsKey(tags)) {
-				WarehouseParam whp = getWHP(resourceName);
-				if (whp == null) {
-					Common.LOG.error(resourceName + " resource not exist!");
-					Common.stopSystem(false);
-				}
-				readerSocketMap.put(tags, ReaderFlowSocketFactory.getInstance(
-						ConnectParams.getInstance(whp, L1seq, Resource.nodeConfig.getInstanceConfigs().get(instance),
-								null),
-						L1seq,
-						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getCustomReader()));
-				readerSocketMap.get(tags).prepareFlow(Resource.nodeConfig.getInstanceConfigs().get(instance),END_TYPE.reader,L1seq);
-			}
-			return readerSocketMap.get(tags);
+			tags = Common.getResourceTag(tagInstance, L1seq, tag, ignoreSeqUseAlias);
+			readerSocketMap.remove(tags);
+			writerSocketMap.remove(tags);
 		}
 	}
 
-	public ComputerFlowSocket getComputerSocket(String instance, String L1seq, String tag, boolean reload) throws EFException {
-		String tags = Common.getResourceTag(instance, L1seq, tag, false);
-		synchronized (computerSocketMap) {
-			if (reload || !computerSocketMap.containsKey(tags)) {
-				computerSocketMap.put(tags, ComputerFlowSocketFactory.getInstance(ConnectParams.getInstance(null,
-						null, Resource.nodeConfig.getInstanceConfigs().get(instance), null)));
-				computerSocketMap.get(tags).prepareFlow(Resource.nodeConfig.getInstanceConfigs().get(instance),END_TYPE.computer,L1seq);
+	public synchronized ReaderFlowSocket getReaderSocket(String resourceName, String instance, String L1seq, String tag) throws EFException {		
+		boolean ignoreSeqUseAlias = false;
+		if (Resource.nodeConfig.getInstanceConfigs().get(instance) != null)
+			ignoreSeqUseAlias = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
+					.isReaderPoolShareAlias();
+		String tagInstance = instance;
+		if (ignoreSeqUseAlias)
+			tagInstance = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
+		String tags = Common.getResourceTag(tagInstance, L1seq, tag, ignoreSeqUseAlias);
+
+		if (!readerSocketMap.containsKey(tags)) {
+			WarehouseParam whp = getWHP(resourceName);
+			if (whp == null) {
+				Common.LOG.error(resourceName + " resource not exist!");
+				Common.stopSystem(false);
 			}
+			readerSocketMap.put(tags, ReaderFlowSocketFactory.getInstance(
+					ConnectParams.getInstance(whp, L1seq, Resource.nodeConfig.getInstanceConfigs().get(instance),
+							null),
+					L1seq,
+					Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getCustomReader()));
+			readerSocketMap.get(tags).prepareFlow(Resource.nodeConfig.getInstanceConfigs().get(instance),END_TYPE.reader,L1seq);
+		}
+		return readerSocketMap.get(tags);
+	}
+
+	public synchronized ComputerFlowSocket getComputerSocket(String instance, String L1seq, String tag, boolean reload) throws EFException {
+		String tags = Common.getResourceTag(instance, L1seq, tag, false);
+		if (reload || !computerSocketMap.containsKey(tags)) {
+			computerSocketMap.put(tags, ComputerFlowSocketFactory.getInstance(ConnectParams.getInstance(null,
+					null, Resource.nodeConfig.getInstanceConfigs().get(instance), null)));
+			computerSocketMap.get(tags).prepareFlow(Resource.nodeConfig.getInstanceConfigs().get(instance),END_TYPE.computer,L1seq);
 		}
 		return computerSocketMap.get(tags);
 	}
 
-	public WriterFlowSocket getWriterSocket(String resourceName, String instance, String L1seq, String tag) throws EFException {
-		synchronized (writerSocketMap) { 
-			String tags = Common.getResourceTag(instance, L1seq, tag, false);
-			if (!writerSocketMap.containsKey(tags)) {
-				WarehouseParam whp = getWHP(resourceName);
-				if (whp == null) {
-					Common.LOG.error(resourceName + " resource not exist!");
-					Common.stopSystem(false);
-				}
-				writerSocketMap.put(tags, WriterSocketFactory.getInstance(
-						ConnectParams.getInstance(whp, L1seq, Resource.nodeConfig.getInstanceConfigs().get(instance),
-								null),
-						L1seq,
-						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getCustomWriter()));
-				writerSocketMap.get(tags).prepareFlow(Resource.nodeConfig.getInstanceConfigs().get(instance),END_TYPE.writer,L1seq);
+	public synchronized WriterFlowSocket getWriterSocket(String resourceName, String instance, String L1seq, String tag) throws EFException {		
+		String tags = Common.getResourceTag(instance, L1seq, tag, false);
+		if (!writerSocketMap.containsKey(tags)) {
+			WarehouseParam whp = getWHP(resourceName);
+			if (whp == null) {
+				Common.LOG.error(resourceName + " resource not exist!");
+				Common.stopSystem(false);
 			}
-			return writerSocketMap.get(tags);
+			writerSocketMap.put(tags, WriterSocketFactory.getInstance(
+					ConnectParams.getInstance(whp, L1seq, Resource.nodeConfig.getInstanceConfigs().get(instance),
+							null),
+					L1seq,
+					Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getCustomWriter()));
+			writerSocketMap.get(tags).prepareFlow(Resource.nodeConfig.getInstanceConfigs().get(instance),END_TYPE.writer,L1seq);
 		}
+		return writerSocketMap.get(tags);
 	}
 
-	public SearcherFlowSocket getSearcherSocket(String resourceName, String instance, String L1seq, String tag,
-			boolean reload) {
-		synchronized (searcherSocketMap) {
-			boolean ignoreSeqUseAlias = false;
-			if (Resource.nodeConfig.getInstanceConfigs().get(instance) != null)
-				ignoreSeqUseAlias = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
-						.isSearcherShareAlias();
-			String tagInstance = instance;
-			if (ignoreSeqUseAlias)
-				tagInstance = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
-			String tags = Common.getResourceTag(tagInstance, L1seq, tag, ignoreSeqUseAlias);
+	public synchronized SearcherFlowSocket getSearcherSocket(String resourceName, String instance, String L1seq, String tag,
+			boolean reload) {		
+		boolean ignoreSeqUseAlias = false;
+		if (Resource.nodeConfig.getInstanceConfigs().get(instance) != null)
+			ignoreSeqUseAlias = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
+					.isSearcherShareAlias();
+		String tagInstance = instance;
+		if (ignoreSeqUseAlias)
+			tagInstance = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
+		String tags = Common.getResourceTag(tagInstance, L1seq, tag, ignoreSeqUseAlias);
 
-			if (reload || !searcherSocketMap.containsKey(tags)) {
-				WarehouseParam whp = getWHP(resourceName);
-				if (whp == null) {
-					Common.LOG.error(resourceName + " resource not exist!");
-					Common.stopSystem(false);
-				}
-				SearcherFlowSocket searcher = SearcherSocketFactory
-						.getInstance(
-								ConnectParams.getInstance(whp, L1seq,
-										Resource.nodeConfig.getInstanceConfigs().get(instance), null),
-								Resource.nodeConfig.getSearchConfigs().get(instance), null);
-				searcherSocketMap.put(tags, searcher);
+		if (reload || !searcherSocketMap.containsKey(tags)) {
+			WarehouseParam whp = getWHP(resourceName);
+			if (whp == null) {
+				Common.LOG.error(resourceName + " resource not exist!");
+				Common.stopSystem(false);
 			}
-			return searcherSocketMap.get(tags);
+			SearcherFlowSocket searcher = SearcherSocketFactory
+					.getInstance(
+							ConnectParams.getInstance(whp, L1seq,
+									Resource.nodeConfig.getInstanceConfigs().get(instance), null),
+							Resource.nodeConfig.getSearchConfigs().get(instance), null);
+			searcherSocketMap.put(tags, searcher);
 		}
+		return searcherSocketMap.get(tags);
 	}
 
 	public WarehouseParam getWHP(String destination) {

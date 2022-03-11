@@ -105,15 +105,13 @@ public class HbaseWriter extends WriterFlowSocket {
 	}
 
 	@Override
-	public void flush() throws EFException { 
-		synchronized (data) {
-			try {
-				getTable().put(data);
-			} catch (IOException e) {
-				throw new EFException(e, ELEVEL.Termination);
-			}
-			data.clear();
-		} 
+	public synchronized void flush() throws EFException { 
+		try {
+			getTable().put(data);
+		} catch (IOException e) {
+			throw new EFException(e, ELEVEL.Termination);
+		}
+		data.clear();
 	}
 
 	@Override

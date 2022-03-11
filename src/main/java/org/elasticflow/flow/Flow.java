@@ -80,24 +80,22 @@ public abstract class Flow {
 	 * @param acceptShareConn  if true, Use global shared connections
 	 * @return
 	 */
-	public EFConnectionSocket<?> PREPARE(boolean isMonopoly,boolean acceptShareConn) {  
-		synchronized (this.retainer) { 
-			if(isMonopoly) { 
-				if(this.EFConn==null) {
-					if(Resource.EFCONNS.get(this.EFConnKey)==null) {
-						Resource.EFCONNS.put(this.EFConnKey, EFConnectionPool.getConn(this.connectParams,
-								this.poolName,acceptShareConn));
-					}
-					this.EFConn = Resource.EFCONNS.get(this.EFConnKey);
-				}					
-			}else {
-				if(this.retainer.getAndIncrement()==0) {
+	public synchronized EFConnectionSocket<?> PREPARE(boolean isMonopoly,boolean acceptShareConn) {  
+		if(isMonopoly) { 
+			if(this.EFConn==null) {
+				if(Resource.EFCONNS.get(this.EFConnKey)==null) {
 					Resource.EFCONNS.put(this.EFConnKey, EFConnectionPool.getConn(this.connectParams,
 							this.poolName,acceptShareConn));
-					this.EFConn = Resource.EFCONNS.get(this.EFConnKey);
-				}					
-			}
-		}		
+				}
+				this.EFConn = Resource.EFCONNS.get(this.EFConnKey);
+			}					
+		}else {
+			if(this.retainer.getAndIncrement()==0) {
+				Resource.EFCONNS.put(this.EFConnKey, EFConnectionPool.getConn(this.connectParams,
+						this.poolName,acceptShareConn));
+				this.EFConn = Resource.EFCONNS.get(this.EFConnKey);
+			}					
+		}
 		return this.EFConn;
 	} 
 
