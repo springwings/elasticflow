@@ -129,7 +129,7 @@ public class DistributeCoorder {
 						EFRPCService.getRemoteProxyObj(EFMonitorCoord.class,
 								new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)),this);
 				nodes.add(node);
-				Common.LOG.info("{} join cluster, current number of nodes {}.",ip,nodes.size());
+				Common.LOG.info("{} join cluster, current number of nodes is {}.",ip,nodes.size());
 			} 
 			if (clusterConditionMatch()) { 
 				clusterStatus.set(0);
