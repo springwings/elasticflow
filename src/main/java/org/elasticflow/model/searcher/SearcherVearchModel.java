@@ -8,8 +8,10 @@ import java.util.Set;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.field.EFField;
 import org.elasticflow.model.EFSearchRequest;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -37,7 +39,7 @@ public class SearcherVearchModel extends SearcherModel<String, String, String> {
 			} else {
 				if (instanceConfig.getWriteFields().containsKey(k)) { 
 					if(instanceConfig.getWriteFields().get(k).getIndextype().toLowerCase().equals("vector")) {
-						_jObject.put("field","features");
+						_jObject.put("field",instanceConfig.getWriteFields().get(k).getAlias());
 						_jObject.put("feature",v); 
 					}  
 				} else {
@@ -47,6 +49,23 @@ public class SearcherVearchModel extends SearcherModel<String, String, String> {
 						break; 
 					} 
 				}
+			}
+		}
+		if(_jObject.size()==0) {
+			Iterator<Map.Entry<String,EFField>> iter_tmp =  instanceConfig.getWriteFields().entrySet().iterator();
+			while (iter_tmp.hasNext()) {
+				Entry<String, EFField> entry = iter_tmp.next();
+				if(entry.getValue().getIndextype().toLowerCase().equals("vector")) {					
+					_jObject.put("field",entry.getValue().getAlias());
+					int size = (JSON.parseObject(entry.getValue().getDsl())).getIntValue("dimension");
+					float[] vec = new float[size];
+					for (int i = 0; i < size; i++) {
+						vec[i] = 0.F;
+			        }
+					_jObject.put("feature",vec); 
+					_jObject.put("max_score",Float.MAX_VALUE); 
+					break;
+				}				
 			}
 		}
 		_jarr.add(_jObject);
