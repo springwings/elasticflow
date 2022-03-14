@@ -28,12 +28,6 @@ import com.alibaba.fastjson.JSONObject;
 
 public class VearchWriter extends WriterFlowSocket {
 	
-	final static int flushSize = 100;
-
-	final static int flushSecond = 3;
-	
-	protected long currentSec = Common.getNow(); 
-	
 	protected CopyOnWriteArrayList<Object> DATAS = new CopyOnWriteArrayList<Object>();
 	 	
 	private final static Logger log = LoggerFactory.getLogger("VearchFlow");
@@ -105,13 +99,6 @@ public class VearchWriter extends WriterFlowSocket {
 				this.curTable = table;
 				this.DATAS.add("{\"index\": {\"_id\": \""+unit.getReaderKeyVal()+"\"}}");				
 				this.DATAS.add(row);
-				if (this.DATAS.size()>flushSize || Common.getNow()-currentSec > flushSecond) {
-					synchronized (this.DATAS) {
-						conn.writeBatch(table, this.DATAS);
-						currentSec = Common.getNow();
-						this.DATAS.clear();
-					}
-				}				
 			} else {	
 				conn.writeSingle(table, row);
 			}
@@ -129,7 +116,6 @@ public class VearchWriter extends WriterFlowSocket {
 		synchronized (this.DATAS) {			
 			conn.deleteBatch(this.curTable, this.DATAS);
 			conn.writeBatch(this.curTable, this.DATAS);
-			currentSec = Common.getNow();
 			this.DATAS.clear();
 		}		
 	}
@@ -204,7 +190,6 @@ public class VearchWriter extends WriterFlowSocket {
 							throw new EFException(e,ELEVEL.Termination);
 						}
 					} 
-					currentSec = Common.getNow();
 					this.DATAS.clear();
 				}				
 			}
@@ -224,7 +209,7 @@ public class VearchWriter extends WriterFlowSocket {
 				instanceConfig.getWriterParams().getStorageStructure().size()>0) {
 			tableMeta = instanceConfig.getWriterParams().getStorageStructure();
 			tableMeta.put("name", tableName);
-		}else {			
+		}else {
 			tableMeta.put("name", tableName);
 			tableMeta.put("partition_num", 1);
 			tableMeta.put("replica_num", 1);

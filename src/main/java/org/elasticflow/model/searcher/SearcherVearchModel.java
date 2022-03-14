@@ -29,7 +29,8 @@ public class SearcherVearchModel extends SearcherModel<String, String, String> {
 		Iterator<Entry<String, Object>> iter = entries.iterator();
 		JSONObject query = new JSONObject(); 
 		JSONArray _jarr = new JSONArray();
-		JSONObject _jObject = new JSONObject();
+		JSONArray filters = new JSONArray();
+		JSONObject _feature = new JSONObject();
 		while (iter.hasNext()) {
 			Entry<String, Object> entry = iter.next();
 			String k = entry.getKey();
@@ -39,37 +40,45 @@ public class SearcherVearchModel extends SearcherModel<String, String, String> {
 			} else {
 				if (instanceConfig.getWriteFields().containsKey(k)) { 
 					if(instanceConfig.getWriteFields().get(k).getIndextype().toLowerCase().equals("vector")) {
-						_jObject.put("field",instanceConfig.getWriteFields().get(k).getAlias());
-						_jObject.put("feature",v); 
-					}  
+						_feature.put("field",instanceConfig.getWriteFields().get(k).getAlias());
+						_feature.put("feature",v); 
+					}else {
+						JSONObject filter = new JSONObject();
+						filter.put(instanceConfig.getWriteFields().get(k).getAlias(),v);
+						JSONObject row = new JSONObject();
+						row.put("term", filter);
+						filters.add(row);
+					}
 				} else {
 					switch(k) {
 					case "max_score":
-						_jObject.put("max_score",Float.parseFloat(v)); 
+						_feature.put("max_score",Float.parseFloat(v)); 
 						break; 
 					} 
 				}
 			}
 		}
-		if(_jObject.size()==0) {
+		if(_feature.size()==0) {
 			Iterator<Map.Entry<String,EFField>> iter_tmp =  instanceConfig.getWriteFields().entrySet().iterator();
 			while (iter_tmp.hasNext()) {
 				Entry<String, EFField> entry = iter_tmp.next();
 				if(entry.getValue().getIndextype().toLowerCase().equals("vector")) {					
-					_jObject.put("field",entry.getValue().getAlias());
+					_feature.put("field",entry.getValue().getAlias());
 					int size = (JSON.parseObject(entry.getValue().getDsl())).getIntValue("dimension");
 					float[] vec = new float[size];
 					for (int i = 0; i < size; i++) {
 						vec[i] = 0.F;
 			        }
-					_jObject.put("feature",vec); 
-					_jObject.put("max_score",Float.MAX_VALUE); 
+					_feature.put("feature",vec); 
+					_feature.put("max_score",Float.MAX_VALUE); 
 					break;
 				}				
 			}
 		}
-		_jarr.add(_jObject);
+		_jarr.add(_feature);
 		query.put("sum",_jarr);
+		if(filters.size()>0)
+			query.put("filter", filters);
 		current.setFq(query.toString());
 	}
 
