@@ -332,7 +332,7 @@ public class DistributeCoorder {
 				runInstances.add(instances[i]);
 			}
 		}
-		Common.LOG.info("start cluster init rebalance, with {} nodes, instance total {}...", nodes.size(),totalInstanceNum);
+		Common.LOG.info("start cluster init rebalance, with {} nodes, total number of instances is {}...", nodes.size(),totalInstanceNum);
 		this.avgInstanceNum = avgInstanceNum();
 		this.distributeInstances(runInstances);
 		Common.LOG.info("finish cluster init rebalance!");

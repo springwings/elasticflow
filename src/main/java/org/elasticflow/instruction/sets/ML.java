@@ -47,7 +47,7 @@ public class ML extends Instruction {
 		DSReader.init(dp);
 		if (DSReader.status()) {
 			try { 
-				long start = Common.getNow();
+				long start = System.currentTimeMillis();
 				int dataNums = DSReader.getDataNums();
 				
 				if(context.getInstanceConfig().getComputeParams().getStage().equals(GlobalParam.COMPUTER_STAGE.PREDICT.name())) {
@@ -55,9 +55,10 @@ public class ML extends Instruction {
 				}else if(context.getInstanceConfig().getComputeParams().getStage().equals(GlobalParam.COMPUTER_STAGE.TRAIN.name()))  {
 					res = context.getComputer().train(context, DSReader, context.getInstanceConfig().getWriteFields());
 				}				
-				context.getComputer().flowState.setLoad((long)(dataNums/(start-context.getComputer().lastGetPageTime+1e-3)));		
+				context.getComputer().flowState.setLoad((long)((dataNums*1000)/(start-context.getComputer().lastGetPageTime)));		
 				context.getComputer().lastGetPageTime = start;
-				context.getComputer().flowState.setPerformance((long) ((dataNums)/(Common.getNow()-start+1e-3)));
+				if(res.getData().size()>0)
+					context.getComputer().flowState.setPerformance((long) ((dataNums*1000)/(System.currentTimeMillis()-start+1e-3)));
 				context.getComputer().flowState.incrementCurrentTimeProcess(dataNums);
 			} catch (EFException e) {
 				log.error("batch Compute Exception", e);
