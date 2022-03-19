@@ -16,7 +16,7 @@ import org.elasticflow.util.Common;
 public final class Task {
 	
 	private String id;
-	private String instance;
+	private String instanceID;
 	private String L1seq;
 	private String L2seq;
 	private InstanceConfig instanceConfig;
@@ -25,11 +25,11 @@ public final class Task {
 	private JOB_TYPE jobType;
 	public TaskState taskState;
 
-	public static Task getInstance(String instance, String L1seq, JOB_TYPE jobType, InstanceConfig instanceConfig,
+	public static Task getInstance(String instanceID, String L1seq, JOB_TYPE jobType, InstanceConfig instanceConfig,
 			String additional) {
 		Task o = new Task();
-		o.id = Common.getInstanceRunId(instance, L1seq);
-		o.instance = instance;
+		o.id = Common.getInstanceRunId(instanceID, L1seq);
+		o.instanceID = instanceID;
 		o.L1seq = L1seq;
 		o.instanceConfig = instanceConfig;
 		o.jobType = jobType;
@@ -43,8 +43,8 @@ public final class Task {
 		return this.instanceConfig;
 	}
 
-	public String getInstance() {
-		return this.instance;
+	public String getInstanceID() {
+		return this.instanceID;
 	}
 	
 	public String getId() {
@@ -68,8 +68,8 @@ public final class Task {
 	}
 
 	public String getStartTime() {
-		return jobType.equals(JOB_TYPE.FULL) ? Common.getFullStartInfo(instance, L1seq)
-				: GlobalParam.TASK_COORDER.getLSeqPos(instance,L1seq, L2seq);
+		return jobType.equals(JOB_TYPE.FULL) ? Common.getFullStartInfo(instanceID, L1seq)
+				: GlobalParam.TASK_COORDER.getLSeqPos(instanceID,L1seq, L2seq);
 	}
 
 	public String getEndTime() {
