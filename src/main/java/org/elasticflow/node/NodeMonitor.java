@@ -508,7 +508,7 @@ public final class NodeMonitor {
 		for (Map.Entry<String, InstanceConfig> entry : nodes.entrySet()) {
 			InstanceConfig config = entry.getValue();
 			JSONObject instance = new JSONObject();
-			instance.put("instance", entry.getKey());
+			instance.put("Instance", entry.getKey());
 			instance.put("Alias", config.getAlias());
 			instance.put("OptimizeCron", config.getPipeParams().getOptimizeCron());
 			instance.put("DeltaCron", config.getPipeParams().getDeltaCron());
@@ -521,8 +521,8 @@ public final class NodeMonitor {
 			instance.put("SearchFrom", config.getPipeParams().getSearchFrom());
 			instance.put("ReadFrom", config.getPipeParams().getReadFrom());
 			instance.put("WriteTo", config.getPipeParams().getWriteTo().replace(",", ";"));
-			instance.put("openTrans", config.openTrans());
-			instance.put("IsMaster", config.getPipeParams().isMaster());
+			instance.put("OpenTrans", config.openTrans());
+			instance.put("IsVirtualPipe", config.getPipeParams().isVirtualPipe());
 			instance.put("InstanceType", EFMonitorUtil.getInstanceType(config.getInstanceType()));
 
 			if (rs.containsKey(config.getAlias())) {

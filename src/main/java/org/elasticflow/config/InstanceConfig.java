@@ -284,6 +284,7 @@ public class InstanceConfig {
 						break;
 					case "pipeParam":
 						Common.getXmlParam(pipeParams, param, c);  
+						pipeParams.reInit();
 						break; 
 					case "readParam": 
 						Common.getXmlParam(readParams, param, c);

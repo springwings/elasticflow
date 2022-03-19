@@ -33,12 +33,13 @@ public class PipeParam {
 	private String deltaCron;
 	private String fullCron;
 	private String optimizeCron; 
-	private String instanceName;
-	private String[] nextJob;
+	/**specify reference instance ,task will only can start by master**/
+	private String referenceInstance;
+	private String[] nextJob = new String[]{};
 	/**flow batch task processing use strict transaction control or not. **/
 	private boolean transactionControl;
-	/** default is slave pipe,if is master will only manage pipe with no detail transfer job! */
-	private boolean isMaster = false;
+	/** default is real pipe,if is virtual will only manage pipe-end with no data flow! */
+	private boolean virtualPipe = false;
 	/** control each slave instance run in Concurrent mode or not **/
 	private boolean async = false;
 	/**data write into type,full create new record,increment update part of data*/
@@ -49,6 +50,15 @@ public class PipeParam {
 	private boolean multiThread = false;
 	/**Task priority control**/
 	private int priority = 9;
+	
+	public void reInit() {
+		if(referenceInstance!=null) {
+			this.deltaCron = null;
+			this.fullCron = null;
+			this.virtualPipe = false;
+			this.optimizeCron = null;
+		}
+	}
 	
 	public boolean isTransactionControl() {
 		return transactionControl;
@@ -110,8 +120,8 @@ public class PipeParam {
 	public String getCustomSearcher() {
 		return customSearcher;
 	} 
-	public String getInstanceName() {
-		return instanceName;
+	public String getReferenceInstance() {
+		return referenceInstance;
 	} 
 	public String getDeltaCron() {
 		return deltaCron;
@@ -180,11 +190,7 @@ public class PipeParam {
 	public boolean isUpdateWriteType() {
 		return writeType;
 	} 
-	
-	public void setInstancename(String v) {
-		this.instanceName = v;
-	}
-	
+ 
 	public boolean isWriterPoolShareAlias() {
 		return writerPoolShareAlias;
 	} 
@@ -197,8 +203,8 @@ public class PipeParam {
 		return searcherShareAlias;
 	}
 
-	public boolean isMaster() {
-		return isMaster;
+	public boolean isVirtualPipe() {
+		return virtualPipe;
 	}  
 	
 	public boolean isAsync() {
@@ -233,15 +239,15 @@ public class PipeParam {
 	public void setReaderPoolShareAlias(String readerPoolShareAlias) { 
 		this.readerPoolShareAlias = Boolean.valueOf(readerPoolShareAlias);
 	}
-	public void setInstanceName(String instanceName) {
-		this.instanceName = instanceName;
+	public void setReferenceInstance(String referenceInstance) {
+		this.referenceInstance = referenceInstance;
 	}
 	public void setNextJob(String nextJob) {
 		this.nextJob = nextJob.replace(",", " ").trim().split(" ");
 	}
-	public void setIsMaster(String isMaster) {
-		if(isMaster.length()>0 && isMaster.toLowerCase().equals("true"))
-			this.isMaster = true;
+	public void setVirtualPipe(String virtualPipe) {
+		if(virtualPipe.length()>0 && virtualPipe.toLowerCase().equals("true"))
+			this.virtualPipe = true;
 	}
 	
 	public void setAsync(String async) {

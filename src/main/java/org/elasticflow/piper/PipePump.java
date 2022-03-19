@@ -52,26 +52,26 @@ public final class PipePump extends Instruction implements Serializable {
 	private static final long serialVersionUID = 3783841547316513634L;
 
 	private final static Logger log = LoggerFactory.getLogger("PipePump");
-	
+
 	private Task fullTask;
-	
+
 	private Task incrementTask;
-	
+
 	private String instanceID;
 
-	public static PipePump getInstance(String contextID,String instance,ReaderFlowSocket reader, ComputerFlowSocket computer,
-			List<WriterFlowSocket> writer, InstanceConfig instanceConfig,String L1seq) {
-		return new PipePump(contextID,instance,reader, computer, writer, instanceConfig,L1seq);
+	public static PipePump getInstance(String contextID, String instance, ReaderFlowSocket reader,
+			ComputerFlowSocket computer, List<WriterFlowSocket> writer, InstanceConfig instanceConfig, String L1seq) {
+		return new PipePump(contextID, instance, reader, computer, writer, instanceConfig, L1seq);
 	}
-	
+
 	public String getInstanceID() {
 		return this.instanceID;
 	}
 
-	private PipePump(String contextID,String instanceID,ReaderFlowSocket reader, ComputerFlowSocket computer, List<WriterFlowSocket> writer,
-			InstanceConfig instanceConfig,String L1seq) {
+	private PipePump(String contextID, String instanceID, ReaderFlowSocket reader, ComputerFlowSocket computer,
+			List<WriterFlowSocket> writer, InstanceConfig instanceConfig, String L1seq) {
 		setID(contextID);
-		CPU.prepare(contextID, instanceConfig, writer, reader, computer);		
+		CPU.prepare(contextID, instanceConfig, writer, reader, computer);
 		this.instanceID = instanceID;
 		fullTask = Task.getInstance(instanceID, L1seq, JOB_TYPE.FULL, instanceConfig, null);
 		incrementTask = Task.getInstance(instanceID, L1seq, JOB_TYPE.INCREMENT, instanceConfig, null);
@@ -91,7 +91,7 @@ public final class PipePump extends Instruction implements Serializable {
 						throw new EFException(e, ELEVEL.Termination);
 					}
 				}
-			} 
+			}
 			if (computer != null) {
 				if (instanceConfig.getComputeParams().getHandler() != null) {
 					try {
@@ -147,12 +147,10 @@ public final class PipePump extends Instruction implements Serializable {
 	 * @param writeInSamePosition
 	 * @throws EFException
 	 */
-	public void run(String storeId, String L1seq, boolean isFull, boolean writeInSamePosition)
-			throws EFException {
+	public void run(String storeId, String L1seq, boolean isFull, boolean isReferenceInstance) throws EFException {
 		JOB_TYPE job_type;
 		String instanceRunId = Common.getInstanceRunId(instanceID, L1seq);
-		String writeInstanceName = writeInSamePosition ? getInstanceConfig().getPipeParams().getInstanceName()
-				: instanceID;
+		String writeInstanceName = isReferenceInstance ? getInstanceConfig().getPipeParams().getReferenceInstance(): instanceID;
 		Task task;
 		if (isFull) {
 			job_type = JOB_TYPE.FULL;
@@ -160,23 +158,22 @@ public final class PipePump extends Instruction implements Serializable {
 		} else {
 			job_type = JOB_TYPE.INCREMENT;
 			task = incrementTask;
-		}		 
+		}
 		List<String> L2seqs = getInstanceConfig().getReadParams().getL2Seq().size() > 0
 				? getInstanceConfig().getReadParams().getL2Seq()
 				: Arrays.asList("");
 		GlobalParam.TASK_COORDER.setFlowInfo(instanceID, job_type.name(), instanceRunId + " L2seqs nums",
 				String.valueOf(L2seqs.size()));
-		processFlow(task, storeId, L2seqs, writeInstanceName, writeInSamePosition);
+		processFlow(task, storeId, L2seqs, writeInstanceName, isReferenceInstance);
 		GlobalParam.TASK_COORDER.resetFlowInfo(instanceID, job_type.name());
 		if (isFull) {
-			if (writeInSamePosition) {
-				String destination = getInstanceConfig().getPipeParams().getInstanceName();
-				synchronized (GlobalParam.TASK_COORDER.getFlowInfo(destination, GlobalParam.JOB_TYPE.MASTER.name())) {
+			if (isReferenceInstance) {
+				synchronized (GlobalParam.TASK_COORDER.getFlowInfo(writeInstanceName, GlobalParam.JOB_TYPE.VIRTUAL.name())) {
 					String remainJobs = GlobalParam.TASK_COORDER
-							.getFlowInfo(destination, GlobalParam.JOB_TYPE.MASTER.name())
+							.getFlowInfo(writeInstanceName, GlobalParam.JOB_TYPE.VIRTUAL.name())
 							.get(GlobalParam.FLOWINFO.FULL_JOBS.name());
 					remainJobs = remainJobs.replace(instanceID, "").trim();
-					GlobalParam.TASK_COORDER.setFlowInfo(destination, GlobalParam.JOB_TYPE.MASTER.name(),
+					GlobalParam.TASK_COORDER.setFlowInfo(writeInstanceName, GlobalParam.JOB_TYPE.VIRTUAL.name(),
 							GlobalParam.FLOWINFO.FULL_JOBS.name(), remainJobs);
 					if (remainJobs.length() == 0) {
 						CPU.RUN(getID(), "Pond", "switchInstance", true, instanceID, L1seq, storeId);
@@ -220,7 +217,7 @@ public final class PipePump extends Instruction implements Serializable {
 	 * @throws EFException
 	 */
 	private void processFlow(Task task, String storeId, List<String> L2seqs, String writeInstanceName,
-			boolean writeInSamePosition) throws EFException {
+			boolean isReferenceInstance) throws EFException {
 		for (String L2seq : L2seqs) {
 			try {
 				task.setL2seq(L2seq);
@@ -231,7 +228,7 @@ public final class PipePump extends Instruction implements Serializable {
 					throw new EFException("Reader page split exception!", ELEVEL.Termination);
 				processListsPages(task, writeInstanceName, pageList, storeId);
 			} catch (EFException e) {
-				if (task.getJobType().equals(JOB_TYPE.FULL) && !writeInSamePosition) {
+				if (task.getJobType().equals(JOB_TYPE.FULL) && !isReferenceInstance) {
 					for (int t = 0; t < 5; t++) {
 						getWriter().PREPARE(false, false);
 						if (getWriter().ISLINK()) {
@@ -264,7 +261,7 @@ public final class PipePump extends Instruction implements Serializable {
 				log.info(Common.formatLog("start",
 						(getInstanceConfig().getPipeParams().isMultiThread() ? "MultiThread" : "SingleThread") + " "
 								+ task.getJobType().name(),
-								instanceRunId, storeId, task.getL2seq(), 0, "",
+						instanceRunId, storeId, task.getL2seq(), 0, "",
 						GlobalParam.TASK_COORDER.getLSeqPos(task.getInstance(), task.getL1seq(), task.getL2seq()), 0,
 						",totalpage:" + pageNum));
 
@@ -292,7 +289,7 @@ public final class PipePump extends Instruction implements Serializable {
 			this.breakCheck(task);
 		}
 	}
-	
+
 	private void breakCheck(Task task) throws EFException {
 		if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(),
 				STATUS.Termination)) {
@@ -326,9 +323,9 @@ public final class PipePump extends Instruction implements Serializable {
 					task.getId() + task.getL2seq(), processPos + "/" + pageList.size());
 			String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(), PipeUtil.getScanParam(
 					task.getL2seq(), startId, dataBoundary, task.getStartTime(), task.getEndTime(), scanField));
-		    
+
 			this.breakCheck(task);
-			
+
 			DataPage pagedata = this.getPageData(
 					Page.getInstance(keyField, scanField, startId, dataBoundary, getInstanceConfig(), dataScanDSL));
 			if (getInstanceConfig().openCompute()) {
@@ -338,14 +335,13 @@ public final class PipePump extends Instruction implements Serializable {
 				String scanStamp = pagedata.getScanStamp();
 				pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(), task.getJobType().name(),
 						writeInstanceName, pagedata);
-				log.info(Common.formatLog("onepage", task.getJobType().name() + " Compute", 
-						task.getId(),
-						storeId, task.getL2seq(), dataSize, datab, scanStamp, Common.getNow() - start,
+				log.info(Common.formatLog("onepage", task.getJobType().name() + " Compute", task.getId(), storeId,
+						task.getL2seq(), dataSize, datab, scanStamp, Common.getNow() - start,
 						",process:" + processPos + "/" + pageNum));
 			}
-			
+
 			this.breakCheck(task);
-			
+
 			rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
 					writeInstanceName, storeId, task, pagedata,
 					",L1seq:" + task.getL1seq() + ",process:" + processPos + "/" + pageNum, isupdate, false);
@@ -384,8 +380,8 @@ public final class PipePump extends Instruction implements Serializable {
 		try {
 			pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchPage", false, pager, getReader());
 			getReader().freeJobPage();
-		} catch (Exception e) { 
-			throw new EFException(e,ELEVEL.Dispose,ETYPE.DATA_ERROR);
+		} catch (Exception e) {
+			throw new EFException(e, ELEVEL.Dispose, ETYPE.DATA_ERROR);
 		} finally {
 			getReader().lock.unlock();
 		}
@@ -438,7 +434,7 @@ public final class PipePump extends Instruction implements Serializable {
 		@Override
 		public int needThreads() {
 			return PipeUtil.estimateThreads(this.pageNum);
-		} 
+		}
 
 		@Override
 		public void run() {
@@ -450,14 +446,14 @@ public final class PipePump extends Instruction implements Serializable {
 						task.getId() + task.getL2seq(), processPos + "/" + this.pageNum);
 				String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(),
 						PipeUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
-								task.getEndTime(), task.getScanParam().getScanField())); 
+								task.getEndTime(), task.getScanParam().getScanField()));
 				if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(),
 						STATUS.Termination)) {
 					Resource.ThreadPools.cleanWaitJob(getId());
 					Common.LOG.warn(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
 					break;
-				} 
-				
+				}
+
 				try {
 					DataPage pagedata = getPageData(
 							Page.getInstance(task.getScanParam().getKeyField(), task.getScanParam().getScanField(),
@@ -469,16 +465,17 @@ public final class PipePump extends Instruction implements Serializable {
 						String scanStamp = pagedata.getScanStamp();
 						pagedata = (DataPage) CPU.RUN(getID(), "ML", "compute", false, getID(),
 								task.getJobType().name(), writeInstanceName, pagedata);
-						log.info(Common.formatLog("onepage", task.getJobType().name() + " Compute",
-								task.getId(), storeId, task.getL2seq(), dataSize, datab, scanStamp,
-								Common.getNow() - start, ",process:" + processPos + "/" + pageNum));
+						log.info(Common.formatLog("onepage", task.getJobType().name() + " Compute", task.getId(),
+								storeId, task.getL2seq(), dataSize, datab, scanStamp, Common.getNow() - start,
+								",process:" + processPos + "/" + pageNum));
 					}
 					if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstance(), task.getL1seq(), task.getJobType(),
 							STATUS.Termination)) {
 						Resource.ThreadPools.cleanWaitJob(getId());
-						Common.LOG.warn(task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
+						Common.LOG.warn(
+								task.getInstance() + " " + task.getJobType().name() + " job has been Terminated!");
 						break;
-					} 
+					}
 					rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
 							task.getId(), storeId, task, pagedata,
 							",L1seq:" + task.getL1seq() + ",process:" + processPos + "/" + pageNum, this.isUpdate,
@@ -497,7 +494,7 @@ public final class PipePump extends Instruction implements Serializable {
 				}
 				total.addAndGet(rState.getCount());
 				startId = dataBoundary;
-				
+
 				GlobalParam.TASK_COORDER.setScanPosition(task.getInstance(), task.getL1seq(), task.getL2seq(),
 						rState.getReaderScanStamp());
 				if (task.getJobType() == JOB_TYPE.INCREMENT) {

@@ -126,7 +126,7 @@ public final class GlobalParam {
 	public final static String DEFAULT_FIELD = "SYSTEM_UPDATE_TIME"; 
 	public final static String DEFAULT_RESOURCE_SEQ = ""; 
 	public static enum JOB_TYPE {
-		MASTER,FULL,INCREMENT,OPTIMIZE,INSTRUCTION
+		VIRTUAL,FULL,INCREMENT,OPTIMIZE,INSTRUCTION
 	} 
 	public static enum FLOWINFO{
 		FULL_STATE,FULL_STOREID,INCRE_STOREID,FULL_JOBS

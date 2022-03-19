@@ -137,7 +137,7 @@ public class HttpReaderService {
 								isUpdate = true;
 
 							try {
-								String writeTo = pipePump.getInstanceConfig().getPipeParams().getInstanceName();
+								String writeTo = pipePump.getInstanceConfig().getPipeParams().getReferenceInstance();
 								if (writeTo == null) {
 									writeTo = Common.getInstanceRunId(instance, seq);
 								}
@@ -192,7 +192,7 @@ public class HttpReaderService {
 							}
 							CPU.RUN(pipePump.getID(), "Pond", "switchInstance", true, instance, seq, storeid);
 							pipePump.run(storeid, seq, true,
-									pipePump.getInstanceConfig().getPipeParams().getInstanceName() == null ? false
+									pipePump.getInstanceConfig().getPipeParams().getReferenceInstance() == null ? false
 											: true);
 						} else {
 							rps.setStatus("Failed to switch index!", RESPONSE_STATUS.ExternErr);

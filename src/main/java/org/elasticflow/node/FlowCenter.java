@@ -150,9 +150,9 @@ public class FlowCenter{
 			throws SchedulerException {
 		String fullFun="runFull";
 		String incrementFun="runIncrement";
-		if(instanceConfig.getPipeParams().isMaster()) {
-			fullFun="runMasterFull";
-			incrementFun="runMasterIncrement";
+		if(instanceConfig.getPipeParams().isVirtualPipe()) {
+			fullFun="runVirtualFull";
+			incrementFun="runVirtualIncrement";
 		} 
 		
 		if (instanceConfig.getPipeParams().getFullCron() != null) { 
@@ -211,9 +211,8 @@ public class FlowCenter{
 		
 			String cron = instanceConfig.getPipeParams().getOptimizeCron()==null?default_cron.replace("PARAM",String.valueOf((int)(Math.random()*60))):instanceConfig.getPipeParams().getOptimizeCron();
 			instanceConfig.getPipeParams().setOptimizeCron(cron);
-			if(instanceConfig.getPipeParams().getInstanceName()==null) {
+			if(instanceConfig.getPipeParams().getReferenceInstance()==null) 
 				createOptimizeJob(instance, task,cron); 
-			} 
 		}
 	}
 	
