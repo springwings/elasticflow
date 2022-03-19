@@ -15,11 +15,11 @@ import org.elasticflow.util.EFException;
 
 /**
  * user defined data unit process function
- * store common function handler
+ * 
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:11
  */
-public interface UnitHandler { 
-	void handle(PipeDataUnit u,EFField field,Object obj,Map<String, EFField> transParams) throws EFException; 
+public interface UnitHandler {
+	void handle(PipeDataUnit u, EFField field, Object obj, Map<String, EFField> transParams) throws EFException;
 }

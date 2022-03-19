@@ -34,7 +34,7 @@ public interface InstanceCoord extends Coordination{
 	
 	public void stopInstance(String instance,String jobtype);
 	
-	public boolean runInstanceNow(String instance,String type);
+	public boolean runInstanceNow(String instance,String type,boolean asyn);
 		
 	public void resumeInstance(String instance,String jobtype);
 	

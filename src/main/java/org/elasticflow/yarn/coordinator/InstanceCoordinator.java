@@ -20,11 +20,11 @@ import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coord.InstanceCoord;
 
 /**
- * Run task instance cluster coordination operation The code runs on the slave/master
- * local running method
+ * Run task instance cluster coordination operation 
+ * The code runs on the slave/master,local running method 
  * @author chengwen
  * @version 0.1
- * @create_time 2021-07-30
+ * @create_time 2019-07-30
  */
 public class InstanceCoordinator implements InstanceCoord { 
 	
@@ -151,8 +151,8 @@ public class InstanceCoordinator implements InstanceCoord {
 	} 
 	
 	@Override
-	public boolean runInstanceNow(String instance,String type) {
-		return Resource.FlOW_CENTER.runInstanceNow(instance, type, true);
+	public boolean runInstanceNow(String instance,String type,boolean asyn) {
+		return Resource.FlOW_CENTER.runInstanceNow(instance, type, asyn);
 	}
 	
 }

@@ -14,23 +14,24 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
+ * spring inversion of control
  * 
  * @author chengwen
  * @version 2.0
  * @date 2018-10-26 09:19
  */
-public final class EFLoc {
-	
-	private static ApplicationContext ACT; 
-	
+public final class EFIoc {
+
+	private static ApplicationContext ACT;
+
 	static {
 		try {
-			org.springframework.util.Log4jConfigurer.initLogging(GlobalParam.configPath+"/log4j.properties");
+			org.springframework.util.Log4jConfigurer.initLogging(GlobalParam.configPath + "/log4j.properties");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		ACT = new ClassPathXmlApplicationContext ("spring.xml");
-	} 
+		ACT = new ClassPathXmlApplicationContext("spring.xml");
+	}
 
 	public static Object getBean(String beanname) {
 		return ACT.getBean(beanname);

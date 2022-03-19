@@ -19,14 +19,15 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Machine learning running Instruction sets
+ * 
  * @author chengwen
  * @version 1.0
  * @date 2018-05-22 09:08
  */
 public class ML extends Instruction {
 
-	private final static Logger log = LoggerFactory.getLogger("ML"); 
-	 
+	private final static Logger log = LoggerFactory.getLogger("ML");
+
 	/**
 	 * @param args parameter order is:String contextId, String types, String
 	 *             instance, DataPage pageData
@@ -46,19 +47,23 @@ public class ML extends Instruction {
 		DataSetReader DSReader = new DataSetReader();
 		DSReader.init(dp);
 		if (DSReader.status()) {
-			try { 
+			try {
 				long start = System.currentTimeMillis();
 				int dataNums = DSReader.getDataNums();
-				
-				if(context.getInstanceConfig().getComputeParams().getStage().equals(GlobalParam.COMPUTER_STAGE.PREDICT.name())) {
+
+				if (context.getInstanceConfig().getComputeParams().getStage()
+						.equals(GlobalParam.COMPUTER_STAGE.PREDICT.name())) {
 					res = context.getComputer().predict(context, DSReader);
-				}else if(context.getInstanceConfig().getComputeParams().getStage().equals(GlobalParam.COMPUTER_STAGE.TRAIN.name()))  {
+				} else if (context.getInstanceConfig().getComputeParams().getStage()
+						.equals(GlobalParam.COMPUTER_STAGE.TRAIN.name())) {
 					res = context.getComputer().train(context, DSReader, context.getInstanceConfig().getWriteFields());
-				}				
-				context.getComputer().flowState.setLoad((long)((dataNums*1000)/(start-context.getComputer().lastGetPageTime)));		
+				}
+				context.getComputer().flowState
+						.setLoad((long) ((dataNums * 1000) / (start - context.getComputer().lastGetPageTime)));
 				context.getComputer().lastGetPageTime = start;
-				if(res.getData().size()>0)
-					context.getComputer().flowState.setPerformance((long) ((dataNums*1000)/(System.currentTimeMillis()-start+1e-3)));
+				if (res.getData().size() > 0)
+					context.getComputer().flowState
+							.setPerformance((long) ((dataNums * 1000) / (System.currentTimeMillis() - start + 1e-3)));
 				context.getComputer().flowState.incrementCurrentTimeProcess(dataNums);
 			} catch (EFException e) {
 				log.error("batch Compute Exception", e);
@@ -68,5 +73,5 @@ public class ML extends Instruction {
 			}
 		}
 		return res;
-	} 
+	}
 }

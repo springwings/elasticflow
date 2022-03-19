@@ -32,7 +32,7 @@ import org.elasticflow.service.EFMonitorService;
 import org.elasticflow.task.FlowTask;
 import org.elasticflow.task.schedule.TaskJobCenter;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.EFLoc;
+import org.elasticflow.util.EFIoc;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.email.EFEmailSender;
 import org.elasticflow.util.instance.EFDataStorer;
@@ -241,7 +241,7 @@ public final class Run {
 	} 
 
 	public static void main(String[] args) throws Exception {
-		Resource.EFLOWS = (Run) EFLoc.getBean("EFLOWS");
+		Resource.EFLOWS = (Run) EFIoc.getBean("EFLOWS");
 		Resource.EFLOWS.start();
 		Runtime.getRuntime().addShutdownHook(new SafeShutDown());
 	}

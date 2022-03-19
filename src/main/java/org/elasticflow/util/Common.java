@@ -170,17 +170,19 @@ public final class Common {
 			}
 		}
 	}
-	
+
 	/**
-	 * 	 * Second timestamp of now
+	 * * Second timestamp of now
+	 * 
 	 * @return
 	 */
 	public static long getNow() {
 		return System.currentTimeMillis() / 1000;
 	}
-	
+
 	/**
 	 * Second timestamp of the current zero point
+	 * 
 	 * @return
 	 */
 	public static long getNowZero() {
@@ -246,8 +248,8 @@ public final class Common {
 		}
 		return sf.toString();
 	}
-	
-	//get hashmap min key
+
+	// get hashmap min key
 	public static Object getMinKey(Set<String> keySets) {
 		Object[] obj = keySets.toArray();
 		Arrays.sort(obj);
@@ -574,8 +576,8 @@ public final class Common {
 
 	public static void processErrorLevel(EFException e) {
 		if (e.getErrorLevel().equals(ELEVEL.Termination)) {
-			LOG.error("The current thread automatically interrupt!",e);
-			Thread.currentThread().interrupt();			
+			LOG.error("The current thread automatically interrupt!", e);
+			Thread.currentThread().interrupt();
 		} else if (e.getErrorLevel().equals(ELEVEL.Stop)) {
 			stopSystem(true);
 		}
@@ -583,12 +585,12 @@ public final class Common {
 
 	public static void stopSystem(boolean soft) {
 		LOG.warn("system will automatically stop...");
-		if(soft)
-			SafeShutDown.stopAllInstances(); 
+		if (soft)
+			SafeShutDown.stopAllInstances();
 		LOG.warn("system stop success!");
 		Resource.ThreadPools.execute(() -> {
-				System.exit(0);
-		}); 
+			System.exit(0);
+		});
 	}
 
 }

@@ -14,18 +14,19 @@ import com.alibaba.fastjson.JSONObject;
 
 /**
  * EFMonitor Coordinator
+ * 
  * @author chengwen
  * @version 0.1
  * @create_time 2021-07-30
  */
 
-public class EFMonitorCoordinator implements EFMonitorCoord{
-	
+public class EFMonitorCoordinator implements EFMonitorCoord {
+
 	@Override
 	public String getPoolStatus(String poolName) {
 		return EFConnectionPool.getStatus(poolName);
 	}
-	
+
 	@Override
 	public JSONObject getPipeEndStatus(String instance, String L1seq) {
 		return EFMonitorUtil.getPipeEndStatus(instance, L1seq);
@@ -46,6 +47,6 @@ public class EFMonitorCoordinator implements EFMonitorCoord{
 			Common.LOG.error(" getStatus Exception ", e);
 		}
 		return dt;
-	} 
+	}
 
 }

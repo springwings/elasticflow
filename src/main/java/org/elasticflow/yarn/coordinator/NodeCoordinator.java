@@ -8,21 +8,22 @@ import org.elasticflow.yarn.monitor.ResourceMonitor;
 
 /**
  * Cluster node operation control Coordinator
+ * 
  * @author chengwen
  * @version 0.1
  * @create_time 2021-07-30
  */
 
-public class NodeCoordinator implements NodeCoord{
+public class NodeCoordinator implements NodeCoord {
 
 	@Override
 	public void stopNode() {
-		if(EFNodeUtil.isSlave()) {
+		if (EFNodeUtil.isSlave()) {
 			ResourceMonitor.stop();
 		}
-		Common.stopSystem(false);		
+		Common.stopSystem(false);
 	}
-	
+
 	public double[] summaryResource() {
 		double[] sum = new double[2];
 		try {

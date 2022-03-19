@@ -84,7 +84,7 @@ public class FlowCenter{
 				}				
 			}
 		} catch (Exception e) {
-			Common.LOG.error("runInstanceNow "+instance+" Exception", e);
+			Common.LOG.error("run instance now "+instance+" Exception", e);
 			return false;
 		}
 

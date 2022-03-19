@@ -186,8 +186,8 @@ public class EFNode {
 		}
 	}
 	
-	public boolean runInstanceNow(String instance,String jobtype) {
-		return this.instanceCoord.runInstanceNow(instance, jobtype);
+	public boolean runInstanceNow(String instance,String jobtype,boolean asyn) {
+		return this.instanceCoord.runInstanceNow(instance, jobtype,asyn);
 	}
 	
 	public void stopInstance(String instance) {

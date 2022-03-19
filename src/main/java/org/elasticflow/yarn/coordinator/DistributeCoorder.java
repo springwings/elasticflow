@@ -33,8 +33,8 @@ import org.elasticflow.yarn.coordinator.node.DistributeService;
 import com.alibaba.fastjson.JSONObject;
 
 /**
- * master control center
- * Control and acquisition sub node
+ * master control center Control and acquisition sub node
+ * 
  * @author chengwen
  * @version 0.1
  * @create_time 2021-07-30
@@ -44,8 +44,8 @@ public class DistributeCoorder {
 	private int totalInstanceNum;
 
 	private int avgInstanceNum;
-	
-	/**cluster status :0 normal 1 freeze 2 down**/
+
+	/** cluster status :0 normal 1 freeze 2 down **/
 	private AtomicInteger clusterStatus = new AtomicInteger(2);
 
 	/** Check whether the system is initialized */
@@ -54,23 +54,25 @@ public class DistributeCoorder {
 	/** Threshold at which resources fall into scheduling **/
 	private double cpuUsage = 90.;
 	private double memUsage = 90.;
-	
+
 	private volatile Queue<Boolean> rebalanceQueue = new LinkedList<Boolean>();
-	
+
 	private ReentrantLock rebalanceLocker = new ReentrantLock();
 
 	private CopyOnWriteArrayList<EFNode> nodes = new CopyOnWriteArrayList<>();
-			
+
+	/** control master local state */
 	public void resumeInstance(String instance) {
 		GlobalParam.INSTANCE_COORDER.resumeInstance(instance, GlobalParam.JOB_TYPE.INCREMENT.name());
 		GlobalParam.INSTANCE_COORDER.resumeInstance(instance, GlobalParam.JOB_TYPE.FULL.name());
 	}
 
+	/** control master local state */
 	public void stopInstance(String instance) {
 		GlobalParam.INSTANCE_COORDER.stopInstance(instance, GlobalParam.JOB_TYPE.INCREMENT.name());
 		GlobalParam.INSTANCE_COORDER.stopInstance(instance, GlobalParam.JOB_TYPE.FULL.name());
-	}	
-	
+	}
+
 	public void updateNodeConfigs(String instance, String end, String fieldName, String value) {
 		nodes.forEach(n -> {
 			if (n.containInstace(instance)) {
@@ -84,7 +86,7 @@ public class DistributeCoorder {
 			n.pushResource();
 		});
 	}
-	
+
 	public HashMap<String, Object> getNodeStatus() {
 		HashMap<String, Object> res = new HashMap<>();
 		for (EFNode node : nodes) {
@@ -127,16 +129,17 @@ public class DistributeCoorder {
 						EFRPCService.getRemoteProxyObj(InstanceCoord.class,
 								new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)),
 						EFRPCService.getRemoteProxyObj(EFMonitorCoord.class,
-								new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)),this);
+								new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)),
+						this);
 				nodes.add(node);
-				Common.LOG.info("{} join cluster, current number of nodes is {}.",ip,nodes.size());
-			} 
-			if (clusterConditionMatch()) { 
+				Common.LOG.info("{} join cluster, current number of nodes is {}.", ip, nodes.size());
+			}
+			if (clusterConditionMatch()) {
 				clusterStatus.set(0);
-				if(rebalanceQueue.size()<2) {
+				if (rebalanceQueue.size() < 2) {
 					rebalanceQueue.add(true);
 					rebalanceLocker.lock();
-					while(!rebalanceQueue.isEmpty()) { 
+					while (!rebalanceQueue.isEmpty()) {
 						Queue<String> bindInstances = clusterScan(false);
 						if (isOnStart.get()) {
 							isOnStart.set(false);
@@ -145,33 +148,33 @@ public class DistributeCoorder {
 							this.rebalanceOnNewNodeJoin(bindInstances);
 						}
 						rebalanceQueue.poll();
-					} 
+					}
 					rebalanceLocker.unlock();
 				}
-				
+
 			}
 		} else {
 			this.getNode(nodeId).recoverInstance();
 			this.getNode(nodeId).refresh();
 		}
 	}
-	
+
 	private boolean clusterConditionMatch() {
-		if (nodes.size() < GlobalParam.CLUSTER_MIN_NODES) { 
+		if (nodes.size() < GlobalParam.CLUSTER_MIN_NODES) {
 			return false;
 		}
 		return true;
 	}
 
-	public synchronized void removeNode(String ip, Integer nodeId, boolean rebalace) {		
+	public synchronized void removeNode(String ip, Integer nodeId, boolean rebalace) {
 		if (this.containsNode(nodeId)) {
 			EFNode node = this.removeNode(nodeId);
 			Queue<String> instances = new LinkedList<String>();
-			instances.addAll(node.getBindInstances()); 
-			Common.LOG.warn("ip {},nodeId {},leave cluster!",ip,nodeId); 
+			instances.addAll(node.getBindInstances());
+			Common.LOG.warn("ip {},nodeId {},leave cluster!", ip, nodeId);
 			node.stopAllInstance();
 			if (!clusterConditionMatch()) {
-				Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed."); 
+				Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed.");
 				stopNodes(false);
 			} else {
 				if (rebalace)
@@ -183,13 +186,13 @@ public class DistributeCoorder {
 	}
 
 	public synchronized void stopNodes(boolean wait) {
-		if(clusterStatus.get()!=1) {
-			clusterStatus.set(1);			
-			DistributeService.closeMonitor(); 
+		if (clusterStatus.get() != 1) {
+			clusterStatus.set(1);
+			DistributeService.closeMonitor();
 			CountDownLatch singal = new CountDownLatch(nodes.size());
-			Resource.ThreadPools.execute(() -> { 
-				nodes.forEach(n -> { 
-					Common.LOG.info("node {},nodeId {}, is stopped!",n.getIp(),n.getNodeId());
+			Resource.ThreadPools.execute(() -> {
+				nodes.forEach(n -> {
+					Common.LOG.info("node {},nodeId {}, is stopped!", n.getIp(), n.getNodeId());
 					n.stopAllInstance();
 					n.getNodeCoord().stopNode();
 					singal.countDown();
@@ -200,10 +203,10 @@ public class DistributeCoorder {
 				clusterStatus.set(2);
 				Common.LOG.info("cluster all slave nodes are offline.");
 			});
-			if(wait) {
+			if (wait) {
 				try {
 					singal.await();
-				} catch (Exception e) {  
+				} catch (Exception e) {
 				}
 			}
 		}
@@ -213,26 +216,26 @@ public class DistributeCoorder {
 	 * Check cluster health
 	 */
 	public synchronized Queue<String> clusterScan(boolean startRebalace) {
-		Queue<String> bindInstances = new LinkedList<String>();		
+		Queue<String> bindInstances = new LinkedList<String>();
 		for (EFNode n : nodes) {
-			if(DistributeService.isOpenMonitor()) {
+			if (DistributeService.isOpenMonitor()) {
 				if (!n.isLive()) {
 					removeNode(n.getIp(), n.getNodeId(), false);
 					bindInstances.addAll(n.getBindInstances());
 				} else {
 					n.refresh();
 				}
-			} 
+			}
 		}
 		if (DistributeService.isOpenMonitor() && !bindInstances.isEmpty() && startRebalace)
 			this.rebalanceOnNodeLeave(bindInstances);
 		return bindInstances;
 	}
 
-	public boolean runClusterInstanceNow(String instance, String jobtype) {
+	public boolean runClusterInstanceNow(String instance, String jobtype, boolean asyn) {
 		for (EFNode node : nodes) {
 			if (node.containInstace(instance)) {
-				return node.runInstanceNow(instance, jobtype);
+				return node.runInstanceNow(instance, jobtype, asyn);
 			}
 		}
 		return false;
@@ -290,22 +293,23 @@ public class DistributeCoorder {
 	}
 
 	// ----------------other-------------------//
-	private synchronized void rebalanceOnNodeLeave(Queue<String> bindInstances) {		
-		if(!clusterConditionMatch()) {
-			Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed."); 
+	private synchronized void rebalanceOnNodeLeave(Queue<String> bindInstances) {
+		if (!clusterConditionMatch()) {
+			Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed.");
 			stopNodes(false);
-		}else {
+		} else {
 			this.avgInstanceNum = avgInstanceNum();
-			Common.LOG.info("start NodeLeave rebalance on {} nodes,avgInstanceNum {}...", nodes.size(),avgInstanceNum);
+			Common.LOG.info("start NodeLeave rebalance on {} nodes,avgInstanceNum {}...", nodes.size(), avgInstanceNum);
 			this.distributeInstances(bindInstances);
 			Common.LOG.info("finish NodeLeave rebalance instance!");
 		}
 	}
- 
+
 	private void rebalanceOnNewNodeJoin(Queue<String> idleInstances) {
 		synchronized (nodes) {
 			this.avgInstanceNum = avgInstanceNum();
-			Common.LOG.info("start NewNodeJoin rebalance on {} nodes, avgInstanceNum {}...", nodes.size(),avgInstanceNum);		
+			Common.LOG.info("start NewNodeJoin rebalance on {} nodes, avgInstanceNum {}...", nodes.size(),
+					avgInstanceNum);
 			ArrayList<EFNode> addInstanceNodes = new ArrayList<>();
 			for (EFNode node : nodes) {
 				if (node.getBindInstances().size() < avgInstanceNum) {
@@ -325,33 +329,34 @@ public class DistributeCoorder {
 	private synchronized void rebalanceOnStart() {
 		String[] instances = GlobalParam.StartConfig.getProperty("instances").split(",");
 		Queue<String> runInstances = new LinkedList<String>();
-		for (int i = 0; i < instances.length;i++) {
+		for (int i = 0; i < instances.length; i++) {
 			String[] strs = instances[i].split(":");
-			if (strs.length>1 && Integer.parseInt(strs[1]) > 0) {
-				totalInstanceNum++; //summary run instance
+			if (strs.length > 1 && Integer.parseInt(strs[1]) > 0) {
+				totalInstanceNum++; // summary run instance
 				runInstances.add(instances[i]);
 			}
 		}
-		Common.LOG.info("start cluster init rebalance, with {} nodes, total number of instances is {}...", nodes.size(),totalInstanceNum);
+		Common.LOG.info("start cluster init rebalance, with {} nodes, total number of instances is {}...", nodes.size(),
+				totalInstanceNum);
 		this.avgInstanceNum = avgInstanceNum();
 		this.distributeInstances(runInstances);
 		Common.LOG.info("finish cluster init rebalance!");
 	}
-	
+
 	private void distributeInstances(Queue<String> runInstances) {
-		if(runInstances.size()>0) {
+		if (runInstances.size() > 0) {
 			for (EFNode node : nodes) {
 				while (node.getBindInstances().size() < avgInstanceNum) {
 					if (runInstances.isEmpty())
 						break;
 					node.pushInstance(runInstances.poll(), true);
 				}
-			} 
+			}
 		}
 	}
 
 	private int avgInstanceNum() {
-		return (int) Math.ceil(totalInstanceNum / (nodes.size()+0.0));
+		return (int) Math.ceil(totalInstanceNum / (nodes.size() + 0.0));
 	}
 
 	private EFNode getNode(Integer nodeId) {

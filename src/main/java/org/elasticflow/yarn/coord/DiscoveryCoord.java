@@ -20,4 +20,7 @@ public interface DiscoveryCoord extends Coordination{
 	
 	public void leaveCluster(String ip,String nodeId);
 	
+	/**Notify the cluster to start the task*/
+	public boolean runInstanceNow(String instance,String type,boolean asyn);
+	
 }

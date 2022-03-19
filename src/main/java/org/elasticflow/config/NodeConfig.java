@@ -29,16 +29,16 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * The EF node configuration control center,
- * manages the abstract flow and data source configuration.
+ * The EF node configuration control center, manages the abstract flow and data
+ * source configuration.
  * 
  * @author chengwen
  * @version 4.1
  * @date 2018-10-11 14:50
  */
 public class NodeConfig {
-	
-	/**instance,instance-config map*/
+
+	/** instance,instance-config map */
 	private final Map<String, InstanceConfig> instanceConfigs = new HashMap<>();
 	private final Map<String, InstanceConfig> searchConfigMap = new HashMap<>();
 	private final Map<String, WarehouseParam> warehouse = new HashMap<>();
@@ -61,7 +61,7 @@ public class NodeConfig {
 	}
 
 	public void init(String instanceSettings) {
-		loadConfig(instanceSettings, true); 
+		loadConfig(instanceSettings, true);
 	}
 
 	public void loadConfig(String instanceSettings, boolean reset) {
@@ -69,19 +69,19 @@ public class NodeConfig {
 			this.reset();
 			parsePondFile(GlobalParam.CONFIG_PATH + "/" + this.pondFile);
 			parseInstructionsFile(GlobalParam.CONFIG_PATH + "/" + this.instructionsFile);
-		} 
-		if(EFNodeUtil.isMaster())
+		}
+		if (EFNodeUtil.isMaster())
 			loadInstanceConfig(instanceSettings);
 	}
-	
+
 	public void reset() {
 		this.instanceConfigs.clear();
 		this.searchConfigMap.clear();
 		this.warehouse.clear();
 		this.instructions.clear();
 	}
-	
-	public void loadInstanceConfig(String instanceSettings) {  
+
+	public void loadInstanceConfig(String instanceSettings) {
 		if (instanceSettings.trim().length() < 1)
 			return;
 		for (String inst : instanceSettings.split(",")) {
@@ -92,7 +92,7 @@ public class NodeConfig {
 			String name = strs[0].trim();
 			if (strs.length == 2) {
 				instanceType = Integer.parseInt(strs[1].trim());
-			} 
+			}
 			InstanceConfig nconfig;
 			if (this.instanceConfigs.containsKey(name)) {
 				nconfig = this.instanceConfigs.get(name);
@@ -101,14 +101,14 @@ public class NodeConfig {
 				this.instanceConfigs.put(name, nconfig);
 			}
 			nconfig.init();
-			if(nconfig.checkStatus()) { 
+			if (nconfig.checkStatus()) {
 				if (nconfig.getAlias().equals(""))
 					nconfig.setAlias(name);
 				nconfig.setInstanceID(name);
 				this.searchConfigMap.put(nconfig.getAlias(), nconfig);
-			}else {
+			} else {
 				Common.stopSystem(false);
-			}			
+			}
 		}
 	}
 
@@ -127,7 +127,6 @@ public class NodeConfig {
 	public Map<String, WarehouseParam> getWarehouse() {
 		return this.warehouse;
 	}
-
 
 	public void reload() {
 		for (Map.Entry<String, InstanceConfig> e : this.instanceConfigs.entrySet()) {
@@ -200,7 +199,7 @@ public class NodeConfig {
 				if (null != in) {
 					in.close();
 				}
-			} catch (Exception e) { 
+			} catch (Exception e) {
 				Common.LOG.error("parse (" + src + ") error,", e);
 			}
 		}
@@ -210,10 +209,10 @@ public class NodeConfig {
 		if (paramlist != null && paramlist.getLength() > 0) {
 			for (int i = 0; i < paramlist.getLength(); i++) {
 				Node param = paramlist.item(i);
-				if (param.getNodeType() == Node.ELEMENT_NODE) { 
+				if (param.getNodeType() == Node.ELEMENT_NODE) {
 					Object o = Common.getXmlObj(param, c);
 					if (c == WarehouseParam.class) {
-						addSource(RESOURCE_TYPE.WAREHOUSE, o);					
+						addSource(RESOURCE_TYPE.WAREHOUSE, o);
 					} else if (c == InstructionParam.class) {
 						addSource(RESOURCE_TYPE.INSTRUCTION, o);
 					}

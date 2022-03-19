@@ -14,52 +14,53 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.util.instance.EFWriterUtil;
 import org.elasticflow.writer.WriterFlowSocket;
- 
+
 /**
+ * Pipeline run instruction context
  * 
  * @author chengwen
  * @version 2.0
- * @date 2018-01-22 
+ * @date 2018-01-22
  * @modify 2019-01-22 11:24
  */
-public class Context { 
-	
+public class Context {
+
 	private InstanceConfig instanceConfig;
-	
+
 	private List<WriterFlowSocket> writer;
-	
+
 	private ReaderFlowSocket reader;
-	
-	private ComputerFlowSocket computer; 
-	
-	public static Context initContext(InstanceConfig instanceConfig,List<WriterFlowSocket> writer,
-			ReaderFlowSocket reader,ComputerFlowSocket computer) {
+
+	private ComputerFlowSocket computer;
+
+	public static Context initContext(InstanceConfig instanceConfig, List<WriterFlowSocket> writer,
+			ReaderFlowSocket reader, ComputerFlowSocket computer) {
 		Context c = new Context();
 		c.instanceConfig = instanceConfig;
 		c.writer = writer;
 		c.reader = reader;
-		c.computer = computer; 
+		c.computer = computer;
 		return c;
 	}
 
 	public InstanceConfig getInstanceConfig() {
 		return instanceConfig;
-	} 
-	
-	public WriterFlowSocket getWriter() {
-		return writer.get(EFWriterUtil.getWriterSocketIndex(this.instanceConfig,writer.size(),0));
 	}
-	
+
+	public WriterFlowSocket getWriter() {
+		return writer.get(EFWriterUtil.getWriterSocketIndex(this.instanceConfig, writer.size(), 0));
+	}
+
 	public WriterFlowSocket getWriter(Long outTime) {
-		return writer.get(EFWriterUtil.getWriterSocketIndex(this.instanceConfig,writer.size(),outTime));
+		return writer.get(EFWriterUtil.getWriterSocketIndex(this.instanceConfig, writer.size(), outTime));
 	}
 
 	public ReaderFlowSocket getReader() {
 		return reader;
-	} 
-	
+	}
+
 	public ComputerFlowSocket getComputer() {
 		return computer;
-	} 
-	 
+	}
+
 }

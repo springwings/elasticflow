@@ -567,7 +567,7 @@ public final class NodeMonitor {
 				boolean state;
 				if(GlobalParam.DISTRIBUTE_RUN) {
 					state = GlobalParam.INSTANCE_COORDER.distributeCoorder().runClusterInstanceNow(rq.getParameter("instance"),
-							rq.getParameter("jobtype"));
+							rq.getParameter("jobtype"),true);
 				}else {
 					state = Resource.FlOW_CENTER.runInstanceNow(rq.getParameter("instance"),
 							rq.getParameter("jobtype"), true);

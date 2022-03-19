@@ -91,6 +91,7 @@ public final class EFNodeUtil {
 	
 	/**
 	 * init slave Coorder
+	 * Communication from slave node to master node
 	 */
 	public static void initSlaveCoorder() {
 		Resource.ThreadPools.execute(() -> {

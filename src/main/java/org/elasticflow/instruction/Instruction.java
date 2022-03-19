@@ -9,18 +9,20 @@ package org.elasticflow.instruction;
 
 import org.elasticflow.node.CPU;
 
-/** 
+/**
+ * Instruction interface
+ * 
  * @author chengwen
- * @version 1.0 
+ * @version 1.0
  */
-public abstract class Instruction {  
-	
-	private String ID = CPU.getUUID(); 
-	
+public abstract class Instruction {
+
+	private String ID = CPU.getUUID();
+
 	public String getID() {
 		return ID;
-	} 
-	
+	}
+
 	public void setID(String ID) {
 		this.ID = ID;
 	}
@@ -28,14 +30,14 @@ public abstract class Instruction {
 	/**
 	 * 
 	 * @param length need parameter nums
-	 * @param args 
+	 * @param args
 	 * @return
 	 */
-	protected static boolean isValid(int length,Object... args) {
-		if(args.length!=length) { 
+	protected static boolean isValid(int length, Object... args) {
+		if (args.length != length) {
 			return false;
 		}
 		return true;
 	};
-	
+
 }

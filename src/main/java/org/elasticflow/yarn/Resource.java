@@ -26,6 +26,7 @@ import com.alibaba.fastjson.JSONObject;
 
 /**
  * Statistics current node resources
+ * 
  * @author chengwen
  * @version 1.0
  * @date 2018-11-13 10:53
@@ -33,30 +34,30 @@ import com.alibaba.fastjson.JSONObject;
 public final class Resource {
 
 	public static SocketCenter SOCKET_CENTER;
-	
+
 	public static FlowCenter FlOW_CENTER;
-	
+
 	public static NodeMonitor nodeMonitor;
-	
+
 	public static TaskJobCenter taskJobCenter;
 
 	public static Scheduler scheduler;
-		
-	public static EFEmailSender mailSender; 
-	
+
+	public static EFEmailSender mailSender;
+
 	public static NodeConfig nodeConfig;
-	
+
 	public static Run EFLOWS;
-	
-	/**FLOW_INFOS store current flow running state information*/
-	public final static EFState<HashMap<String,String>> FLOW_INFOS = new EFState<HashMap<String,String>>();
-	
+
+	/** FLOW_INFOS store current flow running state information */
+	public final static EFState<HashMap<String, String>> FLOW_INFOS = new EFState<HashMap<String, String>>();
+
 	public final static ConcurrentHashMap<String, JSONObject> FLOW_STAT = new ConcurrentHashMap<>();
-	
+
 	public volatile static HashMap<String, EFConnectionSocket<?>> EFCONNS = new HashMap<>();
 
-	public static ConcurrentHashMap<String, FlowTask> tasks; 
-	
+	public static ConcurrentHashMap<String, FlowTask> tasks;
+
 	public static ThreadPools ThreadPools;
-	 
+
 }

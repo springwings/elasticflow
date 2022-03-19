@@ -16,8 +16,8 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 
-
 /**
+ * Pipe Utils
  * 
  * @author chengwen
  * @version 4.x
@@ -25,7 +25,7 @@ import org.elasticflow.model.reader.PipeDataUnit;
  * @modify 2019-01-16 13:54
  */
 public final class PipeUtil {
-	
+
 	/**
 	 * 
 	 * @param tableSeq
@@ -36,7 +36,8 @@ public final class PipeUtil {
 	 * @param scanField
 	 * @return
 	 */
-	public static HashMap<String, String> getScanParam(String L2seq,String startKey,String endKey,String start_time,String end_time,String scanField){
+	public static HashMap<String, String> getScanParam(String L2seq, String startKey, String endKey, String start_time,
+			String end_time, String scanField) {
 		HashMap<String, String> params = new HashMap<>();
 		if (L2seq != null && L2seq.length() > 0)
 			params.put(GlobalParam._seq, L2seq);
@@ -44,10 +45,10 @@ public final class PipeUtil {
 		params.put(GlobalParam._end, endKey);
 		params.put(GlobalParam._start_time, start_time);
 		params.put(GlobalParam._end_time, end_time);
-		params.put(GlobalParam._scan_field, scanField); 
+		params.put(GlobalParam._scan_field, scanField);
 		return params;
 	}
-	
+
 	/**
 	 * replace sql with params
 	 * 
@@ -60,7 +61,7 @@ public final class PipeUtil {
 	 * @return
 	 */
 	public static String fillParam(String scanDSL, HashMap<String, String> params) {
-		if(scanDSL!=null) {
+		if (scanDSL != null) {
 			Iterator<String> entries = params.keySet().iterator();
 			while (entries.hasNext()) {
 				String k = entries.next();
@@ -68,15 +69,15 @@ public final class PipeUtil {
 					scanDSL = scanDSL.replace(k, params.get(k));
 			}
 			return scanDSL;
-		} 
+		}
 		return null;
-	} 
- 
-	public static String getWriteSql(String table,PipeDataUnit unit,Map<String, EFField> transParams) { 		
+	}
+
+	public static String getWriteSql(String table, PipeDataUnit unit, Map<String, EFField> transParams) {
 		return getWriteSqlHead(table, unit, transParams) + getWriteSqlTailData(table, unit, transParams);
 	}
-	
-	public static String getWriteSqlTailData(String table,PipeDataUnit unit,Map<String, EFField> transParams) {		
+
+	public static String getWriteSqlTailData(String table, PipeDataUnit unit, Map<String, EFField> transParams) {
 		StringBuilder values = new StringBuilder();
 		for (Entry<String, Object> r : unit.getData().entrySet()) {
 			String field = r.getKey();
@@ -90,11 +91,11 @@ public final class PipeUtil {
 				continue;
 			values.append("'" + value + "' ,");
 		}
-		
-		return "("+values.substring(0, values.length() - 1)+ ")";
+
+		return "(" + values.substring(0, values.length() - 1) + ")";
 	}
-	
-	public static String getWriteSqlHead(String table,PipeDataUnit unit,Map<String, EFField> transParams) {
+
+	public static String getWriteSqlHead(String table, PipeDataUnit unit, Map<String, EFField> transParams) {
 		String sql = "INSERT INTO " + table;
 		StringBuilder columns = new StringBuilder();
 		for (Entry<String, Object> r : unit.getData().entrySet()) {
@@ -111,21 +112,20 @@ public final class PipeUtil {
 		sql = sql + "(" + columns.substring(0, columns.length() - 1) + ") VALUES ";
 		return sql;
 	}
-	
 
 	public static boolean scanPosCompare(String s1, String s2) {
 		if (s1.compareTo(s2) > 0 || s1.length() > s2.length())
 			return true;
 		return false;
 	}
-	
+
 	public static int estimateThreads(int taskPageNum) {
-		int num = (int) (taskPageNum/3);
-		if(num<2) {
+		int num = (int) (taskPageNum / 3);
+		if (num < 2) {
 			return 1;
-		}else if (num>20) {
+		} else if (num > 20) {
 			return 20;
-		}else {
+		} else {
 			return num;
 		}
 	}

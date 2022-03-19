@@ -1,6 +1,7 @@
 package org.elasticflow.util;
 
 /**
+ * System global error definition
  * 
  * @author chengwen
  * @version 1.0
@@ -9,61 +10,57 @@ package org.elasticflow.util;
 public class EFException extends Exception {
 
 	private static final long serialVersionUID = 1L;
-	
 
 	/**
-	 * Ignore continue running with warning 
-	 * Dispose need to fix and continue
-	 * Termination, will stop thread 
-	 * Stop, will stop program
+	 * Ignore continue running with warning Dispose need to fix and continue
+	 * Termination, will stop thread Stop, will stop program
 	 */
 	public static enum ELEVEL {
 		Ignore, Dispose, Termination, Stop;
 	}
 
 	public static enum ETYPE {
-		WRITE_POS_NOT_FOUND,RESOURCE_ERROR,PARAMETER_ERROR,RESOURCE_FAILURE,UNKNOWN,EXTINTERRUPT,DATA_ERROR;
+		WRITE_POS_NOT_FOUND, RESOURCE_ERROR, PARAMETER_ERROR, RESOURCE_FAILURE, UNKNOWN, EXTINTERRUPT, DATA_ERROR;
 	}
 
 	private ELEVEL e_level = ELEVEL.Ignore;
 
 	private ETYPE e_type = ETYPE.UNKNOWN;
-	
+
 	private StringBuffer SB = new StringBuffer();
 
 	public EFException(String msg) {
 		super(msg);
-	} 
-	
+	}
+
 	public void track(String info) {
 		SB.append(info);
 		SB.append(" > ");
 	}
-	
+
 	public String getTrack() {
-		return "TRACK INFOS:"+SB.toString();
+		return "TRACK INFOS:" + SB.toString();
 	}
-	
+
 	public EFException(Exception e) {
 		super(e);
 	}
-	
+
 	public EFException(Exception e, ELEVEL elevel) {
 		super(e);
 		e_level = elevel;
 	}
-	
+
 	public EFException(String msg, ELEVEL elevel) {
 		super(msg);
 		e_level = elevel;
 	}
-	
+
 	public EFException(Exception e, ELEVEL elevel, ETYPE etype) {
 		super(e);
 		e_level = elevel;
 		e_type = etype;
 	}
-	
 
 	public EFException(String msg, ELEVEL elevel, ETYPE etype) {
 		super(msg);
@@ -77,5 +74,5 @@ public class EFException extends Exception {
 
 	public ETYPE getErrorType() {
 		return e_type;
-	} 
+	}
 }

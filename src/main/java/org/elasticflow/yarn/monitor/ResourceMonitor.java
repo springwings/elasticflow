@@ -17,28 +17,30 @@ import com.alibaba.fastjson.JSON;
 
 /**
  * Cluster resource monitoring
+ * 
  * @author chengwen
  * @version 1.0
  * @date 2018-12-04 13:39
  */
 
-public class ResourceMonitor {   
-	
-	static DistributeService distributeService = new DistributeService(); 
-	
-	public static void start() { 
+public class ResourceMonitor {
+
+	static DistributeService distributeService = new DistributeService();
+
+	public static void start() {
 		ReportStatus.nodeConfigs();
-		EFDataStorer.setData(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs", JSON.toJSONString(GlobalParam.StartConfig)); 
+		EFDataStorer.setData(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs",
+				JSON.toJSONString(GlobalParam.StartConfig));
 		distributeService.start();
-		if(EFNodeUtil.isSlave()) {
+		if (EFNodeUtil.isSlave()) {
 			ReportStatus.openHeartBeat();
 		}
-	} 
-	
+	}
+
 	public static void stop() {
-		if(EFNodeUtil.isSlave()) {
+		if (EFNodeUtil.isSlave()) {
 			ReportStatus.closeHeartBeat();
-		}else {
+		} else {
 			distributeService.stop();
 		}
 	}

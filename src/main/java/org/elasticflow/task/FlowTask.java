@@ -8,6 +8,7 @@
 package org.elasticflow.task;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
@@ -81,8 +82,8 @@ public class FlowTask {
 	
 	public void setRecompute(boolean recompute) {
 		this.recompute = recompute;
-	}
-	
+	} 
+
 	/**
 	 * slave instance full job
 	 */
@@ -100,9 +101,7 @@ public class FlowTask {
 					GlobalParam.TASK_COORDER.scanPositionRecoverKeep(instanceId); 
 					GlobalParam.TASK_COORDER.saveTaskInfo(instanceId, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
 				} 
-				for (String slave : pipePump.getInstanceConfig().getPipeParams().getNextJob()) { 
-					Resource.FlOW_CENTER.runInstanceNow(slave, "full",pipePump.getInstanceConfig().getPipeParams().isAsync());
-				}
+				runNextJobs(JOB_TYPE.FULL); 
 			} catch (Exception e) {
 				breaker.log();
 				log.error(instanceId + " Full Exception", e);
@@ -127,9 +126,7 @@ public class FlowTask {
 				CPU.RUN(pipePump.getID(), "Pond", "createStorePosition", true,Common.getInstanceRunId(destination, L1seq), storeId);
 				GlobalParam.TASK_COORDER.setFlowInfo(instanceId,GlobalParam.JOB_TYPE.VIRTUAL.name(),GlobalParam.FLOWINFO.FULL_JOBS.name(),
 						getNextJobs(pipePump.getInstanceConfig().getPipeParams().getNextJob()));	
-				for (String slave : pipePump.getInstanceConfig().getPipeParams().getNextJob()) { 
-					Resource.FlOW_CENTER.runInstanceNow(slave, "full",pipePump.getInstanceConfig().getPipeParams().isAsync());
-				}
+				runNextJobs(JOB_TYPE.FULL); 
 			} catch (Exception e) {
 				log.error(instanceId + " Virtual Full Exception", e);
 			} finally {
@@ -152,9 +149,7 @@ public class FlowTask {
 			try {				
 				String storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), true, recompute); 						
 				GlobalParam.TASK_COORDER.setFlowInfo(instanceId, GlobalParam.JOB_TYPE.VIRTUAL.name(), GlobalParam.FLOWINFO.INCRE_STOREID.name(), storeId); 				
-				for (String slave : pipePump.getInstanceConfig().getPipeParams().getNextJob()) {
-					Resource.FlOW_CENTER.runInstanceNow(slave, "increment",pipePump.getInstanceConfig().getPipeParams().isAsync());
-				}
+				runNextJobs(JOB_TYPE.INCREMENT); 
 			} catch (Exception e) {
 				log.error(instanceId + " Virtual Increment Exception", e);
 			}finally {
@@ -178,9 +173,7 @@ public class FlowTask {
 			GlobalParam.TASK_COORDER.setAndGetScanInfo(instanceId, L1seq, storeId);				
 			try {
 				pipePump.run(storeId, L1seq, false, isReferenceInstance); 
-				for (String slave : pipePump.getInstanceConfig().getPipeParams().getNextJob()) {
-					Resource.FlOW_CENTER.runInstanceNow(slave, "increment",pipePump.getInstanceConfig().getPipeParams().isAsync());
-				}
+				runNextJobs(JOB_TYPE.INCREMENT);
 			} catch (EFException e) {
 				if (!isReferenceInstance && e.getErrorType()==ETYPE.WRITE_POS_NOT_FOUND) { 
 					storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), true, true);
@@ -237,6 +230,19 @@ public class FlowTask {
 		}
 		return destination;
 	}
+	
+	private void runNextJobs(JOB_TYPE jobtype) {
+		if(GlobalParam.DISTRIBUTE_RUN) {
+			for (String slave : pipePump.getInstanceConfig().getPipeParams().getNextJob()) { 
+				GlobalParam.DISCOVERY_COORDER.runInstanceNow(slave, jobtype.name(),pipePump.getInstanceConfig().getPipeParams().isAsync());
+			}
+		}else {
+			for (String slave : pipePump.getInstanceConfig().getPipeParams().getNextJob()) { 
+				Resource.FlOW_CENTER.runInstanceNow(slave, jobtype.name(),pipePump.getInstanceConfig().getPipeParams().isAsync());
+			}
+		}
+	}
+	
 	
 	private static String getNextJobs(String[] nextJobs) {
 		StringBuilder sf = new StringBuilder();

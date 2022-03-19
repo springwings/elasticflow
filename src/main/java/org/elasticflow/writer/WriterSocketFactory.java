@@ -14,6 +14,7 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 
 /**
+ * Writer Socket Factory
  * 
  * @author chengwen
  * @version 4.0
@@ -39,7 +40,7 @@ public class WriterSocketFactory implements Socket<WriterFlowSocket> {
 		return getFlowSocket(param, L1seq, handler);
 	}
 
-	private static WriterFlowSocket getFlowSocket(ConnectParams connectParams, String L1seq, String writerFlowhandler) { 
+	private static WriterFlowSocket getFlowSocket(ConnectParams connectParams, String L1seq, String writerFlowhandler) {
 		String _class_name;
 		if (writerFlowhandler != null) {
 			_class_name = writerFlowhandler;
@@ -52,10 +53,10 @@ public class WriterSocketFactory implements Socket<WriterFlowSocket> {
 			Method m = clz.getMethod("getInstance", ConnectParams.class);
 			return (WriterFlowSocket) m.invoke(null, connectParams);
 		} catch (Exception e) {
-			if(writerFlowhandler!=null) {
-				Common.LOG.error("custom WriterFlowSocket "+connectParams.getWhp().getType()+" not exists!",e); 
-			}else { 
-				Common.LOG.error("the "+connectParams.getWhp().getType()+" WriterFlowSocket does not exist!",e); 
+			if (writerFlowhandler != null) {
+				Common.LOG.error("custom WriterFlowSocket " + connectParams.getWhp().getType() + " not exists!", e);
+			} else {
+				Common.LOG.error("the " + connectParams.getWhp().getType() + " WriterFlowSocket does not exist!", e);
 			}
 			Common.stopSystem(false);
 		}

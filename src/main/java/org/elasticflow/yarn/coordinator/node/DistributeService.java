@@ -35,21 +35,21 @@ import org.elasticflow.yarn.coordinator.TaskStateCoordinator;
 public class DistributeService {
 
 	DataReceiver dataReceiver;
-	
-	private static boolean openMonitor = true; 
-	
+
+	private static boolean openMonitor = true;
+
 	public static void closeMonitor() {
 		openMonitor = false;
 	}
-	
+
 	public static void openMonitor() {
 		openMonitor = true;
 	}
-	
+
 	public static boolean isOpenMonitor() {
 		return openMonitor;
 	}
-	
+
 	public void start() {
 		if (EFNodeUtil.isMaster()) {
 			boolean createSchedule = !GlobalParam.DISTRIBUTE_RUN;
@@ -61,7 +61,7 @@ public class DistributeService {
 			}
 		}
 		if (GlobalParam.DISTRIBUTE_RUN)
-			instanceCoordStart();		
+			instanceCoordStart();
 
 	}
 
@@ -77,7 +77,7 @@ public class DistributeService {
 					Thread.sleep(GlobalParam.NODE_LIVE_TIME * 2);
 					GlobalParam.INSTANCE_COORDER.distributeCoorder().clusterScan(true);
 				} catch (Exception e) {
-					Common.LOG.warn("monitor exception",e);
+					Common.LOG.warn("monitor exception", e);
 				}
 			}
 		});
@@ -87,11 +87,15 @@ public class DistributeService {
 		Resource.ThreadPools.execute(() -> {
 			try {
 				if (EFNodeUtil.isMaster()) {
+					// Channels that the slave node can operate on taskstatecoord and discoverycoord
 					dataReceiver = new DataReceiver(GlobalParam.MASTER_SYN_PORT);
 					dataReceiver.register(TaskStateCoord.class, TaskStateCoordinator.class);
 					dataReceiver.register(DiscoveryCoord.class, DiscoveryCoordinator.class);
 					monitorNodes();
 				} else {
+					// Channels that the master node can operate on InstanceCoord NodeCoord and
+					// EFMonitorCoord
+					// The master operates the channels on nodes in cluster mode
 					dataReceiver = new DataReceiver(GlobalParam.SLAVE_SYN_PORT);
 					dataReceiver.register(InstanceCoord.class, InstanceCoordinator.class);
 					dataReceiver.register(NodeCoord.class, NodeCoordinator.class);

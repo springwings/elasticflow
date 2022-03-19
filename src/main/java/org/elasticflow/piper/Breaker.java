@@ -13,8 +13,9 @@ import org.elasticflow.model.FIFOQueue;
 import org.elasticflow.util.Common;
 
 /**
- * pipe end connect breaker control
- * When a serious error occurs, temporarily interrupt the operation
+ * pipe end connect breaker control When a serious error occurs, temporarily
+ * interrupt the operation
+ * 
  * @author chengwen
  * @version 1.0
  * @date 2019-01-24 10:55
@@ -26,24 +27,24 @@ public class Breaker {
 	private long earlyFailTime;
 
 	private int failTimes;
-	
-	//per-fail use time in last period
+
+	// per-fail use time in last period
 	private int perFailTime = 200;
-	
-	//Maximum fail times
+
+	// Maximum fail times
 	private int maxFailTime = 1000;
-	
+
 	private FIFOQueue<Long> queue = new FIFOQueue<>(6);
-	
+
 	private String instance;
-	
-	public void init(String instance,int failFreq,int maxFailTime) {		
+
+	public void init(String instance, int failFreq, int maxFailTime) {
 		this.instance = instance;
-		this.perFailTime = 1000/failFreq;
+		this.perFailTime = 1000 / failFreq;
 		this.maxFailTime = maxFailTime;
 		this.reset();
 	}
-	
+
 	private void reset() {
 		this.failTimes = 0;
 		this.earlyFailTime = 0;
@@ -55,23 +56,23 @@ public class Breaker {
 		queue.addLastSafe(System.currentTimeMillis());
 		this.failTimes++;
 	}
-	
+
 	public long failInterval() {
-		if(queue.size()>3) {
+		if (queue.size() > 3) {
 			return queue.getLast() - queue.getFirst();
-		}else {
+		} else {
 			return Integer.MAX_VALUE;
-		}		
+		}
 	}
-	
+
 	public boolean isOn() {
 		long current = System.currentTimeMillis();
-		if (this.failTimes >= maxFailTime || failInterval()<=perFailTime) {
-			reset();			
+		if (this.failTimes >= maxFailTime || failInterval() <= perFailTime) {
+			reset();
 			this.earlyFailTime = current;
-			Common.LOG.warn("{} is auto breaked!",instance);
+			Common.LOG.warn("{} is auto breaked!", instance);
 			return true;
-		}		
+		}
 		return false;
 	}
 }

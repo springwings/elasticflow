@@ -150,7 +150,8 @@ public final class PipePump extends Instruction implements Serializable {
 	public void run(String storeId, String L1seq, boolean isFull, boolean isReferenceInstance) throws EFException {
 		JOB_TYPE job_type;
 		String instanceRunId = Common.getInstanceRunId(instanceID, L1seq);
-		String destination = isReferenceInstance ? getInstanceConfig().getPipeParams().getReferenceInstance(): instanceID;
+		String destination = isReferenceInstance ? getInstanceConfig().getPipeParams().getReferenceInstance()
+				: instanceID;
 		Task task;
 		if (isFull) {
 			job_type = JOB_TYPE.FULL;
@@ -177,7 +178,7 @@ public final class PipePump extends Instruction implements Serializable {
 							GlobalParam.FLOWINFO.FULL_JOBS.name(), remainJobs);
 					if (remainJobs.length() == 0)
 						CPU.RUN(getID(), "Pond", "switchInstance", true, instanceID, L1seq, storeId);
-					
+
 				}
 			} else {
 				CPU.RUN(getID(), "Pond", "switchInstance", true, instanceID, L1seq, storeId);
@@ -221,8 +222,8 @@ public final class PipePump extends Instruction implements Serializable {
 		for (String L2seq : L2seqs) {
 			try {
 				task.setL2seq(L2seq);
-				GlobalParam.TASK_COORDER.setFlowInfo(task.getInstanceID(), task.getJobType().name(), task.getId() + L2seq,
-						"start count page...");
+				GlobalParam.TASK_COORDER.setFlowInfo(task.getInstanceID(), task.getJobType().name(),
+						task.getId() + L2seq, "start count page...");
 				ConcurrentLinkedDeque<String> pageList = this.getPageLists(task);
 				if (pageList == null)
 					throw new EFException("Reader page split exception!", ELEVEL.Termination);
@@ -269,8 +270,8 @@ public final class PipePump extends Instruction implements Serializable {
 			AtomicInteger total = new AtomicInteger(0);
 			if (getInstanceConfig().getPipeParams().isMultiThread()) {
 				CountDownLatch taskSingal = new CountDownLatch(PipeUtil.estimateThreads(pageNum));
-				Resource.ThreadPools.submitTask(new PumpThread(taskSingal, task, storeId, pageList, destination,
-						total, getInstanceConfig()));
+				Resource.ThreadPools.submitTask(
+						new PumpThread(taskSingal, task, storeId, pageList, destination, total, getInstanceConfig()));
 				try {
 					taskSingal.await();
 				} catch (Exception e) {
@@ -298,18 +299,18 @@ public final class PipePump extends Instruction implements Serializable {
 		}
 	}
 
-
 	/**
 	 * single thread process, it is a safe mode and support recover mechanism
+	 * 
 	 * @param task
-	 * @param storeId   destination store id ,is time or a/b
+	 * @param storeId     destination store id ,is time or a/b
 	 * @param pageList
-	 * @param destination   store instance name, will concatenate store id
-	 * @param total   process total data nums
+	 * @param destination store instance name, will concatenate store id
+	 * @param total       process total data nums
 	 * @throws EFException
 	 */
-	private void currentThreadRun(Task task, String storeId, ConcurrentLinkedDeque<String> pageList,
-			String destination, AtomicInteger total) throws EFException {
+	private void currentThreadRun(Task task, String storeId, ConcurrentLinkedDeque<String> pageList, String destination,
+			AtomicInteger total) throws EFException {
 		ReaderState rState = null;
 		int processPos = 0;
 		String startId = "0";
@@ -454,7 +455,8 @@ public final class PipePump extends Instruction implements Serializable {
 				if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstanceID(), task.getL1seq(), task.getJobType(),
 						STATUS.Termination)) {
 					Resource.ThreadPools.cleanWaitJob(getId());
-					Common.LOG.warn(task.getInstanceID() + " " + task.getJobType().name() + " job has been Terminated!");
+					Common.LOG
+							.warn(task.getInstanceID() + " " + task.getJobType().name() + " job has been Terminated!");
 					break;
 				}
 
@@ -473,8 +475,8 @@ public final class PipePump extends Instruction implements Serializable {
 								storeId, task.getL2seq(), dataSize, datab, scanStamp, Common.getNow() - start,
 								",process:" + processPos + "/" + pageNum));
 					}
-					if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstanceID(), task.getL1seq(), task.getJobType(),
-							STATUS.Termination)) {
+					if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstanceID(), task.getL1seq(),
+							task.getJobType(), STATUS.Termination)) {
 						Resource.ThreadPools.cleanWaitJob(getId());
 						Common.LOG.warn(
 								task.getInstanceID() + " " + task.getJobType().name() + " job has been Terminated!");
