@@ -576,7 +576,8 @@ public final class Common {
 
 	public static void processErrorLevel(EFException e) {
 		if (e.getErrorLevel().equals(ELEVEL.Termination)) {
-			LOG.error("The current thread automatically interrupt!", e);
+			LOG.error("The current thread automatically interrupt!",e);
+			Resource.EfNotifier.send("The current thread automatically interrupt!", e.getMessage(), false);
 			Thread.currentThread().interrupt();
 		} else if (e.getErrorLevel().equals(ELEVEL.Stop)) {
 			stopSystem(true);

@@ -22,8 +22,8 @@ public class JobRunFactory implements Job {
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		JobModel job = (JobModel) context.getMergedJobDataMap().get(GlobalParam.FLOW_TAG._DEFAULT.name());
 		if (!invokeMethod(job)) {
-			Resource.mailSender.sendHtmlMailBySynchronizationMode(" [" + GlobalParam.PROJ + "] " + GlobalParam.RUN_ENV,
-					"job [" + job.getJobName() + "] fire fail,with invokeMethod error!");
+			Resource.EfNotifier.send(" [" + GlobalParam.PROJ + "] " + GlobalParam.RUN_ENV,
+					"job [" + job.getJobName() + "] fire fail,with invokeMethod error!",true);
 		}
 	}
 
@@ -38,7 +38,7 @@ public class JobRunFactory implements Job {
 			method.invoke(object);
 			return true;
 		} catch (Exception e) {
-			Common.LOG.error(jobModel.getJobName() + " invokMethod " + jobModel.getMethodName() + " Exception ", e);
+			Common.LOG.error(jobModel.getJobName() + " invokMethod " + jobModel.getMethodName() + " Exception", e);
 		}
 		return false;
 	}

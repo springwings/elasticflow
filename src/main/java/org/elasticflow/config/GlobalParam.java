@@ -37,8 +37,9 @@ public final class GlobalParam {
 	/** ------------system Runtime Environment------------ */
 	public static boolean DEBUG;
 
-	/** send error mail or not */
-	public static boolean SEND_EMAIL = false;
+	/** error notify setting */
+	public static boolean SEND_EMAIL_ON = false;
+	public static String SEND_API_ON;
 
 	/** system run environment alpha beta or product... */
 	public static String RUN_ENV;

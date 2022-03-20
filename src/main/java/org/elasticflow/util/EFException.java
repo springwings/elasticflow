@@ -37,10 +37,11 @@ public class EFException extends Exception {
 		SB.append(info);
 		SB.append(" > ");
 	}
-
-	public String getTrack() {
-		return "TRACK INFOS:" + SB.toString();
-	}
+	
+	@Override
+	public String getMessage() {
+		return this.getTrack()+System.getProperty("line.separator")+super.getMessage();
+	} 
 
 	public EFException(Exception e) {
 		super(e);
@@ -74,5 +75,11 @@ public class EFException extends Exception {
 
 	public ETYPE getErrorType() {
 		return e_type;
+	}
+	
+	private String getTrack() {
+		if(SB.length()>0)
+			return "TRACK INFOS:" + SB.toString();
+		return "";
 	}
 }

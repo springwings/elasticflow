@@ -17,9 +17,9 @@ import org.elasticflow.node.FlowCenter;
 import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.node.SocketCenter;
 import org.elasticflow.node.startup.Run;
+import org.elasticflow.notifier.EFNotifier;
 import org.elasticflow.task.FlowTask;
 import org.elasticflow.task.schedule.TaskJobCenter;
-import org.elasticflow.util.email.EFEmailSender;
 import org.quartz.Scheduler;
 
 import com.alibaba.fastjson.JSONObject;
@@ -43,7 +43,7 @@ public final class Resource {
 
 	public static Scheduler scheduler;
 
-	public static EFEmailSender mailSender;
+	public static EFNotifier EfNotifier;
 
 	public static NodeConfig nodeConfig;
 

@@ -1,4 +1,4 @@
-package org.elasticflow.util.email;
+package org.elasticflow.notifier.emailer;
 
 import java.io.Serializable;
 import java.util.Properties;

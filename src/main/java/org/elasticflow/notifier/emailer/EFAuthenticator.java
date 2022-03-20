@@ -1,4 +1,4 @@
-package org.elasticflow.util.email;
+package org.elasticflow.notifier.emailer;
 
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;

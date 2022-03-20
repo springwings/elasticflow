@@ -26,6 +26,7 @@ import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.node.RecoverMonitor;
 import org.elasticflow.node.SafeShutDown;
 import org.elasticflow.node.SocketCenter;
+import org.elasticflow.notifier.EFNotifier;
 import org.elasticflow.reader.service.HttpReaderService;
 import org.elasticflow.searcher.service.SearcherService;
 import org.elasticflow.service.EFMonitorService;
@@ -34,7 +35,6 @@ import org.elasticflow.task.schedule.TaskJobCenter;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFIoc;
 import org.elasticflow.util.EFNodeUtil;
-import org.elasticflow.util.email.EFEmailSender;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.ThreadPools;
@@ -87,7 +87,7 @@ public final class Run {
 		this.refreshGlobalParam();
 		
 		Resource.scheduler = scheduler;		
-		Resource.mailSender = new EFEmailSender();
+		Resource.EfNotifier = new EFNotifier();
 		Resource.tasks = new ConcurrentHashMap<String, FlowTask>();
 		Resource.taskJobCenter = new TaskJobCenter();
 		Resource.SOCKET_CENTER =  new SocketCenter();
@@ -132,7 +132,8 @@ public final class Run {
 		GlobalParam.DEBUG = GlobalParam.StartConfig.getProperty("is_debug").equals("false") ? false : true;
 		GlobalParam.CONNECTION_POOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("pool_size"));
 		GlobalParam.WRITE_BATCH = GlobalParam.StartConfig.getProperty("write_batch").equals("false") ? false : true;
-		GlobalParam.SEND_EMAIL = GlobalParam.StartConfig.getProperty("send_mail").equals("false") ? false : true;
+		GlobalParam.SEND_EMAIL_ON = GlobalParam.StartConfig.getProperty("send_mail").equals("false") ? false : true;
+		GlobalParam.SEND_API_ON = GlobalParam.StartConfig.containsKey("send_api")?GlobalParam.StartConfig.getProperty("send_api"):"";
 		GlobalParam.DISTRIBUTE_RUN = GlobalParam.StartConfig.getProperty("distribute_run").equals("false") ? false : true;
 		GlobalParam.MASTER_HOST = GlobalParam.StartConfig.getProperty("master_host");
 		GlobalParam.SERVICE_LEVEL = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
