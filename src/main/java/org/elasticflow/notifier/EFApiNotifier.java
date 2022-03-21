@@ -32,6 +32,7 @@ public class EFApiNotifier implements EFNotify{
 	public boolean sendSyncMode(String subject, String content) {
 		JSONObject jO = new JSONObject();
 		jO.put("subject", subject);
+		jO.put("ip", GlobalParam.IP);
 		jO.put("content", content);
 		String response = EFHttpClientUtil.process(GlobalParam.SEND_API_ON,
 				jO.toJSONString(), HttpPut.METHOD_NAME, EFHttpClientUtil.DEFAULT_CONTENT_TYPE, 3000);
