@@ -1,7 +1,7 @@
 # ElasticFlow
-Elasticflow 可用于构建可计算流，数据交换、通用搜索、定时任务等工作...
+Elasticflow是一个分布式异构数据源数据交换处理工具，可用于构建可计算流，数据交换、通用搜索、定时任务等工作...
 
-![image](https://github.com/springwings/elasticflow/blob/master/architecture.jpg)
+![image](https://github.com/springwings/elasticflow/blob/master/example/flow.jpg)
 
 
 # ElasticFlow用来解决什么?
