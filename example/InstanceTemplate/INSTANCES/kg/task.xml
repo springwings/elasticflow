@@ -1,7 +1,6 @@
-<config>  
-<dataflow>
- 
-		<TransParam> 
+<config>
+	<dataflow>
+		<TransParam>
 			<param>
 				<name>fullCron</name>
 				<value>0 0 0/1 * * ?</value>
@@ -9,48 +8,48 @@
 			<param>
 				<name>deltaCron</name>
 				<value>0 0/5 * * * ?</value>
-			</param> 
+			</param>
 			<param>
 				<name>writeTo</name>
 				<value>testname</value>
-			</param>  
-
-                       <!--- pipe start parameters -->
-		 
-			<param> 
-				<name>readFrom</name> 
-				<value>testexample</value> 
 			</param>
-                           
-                       <param>
-                             <name>writeMechanism</name>
-                             <value>ab</value>
-                       </param>
-                       <param>
+
+			<!--- pipe start parameters -->
+
+			<param>
+				<name>readFrom</name>
+				<value>testexample</value>
+			</param>
+
+			<param>
+				<name>writeMechanism</name>
+				<value>ab</value>
+			</param>
+			<param>
 				<name>writeType</name>
 				<value>full</value>
-		       </param>
-                       <param>
+			</param>
+			<param>
 				<name>writerPoolShareAlias</name>
 				<value>true</value>
-			</param> 
-                        <param>
-                             <name>multiThread</name>
-                             <value>false</value>
-                        </param>
-			
-                        <!--- pipe compute service parameters -->
-                        
-                        <!--- pipe search service parameters -->
-                         <param>
+			</param>
+			<param>
+				<name>multiThread</name>
+				<value>false</value>
+			</param>
+
+			<!--- pipe compute service parameters -->
+
+			<!--- pipe search service parameters -->
+			<param>
 				<name>searchFrom</name>
 				<value>testname</value>
-			</param>  
-			 
+			</param>
+
 		</TransParam>
 
-                <ReadParam>   
-                        <param>
+		<ReadParam>
+			<param>
 				<name>keyField</name>
 				<value>subject_id</value>
 			</param>
@@ -80,66 +79,66 @@ SELECT subject_id FROM `kg_subject`
 ]]>
 				</value>
 			</param>
-             </ReadParam> 
-		
-<ExternConfig>
-<param>
-				<name>number_of_shards</name>
-				<value>1</value>
+		</ReadParam>
+
+		<WriteParam>
+			<param>
+				<name>writeKey</name>
+				<value>subject_id</value>
 			</param>
 			<param>
-				<name>number_of_replicas</name>
-				<value>0</value>
+				<name>keyType</name>
+				<value>unique</value>
 			</param>
-</ExternConfig>
 
-              
-<WriteParam>
-   <param>
-	<name>writeKey</name>
-	<value>subject_id</value>
-   </param>
-   <param>
-	<name>keyType</name>
-	<value>unique</value>
-   </param>
+			<fields>
+				<field name="subject_id" indexed="true" stored="true"
+					indextype="text" analyzer="" paramname="id"
+					paramtype="java.lang.String" />
+				<field name="subject" indexed="true" stored="false"
+					indextype="text" analyzer="" paramname="subject"
+					paramtype="java.lang.String" />
+				<field name="alias" indexed="true" stored="false"
+					indextype="text" analyzer="" separator="," paramname="alias"
+					paramtype="java.lang.String" />
+				<field name="type" indexed="true" stored="false"
+					indextype="text" analyzer="" paramname="type"
+					paramtype="java.lang.String" />
+				<field name="data" indexed="true" stored="false"
+					indextype="nested" analyzer="" paramname="data"
+					paramtype="java.lang.String" />
+				<field name="modify_time" indexed="true" stored="false"
+					indextype="long" analyzer="" paramname="modify_time"
+					paramtype="org.elasticflow.field.handler.LongRangeType" />
+			</fields>
+		</WriteParam>
 
-  <fields>
-<field name="subject_id" indexed="true" stored="true" indextype="text" analyzer="" paramname="id" paramtype="java.lang.String" />  
-<field name="subject" indexed="true" stored="false" indextype="text" analyzer="" paramname="subject" paramtype="java.lang.String" /> 
-<field name="alias" indexed="true" stored="false" indextype="text" analyzer="" separator="," paramname="alias" paramtype="java.lang.String" /> 
-<field name="type" indexed="true" stored="false" indextype="text" analyzer="" paramname="type" paramtype="java.lang.String" /> 
-<field name="data" indexed="true" stored="false" indextype="nested" analyzer="" paramname="data" paramtype="java.lang.String" /> 
-<field name="modify_time" indexed="true" stored="false" indextype="long" analyzer="" paramname="modify_time" paramtype="org.elasticflow.field.handler.LongRangeType" /> 
-  </fields>
-</WriteParam>
 
-
-<SearchParam> 
-<param>
-		<name>start</name>
-		<paramtype>java.lang.Integer</paramtype>
-		<defaultValue>0</defaultValue>
-	</param>
-	<param>
-		<name>count</name>
-		<paramtype>java.lang.Integer</paramtype>
-		<defaultValue>1</defaultValue>
-	</param>
-	<param>
-		<name>sort</name>
-		<paramtype>java.lang.String</paramtype>
-	</param>
-	<param>
-		<name>facet</name>
-		<paramtype>java.lang.String</paramtype>
-	</param>					
-	<param>
-		<fields>title,content</fields>
-		<name>q</name>
-		<paramtype>java.lang.String</paramtype>
-	</param>
-</SearchParam>
-</dataflow>  
+		<SearchParam>
+			<param>
+				<name>start</name>
+				<paramtype>java.lang.Integer</paramtype>
+				<defaultValue>0</defaultValue>
+			</param>
+			<param>
+				<name>count</name>
+				<paramtype>java.lang.Integer</paramtype>
+				<defaultValue>1</defaultValue>
+			</param>
+			<param>
+				<name>sort</name>
+				<paramtype>java.lang.String</paramtype>
+			</param>
+			<param>
+				<name>facet</name>
+				<paramtype>java.lang.String</paramtype>
+			</param>
+			<param>
+				<fields>title,content</fields>
+				<name>q</name>
+				<paramtype>java.lang.String</paramtype>
+			</param>
+		</SearchParam>
+	</dataflow>
 
 </config> 
