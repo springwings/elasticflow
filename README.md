@@ -1,8 +1,12 @@
+<div align="center">
+  <img src="images/logo.jpg">
+</div>
 # ElasticFlow
 Elasticflow是一个分布式异构数据源数据交换处理工具，可用于构建可计算流，数据交换、通用搜索、定时任务等工作...
 
-![image](https://github.com/springwings/elasticflow/blob/master/example/flow.jpg)
-
+<div align="center">
+  <img src="images/flow.jpg">
+</div>
 
 # ElasticFlow用来解决什么?
 
