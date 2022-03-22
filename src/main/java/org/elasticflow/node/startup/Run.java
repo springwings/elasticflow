@@ -57,14 +57,7 @@ import com.alibaba.fastjson.JSONObject;
 public final class Run {
 	
 	@Autowired
-	private SearcherService searcherService;
-	@Autowired
-	private ComputerService computerService;	
-	@Autowired
-	private Scheduler scheduler;
-	 
-	@Autowired
-	private HttpReaderService httpReaderService;
+	private Scheduler scheduler; 
 	
 	@Value("#{nodeSystemInfo['version']}")
 	private String version;
@@ -163,15 +156,15 @@ public final class Run {
 	public void startService() {
 		if(EFNodeUtil.isMaster()) {
 			if ((GlobalParam.SERVICE_LEVEL & 1) > 0) 
-				searcherService.start(); 			
+				(new SearcherService()).start(); 			
 			if ((GlobalParam.SERVICE_LEVEL & 16) > 0)
-				computerService.start(); 
+				(new ComputerService()).start(); 
 			if ((GlobalParam.SERVICE_LEVEL & 8) > 0)
 				Resource.FlOW_CENTER.startInstructionsJob(); 
 			new EFMonitorService().start();
 		} 		
 		if ((GlobalParam.SERVICE_LEVEL & 4) > 0)
-			httpReaderService.start();
+			(new HttpReaderService()).start();
 	}
 
 	public void loadGlobalConfig(String path, boolean fromZk) {
