@@ -259,7 +259,12 @@ public final class Common {
 	public static String getLseq(String L1seq, String L2seq) {
 		if(L1seq=="" && L2seq=="")
 			return "_";
-		return L1seq + "." + L2seq;
+		if(L1seq!="") {
+			if(L2seq!="")
+				return L1seq + "." + L2seq;
+			return L1seq;
+		}
+		return L2seq;		
 	}
 
 	/**
