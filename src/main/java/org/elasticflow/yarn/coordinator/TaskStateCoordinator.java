@@ -41,7 +41,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	private static final long serialVersionUID = 6182329757414086104L;
 
 	private final static ConcurrentHashMap<String, ScanPosition> SCAN_POSITION = new ConcurrentHashMap<>();
-
+	
 	/** Store intermediate calculation result data **/
 	private final static ConcurrentHashMap<String, Object> TMP_STORE_DATA = new ConcurrentHashMap<>();
 
@@ -66,21 +66,23 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 		return TMP_STORE_DATA.get(instance);
 	}
 
-	public void setScanPosition(String instance, String L1seq, String L2seq, String scanStamp) {
+	public void setScanPosition(String instance, String L1seq, String L2seq, String scanStamp,boolean isfull) {
 		synchronized (SCAN_POSITION.get(instance)) {
 			if (PipeUtil.scanPosCompare(scanStamp,
-					SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq)))) {
-				SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), scanStamp);
+					SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq),isfull))) {
+				SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), scanStamp,isfull);
 				// update flow status,Distributed environment synchronization status
-				if (GlobalParam.DISTRIBUTE_RUN) {
-					Resource.FLOW_STAT.get(instance).put(FlowState.getStoreKey(L1seq),
-							GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(instance, L1seq));
-				} else {
-					Resource.FLOW_STAT.get(instance).put(FlowState.getStoreKey(L1seq),
-							EFMonitorUtil.getPipeEndStatus(instance, L1seq));
-				}
-				EFFileUtil.createAndSave(Resource.FLOW_STAT.get(instance).toJSONString(),
-						EFFileUtil.getInstancePath(instance)[2]);
+				if(isfull) {
+					if (GlobalParam.DISTRIBUTE_RUN) {
+						Resource.FLOW_STAT.get(instance).put(FlowState.getStoreKey(L1seq),
+								GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(instance, L1seq));
+					} else {
+						Resource.FLOW_STAT.get(instance).put(FlowState.getStoreKey(L1seq),
+								EFMonitorUtil.getPipeEndStatus(instance, L1seq));
+					}
+					EFFileUtil.createAndSave(Resource.FLOW_STAT.get(instance).toJSONString(),
+							EFFileUtil.getInstancePath(instance)[2]);
+				}				
 			}
 		}
 	}
@@ -123,30 +125,31 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	 * @param L1seq
 	 * @return String
 	 */
-	public String getStoreIdFromSave(String instance, String L1seq, boolean reload) {
+	public String getStoreIdFromSave(String instance, String L1seq, boolean reload,boolean isfull) {
 		if (reload) {
-			String path = Common.getTaskStorePath(instance, L1seq, GlobalParam.JOB_INCREMENTINFO_PATH);
+			String path = Common.getTaskStorePath(instance,
+					isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH);
 			byte[] b = EFDataStorer.getData(path, true);
+			ScanPosition sp = new ScanPosition(instance, GlobalParam.DEFAULT_RESOURCE_SEQ);
 			synchronized (SCAN_POSITION.get(instance)) {
 				if (b != null && b.length > 0) {
 					String str = new String(b);
-					SCAN_POSITION.put(instance, new ScanPosition(str, instance, GlobalParam.DEFAULT_RESOURCE_SEQ));
-				} else {
-					SCAN_POSITION.put(instance, new ScanPosition(instance, GlobalParam.DEFAULT_RESOURCE_SEQ));
-				}
+					sp.loadInfos(str, isfull);
+				} 
+				SCAN_POSITION.put(instance,sp);
 			}
 		}
-		return SCAN_POSITION.get(instance).getStoreId();
+		return SCAN_POSITION.get(instance).getStoreId(isfull);
 	}
 
 	public String getIncrementStoreId(String instance, String L1seq, String contextId, boolean reCompute)
 			throws EFException {
-		String storeId = getStoreIdFromSave(instance, L1seq, true);
+		String storeId = getStoreIdFromSave(instance, L1seq, true,false);
 		if (storeId.length() == 0 || reCompute) {
 			storeId = getNewStoreId(contextId, instance, L1seq, true);
 			if (storeId == null)
 				storeId = "a";
-			saveTaskInfo(instance, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
+			saveTaskInfo(instance, L1seq, storeId, false);
 		}
 		return storeId;
 	}
@@ -164,12 +167,13 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	 * @param storeId
 	 * @param location
 	 */
-	public void saveTaskInfo(String instance, String L1seq, String storeId, String location) {
+	public void saveTaskInfo(String instance, String L1seq, String storeId, boolean isfull) {
 		synchronized (SCAN_POSITION.get(instance)) {
-			SCAN_POSITION.get(instance).updateStoreId(storeId);
+			SCAN_POSITION.get(instance).updateStoreId(storeId,isfull);
 		}
-		EFDataStorer.setData(Common.getTaskStorePath(instance, L1seq, location),
-				SCAN_POSITION.get(instance).getString());
+		EFDataStorer.setData(Common.getTaskStorePath(instance, 
+				isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH),
+				SCAN_POSITION.get(instance).getString(isfull));
 	}
 
 	/**
@@ -179,17 +183,18 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	 * @param L1seq
 	 * @param storeId  Master store id
 	 */
-	public void setAndGetScanInfo(String instance, String L1seq, String storeId) {
-		String path = Common.getTaskStorePath(instance, L1seq, GlobalParam.JOB_INCREMENTINFO_PATH);
+	public void setAndGetScanInfo(String instance, String L1seq, String storeId,boolean isfull) {
+		String path = Common.getTaskStorePath(instance, 
+				isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH);
 		byte[] b = EFDataStorer.getData(path, true);
+		ScanPosition sp = new ScanPosition(instance, storeId);
 		synchronized (SCAN_POSITION.get(instance)) {
 			if (b != null && b.length > 0) {
 				String str = new String(b);
-				SCAN_POSITION.put(instance, new ScanPosition(str, instance, storeId));
-			} else {
-				SCAN_POSITION.put(instance, new ScanPosition(instance, storeId));
+				sp.loadInfos(str, isfull);
 			}
-			saveTaskInfo(instance, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
+			SCAN_POSITION.put(instance,sp);
+			saveTaskInfo(instance, L1seq, storeId, isfull);
 		}
 	}
 
@@ -227,30 +232,31 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 		SCAN_POSITION.get(instance).recoverKeep();
 	}
 
-	public String getscanPositionString(String instance) {
-		return SCAN_POSITION.get(instance).getPositionString();
+	public String getScanPositionString(String instance,boolean isfull) {
+		return SCAN_POSITION.get(instance).getPositionDatas(isfull).toJSONString();
 	}
 
-	public void initPutDatas(String instance, ScanPosition scanPosition) {
+	//local run method
+	public void initTaskDatas(String instance, ScanPosition scanPosition) {
 		synchronized (SCAN_POSITION) {
 			SCAN_POSITION.put(instance, scanPosition);
 			TMP_STORE_DATA.put(instance, "");
 		}
 	}
 
-	public String getLSeqPos(String instance, String L1seq, String L2seq) {
-		return SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq));
+	public String getLSeqPos(String instance, String L1seq, String L2seq,boolean isfull) {
+		return SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq),isfull);
 	}
 
-	public void updateLSeqPos(String instance, String L1seq, String L2seq, String position) {
+	public void updateLSeqPos(String instance, String L1seq, String L2seq, String position,boolean isfull) {
 		synchronized (SCAN_POSITION.get(instance)) {
-			SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), position);
+			SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), position,isfull);
 		}
 	}
 
-	public void batchUpdateSeqPos(String instance, String val) {
+	public void batchUpdateSeqPos(String instance, String val,boolean isfull) {
 		synchronized (SCAN_POSITION.get(instance)) {
-			SCAN_POSITION.get(instance).batchUpdateSeqPos(val);
+			SCAN_POSITION.get(instance).batchUpdateSeqPos(val,isfull);
 		}
 	}
 
@@ -260,8 +266,8 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	 * @param instance
 	 * @return
 	 */
-	public String getStoreId(String instance) {
-		return SCAN_POSITION.get(instance).getStoreId();
+	public String getStoreId(String instance,boolean isfull) {
+		return SCAN_POSITION.get(instance).getStoreId(isfull);
 	}
 
 	public void setFlowInfo(String formKeyVal1, String formKeyVal2, String key, String data) {

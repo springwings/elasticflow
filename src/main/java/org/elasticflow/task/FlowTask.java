@@ -99,7 +99,11 @@ public class FlowTask {
 					GlobalParam.TASK_COORDER.scanPositionkeepCurrentPos(instanceId);
 					pipePump.run(storeId, L1seq, true,isReferenceInstance);
 					GlobalParam.TASK_COORDER.scanPositionRecoverKeep(instanceId); 
-					GlobalParam.TASK_COORDER.saveTaskInfo(instanceId, L1seq, storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
+					GlobalParam.TASK_COORDER.saveTaskInfo(instanceId, L1seq, storeId, true);
+					for(String L2seq:pipePump.getInstanceConfig().getReadParams().getL2Seq()) {
+						GlobalParam.TASK_COORDER.setScanPosition(instanceId, L1seq, L2seq, "",true);
+					}
+					GlobalParam.TASK_COORDER.saveTaskInfo(instanceId, L1seq, storeId, false);
 				} 
 				runNextJobs(JOB_TYPE.FULL); 
 			} catch (Exception e) {
@@ -173,7 +177,7 @@ public class FlowTask {
 		if (!breaker.isOn() && GlobalParam.TASK_COORDER.setFlowStatus(instanceId,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
 				pipePump.getInstanceConfig().getPipeParams().showInfoLog())) { 
 			String storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), true, (isReferenceInstance ? false : recompute));
-			GlobalParam.TASK_COORDER.setAndGetScanInfo(instanceId, L1seq, storeId);				
+			GlobalParam.TASK_COORDER.setAndGetScanInfo(instanceId, L1seq, storeId,false);				
 			try {
 				pipePump.run(storeId, L1seq, false, isReferenceInstance); 
 				runNextJobs(JOB_TYPE.INCREMENT);

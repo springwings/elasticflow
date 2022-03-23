@@ -8,6 +8,7 @@
 package org.elasticflow.instruction.sets;
 
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.instruction.Context;
@@ -18,8 +19,11 @@ import org.elasticflow.util.EFException;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.yarn.Resource;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * Task Control Instruction sets
+ * 
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:25
@@ -34,47 +38,41 @@ public class TaskControl extends Instruction {
 		int start = Integer.parseInt(args[0].toString());
 		int days = Integer.parseInt(args[1].toString());
 		int ride = Integer.parseInt(args[2].toString());
-		String[] L1seqs = Common.getL1seqs(context.getInstanceConfig());
-		for (String L1seq : L1seqs) {
-			String info = Common.getFullStartInfo(context.getInstanceConfig().getInstanceID(), L1seq);
-			String saveInfo = "";
-			if (info != null && info.length() > 5) {
-				for (String tm : info.split(",")) {
-					if (Integer.parseInt(tm) < start) {
-						saveInfo += String.valueOf(start + days * 3600 * 24 * ride) + ",";
-					} else {
-						saveInfo += String.valueOf(Integer.parseInt(tm) + days * 3600 * 24 * ride) + ",";
-					}
-				}
+		JSONObject infos = JSONObject.parseObject(
+				GlobalParam.TASK_COORDER.getScanPositionString(context.getInstanceConfig().getInstanceID(), true));
+		JSONObject saveInfo = new JSONObject();
+		for (Entry<String, Object> entry : infos.entrySet()) {
+			if (Integer.parseInt(entry.getValue().toString()) < start) {
+				saveInfo.put(entry.getKey(), start + days * 3600 * 24 * ride);
 			} else {
-				saveInfo = String.valueOf(start + days * 3600 * 24 * ride);
+				saveInfo.put(entry.getKey(), Integer.parseInt(entry.getValue().toString()) + days * 3600 * 24 * ride);
 			}
-			EFDataStorer.setData(Common.getTaskStorePath(context.getInstanceConfig().getInstanceID(), L1seq,
-					GlobalParam.JOB_FULLINFO_PATH), saveInfo);
 		}
+		EFDataStorer.setData(
+				Common.getTaskStorePath(context.getInstanceConfig().getInstanceID(), GlobalParam.JOB_FULLINFO_PATH),
+				saveInfo.toJSONString());
 	}
 
 	public static void setIncrementPosition(Context context, Object[] args) throws EFException {
 		if (!isValid(1, args)) {
-			Common.LOG.error("moveFullPosition parameter not match!");
+			Common.LOG.error("move full position parameter not match!");
 			return;
 		}
 		int position = Integer.parseInt(args[0].toString());
 		String[] l1seqs = Common.getL1seqs(context.getInstanceConfig());
 		for (String l1seq : l1seqs) {
 			List<String> L2Seq = context.getInstanceConfig().getReadParams().getL2Seq();
-			PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(context.getInstanceConfig().getInstanceID(), l1seq, false,
-					GlobalParam.FLOW_TAG._DEFAULT.name());
+			PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(context.getInstanceConfig().getInstanceID(), l1seq,
+					false, GlobalParam.FLOW_TAG._DEFAULT.name());
 			String storeId = GlobalParam.TASK_COORDER.getStoreId(context.getInstanceConfig().getInstanceID(), l1seq,
 					pipePump.getID(), true, false);
 			if (storeId == null)
 				break;
 			for (String tseq : L2Seq) {
 				GlobalParam.TASK_COORDER.updateLSeqPos(context.getInstanceConfig().getInstanceID(), l1seq, tseq,
-						String.valueOf(position));
+						String.valueOf(position), false);
 			}
-			GlobalParam.TASK_COORDER.saveTaskInfo(context.getInstanceConfig().getInstanceID(), l1seq, storeId,
-					GlobalParam.JOB_INCREMENTINFO_PATH);
+			GlobalParam.TASK_COORDER.saveTaskInfo(context.getInstanceConfig().getInstanceID(), l1seq, storeId, false);
 		}
 	}
 }

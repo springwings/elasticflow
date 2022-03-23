@@ -162,7 +162,7 @@ public class Pond extends Instruction {
 			} catch (Exception e) {
 				log.error("switchInstance Exception", e);
 			} finally { 
-				GlobalParam.TASK_COORDER.saveTaskInfo(String.valueOf(args[0]), String.valueOf(args[1]), storeId, GlobalParam.JOB_INCREMENTINFO_PATH);
+				GlobalParam.TASK_COORDER.saveTaskInfo(String.valueOf(args[0]), String.valueOf(args[1]), storeId, false);
 				GlobalParam.TASK_COORDER.setFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
 						context.getInstanceConfig().getPipeParams().showInfoLog());
 				context.getWriter().REALEASE(false,false); 

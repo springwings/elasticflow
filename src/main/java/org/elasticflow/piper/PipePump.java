@@ -8,7 +8,6 @@
 package org.elasticflow.piper;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CountDownLatch;
@@ -160,9 +159,7 @@ public final class PipePump extends Instruction implements Serializable {
 			job_type = JOB_TYPE.INCREMENT;
 			task = incrementTask;
 		}
-		List<String> L2seqs = getInstanceConfig().getReadParams().getL2Seq().size() > 0
-				? getInstanceConfig().getReadParams().getL2Seq()
-				: Arrays.asList("");
+		List<String> L2seqs = getInstanceConfig().getReadParams().getL2Seq();
 		GlobalParam.TASK_COORDER.setFlowInfo(instanceID, job_type.name(), instanceRunId + " L2seqs nums",
 				String.valueOf(L2seqs.size()));
 		processFlow(task, storeId, L2seqs, destination, isReferenceInstance);
@@ -255,7 +252,7 @@ public final class PipePump extends Instruction implements Serializable {
 		if (pageNum == 0) {
 			if (task.getInstanceConfig().getPipeParams().getLogLevel() == 0)
 				log.info(Common.formatLog("start", task.getJobType().name(), instanceRunId, storeId, task.getL2seq(), 0,
-						"", GlobalParam.TASK_COORDER.getLSeqPos(task.getInstanceID(), task.getL1seq(), task.getL2seq()),
+						"", GlobalParam.TASK_COORDER.getLSeqPos(task.getInstanceID(), task.getL1seq(), task.getL2seq(),task.isfull()),
 						0, " no data!"));
 		} else {
 			if (task.getInstanceConfig().getPipeParams().getLogLevel() < 2)
@@ -263,7 +260,7 @@ public final class PipePump extends Instruction implements Serializable {
 						(getInstanceConfig().getPipeParams().isMultiThread() ? "MultiThread" : "SingleThread") + " "
 								+ task.getJobType().name(),
 						instanceRunId, storeId, task.getL2seq(), 0, "",
-						GlobalParam.TASK_COORDER.getLSeqPos(task.getInstanceID(), task.getL1seq(), task.getL2seq()), 0,
+						GlobalParam.TASK_COORDER.getLSeqPos(task.getInstanceID(), task.getL1seq(), task.getL2seq(),task.isfull()), 0,
 						",totalpage:" + pageNum));
 
 			long start = Common.getNow();
@@ -285,7 +282,7 @@ public final class PipePump extends Instruction implements Serializable {
 			if (task.getInstanceConfig().getPipeParams().getLogLevel() < 2)
 				log.info(Common.formatLog("complete", task.getJobType().name(), instanceRunId, storeId, task.getL2seq(),
 						total.get(), "",
-						GlobalParam.TASK_COORDER.getLSeqPos(task.getInstanceID(), task.getL1seq(), task.getL2seq()),
+						GlobalParam.TASK_COORDER.getLSeqPos(task.getInstanceID(), task.getL1seq(), task.getL2seq(),task.isfull()),
 						Common.getNow() - start, ""));
 			this.breakCheck(task);
 		}
@@ -354,13 +351,10 @@ public final class PipePump extends Instruction implements Serializable {
 				throw new EFException("writeDataSet data exception!");
 			total.getAndAdd(rState.getCount());
 			startId = dataBoundary;
-
+ 
 			GlobalParam.TASK_COORDER.setScanPosition(task.getInstanceID(), task.getL1seq(), task.getL2seq(),
-					rState.getReaderScanStamp());
-			if (task.getJobType() == JOB_TYPE.INCREMENT) {
-				GlobalParam.TASK_COORDER.saveTaskInfo(task.getInstanceID(), task.getL1seq(), storeId,
-						GlobalParam.JOB_INCREMENTINFO_PATH);
-			}
+					rState.getReaderScanStamp(),task.isfull());
+			GlobalParam.TASK_COORDER.saveTaskInfo(task.getInstanceID(), task.getL1seq(), storeId,task.isfull());
 		}
 	}
 
@@ -499,14 +493,10 @@ public final class PipePump extends Instruction implements Serializable {
 							getInstanceConfig().getPipeParams().showInfoLog());
 				}
 				total.addAndGet(rState.getCount());
-				startId = dataBoundary;
-
+				startId = dataBoundary; 
 				GlobalParam.TASK_COORDER.setScanPosition(task.getInstanceID(), task.getL1seq(), task.getL2seq(),
-						rState.getReaderScanStamp());
-				if (task.getJobType() == JOB_TYPE.INCREMENT) {
-					GlobalParam.TASK_COORDER.saveTaskInfo(task.getInstanceID(), task.getL1seq(), storeId,
-							GlobalParam.JOB_INCREMENTINFO_PATH);
-				}
+						rState.getReaderScanStamp(),task.isfull());
+				GlobalParam.TASK_COORDER.saveTaskInfo(task.getInstanceID(), task.getL1seq(), storeId,task.isfull());
 			}
 			taskSingal.countDown();
 		}

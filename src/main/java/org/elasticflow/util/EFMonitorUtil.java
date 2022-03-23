@@ -138,22 +138,22 @@ public class EFMonitorUtil {
 		}
 	}
 	
-	public static String threadStateInfo(String instance, JOB_TYPE type) {
+	public static JSONObject threadStateInfo(String instance, JOB_TYPE type) {
 		String[] seqs = EFMonitorUtil.getInstanceL1seqs(instance);
-		StringBuilder sb = new StringBuilder();
+		JSONObject info = new JSONObject();
 		for (String seq : seqs) {
-			sb.append(seq.length() == 0 ? "MAIN " : seq + ":");
+			String state = "";
 			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, STATUS.Stop))
-				sb.append("Stop,");
-			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, STATUS.Ready))
-				sb.append("Ready,");
+				state = "stop";
+			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, STATUS.Ready))				
+				state = "Ready";
 			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, STATUS.Running))
-				sb.append("Running,");
+				state = "Running";
 			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, STATUS.Termination))
-				sb.append("Termination,");
-			sb.append(" ;");
+				state = "Termination";
+			info.put(seq.length() == 0 ? "MAIN " : seq, state);
 		}
-		return sb.toString();
+		return info;
 	}
 	
 
@@ -326,79 +326,30 @@ public class EFMonitorUtil {
 						Writer.put(appendPipe + "FlowState", tmp.get(END_TYPE.writer.name()));
 					}
 					nodeInfo.put(appendPipe+"nodeIP", tmp.get("nodeIP"));
-					nodeInfo.put(appendPipe+"nodeID", tmp.get("nodeID"));
+					nodeInfo.put(appendPipe+"nodeID", tmp.get("nodeID")); 
+					nodeInfo.put(appendPipe+"pipeSize", 
+							Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadPageSize());
 					nodeInfo.put(appendPipe+"status", tmp.get("status"));
 				}
 			}			
 				
 			if((type&4)>0) {
 				if (config.openTrans()) {
-					WarehouseParam wsp = Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom());
-					if (wsp.getL1seq().length > 0) {
-						StringBuilder sb = new StringBuilder();
-						StringBuilder fullstate = new StringBuilder();
-						for (String seq : wsp.getL1seq()) {
-							String strs = GlobalParam.TASK_COORDER.getscanPositionString(instance);
-							if (strs == null)
-								continue;
-							sb.append("\r\n;(" + seq + ") "
-									+ GlobalParam.TASK_COORDER.getStoreId(instance)
-									+ ":");
-
-							for (String str : strs.split(",")) {
-								String update;
-								String[] dstr = str.split(":");
-								if (dstr.length >1 && dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
-									update = dstr[0] + ":"
-											+ (SDF.format(dstr[1].length() < 12 ? Long.valueOf(dstr[1] + "000")
-													: Long.valueOf(dstr[1])))
-											+ " (" + dstr[1] + ")";
-								} else {
-									update = str;
-								}
-								sb.append(", ");
-								sb.append(update);
-							}
-							fullstate.append(seq + ":" + Common.getFullStartInfo(instance, seq) + "; ");
-						}
-						Task.put("Incremental storage status", sb);
-						Task.put("Full storage status", fullstate);
-					} else {
-						String strs = GlobalParam.TASK_COORDER.getscanPositionString(instance);
-						if (strs.length() > 0) {
-							StringBuilder stateStr = new StringBuilder();
-							if (strs.split(",").length > 0) {
-								for (String tm : strs.split(",")) {
-									String[] dstr = tm.split(":");
-									if (dstr[1].length() > 9 && dstr[1].matches("[0-9]+")) {
-										stateStr.append(dstr[0] + ":"
-												+ SDF.format(tm.length() < 12 ? Long.valueOf(dstr[1] + "000")
-														: Long.valueOf(dstr[1])));
-										stateStr.append(" (").append(tm).append(")");
-									} else {
-										stateStr.append(tm);
-									}
-									stateStr.append(", ");
-								}
-							}
-							Task.put("Incremental storage status",
-									GlobalParam.TASK_COORDER.getStoreId(instance)
-											+ ":" + stateStr.toString());
-						}
-						Task.put("Full storage status", Common.getFullStartInfo(instance, null));
-					}
+					Task.put("Incremental storage status", JSONObject.parse(GlobalParam.TASK_COORDER.getScanPositionString(instance,false)));
+					Task.put("Full storage status",JSONObject.parse(GlobalParam.TASK_COORDER.getScanPositionString(instance,true)));
+					Task.put("Full progress", new JSONObject());
 					if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.FULL.name())
 							|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()).size() == 0) {
-						Task.put("Full progress", new JSONObject().put("full","none"));
+						Task.getJSONObject("Full progress").put("full","none");
 					} else {
-						Task.put("Full progress",  new JSONObject().put("full",Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name())));
+						Task.getJSONObject("Full progress").put("full",Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()));
 					}
 					if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.INCREMENT.name())
 							|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()).size() == 0) {
-						Task.put("Incremental progress", "increment:none");
+						Task.put("Incremental progress", "none");
 					} else {
 						Task.put("Incremental progress",
-								"increment:" + Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()));
+								Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()));
 					}
 					Task.put("Incremental thread status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
 					Task.put("Full thread status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));

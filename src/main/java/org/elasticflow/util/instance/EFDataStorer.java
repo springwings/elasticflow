@@ -34,7 +34,7 @@ public class EFDataStorer {
 				fd.mkdirs();
 			}
 		} catch (Exception e) {
-			Common.LOG.error("environmentCheck Exception", e);
+			Common.LOG.error("create path exception", e);
 		}
 	}
 
@@ -46,7 +46,7 @@ public class EFDataStorer {
 				throw e;
 			}
 		} catch (Exception e) {
-			Common.LOG.error("write data Exception", e);
+			Common.LOG.error("write data exception", e);
 		}
 	}
 	
@@ -69,11 +69,11 @@ public class EFDataStorer {
 				}
 				return "".getBytes();
 			}catch(Exception e2) {
-				Common.LOG.error("create file Exception", e2);
+				Common.LOG.error("create file exception", e2);
 				return null;
 			}
 		} catch (Exception e) {
-			Common.LOG.error("read data Exception", e);
+			Common.LOG.error("read data exception", e);
 			return null;
 		}
 	}

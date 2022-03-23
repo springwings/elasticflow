@@ -257,6 +257,8 @@ public final class Common {
 	}
 
 	public static String getLseq(String L1seq, String L2seq) {
+		if(L1seq=="" && L2seq=="")
+			return "_";
 		return L1seq + "." + L2seq;
 	}
 
@@ -273,10 +275,12 @@ public final class Common {
 		}
 
 	}
-
-	public static String getFullStartInfo(String instance, String L1seq) {
-		String info = "0";
-		String path = Common.getTaskStorePath(instance, L1seq, GlobalParam.JOB_FULLINFO_PATH);
+		
+	//full each L1seq one file
+	public static String getStoreTaskInfo(String instance,boolean isfull) {
+		String info = "{}";
+		String path = Common.getTaskStorePath(instance, 
+				isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH);
 		byte[] b = EFDataStorer.getData(path, true);
 		if (b != null && b.length > 0) {
 			String str = new String(b);
@@ -307,9 +311,8 @@ public final class Common {
 	 * @param L1seq,for series data source fetch
 	 * @return
 	 */
-	public static String getTaskStorePath(String instanceName, String L1seq, String location) {
-		return GlobalParam.INSTANCE_PATH + "/" + instanceName + "/"
-				+ ((L1seq != null && L1seq.length() > 0) ? L1seq + "/" : "") + location;
+	public static String getTaskStorePath(String instanceName, String location) {
+		return GlobalParam.INSTANCE_PATH + "/" + instanceName + "/" + location;
 	}
 
 	public static String getResourceTag(String instance, String L1seq, String tag, boolean ignoreSeq) {

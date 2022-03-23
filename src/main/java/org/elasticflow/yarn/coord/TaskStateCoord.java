@@ -28,19 +28,19 @@ public interface TaskStateCoord extends Coordination{
 	
 	public void setFlowStatus(String instance, String L1seq,String tag,AtomicInteger ai);
 	
-	public void setScanPosition(String instance, String L1seq,String L2seq,String scanStamp);
-	
+	public void setScanPosition(String instance, String L1seq,String L2seq,String scanStamp,boolean isfull);
+		
 	public boolean checkFlowStatus(String instance,String seq,JOB_TYPE type,STATUS state);
 	
 	public boolean setFlowStatus(String instance,String L1seq,String type,STATUS needState, STATUS setState,boolean showLog);
 	
-	public String getStoreIdFromSave(String instance, String L1seq,boolean reload);
+	public String getStoreIdFromSave(String instance, String L1seq,boolean reload,boolean isfull);
 	
 	public String getIncrementStoreId(String instance, String L1seq, String contextId,boolean reCompute) throws EFException;
 	
-	public void saveTaskInfo(String instance, String L1seq,String storeId,String location);
+	public void saveTaskInfo(String instance, String L1seq,String storeId,boolean isfull);
 	
-	public void setAndGetScanInfo(String instance, String L1seq,String storeId);
+	public void setAndGetScanInfo(String instance, String L1seq,String storeId,boolean isfull);
 	
 	public String getStoreId(String instance, String L1seq, String contextId, boolean isIncrement,
 			boolean reCompute);
@@ -51,17 +51,18 @@ public interface TaskStateCoord extends Coordination{
 	
 	public void scanPositionRecoverKeep(String instance);
 	
-	public String getscanPositionString(String instance);
+	public String getScanPositionString(String instance,boolean isfull);
 	
-	public void initPutDatas(String instance,ScanPosition scanPosition);
+	//local run method
+	public void initTaskDatas(String instance,ScanPosition scanPosition);
 	
-	public String getLSeqPos(String instance,String L1seq,String L2seq);
+	public String getLSeqPos(String instance,String L1seq,String L2seq,boolean isfull);
 	
-	public void updateLSeqPos(String instance,String L1seq,String L2seq,String position);
+	public void updateLSeqPos(String instance,String L1seq,String L2seq,String position,boolean isfull);
 	
-	public void batchUpdateSeqPos(String instance,String val);	 
+	public void batchUpdateSeqPos(String instance,String val,boolean isfull);	 
 	
-	public String getStoreId(String instance);
+	public String getStoreId(String instance,boolean isfull);
 	
 	public void setFlowInfo(String formKeyVal1,String formKeyVal2,String key,String data);
 	

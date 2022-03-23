@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * store Level-2-seqs relative information like table level
  * @author chengwen
@@ -16,36 +18,36 @@ public class ScanPosition implements Serializable{
 
 	private static final long serialVersionUID = -1408879403312612034L;
 	private String instance;
-	private String storeId;
+	private String incrementStoreId;
+	private String fullStoreId;
 	/**L2seq Scan switch point location information which in Piper configuration file,Lseq is seq l1 + l2*/
-	private ConcurrentHashMap<String, String> LseqPos = new ConcurrentHashMap<>();
-	private String JOB_STATE_SPERATOR = ":";
-	private String JOB_SEQ_SPERATOR = ",";
-	private String INFO_SPERATOR = "#";
-	private String keep="";
-	
-	public ScanPosition(String info,String instance,String storeId) {
-		String[] tmp = info.trim().split(INFO_SPERATOR);
-		if(tmp.length<2) {
-			this.instance = instance;
-			this.storeId = storeId;
-		}else {
-			this.instance = tmp[0];
-			this.storeId = tmp[1];
-			if(tmp.length==3) {
-				String[] L2seqs = tmp[2].split(JOB_SEQ_SPERATOR);
-				String[] row;
-				for(String seq:L2seqs) {
-					row = seq.split(JOB_STATE_SPERATOR);
-					LseqPos.put(row[0], row[1]);
+	private ConcurrentHashMap<String, String> incrementLseqPos = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, String> fullLseqPos = new ConcurrentHashMap<>();
+	private JSONObject keep = new JSONObject();
+		
+	public void loadInfos(String info,boolean isfull) {
+		JSONObject datas = JSONObject.parseObject(info);
+		if(datas.size()>2) {
+			this.instance = datas.getString("instance");
+			if(isfull) {
+				this.fullStoreId = datas.getString("storeId");
+				JSONObject infos = datas.getJSONObject("status");
+				for (Entry<String, Object> entry : infos.entrySet()) {
+					fullLseqPos.put(entry.getKey(), entry.getValue().toString());
+				}
+			}else {
+				this.incrementStoreId = datas.getString("storeId");
+				JSONObject infos = datas.getJSONObject("status");
+				for (Entry<String, Object> entry : infos.entrySet()) {
+					incrementLseqPos.put(entry.getKey(), entry.getValue().toString());
 				}
 			}			
 		}
 	}
 	
-	public ScanPosition(String instance,String storeId) {
+	public ScanPosition(String instance,String incrementStoreId) {
 		this.instance = instance;
-		this.storeId = storeId;
+		this.incrementStoreId = incrementStoreId;
 	}
 	
 	/**
@@ -53,46 +55,64 @@ public class ScanPosition implements Serializable{
 	 * @param seq combine L1seq L2seq
 	 * @param pos
 	 */
-	public void updateLSeqPos(String seq,String pos) {		
-		LseqPos.put(seq, pos);
+	public void updateLSeqPos(String Lseq,String pos,boolean isfull) {		
+		if(isfull) {
+			fullLseqPos.put(Lseq, pos);
+		}else {
+			incrementLseqPos.put(Lseq, pos);
+		}		
 	} 
 	
 	/**
 	 * Store temporary full scan start location 
 	 */
 	public void keepCurrentPos() {
-		keep = getPositionString();
+		keep = getPositionDatas(false);
 	}
 	
 	public void recoverKeep() { 
-		LseqPos.clear();
-		if(keep.length()>0) {
-			String[] seqs = keep.split(JOB_SEQ_SPERATOR);
-			String[] row;
-			for(String seq:seqs) {
-				row = seq.split(JOB_STATE_SPERATOR);
-				LseqPos.put(row[0], row[1]);
+		incrementLseqPos.clear();
+		if(keep.size()>0) {
+			for (Entry<String, Object> entry : keep.entrySet()) {
+				incrementLseqPos.put(entry.getKey(), entry.getValue().toString());
 			}
+			keep.clear();
 		} 
 	}
 	
-	public void batchUpdateSeqPos(String v) {
-		Iterator<Map.Entry<String, String>> iter = LseqPos.entrySet().iterator();
-		while (iter.hasNext()) {
-			Map.Entry<String, String> entry = (Entry<String, String>) iter.next();
-			LseqPos.put(entry.getKey(), v);
-		}
+	public void batchUpdateSeqPos(String v,boolean isfull) {
+		if(isfull) {
+			Iterator<Map.Entry<String, String>> iter = fullLseqPos.entrySet().iterator();
+			while (iter.hasNext()) {
+				Map.Entry<String, String> entry = (Entry<String, String>) iter.next();
+				fullLseqPos.put(entry.getKey(), v);
+			}
+		}else {
+			Iterator<Map.Entry<String, String>> iter = incrementLseqPos.entrySet().iterator();
+			while (iter.hasNext()) {
+				Map.Entry<String, String> entry = (Entry<String, String>) iter.next();
+				incrementLseqPos.put(entry.getKey(), v);
+			}
+		}		
 	}
 	
-	public String getLSeqPos(String seq) {
-		if(LseqPos.containsKey(seq)) {
-			return LseqPos.get(seq);
+	public String getLSeqPos(String Lseq,boolean isfull) {
+		if(isfull) {
+			if(fullLseqPos.containsKey(Lseq)) 
+				return fullLseqPos.get(Lseq);
+		}else {
+			if(incrementLseqPos.containsKey(Lseq)) 
+				return incrementLseqPos.get(Lseq);
 		}
 		return "0";
 	}
 	
-	public void updateStoreId(String storeId) {
-		this.storeId = storeId;
+	public void updateStoreId(String storeId,boolean isfull) {
+		if(isfull) {
+			this.fullStoreId = storeId;
+		}else {
+			this.incrementStoreId = storeId;
+		}		
 	}
 	
 	
@@ -100,27 +120,33 @@ public class ScanPosition implements Serializable{
 		return instance;
 	}
  
-	public String getStoreId() {
-		return storeId==null?"":storeId;
+	public String getStoreId(boolean isfull) {
+		if(isfull) {
+			return fullStoreId==null?"":fullStoreId;
+		}
+		return incrementStoreId==null?"":incrementStoreId;
 	}
 	
-	public String getPositionString() {
-		StringBuilder sf = new StringBuilder(); 
-		Iterator<Map.Entry<String, String>> iter = LseqPos.entrySet().iterator();
+	public JSONObject getPositionDatas(boolean isfull) {
+		JSONObject datas = new JSONObject();
+		Iterator<Map.Entry<String, String>> iter;
+		if(isfull) {
+			iter = fullLseqPos.entrySet().iterator();
+		}else {
+			iter = incrementLseqPos.entrySet().iterator();
+		}		
 		while (iter.hasNext()) {
 			Map.Entry<String, String> entry = (Entry<String, String>) iter.next();
-			sf.append(entry.getKey()+JOB_STATE_SPERATOR+entry.getValue()+JOB_SEQ_SPERATOR);
+			datas.put(entry.getKey(), entry.getValue());
 		}
-		return sf.toString();
+		return datas;
 	}
- 
-	public String getString() {
-		StringBuilder sf = new StringBuilder();
-		sf.append(instance);
-		sf.append(INFO_SPERATOR);
-		sf.append(storeId);
-		sf.append(INFO_SPERATOR);
-		sf.append(getPositionString());
-		return sf.toString();
+	
+	public String getString(boolean isfull) {
+		JSONObject datas = new JSONObject();
+		datas.put("instance", instance);
+		datas.put("storeId", isfull?fullStoreId:incrementStoreId);
+		datas.put("status", getPositionDatas(isfull));
+		return datas.toJSONString();
 	}
 }

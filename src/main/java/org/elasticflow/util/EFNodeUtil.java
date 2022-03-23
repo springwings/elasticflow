@@ -38,20 +38,15 @@ public final class EFNodeUtil {
 	public static void loadInstanceDatas(InstanceConfig instanceConfig) {
 		String instance = instanceConfig.getInstanceID();
 		String[] L1seqs = Common.getL1seqs(instanceConfig);
+		ScanPosition sp = new ScanPosition(instance, "");
 		for (String L1seq : L1seqs) {
 			GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.FULL.name(), new AtomicInteger(1));
 			GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(), new AtomicInteger(1));
-			GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.VIRTUAL.name(), new AtomicInteger(1));
-			String path = Common.getTaskStorePath(instance, L1seq, GlobalParam.JOB_INCREMENTINFO_PATH);
-			byte[] b = EFDataStorer.getData(path, true);
-			if (b != null && b.length > 0) {
-				String str = new String(b);
-				GlobalParam.TASK_COORDER.initPutDatas(instance,
-						new ScanPosition(str, instance, L1seq));
-			} else {
-				GlobalParam.TASK_COORDER.initPutDatas(instance, new ScanPosition(instance, L1seq));
-			}
+			GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.VIRTUAL.name(), new AtomicInteger(1));			
 		}
+		sp.loadInfos(Common.getStoreTaskInfo(instance,false),false);
+		sp.loadInfos(Common.getStoreTaskInfo(instance,true),true);
+		GlobalParam.TASK_COORDER.initTaskDatas(instance,sp);
 	}
 
 	public static void runShell(String path) {

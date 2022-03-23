@@ -147,8 +147,8 @@ public final class GlobalParam {
 	}
 
 	public final static String DEFAULT_SEQ = "__";
-	public final static String JOB_INCREMENTINFO_PATH = "batch";
-	public final static String JOB_FULLINFO_PATH = "full_info";
+	public final static String JOB_INCREMENTINFO_PATH = "increment";
+	public final static String JOB_FULLINFO_PATH = "full";
 
 	/**
 	 * writer parameters Mechanism: AB Active/standby switching mode, Time Build
