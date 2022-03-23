@@ -1,11 +1,13 @@
 <div align="center">
   <img src="images/logo.jpg" width="160px">
-</div>
-
+  
+  
 
 ![GitHub issues](https://img.shields.io/github/issues/springwings/elasticflow)
 ![GitHub](https://img.shields.io/github/license/springwings/elasticflow)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/springwings/elasticflow)
+</div>
+
 
 # ElasticFlow
 ElasticFlow是一个开源弹性流数据交换系统，支持在任意类型数据端之间以及数据与用户之间通过建立可计算弹性流管道，并进行定时定量多渠道方式交换数据服务。项目可应用于数据交换、通用搜索引擎、数据发布服务、数据仓库等项目。
