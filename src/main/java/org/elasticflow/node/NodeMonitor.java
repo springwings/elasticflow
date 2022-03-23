@@ -104,6 +104,8 @@ public final class NodeMonitor {
 			put("deleteinstancedata", "deleteInstanceData");
 			put("getinstanceinfo", "getInstanceInfo");
 			// pipe xml-config manage
+			put("getinstancexml", "getInstanceXml");
+			put("updateinstancexml", "updateInstanceXml");
 			put("setinstancepipeconfig", "setInstancePipeConfig");
 		}
 	};
@@ -435,6 +437,21 @@ public final class NodeMonitor {
 			} else {
 				setResponse(RESPONSE_STATUS.Success, null, JO);
 			}
+		}
+	}
+	
+	public void getInstanceXml(Request rq) {
+		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
+			String xmlPath = GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("instance") + "/task.xml";
+			byte[] datas = EFDataStorer.getData(xmlPath, false);		
+			setResponse(RESPONSE_STATUS.Success, "",new String(datas));
+		}
+	}
+
+	public void updateInstanceXml(Request rq) {
+		if (EFMonitorUtil.checkParams(this, rq, "instance,content ")) {
+			String xmlPath = GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("instance") + "/task.xml";
+			EFDataStorer.setData(xmlPath, rq.getParameter("content").strip());
 		}
 	}
 

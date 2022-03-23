@@ -18,7 +18,7 @@ public class EFFileUtil {
 	
 	public static String[] getInstancePath(String instance) {
 		String[] dt = new String[3];
-		dt[0] = GlobalParam.INSTANCE_PATH + "/" + instance + "/batch";
+		dt[0] = GlobalParam.INSTANCE_PATH + "/" + instance + "/"+GlobalParam.JOB_INCREMENTINFO_PATH;
 		dt[1] = GlobalParam.INSTANCE_PATH + "/" + instance + "/task.xml";
 		dt[2] = GlobalParam.INSTANCE_PATH + "/" + instance + "/stat";
 		return dt;
