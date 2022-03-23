@@ -28,7 +28,7 @@ public interface TaskStateCoord extends Coordination{
 	
 	public void setFlowStatus(String instance, String L1seq,String tag,AtomicInteger ai);
 	
-	public void setScanPosition(String instance, String L1seq,String L2seq,String scanStamp,boolean isfull);
+	public void setScanPosition(String instance, String L1seq, String L2seq, String scanStamp,boolean reset,boolean isfull);
 		
 	public boolean checkFlowStatus(String instance,String seq,JOB_TYPE type,STATUS state);
 	

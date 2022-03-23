@@ -66,9 +66,9 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 		return TMP_STORE_DATA.get(instance);
 	}
 
-	public void setScanPosition(String instance, String L1seq, String L2seq, String scanStamp,boolean isfull) {
+	public void setScanPosition(String instance, String L1seq, String L2seq, String scanStamp,boolean reset,boolean isfull) {
 		synchronized (SCAN_POSITION.get(instance)) {
-			if (PipeUtil.scanPosCompare(scanStamp,
+			if (reset || PipeUtil.scanPosCompare(scanStamp,
 					SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq),isfull))) {
 				SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), scanStamp,isfull);
 				// update flow status,Distributed environment synchronization status

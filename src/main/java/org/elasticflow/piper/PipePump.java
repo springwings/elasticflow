@@ -353,7 +353,7 @@ public final class PipePump extends Instruction implements Serializable {
 			startId = dataBoundary;
  
 			GlobalParam.TASK_COORDER.setScanPosition(task.getInstanceID(), task.getL1seq(), task.getL2seq(),
-					rState.getReaderScanStamp(),task.isfull());
+					rState.getReaderScanStamp(),false,task.isfull());
 			GlobalParam.TASK_COORDER.saveTaskInfo(task.getInstanceID(), task.getL1seq(), storeId,task.isfull());
 		}
 	}
@@ -495,7 +495,7 @@ public final class PipePump extends Instruction implements Serializable {
 				total.addAndGet(rState.getCount());
 				startId = dataBoundary; 
 				GlobalParam.TASK_COORDER.setScanPosition(task.getInstanceID(), task.getL1seq(), task.getL2seq(),
-						rState.getReaderScanStamp(),task.isfull());
+						rState.getReaderScanStamp(),false,task.isfull());
 				GlobalParam.TASK_COORDER.saveTaskInfo(task.getInstanceID(), task.getL1seq(), storeId,task.isfull());
 			}
 			taskSingal.countDown();

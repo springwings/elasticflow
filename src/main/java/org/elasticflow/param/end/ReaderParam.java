@@ -8,7 +8,7 @@
 package org.elasticflow.param.end;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class ReaderParam {
 	private String handler;
 	private boolean isNoSql = false;
 	/** defined series scan location */
-	protected List<String> L2seqs = new ArrayList<String>();
+	protected List<String> L2seqs = Arrays.asList("");
 	
 	/**User defined JSON parameters can be used to extend the plugin*/
 	private JSONObject customParams = new JSONObject();

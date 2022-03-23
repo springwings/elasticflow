@@ -99,11 +99,11 @@ public class FlowTask {
 					GlobalParam.TASK_COORDER.scanPositionkeepCurrentPos(instanceId);
 					pipePump.run(storeId, L1seq, true,isReferenceInstance);
 					GlobalParam.TASK_COORDER.scanPositionRecoverKeep(instanceId); 
-					GlobalParam.TASK_COORDER.saveTaskInfo(instanceId, L1seq, storeId, true);
-					for(String L2seq:pipePump.getInstanceConfig().getReadParams().getL2Seq()) {
-						GlobalParam.TASK_COORDER.setScanPosition(instanceId, L1seq, L2seq, "",true);
-					}
 					GlobalParam.TASK_COORDER.saveTaskInfo(instanceId, L1seq, storeId, false);
+					for(String L2seq:pipePump.getInstanceConfig().getReadParams().getL2Seq()) {
+						GlobalParam.TASK_COORDER.setScanPosition(instanceId, L1seq, L2seq, "",true,true);
+					}
+					GlobalParam.TASK_COORDER.saveTaskInfo(instanceId, L1seq, storeId, true);
 				} 
 				runNextJobs(JOB_TYPE.FULL); 
 			} catch (Exception e) {

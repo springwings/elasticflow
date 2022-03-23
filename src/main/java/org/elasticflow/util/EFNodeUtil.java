@@ -14,7 +14,6 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.NODE_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.reader.ScanPosition;
-import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.yarn.EFRPCService;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coord.DiscoveryCoord;
