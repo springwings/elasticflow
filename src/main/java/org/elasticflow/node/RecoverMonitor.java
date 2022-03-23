@@ -14,7 +14,7 @@ import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.yarn.Resource;
 
 /**
- * 
+ * Recover Master
  * @author chengwen
  * @version 1.0
  * @date 2018-07-22 09:08
@@ -67,7 +67,7 @@ public class RecoverMonitor {
 	}
 	
 	private void takeOverNode() { 
-		Resource.EFLOWS.loadGlobalConfig(GlobalParam.CONFIG_PATH+"/EF_NODES/"+this.takeIp+"/configs",true); 
+		Common.loadGlobalConfig(GlobalParam.CONFIG_PATH+"/EF_NODES/"+this.takeIp+"/configs"); 
 		Resource.EFLOWS.init(true);
 		Resource.EFLOWS.startService();
 		Common.LOG.info(GlobalParam.IP+" has take Over Node "+this.takeIp);

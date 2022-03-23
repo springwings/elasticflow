@@ -18,6 +18,8 @@ import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.node.SocketCenter;
 import org.elasticflow.node.startup.Run;
 import org.elasticflow.notifier.EFNotifier;
+import org.elasticflow.reader.service.HttpReaderService;
+import org.elasticflow.searcher.service.SearcherService;
 import org.elasticflow.task.FlowTask;
 import org.elasticflow.task.schedule.TaskJobCenter;
 import org.quartz.Scheduler;
@@ -59,5 +61,9 @@ public final class Resource {
 	public static ConcurrentHashMap<String, FlowTask> tasks;
 
 	public static ThreadPools ThreadPools;
+	
+	public static SearcherService searcherService;
+
+	public static HttpReaderService httpReaderService;
 
 }

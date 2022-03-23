@@ -35,7 +35,6 @@ import org.elasticflow.task.schedule.TaskJobCenter;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFIoc;
 import org.elasticflow.util.EFNodeUtil;
-import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.ThreadPools;
 import org.elasticflow.yarn.coordinator.InstanceCoordinator;
@@ -44,9 +43,6 @@ import org.elasticflow.yarn.monitor.ResourceMonitor;
 import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 
 /**
  * Application startup position
@@ -155,36 +151,21 @@ public final class Run {
 	 */
 	public void startService() {
 		if(EFNodeUtil.isMaster()) {
-			if ((GlobalParam.SERVICE_LEVEL & 1) > 0) 
-				(new SearcherService()).start(); 			
+			if ((GlobalParam.SERVICE_LEVEL & 1) > 0) {
+				Resource.searcherService =  new SearcherService();
+				Resource.searcherService.start();
+			}			
 			if ((GlobalParam.SERVICE_LEVEL & 16) > 0)
 				(new ComputerService()).start(); 
-			if ((GlobalParam.SERVICE_LEVEL & 8) > 0)
+			if ((GlobalParam.SERVICE_LEVEL & 8) > 0) {
 				Resource.FlOW_CENTER.startInstructionsJob(); 
+			}				
 			new EFMonitorService().start();
 		} 		
-		if ((GlobalParam.SERVICE_LEVEL & 4) > 0)
-			(new HttpReaderService()).start();
-	}
-
-	public void loadGlobalConfig(String path, boolean fromZk) {
-		try {			
-			if (fromZk) {
-				JSONObject _JO = (JSONObject) JSON.parse(EFDataStorer.getData(path, false));
-				for (Map.Entry<String, Object> row : _JO.entrySet()) {
-					GlobalParam.StartConfig.setProperty(row.getKey(), String.valueOf(row.getValue()));
-				}
-			} else {
-				GlobalParam.StartConfig = Common.loadProperties(path);				
-			}
-			Common.LOG.info("load {} Config success!", path);
-		} catch (Exception e) { 
-			Common.LOG.error("load {} Config Exception", path,e);
-			Common.stopSystem(false);
+		if ((GlobalParam.SERVICE_LEVEL & 4) > 0) {
+			Resource.httpReaderService = new HttpReaderService();
+			Resource.httpReaderService.start();
 		}
-		GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");
-		GlobalParam.INSTANCE_PATH = (GlobalParam.CONFIG_PATH+"/INSTANCES").intern();
-		
 	}
 	
 	private void loadPlugins(String plugin) {
@@ -210,7 +191,7 @@ public final class Run {
 	
 	private void start() {
 		try {
-			loadGlobalConfig(this.startConfigPath, false);
+			Common.loadGlobalConfig(this.startConfigPath);
 			loadPlugins(GlobalParam.pluginPath);
 			GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");							
 			if (GlobalParam.StartConfig.get("node_type").equals(NODE_TYPE.backup.name())) {

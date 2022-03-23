@@ -32,10 +32,7 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.InstructionTree;
-import org.elasticflow.param.pipe.InstructionParam;
 import org.elasticflow.param.warehouse.WarehouseParam;
-import org.elasticflow.reader.service.HttpReaderService;
-import org.elasticflow.searcher.service.SearcherService;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFFileUtil;
@@ -48,7 +45,6 @@ import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.Request;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -70,12 +66,6 @@ import com.alibaba.fastjson.JSONObject;
 @NotThreadSafe
 public final class NodeMonitor {
 
-	@Autowired
-	private SearcherService SearcherService;
-
-	@Autowired
-	private HttpReaderService HttpReaderService;
-
 	private RESPONSE_STATUS response_status = RESPONSE_STATUS.CodeException;
 
 	private String response_info;
@@ -86,6 +76,8 @@ public final class NodeMonitor {
 		private static final long serialVersionUID = -8313429841889556616L;
 		{
 			// node manage
+			put("getresource", "getResource");
+			put("updateresource", "updateResource");
 			put("addresource", "addResource");
 			put("removeresource", "removeResource");
 			put("getnodeconfig", "getNodeConfig");
@@ -190,7 +182,20 @@ public final class NodeMonitor {
 			}
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("name", name);
-			updateResourceXml(type.name(), jsonObject, true);
+			updateResourceXml(jsonObject, true);
+		}
+	}
+	
+	public void getResource(Request rq) {
+		String pondPath = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
+		byte[] resourceXml = EFDataStorer.getData(pondPath, false);		
+		setResponse(RESPONSE_STATUS.Success, "",new String(resourceXml));
+	}
+	
+	public void updateResource(Request rq) {
+		if (EFMonitorUtil.checkParams(this, rq, "content")) {
+			String pondPath = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
+			EFDataStorer.setData(pondPath, rq.getParameter("content").strip());
 		}
 	}
 
@@ -198,35 +203,28 @@ public final class NodeMonitor {
 	 * @param socket resource configs json string
 	 */
 	public void addResource(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "socket,type")) {
+		if (EFMonitorUtil.checkParams(this, rq, "socket")) {
 			JSONObject jsonObject = JSON.parseObject(rq.getParameter("socket"));
-			RESOURCE_TYPE type = RESOURCE_TYPE.valueOf(rq.getParameter("type").toUpperCase());
 			Object o = null;
-			Set<String> iter = jsonObject.keySet();
+			Set<String> iter = jsonObject.keySet();			
 			try {
-				switch (type) {
-				case WAREHOUSE:
-					o = new WarehouseParam();
-					for (String key : iter) {
-						Common.setConfigObj(o, WarehouseParam.class, key, jsonObject.getString(key));
-					}
-					break;
-				case INSTRUCTION:
-					o = new InstructionParam();
-					for (String key : iter) {
-						Common.setConfigObj(o, InstructionParam.class, key, jsonObject.getString(key));
-					}
-					break;
+				o = new WarehouseParam();
+				for (String key : iter) {
+					Common.setConfigObj(o, WarehouseParam.class, key, jsonObject.getString(key));
 				}
+//				o = new InstructionParam();
+//				for (String key : iter) {
+//					Common.setConfigObj(o, InstructionParam.class, key, jsonObject.getString(key));
+//				}
 				if (o != null) {
-					Resource.nodeConfig.addSource(type, o);
+					Resource.nodeConfig.addSource(RESOURCE_TYPE.WAREHOUSE, o);
 					setResponse(RESPONSE_STATUS.Success, "add Resource to node success!", null);
-					updateResourceXml(type.name(), jsonObject, false);
+					updateResourceXml(jsonObject, false);
 				}
 			} catch (Exception e) {
 				setResponse(RESPONSE_STATUS.CodeException, "add Resource to node Exception " + e.getMessage(), null);
 			}
-		}
+		}  
 	}
 
 	/**
@@ -246,21 +244,16 @@ public final class NodeMonitor {
 	 * @param type action type,set/remove
 	 */
 	public void setNodeConfig(Request rq) {
-		if (rq.getParameter("k") != null && rq.getParameter("v") != null && rq.getParameter("type") != null) {
-			if (rq.getParameter("type").equals("set")) {
-				GlobalParam.StartConfig.setProperty(rq.getParameter("k"), rq.getParameter("v"));
-			} else {
-				GlobalParam.StartConfig.remove(rq.getParameter("k"));
-			}
+		if (EFMonitorUtil.checkParams(this, rq, "content")) {
 			try {
-				EFMonitorUtil.saveNodeConfig();
+				String fpath = GlobalParam.configPath.replace("file:", "") + "/config.properties";
+				EFDataStorer.setData(fpath, rq.getParameter("content").strip());
+				Common.loadGlobalConfig(fpath);
 				setResponse(RESPONSE_STATUS.Success, "Config set success!", null);
 			} catch (Exception e) {
 				setResponse(RESPONSE_STATUS.CodeException, "Config save Exception " + e.getMessage(), null);
 			}
-		} else {
-			setResponse(RESPONSE_STATUS.DataErr, "Config parameters k v or type not exists!", null);
-		}
+		} 
 	}
 
 	/**
@@ -304,10 +297,10 @@ public final class NodeMonitor {
 		if ((service_level & 4) > 0) {
 			service_level -= 4;
 		}
-		if (HttpReaderService.close()) {
-			setResponse(RESPONSE_STATUS.Success, "Stop Searcher Service Successed!", null);
+		if (Resource.httpReaderService.close()) {
+			setResponse(RESPONSE_STATUS.Success, "Stop Http Reader Service Successed!", null);
 		} else {
-			setResponse(RESPONSE_STATUS.CodeException, "Stop Searcher Service Failed!", null);
+			setResponse(RESPONSE_STATUS.CodeException, "Stop Http Reader Service Failed!", null);
 		}
 	}
 
@@ -320,9 +313,9 @@ public final class NodeMonitor {
 		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
 		if ((service_level & 4) == 0) {
 			service_level += 4;
-			HttpReaderService.start();
+			Resource.httpReaderService.start();
 		}
-		setResponse(RESPONSE_STATUS.Success, "Start Searcher Service Successed!", null);
+		setResponse(RESPONSE_STATUS.Success, "Start Http Reader Service Successed!", null);
 	}
 
 	/**
@@ -335,7 +328,7 @@ public final class NodeMonitor {
 		if ((service_level & 1) > 0) {
 			service_level -= 1;
 		}
-		if (SearcherService.close()) {
+		if (Resource.searcherService.close()) {
 			setResponse(RESPONSE_STATUS.Success, "Stop Searcher Service Successed!", null);
 		} else {
 			setResponse(RESPONSE_STATUS.CodeException, "Stop Searcher Service Failed!", null);
@@ -351,7 +344,7 @@ public final class NodeMonitor {
 		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
 		if ((service_level & 1) == 0) {
 			service_level += 1;
-			SearcherService.start();
+			Resource.searcherService.start();
 		}
 		setResponse(RESPONSE_STATUS.Success, "Start Searcher Service Successed!", null);
 	}
@@ -742,7 +735,7 @@ public final class NodeMonitor {
 		}
 	}
 
-	private boolean updateResourceXml(String resourcetype, JSONObject resourceData, boolean isDel) {
+	private boolean updateResourceXml(JSONObject resourceData, boolean isDel) {
 		try {
 			String pondPath = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
 			byte[] resourceXml = EFDataStorer.getData(pondPath, false);
@@ -750,8 +743,7 @@ public final class NodeMonitor {
 			SAXReader reader = new SAXReader();
 			Document doc = reader.read(new ByteArrayInputStream(resourceXml));
 			Element root = doc.getRootElement();
-			Element content = root.element(resourcetype);
-			List<?> socketlist = content.elements();
+			List<?> socketlist = root.elements();
 			boolean isExist = false;
 			for (Iterator<?> it = socketlist.iterator(); it.hasNext();) {
 				Element socket = (Element) it.next();
@@ -790,7 +782,7 @@ public final class NodeMonitor {
 				}
 			}
 			if (!isExist && !isDel) {
-				Element newelement = content.addElement("socket");
+				Element newelement = root.addElement("socket");
 				for (Map.Entry<String, Object> entry : resourceData.entrySet()) {
 					Element element = newelement.addElement(entry.getKey());
 					element.setText(entry.getValue().toString());

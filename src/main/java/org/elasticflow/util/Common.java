@@ -567,6 +567,18 @@ public final class Common {
 		calendar.set(Calendar.MILLISECOND, 0);
 		return calendar.getTimeInMillis();
 	}
+	
+	public static void loadGlobalConfig(String path) {
+		try {	
+			GlobalParam.StartConfig = Common.loadProperties(path);
+			Common.LOG.info("load {} Config success!", path);
+		} catch (Exception e) { 
+			Common.LOG.error("load {} Config Exception", path,e);
+			Common.stopSystem(false);
+		}
+		GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");
+		GlobalParam.INSTANCE_PATH = (GlobalParam.CONFIG_PATH+"/INSTANCES").intern();		
+	}
 
 	public static EFException getException(Exception e) {
 		Throwable except = e.getCause();

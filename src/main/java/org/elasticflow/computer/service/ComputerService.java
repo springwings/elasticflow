@@ -37,8 +37,7 @@ import org.mortbay.jetty.handler.AbstractHandler;
  */
 public class ComputerService {
 	
-	private EFService FS;
-	
+	private EFService FS;	
 	
 	public boolean start() {
 		HashMap<String, Object> serviceParams = new HashMap<String, Object>();
