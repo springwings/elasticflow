@@ -58,12 +58,12 @@ public class EFMonitorService {
 			Request rq = (request instanceof Request) ? (Request) request
 					: HttpConnection.getCurrentConnection().getRequest(); 
 			String dataTo = rq.getPathInfo().substring(1);
-			EFSearchRequest RR = Common.getRequest(rq);
 			EFResponse rps = EFResponse.getInstance();
+			EFSearchRequest RR = Common.getEFRequest(rq, rps);
 			rps.setRequest(RR.getParams());
 			switch (dataTo) {  
 			case "efm.doaction":{
-				Resource.nodeMonitor.ac(rq,rps);				
+				Resource.nodeMonitor.ac(rq,RR,rps);				
 			}
 				break;   
 			case "_version": 

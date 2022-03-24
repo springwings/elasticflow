@@ -10,11 +10,13 @@ package org.elasticflow.node;
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Base64.Decoder;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -31,6 +33,7 @@ import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.model.EFResponse;
+import org.elasticflow.model.EFSearchRequest;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.util.Common;
@@ -71,6 +74,8 @@ public final class NodeMonitor {
 	private String response_info;
 
 	private Object response_data;
+	
+	static Decoder decoder = Base64.getDecoder();
 
 	private HashMap<String, String> actions = new HashMap<String, String>() {
 		private static final long serialVersionUID = -8313429841889556616L;
@@ -121,12 +126,12 @@ public final class NodeMonitor {
 		this.response_data = data;
 	}
 
-	public void ac(Request rq, EFResponse RS) {
+	public void ac(Request rq,EFSearchRequest RR, EFResponse RS) {
 		try {
-			if (rq.getParameter("ac") != null && this.actions.containsKey(rq.getParameter("ac").toLowerCase())) {
-				Method m = NodeMonitor.class.getMethod(this.actions.get(rq.getParameter("ac").toLowerCase()),
-						Request.class);
-				m.invoke(this, rq);
+			if (RR.getParams().get("ac") != null && this.actions.containsKey(RR.getStringParam("ac").toLowerCase())) {
+				Method m = NodeMonitor.class.getMethod(this.actions.get(RR.getStringParam("ac").toLowerCase()),
+						Request.class,EFSearchRequest.class);
+				m.invoke(this, rq,RR);
 				RS.setStatus(this.response_info, this.response_status);
 				RS.setPayload(this.response_data);
 			} else {
@@ -135,19 +140,20 @@ public final class NodeMonitor {
 			}
 		} catch (Exception e) {
 			RS.setStatus("Actions Exception!", RESPONSE_STATUS.CodeException);
-			Common.LOG.error("ac " + rq.getParameter("ac") + " Exception ", e);
+			Common.LOG.error("ac " + RR.getParams().get("ac") + " Exception ", e);
 		}
 	}
+	
 
 	/**
 	 * Be care full,this will remove all relative instance
 	 * 
 	 * @param rq
 	 */
-	public void removeResource(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "name,type")) {
-			String name = rq.getParameter("name");
-			RESOURCE_TYPE type = RESOURCE_TYPE.valueOf(rq.getParameter("type").toUpperCase());
+	public void removeResource(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "name,type")) {
+			String name = RR.getStringParam("name");
+			RESOURCE_TYPE type = RESOURCE_TYPE.valueOf(RR.getStringParam("type").toUpperCase());
 			String[] seqs;
 			WarehouseParam wp;
 
@@ -188,25 +194,26 @@ public final class NodeMonitor {
 		}
 	}
 	
-	public void getResource(Request rq) {
+	public void getResource(Request rq,EFSearchRequest RR) {
 		String pondPath = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
 		byte[] resourceXml = EFDataStorer.getData(pondPath, false);		
 		setResponse(RESPONSE_STATUS.Success, "",new String(resourceXml));
 	}
 	
-	public void updateResource(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "content")) {
+	public void updateResource(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "content")) {
 			String pondPath = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
-			EFDataStorer.setData(pondPath, rq.getParameter("content").strip());
+			EFDataStorer.setData(pondPath,new String(decoder.decode(RR.getStringParam("content"))));
+			setResponse(RESPONSE_STATUS.Success, "update resource!", null);
 		}
 	}
 
 	/**
 	 * @param socket resource configs json string
 	 */
-	public void addResource(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "socket")) {
-			JSONObject jsonObject = JSON.parseObject(rq.getParameter("socket"));
+	public void addResource(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "socket")) {
+			JSONObject jsonObject = JSON.parseObject(RR.getStringParam("socket"));
 			Object o = null;
 			Set<String> iter = jsonObject.keySet();			
 			try {
@@ -234,7 +241,7 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void getNodeConfig(Request rq) {
+	public void getNodeConfig(Request rq,EFSearchRequest RR) {
 		setResponse(RESPONSE_STATUS.Success, "", GlobalParam.StartConfig);
 	}
 
@@ -245,11 +252,11 @@ public final class NodeMonitor {
 	 * @param v    property value
 	 * @param type action type,set/remove
 	 */
-	public void setNodeConfig(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "content")) {
+	public void setNodeConfig(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "content")) {
 			try {
 				String fpath = GlobalParam.configPath.replace("file:", "") + "/config.properties";
-				EFDataStorer.setData(fpath, rq.getParameter("content").strip());
+				EFDataStorer.setData(fpath, RR.getStringParam("content").strip());
 				Common.loadGlobalConfig(fpath);
 				setResponse(RESPONSE_STATUS.Success, "Config set success!", null);
 			} catch (Exception e) {
@@ -263,7 +270,7 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void restartNode(Request rq) {
+	public void restartNode(Request rq,EFSearchRequest RR) {
 		EFMonitorUtil.restartSystem();
 		setResponse(RESPONSE_STATUS.CodeException, "current node is in restarting...", null);
 	}
@@ -275,10 +282,10 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void loadHandler(Request rq) {
-		if (rq.getParameter("path") != null && rq.getParameter("name") != null) {
+	public void loadHandler(Request rq,EFSearchRequest RR) {
+		if (RR.getStringParam("path") != null && RR.getStringParam("name") != null) {
 			try {
-				new EFLoader(rq.getParameter("path")).loadClass(rq.getParameter("name"));
+				new EFLoader(RR.getStringParam("path")).loadClass(RR.getStringParam("name"));
 				setResponse(RESPONSE_STATUS.Success, "Load Handler success!", null);
 			} catch (Exception e) {
 				setResponse(RESPONSE_STATUS.CodeException, "Load Handler Exception " + e.getMessage(), null);
@@ -294,7 +301,7 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void stopHttpReaderServiceService(Request rq) {
+	public void stopHttpReaderServiceService(Request rq,EFSearchRequest RR) {
 		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
 		if ((service_level & 4) > 0) {
 			service_level -= 4;
@@ -311,7 +318,7 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void startHttpReaderServiceService(Request rq) {
+	public void startHttpReaderServiceService(Request rq,EFSearchRequest RR) {
 		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
 		if ((service_level & 4) == 0) {
 			service_level += 4;
@@ -325,7 +332,7 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void stopSearcherService(Request rq) {
+	public void stopSearcherService(Request rq,EFSearchRequest RR) {
 		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
 		if ((service_level & 1) > 0) {
 			service_level -= 1;
@@ -342,7 +349,7 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void startSearcherService(Request rq) {
+	public void startSearcherService(Request rq,EFSearchRequest RR) {
 		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
 		if ((service_level & 1) == 0) {
 			service_level += 1;
@@ -356,7 +363,7 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void getStatus(Request rq) {
+	public void getStatus(Request rq,EFSearchRequest RR) {
 		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
 		JSONObject dt = new JSONObject();
 		dt.put("NODE_TYPE", GlobalParam.StartConfig.getProperty("node_type"));
@@ -385,16 +392,16 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void getInstanceSeqs(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
+	public void getInstanceSeqs(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "instance")) {
 			try {
-				String instance = rq.getParameter("instance");
+				String instance = RR.getStringParam("instance");
 				InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instance);
 				WarehouseParam dataMap = Resource.nodeConfig.getWarehouse()
 						.get(instanceConfig.getPipeParams().getReadFrom());
 				setResponse(RESPONSE_STATUS.Success, null, StringUtils.join(dataMap.getL1seq(), ","));
 			} catch (Exception e) {
-				setResponse(RESPONSE_STATUS.CodeException, rq.getParameter("instance") + " not exists!", null);
+				setResponse(RESPONSE_STATUS.CodeException, RR.getStringParam("instance") + " not exists!", null);
 			}
 		}
 	}
@@ -404,22 +411,22 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void resetInstanceState(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
+	public void resetInstanceState(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "instance")) {
 			try {
-				String instance = rq.getParameter("instance");
+				String instance = RR.getStringParam("instance");
 				String val = "0";
-				if (rq.getParameterMap().get("set_value") != null)
-					val = rq.getParameter("set_value");
+				if (RR.getParams().get("set_value") != null)
+					val = RR.getStringParam("set_value");
 				String[] L1seqs = EFMonitorUtil.getInstanceL1seqs(instance);
 				for (String L1seq : L1seqs) {
 					GlobalParam.TASK_COORDER.batchUpdateSeqPos(instance, val, false);
 					GlobalParam.TASK_COORDER.saveTaskInfo(instance, L1seq,
 							GlobalParam.TASK_COORDER.getStoreIdFromSave(instance, L1seq, false, false), false);
 				}
-				setResponse(RESPONSE_STATUS.Success, rq.getParameter("instance") + " reset Success!", null);
+				setResponse(RESPONSE_STATUS.Success, RR.getStringParam("instance") + " reset Success!", null);
 			} catch (Exception e) {
-				setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance") + " not exists!", null);
+				setResponse(RESPONSE_STATUS.DataErr, RR.getStringParam("instance") + " not exists!", null);
 			}
 		}
 	}
@@ -429,9 +436,9 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void getInstanceInfo(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
-			JSONObject JO = EFMonitorUtil.getInstanceInfo(rq.getParameter("instance"), 7);
+	public void getInstanceInfo(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "instance")) {
+			JSONObject JO = EFMonitorUtil.getInstanceInfo(RR.getStringParam("instance"), 7);
 			if (JO.isEmpty()) {
 				setResponse(RESPONSE_STATUS.DataErr, "instance not exits!", null);
 			} else {
@@ -440,18 +447,18 @@ public final class NodeMonitor {
 		}
 	}
 	
-	public void getInstanceXml(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
-			String xmlPath = GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("instance") + "/task.xml";
+	public void getInstanceXml(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "instance")) {
+			String xmlPath = GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instance") + "/task.xml";
 			byte[] datas = EFDataStorer.getData(xmlPath, false);		
 			setResponse(RESPONSE_STATUS.Success, "",new String(datas));
 		}
 	}
 
-	public void updateInstanceXml(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "instance,content ")) {
-			String xmlPath = GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("instance") + "/task.xml";
-			EFDataStorer.setData(xmlPath, rq.getParameter("content").strip());
+	public void updateInstanceXml(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "instance,content ")) {
+			String xmlPath = GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instance") + "/task.xml";
+			EFDataStorer.setData(xmlPath, RR.getStringParam("content").strip());
 		}
 	}
 
@@ -460,12 +467,12 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void setInstancePipeConfig(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "instance,param.name,param.value")) {
-			if (Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance"))) {
-				InstanceConfig tmp = Resource.nodeConfig.getInstanceConfigs().get(rq.getParameter("instance"));
+	public void setInstancePipeConfig(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "instance,param.name,param.value")) {
+			if (Resource.nodeConfig.getInstanceConfigs().containsKey(RR.getStringParam("instance"))) {
+				InstanceConfig tmp = Resource.nodeConfig.getInstanceConfigs().get(RR.getStringParam("instance"));
 				try {
-					String[] params = rq.getParameter("param.name").split("\\.");
+					String[] params = RR.getStringParam("param.name").split("\\.");
 					if (params.length != 2)
 						throw new EFException("param.name Must be within two levels.");
 					Class<?> cls = null;
@@ -488,22 +495,22 @@ public final class NodeMonitor {
 						obj = tmp.getWriterParams();
 						break;
 					}
-					Common.setConfigObj(obj, cls, params[1], rq.getParameter("param.value"));
+					Common.setConfigObj(obj, cls, params[1], RR.getStringParam("param.value"));
 					if (GlobalParam.DISTRIBUTE_RUN)
-						GlobalParam.INSTANCE_COORDER.distributeCoorder().updateNodeConfigs(rq.getParameter("instance"),
-								params[0], params[1], rq.getParameter("param.value"));
-					String xmlPath = GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("instance") + "/task.xml";
+						GlobalParam.INSTANCE_COORDER.distributeCoorder().updateNodeConfigs(RR.getStringParam("instance"),
+								params[0], params[1], RR.getStringParam("param.value"));
+					String xmlPath = GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instance") + "/task.xml";
 					try {
 						PipeXMLUtil.ModifyNode(xmlPath, params[0] + ".param", params[1],
-								rq.getParameter("param.value"));
+								RR.getStringParam("param.value"));
 					} catch (EFException e) {
-						setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance") + e.getMessage(), null);
+						setResponse(RESPONSE_STATUS.DataErr, RR.getStringParam("instance") + e.getMessage(), null);
 					}
 				} catch (Exception e) {
 					setResponse(RESPONSE_STATUS.DataErr, e.getMessage(), null);
 				}
 			} else {
-				setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance") + " not exists!", null);
+				setResponse(RESPONSE_STATUS.DataErr, RR.getStringParam("instance") + " not exists!", null);
 			}
 		}
 	}
@@ -513,7 +520,7 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void getInstances(Request rq) {
+	public void getInstances(Request rq,EFSearchRequest RR) {
 		Map<String, InstanceConfig> nodes = Resource.nodeConfig.getInstanceConfigs();
 		HashMap<String, List<JSONObject>> rs = new HashMap<String, List<JSONObject>>();
 		for (Map.Entry<String, InstanceConfig> entry : nodes.entrySet()) {
@@ -554,9 +561,9 @@ public final class NodeMonitor {
 	 * @param rq
 	 * @throws EFException
 	 */
-	public void runCode(Request rq) throws EFException {
-		if (rq.getParameter("script") != null && rq.getParameter("script").contains("Track.cpuFree")) {
-			ArrayList<InstructionTree> Instructions = Common.compileCodes(rq.getParameter("script"), CPU.getUUID());
+	public void runCode(Request rq,EFSearchRequest RR) throws EFException {
+		if (RR.getStringParam("script") != null && RR.getStringParam("script").contains("Track.cpuFree")) {
+			ArrayList<InstructionTree> Instructions = Common.compileCodes(RR.getStringParam("script"), CPU.getUUID());
 			for (InstructionTree Instruction : Instructions) {
 				Instruction.depthRun(Instruction.getRoot());
 			}
@@ -571,37 +578,37 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void runNow(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "instance,jobtype")) {
-			if (Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance"))
-					&& Resource.nodeConfig.getInstanceConfigs().get(rq.getParameter("instance")).openTrans()) {
+	public void runNow(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "instance,jobtype")) {
+			if (Resource.nodeConfig.getInstanceConfigs().containsKey(RR.getStringParam("instance"))
+					&& Resource.nodeConfig.getInstanceConfigs().get(RR.getStringParam("instance")).openTrans()) {
 				boolean state;
 				if (GlobalParam.DISTRIBUTE_RUN) {
 					state = GlobalParam.INSTANCE_COORDER.distributeCoorder()
-							.runClusterInstanceNow(rq.getParameter("instance"), rq.getParameter("jobtype"), true);
+							.runClusterInstanceNow(RR.getStringParam("instance"), RR.getStringParam("jobtype"), true);
 				} else {
-					state = Resource.FlOW_CENTER.runInstanceNow(rq.getParameter("instance"), rq.getParameter("jobtype"),
+					state = Resource.FlOW_CENTER.runInstanceNow(RR.getStringParam("instance"), RR.getStringParam("jobtype"),
 							true);
 				}
 
 				if (state) {
 					setResponse(RESPONSE_STATUS.Success,
-							"Writer " + rq.getParameter("instance") + " job has been started now!", null);
+							"Writer " + RR.getStringParam("instance") + " job has been started now!", null);
 				} else {
-					setResponse(RESPONSE_STATUS.DataErr, "Writer " + rq.getParameter("instance")
+					setResponse(RESPONSE_STATUS.DataErr, "Writer " + RR.getStringParam("instance")
 							+ " job not exists or run failed or had been stated!", null);
 				}
 			} else {
 				setResponse(RESPONSE_STATUS.DataErr,
-						"Writer " + rq.getParameter("instance") + " job not open in this node!Run start faild!", null);
+						"Writer " + RR.getStringParam("instance") + " job not open in this node!Run start faild!", null);
 			}
 		}
 	}
 
-	public void removeInstance(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
-			removeInstance(rq.getParameter("instance"));
-			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job have removed!", null);
+	public void removeInstance(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "instance")) {
+			removeInstance(RR.getStringParam("instance"));
+			setResponse(RESPONSE_STATUS.Success, "Writer " + RR.getStringParam("instance") + " job have removed!", null);
 		}
 	}
 
@@ -610,10 +617,10 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void stopInstance(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "instance,type")) {
-			GlobalParam.INSTANCE_COORDER.stopInstance(rq.getParameter("instance"), rq.getParameter("type"));
-			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job stopped successfully!",
+	public void stopInstance(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "instance,type")) {
+			GlobalParam.INSTANCE_COORDER.stopInstance(RR.getStringParam("instance"), RR.getStringParam("type"));
+			setResponse(RESPONSE_STATUS.Success, "Writer " + RR.getStringParam("instance") + " job stopped successfully!",
 					null);
 		}
 	}
@@ -623,10 +630,10 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq
 	 */
-	public void resumeInstance(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "instance,type")) {
-			GlobalParam.INSTANCE_COORDER.resumeInstance(rq.getParameter("instance"), rq.getParameter("type"));
-			setResponse(RESPONSE_STATUS.Success, "Writer " + rq.getParameter("instance") + " job resumed successfully!",
+	public void resumeInstance(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "instance,type")) {
+			GlobalParam.INSTANCE_COORDER.resumeInstance(RR.getStringParam("instance"), RR.getStringParam("type"));
+			setResponse(RESPONSE_STATUS.Success, "Writer " + RR.getStringParam("instance") + " job resumed successfully!",
 					null);
 		}
 	}
@@ -637,41 +644,41 @@ public final class NodeMonitor {
 	 * @param rq instance=xx&reset=true|false reset true will recreate the instance
 	 *           in java from instance configure.
 	 */
-	public void reloadInstanceConfig(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
-			EFMonitorUtil.controlInstanceState(rq.getParameter("instance"), STATUS.Stop, true);
-			int type = Resource.nodeConfig.getInstanceConfigs().get(rq.getParameter("instance")).getInstanceType();
-			String instanceConfig = rq.getParameter("instance");
+	public void reloadInstanceConfig(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "instance")) {
+			EFMonitorUtil.controlInstanceState(RR.getStringParam("instance"), STATUS.Stop, true);
+			int type = Resource.nodeConfig.getInstanceConfigs().get(RR.getStringParam("instance")).getInstanceType();
+			String instanceConfig = RR.getStringParam("instance");
 			if (type > 0) {
-				instanceConfig = rq.getParameter("instance") + ":" + type;
+				instanceConfig = RR.getStringParam("instance") + ":" + type;
 			} else {
-				if (!Resource.nodeConfig.getInstanceConfigs().containsKey(rq.getParameter("instance")))
-					setResponse(RESPONSE_STATUS.DataErr, rq.getParameter("instance") + " not exists!", null);
+				if (!Resource.nodeConfig.getInstanceConfigs().containsKey(RR.getStringParam("instance")))
+					setResponse(RESPONSE_STATUS.DataErr, RR.getStringParam("instance") + " not exists!", null);
 			}
-			Resource.FLOW_INFOS.remove(rq.getParameter("instance"), JOB_TYPE.FULL.name());
-			Resource.FLOW_INFOS.remove(rq.getParameter("instance"), JOB_TYPE.INCREMENT.name());
-			if (rq.getParameter("reset") != null && rq.getParameter("reset").equals("true")
-					&& rq.getParameter("instance").length() > 2) {
+			Resource.FLOW_INFOS.remove(RR.getStringParam("instance"), JOB_TYPE.FULL.name());
+			Resource.FLOW_INFOS.remove(RR.getStringParam("instance"), JOB_TYPE.INCREMENT.name());
+			if (RR.getParams().get("reset") != null && RR.getStringParam("reset").equals("true")
+					&& RR.getStringParam("instance").length() > 2) {
 				Resource.nodeConfig.loadConfig(instanceConfig, true);
 			} else {
-				String alias = Resource.nodeConfig.getInstanceConfigs().get(rq.getParameter("instance")).getAlias();
+				String alias = Resource.nodeConfig.getInstanceConfigs().get(RR.getStringParam("instance")).getAlias();
 				Resource.nodeConfig.getSearchConfigs().remove(alias);
 				Resource.nodeConfig.loadConfig(instanceConfig, false);
-				EFPipeUtil.removeInstance(rq.getParameter("instance"), true, true);
+				EFPipeUtil.removeInstance(RR.getStringParam("instance"), true, true);
 			}
 			EFMonitorUtil.rebuildFlowGovern(instanceConfig, !GlobalParam.DISTRIBUTE_RUN);
-			EFMonitorUtil.controlInstanceState(rq.getParameter("instance"), STATUS.Ready, true);
-			setResponse(RESPONSE_STATUS.Success, rq.getParameter("instance") + " reload config Success!", null);
+			EFMonitorUtil.controlInstanceState(RR.getStringParam("instance"), STATUS.Ready, true);
+			setResponse(RESPONSE_STATUS.Success, RR.getStringParam("instance") + " reload config Success!", null);
 		}
 	}
 
-	public void cloneInstance(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "instance,new_instance_name")) {
-			EFFileUtil.copyFolder(GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("instance"),
-					GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("new_instance_name"));
-			EFFileUtil.delFile(GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("new_instance_name") + "/batch");
-			EFFileUtil.delFile(GlobalParam.INSTANCE_PATH + "/" + rq.getParameter("new_instance_name") + "/full_info");
-			setResponse(RESPONSE_STATUS.Success, rq.getParameter("new_instance_name") + " clone success!", null);
+	public void cloneInstance(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "instance,new_instance_name")) {
+			EFFileUtil.copyFolder(GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instance"),
+					GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("new_instance_name"));
+			EFFileUtil.delFile(GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("new_instance_name") + "/batch");
+			EFFileUtil.delFile(GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("new_instance_name") + "/full_info");
+			setResponse(RESPONSE_STATUS.Success, RR.getStringParam("new_instance_name") + " clone success!", null);
 		}
 	}
 
@@ -680,18 +687,18 @@ public final class NodeMonitor {
 	 * 
 	 * @param rq instance parameter example,instanceName:1
 	 */
-	public void addInstance(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
+	public void addInstance(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "instance")) {
 			if (GlobalParam.DISTRIBUTE_RUN) {
-				GlobalParam.INSTANCE_COORDER.distributeCoorder().pushInstanceToCluster(rq.getParameter("instance"));
+				GlobalParam.INSTANCE_COORDER.distributeCoorder().pushInstanceToCluster(RR.getStringParam("instance"));
 			} else {
-				GlobalParam.INSTANCE_COORDER.addInstance(rq.getParameter("instance"));
+				GlobalParam.INSTANCE_COORDER.addInstance(RR.getStringParam("instance"));
 			}
-			EFMonitorUtil.addConfigInstances(rq.getParameter("instance"));
+			EFMonitorUtil.addConfigInstances(RR.getStringParam("instance"));
 			try {
 				EFMonitorUtil.saveNodeConfig();
 				setResponse(RESPONSE_STATUS.Success,
-						rq.getParameter("instance") + " add to node " + GlobalParam.IP + " success!", null);
+						RR.getStringParam("instance") + " add to node " + GlobalParam.IP + " success!", null);
 			} catch (Exception e) {
 				setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
 			}
@@ -704,9 +711,9 @@ public final class NodeMonitor {
 	 * @param alias
 	 * @return
 	 */
-	public void deleteInstanceData(Request rq) {
-		if (EFMonitorUtil.checkParams(this, rq, "instance")) {
-			String _instance = rq.getParameter("instance");
+	public void deleteInstanceData(Request rq,EFSearchRequest RR) {
+		if (EFMonitorUtil.checkParams(this, RR, "instance")) {
+			String _instance = RR.getStringParam("instance");
 			Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 			boolean state = true;
 			for (Map.Entry<String, InstanceConfig> ents : configMap.entrySet()) {

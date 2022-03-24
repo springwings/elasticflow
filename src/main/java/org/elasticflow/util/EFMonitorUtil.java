@@ -13,11 +13,11 @@ import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
+import org.elasticflow.model.EFSearchRequest;
 import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.yarn.Resource;
-import org.mortbay.jetty.Request;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -31,9 +31,9 @@ public class EFMonitorUtil {
 	
 	public static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
-	public static boolean checkParams(NodeMonitor obj,Request rq,String checkParams){ 
+	public static boolean checkParams(NodeMonitor obj,EFSearchRequest rq,String checkParams){ 
 		for(String param:checkParams.split(",")) {
-			if(rq.getParameter(param)==null || rq.getParameter(param).strip().equals("")) {
+			if(rq.getParam(param)==null || rq.getStringParam(param).strip().equals("")) {
 				obj.setResponse(RESPONSE_STATUS.ParameterErr, checkParams+" parameters may be missing!", null);
 				return false;
 			}

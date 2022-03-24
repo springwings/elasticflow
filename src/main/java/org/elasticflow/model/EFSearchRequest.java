@@ -83,6 +83,10 @@ public class EFSearchRequest implements EFRequest{
 	public Object getParam(String key) {
 		return this.params.get(key);
 	}
+	
+	public String getStringParam(String key) {
+		return String.valueOf(this.params.get(key));
+	}
 
 	public Map<String, Object> getParams() {
 		return this.params;

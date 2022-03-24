@@ -15,6 +15,7 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.node.CPU;
 import org.elasticflow.piper.Breaker;
 import org.elasticflow.piper.PipePump;
+import org.elasticflow.piper.Valve;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ETYPE;
@@ -37,6 +38,7 @@ public class FlowTask {
 	private boolean isReferenceInstance = false;
 	private PipePump pipePump;
 	private Breaker breaker;
+	private Valve valve;
 	/**
 	 * seq for scan series datas
 	 */
@@ -62,6 +64,7 @@ public class FlowTask {
 		if (pipePump.getInstanceConfig().getPipeParams().getReferenceInstance() != null)
 			isReferenceInstance = true;
 		breaker = new Breaker();
+		valve = new Valve();
 		breaker.init(pipePump.getInstanceConfig().getInstanceID(),
 				pipePump.getInstanceConfig().getPipeParams().getFailFreq(),
 				pipePump.getInstanceConfig().getPipeParams().getMaxFailTime());
@@ -88,7 +91,9 @@ public class FlowTask {
 	 * slave instance full job
 	 */
 	public void runFull() {
-		if (!breaker.isOn() && GlobalParam.TASK_COORDER.setFlowStatus(instanceId,L1seq,GlobalParam.JOB_TYPE.FULL.name(),
+		if(runConditionCheck()==false)
+			return;
+		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceId,L1seq,GlobalParam.JOB_TYPE.FULL.name(),
 				STATUS.Ready,STATUS.Running,pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try { 
 				String storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), false, false);
@@ -124,6 +129,8 @@ public class FlowTask {
 	 * Primary virtual node full task running
 	 */
 	public void runVirtualFull() {
+		if(runConditionCheck()==false)
+			return;
 		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceId,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Ready,STATUS.Running,
 				pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {			
 			try {
@@ -150,6 +157,8 @@ public class FlowTask {
 	 * @throws EFException 
 	 */
 	public void runVirtualIncrement() {
+		if(runConditionCheck()==false)
+			return;
 		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceId,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
 				pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {				
@@ -169,12 +178,14 @@ public class FlowTask {
 				log.info(instanceId + " still running，new virtual increment flow is aborted!");
 		}
 	}
-
+	
 	/**
 	 * slave instance increment job
 	 */
 	public void runIncrement() {  
-		if (!breaker.isOn() && GlobalParam.TASK_COORDER.setFlowStatus(instanceId,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
+		if(runConditionCheck()==false)
+			return;
+		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceId,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
 				pipePump.getInstanceConfig().getPipeParams().showInfoLog())) { 
 			String storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), true, (isReferenceInstance ? false : recompute));
 			GlobalParam.TASK_COORDER.setAndGetScanInfo(instanceId, L1seq, storeId,false);				
@@ -222,6 +233,14 @@ public class FlowTask {
 			}
 		}
 		return false;
+	}	
+	
+	private boolean runConditionCheck() {
+		if(breaker.isOn())
+			return false;
+		if(valve.isOn())
+			return false;
+		return true;
 	}
 	
 	/**
@@ -249,8 +268,7 @@ public class FlowTask {
 				Resource.FlOW_CENTER.runInstanceNow(slave, jobtype.name(),pipePump.getInstanceConfig().getPipeParams().isAsync());
 			}
 		}
-	}
-	
+	}	
 	
 	private static String getNextJobs(String[] nextJobs) {
 		StringBuilder sf = new StringBuilder();

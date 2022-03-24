@@ -515,20 +515,16 @@ public final class Common {
 	 * @param input
 	 * @return
 	 */
-	public static EFSearchRequest getRequest(Request input) {
+	@SuppressWarnings("unchecked")
+	public static EFSearchRequest getRequest(Request rq) {
 		EFSearchRequest rr = EFSearchRequest.getInstance();
-		Request rq = (Request) input;
 		String path = rq.getPathInfo();
 		String pipe = path.substring(1);
 		rr.setPipe(pipe);
-		@SuppressWarnings("unchecked")
-		Iterator<Map.Entry<String, String>> iter = rq.getParameterMap().entrySet().iterator();
-		while (iter.hasNext()) {
-			Map.Entry<String, String> entry = iter.next();
-			String key = (String) entry.getKey();
-			String value = rq.getParameter(key);
-			rr.addParam(key, value);
-		}
+		Set<Map.Entry<String, Object>> entSets = rq.getParameterMap().entrySet();
+		for (Map.Entry<String, Object> entry : entSets) {
+			rr.addParam(entry.getKey(), rq.getParameter(entry.getKey()));
+		}		
 		return rr;
 	}
 
