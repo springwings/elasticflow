@@ -43,8 +43,12 @@ public final class EFNodeUtil {
 			GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(), new AtomicInteger(1));
 			GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.VIRTUAL.name(), new AtomicInteger(1));			
 		}
-		sp.loadInfos(Common.getStoreTaskInfo(instance,false),false);
-		sp.loadInfos(Common.getStoreTaskInfo(instance,true),true);
+		try {
+			sp.loadInfos(Common.getStoreTaskInfo(instance,false),false);
+			sp.loadInfos(Common.getStoreTaskInfo(instance,true),true);
+		} catch (Exception e) {
+			Common.LOG.error("instance {} load Instance Datas exception.",instance,e);
+		}
 		GlobalParam.TASK_COORDER.initTaskDatas(instance,sp);
 	}
 

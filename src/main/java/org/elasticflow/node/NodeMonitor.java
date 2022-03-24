@@ -675,11 +675,11 @@ public final class NodeMonitor {
 	
 	public void addInstance(Request rq,EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this,RR, "instance,content,level")) {
-			String xmlPath = GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instance") + "/task.xml";
-			EFDataStorer.createPath(GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instance"),false);
-			EFDataStorer.setData(xmlPath, new String(decoder.decode(RR.getStringParam("content"))));
-			EFMonitorUtil.addInstanceToSystem(RR.getStringParam("instance"),RR.getStringParam("level"));
+			String xmlPath = GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instance") + "/task.xml";			
 			try {
+				EFDataStorer.createPath(GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instance"),false);
+				EFDataStorer.setData(xmlPath, new String(decoder.decode(RR.getStringParam("content"))));
+				EFMonitorUtil.addInstanceToSystem(RR.getStringParam("instance"),RR.getStringParam("level"));
 				EFMonitorUtil.saveNodeConfig();
 				setResponse(RESPONSE_STATUS.Success,
 						RR.getStringParam("instance") + " save and push to node " + GlobalParam.IP + " success!", null);

@@ -109,7 +109,7 @@ public class InstanceCoordinator implements InstanceCoord {
 	}
 
 	@Override
-	public void addInstance(String instanceSettting) {
+	public void addInstance(String instanceSettting,boolean createSchedule) {
 		Resource.nodeConfig.loadConfig(instanceSettting, false);
 		Resource.nodeConfig.loadInstanceConfig(instanceSettting);
 		String tmp[] = instanceSettting.split(":");
@@ -117,7 +117,7 @@ public class InstanceCoordinator implements InstanceCoord {
 		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instanceName);
 		if (instanceConfig.checkStatus())
 			EFNodeUtil.loadInstanceDatas(instanceConfig);
-		EFMonitorUtil.rebuildFlowGovern(instanceSettting, true);
+		EFMonitorUtil.rebuildFlowGovern(instanceSettting, createSchedule);
 	} 
 
 	@Override

@@ -54,7 +54,6 @@ public class EFMonitorService {
 				ServletException {
 			response.setContentType("application/json;charset=utf8");
 			response.setStatus(HttpServletResponse.SC_OK);
-
 			Request rq = (request instanceof Request) ? (Request) request
 					: HttpConnection.getCurrentConnection().getRequest(); 
 			String dataTo = rq.getPathInfo().substring(1);

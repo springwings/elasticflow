@@ -20,8 +20,16 @@ public class EFlowMonitor {
 	private double cpuUsage = 92.;
 	private double memUsage = 92.;
 	
+	private double resourceAbundance = 1.f;
 	
-	
+	public boolean isOpenRegulate() {
+		return openRegulate;
+	}
+
+	public double getResourceAbundance() {
+		return resourceAbundance;
+	}
+
 	public void checkResourceUsage() {
 		float poolsize = Resource.ThreadPools.getPoolSize()+0.0f;
 		int activate = Resource.ThreadPools.getActiveCount();
@@ -34,11 +42,17 @@ public class EFlowMonitor {
 			}
 		}
 		double[] res = NodeCoordinator.systemResource();
-		if(activate/(4*poolsize)>0.9 || res[0] > this.cpuUsage || res[1] > this.memUsage) {
+		float threadRate = activate/(4*poolsize);
+		if(threadRate>0.9 || res[0] > this.cpuUsage || res[1] > this.memUsage) {
 			this.openRegulate = true;
 		}else {
 			this.openRegulate = false;
 		}
+		this.resourceAbundanceCheck(1-threadRate, 1-res[0], 1-res[1]);
+	}
+	
+	private void resourceAbundanceCheck(float threadIdleRate,double cpuIdlePercent,double memIdlePercent) {
+		resourceAbundance = (threadIdleRate*100.0*0.8+cpuIdlePercent*0.15+memIdlePercent*0.05)/100.0;
 	}
 
 }

@@ -74,11 +74,12 @@ public class EFMonitorUtil {
 	}
 	
 	public static void addInstanceToSystem(String instance,String level) {
-		String instanceString = instance+":"+level;
+		String instanceString = instance+":"+level;		
 		if (GlobalParam.DISTRIBUTE_RUN) {
+			GlobalParam.INSTANCE_COORDER.addInstance(instanceString,false);
 			GlobalParam.INSTANCE_COORDER.distributeCoorder().pushInstanceToCluster(instanceString);
-		} else {
-			GlobalParam.INSTANCE_COORDER.addInstance(instanceString);
+		}else {
+			GlobalParam.INSTANCE_COORDER.addInstance(instanceString,true);
 		}
 		addInstanceToConfig(instanceString);
 	}

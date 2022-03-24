@@ -4,8 +4,10 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.flow.EFlowMonitor;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFFileUtil;
+import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coord.EFMonitorCoord;
 import org.elasticflow.yarn.coord.InstanceCoord;
 import org.elasticflow.yarn.coord.NodeCoord;
@@ -34,10 +36,12 @@ public class EFNode {
 	private volatile DistributeCoorder masterInstanceCoorder;
 	private volatile Queue<String> bindInstances = new LinkedList<String>();
 	private long lastLiveTime;
+	private EFlowMonitor flowMonitor;
 
 	public static EFNode getInstance(String ip, Integer nodeId) {
 		EFNode n = new EFNode(ip, nodeId);
 		n.lastLiveTime = Common.getNow();
+		n.flowMonitor = new EFlowMonitor();
 		return n;
 	}
 
@@ -70,12 +74,23 @@ public class EFNode {
 			setStatus(false);
 		return isLive;
 	}
+	
+	public boolean isOpenRegulate() {
+		return this.flowMonitor.isOpenRegulate();
+	}
+	
+	public double getResourceAbundance() {
+		return this.flowMonitor.getResourceAbundance();
+	}
 
 	public void refresh() {
-		this.lastLiveTime = Common.getNow();
-		double tmp[] = nodeCoord.summaryResource();
-		this.cpuUsed = tmp[0];
-		this.memUsed = tmp[1];
+		this.lastLiveTime = Common.getNow();		
+		Resource.ThreadPools.execute(() -> {
+			double tmp[] = nodeCoord.summaryResource();
+			this.cpuUsed = tmp[0];
+			this.memUsed = tmp[1];
+			this.flowMonitor.checkResourceUsage();
+		});		
 	}
 
 	public void setStatus(boolean isLive) {
@@ -97,17 +112,9 @@ public class EFNode {
 	public double getCpuUsed() {
 		return cpuUsed;
 	}
-
-	public void setCpuUsed(double cpuUsed) {
-		this.cpuUsed = cpuUsed;
-	}
-
+	
 	public double getMemUsed() {
 		return memUsed;
-	}
-
-	public void setMemUsed(double memUsed) {
-		this.memUsed = memUsed;
 	}
 
 	public EFMonitorCoord getEFMonitorCoord() {
@@ -143,13 +150,13 @@ public class EFNode {
 			this.bindInstances.offer(instanceSetting);
 		String[] strs = instanceSetting.split(":");
 		String[] paths = EFFileUtil.getInstancePath(strs[0]);
-		this.instanceCoord.sendInstanceData(EFFileUtil.readText(paths[0], GlobalParam.ENCODING,false),
-				EFFileUtil.readText(paths[1], GlobalParam.ENCODING,false),
-				EFFileUtil.readText(paths[2], GlobalParam.ENCODING,false),strs[0]);
-		this.instanceCoord.addInstance(instanceSetting);
-		this.instanceCoord.resumeInstance(strs[0], GlobalParam.JOB_TYPE.INCREMENT.name());
-		this.instanceCoord.resumeInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());
+		this.instanceCoord.sendInstanceData(EFFileUtil.readText(paths[0], GlobalParam.ENCODING,true),
+				EFFileUtil.readText(paths[1], GlobalParam.ENCODING,true),
+				EFFileUtil.readText(paths[2], GlobalParam.ENCODING,true),strs[0]);
+		this.instanceCoord.addInstance(instanceSetting,true);
 		this.masterInstanceCoorder.resumeInstance(strs[0]);
+		this.instanceCoord.resumeInstance(strs[0], GlobalParam.JOB_TYPE.INCREMENT.name());
+		this.instanceCoord.resumeInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());		
 	}
 
 	public void pushResource() {
