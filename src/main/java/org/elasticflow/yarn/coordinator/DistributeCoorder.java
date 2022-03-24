@@ -252,9 +252,11 @@ public class DistributeCoorder {
 				}
 			}
 		}
-		addNode = this.demotionCheck(addNode);
-		addNode.pushInstance(instanceSettting, false);
-		totalInstanceNum += 1;
+		if(addNode != null) {
+			addNode = this.demotionCheck(addNode);
+			addNode.pushInstance(instanceSettting, false);
+			totalInstanceNum += 1;
+		}
 	}
 
 	private EFNode demotionCheck(EFNode node) {

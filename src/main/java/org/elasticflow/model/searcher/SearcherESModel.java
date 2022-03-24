@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.model.EFSearchRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.searcher.parser.ESQueryParser;
 import org.elasticflow.util.instance.SearchParamUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -41,7 +41,7 @@ public class SearcherESModel extends SearcherModel<QueryBuilder, SortBuilder<?>,
 	private Set<Integer> excludeSet;
 	private String type;
 
-	public static SearcherESModel getInstance(EFSearchRequest request, InstanceConfig instanceConfig) {
+	public static SearcherESModel getInstance(EFRequest request, InstanceConfig instanceConfig) {
 		SearcherESModel eq = new SearcherESModel();
 		eq.setRequestHandler("");
 		eq.setSorts(SearchParamUtil.getSortField(request, instanceConfig));

@@ -35,7 +35,7 @@ import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.EFResponse;
-import org.elasticflow.model.EFSearchRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.FormatProperties;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.model.NMRequest;
@@ -470,8 +470,8 @@ public final class Common {
 		return sb.toString().contains(key);
 	}
 
-	public static EFSearchRequest getEFRequest(Request rq, EFResponse rps) {
-		EFSearchRequest RR = null;
+	public static EFRequest getEFRequest(Request rq, EFResponse rps) {
+		EFRequest RR = null;
 		String ctype = rq.getHeader("Content-type");
 		if (ctype != null && ctype.contentEquals("application/json")) {
 			try (BufferedReader _br = new BufferedReader(new InputStreamReader(rq.getInputStream(), "UTF-8"));) {
@@ -498,8 +498,8 @@ public final class Common {
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
-	public static EFSearchRequest getRequest(String jsonInput) {
-		EFSearchRequest rr = EFSearchRequest.getInstance();
+	public static EFRequest getRequest(String jsonInput) {
+		EFRequest rr = EFRequest.getInstance();
 		JSONObject jsonObject = JSONObject.parseObject(jsonInput);
 		Iterator<?> iter = jsonObject.entrySet().iterator();
 		while (iter.hasNext()) {
@@ -516,8 +516,8 @@ public final class Common {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static EFSearchRequest getRequest(Request rq) {
-		EFSearchRequest rr = EFSearchRequest.getInstance();
+	public static EFRequest getRequest(Request rq) {
+		EFRequest rr = EFRequest.getInstance();
 		String path = rq.getPathInfo();
 		String pipe = path.substring(1);
 		rr.setPipe(pipe);

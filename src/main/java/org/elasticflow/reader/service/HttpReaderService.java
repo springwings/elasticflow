@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.field.EFField;
-import org.elasticflow.model.EFSearchRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
@@ -96,7 +96,7 @@ public class HttpReaderService {
 				while ((line = _br.readLine()) != null) {
 					sb.append(line);
 				}
-				EFSearchRequest RR = Common.getRequest(sb.toString());
+				EFRequest RR = Common.getRequest(sb.toString());
 				EFResponse rps = EFResponse.getInstance();
 				rps.setRequest(RR.getParams());
 				RR.setPipe(rq.getPathInfo().substring(1));

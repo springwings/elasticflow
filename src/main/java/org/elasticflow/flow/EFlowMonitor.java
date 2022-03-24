@@ -2,6 +2,7 @@ package org.elasticflow.flow;
 
 import org.elasticflow.util.Common;
 import org.elasticflow.yarn.Resource;
+import org.elasticflow.yarn.coordinator.NodeCoordinator;
 
 /**
  * EF Flow auto control center
@@ -15,6 +16,12 @@ public class EFlowMonitor {
 	
 	private boolean openRegulate = false;
 	
+	/** Threshold at which resources fall into scheduling **/
+	private double cpuUsage = 92.;
+	private double memUsage = 92.;
+	
+	
+	
 	public void checkResourceUsage() {
 		float poolsize = Resource.ThreadPools.getPoolSize()+0.0f;
 		int activate = Resource.ThreadPools.getActiveCount();
@@ -26,7 +33,8 @@ public class EFlowMonitor {
 				Common.LOG.error(e.getMessage());
 			}
 		}
-		if(activate/(4*poolsize)>0.9) {
+		double[] res = NodeCoordinator.systemResource();
+		if(activate/(4*poolsize)>0.9 || res[0] > this.cpuUsage || res[1] > this.memUsage) {
 			this.openRegulate = true;
 		}else {
 			this.openRegulate = false;

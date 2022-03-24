@@ -9,7 +9,7 @@ import java.util.Set;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
-import org.elasticflow.model.EFSearchRequest;
+import org.elasticflow.model.EFRequest;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -17,13 +17,13 @@ import com.alibaba.fastjson.JSONObject;
 
 public class SearcherVearchModel extends SearcherModel<String, String, String> {
 
-	public static SearcherVearchModel getInstance(EFSearchRequest request, InstanceConfig instanceConfig) {
+	public static SearcherVearchModel getInstance(EFRequest request, InstanceConfig instanceConfig) {
 		SearcherVearchModel sq = new SearcherVearchModel();
 		parse(request, sq, instanceConfig);
 		return sq;
 	}
 
-	public static void parse(EFSearchRequest request, SearcherVearchModel current, InstanceConfig instanceConfig) {
+	public static void parse(EFRequest request, SearcherVearchModel current, InstanceConfig instanceConfig) {
 		Map<String, Object> paramMap = request.getParams();
 		Set<Entry<String, Object>> entries = paramMap.entrySet();
 		Iterator<Entry<String, Object>> iter = entries.iterator();

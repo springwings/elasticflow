@@ -13,7 +13,7 @@ import org.elasticflow.config.GlobalParam.FIELD_PARSE_TYPE;
 import org.elasticflow.config.GlobalParam.QUERY_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
-import org.elasticflow.model.EFSearchRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.param.end.SearcherParam;
 import org.elasticflow.util.Common;
 import org.elasticsearch.common.unit.Fuzziness;
@@ -43,7 +43,7 @@ public class ESQueryParser implements QueryParser{
 		return QueryBuilders.termQuery("EMPTY", "0x000");
 	}
 
-	static public BoolQueryBuilder parseRequest(EFSearchRequest request, InstanceConfig instanceConfig) {
+	static public BoolQueryBuilder parseRequest(EFRequest request, InstanceConfig instanceConfig) {
 		BoolQueryBuilder bquery = QueryBuilders.boolQuery();
 		try {
 			Map<String, Object> paramMap = request.getParams();
@@ -137,7 +137,7 @@ public class ESQueryParser implements QueryParser{
 		return bquery;
 	}
 
-	static private void QueryBoost(QueryBuilder query, EFField tp, EFSearchRequest request) throws Exception {
+	static private void QueryBoost(QueryBuilder query, EFField tp, EFRequest request) throws Exception {
 		float boostValue = tp.getBoost();
 
 		Method m = query.getClass().getMethod("boost", new Class[] { float.class });
@@ -147,7 +147,7 @@ public class ESQueryParser implements QueryParser{
 	}
 
 	static private QueryBuilder buildSingleQuery(String key, String value, EFField tp, SearcherParam sp,
-			EFSearchRequest request, String paramKey, int fuzzy) throws Exception {
+			EFRequest request, String paramKey, int fuzzy) throws Exception {
 		if (value == null || (tp.getDefaultvalue() == null && value.length() <= 0) || tp == null)
 			return null;
 		boolean not_analyzed = tp.getAnalyzer().length()>0 ? false : true;
@@ -202,7 +202,7 @@ public class ESQueryParser implements QueryParser{
 	}
 
 	static private QueryBuilder buildMultiQuery(String multifield, String value, InstanceConfig instanceConfig,
-			EFSearchRequest request, String paramKey, int fuzzy) throws Exception {
+			EFRequest request, String paramKey, int fuzzy) throws Exception {
 		DisMaxQueryBuilder bquery = null;
 		String[] keys = multifield.split(",");
 

@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.model.EFSearchRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.service.EFService;
 import org.elasticflow.service.HttpService;
@@ -60,7 +60,7 @@ public class ComputerService {
 		} 
 		return true;
 	}
-	public EFResponse process(EFSearchRequest request) { 
+	public EFResponse process(EFRequest request) { 
 		long startTime = System.currentTimeMillis();
 		EFResponse response = new EFResponse(); 
 		String pipe = request.getPipe(); 
@@ -86,7 +86,7 @@ public class ComputerService {
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.setHeader("PowerBy", GlobalParam.PROJ); 
 			rq.setHandled(true);
-			EFSearchRequest RR = Common.getRequest(rq);
+			EFRequest RR = Common.getRequest(rq);
 			EFResponse rps = EFResponse.getInstance();
 			rps.setRequest(RR.getParams());
 			if (Resource.nodeConfig.getSearchConfigs().containsKey(

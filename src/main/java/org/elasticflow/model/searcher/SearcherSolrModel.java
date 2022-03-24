@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.model.EFSearchRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.searcher.parser.SolrQueryParser;
 
 /**
@@ -25,7 +25,7 @@ public class SearcherSolrModel extends SearcherModel<SolrQuery, String, String> 
 	List<String> facetsConfig = new ArrayList<String>(); 
 	private List<String> sortinfo;
 	
-	public static SearcherSolrModel getInstance(EFSearchRequest request, InstanceConfig instanceConfig) {
+	public static SearcherSolrModel getInstance(EFRequest request, InstanceConfig instanceConfig) {
 		SearcherSolrModel sq = new SearcherSolrModel(); 
 		sq.setRequestHandler("select");
 		sq.setQuery(SolrQueryParser.parseRequest(request, instanceConfig));		

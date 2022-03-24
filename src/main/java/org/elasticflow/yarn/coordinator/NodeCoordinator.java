@@ -23,18 +23,26 @@ public class NodeCoordinator implements NodeCoord {
 		}
 		Common.stopSystem(false);
 	}
-
+	
+	@Override
 	public double[] summaryResource() {
+		return systemResource();
+	}
+	
+	/**
+	 * 
+	 * @return double[], 0 cpu usage, 1 mem usage
+	 */
+	public static double[] systemResource() {
 		double[] sum = new double[2];
 		try {
 			sum[0] = SystemInfoUtil.getCpuUsage();
 			sum[1] = SystemInfoUtil.getMemUsage();
 		} catch (Exception e) {
-			Common.LOG.error(" summary Resource Exception ", e);
+			Common.LOG.error("summary Resource Exception ", e);
 			sum[0] = 80.;
 			sum[1] = 80.;
 		}
 		return sum;
 	}
-
 }

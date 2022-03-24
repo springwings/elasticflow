@@ -13,7 +13,7 @@ import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
-import org.elasticflow.model.EFSearchRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.piper.PipePump;
@@ -31,7 +31,7 @@ public class EFMonitorUtil {
 	
 	public static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
-	public static boolean checkParams(NodeMonitor obj,EFSearchRequest rq,String checkParams){ 
+	public static boolean checkParams(NodeMonitor obj,EFRequest rq,String checkParams){ 
 		for(String param:checkParams.split(",")) {
 			if(rq.getParam(param)==null || rq.getStringParam(param).strip().equals("")) {
 				obj.setResponse(RESPONSE_STATUS.ParameterErr, checkParams+" parameters may be missing!", null);
@@ -52,7 +52,7 @@ public class EFMonitorUtil {
 	 * add instance to properties file
 	 * @param instanceSetting
 	 */
-	public static void addConfigInstances(String instanceSetting) {
+	public static void addInstanceToConfig(String instanceSetting) {
 		String[] instanceSets = instanceSetting.split(":");
 		boolean isset = false;
 		String tmp = "";
@@ -71,6 +71,16 @@ public class EFMonitorUtil {
 		if(tmp.length()>2)
 			tmp = tmp.substring(1); 
 		GlobalParam.StartConfig.setProperty("instances", tmp);
+	}
+	
+	public static void addInstanceToSystem(String instance,String level) {
+		String instanceString = instance+":"+level;
+		if (GlobalParam.DISTRIBUTE_RUN) {
+			GlobalParam.INSTANCE_COORDER.distributeCoorder().pushInstanceToCluster(instanceString);
+		} else {
+			GlobalParam.INSTANCE_COORDER.addInstance(instanceString);
+		}
+		addInstanceToConfig(instanceString);
 	}
 	
 	/**

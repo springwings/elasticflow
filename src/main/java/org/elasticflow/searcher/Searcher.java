@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.model.EFSearchRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.searcher.ResponseDataUnit;
 import org.elasticflow.model.searcher.SearcherESModel;
@@ -52,7 +52,7 @@ public class Searcher {
 		}
 	}
 
-	public void startSearch(EFSearchRequest rq,EFResponse response) {
+	public void startSearch(EFRequest rq,EFResponse response) {
 		response.setInstance(instanceName);
 		/** check validation */
 		if (!rq.isValid()) {

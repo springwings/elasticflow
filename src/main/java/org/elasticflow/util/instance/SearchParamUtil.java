@@ -16,7 +16,7 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.KEY_PARAM;
 import org.elasticflow.field.EFField;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.model.EFSearchRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.param.end.SearcherParam; 
 
@@ -28,7 +28,7 @@ import org.elasticflow.param.end.SearcherParam;
  */
 public class SearchParamUtil {
 
-	public static void normalParam(EFSearchRequest request, SearcherModel<?, ?, ?> fq,InstanceConfig instanceConfig) {
+	public static void normalParam(EFRequest request, SearcherModel<?, ?, ?> fq,InstanceConfig instanceConfig) {
 		Object o = request.get(GlobalParam.KEY_PARAM.start.name(),
 				instanceConfig.getSearcherParam(KEY_PARAM.start.name()),"java.lang.Integer");
 		int start = 0;
@@ -60,7 +60,7 @@ public class SearchParamUtil {
 			fq.setRequestHandler((String) request.getParam(GlobalParam.PARAM_REQUEST_HANDLER));
 	}
 	
-	public static List<SortBuilder<?>> getSortField(EFSearchRequest request, InstanceConfig instanceConfig) {  
+	public static List<SortBuilder<?>> getSortField(EFRequest request, InstanceConfig instanceConfig) {  
 		String sortstrs = (String) request.getParam(KEY_PARAM.sort.name());
 		List<SortBuilder<?>> sortList = new ArrayList<SortBuilder<?>>();
 		boolean useScore = false;
@@ -131,7 +131,7 @@ public class SearchParamUtil {
 	 * @param prs
 	 * @return
 	 */
-		public static Map<String,List<String[]>> getFacetParams(EFSearchRequest rq,
+		public static Map<String,List<String[]>> getFacetParams(EFRequest rq,
 				InstanceConfig prs) {
 			Map<String,List<String[]>> res = new LinkedHashMap<String,List<String[]>>();
 			if(rq.getParam("facet")!=null){

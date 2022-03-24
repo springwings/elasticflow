@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.model.EFResponse;
-import org.elasticflow.model.EFSearchRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.yarn.Resource;
@@ -59,7 +59,7 @@ public class EFMonitorService {
 					: HttpConnection.getCurrentConnection().getRequest(); 
 			String dataTo = rq.getPathInfo().substring(1);
 			EFResponse rps = EFResponse.getInstance();
-			EFSearchRequest RR = Common.getEFRequest(rq, rps);
+			EFRequest RR = Common.getEFRequest(rq, rps);
 			rps.setRequest(RR.getParams());
 			switch (dataTo) {  
 			case "efm.doaction":{

@@ -12,7 +12,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
-import org.elasticflow.model.EFSearchRequest;
+import org.elasticflow.model.EFRequest;
 import org.elasticflow.param.end.SearcherParam;
 import org.elasticflow.util.Common;
 
@@ -24,7 +24,7 @@ import org.elasticflow.util.Common;
  */
 public class SolrQueryParser implements QueryParser{
 
-	public static SolrQuery parseRequest(EFSearchRequest request, InstanceConfig prs) {
+	public static SolrQuery parseRequest(EFRequest request, InstanceConfig prs) {
 		SolrQuery sq = new SolrQuery();
 		StringBuilder qu = new StringBuilder();
 		Map<String, Object> paramMap = request.getParams();
