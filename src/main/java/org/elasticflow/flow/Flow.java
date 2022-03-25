@@ -58,7 +58,7 @@ public abstract class Flow {
 	public void prepareFlow(InstanceConfig instanceConfig, END_TYPE endType, String L1seq) throws EFException {
 		this.instanceConfig = instanceConfig;
 		this.L1seq = L1seq;
-		this.flowState = new FlowState(Resource.FLOW_STAT.get(instanceConfig.getInstanceID()), endType, L1seq);
+		this.flowState = new FlowState(Resource.FLOW_STATES.get(instanceConfig.getInstanceID()), endType, L1seq);
 		switch (endType) {
 		case writer:
 			this.EFConnKey = Common.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",

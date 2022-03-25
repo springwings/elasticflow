@@ -281,7 +281,12 @@ public final class Common {
 
 	}
 		
-	//full each L1seq one file
+	/**
+	 * get Store Task Info,if file not exists will create
+	 * @param instance
+	 * @param isfull
+	 * @return
+	 */
 	public static String getStoreTaskInfo(String instance,boolean isfull) {
 		String info = "{}";
 		String path = Common.getTaskStorePath(instance, 

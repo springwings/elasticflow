@@ -346,8 +346,8 @@ public class EFMonitorUtil {
 				
 			if((type&4)>0) {
 				if (config.openTrans()) {
-					Task.put("Incremental storage status", JSONObject.parse(GlobalParam.TASK_COORDER.getScanPositionString(instance,false)));
-					Task.put("Full storage status",JSONObject.parse(GlobalParam.TASK_COORDER.getScanPositionString(instance,true)));
+					Task.put("Incremental storage status", GlobalParam.TASK_COORDER.getInstanceScanDatas(instance,false));
+					Task.put("Full storage status",GlobalParam.TASK_COORDER.getInstanceScanDatas(instance,true));
 					Task.put("Full progress", new JSONObject());
 					if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.FULL.name())
 							|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()).size() == 0) {

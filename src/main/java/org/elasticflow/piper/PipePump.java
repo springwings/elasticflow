@@ -252,7 +252,7 @@ public final class PipePump extends Instruction implements Serializable {
 		if (pageNum == 0) {
 			if (task.getInstanceConfig().getPipeParams().getLogLevel() == 0)
 				log.info(Common.formatLog("start", task.getJobType().name(), instanceRunId, storeId, task.getL2seq(), 0,
-						"", GlobalParam.TASK_COORDER.getLSeqPos(task.getInstanceID(), task.getL1seq(), task.getL2seq(),task.isfull()),
+						"", GlobalParam.TASK_COORDER.getScanPositon(task.getInstanceID(), task.getL1seq(), task.getL2seq(),task.isfull()),
 						0, " no data!"));
 		} else {
 			if (task.getInstanceConfig().getPipeParams().getLogLevel() < 2)
@@ -260,7 +260,7 @@ public final class PipePump extends Instruction implements Serializable {
 						(getInstanceConfig().getPipeParams().isMultiThread() ? "MultiThread" : "SingleThread") + " "
 								+ task.getJobType().name(),
 						instanceRunId, storeId, task.getL2seq(), 0, "",
-						GlobalParam.TASK_COORDER.getLSeqPos(task.getInstanceID(), task.getL1seq(), task.getL2seq(),task.isfull()), 0,
+						GlobalParam.TASK_COORDER.getScanPositon(task.getInstanceID(), task.getL1seq(), task.getL2seq(),task.isfull()), 0,
 						",totalpage:" + pageNum));
 
 			long start = Common.getNow();
@@ -282,7 +282,7 @@ public final class PipePump extends Instruction implements Serializable {
 			if (task.getInstanceConfig().getPipeParams().getLogLevel() < 2)
 				log.info(Common.formatLog("complete", task.getJobType().name(), instanceRunId, storeId, task.getL2seq(),
 						total.get(), "",
-						GlobalParam.TASK_COORDER.getLSeqPos(task.getInstanceID(), task.getL1seq(), task.getL2seq(),task.isfull()),
+						GlobalParam.TASK_COORDER.getScanPositon(task.getInstanceID(), task.getL1seq(), task.getL2seq(),task.isfull()),
 						Common.getNow() - start, ""));
 			this.breakCheck(task);
 		}

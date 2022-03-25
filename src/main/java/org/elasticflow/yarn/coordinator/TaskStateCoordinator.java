@@ -29,6 +29,8 @@ import org.elasticflow.util.instance.PipeUtil;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coord.TaskStateCoord;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * task status cluster Coordinator, Coordinate pipeline status and information
  * 
@@ -39,21 +41,22 @@ import org.elasticflow.yarn.coord.TaskStateCoord;
 public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 
 	private static final long serialVersionUID = 6182329757414086104L;
-
+	
+	/**store increment and full task data position*/
 	private final static ConcurrentHashMap<String, ScanPosition> SCAN_POSITION = new ConcurrentHashMap<>();
 	
 	/** Store intermediate calculation result data **/
 	private final static ConcurrentHashMap<String, Object> TMP_STORE_DATA = new ConcurrentHashMap<>();
 
 	/** FLOW_STATUS store current flow running control status */
-	final static EFState<AtomicInteger> FLOW_STATUS = new EFState<>();
+	final static EFState<AtomicInteger> FLOW_RUN_STATUS = new EFState<>();
 
 	public String getContextId(String instance, String L1seq, String tag) {
 		return Resource.SOCKET_CENTER.getContextId(instance, L1seq, tag);
 	}
 
 	public void setFlowStatus(String instance, String L1seq, String tag, AtomicInteger ai) {
-		FLOW_STATUS.set(instance, L1seq, tag, ai);
+		FLOW_RUN_STATUS.set(instance, L1seq, tag, ai);
 	}
 
 	public void updateStoreData(String instance, Object data) {
@@ -72,23 +75,21 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 					SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq),isfull))) {
 				SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), scanStamp,isfull);
 				// update flow status,Distributed environment synchronization status
-				if(isfull) {
-					if (GlobalParam.DISTRIBUTE_RUN) {
-						Resource.FLOW_STAT.get(instance).put(FlowState.getStoreKey(L1seq),
-								GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(instance, L1seq));
-					} else {
-						Resource.FLOW_STAT.get(instance).put(FlowState.getStoreKey(L1seq),
-								EFMonitorUtil.getPipeEndStatus(instance, L1seq));
-					}
-					EFFileUtil.createAndSave(Resource.FLOW_STAT.get(instance).toJSONString(),
-							EFFileUtil.getInstancePath(instance)[2]);
-				}				
+				if (GlobalParam.DISTRIBUTE_RUN) {
+					Resource.FLOW_STATES.get(instance).put(FlowState.getStoreKey(L1seq),
+							GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(instance, L1seq));
+				} else {
+					Resource.FLOW_STATES.get(instance).put(FlowState.getStoreKey(L1seq),
+							EFMonitorUtil.getPipeEndStatus(instance, L1seq));
+				}
+				EFFileUtil.createAndSave(Resource.FLOW_STATES.get(instance).toJSONString(),
+						EFFileUtil.getInstancePath(instance)[2]);			
 			}
 		}
 	}
 
 	public boolean checkFlowStatus(String instance, String seq, JOB_TYPE type, STATUS state) {
-		if ((FLOW_STATUS.get(instance, seq, type.name()).get() & state.getVal()) > 0)
+		if ((FLOW_RUN_STATUS.get(instance, seq, type.name()).get() & state.getVal()) > 0)
 			return true;
 		return false;
 	}
@@ -105,10 +106,10 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	 */
 	public boolean setFlowStatus(String instance, String L1seq, String type, STATUS needState, STATUS setState,
 			boolean showLog) {
-		synchronized (FLOW_STATUS.get(instance, L1seq, type)) {
+		synchronized (FLOW_RUN_STATUS.get(instance, L1seq, type)) {
 			if (needState.equals(STATUS.Blank)
-					|| (FLOW_STATUS.get(instance, L1seq, type).get() == needState.getVal())) {
-				FLOW_STATUS.get(instance, L1seq, type).set(setState.getVal());
+					|| (FLOW_RUN_STATUS.get(instance, L1seq, type).get() == needState.getVal())) {
+				FLOW_RUN_STATUS.get(instance, L1seq, type).set(setState.getVal());
 				return true;
 			} else {
 				if (showLog)
@@ -149,7 +150,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 			storeId = getNewStoreId(contextId, instance, L1seq, true);
 			if (storeId == null)
 				storeId = "a";
-			saveTaskInfo(instance, L1seq, storeId, false);
+			this.saveTaskInfo(instance, L1seq, storeId, false);
 		}
 		return storeId;
 	}
@@ -161,39 +162,40 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	}
 
 	/**
-	 * 
+	 * write task state to file
 	 * @param instance
 	 * @param L1seq
 	 * @param storeId
-	 * @param location
+	 * @param isfull
 	 */
 	public void saveTaskInfo(String instance, String L1seq, String storeId, boolean isfull) {
 		synchronized (SCAN_POSITION.get(instance)) {
 			SCAN_POSITION.get(instance).updateStoreId(storeId,isfull);
+			EFDataStorer.setData(Common.getTaskStorePath(instance, 
+					isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH),
+					SCAN_POSITION.get(instance).getString(isfull));
 		}
-		EFDataStorer.setData(Common.getTaskStorePath(instance, 
-				isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH),
-				SCAN_POSITION.get(instance).getString(isfull));
 	}
 
 	/**
-	 * for Master/slave job get and set LastUpdateTime
+	 * task get/set Last Update Time
 	 * 
 	 * @param instance
 	 * @param L1seq
 	 * @param storeId  Master store id
+	 * @param isfull
 	 */
 	public void setAndGetScanInfo(String instance, String L1seq, String storeId,boolean isfull) {
 		String path = Common.getTaskStorePath(instance, 
 				isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH);
 		byte[] b = EFDataStorer.getData(path, true);
-		ScanPosition sp = new ScanPosition(instance, storeId);
 		synchronized (SCAN_POSITION.get(instance)) {
+			ScanPosition sp = SCAN_POSITION.get(instance);
 			if (b != null && b.length > 0) {
 				String str = new String(b);
 				sp.loadInfos(str, isfull);
 			}
-			SCAN_POSITION.put(instance,sp);
+			sp.updateStoreId(storeId, isfull);
 			saveTaskInfo(instance, L1seq, storeId, isfull);
 		}
 	}
@@ -232,23 +234,21 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 		SCAN_POSITION.get(instance).recoverKeep();
 	}
 
-	public String getScanPositionString(String instance,boolean isfull) {
-		return SCAN_POSITION.get(instance).getPositionDatas(isfull).toJSONString();
+	public JSONObject getInstanceScanDatas(String instance,boolean isfull) {
+		return SCAN_POSITION.get(instance).getPositionDatas(isfull);
 	}
 
 	//local run method
-	public void initTaskDatas(String instance, ScanPosition scanPosition) {
-		synchronized (SCAN_POSITION) {
-			SCAN_POSITION.put(instance, scanPosition);
-			TMP_STORE_DATA.put(instance, "");
-		}
+	public synchronized void initTaskDatas(String instance, ScanPosition scanPosition) {
+		SCAN_POSITION.put(instance, scanPosition);
+		TMP_STORE_DATA.put(instance, "");
 	}
 
-	public String getLSeqPos(String instance, String L1seq, String L2seq,boolean isfull) {
+	public String getScanPositon(String instance, String L1seq, String L2seq,boolean isfull) {
 		return SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq),isfull);
 	}
 
-	public void updateLSeqPos(String instance, String L1seq, String L2seq, String position,boolean isfull) {
+	public void setScanPositon(String instance, String L1seq, String L2seq, String position,boolean isfull) {
 		synchronized (SCAN_POSITION.get(instance)) {
 			SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), position,isfull);
 		}

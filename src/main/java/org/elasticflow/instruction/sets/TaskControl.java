@@ -38,8 +38,7 @@ public class TaskControl extends Instruction {
 		int start = Integer.parseInt(args[0].toString());
 		int days = Integer.parseInt(args[1].toString());
 		int ride = Integer.parseInt(args[2].toString());
-		JSONObject infos = JSONObject.parseObject(
-				GlobalParam.TASK_COORDER.getScanPositionString(context.getInstanceConfig().getInstanceID(), true));
+		JSONObject infos = GlobalParam.TASK_COORDER.getInstanceScanDatas(context.getInstanceConfig().getInstanceID(), true);
 		JSONObject saveInfo = new JSONObject();
 		for (Entry<String, Object> entry : infos.entrySet()) {
 			if (Integer.parseInt(entry.getValue().toString()) < start) {
@@ -69,7 +68,7 @@ public class TaskControl extends Instruction {
 			if (storeId == null)
 				break;
 			for (String tseq : L2Seq) {
-				GlobalParam.TASK_COORDER.updateLSeqPos(context.getInstanceConfig().getInstanceID(), l1seq, tseq,
+				GlobalParam.TASK_COORDER.setScanPositon(context.getInstanceConfig().getInstanceID(), l1seq, tseq,
 						String.valueOf(position), false);
 			}
 			GlobalParam.TASK_COORDER.saveTaskInfo(context.getInstanceConfig().getInstanceID(), l1seq, storeId, false);

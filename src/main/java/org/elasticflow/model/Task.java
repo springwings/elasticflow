@@ -68,8 +68,8 @@ public final class Task {
 	}
 
 	public String getStartTime() {
-		return jobType.equals(JOB_TYPE.FULL) ? GlobalParam.TASK_COORDER.getLSeqPos(instanceID,L1seq,L2seq,true)
-				: GlobalParam.TASK_COORDER.getLSeqPos(instanceID,L1seq,L2seq,false);
+		return jobType.equals(JOB_TYPE.FULL) ? GlobalParam.TASK_COORDER.getScanPositon(instanceID,L1seq,L2seq,true)
+				: GlobalParam.TASK_COORDER.getScanPositon(instanceID,L1seq,L2seq,false);
 	}
 
 	public String getEndTime() {

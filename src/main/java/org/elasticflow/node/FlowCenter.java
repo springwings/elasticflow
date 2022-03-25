@@ -105,12 +105,12 @@ public class FlowCenter{
 		if (instanceConfig.checkStatus()==false || instanceConfig.openTrans() == false)
 			return;
 		String[] L1seqs = Common.getL1seqs(instanceConfig);  
-		if(!Resource.FLOW_STAT.containsKey(instanceID)) {
+		if(!Resource.FLOW_STATES.containsKey(instanceID)) {
 			String content = EFFileUtil.readText(EFFileUtil.getInstancePath(instanceID)[2], GlobalParam.ENCODING, true);
 			if (content!=null && content.length()>0) {
-				Resource.FLOW_STAT.put(instanceID, JSONObject.parseObject(content));
+				Resource.FLOW_STATES.put(instanceID, JSONObject.parseObject(content));
 			}else {
-				Resource.FLOW_STAT.put(instanceID,new JSONObject());
+				Resource.FLOW_STATES.put(instanceID,new JSONObject());
 			}
 		}
 		synchronized(Resource.tasks) {

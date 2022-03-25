@@ -54,7 +54,7 @@ public final class Resource {
 	/** FLOW_INFOS store current flow running state information */
 	public final static EFState<HashMap<String, String>> FLOW_INFOS = new EFState<HashMap<String, String>>();
 
-	public final static ConcurrentHashMap<String, JSONObject> FLOW_STAT = new ConcurrentHashMap<>();
+	public final static ConcurrentHashMap<String, JSONObject> FLOW_STATES = new ConcurrentHashMap<>();
 
 	public volatile static HashMap<String, EFConnectionSocket<?>> EFCONNS = new HashMap<>();
 
