@@ -841,6 +841,7 @@ public final class NodeMonitor {
 	private void removeInstance(String instance) {
 		if (GlobalParam.DISTRIBUTE_RUN) {
 			GlobalParam.INSTANCE_COORDER.distributeCoorder().removeInstanceFromCluster(instance);
+			GlobalParam.INSTANCE_COORDER.removeInstance(instance, false);
 		} else {
 			GlobalParam.INSTANCE_COORDER.removeInstance(instance, true);
 		}
