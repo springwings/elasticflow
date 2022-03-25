@@ -188,7 +188,7 @@ public class FlowTask {
 		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceId,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Ready,STATUS.Running,
 				pipePump.getInstanceConfig().getPipeParams().showInfoLog())) { 
 			String storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), true, (isReferenceInstance ? false : recompute));
-			GlobalParam.TASK_COORDER.setAndGetScanInfo(instanceId, L1seq, storeId,false);				
+			GlobalParam.TASK_COORDER.saveTaskInfo(instanceId, L1seq, storeId, false);			
 			try {
 				pipePump.run(storeId, L1seq, false, isReferenceInstance); 
 				runNextJobs(JOB_TYPE.INCREMENT);

@@ -129,13 +129,17 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	public String getStoreIdFromSave(String instance, String L1seq, boolean reload,boolean isfull) {
 		if (reload) {
 			String path = Common.getTaskStorePath(instance,
-					isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH);
-			byte[] b = EFDataStorer.getData(path, true);
+					isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH);			
 			ScanPosition sp = new ScanPosition(instance, GlobalParam.DEFAULT_RESOURCE_SEQ);
 			synchronized (SCAN_POSITION.get(instance)) {
+				byte[] b = EFDataStorer.getData(path, true);
 				if (b != null && b.length > 0) {
 					String str = new String(b);
-					sp.loadInfos(str, isfull);
+					try {
+						sp.loadInfos(str, isfull);
+					} catch (Exception e) {
+						Common.LOG.error("instance {} L1seq {} parse json exception!", instance, L1seq, e);
+					}					
 				} 
 				SCAN_POSITION.put(instance,sp);
 			}
@@ -175,31 +179,8 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 					isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH),
 					SCAN_POSITION.get(instance).getString(isfull));
 		}
-	}
-
-	/**
-	 * task get/set Last Update Time
-	 * 
-	 * @param instance
-	 * @param L1seq
-	 * @param storeId  Master store id
-	 * @param isfull
-	 */
-	public void setAndGetScanInfo(String instance, String L1seq, String storeId,boolean isfull) {
-		String path = Common.getTaskStorePath(instance, 
-				isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH);
-		byte[] b = EFDataStorer.getData(path, true);
-		synchronized (SCAN_POSITION.get(instance)) {
-			ScanPosition sp = SCAN_POSITION.get(instance);
-			if (b != null && b.length > 0) {
-				String str = new String(b);
-				sp.loadInfos(str, isfull);
-			}
-			sp.updateStoreId(storeId, isfull);
-			saveTaskInfo(instance, L1seq, storeId, isfull);
-		}
-	}
-
+	} 
+	 
 	/**
 	 * get increment store tag name and will auto create new one with some
 	 * conditions.

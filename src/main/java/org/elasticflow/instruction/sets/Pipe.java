@@ -121,7 +121,7 @@ public class Pipe extends Instruction {
 				}
 				rstate.setReaderScanStamp(DSReader.getScanStamp());
 				rstate.setCount(num);				
-				writer.flowState.setLoad((long)((num*1000)/(start-writer.lastGetPageTime)));		
+				writer.flowState.setLoad((long)((num*1000)/(start-writer.lastGetPageTime+1e-3)));		
 				writer.lastGetPageTime = start;
 				if(num>0)
 					writer.flowState.setPerformance((long) ((num*1000)/(System.currentTimeMillis()-start+1e-3)));
