@@ -67,10 +67,10 @@ public class VearchConnector {
 			if (Integer.valueOf(String.valueOf(jr.get("code"))) == 200) {
 				return true;
 			} else {
-				log.warn("delete Space Exception," + jr.get("msg"));
+				log.warn("delete Space {} Exception,",space,jr.get("msg"));
 			}
 		} catch (Exception e) {
-			log.warn("delete Space Exception", e);
+			log.warn("delete Space {} Exception",space, e);
 		}
 		return false;
 	}
@@ -88,7 +88,7 @@ public class VearchConnector {
 				}
 			}
 		} catch (Exception e) {
-			log.error("check Space Exists Exception", e);
+			log.error("check Space {} Exists Exception",table, e);
 		}
 		return false;
 	}
@@ -105,10 +105,10 @@ public class VearchConnector {
 				log.warn("space exists!");
 				return true;
 			} else {
-				throw new EFException("createSpace Exception," + jr.get("msg"));
+				throw new EFException("create Space "+this.dbName+" Exception," + jr.get("msg"));
 			}
 		} catch (Exception e) {
-			log.error("createSpace Exception", e);
+			log.error("create Space {} Exception",this.dbName, e);
 			throw new EFException(e);
 		}
 	}
@@ -212,7 +212,7 @@ public class VearchConnector {
 			master_post.setEntity(stringEntity);
 			this.httpClient.execute(master_post);
 		} catch (IOException e) {
-			log.error("createSpace Exception", e);
+			log.error("create Space Exception", e);
 			return;
 		}
 	}
