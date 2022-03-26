@@ -3,9 +3,13 @@ package org.elasticflow.ml.algorithm;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Set;
+import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.elasticflow.computer.ComputerFlowSocket;
+import org.elasticflow.config.GlobalParam;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
@@ -24,8 +28,12 @@ import org.elasticflow.util.EFFileUtil;
 public class ModelService extends ComputerFlowSocket {
 
 	private CopyOnWriteArrayList<Socket> clients = new CopyOnWriteArrayList<>();
+	
+	private HashMap<String, Process> processes = new HashMap<>();
 	 
 	private String pyTemplete;
+	
+	private int portNum = 100;
 
 	public static ModelService getInstance(final ConnectParams connectParams) {
 		ModelService o = new ModelService();
@@ -40,36 +48,62 @@ public class ModelService extends ComputerFlowSocket {
 	
 	@Override
 	public DataPage predict(Context context, DataSetReader DSR) throws EFException {
-		while (DSR.nextLine()) {
-			PipeDataUnit pdu = DSR.getLineData();
+		synchronized(this.clients) {
+			if(this.clients.size()==0) {
+				this.addService(39000+portNum,context.getInstanceConfig().getComputeParams().getPyPath());
+				portNum++;
+			}
 		}
-		return null;
+		if (this.computerHandler != null) {
+			this.computerHandler.handleData(this, context, DSR);
+		} else {
+			while (DSR.nextLine()) {
+				PipeDataUnit pdu = DSR.getLineData();
+				PipeDataUnit u = PipeDataUnit.getInstance();
+				Set<Entry<String, Object>> itr = pdu.getData().entrySet();
+				for (Entry<String, Object> k : itr) {
+					this.send(k.getValue());
+				}
+				this.dataUnit.add(u);
+			}
+			this.dataPage.put(GlobalParam.READER_LAST_STAMP, DSR.getScanStamp());
+			this.dataPage.putData(this.dataUnit);
+			this.dataPage.putDataBoundary(DSR.getDataBoundary());
+		}
+		return this.dataPage;
 	}
 
-	private void addClient(int port) {
+	private void addService(int port,String pyPath) {
 		try {
+			this.runService(port,pyPath);
 			Socket client = new Socket("127.0.0.1", port);
 			clients.add(client);
 		} catch (Exception e) {
 		}
+	}
+	
+	private String getPyName(int port) {
+		return "EF_TEMP_"+String.valueOf(port)+".py";
 	}
 
 	private Socket getSocket() {
 		return clients.get(0);
 	}
 
-	private void runService(String pyPath) { 
+	private void runService(int port,String pyPath) { 
 		try { 
-			Process proc = Runtime.getRuntime().exec("python3 " + pyPath); 
+			String pyname = getPyName(port);
+			Process proc = Runtime.getRuntime().exec("python3 " + pyPath+"/"+pyname); 
+			processes.put(pyname, proc);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void send(String data) {
+	private void send(Object data) {
 		Socket client = getSocket();
 		try (OutputStreamWriter os = new OutputStreamWriter(client.getOutputStream());) {
-			os.write(data);
+			os.write(data.toString());
 			os.flush();
 			InputStream is = client.getInputStream();
 			byte[] buf = new byte[1024 * 8];
