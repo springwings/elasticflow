@@ -211,8 +211,8 @@ public final class GlobalParam {
 	}
 
 	/** ------------computer parameters------------ */
-	public static enum COMPUTER_STAGE {
-		TRAIN, PREDICT, TEST
+	public static enum COMPUTER_MODE {
+		REST, MODEL,BLANK
 	}
 
 	/** ------------searcher parameters------------ */

@@ -7,14 +7,11 @@
  */
 package org.elasticflow.computer;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.elasticflow.computer.handler.ComputerHandler;
-import org.elasticflow.field.EFField;
 import org.elasticflow.flow.Flow;
 import org.elasticflow.instruction.Context;
-import org.elasticflow.model.computer.SamplePoint;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
@@ -61,18 +58,6 @@ public abstract class ComputerFlowSocket extends Flow{
 	public void setComputerHandler(ComputerHandler computerHandler) {
 		this.computerHandler = computerHandler;
 	} 
-	
-	abstract public boolean loadModel(Object datas);
-	
-	abstract public DataPage train(Context context, DataSetReader DSR, Map<String, EFField> transParam) throws EFException;
-	 
-    /**
-     * predicte the value of sample s
-     * @param s : prediction sample
-     * @return : predicted value
-     */ 
-	abstract public Object predict(SamplePoint point) throws EFException;
-	
+ 
 	abstract public DataPage predict(Context context,DataSetReader DSR) throws EFException;
-	 
 }

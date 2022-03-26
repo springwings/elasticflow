@@ -9,6 +9,8 @@ package org.elasticflow.param.end;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.elasticflow.config.GlobalParam.COMPUTER_MODE;
+
 import com.alibaba.fastjson.JSONObject;
 
 /**
@@ -19,10 +21,8 @@ import com.alibaba.fastjson.JSONObject;
  */
 public class ComputerParam {
 	
-	/**The characteristic fields are separated by ","**/
-	private String features;
-	private String value;
-	private String algorithm;
+	private COMPUTER_MODE mode = COMPUTER_MODE.BLANK;
+	
 	private volatile CopyOnWriteArrayList<String> api = new CopyOnWriteArrayList<>();
 	/**reader and request fields map*/
 	private JSONObject apiRequest = new JSONObject();
@@ -30,24 +30,51 @@ public class ComputerParam {
 	private int apiRequestMaxDatas = 30;
 	/**writer and response fields map*/
 	private JSONObject apiResponse = new JSONObject();
-	/**User defined JSON parameters can be used to extend the plugin*/
-	private JSONObject customParams = new JSONObject();
-	protected String keyField;
-	/** value= int or string */
-	protected String keyFieldType;
-	protected String scanField;
 	
-	private String preprocessing;
-	private String postprocessing;
-	private double learn_rate = 0.1;
-	private double threshold = 0.001;
-	/** model|rest,rest api calculation or load model by python calculation */
-	private String computeMode = "rest";
-	/** train,test,predict **/
-	private String stage = "train";
+	private String keyField;
+	/** value= int or string */
+	private String keyFieldType;
+	private String scanField;
+	private String pyPath;
+	 
 	private String handler;
 	
+	/**User defined JSON parameters can be used to extend the plugin*/
+	private JSONObject customParams = new JSONObject();
+	 
+	public COMPUTER_MODE getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		if(mode==COMPUTER_MODE.MODEL.name().toLowerCase()) { 
+			this.mode = COMPUTER_MODE.MODEL;
+		}else if(mode==COMPUTER_MODE.REST.name().toLowerCase()) {
+			this.mode = COMPUTER_MODE.REST;
+		}else { 
+			this.mode = COMPUTER_MODE.BLANK;
+		}
+	}
 	
+	public String getAlgorithm() {
+		switch(this.mode) {
+		case REST:
+			return "org.elasticflow.ml.algorithm.RestService";
+		case MODEL:
+			return "org.elasticflow.ml.algorithm.ModelService";
+		default:
+			return "org.elasticflow.ml.algorithm.BlankService";
+		}
+	}
+
+	public String getPyPath() {
+		return pyPath;
+	}
+
+	public void setPyPath(String pyPath) {
+		this.pyPath = pyPath;
+	}
+
 	public String getKeyField() {
 		return keyField;
 	}
@@ -70,79 +97,7 @@ public class ComputerParam {
 
 	public void setKeyFieldType(String keyFieldType) {
 		this.keyFieldType = keyFieldType;
-	}
-	
-	public String getFeatures() {
-		return features;
-	}
-
-	public String getValue() {
-		return value;
-	}
-
-	public String getAlgorithm() {
-		return algorithm;
-	}
-
-	public String getStage() {
-		return stage;
-	}
-
-	public double getLearn_rate() {
-		return learn_rate;
-	}
-
-	public double getThreshold() {
-		return threshold;
-	}
-
-	public String getPreprocessing() {
-		return preprocessing;
-	}
-
-	public String getPostprocessing() {
-		return postprocessing;
-	}
-
-	public String getComputeMode() {
-		return computeMode;
-	}
-
-	public void setFeatures(String features) {
-		this.features = features;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
-
-	public void setAlgorithm(String algorithm) {
-		this.algorithm = algorithm;
-	}
-
-	public void setLearn_rate(String learn_rate) {
-		this.learn_rate = Double.parseDouble(learn_rate);
-	}
-
-	public void setThreshold(String threshold) {
-		this.threshold = Double.parseDouble(threshold);
-	}
-
-	public void setStage(String stage) {
-		this.stage = stage.trim().toUpperCase();
-	}
-
-	public void setPreprocessing(String preprocessing) {
-		this.preprocessing = preprocessing;
-	}
-
-	public void setPostprocessing(String postprocessing) {
-		this.postprocessing = postprocessing;
-	}
-
-	public void setComputeType(String computeMode) {
-		this.computeMode = computeMode.toLowerCase();
-	}
+	} 
 
 	public CopyOnWriteArrayList<String> getApi() {
 		return api;

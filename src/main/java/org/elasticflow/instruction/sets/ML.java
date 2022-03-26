@@ -7,7 +7,6 @@
  */
 package org.elasticflow.instruction.sets;
 
-import org.elasticflow.config.GlobalParam;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.model.reader.DataPage;
@@ -49,15 +48,8 @@ public class ML extends Instruction {
 		if (DSReader.status()) {
 			try {
 				long start = System.currentTimeMillis();
-				int dataNums = DSReader.getDataNums();
-
-				if (context.getInstanceConfig().getComputeParams().getStage()
-						.equals(GlobalParam.COMPUTER_STAGE.PREDICT.name())) {
-					res = context.getComputer().predict(context, DSReader);
-				} else if (context.getInstanceConfig().getComputeParams().getStage()
-						.equals(GlobalParam.COMPUTER_STAGE.TRAIN.name())) {
-					res = context.getComputer().train(context, DSReader, context.getInstanceConfig().getWriteFields());
-				}
+				int dataNums = DSReader.getDataNums(); 
+				res = context.getComputer().predict(context, DSReader);
 				context.getComputer().flowState
 						.setLoad((long) ((dataNums * 1000) / (start - context.getComputer().lastGetPageTime)));
 				context.getComputer().lastGetPageTime = start;

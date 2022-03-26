@@ -11,14 +11,11 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.field.EFField;
 import org.elasticflow.instruction.Context;
-import org.elasticflow.model.computer.SamplePoint;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
@@ -43,7 +40,6 @@ import com.alibaba.fastjson.JSONObject;
 public class RestService extends ComputerFlowSocket {
 
 	protected final static Logger log = LoggerFactory.getLogger("RestService");
-	protected ExecutorService executorService;
 	protected ArrayBlockingQueue<String> apiBlockingQueue;
 	protected boolean successRunAll = true;
 
@@ -51,17 +47,6 @@ public class RestService extends ComputerFlowSocket {
 		RestService o = new RestService();
 		o.initConn(connectParams);
 		return o;
-	}
-
-	@Override
-	public boolean loadModel(Object datas) {
-		return false;
-	}
-
-	@Override
-	public Object predict(SamplePoint point) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -83,7 +68,6 @@ public class RestService extends ComputerFlowSocket {
 			this.apiBlockingQueue = new ArrayBlockingQueue<>(apis.size());
 			for (String api : apis)
 				this.apiBlockingQueue.add(api);
-			this.executorService = Executors.newFixedThreadPool(apis.size());
 
 			// construct rest post data
 			JSONObject post_data = new JSONObject();
@@ -282,11 +266,4 @@ public class RestService extends ComputerFlowSocket {
 			return data;
 		}
 	}
-
-	@Override
-	public DataPage train(Context context, DataSetReader DSR, Map<String, EFField> transParam) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }
