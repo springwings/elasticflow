@@ -1,4 +1,4 @@
-package org.elasticflow.ml.algorithm;
+package org.elasticflow.ml;
 
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.config.GlobalParam;

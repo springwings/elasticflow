@@ -1,4 +1,4 @@
-package org.elasticflow.ml.algorithm;
+package org.elasticflow.ml;
 
 import java.io.InputStream;
 import java.io.OutputStreamWriter;

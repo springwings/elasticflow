@@ -1,4 +1,4 @@
-package org.elasticflow.ml.algorithm;
+package org.elasticflow.ml;
 
 import java.util.ArrayList;
 import java.util.Arrays;
