@@ -70,21 +70,19 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	}
 
 	public void setScanPosition(String instance, String L1seq, String L2seq, String scanStamp,boolean reset,boolean isfull) {
-		synchronized (SCAN_POSITION.get(instance)) {
-			if (reset || PipeUtil.scanPosCompare(scanStamp,
-					SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq),isfull))) {
-				SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), scanStamp,isfull);
-				// update flow status,Distributed environment synchronization status
-				if (GlobalParam.DISTRIBUTE_RUN) {
-					Resource.FLOW_STATES.get(instance).put(FlowState.getStoreKey(L1seq),
-							GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(instance, L1seq));
-				} else {
-					Resource.FLOW_STATES.get(instance).put(FlowState.getStoreKey(L1seq),
-							EFMonitorUtil.getPipeEndStatus(instance, L1seq));
-				}
-				EFFileUtil.createAndSave(Resource.FLOW_STATES.get(instance).toJSONString(),
-						EFFileUtil.getInstancePath(instance)[2]);			
+		if (reset || PipeUtil.scanPosCompare(scanStamp,
+				SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq),isfull))) {
+			SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), scanStamp,isfull);
+			// update flow status,Distributed environment synchronization status
+			if (GlobalParam.DISTRIBUTE_RUN) {
+				Resource.FLOW_STATES.get(instance).put(FlowState.getStoreKey(L1seq),
+						GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(instance, L1seq));
+			} else {
+				Resource.FLOW_STATES.get(instance).put(FlowState.getStoreKey(L1seq),
+						EFMonitorUtil.getPipeEndStatus(instance, L1seq));
 			}
+			EFFileUtil.createAndSave(Resource.FLOW_STATES.get(instance).toJSONString(),
+					EFFileUtil.getInstancePath(instance)[2]);			
 		}
 	}
 
@@ -131,16 +129,16 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 			String path = Common.getTaskStorePath(instance,
 					isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH);			
 			ScanPosition sp = new ScanPosition(instance, GlobalParam.DEFAULT_RESOURCE_SEQ);
-			synchronized (SCAN_POSITION.get(instance)) {
-				byte[] b = EFDataStorer.getData(path, true);
-				if (b != null && b.length > 0) {
-					String str = new String(b);
-					try {
-						sp.loadInfos(str, isfull);
-					} catch (Exception e) {
-						Common.LOG.error("instance {} L1seq {} parse json exception!", instance, L1seq, e);
-					}					
-				} 
+			byte[] b = EFDataStorer.getData(path, true);
+			if (b != null && b.length > 0) {
+				String str = new String(b);
+				try {
+					sp.loadInfos(str, isfull);
+				} catch (Exception e) {
+					Common.LOG.error("instance {} L1seq {} parse json exception!", instance, L1seq, e);
+				}					
+			} 
+			synchronized (SCAN_POSITION) {
 				SCAN_POSITION.put(instance,sp);
 			}
 		}
@@ -172,13 +170,11 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	 * @param storeId
 	 * @param isfull
 	 */
-	public void saveTaskInfo(String instance, String L1seq, String storeId, boolean isfull) {
-		synchronized (SCAN_POSITION.get(instance)) {
-			SCAN_POSITION.get(instance).updateStoreId(storeId,isfull);
-			EFDataStorer.setData(Common.getTaskStorePath(instance, 
-					isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH),
-					SCAN_POSITION.get(instance).getString(isfull));
-		}
+	public synchronized void saveTaskInfo(String instance, String L1seq, String storeId, boolean isfull) {
+		SCAN_POSITION.get(instance).updateStoreId(storeId,isfull);
+		EFDataStorer.setData(Common.getTaskStorePath(instance, 
+				isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH),
+				SCAN_POSITION.get(instance).getString(isfull));
 	} 
 	 
 	/**
@@ -236,9 +232,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	}
 
 	public void batchUpdateSeqPos(String instance, String val,boolean isfull) {
-		synchronized (SCAN_POSITION.get(instance)) {
-			SCAN_POSITION.get(instance).batchUpdateSeqPos(val,isfull);
-		}
+		SCAN_POSITION.get(instance).batchUpdateSeqPos(val,isfull);
 	}
 
 	/**

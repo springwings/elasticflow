@@ -1,6 +1,7 @@
 package org.elasticflow.model.reader;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,11 +22,11 @@ public class ScanPosition implements Serializable{
 	private String incrementStoreId;
 	private String fullStoreId;
 	/**L2seq Scan switch point location information which in Piper configuration file,Lseq is seq l1 + l2*/
-	private ConcurrentHashMap<String, String> incrementLseqPos = new ConcurrentHashMap<>();
+	private HashMap<String, String> incrementLseqPos = new HashMap<>();
 	private ConcurrentHashMap<String, String> fullLseqPos = new ConcurrentHashMap<>();
 	private JSONObject keep = new JSONObject();
 		
-	public void loadInfos(String info,boolean isfull) {
+	public synchronized void loadInfos(String info,boolean isfull) {
 		JSONObject datas = JSONObject.parseObject(info);
 		if(datas.size()>2) {
 			this.instance = datas.getString("instance");
@@ -38,6 +39,7 @@ public class ScanPosition implements Serializable{
 			}else {
 				this.incrementStoreId = datas.getString("storeId");
 				JSONObject infos = datas.getJSONObject("status");
+				incrementLseqPos.clear();
 				for (Entry<String, Object> entry : infos.entrySet()) {
 					incrementLseqPos.put(entry.getKey(), entry.getValue().toString());
 				}
@@ -55,7 +57,7 @@ public class ScanPosition implements Serializable{
 	 * @param seq combine L1seq L2seq
 	 * @param pos
 	 */
-	public void updateLSeqPos(String Lseq,String pos,boolean isfull) {		
+	public synchronized void updateLSeqPos(String Lseq,String pos,boolean isfull) {		
 		if(isfull) {
 			fullLseqPos.put(Lseq, pos);
 		}else {
@@ -80,7 +82,7 @@ public class ScanPosition implements Serializable{
 		} 
 	}
 	
-	public void batchUpdateSeqPos(String v,boolean isfull) {
+	public synchronized void batchUpdateSeqPos(String v,boolean isfull) {
 		if(isfull) {
 			Iterator<Map.Entry<String, String>> iter = fullLseqPos.entrySet().iterator();
 			while (iter.hasNext()) {
@@ -107,7 +109,7 @@ public class ScanPosition implements Serializable{
 		return "0";
 	}
 	
-	public void updateStoreId(String storeId,boolean isfull) {
+	public synchronized void updateStoreId(String storeId,boolean isfull) {
 		if(isfull) {
 			this.fullStoreId = storeId;
 		}else {
