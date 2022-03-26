@@ -41,8 +41,8 @@ public class ComputerParam {
 	private String postprocessing;
 	private double learn_rate = 0.1;
 	private double threshold = 0.001;
-	/** flow|batch,Streaming calculation or batch calculation */
-	private String computeType = "batch";
+	/** model|rest,rest api calculation or load model by python calculation */
+	private String computeMode = "rest";
 	/** train,test,predict **/
 	private String stage = "train";
 	private String handler;
@@ -104,8 +104,8 @@ public class ComputerParam {
 		return postprocessing;
 	}
 
-	public String getComputeType() {
-		return computeType;
+	public String getComputeMode() {
+		return computeMode;
 	}
 
 	public void setFeatures(String features) {
@@ -140,8 +140,8 @@ public class ComputerParam {
 		this.postprocessing = postprocessing;
 	}
 
-	public void setComputeType(String computeType) {
-		this.computeType = computeType.toLowerCase();
+	public void setComputeType(String computeMode) {
+		this.computeMode = computeMode.toLowerCase();
 	}
 
 	public CopyOnWriteArrayList<String> getApi() {

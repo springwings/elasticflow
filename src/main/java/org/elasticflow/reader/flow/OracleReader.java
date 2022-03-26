@@ -144,8 +144,10 @@ public class OracleReader extends ReaderFlowSocket{
 			throw new EFException(e);			
 		}finally{ 
 			try {
-				statement.close();
-				rs.close();
+				if(statement!=null && rs!=null) {
+					statement.close();
+					rs.close();
+				}
 			} catch (Exception e) {
 				releaseConn = true; 
 				log.error("close connection resource Exception!");
