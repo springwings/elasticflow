@@ -21,7 +21,7 @@ import com.alibaba.fastjson.JSONObject;
  */
 public class ComputerParam {
 	
-	private COMPUTER_MODE mode = COMPUTER_MODE.BLANK;
+	private COMPUTER_MODE computeMode = COMPUTER_MODE.BLANK;
 	
 	private volatile CopyOnWriteArrayList<String> api = new CopyOnWriteArrayList<>();
 	/**reader and request fields map*/
@@ -42,28 +42,29 @@ public class ComputerParam {
 	/**User defined JSON parameters can be used to extend the plugin*/
 	private JSONObject customParams = new JSONObject();
 	 
-	public COMPUTER_MODE getMode() {
-		return mode;
+	public COMPUTER_MODE getComputeMode() {
+		return computeMode;
 	}
 
-	public void setMode(String mode) {
-		if(mode==COMPUTER_MODE.MODEL.name().toLowerCase()) { 
-			this.mode = COMPUTER_MODE.MODEL;
-		}else if(mode==COMPUTER_MODE.REST.name().toLowerCase()) {
-			this.mode = COMPUTER_MODE.REST;
+	public void setComputeMode(String computeMode) {
+		computeMode = computeMode.strip().toLowerCase();
+		if(COMPUTER_MODE.MODEL.name().toLowerCase().equals(computeMode)) { 
+			this.computeMode = COMPUTER_MODE.MODEL;
+		}else if(COMPUTER_MODE.REST.name().toLowerCase().equals(computeMode)) {
+			this.computeMode = COMPUTER_MODE.REST;
 		}else { 
-			this.mode = COMPUTER_MODE.BLANK;
+			this.computeMode = COMPUTER_MODE.BLANK;
 		}
 	}
 	
 	public String getAlgorithm() {
-		switch(this.mode) {
+		switch(this.computeMode) {
 		case REST:
-			return "org.elasticflow.ml.algorithm.RestService";
+			return "org.elasticflow.ml.RestService";
 		case MODEL:
-			return "org.elasticflow.ml.algorithm.ModelService";
+			return "org.elasticflow.ml.ModelService";
 		default:
-			return "org.elasticflow.ml.algorithm.BlankService";
+			return "org.elasticflow.ml.BlankService";
 		}
 	}
 

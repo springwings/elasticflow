@@ -17,6 +17,8 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFFileUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Model Compute
@@ -34,6 +36,8 @@ public class ModelService extends ComputerFlowSocket {
 	private String pyTemplete;
 	
 	private int portNum = 100;
+	
+	private final static Logger log = LoggerFactory.getLogger("ML");
 
 	public static ModelService getInstance(final ConnectParams connectParams) {
 		ModelService o = new ModelService();
@@ -79,6 +83,7 @@ public class ModelService extends ComputerFlowSocket {
 			Socket client = new Socket("127.0.0.1", port);
 			clients.add(client);
 		} catch (Exception e) {
+			log.error(e.getMessage());
 		}
 	}
 	
@@ -93,10 +98,13 @@ public class ModelService extends ComputerFlowSocket {
 	private void runService(int port,String pyPath) { 
 		try { 
 			String pyname = getPyName(port);
-			Process proc = Runtime.getRuntime().exec("python3 " + pyPath+"/"+pyname); 
+			String runPy = pyPath+"/"+pyname; 
+			EFFileUtil.createAndSave(pyTemplete, runPy);
+			ProcessBuilder pb = new ProcessBuilder("python3", runPy, String.valueOf(port)).inheritIO();
+			Process proc = pb.start();
 			processes.put(pyname, proc);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 	}
 
@@ -113,7 +121,7 @@ public class ModelService extends ComputerFlowSocket {
 			}
 			client.shutdownInput();
 		} catch (Exception e) {
-
+			log.error(e.getMessage());
 		}
 	}
 

@@ -129,16 +129,16 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 			String path = Common.getTaskStorePath(instance,
 					isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH);			
 			ScanPosition sp = new ScanPosition(instance, GlobalParam.DEFAULT_RESOURCE_SEQ);
-			byte[] b = EFDataStorer.getData(path, true);
-			if (b != null && b.length > 0) {
-				String str = new String(b);
-				try {
-					sp.loadInfos(str, isfull);
-				} catch (Exception e) {
-					Common.LOG.error("instance {} L1seq {} parse json exception!", instance, L1seq, e);
-				}					
-			} 
 			synchronized (SCAN_POSITION) {
+				byte[] b = EFDataStorer.getData(path, true);
+				if (b != null && b.length > 0) {
+					String str = new String(b);
+					try {
+						sp.loadInfos(str, isfull);
+					} catch (Exception e) {
+						Common.LOG.error("instance {} L1seq {} parse json exception!", instance, L1seq, e);
+					}					
+				} 
 				SCAN_POSITION.put(instance,sp);
 			}
 		}
@@ -170,11 +170,13 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	 * @param storeId
 	 * @param isfull
 	 */
-	public synchronized void saveTaskInfo(String instance, String L1seq, String storeId, boolean isfull) {
-		SCAN_POSITION.get(instance).updateStoreId(storeId,isfull);
-		EFDataStorer.setData(Common.getTaskStorePath(instance, 
-				isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH),
-				SCAN_POSITION.get(instance).getString(isfull));
+	public void saveTaskInfo(String instance, String L1seq, String storeId, boolean isfull) {
+		synchronized(SCAN_POSITION) {
+			SCAN_POSITION.get(instance).updateStoreId(storeId,isfull);
+			EFDataStorer.setData(Common.getTaskStorePath(instance, 
+					isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH),
+					SCAN_POSITION.get(instance).getString(isfull));
+		}
 	} 
 	 
 	/**

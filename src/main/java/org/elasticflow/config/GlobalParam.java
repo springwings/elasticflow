@@ -62,6 +62,9 @@ public final class GlobalParam {
 	public static String INSTANCE_PATH;
 
 	public static String IP;
+	
+	/**Computer parameters*/
+	public final static String MAIN_PY = "entrance";
 
 	/** CONNECT_EXPIRED is milliseconds time */
 	public static int CONNECT_EXPIRED = 7200000;
