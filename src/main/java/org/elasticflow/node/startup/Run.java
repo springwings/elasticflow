@@ -101,10 +101,10 @@ public final class Run {
 					if(instanceConfig.getPipeParams().isMultiThread())
 						openThreadPools +=1;
 				}
-			}						
+			}
 		}
 		
-		Resource.ThreadPools = new ThreadPools(Integer.parseInt(GlobalParam.StartConfig.getProperty("default_threadpool_size")));
+		Resource.ThreadPools = new ThreadPools(Integer.parseInt(GlobalParam.StartConfig.getProperty("sys_threadpool_size")));
 		if(openThreadPools>0 && GlobalParam.DISTRIBUTE_RUN==false) {
 			Resource.ThreadPools.start();
 		}
@@ -119,7 +119,7 @@ public final class Run {
 		GlobalParam.VERSION = version;
 		GlobalParam.GROUPID = groupId;
 		GlobalParam.DEBUG = GlobalParam.StartConfig.getProperty("is_debug").equals("false") ? false : true;
-		GlobalParam.CONNECTION_POOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("pool_size"));
+		GlobalParam.CONNECTION_POOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("resource_pool_size"));
 		GlobalParam.WRITE_BATCH = GlobalParam.StartConfig.getProperty("write_batch").equals("false") ? false : true;
 		GlobalParam.SEND_EMAIL_ON = GlobalParam.StartConfig.getProperty("send_mail").equals("false") ? false : true;
 		GlobalParam.SEND_API_ON = GlobalParam.StartConfig.containsKey("send_api")?GlobalParam.StartConfig.getProperty("send_api"):"";

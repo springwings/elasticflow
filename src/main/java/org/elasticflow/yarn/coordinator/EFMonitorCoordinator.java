@@ -40,6 +40,7 @@ public class EFMonitorCoordinator implements EFMonitorCoord {
 		dt.put("TASKS", Resource.tasks.size());
 		dt.put("THREAD_POOL_SIZE", Resource.ThreadPools.getPoolSize());
 		dt.put("THREAD_ACTIVE_COUNT", Resource.ThreadPools.getActiveCount());
+		dt.put("SYS_THREAD_POOL_SIZE", GlobalParam.StartConfig.getProperty("sys_threadpool_size"));
 		try {
 			dt.put("CPU", SystemInfoUtil.getCpuUsage());
 			dt.put("MEMORY", SystemInfoUtil.getMemUsage());
