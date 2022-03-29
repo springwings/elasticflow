@@ -368,6 +368,7 @@ public final class NodeMonitor {
 		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
 		JSONObject dt = new JSONObject();
 		dt.put("NODE_TYPE", GlobalParam.StartConfig.getProperty("node_type"));
+		dt.put("NODE_IP", GlobalParam.IP);
 		dt.put("WRITE_BATCH", GlobalParam.WRITE_BATCH);
 		dt.put("SERVICE_LEVEL", service_level);
 		dt.put("STATUS", "running");

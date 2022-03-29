@@ -131,11 +131,11 @@ public class MysqlWriter extends WriterFlowSocket {
 	
 	@Override
 	public boolean storePositionExists(String storeName) throws EFException {
-		String checkdatabase = "show databases like \"" + storeName + "\"";
+		String checkdatabase = "show tables like \"" + storeName + "\"";
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
 		try (PreparedStatement stat = conn.prepareStatement(checkdatabase);) {
-			ResultSet resultSet = stat.executeQuery();
-			if (resultSet.next()) {
+			ResultSet rs = stat.executeQuery();
+			if (rs.next()) {
 				return true;
 			}
 		} catch (Exception e) {
@@ -152,11 +152,17 @@ public class MysqlWriter extends WriterFlowSocket {
 		if (!ISLINK())
 			return select;
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
-		String checkSql = " show tables like '" + Common.getStoreName(mainName, "a") + "';";
+		String checkSql = "show tables like \"" + Common.getStoreName(mainName, select) + "\";";
 		try (PreparedStatement statement = conn.prepareStatement(checkSql);) {
 			try (ResultSet rs = statement.executeQuery();) {
-				if (!rs.next())
-					select = "b";
+				if (!rs.next()) {
+					checkSql = "show tables like \"" + Common.getStoreName(mainName, "b") + "\";";
+					try (PreparedStatement stat2 = conn.prepareStatement(checkSql);) {
+						ResultSet rs2 = stat2.executeQuery();
+						if (rs2.next()) 
+							select = "b";
+					}
+				}
 			} catch (Exception e) {
 				log.error("ResultSet Exception", e);
 			}
@@ -164,6 +170,11 @@ public class MysqlWriter extends WriterFlowSocket {
 			log.error("PreparedStatement Exception", e);
 		} finally {
 			REALEASE(false, releaseConn);
+		}
+		if(!isIncrement) {
+			if(select=="a")
+				return "b";
+			return "a";
 		}
 		return select;
 	}
