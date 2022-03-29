@@ -20,6 +20,7 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
+import org.elasticflow.util.EFException.ETYPE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +140,7 @@ public class KafkaReader extends ReaderFlowSocket {
 			try {
 				((KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader)).commitSync();
 			} catch (Exception e) {
-				throw new EFException(e, ELEVEL.Dispose);
+				throw new EFException(e, ELEVEL.Dispose,ETYPE.RESOURCE_ERROR);
 			}
 		}	
 	}
