@@ -27,15 +27,15 @@ public class EFException extends Exception {
 
 	private ETYPE e_type = ETYPE.UNKNOWN;
 
-	private StringBuffer SB = new StringBuffer();
+	private StringBuffer track_info = new StringBuffer();
 
 	public EFException(String msg) {
 		super(msg);
 	}
 
 	public void track(String info) {
-		SB.append(info);
-		SB.append(" > ");
+		track_info.append(info);
+		track_info.append(" > ");
 	}
 	
 	@Override
@@ -78,8 +78,8 @@ public class EFException extends Exception {
 	}
 	
 	private String getTrack() {
-		if(SB.length()>0)
-			return "TRACK INFOS:" + SB.toString();
+		if(track_info.length()>0)
+			return "TRACK INFOS:" + track_info.toString()+" error level "+e_level.name();
 		return "";
 	}
 }

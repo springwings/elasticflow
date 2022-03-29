@@ -150,13 +150,12 @@ public class EFNode {
 			this.bindInstances.offer(instanceSetting);
 		String[] strs = instanceSetting.split(":");
 		String[] paths = EFFileUtil.getInstancePath(strs[0]);
+		this.masterInstanceCoorder.stopInstance(strs[0]);
 		this.instanceCoord.sendInstanceData(EFFileUtil.readText(paths[0], GlobalParam.ENCODING,true),
 				EFFileUtil.readText(paths[1], GlobalParam.ENCODING,true),
 				EFFileUtil.readText(paths[2], GlobalParam.ENCODING,true),strs[0]);
 		this.instanceCoord.addInstance(instanceSetting,true);
-		this.masterInstanceCoorder.resumeInstance(strs[0]);
-		this.instanceCoord.resumeInstance(strs[0], GlobalParam.JOB_TYPE.INCREMENT.name());
-		this.instanceCoord.resumeInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());		
+		this.masterInstanceCoorder.resumeInstance(strs[0]);	
 	}
 
 	public void pushResource() {

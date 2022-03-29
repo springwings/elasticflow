@@ -133,7 +133,6 @@ public class Pipe extends Instruction {
 						storeId, task.getL2seq(), num,
 						DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));
 			} catch (EFException e) {
-				Common.processErrorLevel(e);
 				if (e.getErrorType()==ETYPE.RESOURCE_ERROR) { 
 					freeConn = true;
 				}

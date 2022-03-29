@@ -24,8 +24,8 @@ while True:
         conn,addr = _SK.accept()
         data = conn.recv(1024)
         data = bytes.decode(data)
-        result = entrance.predict(data)
-        conn.sendall(result)     
+        #result = entrance.predict(data)
+        conn.sendall(data.encode('utf-8'))
         conn.close()    
     except Exception:
         pass

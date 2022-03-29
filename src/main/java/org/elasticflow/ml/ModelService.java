@@ -1,22 +1,23 @@
 package org.elasticflow.ml;
 
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.Set;
-import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.instruction.Context;
+import org.elasticflow.model.EFSocket;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFFileUtil;
+import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,13 +30,13 @@ import org.slf4j.LoggerFactory;
  */
 public class ModelService extends ComputerFlowSocket {
 
-	private CopyOnWriteArrayList<Socket> clients = new CopyOnWriteArrayList<>();
+	private CopyOnWriteArrayList<EFSocket> clients = new CopyOnWriteArrayList<>();
 	
-	private HashMap<String, Process> processes = new HashMap<>();
+	private CopyOnWriteArrayList<Process> processes = new CopyOnWriteArrayList<>();
 	 
 	private String pyTemplete;
 	
-	private int portNum = 100;
+	static AtomicInteger portNum = new AtomicInteger(100);
 	
 	private final static Logger log = LoggerFactory.getLogger("ML");
 
@@ -51,16 +52,15 @@ public class ModelService extends ComputerFlowSocket {
 	}
 	
 	@Override
-	public DataPage predict(Context context, DataSetReader DSR) throws EFException {
-		synchronized(this.clients) {
-			if(this.clients.size()==0) {
-				this.addService(39000+portNum,context.getInstanceConfig().getComputeParams().getPyPath());
-				portNum++;
-			}
-		}
+	public DataPage predict(Context context, DataSetReader DSR) throws EFException { 
 		if (this.computerHandler != null) {
 			this.computerHandler.handleData(this, context, DSR);
 		} else {
+			synchronized(portNum) {
+				if(this.clients.size()==0) {
+					this.addService(39000+portNum.getAndIncrement(),context.getInstanceConfig().getComputeParams().getPyPath());
+				}
+			}
 			while (DSR.nextLine()) {
 				PipeDataUnit pdu = DSR.getLineData();
 				PipeDataUnit u = PipeDataUnit.getInstance();
@@ -76,22 +76,47 @@ public class ModelService extends ComputerFlowSocket {
 		}
 		return this.dataPage;
 	}
-
-	private void addService(int port,String pyPath) {
-		try {
-			this.runService(port,pyPath);
-			Socket client = new Socket("127.0.0.1", port);
-			clients.add(client);
-		} catch (Exception e) {
-			log.error(e.getMessage());
+	
+	public void shutdown() {
+		for(EFSocket sk : clients) {
+			try {
+				sk.close();
+			} catch (Exception e) {
+				log.warn("shut down model service socket exception",e);
+			}
 		}
+		for(Process proc:processes) {
+			proc.destroy();
+		}
+	}
+
+	private synchronized void addService(int port,String pyPath) {
+		Resource.ThreadPools.execute(() -> { 
+			this.runService(port,pyPath); 
+		});		
+		for(int i=0;i<5;i++) {
+			boolean success = connectSocket(port);
+			if(success)
+				break;
+		}
+	} 
+	
+	private boolean connectSocket(int port) {
+		try {
+			Thread.sleep(200);
+			Socket sk = new Socket("127.0.0.1", port);
+			clients.add(new EFSocket(sk));
+		} catch (Exception e) {
+			return false;
+		} 		
+		return true;
 	}
 	
 	private String getPyName(int port) {
 		return "EF_TEMP_"+String.valueOf(port)+".py";
 	}
 
-	private Socket getSocket() {
+	private EFSocket getSocket() {
 		return clients.get(0);
 	}
 
@@ -102,27 +127,27 @@ public class ModelService extends ComputerFlowSocket {
 			EFFileUtil.createAndSave(pyTemplete, runPy);
 			ProcessBuilder pb = new ProcessBuilder("python3", runPy, String.valueOf(port)).inheritIO();
 			Process proc = pb.start();
-			processes.put(pyname, proc);
+			processes.add(proc);
+			proc.waitFor();
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error("open model service socket exception",e);
 		}
 	}
 
 	private void send(Object data) {
-		Socket client = getSocket();
-		try (OutputStreamWriter os = new OutputStreamWriter(client.getOutputStream());) {
-			os.write(data.toString());
-			os.flush();
-			InputStream is = client.getInputStream();
+		EFSocket client = getSocket();
+		try {
+			client.getOSW().write(data.toString());
+			client.getOSW().flush();
+			InputStream is = client.getSocket().getInputStream();
 			byte[] buf = new byte[1024 * 8];
 			StringBuilder recive = new StringBuilder();
 			for (int len = is.read(buf); len > 0; len = is.read(buf)) {
 				recive.append(new String(buf, 0, len));
 			}
-			client.shutdownInput();
+			System.out.println(recive);
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error("send message exception",e);
 		}
 	}
-
 }

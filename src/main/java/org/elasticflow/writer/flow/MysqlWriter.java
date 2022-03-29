@@ -146,7 +146,7 @@ public class MysqlWriter extends WriterFlowSocket {
 
 	@Override
 	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) throws EFException {
-		String select = "b";
+		String select = "a";
 		boolean releaseConn = false;
 		PREPARE(false, false);
 		if (!ISLINK())
@@ -156,7 +156,7 @@ public class MysqlWriter extends WriterFlowSocket {
 		try (PreparedStatement statement = conn.prepareStatement(checkSql);) {
 			try (ResultSet rs = statement.executeQuery();) {
 				if (!rs.next())
-					select = "a";
+					select = "b";
 			} catch (Exception e) {
 				log.error("ResultSet Exception", e);
 			}
@@ -176,26 +176,33 @@ public class MysqlWriter extends WriterFlowSocket {
 	 * @return
 	 */
 	private String getTableSql(String instance, InstanceConfig instanceConfig) {
-		StringBuilder sf = new StringBuilder();
-		sf.append("create table " + instance + " (");
-		Map<String, EFField> transParams = instanceConfig.getWriteFields();
-		for (Map.Entry<String, EFField> e : transParams.entrySet()) {
-			EFField p = e.getValue();
-			if (p.getAlias() == null)
-				continue;
-			sf.append(p.getAlias());
-			sf.append(" " + p.getIndextype());
-			if (p.getIndextype().toLowerCase().equals("timestamp"))
-				sf.append(" DEFAULT CURRENT_TIMESTAMP");
-			sf.append(" ,");
-			if (p.getIndexed().equals("true") && !p.getAlias().equals(instanceConfig.getWriterParams().getWriteKey())) {
-				sf.append("KEY `" + p.getAlias() + "` (`" + p.getAlias() + "`) ,");
+		if(instanceConfig.getWriterParams().getStorageStructure() != null && 
+				instanceConfig.getWriterParams().getStorageStructure().size()>0) {
+			String tablesql = "create table " + instance ;
+			tablesql+=instanceConfig.getWriterParams().getStorageStructure().getString("tablemeta");
+			return tablesql;
+		}else {
+			StringBuilder sf = new StringBuilder();
+			sf.append("create table " + instance + " (");
+			Map<String, EFField> transParams = instanceConfig.getWriteFields();
+			for (Map.Entry<String, EFField> e : transParams.entrySet()) {
+				EFField p = e.getValue();
+				if (p.getAlias() == null)
+					continue;
+				sf.append(p.getAlias());
+				sf.append(" " + p.getIndextype());
+				if (p.getIndextype().toLowerCase().equals("timestamp"))
+					sf.append(" DEFAULT CURRENT_TIMESTAMP");
+				sf.append(" ,");
+				if (p.getIndexed().equals("true") && !p.getAlias().equals(instanceConfig.getWriterParams().getWriteKey())) {
+					sf.append("KEY `" + p.getAlias() + "` (`" + p.getAlias() + "`) ,");
+				}
 			}
-		}
-		sf.append("PRIMARY KEY `" + instanceConfig.getWriterParams().getWriteKey() + "` (`"
-				+ instanceConfig.getWriterParams().getWriteKey() + "`) USING BTREE ");
-		String tmp = sf.substring(0, sf.length() - 1);
-		return tmp + ");";
+			sf.append("PRIMARY KEY `" + instanceConfig.getWriterParams().getWriteKey() + "` (`"
+					+ instanceConfig.getWriterParams().getWriteKey() + "`) USING BTREE ");
+			String tmp = sf.substring(0, sf.length() - 1);
+			return tmp + ");";
+		}		
 	} 
 
 	private void insertDb(String sql) throws EFException {

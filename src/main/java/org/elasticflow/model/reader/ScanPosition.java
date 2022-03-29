@@ -1,7 +1,6 @@
 package org.elasticflow.model.reader;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,7 +21,7 @@ public class ScanPosition implements Serializable{
 	private String incrementStoreId;
 	private String fullStoreId;
 	/**L2seq Scan switch point location information which in Piper configuration file,Lseq is seq l1 + l2*/
-	private HashMap<String, String> incrementLseqPos = new HashMap<>();
+	private ConcurrentHashMap<String, String> incrementLseqPos = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<String, String> fullLseqPos = new ConcurrentHashMap<>();
 	private JSONObject keep = new JSONObject();
 		
