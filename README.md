@@ -64,6 +64,7 @@ ElasticFlow(伊塔)是一个开源弹性流数据交换系统，支持在任意�
 
 # Computer Support
     - Rest API (POST/JSON)
+    - Model
     
 # Writer Support
     - ElasticSearch 7.x
@@ -72,6 +73,7 @@ ElasticFlow(伊塔)是一个开源弹性流数据交换系统，支持在任意�
     - Vearch
     - Solr 5.5.0
     - Hbase 1.2.1
+    - Kafka 2.1.1
 
 # Document
 ==>>[详细文档参照wiki](https://github.com/springwings/elasticflow/wiki)  
