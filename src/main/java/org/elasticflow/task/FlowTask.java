@@ -114,7 +114,7 @@ public class FlowTask {
 			} catch (Exception e) {
 				breaker.log();
 				log.error(instanceId + " Full Exception", e);
-				Resource.EfNotifier.send(instanceId + " Full Exception", e.getMessage(), false);
+				Resource.EfNotifier.send(instanceId + " Full Exception",instanceId, e.getMessage(),EFException.ETYPE.DATA_ERROR.name(), false);
 			} finally {
 				GlobalParam.TASK_COORDER.setFlowStatus(instanceId,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready,
 						pipePump.getInstanceConfig().getPipeParams().showInfoLog());
@@ -141,7 +141,7 @@ public class FlowTask {
 				runNextJobs(JOB_TYPE.FULL); 
 			} catch (Exception e) {
 				log.error(instanceId + " Virtual Full Exception", e);
-				Resource.EfNotifier.send(instanceId + " Virtual Full Exception", e.getMessage(), false);
+				Resource.EfNotifier.send(instanceId + " Virtual Full Exception",instanceId, e.getMessage(),EFException.ETYPE.DATA_ERROR.name(), false);
 			} finally {
 				GlobalParam.TASK_COORDER.setFlowStatus(instanceId,L1seq,GlobalParam.JOB_TYPE.FULL.name(),STATUS.Blank,STATUS.Ready,
 						pipePump.getInstanceConfig().getPipeParams().showInfoLog());
@@ -167,7 +167,7 @@ public class FlowTask {
 				runNextJobs(JOB_TYPE.INCREMENT); 
 			} catch (Exception e) {
 				log.error(instanceId + " Virtual Increment Exception", e);
-				Resource.EfNotifier.send(instanceId + " Virtual Increment Exception", e.getMessage(), false);
+				Resource.EfNotifier.send(instanceId + " Virtual Increment Exception",instanceId, e.getMessage(),EFException.ETYPE.DATA_ERROR.name(),false);
 			}finally {
 				GlobalParam.TASK_COORDER.setFlowStatus(instanceId,L1seq,GlobalParam.JOB_TYPE.INCREMENT.name(),STATUS.Blank,STATUS.Ready,
 						pipePump.getInstanceConfig().getPipeParams().showInfoLog());  
@@ -200,7 +200,7 @@ public class FlowTask {
 						pipePump.run(storeId,L1seq, false, isReferenceInstance);
 					} catch (EFException ex) {
 						log.error("try to rebuild {} storage location exception,", destination,ex);
-						Resource.EfNotifier.send("try to rebuild "+destination+" storage location exception", ex.getMessage(), false);
+						Resource.EfNotifier.send("try to rebuild "+destination+" storage location exception",instanceId, ex.getMessage(),ex.getErrorType().name(), false);
 					}
 				}else if (e.getErrorType()==ETYPE.EXTINTERRUPT){
 					log.warn("{} increment external interrupt!",instanceId);

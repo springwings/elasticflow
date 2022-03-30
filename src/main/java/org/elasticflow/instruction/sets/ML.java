@@ -59,7 +59,7 @@ public class ML extends Instruction {
 				context.getComputer().flowState.incrementCurrentTimeProcess(dataNums);
 			} catch (EFException e) {
 				log.error("batch Compute Exception", e);
-				Common.processErrorLevel(e);
+				Common.processErrorLevel(e,context.getInstanceConfig().getInstanceID());
 			} finally {
 				DSReader.close();
 			}

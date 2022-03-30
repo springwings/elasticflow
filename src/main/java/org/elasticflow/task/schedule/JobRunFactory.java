@@ -8,6 +8,7 @@ import org.quartz.JobExecutionException;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.elasticflow.yarn.Resource;
 
 /**
@@ -22,8 +23,8 @@ public class JobRunFactory implements Job {
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		JobModel job = (JobModel) context.getMergedJobDataMap().get(GlobalParam.FLOW_TAG._DEFAULT.name());
 		if (!invokeMethod(job)) {
-			Resource.EfNotifier.send(" [" + GlobalParam.PROJ + "] " + GlobalParam.RUN_ENV,
-					"job [" + job.getJobName() + "] fire fail,with invokeMethod error!",true);
+			Resource.EfNotifier.send(" [" + GlobalParam.PROJ + "] " + GlobalParam.RUN_ENV,job.getJobName(),
+					"job [" + job.getJobName() + "] fire fail,with invokeMethod error!",EFException.ETYPE.PARAMETER_ERROR.name(),true);
 		}
 	}
 

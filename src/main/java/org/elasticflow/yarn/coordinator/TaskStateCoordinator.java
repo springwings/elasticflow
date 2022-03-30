@@ -200,7 +200,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 		} catch (EFException e) {
 			Common.LOG.error("instance {},L1seq {},getStoreId exception!", instance, L1seq, e);
 			EFPipeUtil.removeInstance(instance, true, true);
-			Common.processErrorLevel(e);
+			Common.processErrorLevel(e,instance);
 		}
 		return null;
 	}

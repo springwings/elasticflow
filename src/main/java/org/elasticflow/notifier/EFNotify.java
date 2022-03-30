@@ -17,5 +17,5 @@ public interface EFNotify {
 	 * @param sync  ,is synchronous send mode or not
 	 * @return
 	 */
-	public boolean send(final String subject, final String content,boolean sync);
+	public boolean send(final String subject,final String instance, final String content, final String errorType,boolean sync);
 }

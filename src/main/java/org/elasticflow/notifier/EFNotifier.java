@@ -24,12 +24,12 @@ public class EFNotifier implements EFNotify{
 	}
 
 	@Override
-	public boolean send(String subject, String content, boolean sync) {
+	public boolean send(String subject,String instance, String content,String errorType, boolean sync) {
 		boolean sendstate = true;
 		if(GlobalParam.SEND_EMAIL_ON) 
-			sendstate &= mailSender.send(subject, content, sync);
+			sendstate &= mailSender.send(subject,instance,content,errorType,sync);
 		if(GlobalParam.SEND_API_ON!="") 
-			sendstate &= apiSender.send(subject, content, sync);
+			sendstate &= apiSender.send(subject,instance,content,errorType,sync);
 		return sendstate;
 	}
 }

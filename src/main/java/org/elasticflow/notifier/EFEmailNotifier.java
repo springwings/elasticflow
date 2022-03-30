@@ -33,19 +33,19 @@ public class EFEmailNotifier implements EFNotify {
 	private static Logger log = LoggerFactory.getLogger(EFEmailNotifier.class);
 
 	@Override
-	public boolean send(final String subject, final String content, final boolean sync) {
+	public boolean send(final String subject,final String instance, final String content,final String errorType, final boolean sync) {
 		if (sync) {
-			return sendHtmlMailSyncMode(subject, content);
+			return sendHtmlMailSyncMode(subject,instance,content,errorType);
 		} else {
-			sendHtmltMailAsyncMode(subject, content);
+			sendHtmltMailAsyncMode(subject,instance,content,errorType);
 		}
 		return true;
 	}
 
-	public void sendHtmltMailAsyncMode(final String subject, final String content) {
+	public void sendHtmltMailAsyncMode(final String subject, final String instance,final String content,final String errorType) {
 		Resource.ThreadPools.execute(() -> {
 			try {
-				boolean b = sendHtmlMailSyncMode(subject, content);
+				boolean b = sendHtmlMailSyncMode(subject,instance, content,errorType);
 				if (b) {
 					log.info("email send success!");
 				} else {
@@ -57,7 +57,7 @@ public class EFEmailNotifier implements EFNotify {
 		});
 	}
 
-	public boolean sendHtmlMailSyncMode(String subject, String content) {
+	public boolean sendHtmlMailSyncMode(final String subject, final String instance,final String content,final String errorType) {
 		EmailConfig emailInfo = getEmailConfig(subject);
 		emailInfo.setSubject(subject);
 		emailInfo.setContent(content);

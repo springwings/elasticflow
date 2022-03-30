@@ -18,21 +18,23 @@ import com.alibaba.fastjson.JSONObject;
 public class EFApiNotifier implements EFNotify{
 
 	@Override
-	public boolean send(String subject, String content, boolean sync) {
+	public boolean send(String subject, String instance,String content, String errorType, boolean sync) {
 		if(sync) {
-			return this.sendSyncMode(subject, content);
+			return this.sendSyncMode(subject,instance, content,errorType);
 		}else {
 			Resource.ThreadPools.execute(() -> { 
-				this.sendSyncMode(subject, content);
+				this.sendSyncMode(subject,instance, content,errorType);
 			});
 		}
 		return true;
 	}
 	
-	public boolean sendSyncMode(String subject, String content) {
+	public boolean sendSyncMode(String subject,String instance, String content, String errorType) {
 		JSONObject jO = new JSONObject();
 		jO.put("subject", subject);
 		jO.put("ip", GlobalParam.IP);
+		jO.put("instance", instance);
+		jO.put("type", errorType);
 		jO.put("content", content);
 		String response = EFHttpClientUtil.process(GlobalParam.SEND_API_ON,
 				jO.toJSONString(), HttpPut.METHOD_NAME, EFHttpClientUtil.DEFAULT_CONTENT_TYPE, 3000);
