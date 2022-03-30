@@ -64,6 +64,14 @@ public class Breaker {
 			return Integer.MAX_VALUE;
 		}
 	}
+	
+	public String getReason() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("fail times:"+String.valueOf(this.failTimes));
+		sb.append("\n");
+		sb.append("fail interval:"+String.valueOf(failInterval()));
+		return sb.toString();
+	}
 
 	public boolean isOn() {
 		long current = System.currentTimeMillis();

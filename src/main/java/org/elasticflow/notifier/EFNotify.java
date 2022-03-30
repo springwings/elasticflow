@@ -11,10 +11,12 @@ package org.elasticflow.notifier;
 public interface EFNotify {
 	
 	/**
-	 * Notifier 
-	 * @param subject  information subject
-	 * @param content  information contents
-	 * @param sync  ,is synchronous send mode or not
+	 * Notifier
+	 * @param subject    information subject
+	 * @param instance   
+	 * @param content    information contents
+	 * @param errorType  
+	 * @param sync       is synchronous send mode or not
 	 * @return
 	 */
 	public boolean send(final String subject,final String instance, final String content, final String errorType,boolean sync);

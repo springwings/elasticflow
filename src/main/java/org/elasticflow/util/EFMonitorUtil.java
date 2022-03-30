@@ -322,6 +322,8 @@ public class EFMonitorUtil {
 					if (L1seq != "") {
 						appendPipe = "Seq(" + L1seq + ") ";
 					}
+					Task.put(appendPipe + "Breaker is on", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breakerIsOn());
+					Task.put(appendPipe + "Valve turn level", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).valveTurnLevel());
 					JSONObject tmp;
 					if(GlobalParam.DISTRIBUTE_RUN) {
 						tmp = GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(config.getInstanceID(), L1seq);						
@@ -345,7 +347,7 @@ public class EFMonitorUtil {
 			}			
 				
 			if((type&4)>0) {
-				if (config.openTrans()) {
+				if (config.openTrans()) { 
 					Task.put("Incremental storage status", GlobalParam.TASK_COORDER.getInstanceScanDatas(instance,false));
 					Task.put("Full storage status",GlobalParam.TASK_COORDER.getInstanceScanDatas(instance,true));
 					Task.put("Full progress", new JSONObject());

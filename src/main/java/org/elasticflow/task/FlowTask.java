@@ -71,6 +71,14 @@ public class FlowTask {
 		destination = getDestination();
 		instanceId = pipePump.getInstanceID();
 	}
+	
+	public boolean breakerIsOn() {
+		return breaker.isOn();
+	}
+	
+	public int valveTurnLevel() {
+		return valve.getTurnLevel();
+	}
 
 	/**
 	 * if no full job will auto open optimize job
@@ -236,10 +244,14 @@ public class FlowTask {
 	}	
 	
 	private boolean runConditionCheck() {
-		if(breaker.isOn())
+		if(breaker.isOn()) {
+			Resource.EfNotifier.send(this.instanceId+" breaker is on",
+					this.instanceId,breaker.getReason(),EFException.ETYPE.DATA_ERROR.name(),true);
 			return false;
-		if(valve.isOn())
+		}			
+		if(valve.isOn()) {
 			return false;
+		}
 		return true;
 	}
 	
