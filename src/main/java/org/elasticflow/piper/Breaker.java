@@ -70,6 +70,8 @@ public class Breaker {
 		sb.append("fail times:"+String.valueOf(this.failTimes));
 		sb.append("\n");
 		sb.append("fail interval:"+String.valueOf(failInterval()));
+		sb.append("\n");
+		sb.append("fail times > "+String.valueOf(maxFailTime) +" OR fail Interval < "+String.valueOf(perFailTime));
 		return sb.toString();
 	}
 

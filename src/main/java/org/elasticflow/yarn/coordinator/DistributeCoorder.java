@@ -105,7 +105,7 @@ public class DistributeCoorder {
 
 	public JSONObject getPipeEndStatus(String instance, String L1seq) {
 		for (EFNode node : nodes) {
-			if (node.containInstace(instance)) {
+			if (node.containInstace(instance) && node.isLive()) {
 				JSONObject jo = node.getEFMonitorCoord().getPipeEndStatus(instance, L1seq);
 				jo.put("nodeIP", node.getIp());
 				jo.put("nodeID", node.getNodeId());
@@ -345,15 +345,36 @@ public class DistributeCoorder {
 		Common.LOG.info("finish cluster init rebalance!");
 	}
 
+	/**
+	 * distribute Instances over cluster
+	 * @param runInstances
+	 */
 	private void distributeInstances(Queue<String> runInstances) {
-		if (runInstances.size() > 0) {
-			for (EFNode node : nodes) {
-				while (node.getBindInstances().size() < avgInstanceNum) {
-					if (runInstances.isEmpty())
+		if (runInstances.size() > 0) { 
+			synchronized(nodes) {
+				EFNode removeNode = null;
+				for(EFNode node:nodes) {
+					while (node.getBindInstances().size() < avgInstanceNum) {
+						if (runInstances.isEmpty())
+							break;
+						try {
+							node.pushInstance(runInstances.poll(), true);
+						}catch(Exception e) {
+							removeNode = node;
+							break;
+						}
+					}
+					if(removeNode!=null)
 						break;
-					node.pushInstance(runInstances.poll(), true);
+				}				 
+				if(removeNode!=null) {
+					if(nodes.contains(removeNode)) {
+						nodes.remove(removeNode);
+					}
+					this.avgInstanceNum = avgInstanceNum();
+					distributeInstances(runInstances);
 				}
-			}
+			} 
 		}
 	}
 
