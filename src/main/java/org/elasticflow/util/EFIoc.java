@@ -7,8 +7,7 @@
  */
 package org.elasticflow.util;
 
-import java.io.FileNotFoundException;
-
+import org.apache.log4j.PropertyConfigurator;
 import org.elasticflow.config.GlobalParam;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -26,8 +25,8 @@ public final class EFIoc {
 
 	static {
 		try {
-			org.springframework.util.Log4jConfigurer.initLogging(GlobalParam.configPath + "/log4j.properties");
-		} catch (FileNotFoundException e) {
+			PropertyConfigurator.configure(GlobalParam.configPath + "/log4j.properties");
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		ACT = new ClassPathXmlApplicationContext("spring.xml");
