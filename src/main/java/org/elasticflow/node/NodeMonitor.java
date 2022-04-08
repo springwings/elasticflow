@@ -382,7 +382,7 @@ public final class NodeMonitor {
 			dt.put("CPU", SystemInfoUtil.getCpuUsage());
 			dt.put("MEMORY", SystemInfoUtil.getMemUsage());
 		} catch (Exception e) {
-			Common.LOG.error(" getStatus Exception ", e);
+			Common.LOG.error("getStatus Exception ", e);
 		}
 		if (GlobalParam.DISTRIBUTE_RUN) {
 			dt.put("SLAVES", GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodeStatus());

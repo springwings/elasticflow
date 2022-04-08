@@ -288,7 +288,7 @@ public class EFMonitorUtil {
 					for(String seq:wp.getL1seq()) {
 						poolstatus.put(seq, getConnectionStatus(instance,wp.getPoolName(seq)));
 					}					
-					Reader.put("Pool Status", poolstatus);
+					Reader.put("pool_status", poolstatus);
 				}
 				
 
@@ -298,7 +298,7 @@ public class EFMonitorUtil {
 					for(String seq:wp.getL1seq()) {
 						poolstatus.put(seq, getConnectionStatus(instance,wp.getPoolName(seq)));
 					}						
-					Writer.put("Pool Status", poolstatus);
+					Writer.put("pool_status", poolstatus);
 				}
 
 				if ((GlobalParam.SERVICE_LEVEL & 1) > 0) {
@@ -306,9 +306,9 @@ public class EFMonitorUtil {
 					String searcherInfo = "";
 					if (config.getPipeParams().getWriteTo() != null
 							&& config.getPipeParams().getWriteTo().equals(searchFrom)) {
-						searcherInfo = "Pool (Default Writer) Status";
+						searcherInfo = "pool_status_(default_is_writer)";
 					} else {
-						searcherInfo = "Pool Status";
+						searcherInfo = "pool_status";
 					}					
 					String poolname = Resource.nodeConfig.getWarehouse().get(searchFrom).getPoolName(GlobalParam.DEFAULT_RESOURCE_SEQ);
 					Searcher.put(searcherInfo, getConnectionStatus(instance,poolname));					
@@ -322,25 +322,25 @@ public class EFMonitorUtil {
 					if (L1seq != "") {
 						appendPipe = "Seq(" + L1seq + ") ";
 					}
-					Task.put(appendPipe + "Breaker is on", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breakerIsOn());
-					Task.put(appendPipe + "Valve turn level", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).valveTurnLevel());
+					Task.put(appendPipe + "breaker_is_on", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breakerIsOn());
+					Task.put(appendPipe + "valve_turn_level", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).valveTurnLevel());
 					JSONObject tmp;
 					if(GlobalParam.DISTRIBUTE_RUN) {
 						tmp = GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(config.getInstanceID(), L1seq);						
 					} else {
 						tmp = getPipeEndStatus(config.getInstanceID(), L1seq);
 					} 
-					Searcher.put(appendPipe + "FlowState", tmp.get(END_TYPE.searcher.name()));
-					Reader.put(appendPipe + "FlowState", tmp.get(END_TYPE.reader.name()));
+					Searcher.put(appendPipe + "flow_state", tmp.get(END_TYPE.searcher.name()));
+					Reader.put(appendPipe + "flow_state", tmp.get(END_TYPE.reader.name()));
 					if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {
-						Computer.put(appendPipe + "FlowState", tmp.get(END_TYPE.computer.name()));
+						Computer.put(appendPipe + "flow_state", tmp.get(END_TYPE.computer.name()));
 					}
 					if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
-						Writer.put(appendPipe + "FlowState", tmp.get(END_TYPE.writer.name()));
+						Writer.put(appendPipe + "flow_state", tmp.get(END_TYPE.writer.name()));
 					}
-					nodeInfo.put(appendPipe+"nodeIP", tmp.get("nodeIP"));
-					nodeInfo.put(appendPipe+"nodeID", tmp.get("nodeID")); 
-					nodeInfo.put(appendPipe+"pipeSize", 
+					nodeInfo.put(appendPipe+"node_iP", tmp.get("nodeIP"));
+					nodeInfo.put(appendPipe+"node_iP", tmp.get("nodeID")); 
+					nodeInfo.put(appendPipe+"node_iP", 
 							Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadPageSize());
 					nodeInfo.put(appendPipe+"status", tmp.get("status"));
 				}
@@ -348,32 +348,32 @@ public class EFMonitorUtil {
 				
 			if((type&4)>0) {
 				if (config.openTrans()) { 
-					Task.put("Incremental storage status", GlobalParam.TASK_COORDER.getInstanceScanDatas(instance,false));
-					Task.put("Full storage status",GlobalParam.TASK_COORDER.getInstanceScanDatas(instance,true));
-					Task.put("Full progress", new JSONObject());
+					Task.put("incremental_storage_status", GlobalParam.TASK_COORDER.getInstanceScanDatas(instance,false));
+					Task.put("full_storage_status",GlobalParam.TASK_COORDER.getInstanceScanDatas(instance,true));
+					Task.put("full_progress", new JSONObject());
 					if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.FULL.name())
 							|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()).size() == 0) {
-						Task.getJSONObject("Full progress").put("full","none");
+						Task.getJSONObject("full_progress").put("full","none");
 					} else {
-						Task.getJSONObject("Full progress").put("full",Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()));
+						Task.getJSONObject("full_progress").put("full",Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()));
 					}
 					if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.INCREMENT.name())
 							|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()).size() == 0) {
-						Task.put("Incremental progress", "none");
+						Task.put("incremental_progress", "none");
 					} else {
-						Task.put("Incremental progress",
+						Task.put("incremental_progress",
 								Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()));
 					}
-					Task.put("Incremental thread status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
-					Task.put("Full thread status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
+					Task.put("incremental_thread_status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
+					Task.put("iull_thread_status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
 				}	
 			}
-			JO.put("Reader", Reader);
-			JO.put("Computer", Computer);
-			JO.put("Writer", Writer); 
-			JO.put("Searcher", Searcher);
-			JO.put("Task", Task);
-			JO.put("NodeInfo", nodeInfo);
+			JO.put("reader", Reader);
+			JO.put("computer", Computer);
+			JO.put("writer", Writer); 
+			JO.put("searcher", Searcher);
+			JO.put("task", Task);
+			JO.put("node_info", nodeInfo);
 		} 		
 		return JO;
 	}
