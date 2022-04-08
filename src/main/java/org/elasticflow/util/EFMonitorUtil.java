@@ -258,6 +258,8 @@ public class EFMonitorUtil {
 				res.put(END_TYPE.computer.name(), pipePump.getComputer().flowState.get());
 			}
 			res.put("status", "online");
+			res.put("nodeIP", GlobalParam.IP);
+			res.put("nodeID", GlobalParam.NODEID);
 		}
 		return res;
 	}
@@ -320,7 +322,7 @@ public class EFMonitorUtil {
 				for (String L1seq : L1seqs) {	 
 					String appendPipe = "";
 					if (L1seq != "") {
-						appendPipe = "Seq(" + L1seq + ") ";
+						appendPipe = "L1seq(" + L1seq + ")_";
 					}
 					Task.put(appendPipe + "breaker_is_on", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breakerIsOn());
 					Task.put(appendPipe + "valve_turn_level", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).valveTurnLevel());
@@ -338,9 +340,9 @@ public class EFMonitorUtil {
 					if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
 						Writer.put(appendPipe + "flow_state", tmp.get(END_TYPE.writer.name()));
 					}
-					nodeInfo.put(appendPipe+"node_iP", tmp.get("nodeIP"));
-					nodeInfo.put(appendPipe+"node_iP", tmp.get("nodeID")); 
-					nodeInfo.put(appendPipe+"node_iP", 
+					nodeInfo.put(appendPipe+"node_ip", tmp.get("nodeIP"));
+					nodeInfo.put(appendPipe+"node_id", tmp.get("nodeID")); 
+					nodeInfo.put(appendPipe+"pipe_size", 
 							Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadPageSize());
 					nodeInfo.put(appendPipe+"status", tmp.get("status"));
 				}

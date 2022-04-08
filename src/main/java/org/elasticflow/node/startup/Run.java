@@ -104,7 +104,7 @@ public final class Run {
 			}
 		}
 		
-		Resource.ThreadPools = new ThreadPools(Integer.parseInt(GlobalParam.StartConfig.getProperty("sys_threadpool_size")));
+		Resource.ThreadPools = new ThreadPools(GlobalParam.STS_THREADPOOL_SIZE);
 		if(openThreadPools>0 && GlobalParam.DISTRIBUTE_RUN==false) {
 			Resource.ThreadPools.start();
 		}

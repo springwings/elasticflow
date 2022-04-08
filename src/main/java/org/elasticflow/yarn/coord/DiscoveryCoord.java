@@ -16,9 +16,9 @@ package org.elasticflow.yarn.coord;
  */
 public interface DiscoveryCoord extends Coordination{
 	
-	public void reportStatus(String ip,String nodeId);
+	public void reportStatus(String ip,int nodeId);
 	
-	public void leaveCluster(String ip,String nodeId);
+	public void leaveCluster(String ip,int nodeId);
 	
 	/**Notify the cluster to start the task*/
 	public boolean runInstanceNow(String instance,String type,boolean asyn);

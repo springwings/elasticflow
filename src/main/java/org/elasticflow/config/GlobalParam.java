@@ -7,13 +7,11 @@
  */
 package org.elasticflow.config;
 
-import java.net.InetAddress;
 import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Properties;
 
 import org.elasticflow.model.FormatProperties;
-import org.elasticflow.util.Common;
 import org.elasticflow.yarn.coord.DiscoveryCoord;
 import org.elasticflow.yarn.coord.InstanceCoord;
 import org.elasticflow.yarn.coord.TaskStateCoord;
@@ -61,7 +59,7 @@ public final class GlobalParam {
 
 	public static String INSTANCE_PATH;
 
-	public static String IP;
+	public static String IP = "127.0.0.1";
 	
 	/**Computer parameters*/
 	public final static String MAIN_PY = "entrance";
@@ -87,7 +85,9 @@ public final class GlobalParam {
 
 	public static int CLUSTER_MIN_NODES;
 
-	public static String NODEID = System.getProperty("nodeid");
+	public final static int NODEID = Integer.valueOf(System.getProperty("nodeid"));
+	
+	public final static int STS_THREADPOOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("sys_threadpool_size"));
 
 	public static String MASTER_HOST = "";
 
@@ -265,13 +265,4 @@ public final class GlobalParam {
 	public static final String READER_SCAN_KEY = "_SCAN_FIELD";
 	public static final String READER_LAST_STAMP = "lastUpdateTime";
 	public static final String READER_STATUS = "_reader_status";
-
-	/** ------------static init------------ */
-	static {
-		try {
-			IP = InetAddress.getLocalHost().getHostAddress();
-		} catch (Exception e) {
-			Common.LOG.error("getHostAddress Exception ", e);
-		}
-	}
 }
