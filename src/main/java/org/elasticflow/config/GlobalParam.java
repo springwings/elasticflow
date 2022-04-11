@@ -87,7 +87,7 @@ public final class GlobalParam {
 
 	public final static int NODEID = Integer.valueOf(System.getProperty("nodeid"));
 	
-	public final static int STS_THREADPOOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("sys_threadpool_size"));
+	public static int STS_THREADPOOL_SIZE = 100;
 
 	public static String MASTER_HOST = "";
 

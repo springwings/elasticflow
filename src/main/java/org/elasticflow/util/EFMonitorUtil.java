@@ -324,8 +324,8 @@ public class EFMonitorUtil {
 					if (L1seq != "") {
 						appendPipe = "L1seq(" + L1seq + ")_";
 					}
-					Task.put(appendPipe + "breaker_is_on", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breakerIsOn());
-					Task.put(appendPipe + "valve_turn_level", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).valveTurnLevel());
+					Task.put(appendPipe + "breaker_is_on", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.isOn());
+					Task.put(appendPipe + "valve_turn_level", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).valve.getTurnLevel());
 					JSONObject tmp;
 					if(GlobalParam.DISTRIBUTE_RUN) {
 						tmp = GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(config.getInstanceID(), L1seq);						
@@ -366,8 +366,8 @@ public class EFMonitorUtil {
 						Task.put("incremental_progress",
 								Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()));
 					}
-					Task.put("incremental_thread_status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
-					Task.put("iull_thread_status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
+					Task.put("full_thread_status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
+					Task.put("incremental_thread_status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));					
 				}	
 			}
 			JO.put("reader", Reader);

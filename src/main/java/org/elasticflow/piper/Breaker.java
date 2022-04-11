@@ -25,6 +25,8 @@ import org.elasticflow.util.Common;
 public class Breaker {
 
 	private long earlyFailTime;
+	
+	private boolean openBreaker = false;
 
 	private int failTimes;
 
@@ -45,9 +47,10 @@ public class Breaker {
 		this.reset();
 	}
 
-	private void reset() {
+	public void reset() {
 		this.failTimes = 0;
 		this.earlyFailTime = 0;
+		this.closeBreaker();
 	}
 
 	public void log() {
@@ -67,6 +70,8 @@ public class Breaker {
 	
 	public String getReason() {
 		StringBuffer sb = new StringBuffer();
+		sb.append("breaker is manual opening:"+String.valueOf(this.openBreaker));
+		sb.append("\n");
 		sb.append("fail times:"+String.valueOf(this.failTimes));
 		sb.append("\n");
 		sb.append("fail interval:"+String.valueOf(failInterval()));
@@ -74,12 +79,17 @@ public class Breaker {
 		sb.append("fail times > "+String.valueOf(maxFailTime) +" OR fail Interval < "+String.valueOf(perFailTime));
 		return sb.toString();
 	}
+	
+	public void openBreaker() {
+		this.openBreaker = true;
+	}
+	
+	public void closeBreaker() {
+		this.openBreaker = false;
+	}
 
 	public boolean isOn() {
-		long current = System.currentTimeMillis();
-		if (this.failTimes >= maxFailTime || failInterval() <= perFailTime) {
-			reset();
-			this.earlyFailTime = current;
+		if (this.openBreaker || this.failTimes >= maxFailTime || failInterval() <= perFailTime) {
 			Common.LOG.warn("{} is auto breaked!", instance);
 			return true;
 		}

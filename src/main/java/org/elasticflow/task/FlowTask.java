@@ -37,8 +37,8 @@ public class FlowTask {
 	/**Used to control multiple tasks to write data to the same place*/
 	private boolean isReferenceInstance = false;
 	private PipePump pipePump;
-	private Breaker breaker;
-	private Valve valve;
+	public Breaker breaker;
+	public Valve valve;
 	/**
 	 * seq for scan series datas
 	 */
@@ -72,14 +72,7 @@ public class FlowTask {
 		instanceId = pipePump.getInstanceID();
 	}
 	
-	public boolean breakerIsOn() {
-		return breaker.isOn();
-	}
 	
-	public int valveTurnLevel() {
-		return valve.getTurnLevel();
-	}
-
 	/**
 	 * if no full job will auto open optimize job
 	 * @throws EFException 

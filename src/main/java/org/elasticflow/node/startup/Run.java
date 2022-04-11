@@ -128,6 +128,7 @@ public final class Run {
 		GlobalParam.SERVICE_LEVEL = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
 		if(!GlobalParam.StartConfig.get("node_ip").equals(""))
 			GlobalParam.IP = GlobalParam.StartConfig.get("node_ip").toString();
+		GlobalParam.STS_THREADPOOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("sys_threadpool_size"));
 		GlobalParam.CLUSTER_MIN_NODES = Integer.parseInt(GlobalParam.StartConfig.getProperty("min_nodes"));
 		
 		switch(GlobalParam.StartConfig.getProperty("node_type")) {
