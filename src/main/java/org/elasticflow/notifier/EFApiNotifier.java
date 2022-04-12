@@ -1,6 +1,6 @@
 package org.elasticflow.notifier;
 
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpPost;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.util.EFHttpClientUtil;
 import org.elasticflow.yarn.Resource;
@@ -37,7 +37,7 @@ public class EFApiNotifier implements EFNotify{
 		jO.put("type", errorType);
 		jO.put("content", content);
 		String response = EFHttpClientUtil.process(GlobalParam.SEND_API_ON,
-				jO.toJSONString(), HttpPut.METHOD_NAME, EFHttpClientUtil.DEFAULT_CONTENT_TYPE, 3000);
+				jO.toJSONString(), HttpPost.METHOD_NAME, EFHttpClientUtil.DEFAULT_CONTENT_TYPE, 3000);
 		JSONObject jr = JSONObject.parseObject(response);
 		if(jr.containsKey("status")) {
 			if (Integer.valueOf(String.valueOf(jr.get("status"))) == 0)
