@@ -6,7 +6,7 @@
 	<groupId>org.elasticflow</groupId>
 	<artifactId>elasticflow</artifactId>
 	<packaging>jar</packaging>
-	<version>5.3.7</version>
+	<version>5.4.1</version>
 	<name>elasticflow</name>
 	<description>ElasticFlow是一个开源数据流系统，支持在任意类型数据端之间以及数据与用户之间通过建立可计算流通道，进行可定时定量多渠道方式交换数据服务。可用于数据交换、通用搜索引擎、数据发布服务等项目。</description>
 	<url>https://github.com/springwings/elasticflow/tree/master</url>
@@ -56,12 +56,7 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
 			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-orm</artifactId>
-			<version>${spring.version}</version>
-		</dependency>		
+		</dependency> 
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
