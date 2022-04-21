@@ -169,6 +169,10 @@ public final class Run {
 		}
 	}
 	
+	/**
+	 * External loading plug-ins
+	 * @param plugin	Jar package storage path 
+	 */
 	private void loadPlugins(String plugin) {
 		if(plugin!=null && plugin.length()>1) {
 			List<File> jars = Arrays.asList(new File(plugin).listFiles(new FilenameFilter() {
@@ -189,7 +193,7 @@ public final class Run {
 			Thread.currentThread().setContextClassLoader(GlobalParam.PLUGIN_CLASS_LOADER);  
 		}
 	}
-	
+
 	private void start() {
 		try {
 			Common.loadGlobalConfig(this.startConfigPath);
@@ -215,11 +219,15 @@ public final class Run {
 		}
 		
 	} 
-
+	
+	/**
+	 * System start position
+	 * @param args
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
 		Resource.EFLOWS = (Run) EFIoc.getBean("EFLOWS");
 		Resource.EFLOWS.start();
 		Runtime.getRuntime().addShutdownHook(new SafeShutDown());
 	}
-
 }
