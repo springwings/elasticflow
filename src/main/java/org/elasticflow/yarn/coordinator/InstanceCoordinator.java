@@ -143,8 +143,8 @@ public class InstanceCoordinator implements InstanceCoord {
 		if(waitComplete)
 			EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
 		if (Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType() > 0) {
-			Resource.FLOW_INFOS.remove(instance, JOB_TYPE.FULL.name());
-			Resource.FLOW_INFOS.remove(instance, JOB_TYPE.INCREMENT.name());
+			Resource.flowInfos.remove(instance, JOB_TYPE.FULL.name());
+			Resource.flowInfos.remove(instance, JOB_TYPE.INCREMENT.name());
 		}		
 		EFPipeUtil.removeInstance(instance, true, true);
 		EFMonitorUtil.removeConfigInstance(instance);
@@ -152,7 +152,7 @@ public class InstanceCoordinator implements InstanceCoord {
 	
 	@Override
 	public boolean runInstanceNow(String instance,String type,boolean asyn) {
-		return Resource.FlOW_CENTER.runInstanceNow(instance, type, asyn);
+		return Resource.flowCenter.runInstanceNow(instance, type, asyn);
 	}
 	
 }

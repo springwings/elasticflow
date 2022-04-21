@@ -61,7 +61,7 @@ public class TaskControl extends Instruction {
 		String[] l1seqs = Common.getL1seqs(context.getInstanceConfig());
 		for (String l1seq : l1seqs) {
 			List<String> L2Seq = context.getInstanceConfig().getReadParams().getL2Seq();
-			PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(context.getInstanceConfig().getInstanceID(), l1seq,
+			PipePump pipePump = Resource.socketCenter.getPipePump(context.getInstanceConfig().getInstanceID(), l1seq,
 					false, GlobalParam.FLOW_TAG._DEFAULT.name());
 			String storeId = GlobalParam.TASK_COORDER.getStoreId(context.getInstanceConfig().getInstanceID(), l1seq,
 					pipePump.getID(), true, false);

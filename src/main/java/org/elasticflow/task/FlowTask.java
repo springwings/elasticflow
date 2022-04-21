@@ -270,7 +270,7 @@ public class FlowTask {
 			}
 		}else {
 			for (String slave : pipePump.getInstanceConfig().getPipeParams().getNextJob()) { 
-				Resource.FlOW_CENTER.runInstanceNow(slave, jobtype.name(),pipePump.getInstanceConfig().getPipeParams().isAsync());
+				Resource.flowCenter.runInstanceNow(slave, jobtype.name(),pipePump.getInstanceConfig().getPipeParams().isAsync());
 			}
 		}
 	}	

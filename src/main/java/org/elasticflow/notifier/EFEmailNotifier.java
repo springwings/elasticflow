@@ -43,7 +43,7 @@ public class EFEmailNotifier implements EFNotify {
 	}
 
 	public void sendHtmltMailAsyncMode(final String subject, final String instance,final String content,final String errorType) {
-		Resource.ThreadPools.execute(() -> {
+		Resource.threadPools.execute(() -> {
 			try {
 				boolean b = sendHtmlMailSyncMode(subject,instance, content,errorType);
 				if (b) {

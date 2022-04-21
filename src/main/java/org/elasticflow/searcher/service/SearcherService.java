@@ -67,7 +67,7 @@ public class SearcherService{
 		String pipe = request.getPipe(); 
 		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getSearchConfigs();
 		if (configMap.containsKey(pipe)) {  
-			Resource.SOCKET_CENTER.getSearcher(pipe,"","",false).startSearch(request,response);
+			Resource.socketCenter.getSearcher(pipe,"","",false).startSearch(request,response);
 		}   
 		response.setEndTime(System.currentTimeMillis());  
 		return response;

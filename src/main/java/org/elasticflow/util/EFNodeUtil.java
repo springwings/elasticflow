@@ -92,7 +92,7 @@ public final class EFNodeUtil {
 	 * Communication from slave node to master node
 	 */
 	public static void initSlaveCoorder() {
-		Resource.ThreadPools.execute(() -> {
+		Resource.threadPools.execute(() -> {
 			boolean redo = true;
 			while (redo) {
 				try {

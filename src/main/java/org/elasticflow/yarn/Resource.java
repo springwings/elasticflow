@@ -35,9 +35,9 @@ import com.alibaba.fastjson.JSONObject;
  */
 public final class Resource {
 
-	public static SocketCenter SOCKET_CENTER;
+	public static SocketCenter socketCenter;
 
-	public static FlowCenter FlOW_CENTER;
+	public static FlowCenter flowCenter;
 
 	public static NodeMonitor nodeMonitor;
 
@@ -52,15 +52,15 @@ public final class Resource {
 	public static Run EFLOWS;
 
 	/** FLOW_INFOS store current flow running state information */
-	public final static EFState<HashMap<String, String>> FLOW_INFOS = new EFState<HashMap<String, String>>();
+	public final static EFState<HashMap<String, String>> flowInfos = new EFState<HashMap<String, String>>();
 
-	public final static ConcurrentHashMap<String, JSONObject> FLOW_STATES = new ConcurrentHashMap<>();
+	public final static ConcurrentHashMap<String, JSONObject> flowStates = new ConcurrentHashMap<>();
 
-	public volatile static HashMap<String, EFConnectionSocket<?>> EFCONNS = new HashMap<>();
+	public volatile static HashMap<String, EFConnectionSocket<?>> EFConns = new HashMap<>();
 
 	public static ConcurrentHashMap<String, FlowTask> tasks;
 
-	public static ThreadPools ThreadPools;
+	public static ThreadPools threadPools;
 	
 	public static SearcherService searcherService;
 

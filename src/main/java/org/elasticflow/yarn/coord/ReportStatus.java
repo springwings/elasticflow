@@ -38,7 +38,7 @@ public final class ReportStatus {
 	public static void openHeartBeat() {
 		if (EFNodeUtil.isMaster() == false) {
 			openHeartBeat = true;
-			Resource.ThreadPools.execute(() -> {
+			Resource.threadPools.execute(() -> {
 				while (openHeartBeat) {
 					try {
 						Thread.sleep(GlobalParam.NODE_LIVE_TIME/2);

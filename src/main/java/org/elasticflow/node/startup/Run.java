@@ -79,8 +79,8 @@ public final class Run {
 		Resource.EfNotifier = new EFNotifier();
 		Resource.tasks = new ConcurrentHashMap<String, FlowTask>();
 		Resource.taskJobCenter = new TaskJobCenter();
-		Resource.SOCKET_CENTER =  new SocketCenter();
-		Resource.FlOW_CENTER = new FlowCenter();
+		Resource.socketCenter =  new SocketCenter();
+		Resource.flowCenter = new FlowCenter();
 		Resource.nodeMonitor = new NodeMonitor(); 
 		
 		if(!EFNodeUtil.isSlave()) {//for master
@@ -104,9 +104,9 @@ public final class Run {
 			}
 		}
 		
-		Resource.ThreadPools = new ThreadPools(GlobalParam.STS_THREADPOOL_SIZE);
+		Resource.threadPools = new ThreadPools(GlobalParam.STS_THREADPOOL_SIZE);
 		if(openThreadPools>0 && GlobalParam.DISTRIBUTE_RUN==false) {
-			Resource.ThreadPools.start();
+			Resource.threadPools.start();
 		}
 		
 		if(EFNodeUtil.isSlave()) {
@@ -159,7 +159,7 @@ public final class Run {
 			if ((GlobalParam.SERVICE_LEVEL & 16) > 0)
 				(new ComputerService()).start(); 
 			if ((GlobalParam.SERVICE_LEVEL & 8) > 0) {
-				Resource.FlOW_CENTER.startInstructionsJob(); 
+				Resource.flowCenter.startInstructionsJob(); 
 			}				
 			new EFMonitorService().start();
 		} 		

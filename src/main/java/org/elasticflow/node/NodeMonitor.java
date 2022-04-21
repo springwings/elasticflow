@@ -374,9 +374,9 @@ public final class NodeMonitor {
 		dt.put("STATUS", "running");
 		dt.put("VERSION", GlobalParam.VERSION);
 		dt.put("TASKS", Resource.tasks.size());
-		dt.put("THREAD_POOL_SIZE", Resource.ThreadPools.getPoolSize());
+		dt.put("THREAD_POOL_SIZE", Resource.threadPools.getPoolSize());
 		dt.put("SYS_THREAD_POOL_SIZE", GlobalParam.STS_THREADPOOL_SIZE);
-		dt.put("THREAD_ACTIVE_COUNT", Resource.ThreadPools.getActiveCount());
+		dt.put("THREAD_ACTIVE_COUNT", Resource.threadPools.getActiveCount());
 		dt.put("DISTRIBUTE_RUN", GlobalParam.DISTRIBUTE_RUN);
 		try {
 			dt.put("CPU", SystemInfoUtil.getCpuUsage());
@@ -590,7 +590,7 @@ public final class NodeMonitor {
 					state = GlobalParam.INSTANCE_COORDER.distributeCoorder()
 							.runClusterInstanceNow(RR.getStringParam("instance"), RR.getStringParam("jobtype"), true);
 				} else {
-					state = Resource.FlOW_CENTER.runInstanceNow(RR.getStringParam("instance"), RR.getStringParam("jobtype"),
+					state = Resource.flowCenter.runInstanceNow(RR.getStringParam("instance"), RR.getStringParam("jobtype"),
 							true);
 				}
 
@@ -658,8 +658,8 @@ public final class NodeMonitor {
 				if (!Resource.nodeConfig.getInstanceConfigs().containsKey(RR.getStringParam("instance")))
 					setResponse(RESPONSE_STATUS.DataErr, RR.getStringParam("instance") + " not exists!", null);
 			}
-			Resource.FLOW_INFOS.remove(RR.getStringParam("instance"), JOB_TYPE.FULL.name());
-			Resource.FLOW_INFOS.remove(RR.getStringParam("instance"), JOB_TYPE.INCREMENT.name());
+			Resource.flowInfos.remove(RR.getStringParam("instance"), JOB_TYPE.FULL.name());
+			Resource.flowInfos.remove(RR.getStringParam("instance"), JOB_TYPE.INCREMENT.name());
 			if (RR.getParams().get("reset") != null && RR.getStringParam("reset").equals("true")
 					&& RR.getStringParam("instance").length() > 2) {
 				Resource.nodeConfig.loadConfig(instanceConfig, true);
@@ -748,7 +748,7 @@ public final class NodeMonitor {
 						String tags = Common.getResourceTag(instance, L1seq, GlobalParam.FLOW_TAG._DEFAULT.name(),
 								false);
 						try {
-							WriterFlowSocket wfs = Resource.SOCKET_CENTER.getWriterSocket(
+							WriterFlowSocket wfs = Resource.socketCenter.getWriterSocket(
 									Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getWriteTo(),
 									instance, L1seq, tags);
 							wfs.PREPARE(false, false);

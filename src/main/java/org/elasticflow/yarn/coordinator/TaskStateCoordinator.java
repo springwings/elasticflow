@@ -52,7 +52,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	final static EFState<AtomicInteger> FLOW_RUN_STATUS = new EFState<>();
 
 	public String getContextId(String instance, String L1seq, String tag) {
-		return Resource.SOCKET_CENTER.getContextId(instance, L1seq, tag);
+		return Resource.socketCenter.getContextId(instance, L1seq, tag);
 	}
 
 	public void setFlowStatus(String instance, String L1seq, String tag, AtomicInteger ai) {
@@ -75,13 +75,13 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 			SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), scanStamp,isfull);
 			// update flow status,Distributed environment synchronization status
 			if (GlobalParam.DISTRIBUTE_RUN) {
-				Resource.FLOW_STATES.get(instance).put(FlowState.getStoreKey(L1seq),
+				Resource.flowStates.get(instance).put(FlowState.getStoreKey(L1seq),
 						GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(instance, L1seq));
 			} else {
-				Resource.FLOW_STATES.get(instance).put(FlowState.getStoreKey(L1seq),
+				Resource.flowStates.get(instance).put(FlowState.getStoreKey(L1seq),
 						EFMonitorUtil.getPipeEndStatus(instance, L1seq));
 			}
-			EFFileUtil.createAndSave(Resource.FLOW_STATES.get(instance).toJSONString(),
+			EFFileUtil.createAndSave(Resource.flowStates.get(instance).toJSONString(),
 					EFFileUtil.getInstancePath(instance)[2]);			
 		}
 	}
@@ -248,16 +248,16 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	}
 
 	public void setFlowInfo(String formKeyVal1, String formKeyVal2, String key, String data) {
-		if (!Resource.FLOW_INFOS.containsKey(formKeyVal1, formKeyVal2))
-			Resource.FLOW_INFOS.set(formKeyVal1, formKeyVal2, new HashMap<String, String>());
-		Resource.FLOW_INFOS.get(formKeyVal1, formKeyVal2).put(key, data);
+		if (!Resource.flowInfos.containsKey(formKeyVal1, formKeyVal2))
+			Resource.flowInfos.set(formKeyVal1, formKeyVal2, new HashMap<String, String>());
+		Resource.flowInfos.get(formKeyVal1, formKeyVal2).put(key, data);
 	}
 
 	public void resetFlowInfo(String formKeyVal1, String formKeyVal2) {
-		Resource.FLOW_INFOS.get(formKeyVal1, formKeyVal2).clear();
+		Resource.flowInfos.get(formKeyVal1, formKeyVal2).clear();
 	}
 
 	public HashMap<String, String> getFlowInfo(String formKeyVal1, String formKeyVal2) {
-		return Resource.FLOW_INFOS.get(formKeyVal1, formKeyVal2);
+		return Resource.flowInfos.get(formKeyVal1, formKeyVal2);
 	}
 }

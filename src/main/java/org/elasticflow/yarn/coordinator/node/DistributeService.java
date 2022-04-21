@@ -56,7 +56,7 @@ public class DistributeService {
 			if ((GlobalParam.SERVICE_LEVEL & 2) > 0) {
 				Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 				for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {
-					Resource.FlOW_CENTER.addFlowGovern(entry.getKey(), entry.getValue(), false, createSchedule);
+					Resource.flowCenter.addFlowGovern(entry.getKey(), entry.getValue(), false, createSchedule);
 				}
 			}
 		}
@@ -71,7 +71,7 @@ public class DistributeService {
 	}
 
 	private void monitorNodes() {
-		Resource.ThreadPools.execute(() -> {
+		Resource.threadPools.execute(() -> {
 			while (openMonitor) {
 				try {
 					Thread.sleep(GlobalParam.NODE_LIVE_TIME * 2);
@@ -84,7 +84,7 @@ public class DistributeService {
 	}
 
 	private void instanceCoordStart() {
-		Resource.ThreadPools.execute(() -> {
+		Resource.threadPools.execute(() -> {
 			try {
 				if (EFNodeUtil.isMaster()) {
 					// Channels that the slave node can operate on taskstatecoord and discoverycoord

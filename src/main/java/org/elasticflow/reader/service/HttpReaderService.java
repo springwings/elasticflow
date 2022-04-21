@@ -118,7 +118,7 @@ public class HttpReaderService {
 							if (RR.getParam("ef_is_monopoly") != null && RR.getParam("ef_is_monopoly").equals("true"))
 								monopoly = true;
 
-							PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instance, seq, false,
+							PipePump pipePump = Resource.socketCenter.getPipePump(instance, seq, false,
 									monopoly ? GlobalParam.FLOW_TAG._MOP.name() : GlobalParam.FLOW_TAG._DEFAULT.name());
 							if (pipePump == null || !pipePump.getInstanceConfig().getAlias().equals(RR.getPipe())) {
 								rps.setStatus("Writer get Error,Instance not exits!", RESPONSE_STATUS.DataErr);
@@ -164,7 +164,7 @@ public class HttpReaderService {
 						break;
 					case "get_new_storeid":
 						if (RR.getParam("instance") != null && RR.getParam("seq") != null) {
-							PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(
+							PipePump pipePump = Resource.socketCenter.getPipePump(
 									String.valueOf(RR.getParam("instance")), String.valueOf(RR.getParam("seq")), false,
 									GlobalParam.FLOW_TAG._DEFAULT.name());
 							String storeid = GlobalParam.TASK_COORDER.getStoreId(
@@ -181,7 +181,7 @@ public class HttpReaderService {
 							String storeid;
 							String instance = (String) RR.getParam("instance");
 							String seq = (String) RR.getParam("seq");
-							PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instance, seq, false,
+							PipePump pipePump = Resource.socketCenter.getPipePump(instance, seq, false,
 									GlobalParam.FLOW_TAG._DEFAULT.name());
 							if (RR.getParam("storeid") != null) {
 								storeid = (String) RR.getParam("storeid");
@@ -204,7 +204,7 @@ public class HttpReaderService {
 							SearcherModel<?, ?, ?> query = null;
 							String instance = (String) RR.getParam("instance");
 							String seq = (String) RR.getParam("seq");
-							PipePump transFlow = Resource.SOCKET_CENTER.getPipePump(instance, seq, false,
+							PipePump transFlow = Resource.socketCenter.getPipePump(instance, seq, false,
 									GlobalParam.FLOW_TAG._DEFAULT.name());
 							if (transFlow == null) {
 								rps.setStatus("Writer get Error,Instance and seq Error!", RESPONSE_STATUS.DataErr);
@@ -212,7 +212,7 @@ public class HttpReaderService {
 							}
 							String storeid = GlobalParam.TASK_COORDER.getStoreId(instance, seq, transFlow.getID(), true,
 									true);
-							WarehouseParam param = Resource.SOCKET_CENTER
+							WarehouseParam param = Resource.socketCenter
 									.getWHP(transFlow.getInstanceConfig().getPipeParams().getWriteTo());
 							switch (param.getType()) {
 							case ES:

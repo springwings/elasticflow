@@ -610,7 +610,7 @@ public final class Common {
 		if (soft)
 			SafeShutDown.stopAllInstances();
 		LOG.warn("system stop success!");
-		Resource.ThreadPools.execute(() -> {
+		Resource.threadPools.execute(() -> {
 			System.exit(0);
 		});
 	}

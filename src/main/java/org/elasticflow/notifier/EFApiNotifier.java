@@ -22,7 +22,7 @@ public class EFApiNotifier implements EFNotify{
 		if(sync) {
 			return this.sendSyncMode(subject,instance, content,errorType);
 		}else {
-			Resource.ThreadPools.execute(() -> { 
+			Resource.threadPools.execute(() -> { 
 				this.sendSyncMode(subject,instance, content,errorType);
 			});
 		}

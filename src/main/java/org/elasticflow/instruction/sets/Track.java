@@ -57,15 +57,15 @@ public class Track extends Instruction {
 		if(writeDests.length<1)
 			Common.LOG.error("build write pipe socket error!Misconfiguration writer destination!");
 		for (String dest : writeDests) {
-			wfs.add(Resource.SOCKET_CENTER.getWriterSocket(dest, instance,L1seq, ""));
+			wfs.add(Resource.socketCenter.getWriterSocket(dest, instance,L1seq, ""));
 		}
 		
 		CPU.prepare(id, Resource.nodeConfig.getInstanceConfigs().get(instance),
 				wfs,
-				Resource.SOCKET_CENTER.getReaderSocket(
+				Resource.socketCenter.getReaderSocket(
 						Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadFrom(), instance,
 						L1seq, ""),
-				Resource.SOCKET_CENTER.getComputerSocket(instance, L1seq,"",false));
+				Resource.socketCenter.getComputerSocket(instance, L1seq,"",false));
 		return true;
 
 	}

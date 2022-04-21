@@ -91,7 +91,7 @@ public class ModelService extends ComputerFlowSocket {
 	}
 
 	private synchronized void addService(int port,String pyPath) {
-		Resource.ThreadPools.execute(() -> { 
+		Resource.threadPools.execute(() -> { 
 			this.runService(port,pyPath); 
 		});		
 		for(int i=0;i<5;i++) {

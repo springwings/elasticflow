@@ -85,7 +85,7 @@ public class EFNode {
 
 	public void refresh() {
 		this.lastLiveTime = Common.getNow();		
-		Resource.ThreadPools.execute(() -> {
+		Resource.threadPools.execute(() -> {
 			double tmp[] = nodeCoord.summaryResource();
 			this.cpuUsed = tmp[0];
 			this.memUsed = tmp[1];

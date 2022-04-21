@@ -31,10 +31,10 @@ public class EFlowMonitor {
 	}
 
 	public void checkResourceUsage() {
-		float poolsize = Resource.ThreadPools.getPoolSize()+0.0f;
-		int activate = Resource.ThreadPools.getActiveCount();
+		float poolsize = Resource.threadPools.getPoolSize()+0.0f;
+		int activate = Resource.threadPools.getActiveCount();
 		for(int i=0;i<3;i++) {
-			activate += Resource.ThreadPools.getActiveCount();
+			activate += Resource.threadPools.getActiveCount();
 			try {
 				Thread.sleep(100);
 			} catch (Exception e) {

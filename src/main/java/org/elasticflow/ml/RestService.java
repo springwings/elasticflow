@@ -100,7 +100,7 @@ public class RestService extends ComputerFlowSocket {
 						if(this.apiBlockingQueue.isEmpty())
 							this.flowState.incrementBlockTime();
 						String api = this.apiBlockingQueue.take();
-						Resource.ThreadPools.execute(() -> {						
+						Resource.threadPools.execute(() -> {						
 							JSONObject tmp = null;	
 							try {
 								tmp = JSONObject.parseObject(this.sentRequest(_postdt, api));
@@ -132,7 +132,7 @@ public class RestService extends ComputerFlowSocket {
 					if(this.apiBlockingQueue.isEmpty())
 						this.flowState.incrementBlockTime();
 					String api = this.apiBlockingQueue.take();
-					Resource.ThreadPools.execute(() -> {						
+					Resource.threadPools.execute(() -> {						
 						try {
 							JSONObject tmp = null;	
 							tmp = JSONObject.parseObject(this.sentRequest(_postdt, api));

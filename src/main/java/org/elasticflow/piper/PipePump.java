@@ -267,7 +267,7 @@ public final class PipePump extends Instruction implements Serializable {
 			AtomicInteger total = new AtomicInteger(0);
 			if (getInstanceConfig().getPipeParams().isMultiThread()) {
 				CountDownLatch taskSingal = new CountDownLatch(PipeUtil.estimateThreads(pageNum));
-				Resource.ThreadPools.submitTask(
+				Resource.threadPools.submitTask(
 						new PumpThread(taskSingal, task, storeId, pageList, destination, total, getInstanceConfig()));
 				try {
 					taskSingal.await();
@@ -448,7 +448,7 @@ public final class PipePump extends Instruction implements Serializable {
 								task.getEndTime(), task.getScanParam().getScanField()));
 				if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstanceID(), task.getL1seq(), task.getJobType(),
 						STATUS.Termination)) {
-					Resource.ThreadPools.cleanWaitJob(getId());
+					Resource.threadPools.cleanWaitJob(getId());
 					Common.LOG
 							.warn(task.getInstanceID() + " " + task.getJobType().name() + " job has been Terminated!");
 					break;
@@ -471,7 +471,7 @@ public final class PipePump extends Instruction implements Serializable {
 					}
 					if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstanceID(), task.getL1seq(),
 							task.getJobType(), STATUS.Termination)) {
-						Resource.ThreadPools.cleanWaitJob(getId());
+						Resource.threadPools.cleanWaitJob(getId());
 						Common.LOG.warn(
 								task.getInstanceID() + " " + task.getJobType().name() + " job has been Terminated!");
 						break;

@@ -97,7 +97,7 @@ public abstract class WriterFlowSocket extends Flow {
 		try {
 			// remove out of date instance ,but this function not support cross L1Seqs
 			// destination
-			PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(mainName, this.connectParams.getL1Seq(), false,
+			PipePump pipePump = Resource.socketCenter.getPipePump(mainName, this.connectParams.getL1Seq(), false,
 					GlobalParam.FLOW_TAG._DEFAULT.name());
 			pipePump.getWriter(dTuple.v2).removeInstance(mainName, String.valueOf(dTuple.v2));
 		} catch (Exception e) {

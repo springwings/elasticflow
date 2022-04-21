@@ -178,7 +178,7 @@ public class DistributeCoorder {
 				stopNodes(false);
 			} else {
 				if (rebalace)
-					Resource.ThreadPools.execute(() -> {
+					Resource.threadPools.execute(() -> {
 						this.rebalanceOnNodeLeave(instances);
 					});
 			}
@@ -190,7 +190,7 @@ public class DistributeCoorder {
 			clusterStatus.set(1);
 			DistributeService.closeMonitor();
 			CountDownLatch singal = new CountDownLatch(nodes.size());
-			Resource.ThreadPools.execute(() -> {
+			Resource.threadPools.execute(() -> {
 				nodes.forEach(n -> {
 					Common.LOG.info("node {},nodeId {}, is stopped!", n.getIp(), n.getNodeId());
 					n.stopAllInstance();

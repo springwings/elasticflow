@@ -35,7 +35,7 @@ public class EFPipeUtil {
 
 					if (removePipe) {
 						for (GlobalParam.FLOW_TAG tag : GlobalParam.FLOW_TAG.values()) {
-							Resource.SOCKET_CENTER.clearPipePump(instance, L1seq, tag.name());
+							Resource.socketCenter.clearPipePump(instance, L1seq, tag.name());
 						}
 					}
 				}

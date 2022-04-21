@@ -105,12 +105,12 @@ public class FlowCenter{
 		if (instanceConfig.checkStatus()==false || instanceConfig.openTrans() == false)
 			return;
 		String[] L1seqs = Common.getL1seqs(instanceConfig);  
-		if(!Resource.FLOW_STATES.containsKey(instanceID)) {
+		if(!Resource.flowStates.containsKey(instanceID)) {
 			String content = EFFileUtil.readText(EFFileUtil.getInstancePath(instanceID)[2], GlobalParam.ENCODING, true);
 			if (content!=null && content.length()>0) {
-				Resource.FLOW_STATES.put(instanceID, JSONObject.parseObject(content));
+				Resource.flowStates.put(instanceID, JSONObject.parseObject(content));
 			}else {
-				Resource.FLOW_STATES.put(instanceID,new JSONObject());
+				Resource.flowStates.put(instanceID,new JSONObject());
 			}
 		}
 		synchronized(Resource.tasks) {
@@ -119,7 +119,7 @@ public class FlowCenter{
 					if (L1seq == null)
 						continue; 
 					if(!Resource.tasks.containsKey(Common.getInstanceRunId(instanceID, L1seq)) || needClear){
-						PipePump pipePump = Resource.SOCKET_CENTER.getPipePump(instanceID, L1seq,needClear,GlobalParam.FLOW_TAG._DEFAULT.name());
+						PipePump pipePump = Resource.socketCenter.getPipePump(instanceID, L1seq,needClear,GlobalParam.FLOW_TAG._DEFAULT.name());
 						Resource.tasks.put(Common.getInstanceRunId(instanceID, L1seq), FlowTask.createTask(pipePump, L1seq));
 					}  
 					if(createSchedule)

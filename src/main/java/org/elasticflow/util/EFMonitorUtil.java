@@ -106,7 +106,7 @@ public class EFMonitorUtil {
 			String[] strs = inst.split(":");
 			if (strs.length < 1)
 				continue;
-			Resource.FlOW_CENTER.addFlowGovern(strs[0], Resource.nodeConfig.getInstanceConfigs().get(strs[0]), true,createSchedule);
+			Resource.flowCenter.addFlowGovern(strs[0], Resource.nodeConfig.getInstanceConfigs().get(strs[0]), true,createSchedule);
 		}
 	}
 	
@@ -243,7 +243,7 @@ public class EFMonitorUtil {
 		res.put("status", "offline");
 		PipePump pipePump = null;
 		try {
-			pipePump = Resource.SOCKET_CENTER.getPipePump(instance, L1seq, false,
+			pipePump = Resource.socketCenter.getPipePump(instance, L1seq, false,
 					GlobalParam.FLOW_TAG._DEFAULT.name());
 		} catch (EFException e) {
 			Common.LOG.error("",e);
@@ -353,18 +353,18 @@ public class EFMonitorUtil {
 					Task.put("incremental_storage_status", GlobalParam.TASK_COORDER.getInstanceScanDatas(instance,false));
 					Task.put("full_storage_status",GlobalParam.TASK_COORDER.getInstanceScanDatas(instance,true));
 					Task.put("full_progress", new JSONObject());
-					if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.FULL.name())
-							|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()).size() == 0) {
+					if (!Resource.flowInfos.containsKey(instance, JOB_TYPE.FULL.name())
+							|| Resource.flowInfos.get(instance, JOB_TYPE.FULL.name()).size() == 0) {
 						Task.getJSONObject("full_progress").put("full","none");
 					} else {
-						Task.getJSONObject("full_progress").put("full",Resource.FLOW_INFOS.get(instance, JOB_TYPE.FULL.name()));
+						Task.getJSONObject("full_progress").put("full",Resource.flowInfos.get(instance, JOB_TYPE.FULL.name()));
 					}
-					if (!Resource.FLOW_INFOS.containsKey(instance, JOB_TYPE.INCREMENT.name())
-							|| Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()).size() == 0) {
+					if (!Resource.flowInfos.containsKey(instance, JOB_TYPE.INCREMENT.name())
+							|| Resource.flowInfos.get(instance, JOB_TYPE.INCREMENT.name()).size() == 0) {
 						Task.put("incremental_progress", "none");
 					} else {
 						Task.put("incremental_progress",
-								Resource.FLOW_INFOS.get(instance, JOB_TYPE.INCREMENT.name()));
+								Resource.flowInfos.get(instance, JOB_TYPE.INCREMENT.name()));
 					}
 					Task.put("full_thread_status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
 					Task.put("incremental_thread_status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));					

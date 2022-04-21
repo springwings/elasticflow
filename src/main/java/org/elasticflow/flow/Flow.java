@@ -58,7 +58,7 @@ public abstract class Flow {
 	public void prepareFlow(InstanceConfig instanceConfig, END_TYPE endType, String L1seq) throws EFException {
 		this.instanceConfig = instanceConfig;
 		this.L1seq = L1seq;
-		this.flowState = new FlowState(Resource.FLOW_STATES.get(instanceConfig.getInstanceID()), endType, L1seq);
+		this.flowState = new FlowState(Resource.flowStates.get(instanceConfig.getInstanceID()), endType, L1seq);
 		switch (endType) {
 		case writer:
 			this.EFConnKey = Common.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",
@@ -73,8 +73,8 @@ public abstract class Flow {
 					this.instanceConfig.getPipeParams().isSearcherShareAlias());
 			break;
 		}
-		synchronized (Resource.EFCONNS) {
-			Resource.EFCONNS.put(this.EFConnKey, null);
+		synchronized (Resource.EFConns) {
+			Resource.EFConns.put(this.EFConnKey, null);
 		}
 		this.initFlow();
 	}
@@ -90,17 +90,17 @@ public abstract class Flow {
 	public synchronized EFConnectionSocket<?> PREPARE(boolean isMonopoly, boolean acceptShareConn) {
 		if (isMonopoly) {
 			if (this.EFConn == null) {
-				if (Resource.EFCONNS.get(this.EFConnKey) == null) {
-					Resource.EFCONNS.put(this.EFConnKey,
+				if (Resource.EFConns.get(this.EFConnKey) == null) {
+					Resource.EFConns.put(this.EFConnKey,
 							EFConnectionPool.getConn(this.connectParams, this.poolName, acceptShareConn));
 				}
-				this.EFConn = Resource.EFCONNS.get(this.EFConnKey);
+				this.EFConn = Resource.EFConns.get(this.EFConnKey);
 			}
 		} else {
 			if (this.retainer.getAndIncrement() == 0) {
-				Resource.EFCONNS.put(this.EFConnKey,
+				Resource.EFConns.put(this.EFConnKey,
 						EFConnectionPool.getConn(this.connectParams, this.poolName, acceptShareConn));
-				this.EFConn = Resource.EFCONNS.get(this.EFConnKey);
+				this.EFConn = Resource.EFConns.get(this.EFConnKey);
 			}
 		}
 		return this.EFConn;

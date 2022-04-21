@@ -38,8 +38,8 @@ public class EFMonitorCoordinator implements EFMonitorCoord {
 		dt.put("WRITE_BATCH", GlobalParam.WRITE_BATCH);
 		dt.put("VERSION", GlobalParam.VERSION);
 		dt.put("TASKS", Resource.tasks.size());
-		dt.put("THREAD_POOL_SIZE", Resource.ThreadPools.getPoolSize());
-		dt.put("THREAD_ACTIVE_COUNT", Resource.ThreadPools.getActiveCount());
+		dt.put("THREAD_POOL_SIZE", Resource.threadPools.getPoolSize());
+		dt.put("THREAD_ACTIVE_COUNT", Resource.threadPools.getActiveCount());
 		dt.put("SYS_THREAD_POOL_SIZE", GlobalParam.STS_THREADPOOL_SIZE);
 		try {
 			dt.put("CPU", SystemInfoUtil.getCpuUsage());
