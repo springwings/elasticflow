@@ -1,0 +1,110 @@
+<config>  
+<dataflow>
+ 
+		<TransParam> 
+			<param>
+				<name>fullCron</name>
+				<value>0 0 0/1 * * ?</value>
+			</param>
+			<param>
+				<name>deltaCron</name>
+				<value>0 1/15 * * * ?</value>
+			</param> 
+			<param>
+				<name>writeTo</name>
+				<value>elasticsarch_position</value>
+			</param>  
+
+                       <!--- pipe start parameters -->
+		 
+			<param> 
+				<name>readFrom</name> 
+				<value>mysql_db</value> 
+			</param>
+                           
+                       <param>
+                             <name>writeMechanism</name>
+                             <value>ab</value>
+                       </param>
+                       <param>
+				<name>writeType</name>
+				<value>full</value>
+		       </param>
+                       <param>
+				<name>writerPoolShareAlias</name>
+				<value>true</value>
+			</param> 
+                        <param>
+                             <name>multiThread</name>
+                             <value>false</value>
+                        </param>
+			
+                        <!--- pipe compute service parameters -->
+                        
+                        <!--- pipe search service parameters -->
+                         <param>
+				<name>searchFrom</name>
+				<value>kges</value>
+			</param>  
+			 
+		</TransParam>
+
+                <ReadParam>   
+                        <param>
+				<name>keyField</name>
+				<value>subject_id</value>
+			</param>
+			<param>
+				<name>scanField</name>
+				<value>update_time</value>
+			</param>
+			<param>
+				<name>dataScanDSL</name>
+				<value><![CDATA[  
+SELECT * from cms_table WHERE id>'#{page_start}' AND id <='#{page_end}' AND UNIX_TIMESTAMP(update_time) > '#{start_time}' 
+]]></value>
+			</param>
+			<param>
+				<name>pageScanDSL</name>
+				<value><![CDATA[ 
+SELECT id FROM cms_table  WHERE  UNIX_TIMESTAMP(kg_subject.update_time) > '#{start_time}'
+]]>
+				</value>
+			</param>
+</ReadParam>  
+<WriteParam>
+   <param>
+	<name>writeKey</name>
+	<value>subject_id</value>
+   </param>
+   <param>
+	<name>keyType</name>
+	<value>unique</value>
+   </param>
+
+  <fields>
+<field name="subject_id" indexed="true" stored="true" indextype="keyword" alias="id" paramtype="java.lang.String" />  
+<field name="subject" indexed="true" stored="true" indextype="keyword" alias="subject" paramtype="java.lang.String" /> 
+<field name="alias" indexed="true" stored="true" indextype="keyword" separator="," alias="alias" paramtype="java.lang.String" /> 
+<field name="type" indexed="true" stored="true" indextype="keyword" alias="type" paramtype="java.lang.String" /> 
+<field name="update_time" indexed="true" stored="false" indextype="long" alias="update_time" paramtype="org.elasticflow.field.handler.LongRangeType" /> 
+  </fields>
+</WriteParam>
+
+
+<SearchParam> 
+<param>
+		<name>start</name>
+		<paramtype>java.lang.Integer</paramtype>
+		<defaultValue>0</defaultValue>
+	</param>
+	<param>
+		<name>count</name>
+		<paramtype>java.lang.Integer</paramtype>
+		<defaultValue>1</defaultValue>
+	</param>
+	 
+</SearchParam>
+</dataflow>  
+
+</config> 
