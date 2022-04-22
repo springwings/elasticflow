@@ -104,7 +104,7 @@ public class VearchWriter extends WriterFlowSocket {
 			}
 		} catch (Exception e) {
 			if(e.getMessage().contains("spaceName param not build")) {
-				throw new EFException(e,ELEVEL.Dispose,ETYPE.WRITE_POS_NOT_FOUND);
+				throw new EFException(e,ELEVEL.Dispose,ETYPE.RESOURCE_ERROR);
 			}else {
 				throw new EFException(e,ELEVEL.Dispose);
 			} 
@@ -185,7 +185,7 @@ public class VearchWriter extends WriterFlowSocket {
 						conn.writeBatch(this.curTable, this.DATAS);
 					} catch (Exception e) {
 						if(e.getMessage().contains("spaceName param not build")) {
-							throw new EFException(e,ELEVEL.Dispose,ETYPE.WRITE_POS_NOT_FOUND);
+							throw new EFException(e,ELEVEL.Dispose,ETYPE.RESOURCE_ERROR);
 						}else {
 							throw new EFException(e,ELEVEL.Termination);
 						}

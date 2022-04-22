@@ -264,6 +264,18 @@ public class EFMonitorUtil {
 		return res;
 	}
 	
+	public static boolean closeBreaker(String instance) {
+		if (Resource.nodeConfig.getInstanceConfigs().containsKey(instance)) {		
+			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
+			String[] L1seqs = Common.getL1seqs(config);
+			for (String L1seq : L1seqs) {
+				 Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.closeBreaker();
+			}
+			return true;
+		}		
+		return false;
+	}
+	
 /**
  * get instance detail informations.
  * @param instance
@@ -324,7 +336,7 @@ public class EFMonitorUtil {
 					if (L1seq != "") {
 						appendPipe = "L1seq(" + L1seq + ")_";
 					}
-					Task.put(appendPipe + "breaker_is_on", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.isOn());
+					Task.put(appendPipe + "breaker_is_on", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.isOn(1));
 					Task.put(appendPipe + "valve_turn_level", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).valve.getTurnLevel());
 					JSONObject tmp;
 					if(GlobalParam.DISTRIBUTE_RUN) {

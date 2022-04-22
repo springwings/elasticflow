@@ -45,7 +45,8 @@ public interface TaskStateCoord extends Coordination {
 
 	public void saveTaskInfo(String instance, String L1seq, String storeId, boolean isfull);
 
-	public String getStoreId(String instance, String L1seq, String contextId, boolean isIncrement, boolean reCompute);
+	public String getStoreId(String instance, String L1seq, String contextId, boolean isIncrement, boolean reCompute)
+			throws EFException;
 
 	public String getNewStoreId(String contextId, String instance, String L1seq, boolean isIncrement)
 			throws EFException;

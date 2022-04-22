@@ -215,7 +215,7 @@ public class SolrWriter extends WriterFlowSocket{
 					getSolrConn().commit(true, true, true);
 				} catch (Exception e) {
 					if (Common.exceptionCheckContain(e, "Collection not found")) {
-						throw new EFException("storeId not found",ELEVEL.Dispose,ETYPE.WRITE_POS_NOT_FOUND);
+						throw new EFException("storeId not found",ELEVEL.Dispose,ETYPE.RESOURCE_ERROR);
 					} else {
 						throw new EFException(e);
 					}

@@ -88,9 +88,10 @@ public class Breaker {
 		this.openBreaker = false;
 	}
 
-	public boolean isOn() {
+	public boolean isOn(int logLevel) {
 		if (this.openBreaker || this.failTimes >= maxFailTime || failInterval() <= perFailTime) {
-			Common.LOG.warn("{} is auto breaked!", instance);
+			if(logLevel==0)
+				Common.LOG.warn("{} is auto breaked!", instance);
 			return true;
 		}
 		return false;

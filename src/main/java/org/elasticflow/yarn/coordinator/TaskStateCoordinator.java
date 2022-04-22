@@ -23,7 +23,6 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFMonitorUtil;
-import org.elasticflow.util.EFPipeUtil;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.util.instance.PipeUtil;
 import org.elasticflow.yarn.Resource;
@@ -190,19 +189,12 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	 * @return String
 	 * @throws EFException
 	 */
-	public String getStoreId(String instance, String L1seq, String contextId, boolean isIncrement, boolean reCompute) {
-		try {
-			if (isIncrement) {
-				return getIncrementStoreId(instance, L1seq, contextId, reCompute);
-			} else {
-				return getNewStoreId(contextId, instance, L1seq, false);
-			}
-		} catch (EFException e) {
-			Common.LOG.error("instance {},L1seq {},getStoreId exception!", instance, L1seq, e);
-			EFPipeUtil.removeInstance(instance, true, true);
-			Common.processErrorLevel(e,instance);
+	public String getStoreId(String instance, String L1seq, String contextId, boolean isIncrement, boolean reCompute) throws EFException {
+		if (isIncrement) {
+			return getIncrementStoreId(instance, L1seq, contextId, reCompute);
+		} else {
+			return getNewStoreId(contextId, instance, L1seq, false);
 		}
-		return null;
 	}
 
 	public void scanPositionkeepCurrentPos(String instance) {

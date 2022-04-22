@@ -173,7 +173,7 @@ public class EsWriter extends WriterFlowSocket {
 		} catch (Exception e) {
 			log.error("write Exception", e);
 			if (Common.exceptionCheckContain(e, "IndexNotFoundException")) {
-				throw new EFException("storeId not found", ELEVEL.Termination, ETYPE.WRITE_POS_NOT_FOUND);
+				throw new EFException("storeId not found", ELEVEL.Termination, ETYPE.RESOURCE_ERROR);
 			} else {
 				throw new EFException(e,ELEVEL.Dispose);
 			}
