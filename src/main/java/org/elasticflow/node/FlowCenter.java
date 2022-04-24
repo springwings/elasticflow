@@ -67,7 +67,7 @@ public class FlowCenter{
 				
 				if(GlobalParam.JOB_TYPE.FULL.name().equals(type.toUpperCase())) {
 					if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready))
-						state = EFPipeUtil.jobAction(Common.getInstanceRunId(instance, L1seq), GlobalParam.JOB_TYPE.FULL.name(), "run") && state;
+						state = EFPipeUtil.jobAction(Common.getInstanceRunId(instance, L1seq), GlobalParam.JOB_TYPE.FULL.name(), "start") && state;
 						if(state && !asyn) {
 							Thread.sleep(1000);//waiting to start job
 							while(GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready)==false)
@@ -75,7 +75,7 @@ public class FlowCenter{
 						} 
 				}else {
 					if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready))
-						state = EFPipeUtil.jobAction(Common.getInstanceRunId(instance, L1seq), GlobalParam.JOB_TYPE.INCREMENT.name(), "run") && state;
+						state = EFPipeUtil.jobAction(Common.getInstanceRunId(instance, L1seq), GlobalParam.JOB_TYPE.INCREMENT.name(), "start") && state;
 						if(state && asyn) {
 							Thread.sleep(1000);//waiting to start job
 							while(GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready)==false)

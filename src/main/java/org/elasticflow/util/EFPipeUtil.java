@@ -55,7 +55,7 @@ public class EFPipeUtil {
 		case "stop":
 			state = Resource.taskJobCenter.stopJob(jobname);
 			break;
-		case "run":
+		case "start":
 			state = Resource.taskJobCenter.startNow(jobname);
 			break;
 		case "resume":

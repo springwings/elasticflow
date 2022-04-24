@@ -246,14 +246,10 @@ public class FlowTask {
 	}
 
 	private boolean runConditionCheck() {
-		if (breaker.isOn(pipePump.getInstanceConfig().getPipeParams().getLogLevel())) {
-			Resource.EfNotifier.send(this.instanceId + " breaker is on", this.instanceId, breaker.getReason(),
-					EFException.ETYPE.DATA_ERROR.name(), true);
+		if (breaker.isOn(pipePump.getInstanceConfig().getPipeParams().getLogLevel())) 
 			return false;
-		}
-		if (valve.isOn()) {
+		if (valve.isOn())
 			return false;
-		}
 		return true;
 	}
 
