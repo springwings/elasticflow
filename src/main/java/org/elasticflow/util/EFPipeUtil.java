@@ -17,39 +17,39 @@ import org.quartz.SchedulerException;
  */
 public class EFPipeUtil {
 
-	public static boolean removeInstance(String instance, boolean removeTask, boolean removePipe) {
+	public static boolean removeInstance(String instanceID, boolean removeTask, boolean removePipe) {
 		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 		boolean state = true;
-		if (configMap.containsKey(instance)) {
+		if (configMap.containsKey(instanceID)) {
 			try {
-				InstanceConfig instanceConfig = configMap.get(instance);
+				InstanceConfig instanceConfig = configMap.get(instanceID);
 				String[] L1seqs = Common.getL1seqs(instanceConfig);
 				for (String L1seq : L1seqs) {
 					if (L1seq == null)
 						continue;
-					if (removeTask && Resource.tasks.containsKey(Common.getInstanceRunId(instance, L1seq))) {
-						Resource.tasks.remove(Common.getInstanceRunId(instance, L1seq));
-						state = removeFlowScheduleJob(Common.getInstanceRunId(instance, L1seq), instanceConfig)
+					if (removeTask && Resource.tasks.containsKey(Common.getInstanceRunId(instanceID, L1seq))) {
+						Resource.tasks.remove(Common.getInstanceRunId(instanceID, L1seq));
+						state = removeFlowScheduleJob(Common.getInstanceRunId(instanceID, L1seq), instanceConfig)
 								&& state;
 					}
 
 					if (removePipe) {
 						for (GlobalParam.FLOW_TAG tag : GlobalParam.FLOW_TAG.values()) {
-							Resource.socketCenter.clearPipePump(instance, L1seq, tag.name());
+							Resource.socketCenter.clearPipePump(instanceID, L1seq, tag.name());
 						}
 					}
 				}
 			} catch (Exception e) {
-				Common.LOG.error("remove Instance " + instance + " Exception", e);
+				Common.LOG.error("remove Instance " + instanceID + " Exception", e);
 				return false;
 			}
-			configMap.remove(instance);
+			configMap.remove(instanceID);
 		}
 		return state;
 	}
 
-	public static boolean jobAction(String mainName, String type, String actype) {
-		String jobname = getJobName(mainName, type);
+	public static boolean jobAction(String instanceID, String type, String actype) {
+		String jobname = getJobName(instanceID, type);
 		boolean state = false;
 		switch (actype) {
 		case "stop":
@@ -73,26 +73,26 @@ public class EFPipeUtil {
 		return state;
 	}
 
-	public static boolean removeFlowScheduleJob(String instance, InstanceConfig instanceConfig)
+	public static boolean removeFlowScheduleJob(String instanceID, InstanceConfig instanceConfig)
 			throws SchedulerException {
 		boolean state = true;
 		if (instanceConfig.getPipeParams().getFullCron() != null) {
-			jobAction(instance, GlobalParam.JOB_TYPE.FULL.name(), "stop");
-			state = jobAction(instance, GlobalParam.JOB_TYPE.FULL.name(), "remove") && state;
+			jobAction(instanceID, GlobalParam.JOB_TYPE.FULL.name(), "stop");
+			state = jobAction(instanceID, GlobalParam.JOB_TYPE.FULL.name(), "remove") && state;
 		}
 		if (instanceConfig.getPipeParams().getFullCron() == null
 				|| instanceConfig.getPipeParams().getOptimizeCron() != null) {
-			jobAction(instance, GlobalParam.JOB_TYPE.OPTIMIZE.name(), "stop");
-			state = jobAction(instance, GlobalParam.JOB_TYPE.OPTIMIZE.name(), "remove") && state;
+			jobAction(instanceID, GlobalParam.JOB_TYPE.OPTIMIZE.name(), "stop");
+			state = jobAction(instanceID, GlobalParam.JOB_TYPE.OPTIMIZE.name(), "remove") && state;
 		}
 		if (instanceConfig.getPipeParams().getDeltaCron() != null) {
-			jobAction(instance, GlobalParam.JOB_TYPE.INCREMENT.name(), "stop");
-			state = jobAction(instance, GlobalParam.JOB_TYPE.INCREMENT.name(), "remove") && state;
+			jobAction(instanceID, GlobalParam.JOB_TYPE.INCREMENT.name(), "stop");
+			state = jobAction(instanceID, GlobalParam.JOB_TYPE.INCREMENT.name(), "remove") && state;
 		}
 		return state;
 	}
 
-	public static String getJobName(String instance, String type) {
-		return instance + "_" + type;
+	public static String getJobName(String instanceID, String type) {
+		return instanceID + "_" + type;
 	}
 }

@@ -135,7 +135,7 @@ public class FlowCenter{
 
 	
 	private void createInstructionScheduleJob(InstructionParam param, InstructionTask task) {
-		JobModel _sj = new JobModel(
+		JobModel _sj = new JobModel(param.getId(),
 				EFPipeUtil.getJobName(param.getId(), GlobalParam.JOB_TYPE.INSTRUCTION.name()), param.getCron(),
 				"org.elasticflow.task.InstructionTask", "runInstructions", task); 
 		try {
@@ -145,7 +145,7 @@ public class FlowCenter{
 		} 
 	}
 
-	private void createFlowScheduleJob(String instance, FlowTask task,
+	private void createFlowScheduleJob(String instanceID, FlowTask task,
 			InstanceConfig instanceConfig,boolean needclear)
 			throws SchedulerException {
 		String fullFun="runFull";
@@ -157,25 +157,25 @@ public class FlowCenter{
 		
 		if (instanceConfig.getPipeParams().getFullCron() != null) { 
 			if(needclear)
-				EFPipeUtil.jobAction(instance, GlobalParam.JOB_TYPE.FULL.name(), "remove"); 
-			JobModel _sj = new JobModel(
-					EFPipeUtil.getJobName(instance, GlobalParam.JOB_TYPE.FULL.name()), instanceConfig.getPipeParams().getFullCron(),
+				EFPipeUtil.jobAction(instanceID, GlobalParam.JOB_TYPE.FULL.name(), "remove"); 
+			JobModel _sj = new JobModel(instanceID,
+					EFPipeUtil.getJobName(instanceID, GlobalParam.JOB_TYPE.FULL.name()), instanceConfig.getPipeParams().getFullCron(),
 					"org.elasticflow.task.FlowTask", fullFun, task); 
 			Resource.taskJobCenter.addJob(_sj); 
 		}else if(instanceConfig.getPipeParams().getReadFrom()!= null && instanceConfig.getPipeParams().getWriteTo()!=null) { 
 			instanceConfig.setHasFullJob(false);
 			if(needclear)
-				EFPipeUtil.jobAction(instance, GlobalParam.JOB_TYPE.FULL.name(), "remove");
+				EFPipeUtil.jobAction(instanceID, GlobalParam.JOB_TYPE.FULL.name(), "remove");
 			//Add valid full tasks to prevent other program errors
-			JobModel _sj = new JobModel(
-					EFPipeUtil.getJobName(instance,GlobalParam.JOB_TYPE.FULL.name()), not_run_cron,
+			JobModel _sj = new JobModel(instanceID,
+					EFPipeUtil.getJobName(instanceID,GlobalParam.JOB_TYPE.FULL.name()), not_run_cron,
 					"org.elasticflow.task.FlowTask", fullFun, task); 
 			Resource.taskJobCenter.addJob(_sj); 
 		}  
 		
 		if (instanceConfig.getPipeParams().getDeltaCron() != null) { 
 			if(needclear)
-				EFPipeUtil.jobAction(instance, GlobalParam.JOB_TYPE.INCREMENT.name(), "remove");
+				EFPipeUtil.jobAction(instanceID, GlobalParam.JOB_TYPE.INCREMENT.name(), "remove");
 			
 			String cron = instanceConfig.getPipeParams().getDeltaCron();
 			if(this.cron_exists.contains(cron)){
@@ -189,17 +189,17 @@ public class FlowCenter{
 			}else{
 				this.cron_exists.add(cron);
 			}
-			JobModel _sj = new JobModel(
-					EFPipeUtil.getJobName(instance, GlobalParam.JOB_TYPE.INCREMENT.name()),
+			JobModel _sj = new JobModel(instanceID,
+					EFPipeUtil.getJobName(instanceID, GlobalParam.JOB_TYPE.INCREMENT.name()),
 					instanceConfig.getPipeParams().getDeltaCron(), "org.elasticflow.task.FlowTask",
 					incrementFun, task); 
 			Resource.taskJobCenter.addJob(_sj);
 		}else if(instanceConfig.getPipeParams().getReadFrom()!= null && instanceConfig.getPipeParams().getWriteTo()!=null) {
 			if(needclear)
-				EFPipeUtil.jobAction(instance, GlobalParam.JOB_TYPE.INCREMENT.name(), "remove");
+				EFPipeUtil.jobAction(instanceID, GlobalParam.JOB_TYPE.INCREMENT.name(), "remove");
 			//Add valid full tasks to prevent other program errors
-			JobModel _sj = new JobModel(
-					EFPipeUtil.getJobName(instance,GlobalParam.JOB_TYPE.INCREMENT.name()),
+			JobModel _sj = new JobModel(instanceID,
+					EFPipeUtil.getJobName(instanceID,GlobalParam.JOB_TYPE.INCREMENT.name()),
 					not_run_cron, "org.elasticflow.task.FlowTask",
 					incrementFun, task); 
 			Resource.taskJobCenter.addJob(_sj);
@@ -207,18 +207,18 @@ public class FlowCenter{
 		
 		if(instanceConfig.getPipeParams().getFullCron() == null || instanceConfig.getPipeParams().getOptimizeCron()!=null){
 			if(needclear)
-				EFPipeUtil.jobAction(instance,GlobalParam.JOB_TYPE.OPTIMIZE.name(), "remove");
+				EFPipeUtil.jobAction(instanceID,GlobalParam.JOB_TYPE.OPTIMIZE.name(), "remove");
 		
 			String cron = instanceConfig.getPipeParams().getOptimizeCron()==null?default_cron.replace("PARAM",String.valueOf((int)(Math.random()*60))):instanceConfig.getPipeParams().getOptimizeCron();
 			instanceConfig.getPipeParams().setOptimizeCron(cron);
 			if(instanceConfig.getPipeParams().getReferenceInstance()==null) 
-				createOptimizeJob(instance, task,cron); 
+				createOptimizeJob(instanceID, task,cron); 
 		}
 	}
 	
-	private void createOptimizeJob(String indexName, FlowTask batch,String cron) throws SchedulerException{
-		JobModel _sj = new JobModel(
-				EFPipeUtil.getJobName(indexName, GlobalParam.JOB_TYPE.OPTIMIZE.name()),cron,
+	private void createOptimizeJob(String instanceID, FlowTask batch,String cron) throws SchedulerException{
+		JobModel _sj = new JobModel(instanceID,
+				EFPipeUtil.getJobName(instanceID, GlobalParam.JOB_TYPE.OPTIMIZE.name()),cron,
 				"org.elasticflow.manager.Task", "optimizeInstance", batch); 
 		Resource.taskJobCenter.addJob(_sj); 
 	}
