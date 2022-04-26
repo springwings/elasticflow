@@ -103,7 +103,7 @@ public final class NodeMonitor {
 			put("getinstanceseqs", "getInstanceSeqs");
 			put("reloadinstanceconfig", "reloadInstanceConfig");
 			put("runnow", "runNow");
-			put("closebreaker", "closeBreaker");
+			put("resetbreaker", "resetBreaker");
 			put("addinstancetosystem", "addInstanceToSystem");
 			put("stopinstance", "stopInstance");
 			put("resumeinstance", "resumeInstance");
@@ -440,9 +440,9 @@ public final class NodeMonitor {
 	 * @param rq
 	 * @param RR
 	 */
-	public void closeBreaker(Request rq,EFRequest RR) {
+	public void resetBreaker(Request rq,EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this,RR, "instance")) {
-			Boolean state = EFMonitorUtil.closeBreaker(RR.getStringParam("instance"));
+			Boolean state = EFMonitorUtil.resetBreaker(RR.getStringParam("instance"));					
 			if (state) {
 				setResponse(RESPONSE_STATUS.Success, null,"");				
 			} else {

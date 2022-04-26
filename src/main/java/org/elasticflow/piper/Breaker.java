@@ -101,7 +101,7 @@ public class Breaker {
 		if (this.openBreaker || this.failTimes >= maxFailTime || failInterval() <= perFailTime) {
 			if(isFirstNotify) {
 				Common.LOG.warn("instance {} breaker is on!", instanceID);
-				Resource.EfNotifier.send(instanceID + " breaker is on!", instanceID, getReason(),
+				Resource.EfNotifier.send(instanceID + " breaker is on!", instanceID, "Instance data flow has been disconnected!",
 						EFException.ETYPE.RESOURCE_ERROR.name(), false);
 			}
 			isFirstNotify = false;

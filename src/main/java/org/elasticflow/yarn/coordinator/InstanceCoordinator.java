@@ -158,6 +158,11 @@ public class InstanceCoordinator implements InstanceCoord {
 	}
 	
 	@Override
+	public void resetBreaker(String instance,String L1seq) {
+		Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.reset();
+	}
+	
+	@Override
 	public JSONObject getBreakerStatus(String instance,String L1seq,String appendPipe) {
 		JSONObject JO = new JSONObject();
 		JO.put(appendPipe + "breaker_is_on", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.isOn());

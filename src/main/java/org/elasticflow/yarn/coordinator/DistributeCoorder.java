@@ -102,6 +102,13 @@ public class DistributeCoorder {
 		}
 		return "";
 	}
+	
+	public void resetBreaker(String instance,String L1seq) {
+		for (EFNode node : nodes) {
+			if (node.containInstace(instance))
+				node.resetBreaker(instance, L1seq);
+		}
+	}
 
 	public JSONObject getBreakerStatus(String instance,String L1seq,String appendPipe) {
 		for (EFNode node : nodes) {

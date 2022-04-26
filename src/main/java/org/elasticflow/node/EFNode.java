@@ -194,6 +194,10 @@ public class EFNode {
 		}
 	}
 	
+	public void resetBreaker(String instance,String L1seq) {
+		this.instanceCoord.resetBreaker(instance, L1seq);
+	}
+	
 	public JSONObject getBreakerStatus(String instance,String L1seq,String appendPipe) {
 		return this.instanceCoord.getBreakerStatus(instance,L1seq,appendPipe);
 	}

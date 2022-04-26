@@ -46,4 +46,6 @@ public interface InstanceCoord extends Coordination{
 	
 	public JSONObject getBreakerStatus(String instance,String L1seq,String appendPipe);
 	
+	public void resetBreaker(String instance,String L1seq);
+	
 }

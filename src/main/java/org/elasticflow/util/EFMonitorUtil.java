@@ -264,12 +264,16 @@ public class EFMonitorUtil {
 		return res;
 	}
 	
-	public static boolean closeBreaker(String instance) {
+	public static boolean resetBreaker(String instance) {
 		if (Resource.nodeConfig.getInstanceConfigs().containsKey(instance)) {		
 			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
 			String[] L1seqs = Common.getL1seqs(config);
 			for (String L1seq : L1seqs) {
-				 Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.reset();
+				if(GlobalParam.DISTRIBUTE_RUN) {
+					GlobalParam.INSTANCE_COORDER.distributeCoorder().resetBreaker(instance, L1seq);
+				}else {
+					Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.reset();
+				}				
 			}
 			return true;
 		}		
