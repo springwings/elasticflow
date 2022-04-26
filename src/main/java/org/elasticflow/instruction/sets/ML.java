@@ -11,7 +11,6 @@ import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.reader.util.DataSetReader;
-import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +29,10 @@ public class ML extends Instruction {
 	/**
 	 * @param args parameter order is:String contextId, String types, String
 	 *             instance, DataPage pageData
+	 * @throws EFException 
 	 * @throws Exception
 	 */
-	public static DataPage compute(Context context, Object[] args) {
+	public static DataPage compute(Context context, Object[] args) throws EFException {
 		DataPage res = new DataPage();
 		if (!isValid(4, args)) {
 			log.error("Compute parameter not match!");
@@ -58,8 +58,7 @@ public class ML extends Instruction {
 							.setPerformance((long) ((dataNums * 1000) / (System.currentTimeMillis() - start + 1e-3)));
 				context.getComputer().flowState.incrementCurrentTimeProcess(dataNums);
 			} catch (EFException e) {
-				log.error("batch Compute Exception", e);
-				Common.processErrorLevel(e,context.getInstanceConfig().getInstanceID());
+				throw e;
 			} finally {
 				DSReader.close();
 			}

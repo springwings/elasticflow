@@ -19,6 +19,7 @@ import org.elasticflow.config.GlobalParam.MECHANISM;
 public class PipeParam { 
 	private int readPageSize = GlobalParam.READ_PAGE_SIZE;
 	private int logLevel = 0;
+	/**Failures per second*/
 	private int failFreq = 5;
 	private int maxFailTime = 100;
 	private String writeTo;

@@ -206,6 +206,7 @@ public class FlowTask {
 				pipePump.run(storeId, L1seq, false, isReferenceInstance);
 				runNextJobs(JOB_TYPE.INCREMENT);
 			} catch (EFException e) {
+				breaker.log();
 				if (!isReferenceInstance && e.getErrorType() == ETYPE.RESOURCE_ERROR) {
 					log.error("get {} storage location exception!", destination, e);
 					breaker.openBreaker();
@@ -215,8 +216,7 @@ public class FlowTask {
 				} else if (e.getErrorType() == ETYPE.EXTINTERRUPT) {
 					log.warn("{} increment external interrupt!", instanceId);
 				} else {
-					breaker.log();
-					log.error(instanceId + " IncrementJob Exception", e);
+					log.error(instanceId + " increment job exception", e);
 				}
 			} finally {
 				recompute = this.checkReCompute(storeId);
@@ -246,7 +246,7 @@ public class FlowTask {
 	}
 
 	private boolean runConditionCheck() {
-		if (breaker.isOn(pipePump.getInstanceConfig().getPipeParams().getLogLevel())) 
+		if (breaker.isOn()) 
 			return false;
 		if (valve.isOn())
 			return false;

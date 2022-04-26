@@ -11,6 +11,8 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import org.elasticflow.model.FIFOQueue;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
+import org.elasticflow.yarn.Resource;
 
 /**
  * pipe end connect breaker control When a serious error occurs, temporarily
@@ -27,6 +29,8 @@ public class Breaker {
 	private long earlyFailTime;
 	
 	private boolean openBreaker = false;
+	
+	public boolean isFirstNotify = true;
 
 	private int failTimes;
 
@@ -38,10 +42,10 @@ public class Breaker {
 
 	private FIFOQueue<Long> queue = new FIFOQueue<>(6);
 
-	private String instance;
+	private String instanceID;
 
-	public void init(String instance, int failFreq, int maxFailTime) {
-		this.instance = instance;
+	public void init(String instanceID, int failFreq, int maxFailTime) {
+		this.instanceID = instanceID;
 		this.perFailTime = 1000 / failFreq;
 		this.maxFailTime = maxFailTime;
 		this.reset();
@@ -50,6 +54,7 @@ public class Breaker {
 	public void reset() {
 		this.failTimes = 0;
 		this.earlyFailTime = 0;
+		this.isFirstNotify = true;
 		this.closeBreaker();
 	}
 
@@ -66,6 +71,10 @@ public class Breaker {
 		} else {
 			return Integer.MAX_VALUE;
 		}
+	}
+	
+	public int getFailTimes() {
+		return this.failTimes;
 	}
 	
 	public String getReason() {
@@ -88,10 +97,14 @@ public class Breaker {
 		this.openBreaker = false;
 	}
 
-	public boolean isOn(int logLevel) {
+	public boolean isOn() {
 		if (this.openBreaker || this.failTimes >= maxFailTime || failInterval() <= perFailTime) {
-			if(logLevel==0)
-				Common.LOG.warn("instance {} breaker is on!", instance);
+			if(isFirstNotify) {
+				Common.LOG.warn("instance {} breaker is on!", instanceID);
+				Resource.EfNotifier.send(instanceID + " breaker is on!", instanceID, getReason(),
+						EFException.ETYPE.RESOURCE_ERROR.name(), false);
+			}
+			isFirstNotify = false;
 			return true;
 		}
 		return false;

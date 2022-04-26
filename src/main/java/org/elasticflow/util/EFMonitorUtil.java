@@ -269,7 +269,7 @@ public class EFMonitorUtil {
 			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
 			String[] L1seqs = Common.getL1seqs(config);
 			for (String L1seq : L1seqs) {
-				 Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.closeBreaker();
+				 Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.reset();
 			}
 			return true;
 		}		
@@ -333,15 +333,13 @@ public class EFMonitorUtil {
 				String[] L1seqs = Common.getL1seqs(config);
 				for (String L1seq : L1seqs) {	 
 					String appendPipe = "";
-					if (L1seq != "") {
+					if (L1seq != "") 
 						appendPipe = "L1seq(" + L1seq + ")_";
-					}
-					Task.put(appendPipe + "breaker_is_on", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.isOn(1));
-					Task.put(appendPipe + "valve_turn_level", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).valve.getTurnLevel());
+					Task.putAll(GlobalParam.INSTANCE_COORDER.distributeCoorder().getBreakerStatus(config.getInstanceID(), L1seq, appendPipe));
 					JSONObject tmp;
-					if(GlobalParam.DISTRIBUTE_RUN) {
+					if(GlobalParam.DISTRIBUTE_RUN) {						
 						tmp = GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(config.getInstanceID(), L1seq);						
-					} else {
+					} else {						
 						tmp = getPipeEndStatus(config.getInstanceID(), L1seq);
 					} 
 					Searcher.put(appendPipe + "flow_state", tmp.get(END_TYPE.searcher.name()));

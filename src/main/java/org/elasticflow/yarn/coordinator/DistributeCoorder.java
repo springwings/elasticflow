@@ -103,6 +103,23 @@ public class DistributeCoorder {
 		return "";
 	}
 
+	public JSONObject getBreakerStatus(String instance,String L1seq,String appendPipe) {
+		for (EFNode node : nodes) {
+			if (node.containInstace(instance) && node.isLive()) {				
+				return node.getBreakerStatus(instance, L1seq, appendPipe);
+			}
+		}
+		JSONObject JO = new JSONObject();
+		JO.put(appendPipe + "breaker_is_on", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.isOn());
+		if(Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.isOn()) {
+			JO.put(appendPipe + "breaker_is_on_reason", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.getReason());
+		}
+		JO.put(appendPipe + "valve_turn_level", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).valve.getTurnLevel());
+		JO.put(appendPipe + "current_fail_freq", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.failInterval());
+		JO.put(appendPipe + "total_fail_times", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.getFailTimes());
+		return JO;
+	}
+	
 	public JSONObject getPipeEndStatus(String instance, String L1seq) {
 		for (EFNode node : nodes) {
 			if (node.containInstace(instance) && node.isLive()) {

@@ -13,6 +13,8 @@ import org.elasticflow.yarn.coord.InstanceCoord;
 import org.elasticflow.yarn.coord.NodeCoord;
 import org.elasticflow.yarn.coordinator.DistributeCoorder;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * Node Model
  * It is mainly used for distributed node control
@@ -190,6 +192,10 @@ public class EFNode {
 		while (!this.bindInstances.isEmpty()) {
 			popInstance();
 		}
+	}
+	
+	public JSONObject getBreakerStatus(String instance,String L1seq,String appendPipe) {
+		return this.instanceCoord.getBreakerStatus(instance,L1seq,appendPipe);
 	}
 	
 	public boolean runInstanceNow(String instance,String jobtype,boolean asyn) {

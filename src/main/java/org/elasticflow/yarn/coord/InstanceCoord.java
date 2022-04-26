@@ -9,6 +9,8 @@ package org.elasticflow.yarn.coord;
 
 import org.elasticflow.yarn.coordinator.DistributeCoorder;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * Run task instance cluster coordination interface
  * 
@@ -41,5 +43,7 @@ public interface InstanceCoord extends Coordination{
 	public void removeInstance(String instance,boolean waitComplete);
 	
 	public DistributeCoorder distributeCoorder();
+	
+	public JSONObject getBreakerStatus(String instance,String L1seq,String appendPipe);
 	
 }
