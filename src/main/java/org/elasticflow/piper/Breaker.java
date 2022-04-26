@@ -28,11 +28,11 @@ public class Breaker {
 
 	private long earlyFailTime;
 	
-	private boolean openBreaker = false;
+	private volatile boolean openBreaker = false;
 	
-	public boolean isFirstNotify = true;
+	public volatile boolean isFirstNotify = true;
 
-	private int failTimes;
+	private volatile int failTimes;
 
 	// per-fail use time in last period
 	private int perFailTime = 200;
@@ -55,6 +55,7 @@ public class Breaker {
 		this.failTimes = 0;
 		this.earlyFailTime = 0;
 		this.isFirstNotify = true;
+		this.queue.clear();
 		this.closeBreaker();
 	}
 
