@@ -194,7 +194,7 @@ public class FlowTask {
 	 * slave instance increment job
 	 */
 	public void runIncrement() {
-		if (runConditionCheck() == false)
+		if (runConditionCheck() == false) 
 			return;
 		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceId, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
 				STATUS.Ready, STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
@@ -246,8 +246,13 @@ public class FlowTask {
 	}
 
 	private boolean runConditionCheck() {
-		if (breaker.isOn()) 
+		if (breaker.isOn()) {
+			if(breaker.isFirstNotify) {
+				pipePump.getReader().clearPool();
+				pipePump.getWriter().clearPool();
+			}
 			return false;
+		}			
 		if (valve.isOn())
 			return false;
 		return true;
