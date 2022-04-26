@@ -20,7 +20,7 @@ public class EFException extends Exception {
 	}
 
 	public static enum ETYPE {
-		RESOURCE_ERROR, PARAMETER_ERROR, RESOURCE_FAILURE, UNKNOWN, EXTINTERRUPT, DATA_ERROR;
+		RESOURCE_ERROR, PARAMETER_ERROR, DATA_ERROR, EXTINTERRUPT, UNKNOWN;
 	}
 
 	private ELEVEL e_level = ELEVEL.Ignore;
