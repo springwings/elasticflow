@@ -32,7 +32,12 @@ public class EFApiNotifier implements EFNotify{
 	public boolean sendSyncMode(String subject,String instance, String content, String errorType) {
 		JSONObject jO = new JSONObject();
 		jO.put("subject", subject);
-		jO.put("ip", GlobalParam.IP);
+		if(GlobalParam.DISTRIBUTE_RUN) {
+			jO.put("ip", GlobalParam.MASTER_HOST);
+		}else {
+			jO.put("ip", GlobalParam.IP);
+		}
+		
 		jO.put("instance", instance);
 		jO.put("type", errorType);
 		jO.put("content", content);
