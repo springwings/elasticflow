@@ -138,6 +138,7 @@ public abstract class Flow {
 	}
 
 	public void clearPool() {
+		REALEASE(false,true);
 		EFConnectionPool.clearPool(this.poolName);
 	}
 }
