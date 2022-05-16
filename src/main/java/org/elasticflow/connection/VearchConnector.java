@@ -144,7 +144,7 @@ public class VearchConnector {
 		String response = EFHttpClientUtil.process(this.method + this.ROOTER + "/" + this.dbName + "/" + table + "/_search",
 				HttpPost.METHOD_NAME,
 				EFHttpClientUtil.DEFAULT_CONTENT_TYPE,
-				query); 
+				query); 		
 		return JSONObject.parseObject(response);	 
 	}
 

@@ -166,8 +166,11 @@ public class InstanceConfig {
 		InputStream in;
 		try {
 			byte[] bt = EFDataStorer.getData(this.configPath, false);
-			if (bt.length <= 0)
+			if (bt.length <= 0) {
+				setStatus(false);
+				Common.LOG.error("{} configuration information does not exist!", this.configPath);
 				return;
+			}				
 			in = new ByteArrayInputStream(bt, 0, bt.length);
 			configParse(in);
 			in.close();

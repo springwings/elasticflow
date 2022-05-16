@@ -34,9 +34,9 @@ public class SearcherVearchModel extends SearcherModel<String, String, String> {
 		while (iter.hasNext()) {
 			Entry<String, Object> entry = iter.next();
 			String k = entry.getKey();
-			String v = String.valueOf(entry.getValue());
+			Object v = entry.getValue();
 			if (k.equals(GlobalParam.KEY_PARAM.__storeid.name())) {
-				current.storeId = v;
+				current.storeId = String.valueOf(v);
 			} else {
 				if (instanceConfig.getWriteFields().containsKey(k)) { 
 					if(instanceConfig.getWriteFields().get(k).getIndextype().toLowerCase().equals("vector")) {
@@ -52,7 +52,7 @@ public class SearcherVearchModel extends SearcherModel<String, String, String> {
 				} else {
 					switch(k) {
 					case "max_score":
-						_feature.put("max_score",Float.parseFloat(v)); 
+						_feature.put("max_score",Float.parseFloat(String.valueOf(v))); 
 						break; 
 					} 
 				}
@@ -79,7 +79,7 @@ public class SearcherVearchModel extends SearcherModel<String, String, String> {
 		query.put("sum",_jarr);
 		if(filters.size()>0)
 			query.put("filter", filters);
-		current.setFq(query.toString());
+		current.setFq(query.toJSONString());
 	}
 
 	@Override

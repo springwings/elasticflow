@@ -49,7 +49,6 @@ public class SearchParamUtil {
 		if((start+count)>GlobalParam.SEARCH_MAX_WINDOW) {
 			request.addError("start+count<="+GlobalParam.SEARCH_MAX_WINDOW);
 		}
-		
 		if (request.getParams().containsKey(GlobalParam.PARAM_SHOWQUERY))
 			fq.setShowQueryInfo(true);
 		if (request.getParams().containsKey(GlobalParam.PARAM_FL))
