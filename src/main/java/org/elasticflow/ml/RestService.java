@@ -185,8 +185,10 @@ public class RestService extends ComputerFlowSocket {
 			throws EFException {
 		String datafield = responseParams.getJSONObject("dataField").getString("name");
 		JSONArray JA = datas.getJSONArray(datafield);
-		if (keepDatas != null && JA.size() != keepDatas.size())
+		if (keepDatas != null && JA.size() != keepDatas.size()) {
+			this.flowState.incrementFailUnitTime(keepDatas.size());
 			throw new EFException("predict result exception,"+datas.toString(), ELEVEL.Dispose);
+		}			
 		for (int i = 0; i < JA.size(); i++) {
 			JSONObject jr = keepDatas.get(i);
 			jr.putAll((JSONObject) JA.get(i));

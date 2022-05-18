@@ -1,6 +1,8 @@
 package org.elasticflow.model;
 
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.util.Common;
@@ -17,28 +19,31 @@ import com.alibaba.fastjson.JSONObject;
 final public class FlowState {
 	
 	private int keepPeriod = 7;
+	
+	/** FAIL processing data units statistics **/
+	private volatile AtomicInteger failProcess = new AtomicInteger(0);
 
 	/** Batch processing blocking statistics **/
-	protected long BLOCKTIME = 0;
+	private volatile AtomicInteger BLOCKTIME = new AtomicInteger(0);
 
 	/** Average load of the flow,the amount of data processed per second **/
-	protected long LOAD = -1;
+	private volatile long LOAD = -1;
 
 	/** Transient performance,the amount of data processed per second in batch **/
-	protected long PERFORMANCE = -1;
+	private volatile long PERFORMANCE = -1;
 
 	/** Total amount of historical real-time data processed **/
-	private long totalProcess = 0;
+	private volatile AtomicLong totalProcess = new AtomicLong(0);
 
 	/** Real time statistics of current time period **/
-	private long currentTimeProcess = 0;
+	private volatile AtomicLong currentTimeProcess = new AtomicLong(0);
 
 	/** Amount of data processed history **/
-	private JSONObject historyProcess;
+	private volatile JSONObject historyProcess;
 	
 	private long flowStartTime = Common.getNow();
 	
-	private HashMap<String, Object> flowEndStatus;
+	private volatile HashMap<String, Object> flowEndStatus;
 	
 	private String todayZero = String.valueOf(Common.getNowZero());
 	
@@ -68,7 +73,7 @@ final public class FlowState {
 			JSONObject JO = stat.getJSONObject(storeKey);
 			if(JO.containsKey(endType.name())) {
 				JSONObject _JO = JO.getJSONObject(endType.name());
-				this.totalProcess = _JO.getLong("totalProcess");
+				this.totalProcess.set(_JO.getLong("totalProcess"));
 				this.flowStartTime = _JO.getLong("flowStartTime");
 				this.historyProcess = _JO.getJSONObject("historyProcess");	
 			}							
@@ -77,7 +82,7 @@ final public class FlowState {
 		if(this.historyProcess == null)
 			this.historyProcess = new JSONObject();
 		if(this.historyProcess.containsKey(todayZero)) {
-			this.currentTimeProcess = this.historyProcess.getLongValue(todayZero);
+			this.currentTimeProcess.set(this.historyProcess.getLongValue(todayZero));;
 		}
 	} 
 	
@@ -98,12 +103,10 @@ final public class FlowState {
 		JO.put("historyProcess", this.historyProcess==null?"":this.historyProcess);
 		JO.put("performance", this.PERFORMANCE);
 		JO.put("avgload", this.LOAD);
-		JO.put("blocktime", this.BLOCKTIME);
+		JO.put("blockTime", this.BLOCKTIME);
+		JO.put("failProcess", this.failProcess);
 	}
 	
-	public long getCurrentTimeProcess() {
-		return this.currentTimeProcess;
-	}
 	
 	public long getFlowStartTime() {
 		return this.flowStartTime;
@@ -117,29 +120,32 @@ final public class FlowState {
 		return this.PERFORMANCE;
 	}
 
-	public long getBlockTime() {
-		return this.BLOCKTIME;
-	}
-
 	public void setLoad(long load) {
 		this.LOAD = load;
+		this.updateDatas(this.flowEndStatus);
 	}
 
 	public void setPerformance(long performance) {
-		if (performance > this.PERFORMANCE)
+		if (performance > this.PERFORMANCE) {
 			this.PERFORMANCE = performance;
+			this.updateDatas(this.flowEndStatus);
+		}	
 	}
 
 	public void resetBlockTime() {
-		this.BLOCKTIME = 0L;
+		this.BLOCKTIME.set(0);
 	}
 
 	public void incrementBlockTime() {
-		this.BLOCKTIME += 1;
+		this.BLOCKTIME.incrementAndGet();
 	}
-
-	public long getTotalProcess() {
-		return totalProcess;
+	
+	public void incrementFailUnitTime() {
+		this.failProcess.incrementAndGet();
+	}
+	
+	public void incrementFailUnitTime(int val) {
+		this.failProcess.addAndGet(val);
 	} 
 	
 	public void incrementCurrentTimeProcess(int delta) {
@@ -149,11 +155,11 @@ final public class FlowState {
 				String minkey = (String) Common.getMinKey(this.historyProcess.keySet());
 				this.historyProcess.remove(minkey);
 			}
-			this.currentTimeProcess = delta;
+			this.currentTimeProcess.set(delta);
 		}else {
-			this.currentTimeProcess += delta;
+			this.currentTimeProcess.addAndGet(delta);
 		}
-		this.totalProcess += delta;
+		this.totalProcess.addAndGet(delta);
 		this.historyProcess.put(todayZero, this.currentTimeProcess);
 		this.updateDatas(this.flowEndStatus);
 	}
