@@ -156,8 +156,8 @@ public class EFNode {
 		this.instanceCoord.sendInstanceData(EFFileUtil.readText(paths[0], GlobalParam.ENCODING,true),
 				EFFileUtil.readText(paths[1], GlobalParam.ENCODING,true),
 				EFFileUtil.readText(paths[2], GlobalParam.ENCODING,true),strs[0]);
-		this.instanceCoord.addInstance(instanceSetting,true);
 		this.masterInstanceCoorder.resumeInstance(strs[0]);	
+		this.instanceCoord.addInstance(instanceSetting,true);		
 	}
 
 	public void pushResource() {

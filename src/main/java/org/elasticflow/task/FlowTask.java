@@ -214,9 +214,9 @@ public class FlowTask {
 							"get " + destination + " storage location exception!", instanceId,
 							e.getMessage(), e.getErrorType().name(), false);
 				} else if (e.getErrorType() == ETYPE.EXTINTERRUPT) {
-					log.warn("{} increment external interrupt!", instanceId);
+					log.warn("{}_{} increment external interrupt!",instanceId,L1seq);
 				} else {
-					log.error(instanceId + " increment job exception", e);
+					log.error(instanceId + "_" +L1seq+ " increment job exception", e);
 				}
 			} finally {
 				recompute = this.checkReCompute(storeId);
