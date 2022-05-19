@@ -1,6 +1,11 @@
 package org.elasticflow.connection;
 
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseParam;
@@ -9,6 +14,7 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
@@ -33,6 +39,8 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 	private final static int BULK_FLUSH_SECONDS = 3;
 	private final static int BULK_CONCURRENT = 1;
 
+	private CredentialsProvider credentialsProvider;
+
 	private final static Logger log = LoggerFactory.getLogger(EsConnection.class);
 
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
@@ -45,6 +53,11 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 	protected boolean connect(END_TYPE endType) {
 		WarehouseParam wnp = this.connectParams.getWhp();
 		if (wnp.getHost() != null) {
+			if (wnp.getPassword() != null) {
+				credentialsProvider = new BasicCredentialsProvider();
+				credentialsProvider.setCredentials(AuthScope.ANY,
+						new UsernamePasswordCredentials(wnp.getUser(), wnp.getPassword()));
+			}
 			if (!status()) {
 				String[] hosts = wnp.getHost().split(",");
 				HttpHost[] httpHosts = new HttpHost[hosts.length];
@@ -55,7 +68,18 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 						log.error("connect Exception", e);
 					}
 				}
-				this.conn = new RestHighLevelClient(RestClient.builder(httpHosts));
+				if(credentialsProvider!=null) {
+					this.conn = new RestHighLevelClient(RestClient.builder(httpHosts)
+							.setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
+								public HttpAsyncClientBuilder customizeHttpClient(
+										HttpAsyncClientBuilder httpClientBuilder) {
+									httpClientBuilder.disableAuthCaching();
+									return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+								}
+							}));
+				}else {
+					this.conn = new RestHighLevelClient(RestClient.builder(httpHosts));
+				}
 				this.ESC.setClient(this.conn);
 			}
 		} else {
@@ -66,8 +90,8 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 
 	@Override
 	public EsConnector getConnection(END_TYPE endType) {
-		connect(endType); 
-		if (endType!=END_TYPE.searcher) {
+		connect(endType);
+		if (endType != END_TYPE.searcher) {
 			if (this.bulkProcessor == null) {
 				getBulkProcessor(this.conn);
 				this.ESC.setBulkProcessor(this.bulkProcessor);
@@ -88,7 +112,7 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 	@Override
 	public boolean free() {
 		try {
-			if(this.conn!=null)
+			if (this.conn != null)
 				this.conn.close();
 			this.ESC = null;
 			this.conn = null;
@@ -112,8 +136,8 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 							@Override
 							public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
 								if (response.hasFailures()) {
-									ESC.setRunState(false); 
-									ESC.setInfos(response.buildFailureMessage());					
+									ESC.setRunState(false);
+									ESC.setInfos(response.buildFailureMessage());
 								}
 							}
 
