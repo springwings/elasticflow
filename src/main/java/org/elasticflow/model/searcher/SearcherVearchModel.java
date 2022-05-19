@@ -7,9 +7,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.EFRequest;
+import org.elasticflow.util.Common;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -57,6 +59,9 @@ public class SearcherVearchModel extends SearcherModel<String, String, String> {
 					} 
 				}
 			}
+		}
+		if(current.storeId==null && instanceConfig.getPipeParams().getWriteMechanism().equals(MECHANISM.Time)) {
+			current.storeId = String.valueOf(Common.getNowZero());
 		}
 		if(_feature.size()==0) {
 			Iterator<Map.Entry<String,EFField>> iter_tmp =  instanceConfig.getWriteFields().entrySet().iterator();
