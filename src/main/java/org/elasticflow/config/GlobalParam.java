@@ -34,7 +34,9 @@ public final class GlobalParam {
 
 	/** ------------system Runtime Environment------------ */
 	public static boolean DEBUG;
-
+	
+	public static String LANG = "EN";
+	
 	/** error notify setting */
 	public static boolean SEND_EMAIL_ON = false;
 	public static String SEND_API_ON;

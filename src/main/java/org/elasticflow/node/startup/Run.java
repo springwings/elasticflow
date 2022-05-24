@@ -116,6 +116,7 @@ public final class Run {
 	
 	private void refreshGlobalParam() {
 		GlobalParam.RUN_ENV = String.valueOf(GlobalParam.StartConfig.get("run_environment"));
+		GlobalParam.LANG = String.valueOf(GlobalParam.StartConfig.get("language")).toUpperCase();
 		GlobalParam.VERSION = version;
 		GlobalParam.GROUPID = groupId;
 		GlobalParam.DEBUG = GlobalParam.StartConfig.getProperty("is_debug").equals("false") ? false : true;

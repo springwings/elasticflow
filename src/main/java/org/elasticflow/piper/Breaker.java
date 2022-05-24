@@ -10,6 +10,8 @@ package org.elasticflow.piper;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import org.elasticflow.model.FIFOQueue;
+import org.elasticflow.model.Localization;
+import org.elasticflow.model.Localization.LAG_TYPE;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.yarn.Resource;
@@ -101,8 +103,8 @@ public class Breaker {
 	public boolean isOn() {
 		if (this.openBreaker || this.failTimes >= maxFailTime || failInterval() <= perFailTime) {
 			if(isFirstNotify) {
-				Common.LOG.warn("instance {} breaker is on!", instanceID);
-				Resource.EfNotifier.send(instanceID + " breaker is on!", instanceID, "Instance data flow has been disconnected!",
+				Common.LOG.warn(Localization.format(LAG_TYPE.flowBreaker,instanceID));
+				Resource.EfNotifier.send(Localization.format(LAG_TYPE.flowBreaker,instanceID), instanceID, Localization.format(LAG_TYPE.flowDisconnect),
 						EFException.ETYPE.RESOURCE_ERROR.name(), false);
 			}
 			isFirstNotify = false;
