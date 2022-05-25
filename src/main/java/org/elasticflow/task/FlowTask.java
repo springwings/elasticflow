@@ -11,6 +11,8 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.GlobalParam.STATUS;
+import org.elasticflow.model.Localization;
+import org.elasticflow.model.Localization.LAG_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.node.CPU;
 import org.elasticflow.piper.Breaker;
@@ -116,7 +118,7 @@ public class FlowTask {
 			} catch (Exception e) {
 				breaker.log();
 				log.error(instanceId + " Full Exception", e);
-				Resource.EfNotifier.send(instanceId + " Full Exception", instanceId, e.getMessage(),
+				Resource.EfNotifier.send(Localization.format(LAG_TYPE.fullFail, instanceId), instanceId, e.getMessage(),
 						EFException.ETYPE.DATA_ERROR.name(), false);
 			} finally {
 				GlobalParam.TASK_COORDER.setFlowStatus(instanceId, L1seq, GlobalParam.JOB_TYPE.FULL.name(),
@@ -210,8 +212,7 @@ public class FlowTask {
 				if (!isReferenceInstance && e.getErrorType() == ETYPE.RESOURCE_ERROR) {
 					log.error("get {} storage location exception!", destination, e);
 					breaker.openBreaker();
-					Resource.EfNotifier.send(
-							"get " + destination + " storage location exception!", instanceId,
+					Resource.EfNotifier.send(Localization.format(LAG_TYPE.FailPosition, destination), instanceId,
 							e.getMessage(), e.getErrorType().name(), false);
 				} else if (e.getErrorType() == ETYPE.EXTINTERRUPT) {
 					log.warn("{}_{} increment external interrupt!",instanceId,L1seq);

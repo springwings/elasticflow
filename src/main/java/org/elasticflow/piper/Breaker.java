@@ -29,9 +29,9 @@ import org.elasticflow.yarn.Resource;
 public class Breaker {
 
 	private long earlyFailTime;
-	
+
 	private volatile boolean openBreaker = false;
-	
+
 	public volatile boolean isFirstNotify = true;
 
 	private volatile int failTimes;
@@ -75,37 +75,37 @@ public class Breaker {
 			return Integer.MAX_VALUE;
 		}
 	}
-	
+
 	public int getFailTimes() {
 		return this.failTimes;
 	}
-	
+
 	public String getReason() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("breaker is manual opening:"+String.valueOf(this.openBreaker));
+		sb.append("breaker is manual opening:" + String.valueOf(this.openBreaker));
 		sb.append("\n");
-		sb.append("fail times:"+String.valueOf(this.failTimes));
+		sb.append("fail times:" + String.valueOf(this.failTimes));
 		sb.append("\n");
-		sb.append("fail interval:"+String.valueOf(failInterval()));
+		sb.append("fail interval:" + String.valueOf(failInterval()));
 		sb.append("\n");
-		sb.append("fail times > "+String.valueOf(maxFailTime) +" OR fail Interval < "+String.valueOf(perFailTime));
+		sb.append("fail times > " + String.valueOf(maxFailTime) + " OR fail Interval < " + String.valueOf(perFailTime));
 		return sb.toString();
 	}
-	
+
 	public void openBreaker() {
 		this.openBreaker = true;
 	}
-	
+
 	public void closeBreaker() {
 		this.openBreaker = false;
 	}
 
 	public boolean isOn() {
 		if (this.openBreaker || this.failTimes >= maxFailTime || failInterval() <= perFailTime) {
-			if(isFirstNotify) {
-				Common.LOG.warn(Localization.format(LAG_TYPE.flowBreaker,instanceID));
-				Resource.EfNotifier.send(Localization.format(LAG_TYPE.flowBreaker,instanceID), instanceID, Localization.format(LAG_TYPE.flowDisconnect),
-						EFException.ETYPE.RESOURCE_ERROR.name(), false);
+			if (isFirstNotify) {
+				Common.LOG.warn(Localization.formatEN(LAG_TYPE.flowBreaker, instanceID));
+				Resource.EfNotifier.send(Localization.format(LAG_TYPE.flowBreaker, instanceID), instanceID,
+						Localization.format(LAG_TYPE.flowDisconnect), EFException.ETYPE.RESOURCE_ERROR.name(), false);
 			}
 			isFirstNotify = false;
 			return true;
