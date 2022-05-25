@@ -372,6 +372,7 @@ public final class NodeMonitor {
 		dt.put("NODE_IP", GlobalParam.IP);
 		dt.put("WRITE_BATCH", GlobalParam.WRITE_BATCH);
 		dt.put("SERVICE_LEVEL", service_level);
+		dt.put("LANG", GlobalParam.LANG);
 		dt.put("STATUS", "running");
 		dt.put("VERSION", GlobalParam.VERSION);
 		dt.put("TASKS", Resource.tasks.size());

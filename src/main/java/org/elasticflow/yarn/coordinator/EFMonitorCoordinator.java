@@ -37,6 +37,7 @@ public class EFMonitorCoordinator implements EFMonitorCoord {
 		HashMap<String, Object> dt = new HashMap<>();
 		dt.put("WRITE_BATCH", GlobalParam.WRITE_BATCH);
 		dt.put("VERSION", GlobalParam.VERSION);
+		dt.put("LANG", GlobalParam.LANG);
 		dt.put("TASKS", Resource.tasks.size());
 		dt.put("THREAD_POOL_SIZE", Resource.threadPools.getPoolSize());
 		dt.put("THREAD_ACTIVE_COUNT", Resource.threadPools.getActiveCount());
