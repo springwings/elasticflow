@@ -214,10 +214,11 @@ public class SolrWriter extends WriterFlowSocket{
 					getSolrConn().add(docs);
 					getSolrConn().commit(true, true, true);
 				} catch (Exception e) {
+					log.error("Solr error writing data", e);
 					if (Common.exceptionCheckContain(e, "Collection not found")) {
 						throw new EFException("storeId not found",ELEVEL.Dispose,ETYPE.RESOURCE_ERROR);
 					} else {
-						throw new EFException(e);
+						throw new EFException("Solr error writing data");
 					}
 				}
 				docs.clear();

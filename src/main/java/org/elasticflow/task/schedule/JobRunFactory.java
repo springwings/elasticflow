@@ -7,6 +7,8 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.model.Localization;
+import org.elasticflow.model.Localization.LAG_TYPE;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.yarn.Resource;
@@ -22,9 +24,9 @@ public class JobRunFactory implements Job {
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		JobModel job = (JobModel) context.getMergedJobDataMap().get(GlobalParam.FLOW_TAG._DEFAULT.name());
-		if (!invokeMethod(job)) {
-			Resource.EfNotifier.send(" [" + GlobalParam.PROJ + "] " + GlobalParam.RUN_ENV,job.getInstanceID(),
-					"Call method error causes job [" + job.getJobName() +"]  startup failure!",EFException.ETYPE.PARAMETER_ERROR.name(),true);
+		if (!invokeMethod(job)) {			
+			Resource.EfNotifier.send(Localization.formatEN(LAG_TYPE.JobstartFailed, job.getInstanceID()),job.getInstanceID(),
+					Localization.formatEN(LAG_TYPE.JobstartFailed, job.getInstanceID()),EFException.ETYPE.PARAMETER_ERROR.name(),true);
 		}
 	}
 
@@ -39,7 +41,7 @@ public class JobRunFactory implements Job {
 			method.invoke(object);
 			return true;
 		} catch (Exception e) {
-			Common.LOG.error(jobModel.getJobName() + " invokMethod " + jobModel.getMethodName() + " Exception", e);
+			Common.LOG.error(jobModel.getJobName() + " invoke method " + jobModel.getMethodName() + " Exception", e);
 		}
 		return false;
 	}

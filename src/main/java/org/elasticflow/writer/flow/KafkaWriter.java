@@ -13,6 +13,8 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.writer.WriterFlowSocket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Kafka flow Writer Manager
@@ -21,7 +23,9 @@ import org.elasticflow.writer.WriterFlowSocket;
  */
 
 public class KafkaWriter extends WriterFlowSocket {
-
+	
+	private final static Logger log = LoggerFactory.getLogger(KafkaWriter.class);
+	
 	public static KafkaWriter getInstance(ConnectParams connectParams) {
 		KafkaWriter o = new KafkaWriter();
 		o.initConn(connectParams);
@@ -55,7 +59,8 @@ public class KafkaWriter extends WriterFlowSocket {
 				}						
 			}			
 		} catch (Exception e) {
-			throw new EFException(e,ELEVEL.Dispose);
+			log.error("Kafka error writing data", e);
+			throw new EFException("Kafka error writing data",ELEVEL.Dispose);
 		}
 	}
 

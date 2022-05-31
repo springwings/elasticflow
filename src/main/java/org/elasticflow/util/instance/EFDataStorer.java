@@ -46,7 +46,7 @@ public class EFDataStorer {
 				throw e;
 			}
 		} catch (Exception e) {
-			Common.LOG.error("write data exception", e);
+			Common.LOG.error(path+" error writing data", e);
 		}
 	}
 	

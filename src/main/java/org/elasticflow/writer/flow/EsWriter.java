@@ -62,7 +62,7 @@ public class EsWriter extends WriterFlowSocket {
 
 	private boolean reconn = false;
 
-	private final static Logger log = LoggerFactory.getLogger("ESFlow");
+	private final static Logger log = LoggerFactory.getLogger(EsWriter.class);
 
 	public static EsWriter getInstance(ConnectParams connectParams) {
 		EsWriter o = new EsWriter();
@@ -110,7 +110,8 @@ public class EsWriter extends WriterFlowSocket {
 			_UR.setRefresh(true);
 			getESC().getClient().updateByQuery(_UR, RequestOptions.DEFAULT);
 		} catch (Exception e) {
-			throw new EFException(e);
+			log.error("ElasticSearch error writing data", e);
+			throw new EFException("ElasticSearch error writing data");
 		}
 	}
 
@@ -171,11 +172,11 @@ public class EsWriter extends WriterFlowSocket {
 				}
 			}
 		} catch (Exception e) {
-			log.error("write Exception", e);
+			log.error("ElasticSearch error writing data", e);
 			if (Common.exceptionCheckContain(e, "IndexNotFoundException")) {
 				throw new EFException("storeId not found", ELEVEL.Termination, ETYPE.RESOURCE_ERROR);
 			} else {
-				throw new EFException(e,ELEVEL.Dispose);
+				throw new EFException("ElasticSearch error writing data",ELEVEL.Dispose);
 			}
 		}
 	}

@@ -15,7 +15,7 @@ import org.elasticflow.config.GlobalParam;
 public class Localization {
 
 	public static enum LAG_TYPE {
-		flowDisconnect,flowBreaker,fullFail,FailPosition
+		flowDisconnect,flowBreaker,fullFail,FailPosition,JobstartFailed
 	}
 	
 	final static HashMap<String, String> lOC_MAP = new HashMap<String, String>() {
@@ -29,6 +29,8 @@ public class Localization {
 			put("fullFail_EN", "{0} Full Task Exception");
 			put("FailPosition_ZH", "获取{0}存储位置错误!");
 			put("FailPosition_EN", "get {0} storage location exception!");
+			put("JobstartFailed_ZH", "{0}任务启动失败!");
+			put("JobstartFailed_EN", "job {0} start failure, call method error!");
 		}
 	};
 	

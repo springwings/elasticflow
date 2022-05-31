@@ -120,7 +120,7 @@ public class VearchConnector {
 		if (Integer.valueOf(String.valueOf(jr.get("status"))) == 200)
 			return;
 		else {
-			throw new EFException("write data Exception," + jr.get("error"));
+			throw new EFException("Vearch error writing data," + jr.get("error"));
 		}
 	}
 
@@ -183,7 +183,7 @@ public class VearchConnector {
 			if (Integer.valueOf(String.valueOf(jo.get("status"))) != 200) {
 				if(GlobalParam.DEBUG)
 					log.warn(dt.toString());
-				throw new EFException("write data Exception," + jo.get("error"));
+				throw new EFException("Vearch error writing data," + jo.get("error"));
 			}				
 		}
 	}

@@ -22,7 +22,7 @@ import com.alibaba.fastjson.JSONObject;
 
 public class Neo4jWriter extends WriterFlowSocket {
 	
-	private final static Logger log = LoggerFactory.getLogger("Neo4jFlow");
+	private final static Logger log = LoggerFactory.getLogger(Neo4jWriter.class);
 	
 	public static Neo4jWriter getInstance(ConnectParams connectParams) {
 		Neo4jWriter o = new Neo4jWriter();
@@ -56,7 +56,8 @@ public class Neo4jWriter extends WriterFlowSocket {
 				log.info(getWriteSQL(writerParam, unit, transParams));
 			}
 		} catch (Exception e) { 
-			throw new EFException(e,ELEVEL.Dispose);
+			log.error("Neo4j error writing data", e);
+			throw new EFException("Neo4j error writing data",ELEVEL.Dispose);
 		} finally {
 			REALEASE(false, releaseConn);
 		}

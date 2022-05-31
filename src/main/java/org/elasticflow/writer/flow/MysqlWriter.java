@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class MysqlWriter extends WriterFlowSocket {
 
-	private final static Logger log = LoggerFactory.getLogger("MysqlFlow");
+	private final static Logger log = LoggerFactory.getLogger(MysqlWriter.class);
 
 	final static int flushSize = 100;
 
@@ -68,7 +68,8 @@ public class MysqlWriter extends WriterFlowSocket {
 				this.insertDb(PipeUtil.getWriteSql(table, unit, transParams));
 			}
 		} catch (Exception e) { 
-			throw new EFException(e,ELEVEL.Dispose);
+			log.error("Mysql error writing data", e);
+			throw new EFException("Mysql error writing data",ELEVEL.Dispose);
 		}
 	}
 
