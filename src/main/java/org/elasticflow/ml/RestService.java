@@ -108,19 +108,21 @@ public class RestService extends ComputerFlowSocket {
 								this.write(context, tmp, responseParams, _keepdt); 
 							} catch (Exception e) { 
 								this.successRunAll = false;
-								log.error(apis.get(0));
+								log.error(api);
 								log.error("rest post data process error", e);
+							} finally {
+								taskSingal.countDown();
 							}
-							taskSingal.countDown();
 			            }); 
 					} catch (Exception e) { 
 						this.successRunAll = false;
 						log.error(apis.get(0));
 						log.error("rest post data process error", e);
+					}finally {
+						count = 0;
+						post_data.clear();
+						keepDatas.clear();
 					}
-					post_data.clear();
-					keepDatas.clear();
-					count = 0;
 				}
 			}
 
@@ -140,10 +142,11 @@ public class RestService extends ComputerFlowSocket {
 							this.write(context, tmp, responseParams, _keepdt); 
 						} catch (Exception e) { 
 							this.successRunAll = false;
-							log.error(apis.get(0));
+							log.error(api);
 							log.error("rest post data process error", e);
+						} finally {
+							taskSingal.countDown();
 						}
-						taskSingal.countDown();
 		            }); 
 				} catch (Exception e) { 
 					this.successRunAll = false;

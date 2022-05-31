@@ -140,8 +140,8 @@ public class OracleReader extends ReaderFlowSocket{
 		}catch (Exception e) {
 			releaseConn = true;
 			page = null;
-			log.error("get page splits exception will auto free connection!");
-			throw new EFException(e);			
+			log.error("Oracle Reader get page lists Exception, system will auto free connection!",e);
+			throw new EFException("Oracle Reader get page lists Exception");			
 		}finally{ 
 			try {
 				if(statement!=null && rs!=null) {
@@ -150,8 +150,8 @@ public class OracleReader extends ReaderFlowSocket{
 				}
 			} catch (Exception e) {
 				releaseConn = true; 
-				log.error("close connection resource Exception!");
-				throw new EFException(e);	
+				log.error("close connection resource Exception!",e);
+				throw new EFException("Oracle close connection Exception!");	
 			} 
 			REALEASE(false,releaseConn);  
 		}  

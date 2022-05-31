@@ -123,8 +123,8 @@ public class KafkaReader extends ReaderFlowSocket {
 			} catch (EFException e1) {
 				throw e1;
 			}
-			log.error("get dataPage Exception will auto free connection!");
-			throw new EFException(e);
+			log.error("Kafka Reader get dataPage Exception, system will auto free connection!",e);
+			throw new EFException("Kafka Reader get dataPage Exception!");
 		}  
 		return this.dataPage;
 	}
@@ -171,8 +171,8 @@ public class KafkaReader extends ReaderFlowSocket {
 			} catch (EFException e1) {
 				throw e1;
 			}
-			log.error("get page splits exception will auto free connection!");
-			throw new EFException(e);	
+			log.error("Kafka Reader get page lists Exception, system will auto free connection!",e);
+			throw new EFException("Kafka Reader get page lists Exception!");	
 		}  
 		return page;
 	}

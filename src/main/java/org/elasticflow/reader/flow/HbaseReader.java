@@ -119,13 +119,13 @@ public class HbaseReader extends ReaderFlowSocket {
 			} catch (Exception e) {
 				releaseConn = true;
 				this.dataPage.put(GlobalParam.READER_LAST_STAMP, -1);
-				log.error("get dataPage Exception will auto free connection!");
-				throw new EFException(e);
+				log.error("Hbase Reader get dataPage Exception, system will auto free connection!",e);
+				throw new EFException("Hbase Reader get dataPage Exception");
 			} 
 		} catch (Exception e) {
 			releaseConn = true;
-			log.error("get dataPage Exception will auto free connection!");
-			throw new EFException(e);
+			log.error("Hbase Reader get dataPage Exception, system will auto free connection!",e);
+			throw new EFException("Hbase Reader get dataPage Exception");
 		}finally{
 			REALEASE(false,releaseConn);
 		} 
@@ -165,8 +165,8 @@ public class HbaseReader extends ReaderFlowSocket {
 			}
 		} catch (Exception e) {
 			releaseConn = true;
-			log.error("get page splits exception will auto free connection!");
-			throw new EFException(e);
+			log.error("Hbase Reader get page lists Exception, system will auto free connection!",e);
+			throw new EFException("Hbase Reader get page lists Exception!");
 		}finally{ 
 			REALEASE(false,releaseConn);
 		}
