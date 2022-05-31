@@ -222,8 +222,10 @@ public final class PipePump extends Instruction implements Serializable {
 				GlobalParam.TASK_COORDER.setFlowInfo(task.getInstanceID(), task.getJobType().name(),
 						task.getId() + L2seq, "start count page...");
 				ConcurrentLinkedDeque<String> pageList = this.getPageLists(task);
-				if (pageList == null)
-					throw new EFException("Reader page split exception!", ELEVEL.Termination);
+				if (pageList == null) {
+					log.warn("{} get data page list is null.",task.getId());
+					continue;
+				}
 				processListsPages(task, destination, pageList, storeId);
 			} catch (EFException e) {
 				if (task.getJobType().equals(JOB_TYPE.FULL) && !isReferenceInstance) {
