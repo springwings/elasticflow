@@ -7,6 +7,9 @@
  */
 package org.elasticflow.yarn.coordinator;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -327,7 +330,8 @@ public class DistributeCoorder {
 			this.avgInstanceNum = avgInstanceNum();
 			Common.LOG.info("start NodeLeave rebalance on {} nodes,avgInstanceNum {}...", nodes.size(), avgInstanceNum);
 			this.distributeInstances(bindInstances);
-			Common.LOG.info("finish NodeLeave rebalance instance!");
+			this.storeNodesStatus();
+			Common.LOG.info("finish NodeLeave rebalance instance!");			
 		}
 	}
 
@@ -349,6 +353,7 @@ public class DistributeCoorder {
 			// re-balance nodes
 			this.distributeInstances(idleInstances);
 		}
+		this.storeNodesStatus();
 		Common.LOG.info("finish NewNodeJoin rebalance!");
 	}
 
@@ -366,7 +371,18 @@ public class DistributeCoorder {
 				totalInstanceNum);
 		this.avgInstanceNum = avgInstanceNum();
 		this.distributeInstances(runInstances);
+		this.storeNodesStatus();
 		Common.LOG.info("finish cluster init rebalance!");
+	}
+	
+	private void storeNodesStatus() {
+		String fpath = GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/status";
+		File file = new File(fpath); 
+		try(ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file)); ){			
+			oos.writeObject(this.nodes); 			
+		} catch (Exception e) {
+			Common.LOG.error("write nodes status exception", e);
+		} 
 	}
 
 	/**

@@ -28,19 +28,17 @@ public class RecoverMonitor {
 		Common.LOG.info("Start Recover Monitor Service!");
 		while(true) {
 			try {
-				String[] monitor_ips = GlobalParam.StartConfig.getProperty("monitor_ip").split(",");
+				String ip = GlobalParam.StartConfig.getProperty("monitor_ip");
 				TelnetClient client = new TelnetClient(); 
-				client.setDefaultTimeout(2000); 
-				for(String ip:monitor_ips) {
-					try { 
-						client.connect(ip, 8617); 
-					} catch (Exception e) {
-						this.takeIp = ip;
-						takeOverNode();
-						return;
-					}
+				client.setDefaultTimeout(6000); 
+				try { 
+					client.connect(ip, 8617); 
+				} catch (Exception e) {
+					this.takeIp = ip;
+					takeOverNode();
+					return;
 				}
-				Thread.sleep(5000);
+				Thread.sleep(6000);
 			}catch (Exception e) {
 				Common.LOG.error("RecoverMonitor start Exception",e);
 			}  

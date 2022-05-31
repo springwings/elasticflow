@@ -80,6 +80,10 @@ public final class ReportStatus {
 				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID, false);
 			}
 			if (EFDataStorer
+					.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/status") == false) {
+				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/status", true);
+			}
+			if (EFDataStorer
 					.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs") == false) {
 				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs", true);
 			}
