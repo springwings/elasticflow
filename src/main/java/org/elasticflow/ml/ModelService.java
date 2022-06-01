@@ -1,28 +1,32 @@
 package org.elasticflow.ml;
 
-import java.io.InputStream;
-import java.net.Socket;
+import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.instruction.Context;
-import org.elasticflow.model.EFSocket;
+import org.elasticflow.ml.common.ImageUtil;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFFileUtil;
-import org.elasticflow.yarn.Resource;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.onnxruntime.OnnxTensor;
+import ai.onnxruntime.OrtEnvironment;
+import ai.onnxruntime.OrtSession;
+import ai.onnxruntime.OrtSession.Result;
+import ai.onnxruntime.OrtSession.SessionOptions;
+import ai.onnxruntime.OrtSession.SessionOptions.OptLevel;
+
 /**
- * Model Compute
+ * Onnx Model Compute
  * 
  * @author chengwen
  * @version 1.0
@@ -30,15 +34,15 @@ import org.slf4j.LoggerFactory;
  */
 public class ModelService extends ComputerFlowSocket {
 
-	private CopyOnWriteArrayList<EFSocket> clients = new CopyOnWriteArrayList<>();
-	
-	private CopyOnWriteArrayList<Process> processes = new CopyOnWriteArrayList<>();
-	 
-	private String pyTemplete;
-	
-	static AtomicInteger portNum = new AtomicInteger(100);
-	
-	private final static Logger log = LoggerFactory.getLogger("ML");
+	private String modelPath = "/VM/model.onnx";
+
+	private OrtEnvironment env = OrtEnvironment.getEnvironment();
+
+	private OrtSession sess;
+
+	private String inputName;
+
+	private final static Logger log = LoggerFactory.getLogger("ModelService");
 
 	public static ModelService getInstance(final ConnectParams connectParams) {
 		ModelService o = new ModelService();
@@ -46,27 +50,50 @@ public class ModelService extends ComputerFlowSocket {
 		o.init();
 		return o;
 	}
-	
+
 	public void init() {
-		pyTemplete = EFFileUtil.readText("src/main/resources/ModelService.py", "utf-8", false);
+		OrtSession.SessionOptions opts = new SessionOptions();
+		try {
+			opts.setOptimizationLevel(OptLevel.BASIC_OPT);
+			log.info("Loading model from " + modelPath);
+			sess = env.createSession(modelPath, opts);
+			inputName = sess.getInputNames().iterator().next();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
+	public static int pred(float[] probabilities) {
+	    float maxVal = Float.NEGATIVE_INFINITY;
+	    int idx = 0;
+	    for (int i = 0; i < probabilities.length; i++) {
+	      if (probabilities[i] > maxVal) {
+	        maxVal = probabilities[i];
+	        idx = i;
+	      }
+	    }
+	    return idx;
+	  }
+
 	@Override
-	public DataPage predict(Context context, DataSetReader DSR) throws EFException { 
+	public DataPage predict(Context context, DataSetReader DSR) throws EFException {
 		if (this.computerHandler != null) {
 			this.computerHandler.handleData(this, context, DSR);
 		} else {
-			synchronized(portNum) {
-				if(this.clients.size()==0) {
-					this.addService(39000+portNum.getAndIncrement(),context.getInstanceConfig().getComputeParams().getPyPath());
-				}
-			}
 			while (DSR.nextLine()) {
 				PipeDataUnit pdu = DSR.getLineData();
 				PipeDataUnit u = PipeDataUnit.getInstance();
 				Set<Entry<String, Object>> itr = pdu.getData().entrySet();
-				for (Entry<String, Object> k : itr) {
-					this.send(k.getValue());
+				int[][][][] testData = ImageUtil.getImgArrays(new String[] {"/VM/test.jpg"},128,256);
+				INDArray features = Nd4j.create(testData); 
+				for (Entry<String, Object> k : itr) { 
+					try (OnnxTensor test = OnnxTensor.createTensor(env, features);
+							Result output = sess.run(Collections.singletonMap(inputName, test))) {
+						float[][] outputProbs = (float[][]) output.get(0).getValue();
+						System.out.println(outputProbs[0]);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 				this.dataUnit.add(u);
 			}
@@ -76,78 +103,5 @@ public class ModelService extends ComputerFlowSocket {
 		}
 		return this.dataPage;
 	}
-	
-	public void shutdown() {
-		for(EFSocket sk : clients) {
-			try {
-				sk.close();
-			} catch (Exception e) {
-				log.warn("shut down model service socket exception",e);
-			}
-		}
-		for(Process proc:processes) {
-			proc.destroy();
-		}
-	}
 
-	private synchronized void addService(int port,String pyPath) {
-		Resource.threadPools.execute(() -> { 
-			this.runService(port,pyPath); 
-		});		
-		for(int i=0;i<5;i++) {
-			boolean success = connectSocket(port);
-			if(success)
-				break;
-		}
-	} 
-	
-	private boolean connectSocket(int port) {
-		try {
-			Thread.sleep(200);
-			Socket sk = new Socket("127.0.0.1", port);
-			clients.add(new EFSocket(sk));
-		} catch (Exception e) {
-			return false;
-		} 		
-		return true;
-	}
-	
-	private String getPyName(int port) {
-		return "EF_TEMP_"+String.valueOf(port)+".py";
-	}
-
-	private EFSocket getSocket() {
-		return clients.get(0);
-	}
-
-	private void runService(int port,String pyPath) { 
-		try { 
-			String pyname = getPyName(port);
-			String runPy = pyPath+"/"+pyname; 
-			EFFileUtil.createAndSave(pyTemplete, runPy);
-			ProcessBuilder pb = new ProcessBuilder("python3", runPy, String.valueOf(port)).inheritIO();
-			Process proc = pb.start();
-			processes.add(proc);
-			proc.waitFor();
-		} catch (Exception e) {
-			log.error("open model service socket exception",e);
-		}
-	}
-
-	private void send(Object data) {
-		EFSocket client = getSocket();
-		try {
-			client.getOSW().write(data.toString());
-			client.getOSW().flush();
-			InputStream is = client.getSocket().getInputStream();
-			byte[] buf = new byte[1024 * 8];
-			StringBuilder recive = new StringBuilder();
-			for (int len = is.read(buf); len > 0; len = is.read(buf)) {
-				recive.append(new String(buf, 0, len));
-			}
-			System.out.println(recive);
-		} catch (Exception e) {
-			log.error("send message exception",e);
-		}
-	}
 }
