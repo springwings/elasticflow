@@ -17,8 +17,8 @@ import org.elasticflow.util.EFException;
  * @version 1.0
  * @date 2018-11-19 15:33
  */
-public class EFRPCService<T> {
-
+public class EFRPCService<T> {	
+	
 	@SuppressWarnings("unchecked")
 	public static <T> T getRemoteProxyObj(final Class<?> serviceInterface, final InetSocketAddress addr) {
 		return (T) Proxy.newProxyInstance(serviceInterface.getClassLoader(), new Class<?>[] { serviceInterface },

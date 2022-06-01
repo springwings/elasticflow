@@ -7,10 +7,6 @@
  */
 package org.elasticflow.yarn.coordinator;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -26,13 +22,12 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.node.EFNode;
 import org.elasticflow.util.Common;
-import org.elasticflow.yarn.EFRPCService;
+import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.yarn.Resource;
-import org.elasticflow.yarn.coord.EFMonitorCoord;
-import org.elasticflow.yarn.coord.InstanceCoord;
-import org.elasticflow.yarn.coord.NodeCoord;
 import org.elasticflow.yarn.coordinator.node.DistributeService;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 /**
@@ -150,14 +145,7 @@ public class DistributeCoorder {
 		if (!this.containsNode(nodeId)) {
 			synchronized (nodes) {
 				EFNode node = EFNode.getInstance(ip, nodeId);
-				node.init(isOnStart.get(),
-						EFRPCService.getRemoteProxyObj(NodeCoord.class,
-								new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)),
-						EFRPCService.getRemoteProxyObj(InstanceCoord.class,
-								new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)),
-						EFRPCService.getRemoteProxyObj(EFMonitorCoord.class,
-								new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT)),
-						this);
+				node.init(isOnStart.get(),this,true);
 				nodes.add(node);
 				Common.LOG.info("{} join cluster, current number of nodes is {}.", ip, nodes.size());
 			}
@@ -377,12 +365,11 @@ public class DistributeCoorder {
 	
 	private void storeNodesStatus() {
 		String fpath = GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/status";
-		File file = new File(fpath); 
-		try(ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file)); ){			
-			oos.writeObject(this.nodes); 			
-		} catch (Exception e) {
-			Common.LOG.error("write nodes status exception", e);
-		} 
+		JSONArray JA = new JSONArray();
+		for (EFNode node : nodes) {
+			JA.add(node.getNodeInfos());
+		}
+		EFDataStorer.setData(fpath,JSON.toJSONString(JA));
 	}
 
 	/**

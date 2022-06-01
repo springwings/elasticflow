@@ -241,7 +241,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
+		<dependency>
+			<groupId>com.microsoft.onnxruntime</groupId>
+			<artifactId>onnxruntime_gpu</artifactId>
+			<version>${onnxruntime_gpu.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase-protocol</artifactId>
@@ -467,5 +471,6 @@
 		<fastdfs.version>1.29-SNAPSHOT</fastdfs.version>
 		<hadoop.version>3.1.1</hadoop.version>
 		<commons-io.version>2.9.0</commons-io.version>
+		<onnxruntime_gpu.version>1.11.0</onnxruntime_gpu.version>
 	</properties>
 </project>

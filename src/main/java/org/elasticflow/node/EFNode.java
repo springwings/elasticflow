@@ -1,5 +1,6 @@
 package org.elasticflow.node;
 
+import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -7,6 +8,7 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.flow.EFlowMonitor;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFFileUtil;
+import org.elasticflow.yarn.EFRPCService;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coord.EFMonitorCoord;
 import org.elasticflow.yarn.coord.InstanceCoord;
@@ -16,8 +18,8 @@ import org.elasticflow.yarn.coordinator.DistributeCoorder;
 import com.alibaba.fastjson.JSONObject;
 
 /**
- * Node Model
- * It is mainly used for distributed node control
+ * Node Model It is mainly used for distributed node control
+ * 
  * @author chengwen
  * @version 1.0
  */
@@ -52,15 +54,27 @@ public class EFNode {
 		setNodeId(nodeId);
 	}
 
-	public void init(boolean isOnStart,NodeCoord nodeCoord, InstanceCoord instanceCoord, 
-			EFMonitorCoord monitorCoord,DistributeCoorder masterInstanceCoorder) {
-		this.nodeCoord = nodeCoord;
-		this.instanceCoord = instanceCoord;
-		this.monitorCoord = monitorCoord;
-		this.instanceCoord.initNode(isOnStart);
-		this.masterInstanceCoorder = masterInstanceCoorder;
-		this.pushResource();
-		this.stopAllInstance();
+	public void init(boolean isOnStart, DistributeCoorder masterInstanceCoorder,boolean reset) {
+		this.nodeCoord = EFRPCService.getRemoteProxyObj(NodeCoord.class,
+				new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT));
+		this.instanceCoord = EFRPCService.getRemoteProxyObj(InstanceCoord.class,
+				new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT));
+		this.monitorCoord = EFRPCService.getRemoteProxyObj(EFMonitorCoord.class,
+				new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT));
+		if(reset) {
+			this.instanceCoord.initNode(isOnStart);
+			this.masterInstanceCoorder = masterInstanceCoorder;
+			this.pushResource();
+			this.stopAllInstance();
+		}		
+	}
+
+	public JSONObject getNodeInfos() {
+		JSONObject JO = new JSONObject();
+		JO.put("ip", ip);
+		JO.put("nodeId", nodeId);
+		JO.put("bindInstances", bindInstances);
+		return JO;
 	}
 
 	public String getIp() {
@@ -76,23 +90,23 @@ public class EFNode {
 			setStatus(false);
 		return isLive;
 	}
-	
+
 	public boolean isOpenRegulate() {
 		return this.flowMonitor.isOpenRegulate();
 	}
-	
+
 	public double getResourceAbundance() {
 		return this.flowMonitor.getResourceAbundance();
 	}
 
 	public void refresh() {
-		this.lastLiveTime = Common.getNow();		
+		this.lastLiveTime = Common.getNow();
 		Resource.threadPools.execute(() -> {
 			double tmp[] = nodeCoord.summaryResource();
 			this.cpuUsed = tmp[0];
 			this.memUsed = tmp[1];
 			this.flowMonitor.checkResourceUsage();
-		});		
+		});
 	}
 
 	public void setStatus(boolean isLive) {
@@ -109,12 +123,12 @@ public class EFNode {
 
 	public InstanceCoord getInstanceCoord() {
 		return instanceCoord;
-	} 
-	
+	}
+
 	public double getCpuUsed() {
 		return cpuUsed;
 	}
-	
+
 	public double getMemUsed() {
 		return memUsed;
 	}
@@ -137,48 +151,48 @@ public class EFNode {
 				return true;
 		}
 		return false;
-	} 
-	
-	public void recoverInstance() {
-		if(this.instanceCoord.onlineTasksNum()==0) {
-			for(String instanceSetting : this.bindInstances) {
-				this.pushInstance(instanceSetting,false);
-			}
-		}		
 	}
-	
-	public void pushInstance(String instanceSetting,boolean updateBindInstances) {
-		if(updateBindInstances)//for recover
+
+	public void recoverInstance() {
+		if (this.instanceCoord.onlineTasksNum() == 0) {
+			for (String instanceSetting : this.bindInstances) {
+				this.pushInstance(instanceSetting, false);
+			}
+		}
+	}
+
+	public void pushInstance(String instanceSetting, boolean updateBindInstances) {
+		if (updateBindInstances)// for recover
 			this.bindInstances.offer(instanceSetting);
 		String[] strs = instanceSetting.split(":");
 		String[] paths = EFFileUtil.getInstancePath(strs[0]);
 		this.masterInstanceCoorder.stopInstance(strs[0]);
-		this.instanceCoord.sendInstanceData(EFFileUtil.readText(paths[0], GlobalParam.ENCODING,true),
-				EFFileUtil.readText(paths[1], GlobalParam.ENCODING,true),
-				EFFileUtil.readText(paths[2], GlobalParam.ENCODING,true),strs[0]);
-		this.masterInstanceCoorder.resumeInstance(strs[0]);	
-		this.instanceCoord.addInstance(instanceSetting,true);		
+		this.instanceCoord.sendInstanceData(EFFileUtil.readText(paths[0], GlobalParam.ENCODING, true),
+				EFFileUtil.readText(paths[1], GlobalParam.ENCODING, true),
+				EFFileUtil.readText(paths[2], GlobalParam.ENCODING, true), strs[0]);
+		this.masterInstanceCoorder.resumeInstance(strs[0]);
+		this.instanceCoord.addInstance(instanceSetting, true);
 	}
 
 	public void pushResource() {
 		String resource = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
 		String instructions = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("instructions");
-		this.instanceCoord.sendData(EFFileUtil.readText(resource,GlobalParam.ENCODING,false),
+		this.instanceCoord.sendData(EFFileUtil.readText(resource, GlobalParam.ENCODING, false),
 				"/" + GlobalParam.StartConfig.getProperty("pond"), true);
-		this.instanceCoord.sendData(EFFileUtil.readText(instructions, GlobalParam.ENCODING,false),
+		this.instanceCoord.sendData(EFFileUtil.readText(instructions, GlobalParam.ENCODING, false),
 				"/" + GlobalParam.StartConfig.getProperty("instructions"), true);
 		this.instanceCoord.reloadResource();
 	}
-	
+
 	public String popInstance() {
 		String instanceSetting = this.bindInstances.poll();
 		this.removeInstance(instanceSetting);
 		return instanceSetting;
 	}
-	
-	public String popInstance(String instance) { 
+
+	public String popInstance(String instance) {
 		String instanceSetting;
-		while(true) {
+		while (true) {
 			instanceSetting = this.bindInstances.poll();
 			if (instanceSetting.split(":")[0].equals(instance))
 				break;
@@ -187,31 +201,31 @@ public class EFNode {
 		this.removeInstance(instanceSetting);
 		return instanceSetting;
 	}
-	
+
 	public void stopAllInstance() {
 		while (!this.bindInstances.isEmpty()) {
 			popInstance();
 		}
 	}
-	
-	public void resetBreaker(String instance,String L1seq) {
+
+	public void resetBreaker(String instance, String L1seq) {
 		this.instanceCoord.resetBreaker(instance, L1seq);
 	}
-	
-	public JSONObject getBreakerStatus(String instance,String L1seq,String appendPipe) {
-		return this.instanceCoord.getBreakerStatus(instance,L1seq,appendPipe);
+
+	public JSONObject getBreakerStatus(String instance, String L1seq, String appendPipe) {
+		return this.instanceCoord.getBreakerStatus(instance, L1seq, appendPipe);
 	}
-	
-	public boolean runInstanceNow(String instance,String jobtype,boolean asyn) {
-		return this.instanceCoord.runInstanceNow(instance, jobtype,asyn);
+
+	public boolean runInstanceNow(String instance, String jobtype, boolean asyn) {
+		return this.instanceCoord.runInstanceNow(instance, jobtype, asyn);
 	}
-	
+
 	public void stopInstance(String instance) {
 		this.instanceCoord.stopInstance(instance, GlobalParam.JOB_TYPE.INCREMENT.name());
 		this.instanceCoord.stopInstance(instance, GlobalParam.JOB_TYPE.FULL.name());
 		this.masterInstanceCoorder.stopInstance(instance);
 	}
-		
+
 	private void removeInstance(String instanceSetting) {
 		if (instanceSetting != null) {
 			String[] strs = instanceSetting.split(":");

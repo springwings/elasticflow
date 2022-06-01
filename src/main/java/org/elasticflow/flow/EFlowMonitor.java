@@ -12,7 +12,7 @@ import org.elasticflow.yarn.coordinator.NodeCoordinator;
  * @date 2018-10-31 10:52
  * @modify 2021-06-11 10:45
  */
-public class EFlowMonitor {
+public class EFlowMonitor{
 	
 	private boolean openRegulate = false;
 	
