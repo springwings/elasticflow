@@ -1,21 +1,17 @@
 package org.elasticflow.ml.common;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
-
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 
 public class ImageUtil {
 
@@ -54,10 +50,10 @@ public class ImageUtil {
 				throw new EFException(e.getMessage(),ELEVEL.Dispose);
 			}
 		}
-		return convertTO3DArray(bf);
+		return convertTO4DArray(bf);
 	}
 
-	public static int[][][][] convertTO3DArray(BufferedImage[] bf) {
+	public static int[][][][] convertTO4DArray(BufferedImage[] bf) {
 		int width = bf[0].getWidth();
 		int height = bf[0].getHeight();
 		int channel = 3;

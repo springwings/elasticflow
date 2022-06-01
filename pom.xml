@@ -80,12 +80,7 @@
 			<groupId>org.mortbay.jetty</groupId>
 			<artifactId>jetty</artifactId>
 			<version>6.1.26</version>
-		</dependency>
-		<dependency>
-			<groupId>org.nd4j</groupId>
-			<artifactId>nd4j-native-platform</artifactId>
-			<version>1.0.0-M2</version>
-		</dependency>
+		</dependency> 
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
@@ -245,11 +240,6 @@
 					</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.microsoft.onnxruntime</groupId>
-			<artifactId>onnxruntime_gpu</artifactId>
-			<version>${onnxruntime_gpu.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
@@ -476,6 +466,5 @@
 		<fastdfs.version>1.29-SNAPSHOT</fastdfs.version>
 		<hadoop.version>3.1.1</hadoop.version>
 		<commons-io.version>2.9.0</commons-io.version>
-		<onnxruntime_gpu.version>1.11.0</onnxruntime_gpu.version>
 	</properties>
 </project>
