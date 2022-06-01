@@ -11,8 +11,6 @@ import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.EFException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
  
 
 /**
@@ -23,12 +21,6 @@ import org.slf4j.LoggerFactory;
  * @date 2018-05-22 09:08
  */
 public class ModelService extends ComputerFlowSocket {
-
-	private String modelPath = "/VM/model.onnx";
-
-	private String inputName;
-
-	private final static Logger log = LoggerFactory.getLogger("ModelService");
 
 	public static ModelService getInstance(final ConnectParams connectParams) {
 		ModelService o = new ModelService();
