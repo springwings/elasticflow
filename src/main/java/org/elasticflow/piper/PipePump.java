@@ -311,7 +311,7 @@ public final class PipePump extends Instruction implements Serializable {
 	private void currentThreadRun(Task task, String storeId, ConcurrentLinkedDeque<String> pageList, String destination,
 			AtomicInteger total) throws EFException {
 		ReaderState rState = null;
-		int processPos = 0;
+		int progressPos = 0;
 		String startId = "0";
 
 		String scanField = task.getScanParam().getScanField();
@@ -322,9 +322,9 @@ public final class PipePump extends Instruction implements Serializable {
 
 		while (!pageList.isEmpty()) {
 			dataBoundary = pageList.poll();
-			processPos++;
+			progressPos++;
 			GlobalParam.TASK_COORDER.setFlowInfo(task.getInstanceID(), task.getJobType().name(),
-					task.getId() + task.getL2seq(), processPos + "/" + pageList.size());
+					task.getId() + task.getL2seq(), progressPos + "/" + pageList.size());
 			String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(), PipeUtil.getScanParam(
 					task.getL2seq(), startId, dataBoundary, task.getStartTime(), task.getEndTime(), scanField));
 
@@ -341,14 +341,14 @@ public final class PipePump extends Instruction implements Serializable {
 						destination, pagedata);
 				log.info(Common.formatLog("onepage", task.getJobType().name() + " Compute", task.getId(), storeId,
 						task.getL2seq(), dataSize, datab, scanStamp, Common.getNow() - start,
-						",process:" + processPos + "/" + pageNum));
+						",progress:" + progressPos + "/" + pageNum));
 			}
 
 			this.breakCheck(task);
 
 			rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
 					destination, storeId, task, pagedata,
-					",L1seq:" + task.getL1seq() + ",process:" + processPos + "/" + pageNum, isupdate, false);
+					",progress:" + progressPos + "/" + pageNum, isupdate, false);
 			if (rState.isStatus() == false)
 				throw new EFException("writeDataSet data exception!");
 			total.getAndAdd(rState.getCount());
@@ -409,7 +409,7 @@ public final class PipePump extends Instruction implements Serializable {
 		Task task;
 		CountDownLatch taskSingal;
 		ReaderState rState = null;
-		AtomicInteger processPos = new AtomicInteger(0);
+		AtomicInteger progressPos = new AtomicInteger(0);
 		String startId = "0";
 		ConcurrentLinkedDeque<String> pageList;
 		InstanceConfig instanceConfig;
@@ -442,9 +442,9 @@ public final class PipePump extends Instruction implements Serializable {
 			String dataBoundary;
 			while (!pageList.isEmpty()) {
 				dataBoundary = pageList.poll();
-				processPos.incrementAndGet();
+				progressPos.incrementAndGet();
 				GlobalParam.TASK_COORDER.setFlowInfo(task.getInstanceID(), task.getJobType().name(),
-						task.getId() + task.getL2seq(), processPos + "/" + this.pageNum);
+						task.getId() + task.getL2seq(), progressPos + "/" + this.pageNum);
 				String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(),
 						PipeUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
 								task.getEndTime(), task.getScanParam().getScanField()));
@@ -469,7 +469,7 @@ public final class PipePump extends Instruction implements Serializable {
 								task.getJobType().name(), destination, pagedata);
 						log.info(Common.formatLog("onepage", task.getJobType().name() + " Compute", task.getId(),
 								storeId, task.getL2seq(), dataSize, datab, scanStamp, Common.getNow() - start,
-								",process:" + processPos + "/" + pageNum));
+								",progress:" + progressPos + "/" + pageNum));
 					}
 					if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstanceID(), task.getL1seq(),
 							task.getJobType(), STATUS.Termination)) {
@@ -480,7 +480,7 @@ public final class PipePump extends Instruction implements Serializable {
 					}
 					rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
 							task.getId(), storeId, task, pagedata,
-							",L1seq:" + task.getL1seq() + ",process:" + processPos + "/" + pageNum, this.isUpdate,
+							",progress:" + progressPos + "/" + pageNum, this.isUpdate,
 							false);
 				} catch (EFException e) {
 					log.error("PumpThread", e);

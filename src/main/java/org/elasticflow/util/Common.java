@@ -214,23 +214,26 @@ public final class Common {
 			}
 		}
 
-		String ret = "";
+		String res = "";
 		if (h >= 10)
-			ret += h + "h";
+			res += h + "h";
 		else if (h > 0)
-			ret += "0" + h + "h";
+			res += "0" + h + "h";
 
 		if (m >= 10)
-			ret += m + "m";
+			res += m + "m";
 		else if (m > 0)
-			ret += "0" + m + "m";
+			res += "0" + m + "m";
 
 		if (s >= 10)
-			ret += s + "s";
+			res += s + "s";
 		else if (s >= 0)
-			ret += "0" + s + "s";
+			res += "0" + s + "s";
+		
+		if (res=="")
+			res = "00s";
 
-		return ret;
+		return res;
 	}
 
 	public static List<String> stringToList(String str, String seperator) {
