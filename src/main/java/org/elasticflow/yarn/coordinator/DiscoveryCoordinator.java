@@ -20,7 +20,7 @@ import org.elasticflow.yarn.coord.DiscoveryCoord;
 public class DiscoveryCoordinator implements DiscoveryCoord {
 
 	public void reportStatus(String ip, int nodeId) {
-		GlobalParam.INSTANCE_COORDER.distributeCoorder().updateNode(ip, nodeId);
+		GlobalParam.INSTANCE_COORDER.distributeCoorder().updateClusterNode(ip, nodeId);
 	}
 
 	public void leaveCluster(String ip, int nodeId) {

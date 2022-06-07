@@ -14,9 +14,10 @@ public class EFException extends Exception {
 	/**
 	 * Ignore continue running with warning Dispose need to fix and continue
 	 * Termination, will stop thread Stop, will stop program
+	 * BreakOff, open breaker
 	 */
 	public static enum ELEVEL {
-		Ignore, Dispose, Termination, Stop;
+		Ignore, Dispose,BreakOff,Termination, Stop;
 	}
 
 	public static enum ETYPE {

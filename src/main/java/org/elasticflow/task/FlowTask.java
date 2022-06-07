@@ -218,7 +218,7 @@ public class FlowTask {
 					log.warn("{}_{} increment external interrupt!",instanceId,L1seq);
 				} else {
 					log.error(instanceId + "_" +L1seq+ " increment job exception", e);
-				}
+				} 
 			} finally {
 				recompute = this.checkReCompute(storeId);
 				GlobalParam.TASK_COORDER.setFlowStatus(instanceId, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),

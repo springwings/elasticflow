@@ -92,7 +92,8 @@ public final class Run {
 		if (initInstance) {
 			Resource.nodeConfig = NodeConfig.getInstance(GlobalParam.StartConfig.getProperty("pond"), GlobalParam.StartConfig.getProperty("instructions"));			
 			if(EFNodeUtil.isMaster()) {	
-				Resource.nodeConfig.init(GlobalParam.StartConfig.getProperty("instances"));
+				Resource.nodeConfig.init(GlobalParam.StartConfig.getProperty("instances"),
+						GlobalParam.StartConfig.getProperty("instances_location"));
 				Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 				for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {
 					InstanceConfig instanceConfig = entry.getValue();

@@ -40,7 +40,6 @@ import com.alibaba.fastjson.JSONObject;
 public class RestService extends ComputerFlowSocket {
 
 	protected final static Logger log = LoggerFactory.getLogger("RestService");
-	protected ArrayBlockingQueue<String> apiBlockingQueue;
 	protected boolean successRunAll = true;
 
 	public static RestService getInstance(final ConnectParams connectParams) {
@@ -65,10 +64,11 @@ public class RestService extends ComputerFlowSocket {
 			
 			// construct thread pool
 			CopyOnWriteArrayList<String> apis = context.getInstanceConfig().getComputeParams().getApi();
-			this.apiBlockingQueue = new ArrayBlockingQueue<>(apis.size());
+			if(apis.size()==0)
+				throw new EFException("No API is available", ELEVEL.BreakOff);
+			ArrayBlockingQueue<String> apiBlockingQueue = new ArrayBlockingQueue<>(apis.size());
 			for (String api : apis)
-				this.apiBlockingQueue.add(api);
-
+				apiBlockingQueue.add(api);			
 			// construct rest post data
 			JSONObject post_data = new JSONObject();
 			this.successRunAll = true;
@@ -97,14 +97,14 @@ public class RestService extends ComputerFlowSocket {
 					@SuppressWarnings("unchecked")
 					ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();					 
 					try {
-						if(this.apiBlockingQueue.isEmpty())
+						if(apiBlockingQueue.isEmpty())
 							this.flowState.incrementBlockTime();
-						String api = this.apiBlockingQueue.take();
+						String api = apiBlockingQueue.take();
 						Resource.threadPools.execute(() -> {						
 							JSONObject tmp = null;	
 							try {
 								tmp = JSONObject.parseObject(this.sentRequest(_postdt, api));
-								this.apiBlockingQueue.put(api);
+								apiBlockingQueue.put(api);
 								this.write(context, tmp, responseParams, _keepdt); 
 							} catch (Exception e) { 
 								this.successRunAll = false;
@@ -131,14 +131,14 @@ public class RestService extends ComputerFlowSocket {
 				@SuppressWarnings("unchecked")
 				ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();
 				try {
-					if(this.apiBlockingQueue.isEmpty())
+					if(apiBlockingQueue.isEmpty())
 						this.flowState.incrementBlockTime();
-					String api = this.apiBlockingQueue.take();
+					String api = apiBlockingQueue.take();
 					Resource.threadPools.execute(() -> {						
 						try {
 							JSONObject tmp = null;	
 							tmp = JSONObject.parseObject(this.sentRequest(_postdt, api));
-							this.apiBlockingQueue.put(api);
+							apiBlockingQueue.put(api);
 							this.write(context, tmp, responseParams, _keepdt); 
 						} catch (Exception e) { 
 							this.successRunAll = false;

@@ -588,7 +588,17 @@ public final class Common {
 		GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");
 		GlobalParam.INSTANCE_PATH = (GlobalParam.CONFIG_PATH+"/INSTANCES").intern();		
 	}
+	
+	public static void processErrorLevel(EFException e) {
+		if (e.getErrorLevel().equals(ELEVEL.Termination)) {
+			LOG.error("The current thread automatically interrupt!",e);
+			Thread.currentThread().interrupt();			
+		} else if (e.getErrorLevel().equals(ELEVEL.Stop)) {
+			stopSystem(true);
+		}
+	}
 
+	
 	public static EFException getException(Exception e) {
 		Throwable except = e.getCause();
 		if (except instanceof EFException) {

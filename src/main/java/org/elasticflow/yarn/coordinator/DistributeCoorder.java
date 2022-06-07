@@ -100,31 +100,36 @@ public class DistributeCoorder {
 		}
 		return "";
 	}
-	
-	public void resetBreaker(String instance,String L1seq) {
+
+	public void resetBreaker(String instance, String L1seq) {
 		for (EFNode node : nodes) {
 			if (node.containInstace(instance))
 				node.resetBreaker(instance, L1seq);
 		}
 	}
 
-	public JSONObject getBreakerStatus(String instance,String L1seq,String appendPipe) {
+	public JSONObject getBreakerStatus(String instance, String L1seq, String appendPipe) {
 		for (EFNode node : nodes) {
-			if (node.containInstace(instance) && node.isLive()) {				
+			if (node.containInstace(instance) && node.isLive()) {
 				return node.getBreakerStatus(instance, L1seq, appendPipe);
 			}
 		}
 		JSONObject JO = new JSONObject();
-		JO.put(appendPipe + "breaker_is_on", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.isOn());
-		if(Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.isOn()) {
-			JO.put(appendPipe + "breaker_is_on_reason", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.getReason());
+		JO.put(appendPipe + "breaker_is_on",
+				Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.isOn());
+		if (Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.isOn()) {
+			JO.put(appendPipe + "breaker_is_on_reason",
+					Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.getReason());
 		}
-		JO.put(appendPipe + "valve_turn_level", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).valve.getTurnLevel());
-		JO.put(appendPipe + "current_fail_freq", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.failInterval());
-		JO.put(appendPipe + "total_fail_times", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.getFailTimes());
+		JO.put(appendPipe + "valve_turn_level",
+				Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).valve.getTurnLevel());
+		JO.put(appendPipe + "current_fail_freq",
+				Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.failInterval());
+		JO.put(appendPipe + "total_fail_times",
+				Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.getFailTimes());
 		return JO;
 	}
-	
+
 	public JSONObject getPipeEndStatus(String instance, String L1seq) {
 		for (EFNode node : nodes) {
 			if (node.containInstace(instance) && node.isLive()) {
@@ -141,11 +146,11 @@ public class DistributeCoorder {
 		return jo;
 	}
 
-	public void updateNode(String ip, Integer nodeId) {
+	public void updateClusterNode(String ip, Integer nodeId) {
 		if (!this.containsNode(nodeId)) {
 			synchronized (nodes) {
 				EFNode node = EFNode.getInstance(ip, nodeId);
-				node.init(isOnStart.get(),this,true);
+				node.init(isOnStart.get(), this, true);
 				nodes.add(node);
 				Common.LOG.info("{} join cluster, current number of nodes is {}.", ip, nodes.size());
 			}
@@ -267,7 +272,7 @@ public class DistributeCoorder {
 				}
 			}
 		}
-		if(addNode != null) {
+		if (addNode != null) {
 			addNode = this.demotionCheck(addNode);
 			addNode.pushInstance(instanceSettting, false);
 			totalInstanceNum += 1;
@@ -319,7 +324,7 @@ public class DistributeCoorder {
 			Common.LOG.info("start NodeLeave rebalance on {} nodes,avgInstanceNum {}...", nodes.size(), avgInstanceNum);
 			this.distributeInstances(bindInstances);
 			this.storeNodesStatus();
-			Common.LOG.info("finish NodeLeave rebalance instance!");			
+			Common.LOG.info("finish NodeLeave rebalance instance!");
 		}
 	}
 
@@ -362,46 +367,76 @@ public class DistributeCoorder {
 		this.storeNodesStatus();
 		Common.LOG.info("finish cluster init rebalance!");
 	}
-	
+
 	private void storeNodesStatus() {
 		String fpath = GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/status";
 		JSONArray JA = new JSONArray();
 		for (EFNode node : nodes) {
 			JA.add(node.getNodeInfos());
 		}
-		EFDataStorer.setData(fpath,JSON.toJSONString(JA));
+		EFDataStorer.setData(fpath, JSON.toJSONString(JA));
+	}
+
+	private boolean containInstanceLocation(int nodeId) {
+		for (EFNode node : nodes) {
+			if (node.getNodeId() == nodeId)
+				return true;
+		}
+		return false;
 	}
 
 	/**
 	 * distribute Instances over cluster
+	 * 
 	 * @param runInstances
 	 */
 	private void distributeInstances(Queue<String> runInstances) {
-		if (runInstances.size() > 0) { 
-			synchronized(nodes) {
+		if (runInstances.size() > 0) {
+			Queue<String> keepInstances = new LinkedList<String>();
+			synchronized (nodes) {
 				EFNode removeNode = null;
-				for(EFNode node:nodes) {
+				for (EFNode node : nodes) {
 					while (node.getBindInstances().size() < avgInstanceNum) {
 						if (runInstances.isEmpty())
 							break;
 						try {
-							node.pushInstance(runInstances.poll(), true);
-						}catch(Exception e) {
+							String instance = runInstances.poll();
+							if (Resource.nodeConfig.getInstancesLocation().containsKey(instance)
+									&& this.containInstanceLocation(
+											Resource.nodeConfig.getInstancesLocation().get(instance))) {
+								if (node.getNodeId() == Resource.nodeConfig.getInstancesLocation().get(instance)) {
+									node.pushInstance(instance, true);
+								} else {
+									keepInstances.add(instance);
+								}
+							} else {
+								node.pushInstance(instance, true);
+							}
+						} catch (Exception e) {
 							removeNode = node;
 							break;
 						}
 					}
-					if(removeNode!=null)
+					if (removeNode != null)
 						break;
-				}				 
-				if(removeNode!=null) {
-					if(nodes.contains(removeNode)) {
+				}
+				if (removeNode != null) {
+					if (nodes.contains(removeNode)) {
 						nodes.remove(removeNode);
 					}
 					this.avgInstanceNum = avgInstanceNum();
 					distributeInstances(runInstances);
 				}
-			} 
+			}
+			while (keepInstances.peek() != null) {
+				String instance = keepInstances.poll();
+				for (EFNode node : nodes) {
+					if (node.getNodeId() == Resource.nodeConfig.getInstancesLocation().get(instance)) {
+						node.pushInstance(instance, true);
+						break;
+					}
+				}
+			}
 		}
 	}
 

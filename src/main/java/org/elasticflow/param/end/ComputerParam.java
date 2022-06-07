@@ -105,10 +105,10 @@ public class ComputerParam {
 	}
 
 	public void setApi(String api) {
-		if(this.api.isEmpty()) 
+		if(!this.api.isEmpty()) 
 			this.api.clear();
-		if(api!=null) {
-			for(String url:api.split(","))
+		if(api!=null && api.strip().length()>0) {
+			for(String url:api.strip().split(","))
 				this.api.add(url);
 		}		
 	}

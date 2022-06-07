@@ -40,6 +40,8 @@ public class NodeConfig {
 
 	/** instance,instance-config map */
 	private final Map<String, InstanceConfig> instanceConfigs = new HashMap<>();
+	/** instance,nodeid */
+	private final Map<String, Integer> instancesLocation = new HashMap<>();
 	private final Map<String, InstanceConfig> searchConfigMap = new HashMap<>();
 	private final Map<String, WarehouseParam> warehouse = new HashMap<>();
 	private final Map<String, InstructionParam> instructions = new HashMap<>();
@@ -60,8 +62,17 @@ public class NodeConfig {
 		return o;
 	}
 
-	public void init(String instanceSettings) {
+	public void init(String instanceSettings,String instancelocations) {
 		loadConfig(instanceSettings, true);
+		if(instancelocations!=null) {
+			for (String inst : instancelocations.split(",")) {
+				String[] strs = inst.split(":");
+				if (strs.length !=2)
+					continue;
+				String name = strs[0].trim();
+				this.instancesLocation.put(name, Integer.parseInt(strs[1]));
+			}
+		}		
 	}
 
 	public void loadConfig(String instanceSettings, boolean reset) {
@@ -76,6 +87,7 @@ public class NodeConfig {
 
 	public void reset() {
 		this.instanceConfigs.clear();
+		this.instancesLocation.clear();
 		this.searchConfigMap.clear();
 		this.warehouse.clear();
 		this.instructions.clear();
@@ -118,6 +130,10 @@ public class NodeConfig {
 
 	public Map<String, InstanceConfig> getInstanceConfigs() {
 		return this.instanceConfigs;
+	}
+	
+	public Map<String, Integer> getInstancesLocation() {
+		return this.instancesLocation;
 	}
 
 	public Map<String, InstanceConfig> getSearchConfigs() {
