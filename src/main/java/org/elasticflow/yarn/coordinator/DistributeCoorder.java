@@ -42,6 +42,8 @@ public class DistributeCoorder {
 	private int totalInstanceNum;
 
 	private int avgInstanceNum;
+	
+	private volatile AtomicInteger startCount = new AtomicInteger();
 
 	/** cluster status :0 normal 1 freeze 2 down **/
 	private AtomicInteger clusterStatus = new AtomicInteger(2);
@@ -153,26 +155,36 @@ public class DistributeCoorder {
 				node.init(isOnStart.get(), this, true);
 				nodes.add(node);
 				Common.LOG.info("{} join cluster, current number of nodes is {}.", ip, nodes.size());
+				startCount.incrementAndGet();
 			}
-			if (clusterConditionMatch()) {
-				clusterStatus.set(0);
-				if (rebalanceQueue.size() < 2) {
-					rebalanceQueue.add(true);
-					rebalanceLocker.lock();
-					while (!rebalanceQueue.isEmpty()) {
-						Queue<String> bindInstances = clusterScan(false);
-						if (isOnStart.get()) {
-							isOnStart.set(false);
-							this.rebalanceOnStart();
-						} else {
-							this.rebalanceOnNewNodeJoin(bindInstances);
+			try {
+				Thread.sleep(6000);
+			} catch (InterruptedException e) {
+				Common.stopSystem(false);
+			}
+			synchronized(startCount) {
+				if(startCount.decrementAndGet()==0) {
+					if (clusterConditionMatch()) {
+						clusterStatus.set(0);
+						if (rebalanceQueue.size() < 2) {
+							rebalanceQueue.add(true);
+							rebalanceLocker.lock();
+							while (!rebalanceQueue.isEmpty()) {
+								Queue<String> bindInstances = clusterScan(false);
+								if (isOnStart.get()) {
+									isOnStart.set(false);
+									this.rebalanceOnStart();
+								} else {
+									this.rebalanceOnNewNodeJoin(bindInstances);
+								}
+								rebalanceQueue.poll();
+							}
+							rebalanceLocker.unlock();
 						}
-						rebalanceQueue.poll();
 					}
-					rebalanceLocker.unlock();
 				}
-
 			}
+			
 		} else {
 			this.getNode(nodeId).recoverInstance();
 			this.getNode(nodeId).refresh();
