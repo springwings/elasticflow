@@ -26,7 +26,7 @@ public class SafeShutDown extends Thread {
 		if (GlobalParam.DISTRIBUTE_RUN) {
 			if (EFNodeUtil.isMaster()) {
 				Common.LOG.warn("cluster master is closed.");
-				GlobalParam.INSTANCE_COORDER.distributeCoorder().stopNodes(true);
+				GlobalParam.INSTANCE_COORDER.distributeCoorder().stopAllNodes(true);
 				Common.stopSystem(false);
 			} else {
 				// close heartBeat and try leave cluster

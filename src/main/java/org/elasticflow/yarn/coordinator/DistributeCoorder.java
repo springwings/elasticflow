@@ -41,10 +41,10 @@ public class DistributeCoorder {
 	private int totalInstanceNum;
 
 	private int avgInstanceNum;
-	
+
 	private volatile AtomicInteger rebalanceCount = new AtomicInteger();
 
-	/** cluster status :0 normal, 1 freeze, 2 rebalance, 3 down**/
+	/** cluster status :0 normal, 1 freeze, 2 rebalance, 3 down **/
 	private AtomicInteger clusterStatus = new AtomicInteger(1);
 
 	/** Check whether the system is initialized */
@@ -56,29 +56,29 @@ public class DistributeCoorder {
 
 	private CopyOnWriteArrayList<EFNode> nodes = new CopyOnWriteArrayList<>();
 
-	/** control master local state */
+	/** control master instance local state */
 	public void resumeInstance(String instance) {
 		GlobalParam.INSTANCE_COORDER.resumeInstance(instance, GlobalParam.JOB_TYPE.INCREMENT.name());
 		GlobalParam.INSTANCE_COORDER.resumeInstance(instance, GlobalParam.JOB_TYPE.FULL.name());
-	}
-	
-	public String getClusterState() {
-		switch(clusterStatus.get()) {
-			case 0:
-				return "normal";
-			case 1:
-				return "freeze";
-			case 2:
-				return "rebalance";
-			default:
-				return "down";
-		}
-	}
+	}	
 
-	/** control master local state */
+	/** control master instance local state */
 	public void stopInstance(String instance) {
 		GlobalParam.INSTANCE_COORDER.stopInstance(instance, GlobalParam.JOB_TYPE.INCREMENT.name());
 		GlobalParam.INSTANCE_COORDER.stopInstance(instance, GlobalParam.JOB_TYPE.FULL.name());
+	}
+
+	public String getClusterState() {
+		switch (clusterStatus.get()) {
+		case 0:
+			return "normal";
+		case 1:
+			return "freeze";
+		case 2:
+			return "rebalance";
+		default:
+			return "down";
+		}
 	}
 
 	public void updateNodeConfigs(String instance, String end, String fieldName, String value) {
@@ -154,10 +154,11 @@ public class DistributeCoorder {
 		jo.put("nodeID", "-");
 		jo.put("status", "offline");
 		return jo;
-	} 
-	
+	}
+
 	/**
 	 * new node join
+	 * 
 	 * @param ip
 	 * @param nodeId
 	 */
@@ -169,17 +170,17 @@ public class DistributeCoorder {
 				nodes.add(node);
 				Common.LOG.info("{} join cluster, current number of nodes is {}.", ip, nodes.size());
 				rebalanceCount.incrementAndGet();
-				if (isOnStart.get()) 
+				if (isOnStart.get())
 					clusterStatus.set(2);
 			}
-			//cluster Steady checking
+			// cluster Steady checking
 			try {
 				Thread.sleep(6000);
 			} catch (InterruptedException e) {
 				Common.stopSystem(false);
 			}
-			synchronized(rebalanceCount) {
-				if(rebalanceCount.decrementAndGet()==0) {
+			synchronized (rebalanceCount) {
+				if (rebalanceCount.decrementAndGet() == 0) {
 					if (clusterConditionMatch()) {
 						Queue<String> bindInstances = clusterScan(false);
 						if (isOnStart.get()) {
@@ -192,7 +193,7 @@ public class DistributeCoorder {
 					}
 				}
 			}
-			
+
 		} else {
 			this.getNode(nodeId).recoverInstance();
 			this.getNode(nodeId).refresh();
@@ -216,19 +217,21 @@ public class DistributeCoorder {
 			node.stopAllInstance();
 			if (!clusterConditionMatch()) {
 				Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed.");
-				stopNodes(false);
-				clusterStatus.set(3);
+				stopAllNodes(false);
 			} else {
 				if (rebalace)
 					Resource.threadPools.execute(() -> {
 						this.rebalanceOnNodeLeave(instances);
-						clusterStatus.set(0);
 					});
 			}
 		}
 	}
-
-	public synchronized void stopNodes(boolean wait) {
+	
+	/**
+	 * 
+	 * @param wait, asyn or syn
+	 */
+	public synchronized void stopAllNodes(boolean wait) {
 		if (clusterStatus.get() != 1) {
 			clusterStatus.set(1);
 			DistributeService.closeMonitor();
@@ -243,7 +246,7 @@ public class DistributeCoorder {
 				nodes.clear();
 				isOnStart.set(true);
 				DistributeService.openMonitor();
-				clusterStatus.set(2);
+				clusterStatus.set(3);
 				Common.LOG.info("cluster all slave nodes are offline.");
 			});
 			if (wait) {
@@ -301,7 +304,12 @@ public class DistributeCoorder {
 			totalInstanceNum += 1;
 		}
 	}
-
+	
+	/**
+	 * Priority check control
+	 * @param node
+	 * @return
+	 */
 	private EFNode demotionCheck(EFNode node) {
 		EFNode _node = node;
 		if (node.getCpuUsed() > this.cpuUsage || node.getMemUsed() > this.memUsage) {
@@ -341,18 +349,20 @@ public class DistributeCoorder {
 	private synchronized void rebalanceOnNodeLeave(Queue<String> bindInstances) {
 		if (!clusterConditionMatch()) {
 			Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed.");
-			stopNodes(false);
+			stopAllNodes(false);
 		} else {
 			this.avgInstanceNum = avgInstanceNum();
 			Common.LOG.info("start NodeLeave rebalance on {} nodes,avgInstanceNum {}...", nodes.size(), avgInstanceNum);
 			this.distributeInstances(bindInstances);
 			this.storeNodesStatus();
+			clusterStatus.set(0);
 			Common.LOG.info("finish NodeLeave rebalance instance!");
 		}
 	}
 
 	private void rebalanceOnNewNodeJoin(Queue<String> idleInstances) {
 		synchronized (nodes) {
+			clusterStatus.set(2);
 			this.avgInstanceNum = avgInstanceNum();
 			Common.LOG.info("start NewNodeJoin rebalance on {} nodes, avgInstanceNum {}...", nodes.size(),
 					avgInstanceNum);
@@ -368,6 +378,7 @@ public class DistributeCoorder {
 			}
 			// re-balance nodes
 			this.distributeInstances(idleInstances);
+			clusterStatus.set(0);
 		}
 		this.storeNodesStatus();
 		Common.LOG.info("finish NewNodeJoin rebalance!");
