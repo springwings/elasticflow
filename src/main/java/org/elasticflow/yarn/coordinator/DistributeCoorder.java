@@ -176,7 +176,7 @@ public class DistributeCoorder {
 			}
 			// cluster Steady checking
 			try {
-				Thread.sleep(6000);
+				Thread.sleep(9000);
 			} catch (InterruptedException e) {
 				Common.stopSystem(false);
 			}
