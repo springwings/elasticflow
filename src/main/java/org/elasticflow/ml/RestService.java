@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.config.GlobalParam;
@@ -159,13 +160,13 @@ public class RestService extends ComputerFlowSocket {
 			
 			try {
 				if (this.successRunAll == true)
-					taskSingal.await();
+					taskSingal.await(600,TimeUnit.SECONDS);
 			} catch (Exception e) { 
-				throw new EFException(e.getMessage(), ELEVEL.Ignore);
+				throw new EFException(e.getMessage(), ELEVEL.BreakOff);
 			}	
 			
 			if (this.successRunAll == false)
-				throw new EFException("job executorService exception", ELEVEL.Termination);
+				throw new EFException("job executorService exception", ELEVEL.BreakOff);
 
 			this.dataPage.put(GlobalParam.READER_LAST_STAMP, DSR.getScanStamp());
 			this.dataPage.putData(this.dataUnit);
@@ -186,11 +187,20 @@ public class RestService extends ComputerFlowSocket {
 
 	private void write(Context context, JSONObject datas, JSONObject responseParams, ArrayList<JSONObject> keepDatas)
 			throws EFException {
+		if(responseParams.containsKey("statusField")) {
+			String status = responseParams.getJSONObject("statusField").getString("success");
+			if(datas.getString("status")!=status) {//response status check
+				this.flowState.incrementFailUnitTime(keepDatas.size());
+				log.warn(context.getInstanceConfig().getInstanceID()+" predict warn.");
+				log.warn(datas.getString(responseParams.getJSONObject("statusField").getString("errorInfo")));
+				return;
+			}
+		}		
 		String datafield = responseParams.getJSONObject("dataField").getString("name");
 		JSONArray JA = datas.getJSONArray(datafield);
 		if (keepDatas != null && JA.size() != keepDatas.size()) {
 			this.flowState.incrementFailUnitTime(keepDatas.size());
-			throw new EFException("predict result exception,"+datas.toString(), ELEVEL.Dispose);
+			throw new EFException("predict exception,"+datas.toString(), ELEVEL.BreakOff);
 		}			
 		for (int i = 0; i < JA.size(); i++) {
 			JSONObject jr = keepDatas.get(i);
