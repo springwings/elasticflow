@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -239,9 +240,12 @@ public class DistributeCoorder {
 			Resource.threadPools.execute(() -> {
 				nodes.forEach(n -> {
 					Common.LOG.info("node {},nodeId {}, is stopped!", n.getIp(), n.getNodeId());
-					n.stopAllInstance();
-					n.getNodeCoord().stopNode();
-					singal.countDown();
+					try {
+						n.stopAllInstance();
+						n.getNodeCoord().stopNode();
+					}finally {
+						singal.countDown();
+					}
 				});
 				nodes.clear();
 				isOnStart.set(true);
@@ -251,8 +255,9 @@ public class DistributeCoorder {
 			});
 			if (wait) {
 				try {
-					singal.await();
+					singal.await(300,TimeUnit.SECONDS);
 				} catch (Exception e) {
+					Common.LOG.error(e.getMessage());
 				}
 			}
 		}
