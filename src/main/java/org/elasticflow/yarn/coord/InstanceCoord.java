@@ -32,7 +32,7 @@ public interface InstanceCoord extends Coordination{
 		
 	public void sendInstanceData(String content0,String content1,String content2, String instance);
 	
-	public void addInstance(String instanceSettting,boolean createSchedule);
+	public void loadInstance(String instanceSettting,boolean createSchedule,boolean reset);
 	
 	public void stopInstance(String instance,String jobtype);
 	

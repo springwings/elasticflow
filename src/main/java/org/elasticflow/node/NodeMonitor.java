@@ -11,12 +11,12 @@ import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Base64.Decoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Base64.Decoder;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -25,15 +25,14 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
-import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.EFRequest;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.util.Common;
@@ -41,7 +40,6 @@ import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFLoader;
 import org.elasticflow.util.EFMonitorUtil;
-import org.elasticflow.util.EFPipeUtil;
 import org.elasticflow.util.PipeXMLUtil;
 import org.elasticflow.util.SystemInfoUtil;
 import org.elasticflow.util.instance.EFDataStorer;
@@ -101,7 +99,7 @@ public final class NodeMonitor {
 			put("cloneinstance", "cloneInstance");
 			put("resetinstancestate", "resetInstanceState");
 			put("getinstanceseqs", "getInstanceSeqs");
-			put("reloadinstanceconfig", "reloadInstanceConfig");
+			put("reloadinstance", "reloadInstance");
 			put("runnow", "runNow");
 			put("resetbreaker", "resetBreaker");
 			put("addinstancetosystem", "addInstanceToSystem");
@@ -664,36 +662,24 @@ public final class NodeMonitor {
 	}
 
 	/**
-	 * reload instance configure,auto rebuild instance in memory
+	 * reload instance configure
+	 * rebuild instance in memory
 	 * 
-	 * @param rq instance=xx&reset=true|false reset true will recreate the instance
-	 *           in java from instance configure.
+	 * @param rq instance=xx&reset=true|false&runType=1 
+	 * reset true will recreate the instance in java from instance configure.
+	 * 
 	 */
-	public void reloadInstanceConfig(Request rq,EFRequest RR) {
-		if (EFMonitorUtil.checkParams(this,RR, "instance")) {
-			EFMonitorUtil.controlInstanceState(RR.getStringParam("instance"), STATUS.Stop, true);
-			int type = Resource.nodeConfig.getInstanceConfigs().get(RR.getStringParam("instance")).getInstanceType();
-			String instanceConfig = RR.getStringParam("instance");
-			if (type > 0) {
-				instanceConfig = RR.getStringParam("instance") + ":" + type;
-			} else {
-				if (!Resource.nodeConfig.getInstanceConfigs().containsKey(RR.getStringParam("instance")))
-					setResponse(RESPONSE_STATUS.DataErr, RR.getStringParam("instance") + " not exists!", null);
-			}
-			Resource.flowInfos.remove(RR.getStringParam("instance"), JOB_TYPE.FULL.name());
-			Resource.flowInfos.remove(RR.getStringParam("instance"), JOB_TYPE.INCREMENT.name());
-			if (RR.getParams().get("reset") != null && RR.getStringParam("reset").equals("true")
-					&& RR.getStringParam("instance").length() > 2) {
-				Resource.nodeConfig.loadConfig(instanceConfig, true);
-			} else {
-				String alias = Resource.nodeConfig.getInstanceConfigs().get(RR.getStringParam("instance")).getAlias();
-				Resource.nodeConfig.getSearchConfigs().remove(alias);
-				Resource.nodeConfig.loadConfig(instanceConfig, false);
-				EFPipeUtil.removeInstance(RR.getStringParam("instance"), true, true);
-			}
-			EFMonitorUtil.rebuildFlowGovern(instanceConfig, !GlobalParam.DISTRIBUTE_RUN);
-			EFMonitorUtil.controlInstanceState(RR.getStringParam("instance"), STATUS.Ready, true);
-			setResponse(RESPONSE_STATUS.Success, RR.getStringParam("instance") + " reload config Success!", null);
+	public void reloadInstance(Request rq,EFRequest RR) {
+		if (EFMonitorUtil.checkParams(this,RR, "instance,runtype,reset")) {
+			String instance = RR.getStringParam("instance");
+			String reset = RR.getStringParam("reset");
+			String runType = RR.getStringParam("runtype");
+			if (!Resource.nodeConfig.getInstanceConfigs().containsKey(instance)) {
+				setResponse(RESPONSE_STATUS.DataErr, instance + " not exists!", null);
+			}else {
+				EFMonitorUtil.reloadInstance(instance,reset,runType);
+				setResponse(RESPONSE_STATUS.Success, RR.getStringParam("instance") + " reload config Success!", null);
+			} 			
 		}
 	}
 	
@@ -864,7 +850,7 @@ public final class NodeMonitor {
 	 */
 	private void removeInstance(String instance) {
 		if (GlobalParam.DISTRIBUTE_RUN) {
-			GlobalParam.INSTANCE_COORDER.distributeCoorder().removeInstanceFromCluster(instance);
+			GlobalParam.INSTANCE_COORDER.distributeCoorder().removeInstanceFromCluster(instance,false);
 			GlobalParam.INSTANCE_COORDER.removeInstance(instance, false);
 		} else {
 			GlobalParam.INSTANCE_COORDER.removeInstance(instance, true);

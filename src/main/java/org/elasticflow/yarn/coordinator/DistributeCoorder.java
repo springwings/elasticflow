@@ -291,7 +291,17 @@ public class DistributeCoorder {
 		}
 		return false;
 	}
-
+	
+	public synchronized void reloadClusterInstance(String instanceSettting,boolean reset) {
+		String[] strs = instanceSettting.split(":");
+		for (EFNode node : nodes) {
+			if(node.containInstace(strs[0])) {
+				node.pushInstance(instanceSettting, false);
+				break;
+			}
+		}
+	}
+	
 	public synchronized void pushInstanceToCluster(String instanceSettting) {
 		EFNode addNode = null;
 		for (EFNode node : nodes) {
@@ -340,11 +350,15 @@ public class DistributeCoorder {
 		return _node;
 	}
 
-	public synchronized void removeInstanceFromCluster(String instance) {
+	public synchronized void removeInstanceFromCluster(String instance,boolean keepInNode) {
 		for (EFNode node : nodes) {
 			if (node.containInstace(instance)) {
-				node.popInstance(instance);
-				totalInstanceNum -= 1;
+				if(keepInNode) {
+					node.stopInstance(instance);
+				}else {
+					node.popInstance(instance);
+					totalInstanceNum -= 1;
+				}				
 				break;
 			}
 		}

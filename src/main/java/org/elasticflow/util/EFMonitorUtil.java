@@ -40,7 +40,46 @@ public class EFMonitorUtil {
 		} 
 		return true;
 	}	
-	 
+	
+	/**
+	 * reload instance
+	 * @param instance
+	 * @param reset  will reload resource.xml and so on
+	 * @param runType
+	 */
+	public static void reloadInstance(String instance,String reset,String runType) {
+		EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
+		int type = Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType();
+		if(runType !=null) {
+			type = Integer.parseInt(runType);
+		}
+		String instanceConfig = instance;
+		if (type > 0) {
+			instanceConfig = instance + ":" + type;
+		} 
+		Resource.flowInfos.remove(instance, JOB_TYPE.FULL.name());
+		Resource.flowInfos.remove(instance, JOB_TYPE.INCREMENT.name());
+		
+		//control slave node
+		if(GlobalParam.DISTRIBUTE_RUN) {
+			GlobalParam.INSTANCE_COORDER.distributeCoorder().removeInstanceFromCluster(instanceConfig,true);
+		}	
+		if (reset != null && reset.equals("true")) {
+			EFPipeUtil.removeInstance(instance, true, true);
+			Resource.nodeConfig.loadConfig(instanceConfig, true);
+		} else {
+			String alias = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
+			Resource.nodeConfig.getSearchConfigs().remove(alias);
+			EFPipeUtil.removeInstance(instance, true, true);
+			Resource.nodeConfig.loadConfig(instanceConfig, false);			
+		} 
+		EFMonitorUtil.rebuildFlowGovern(instanceConfig, !GlobalParam.DISTRIBUTE_RUN);
+		//control slave node
+		if(GlobalParam.DISTRIBUTE_RUN) {
+			GlobalParam.INSTANCE_COORDER.distributeCoorder().reloadClusterInstance(instanceConfig, reset.equals("true"));
+		}		
+		EFMonitorUtil.controlInstanceState(instance, STATUS.Ready, true);
+	}
 
 	public static void saveNodeConfig() throws Exception {
 		OutputStream os = null;
@@ -76,10 +115,10 @@ public class EFMonitorUtil {
 	public static void addInstanceToSystem(String instance,String level) {
 		String instanceString = instance+":"+level;		
 		if (GlobalParam.DISTRIBUTE_RUN) {
-			GlobalParam.INSTANCE_COORDER.addInstance(instanceString,false);
+			GlobalParam.INSTANCE_COORDER.loadInstance(instanceString,false,false);
 			GlobalParam.INSTANCE_COORDER.distributeCoorder().pushInstanceToCluster(instanceString);
 		}else {
-			GlobalParam.INSTANCE_COORDER.addInstance(instanceString,true);
+			GlobalParam.INSTANCE_COORDER.loadInstance(instanceString,true,false);
 		}
 		addInstanceToConfig(instanceString);
 	}

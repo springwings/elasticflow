@@ -171,7 +171,7 @@ public class EFNode {
 				EFFileUtil.readText(paths[1], GlobalParam.ENCODING, true),
 				EFFileUtil.readText(paths[2], GlobalParam.ENCODING, true), strs[0]);
 		this.masterInstanceCoorder.resumeInstance(strs[0]);
-		this.instanceCoord.addInstance(instanceSetting, true);
+		this.instanceCoord.loadInstance(instanceSetting, true,false);
 	}
 
 	public void pushResource() {

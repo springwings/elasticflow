@@ -109,10 +109,10 @@ public class InstanceCoordinator implements InstanceCoord {
 		sendData(content1, paths[1],false);
 		sendData(content2, paths[2],false);
 	}
-
+	
 	@Override
-	public void addInstance(String instanceSettting,boolean createSchedule) {
-		Resource.nodeConfig.loadConfig(instanceSettting, false);
+	public void loadInstance(String instanceSettting,boolean createSchedule,boolean reset) {
+		Resource.nodeConfig.loadConfig(instanceSettting, reset);
 		Resource.nodeConfig.loadInstanceConfig(instanceSettting);
 		String tmp[] = instanceSettting.split(":");
 		String instanceName = tmp[0];
@@ -120,7 +120,7 @@ public class InstanceCoordinator implements InstanceCoord {
 		if (instanceConfig.checkStatus())
 			EFNodeUtil.loadInstanceDatas(instanceConfig);
 		EFMonitorUtil.rebuildFlowGovern(instanceSettting, createSchedule);
-	} 
+	}
 
 	@Override
 	public void stopInstance(String instance, String jobtype) {

@@ -47,7 +47,7 @@ public final class Resource {
 
 	public static EFNotifier EfNotifier;
 
-	public static NodeConfig nodeConfig;
+	public static volatile NodeConfig nodeConfig;
 
 	public static Run EFLOWS;
 
