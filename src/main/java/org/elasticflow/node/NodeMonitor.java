@@ -373,7 +373,11 @@ public final class NodeMonitor {
 		dt.put("WRITE_BATCH", GlobalParam.WRITE_BATCH);
 		dt.put("SERVICE_LEVEL", service_level);
 		dt.put("LANG", GlobalParam.LANG);
-		dt.put("STATUS", "running");
+		if(GlobalParam.DISTRIBUTE_RUN) {
+			dt.put("STATUS",GlobalParam.INSTANCE_COORDER.distributeCoorder().getClusterState());
+		}else {
+			dt.put("STATUS", "running");
+		}
 		dt.put("VERSION", GlobalParam.VERSION);
 		dt.put("TASKS", Resource.tasks.size());
 		dt.put("THREAD_POOL_SIZE", Resource.threadPools.getPoolSize());

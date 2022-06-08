@@ -16,7 +16,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
@@ -43,10 +42,10 @@ public class DistributeCoorder {
 
 	private int avgInstanceNum;
 	
-	private volatile AtomicInteger startCount = new AtomicInteger();
+	private volatile AtomicInteger rebalanceCount = new AtomicInteger();
 
-	/** cluster status :0 normal 1 freeze 2 down **/
-	private AtomicInteger clusterStatus = new AtomicInteger(2);
+	/** cluster status :0 normal, 1 freeze, 2 rebalance, 3 down**/
+	private AtomicInteger clusterStatus = new AtomicInteger(1);
 
 	/** Check whether the system is initialized */
 	private AtomicBoolean isOnStart = new AtomicBoolean(true);
@@ -55,16 +54,25 @@ public class DistributeCoorder {
 	private double cpuUsage = 90.;
 	private double memUsage = 90.;
 
-	private volatile Queue<Boolean> rebalanceQueue = new LinkedList<Boolean>();
-
-	private ReentrantLock rebalanceLocker = new ReentrantLock();
-
 	private CopyOnWriteArrayList<EFNode> nodes = new CopyOnWriteArrayList<>();
 
 	/** control master local state */
 	public void resumeInstance(String instance) {
 		GlobalParam.INSTANCE_COORDER.resumeInstance(instance, GlobalParam.JOB_TYPE.INCREMENT.name());
 		GlobalParam.INSTANCE_COORDER.resumeInstance(instance, GlobalParam.JOB_TYPE.FULL.name());
+	}
+	
+	public String getClusterState() {
+		switch(clusterStatus.get()) {
+			case 0:
+				return "normal";
+			case 1:
+				return "freeze";
+			case 2:
+				return "rebalance";
+			default:
+				return "down";
+		}
 	}
 
 	/** control master local state */
@@ -146,8 +154,13 @@ public class DistributeCoorder {
 		jo.put("nodeID", "-");
 		jo.put("status", "offline");
 		return jo;
-	}
-
+	} 
+	
+	/**
+	 * new node join
+	 * @param ip
+	 * @param nodeId
+	 */
 	public void updateClusterNode(String ip, Integer nodeId) {
 		if (!this.containsNode(nodeId)) {
 			synchronized (nodes) {
@@ -155,32 +168,27 @@ public class DistributeCoorder {
 				node.init(isOnStart.get(), this, true);
 				nodes.add(node);
 				Common.LOG.info("{} join cluster, current number of nodes is {}.", ip, nodes.size());
-				startCount.incrementAndGet();
+				rebalanceCount.incrementAndGet();
+				if (isOnStart.get()) 
+					clusterStatus.set(2);
 			}
+			//cluster Steady checking
 			try {
 				Thread.sleep(6000);
 			} catch (InterruptedException e) {
 				Common.stopSystem(false);
 			}
-			synchronized(startCount) {
-				if(startCount.decrementAndGet()==0) {
+			synchronized(rebalanceCount) {
+				if(rebalanceCount.decrementAndGet()==0) {
 					if (clusterConditionMatch()) {
-						clusterStatus.set(0);
-						if (rebalanceQueue.size() < 2) {
-							rebalanceQueue.add(true);
-							rebalanceLocker.lock();
-							while (!rebalanceQueue.isEmpty()) {
-								Queue<String> bindInstances = clusterScan(false);
-								if (isOnStart.get()) {
-									isOnStart.set(false);
-									this.rebalanceOnStart();
-								} else {
-									this.rebalanceOnNewNodeJoin(bindInstances);
-								}
-								rebalanceQueue.poll();
-							}
-							rebalanceLocker.unlock();
+						Queue<String> bindInstances = clusterScan(false);
+						if (isOnStart.get()) {
+							isOnStart.set(false);
+							this.rebalanceOnStart();
+						} else {
+							this.rebalanceOnNewNodeJoin(bindInstances);
 						}
+						clusterStatus.set(0);
 					}
 				}
 			}
@@ -200,6 +208,7 @@ public class DistributeCoorder {
 
 	public synchronized void removeNode(String ip, Integer nodeId, boolean rebalace) {
 		if (this.containsNode(nodeId)) {
+			clusterStatus.set(2);
 			EFNode node = this.removeNode(nodeId);
 			Queue<String> instances = new LinkedList<String>();
 			instances.addAll(node.getBindInstances());
@@ -208,10 +217,12 @@ public class DistributeCoorder {
 			if (!clusterConditionMatch()) {
 				Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed.");
 				stopNodes(false);
+				clusterStatus.set(3);
 			} else {
 				if (rebalace)
 					Resource.threadPools.execute(() -> {
 						this.rebalanceOnNodeLeave(instances);
+						clusterStatus.set(0);
 					});
 			}
 		}
