@@ -54,7 +54,7 @@ public class EFNode {
 		setNodeId(nodeId);
 	}
 
-	public void init(boolean isOnStart, DistributeCoorder masterInstanceCoorder,boolean reset) {
+	public void init(DistributeCoorder masterInstanceCoorder,boolean reset) {
 		this.nodeCoord = EFRPCService.getRemoteProxyObj(NodeCoord.class,
 				new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT));
 		this.instanceCoord = EFRPCService.getRemoteProxyObj(InstanceCoord.class,
@@ -62,7 +62,7 @@ public class EFNode {
 		this.monitorCoord = EFRPCService.getRemoteProxyObj(EFMonitorCoord.class,
 				new InetSocketAddress(ip, GlobalParam.SLAVE_SYN_PORT));
 		if(reset) {
-			this.instanceCoord.initNode(isOnStart);
+			this.instanceCoord.initNode();
 			this.masterInstanceCoorder = masterInstanceCoorder;
 			this.pushResource();
 			this.stopAllInstance();
@@ -86,7 +86,7 @@ public class EFNode {
 	}
 
 	public boolean isLive() {
-		if (Common.getNow() - this.lastLiveTime > GlobalParam.NODE_LIVE_TIME)
+		if ((Common.getNow() - this.lastLiveTime) > GlobalParam.NODE_LIVE_TIME)
 			setStatus(false);
 		return isLive;
 	}
@@ -102,10 +102,15 @@ public class EFNode {
 	public void refresh() {
 		this.lastLiveTime = Common.getNow();
 		Resource.threadPools.execute(() -> {
-			double tmp[] = nodeCoord.summaryResource();
-			this.cpuUsed = tmp[0];
-			this.memUsed = tmp[1];
-			this.flowMonitor.checkResourceUsage();
+			try {
+				double tmp[] = nodeCoord.summaryResource();
+				this.cpuUsed = tmp[0];
+				this.memUsed = tmp[1];
+				this.flowMonitor.checkResourceUsage();
+			}catch (Exception e) {
+				setStatus(false);
+				Common.LOG.warn("ip {},nodeId {}, can not connect!",ip,nodeId);
+			}
 		});
 	}
 
@@ -153,11 +158,15 @@ public class EFNode {
 		return false;
 	}
 
+	public boolean needRecover() {
+		if (this.instanceCoord.onlineTasksNum()<1) 
+			return true;
+		return false;
+	}
+	
 	public void recoverInstance() {
-		if (this.instanceCoord.onlineTasksNum() == 0) {
-			for (String instanceSetting : this.bindInstances) {
-				this.pushInstance(instanceSetting, false);
-			}
+		for (String instanceSetting : this.bindInstances) {
+			this.pushInstance(instanceSetting, false);
 		}
 	}
 

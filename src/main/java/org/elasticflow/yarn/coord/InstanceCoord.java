@@ -20,7 +20,7 @@ import com.alibaba.fastjson.JSONObject;
  */
 public interface InstanceCoord extends Coordination{
 	
-	public void initNode(boolean isOnStart);
+	public void initNode();
 	
 	public void updateInstanceConfig(String instance,String end,String fieldName,String value);
 		

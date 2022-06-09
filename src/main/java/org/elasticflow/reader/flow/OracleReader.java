@@ -140,7 +140,7 @@ public class OracleReader extends ReaderFlowSocket{
 		}catch (Exception e) {
 			releaseConn = true;
 			page = null;
-			log.error("Oracle Reader get page lists Exception, system will auto free connection!",e);
+			log.error("{} Oracle Reader get page lists Exception, system will auto free connection!",task.getInstanceID(),e);
 			throw new EFException("Oracle Reader get page lists Exception");			
 		}finally{ 
 			try {

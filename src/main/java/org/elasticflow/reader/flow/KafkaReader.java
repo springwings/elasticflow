@@ -171,7 +171,7 @@ public class KafkaReader extends ReaderFlowSocket {
 			} catch (EFException e1) {
 				throw e1;
 			}
-			log.error("Kafka Reader get page lists Exception, system will auto free connection!",e);
+			log.error("{} Kafka Reader get page lists Exception, system will auto free connection!",task.getInstanceID(),e);
 			throw new EFException("Kafka Reader get page lists Exception!");	
 		}  
 		return page;

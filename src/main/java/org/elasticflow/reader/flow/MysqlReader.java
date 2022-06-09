@@ -142,7 +142,7 @@ public class MysqlReader extends ReaderFlowSocket{
 		}catch (Exception e) {
 			releaseConn = true;
 			page = null;
-			log.error("Mysql Reader get page lists Exception, system will auto free connection!",e);
+			log.error("{} Mysql Reader get page lists Exception, system will auto free connection!",task.getInstanceID(),e);
 			throw new EFException("Mysql Reader get page lists Exception!");
 		}finally{ 
 			try {

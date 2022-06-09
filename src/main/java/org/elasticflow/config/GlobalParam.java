@@ -31,7 +31,7 @@ public final class GlobalParam {
 	public static long SYS_START_TIME = System.currentTimeMillis();
 
 	public static final String ENCODING = "utf-8";
-
+	
 	/** ------------system Runtime Environment------------ */
 	public static boolean DEBUG;
 	

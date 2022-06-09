@@ -44,12 +44,9 @@ public class InstanceCoordinator implements InstanceCoord {
 	}
 	
 	@Override
-	public void initNode(boolean isOnStart) {
-		boolean wait = isOnStart;
-		while(Resource.tasks.size()>0) {
-			EFMonitorUtil.cleanAllInstance(wait);
-			wait = false;
-		}			
+	public void initNode() {
+		//Direct cleanup of all resident tasks
+		EFMonitorUtil.cleanAllInstance(false);			
 	}
 	
 	@Override

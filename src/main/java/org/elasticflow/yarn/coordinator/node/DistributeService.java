@@ -72,10 +72,10 @@ public class DistributeService {
 
 	private void monitorNodes() {
 		Resource.threadPools.execute(() -> {
-			while (openMonitor) {
+			while (isOpenMonitor()) {
 				try {
 					Thread.sleep(GlobalParam.NODE_LIVE_TIME * 2);
-					GlobalParam.INSTANCE_COORDER.distributeCoorder().clusterScan(true);
+					GlobalParam.INSTANCE_COORDER.distributeCoorder().clusterScan();
 				} catch (Exception e) {
 					Common.LOG.warn("monitor exception", e);
 				}
