@@ -237,9 +237,11 @@ public final class EFConnectionPool {
 					conn = (EFConnectionSocket<?>) m.invoke(null,params);
 				}catch (Exception e) { 
 					log.error(_class_name+" Not Support!",e);
+					Common.stopSystem(true);
 				}
 			} else {
-				log.error("Parameter error can't create new " + this.poolName + " connection!");
+				log.error("Parameter error,create " + this.poolName + " connection fail!");
+				Common.stopSystem(true);
 			}
 			return conn;
 		}
