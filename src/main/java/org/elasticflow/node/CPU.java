@@ -63,6 +63,7 @@ public class CPU {
 				Common.LOG.error("{} context is not exists!",runId);
 			}
 		}catch (Exception e) {
+			Common.LOG.warn("instruction description:runId {},instructionsSet {}",runId,instructionsSet);
 			throw Common.getException(e);
 		}
 		return rs;

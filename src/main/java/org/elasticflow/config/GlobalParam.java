@@ -48,7 +48,7 @@ public final class GlobalParam {
 
 	public static String GROUPID;
 
-	public static int CONNECTION_POOL_SIZE = 5;
+	public static int CONNECTION_POOL_SIZE = 6;
 
 	public static boolean WRITE_BATCH = false;
 	/**

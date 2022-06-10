@@ -597,7 +597,6 @@ public final class Common {
 			stopSystem(true);
 		}
 	}
-
 	
 	public static EFException getException(Exception e) {
 		Throwable except = e.getCause();

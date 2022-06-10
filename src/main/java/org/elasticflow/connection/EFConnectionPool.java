@@ -104,7 +104,7 @@ public final class EFConnectionPool {
 	}
 
 	private void createPools(String poolName, ConnectParams params) {
-		ConnectionPool pool = new ConnectionPool(GlobalParam.CONNECTION_POOL_SIZE, poolName, params);
+		ConnectionPool pool = new ConnectionPool(poolName, params);
 		this._pools.put(poolName, pool);
 		log.info("success create pool " + poolName);
 	}
@@ -123,12 +123,12 @@ public final class EFConnectionPool {
 		private ConcurrentLinkedQueue<EFConnectionSocket<?>> freeConnections = new ConcurrentLinkedQueue<EFConnectionSocket<?>>();
 		private EFConnectionSocket<?> shareConn;
 
-		public ConnectionPool(int maxConn, String poolName, final ConnectParams params) {
+		public ConnectionPool(String poolName, final ConnectParams params) {
 			super();
-			if (params.getWhp().getMaxConn()>0) {
-				this.maxConn = params.getWhp().getMaxConn();
+			if (params.getWhp().getMaxPoolSize()>0) {
+				this.maxConn = params.getWhp().getMaxPoolSize();
 			} else {
-				this.maxConn = maxConn;
+				this.maxConn = GlobalParam.CONNECTION_POOL_SIZE;
 			}
 			this.poolName = poolName;
 			this.params = params;
@@ -155,6 +155,8 @@ public final class EFConnectionPool {
 				if (tryTime > 10)
 					break;
 			}
+			if(conn==null)
+				log.warn("{} Connection pool is full, unable to get connection.",this.poolName);
 			return conn;
 		}
 

@@ -30,12 +30,12 @@ public class WarehouseParam {
 	private String host = "";
 	private String user = "";
 	private String password = "";
+	private int maxPoolSize = 0;
 	private int port;
 	private JSONObject defaultValue;
 	private JSONObject customParams;
 	private String handler;
 	private String[] L1seq = {};
-	private int maxConn = 0;
 	
 	public DATA_SOURCE_TYPE getType() {
 		return type;
@@ -106,6 +106,8 @@ public class WarehouseParam {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+	
+	
 	
 	public int getPort() {
 		return port;
@@ -187,13 +189,12 @@ public class WarehouseParam {
 		}	
 	}
 
-	public int getMaxConn() {
-		return this.maxConn;
+	public int getMaxPoolSize() {
+		return this.maxPoolSize;
 	}
 
-	public void setMaxConn(String maxConn) {
-		if(maxConn!=null) {
-			this.maxConn = Integer.parseInt(maxConn);
-		}
+	public void setMaxPoolSize(String maxPoolSize) {
+		if(maxPoolSize!=null) 
+			this.maxPoolSize = Integer.parseInt(maxPoolSize);
 	}	
 }
