@@ -25,8 +25,8 @@ public class JobRunFactory implements Job {
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		JobModel job = (JobModel) context.getMergedJobDataMap().get(GlobalParam.FLOW_TAG._DEFAULT.name());
 		if (!invokeMethod(job)) {			
-			Resource.EfNotifier.send(Localization.formatEN(LAG_TYPE.JobstartFailed, job.getInstanceID()),job.getInstanceID(),
-					Localization.formatEN(LAG_TYPE.JobstartFailed, job.getInstanceID()),EFException.ETYPE.PARAMETER_ERROR.name(),true);
+			Resource.EfNotifier.send(Localization.format(LAG_TYPE.JobstartFailed, job.getInstanceID()),job.getInstanceID(),
+					Localization.format(LAG_TYPE.JobstartFailed, job.getInstanceID()),EFException.ETYPE.PARAMETER_ERROR.name(),true);
 		}
 	}
 
