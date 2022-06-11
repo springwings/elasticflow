@@ -19,6 +19,7 @@ import org.elasticflow.task.FlowTask;
 import org.elasticflow.task.InstructionTask;
 import org.elasticflow.task.schedule.JobModel;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFPipeUtil;
 import org.elasticflow.yarn.Resource;
@@ -100,8 +101,9 @@ public class FlowCenter{
 	 * @param needClear
 	 * @param createSchedule
 	 * @param contextId
+	 * @throws EFException 
 	 */
-	public void addFlowGovern(String instanceID, InstanceConfig instanceConfig,boolean needClear,boolean createSchedule) { 
+	public void addFlowGovern(String instanceID, InstanceConfig instanceConfig,boolean needClear,boolean createSchedule) throws EFException { 
 		if (instanceConfig.checkStatus()==false || instanceConfig.openTrans() == false)
 			return;
 		String[] L1seqs = Common.getL1seqs(instanceConfig);  

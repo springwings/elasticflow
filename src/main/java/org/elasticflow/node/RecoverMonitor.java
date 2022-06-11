@@ -10,6 +10,7 @@ package org.elasticflow.node;
 import org.apache.commons.net.telnet.TelnetClient;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.yarn.Resource;
 
@@ -64,7 +65,7 @@ public class RecoverMonitor {
 		}
 	}
 	
-	private void takeOverNode() { 
+	private void takeOverNode() throws EFException { 
 		Common.loadGlobalConfig(GlobalParam.CONFIG_PATH+"/EF_NODES/"+this.takeIp+"/configs"); 
 		Resource.EFLOWS.init(true);
 		Resource.EFLOWS.startService();

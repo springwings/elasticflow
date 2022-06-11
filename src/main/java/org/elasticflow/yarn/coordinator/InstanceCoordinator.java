@@ -12,6 +12,7 @@ import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.EFNodeUtil;
@@ -113,10 +114,14 @@ public class InstanceCoordinator implements InstanceCoord {
 		Resource.nodeConfig.loadInstanceConfig(instanceSettting);
 		String tmp[] = instanceSettting.split(":");
 		String instanceName = tmp[0];
-		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instanceName);
-		if (instanceConfig.checkStatus())
-			EFNodeUtil.loadInstanceDatas(instanceConfig);
-		EFMonitorUtil.rebuildFlowGovern(instanceSettting, createSchedule);
+		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instanceName);		
+		try {
+			if (instanceConfig.checkStatus())
+				EFNodeUtil.loadInstanceDatas(instanceConfig);
+			EFMonitorUtil.rebuildFlowGovern(instanceSettting, createSchedule);
+		} catch (EFException e) {
+			Common.LOG.error(e.getMessage());
+		}
 	}
 
 	@Override

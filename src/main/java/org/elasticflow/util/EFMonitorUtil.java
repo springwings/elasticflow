@@ -46,8 +46,9 @@ public class EFMonitorUtil {
 	 * @param instance
 	 * @param reset  will reload resource.xml and so on
 	 * @param runType
+	 * @throws EFException 
 	 */
-	public static void reloadInstance(String instance,String reset,String runType) {
+	public static void reloadInstance(String instance,String reset,String runType) throws EFException {
 		EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
 		int type = Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType();
 		if(runType !=null) {
@@ -140,7 +141,7 @@ public class EFMonitorUtil {
 	}
 
 	
-	public static void rebuildFlowGovern(String instanceSettting,boolean createSchedule) {
+	public static void rebuildFlowGovern(String instanceSettting,boolean createSchedule) throws EFException {
 		for (String inst : instanceSettting.split(",")) {
 			String[] strs = inst.split(":");
 			if (strs.length < 1)
@@ -308,7 +309,7 @@ public class EFMonitorUtil {
 		return res;
 	}
 	
-	public static boolean resetBreaker(String instance) {
+	public static boolean resetBreaker(String instance) throws EFException {
 		if (Resource.nodeConfig.getInstanceConfigs().containsKey(instance)) {		
 			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
 			String[] L1seqs = Common.getL1seqs(config);
@@ -332,8 +333,9 @@ public class EFMonitorUtil {
  * 2 Performance status ++
  * 4 task status ++
  * @return
+ * @throws EFException 
  */
-	public static JSONObject getInstanceInfo(String instance,int type) {
+	public static JSONObject getInstanceInfo(String instance,int type) throws EFException {
 		JSONObject JO = new JSONObject();
 		if (Resource.nodeConfig.getInstanceConfigs().containsKey(instance)) {			
 			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);

@@ -288,7 +288,7 @@ public class FlowTask {
 		}
 	}
 
-	private static String getNextJobs(String[] nextJobs) {
+	private static String getNextJobs(String[] nextJobs) throws EFException {
 		StringBuilder sf = new StringBuilder();
 		for (String job : nextJobs) {
 			InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(job);

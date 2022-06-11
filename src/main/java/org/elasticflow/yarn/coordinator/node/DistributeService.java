@@ -12,6 +12,7 @@ import java.util.Map;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coord.DiscoveryCoord;
@@ -50,7 +51,7 @@ public class DistributeService {
 		return openMonitor;
 	}
 
-	public void start() {
+	public void start() throws EFException {
 		if (EFNodeUtil.isMaster()) {
 			boolean createSchedule = !GlobalParam.DISTRIBUTE_RUN;
 			if ((GlobalParam.SERVICE_LEVEL & 2) > 0) {

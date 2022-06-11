@@ -33,8 +33,9 @@ public final class EFNodeUtil {
 	 * init node start parameters
 	 * 
 	 * @param instanceConfig
+	 * @throws EFException 
 	 */
-	public static void loadInstanceDatas(InstanceConfig instanceConfig) {
+	public static void loadInstanceDatas(InstanceConfig instanceConfig) throws EFException {
 		String instance = instanceConfig.getInstanceID();
 		String[] L1seqs = Common.getL1seqs(instanceConfig);
 		ScanPosition sp = new ScanPosition(instance, "");

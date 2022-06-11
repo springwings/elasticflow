@@ -344,14 +344,15 @@ public final class Common {
 	 * @param instanceName
 	 * @param fillDefault  if empty fill with system default blank seq
 	 * @return
+	 * @throws EFException 
 	 */
-	public static String[] getL1seqs(InstanceConfig instanceConfig) {
+	public static String[] getL1seqs(InstanceConfig instanceConfig) throws EFException {
 		String[] seqs = {};
 		WarehouseParam wp = Resource.nodeConfig.getWarehouse().get(instanceConfig.getPipeParams().getReadFrom());
 		if (null != wp) {
 			seqs = wp.getL1seq();
 		} else {
-			LOG.warn("{} resource is null.", instanceConfig.getPipeParams().getReadFrom());
+			throw new EFException(instanceConfig.getPipeParams().getReadFrom()+" resource is null.", ELEVEL.Termination);
 		}
 		return seqs;
 	}

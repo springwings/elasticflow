@@ -33,6 +33,7 @@ import org.elasticflow.service.EFMonitorService;
 import org.elasticflow.task.FlowTask;
 import org.elasticflow.task.schedule.TaskJobCenter;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFIoc;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.yarn.Resource;
@@ -70,8 +71,9 @@ public final class Run {
 	/**
 	 * Initialize relevant models and task execution parameters
 	 * @param initInstance
+	 * @throws EFException 
 	 */
-	public void init(boolean initInstance) {
+	public void init(boolean initInstance) throws EFException {
 		
 		this.refreshGlobalParam();
 		
@@ -82,6 +84,7 @@ public final class Run {
 		Resource.socketCenter =  new SocketCenter();
 		Resource.flowCenter = new FlowCenter();
 		Resource.nodeMonitor = new NodeMonitor(); 
+		Resource.threadPools = new ThreadPools(GlobalParam.STS_THREADPOOL_SIZE);
 		
 		if(!EFNodeUtil.isSlave()) {//for master
 			GlobalParam.TASK_COORDER = new TaskStateCoordinator();
@@ -103,9 +106,8 @@ public final class Run {
 						openThreadPools +=1;
 				}
 			}
-		}
+		} 
 		
-		Resource.threadPools = new ThreadPools(GlobalParam.STS_THREADPOOL_SIZE);
 		if(openThreadPools>0 && GlobalParam.DISTRIBUTE_RUN==false) {
 			Resource.threadPools.start();
 		}
@@ -198,6 +200,7 @@ public final class Run {
 
 	private void start() {
 		try {
+			Runtime.getRuntime().addShutdownHook(new SafeShutDown());
 			Common.loadGlobalConfig(this.startConfigPath);
 			loadPlugins(GlobalParam.pluginPath);
 			GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");							
@@ -208,18 +211,17 @@ public final class Run {
 				init(true);
 				ResourceMonitor.start(); 
 				startService();
+			} 
+			if(GlobalParam.DISTRIBUTE_RUN) {
+				Common.LOG.info("ElasticFlow {} {}, nodeID {} Start Success!",GlobalParam.VERSION,
+						GlobalParam.StartConfig.get("node_type"),GlobalParam.NODEID);
+			}else {
+				Common.LOG.info("ElasticFlow {} nodeID {} standalone mode Start Success!",GlobalParam.VERSION,GlobalParam.NODEID);
 			}
 		} catch (Exception e) {
 	    	Common.LOG.error("Init System Exception", e);
 	    	Common.stopSystem(false);
 	    } 
-		if(GlobalParam.DISTRIBUTE_RUN) {
-			Common.LOG.info("ElasticFlow {} {}, nodeID {} Start Success!",GlobalParam.VERSION,
-					GlobalParam.StartConfig.get("node_type"),GlobalParam.NODEID);
-		}else {
-			Common.LOG.info("ElasticFlow {} nodeID {} standalone mode Start Success!",GlobalParam.VERSION,GlobalParam.NODEID);
-		}
-		
 	} 
 	
 	/**
@@ -229,7 +231,6 @@ public final class Run {
 	 */
 	public static void main(String[] args) throws Exception {
 		Resource.EFLOWS = (Run) EFIoc.getBean("EFLOWS");
-		Resource.EFLOWS.start();
-		Runtime.getRuntime().addShutdownHook(new SafeShutDown());
+		Resource.EFLOWS.start(); 
 	}
 }

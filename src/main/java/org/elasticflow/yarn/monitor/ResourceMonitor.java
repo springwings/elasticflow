@@ -8,6 +8,7 @@
 package org.elasticflow.yarn.monitor;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.yarn.coord.ReportStatus;
@@ -27,7 +28,7 @@ public class ResourceMonitor {
 
 	static DistributeService distributeService = new DistributeService();
 
-	public static void start() {
+	public static void start() throws EFException {
 		ReportStatus.nodeConfigs();
 		EFDataStorer.setData(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs",
 				JSON.toJSONString(GlobalParam.StartConfig));
