@@ -127,8 +127,7 @@ public class Pipe extends Instruction {
 					writer.flowState.setPerformance((long) ((num*1000)/(System.currentTimeMillis()-start+1e-3)));
 				writer.flowState.incrementCurrentTimeProcess(num);
 				context.getReader().flush();
-				writer.flush();
-				
+				writer.flush(); 
 				log.info(Common.formatLog("onepage",id + " Write", task.getId(), 
 						storeId, task.getL2seq(), num,
 						DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));

@@ -133,12 +133,11 @@ public class KafkaReader extends ReaderFlowSocket {
 	 * Do not release the connection unless there is a processing error
 	 * @throws EFException 
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public void flush() throws EFException { 
 		if(!this.autoCommit) { 
 			try {
-				((KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader)).commitSync();
+				conn.commitSync();
 			} catch (Exception e) {
 				throw new EFException(e, ELEVEL.Dispose,ETYPE.RESOURCE_ERROR);
 			}
