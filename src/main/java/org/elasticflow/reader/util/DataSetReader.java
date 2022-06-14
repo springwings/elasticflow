@@ -26,18 +26,20 @@ public class DataSetReader{
 	private String dataBoundary;
 	private ConcurrentLinkedQueue<PipeDataUnit> datas;
 	private boolean status = true;
- 
-	public void init(DataPage DP) {
+	
+	public static DataSetReader getInstance(DataPage DP) {
+		DataSetReader ds = new DataSetReader();
 		if (DP.size() > 1) {
-			this.keyColumn =  String.valueOf(DP.get(GlobalParam.READER_KEY));
-			this.IncrementColumn = String.valueOf(DP.get(GlobalParam.READER_SCAN_KEY));
-			this.dataBoundary = DP.getDataBoundary();
-			this.READER_LAST_STAMP = DP.getScanStamp();
+			ds.keyColumn =  String.valueOf(DP.get(GlobalParam.READER_KEY));
+			ds.IncrementColumn = String.valueOf(DP.get(GlobalParam.READER_SCAN_KEY));
+			ds.dataBoundary = DP.getDataBoundary();
+			ds.READER_LAST_STAMP = DP.getScanStamp();
 			if(DP.containsKey(GlobalParam.READER_STATUS))
-				this.status = (boolean) DP.get(GlobalParam.READER_STATUS);
-			this.datas = (ConcurrentLinkedQueue<PipeDataUnit>) DP.getData();
+				ds.status = (boolean) DP.get(GlobalParam.READER_STATUS);
+			ds.datas = (ConcurrentLinkedQueue<PipeDataUnit>) DP.getData();
 		}
-	}
+		return ds;
+	} 
  
 	public String getIncrementColumn() {
 		return IncrementColumn;

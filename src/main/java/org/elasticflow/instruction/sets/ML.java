@@ -43,8 +43,7 @@ public class ML extends Instruction {
 		if (dp.size() == 0)
 			return res;
 
-		DataSetReader DSReader = new DataSetReader();
-		DSReader.init(dp);
+		DataSetReader DSReader = DataSetReader.getInstance(dp);
 		if (DSReader.status()) {
 			try {
 				long start = System.currentTimeMillis();

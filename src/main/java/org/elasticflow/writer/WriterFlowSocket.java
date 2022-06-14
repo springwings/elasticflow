@@ -60,6 +60,14 @@ public abstract class WriterFlowSocket extends Flow {
 		return writeHandler;
 	}
 
+	/**
+	 * Get storage additional ID
+	 * @param mainName   instanceID
+	 * @param isIncrement
+	 * @param instanceConfig
+	 * @return
+	 * @throws EFException
+	 */
 	public String getNewStoreId(String mainName, boolean isIncrement, InstanceConfig instanceConfig)
 			throws EFException {
 		if (instanceConfig.getPipeParams().getWriteMechanism() == MECHANISM.AB) {
@@ -136,6 +144,6 @@ public abstract class WriterFlowSocket extends Flow {
 	public void flush() throws EFException {
 
 	}
-
+	
 	public abstract void optimize(String instance, String storeId);
 }

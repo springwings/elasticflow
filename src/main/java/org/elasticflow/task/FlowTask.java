@@ -49,7 +49,7 @@ public class FlowTask {
 
 	/** write real destination */
 	private String destination;
-	private String instanceId;
+	private String instanceID;
 
 	private final static Logger log = LoggerFactory.getLogger(FlowTask.class);
 
@@ -72,7 +72,7 @@ public class FlowTask {
 				pipePump.getInstanceConfig().getPipeParams().getFailFreq(),
 				pipePump.getInstanceConfig().getPipeParams().getMaxFailTime());
 		destination = getDestination();
-		instanceId = pipePump.getInstanceID();
+		instanceID = pipePump.getInstanceID();
 	}
 
 	/**
@@ -96,7 +96,7 @@ public class FlowTask {
 	public void runFull() {
 		if (runConditionCheck() == false)
 			return;
-		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceId, L1seq, GlobalParam.JOB_TYPE.FULL.name(), STATUS.Ready,
+		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(), STATUS.Ready,
 				STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
 				String storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), false,
@@ -105,28 +105,28 @@ public class FlowTask {
 					CPU.RUN(pipePump.getID(), "Pond", "createStorePosition", true,
 							Common.getInstanceRunId(destination, L1seq), storeId);
 				if (storeId != null) {
-					GlobalParam.TASK_COORDER.scanPositionkeepCurrentPos(instanceId);
+					GlobalParam.TASK_COORDER.scanPositionkeepCurrentPos(instanceID);
 					pipePump.run(storeId, L1seq, true, isReferenceInstance);
-					GlobalParam.TASK_COORDER.scanPositionRecoverKeep(instanceId);
-					GlobalParam.TASK_COORDER.saveTaskInfo(instanceId, L1seq, storeId, false);
+					GlobalParam.TASK_COORDER.scanPositionRecoverKeep(instanceID);
+					GlobalParam.TASK_COORDER.saveTaskInfo(instanceID, L1seq, storeId, false);
 					for (String L2seq : pipePump.getInstanceConfig().getReadParams().getL2Seq()) {
-						GlobalParam.TASK_COORDER.setScanPosition(instanceId, L1seq, L2seq, "", true, true);
+						GlobalParam.TASK_COORDER.setScanPosition(instanceID, L1seq, L2seq, "", true, true);
 					}
-					GlobalParam.TASK_COORDER.saveTaskInfo(instanceId, L1seq, storeId, true);
+					GlobalParam.TASK_COORDER.saveTaskInfo(instanceID, L1seq, storeId, true);
 				}
 				runNextJobs(JOB_TYPE.FULL);
 			} catch (Exception e) {
 				breaker.log();
-				log.error(instanceId + " Full Exception", e);
-				Resource.EfNotifier.send(Localization.format(LAG_TYPE.fullFail, instanceId), instanceId, e.getMessage(),
+				log.error(instanceID + " Full Exception", e);
+				Resource.EfNotifier.send(Localization.format(LAG_TYPE.fullFail, instanceID), instanceID, e.getMessage(),
 						EFException.ETYPE.DATA_ERROR.name(), false);
 			} finally {
-				GlobalParam.TASK_COORDER.setFlowStatus(instanceId, L1seq, GlobalParam.JOB_TYPE.FULL.name(),
+				GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(),
 						STATUS.Blank, STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
 			}
 		} else {
 			if (pipePump.getInstanceConfig().getPipeParams().getLogLevel() == 0)
-				log.info(instanceId + " still running，new full job is aborted!");
+				log.info(instanceID + " still running，new full job is aborted!");
 		}
 	}
 
@@ -136,28 +136,28 @@ public class FlowTask {
 	public void runVirtualFull() {
 		if (runConditionCheck() == false)
 			return;
-		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceId, L1seq, GlobalParam.JOB_TYPE.FULL.name(), STATUS.Ready,
+		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(), STATUS.Ready,
 				STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
 				String storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), false,
 						false);
 				CPU.RUN(pipePump.getID(), "Pond", "createStorePosition", true,
 						Common.getInstanceRunId(destination, L1seq), storeId);
-				GlobalParam.TASK_COORDER.setFlowInfo(instanceId, GlobalParam.JOB_TYPE.VIRTUAL.name(),
+				GlobalParam.TASK_COORDER.setFlowInfo(instanceID, GlobalParam.JOB_TYPE.VIRTUAL.name(),
 						GlobalParam.FLOWINFO.FULL_JOBS.name(),
 						getNextJobs(pipePump.getInstanceConfig().getPipeParams().getNextJob()));
 				runNextJobs(JOB_TYPE.FULL);
 			} catch (Exception e) {
-				log.error(instanceId + " Virtual Full Exception", e);
-				Resource.EfNotifier.send(instanceId + " Virtual Full Exception", instanceId, e.getMessage(),
+				log.error(instanceID + " Virtual Full Exception", e);
+				Resource.EfNotifier.send(instanceID + " Virtual Full Exception", instanceID, e.getMessage(),
 						EFException.ETYPE.DATA_ERROR.name(), false);
 			} finally {
-				GlobalParam.TASK_COORDER.setFlowStatus(instanceId, L1seq, GlobalParam.JOB_TYPE.FULL.name(),
+				GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(),
 						STATUS.Blank, STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
 			}
 		} else {
 			if (pipePump.getInstanceConfig().getPipeParams().getLogLevel() == 0)
-				log.info(instanceId + " still running，new virtual full job is aborted!");
+				log.info(instanceID + " still running，new virtual full job is aborted!");
 		}
 	}
 
@@ -169,26 +169,26 @@ public class FlowTask {
 	public void runVirtualIncrement() {
 		if (runConditionCheck() == false)
 			return;
-		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceId, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
+		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
 				STATUS.Ready, STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
 				String storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), true,
 						recompute);
-				GlobalParam.TASK_COORDER.setFlowInfo(instanceId, GlobalParam.JOB_TYPE.VIRTUAL.name(),
+				GlobalParam.TASK_COORDER.setFlowInfo(instanceID, GlobalParam.JOB_TYPE.VIRTUAL.name(),
 						GlobalParam.FLOWINFO.INCRE_STOREID.name(), storeId);
 				runNextJobs(JOB_TYPE.INCREMENT);
 			} catch (Exception e) {
-				log.error(instanceId + " Virtual Increment Exception", e);
-				Resource.EfNotifier.send(instanceId + " Virtual Increment Exception", instanceId, e.getMessage(),
+				log.error(instanceID + " Virtual Increment Exception", e);
+				Resource.EfNotifier.send(instanceID + " Virtual Increment Exception", instanceID, e.getMessage(),
 						EFException.ETYPE.DATA_ERROR.name(), false);
 			} finally {
-				GlobalParam.TASK_COORDER.setFlowStatus(instanceId, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
+				GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
 						STATUS.Blank, STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
 				recompute = false;
 			}
 		} else {
 			if (pipePump.getInstanceConfig().getPipeParams().getLogLevel() == 0)
-				log.info(instanceId + " still running，new virtual increment job is aborted!");
+				log.info(instanceID + " still running，new virtual increment job is aborted!");
 		}
 	}
 
@@ -198,13 +198,13 @@ public class FlowTask {
 	public void runIncrement() {
 		if (runConditionCheck() == false) 
 			return;
-		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceId, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
+		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
 				STATUS.Ready, STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			String storeId = null;
 			try {
 				storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), true,
 						(isReferenceInstance ? false : recompute));
-				GlobalParam.TASK_COORDER.saveTaskInfo(instanceId, L1seq, storeId, false);
+				GlobalParam.TASK_COORDER.saveTaskInfo(instanceID, L1seq, storeId, false);
 				pipePump.run(storeId, L1seq, false, isReferenceInstance);
 				runNextJobs(JOB_TYPE.INCREMENT);
 			} catch (EFException e) {
@@ -212,21 +212,21 @@ public class FlowTask {
 				if (!isReferenceInstance && e.getErrorType() == ETYPE.RESOURCE_ERROR) {
 					log.error("get {} storage location exception!", destination, e);
 					breaker.openBreaker();
-					Resource.EfNotifier.send(Localization.format(LAG_TYPE.FailPosition, destination), instanceId,
+					Resource.EfNotifier.send(Localization.format(LAG_TYPE.FailPosition, destination), instanceID,
 							e.getMessage(), e.getErrorType().name(), false);
 				} else if (e.getErrorType() == ETYPE.EXTINTERRUPT) {
-					log.warn("{}_{} increment external interrupt!",instanceId,L1seq);
+					log.warn("{}_{} increment external interrupt!",instanceID,L1seq);
 				} else {
-					log.error(instanceId + "_" +L1seq+ " increment job exception", e);
+					log.error(instanceID + "_" +L1seq+ " increment job exception", e);
 				} 
 			} finally {
 				recompute = this.checkReCompute(storeId);
-				GlobalParam.TASK_COORDER.setFlowStatus(instanceId, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
+				GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
 						STATUS.Blank, STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
 			}
 		} else {
 			if (pipePump.getInstanceConfig().getPipeParams().getLogLevel() == 0)
-				log.info(instanceId + " still running，new increment job is aborted!");
+				log.info(instanceID + " still running，new increment job is aborted!");
 		}
 	}
 

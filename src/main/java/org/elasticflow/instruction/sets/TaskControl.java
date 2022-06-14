@@ -23,6 +23,7 @@ import com.alibaba.fastjson.JSONObject;
 
 /**
  * Task Control Instruction sets
+ * It is an instruction code,Can only interpret calls
  * 
  * @author chengwen
  * @version 1.0

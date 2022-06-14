@@ -24,6 +24,8 @@ import org.elasticflow.yarn.Resource;
 
 /**
  * runtime info manage
+ * It is an instruction code,Can only interpret calls
+ * 
  * @author chengwen
  * @version 2.1
  * @date 2018-11-02 16:47

@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Pipe operation Instruction sets
+ * It is an instruction code,Can only interpret calls
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:25
@@ -34,7 +35,7 @@ public class Pipe extends Instruction {
 
 	/**
 	 * @param args
-	 *            parameter order is: String mainName, String storeId
+	 *            parameter order is: String instanceId, String storeId
 	 */
 	public static void create(Context context, Object[] args) {
 		if (!isValid(2, args)) {
@@ -76,7 +77,7 @@ public class Pipe extends Instruction {
 
 	/**
 	 * @param args
-	 *            parameter order is: String id, String instance, String storeId,
+	 *            parameter order is: String jobType, String instance, String storeId,
 	 *            String L2seq, DataPage pageData, String info, boolean isUpdate,
 	 *            boolean monopoly
 	 * @throws Exception
@@ -87,7 +88,7 @@ public class Pipe extends Instruction {
 			log.error("writeDataSet parameter not match!");
 			return rstate;
 		}
-		String id = String.valueOf(args[0]);
+		String jobType = String.valueOf(args[0]);
 		String instance = String.valueOf(args[1]);
 		String storeId = String.valueOf(args[2]);
 		Task task = (Task) args[3];
@@ -95,23 +96,27 @@ public class Pipe extends Instruction {
 		String info = String.valueOf(args[5]);
 		boolean isUpdate = (boolean) args[6];
 		boolean monopoly = (boolean) args[7];
+		//Control the release of problematic connections
+		boolean freeConn = false;
 		
-		if (dataPage.size() == 0)
+		WriterFlowSocket writer = context.getWriter();
+		writer.PREPARE(monopoly, false);
+		if (!writer.ISLINK()) {
+			rstate.setStatus(false);
 			return rstate;
-		WriterFlowSocket writer = context.getWriter();		
+		}
+		if (dataPage.size() == 0) {
+			//Prevent status from never being submitted
+			context.getReader().flush();
+			writer.flush(); 
+			return rstate;
+		}
 		if(writer.getWriteHandler()!=null)
-			dataPage = writer.getWriteHandler().handleData(context, dataPage);
-		DataSetReader DSReader = new DataSetReader();
-		DSReader.init(dataPage);
+			dataPage = writer.getWriteHandler().handleData(context, dataPage);		
+		DataSetReader DSReader = DataSetReader.getInstance(dataPage);
 		long start = System.currentTimeMillis();
 		int num = 0;
-		if (DSReader.status()) {
-			writer.PREPARE(monopoly, false);
-			if (!writer.ISLINK()) {
-				rstate.setStatus(false);
-				return rstate;
-			}
-			boolean freeConn = false;
+		if (DSReader.status()) {	
 			try {
 				while (DSReader.nextLine()) { 
 					writer.write(context.getInstanceConfig(),
@@ -128,7 +133,7 @@ public class Pipe extends Instruction {
 				writer.flowState.incrementCurrentTimeProcess(num);
 				context.getReader().flush();
 				writer.flush(); 
-				log.info(Common.formatLog("onepage",id + " Write", task.getId(), 
+				log.info(Common.formatLog("onepage",jobType + " Write", task.getId(), 
 						storeId, task.getL2seq(), num,
 						DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));
 			} catch (EFException e) {
@@ -141,6 +146,7 @@ public class Pipe extends Instruction {
 				writer.REALEASE(monopoly, freeConn); 
 			}
 		} else {
+			writer.REALEASE(monopoly, freeConn); 
 			rstate.setStatus(false);
 		}
 		return rstate;

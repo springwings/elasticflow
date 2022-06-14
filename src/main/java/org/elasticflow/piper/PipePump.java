@@ -203,15 +203,14 @@ public final class PipePump extends Instruction implements Serializable {
 		return CPU.getContext(getID()).getWriter();
 	}
 
+
 	/**
 	 * process resource data Flow
-	 * 
 	 * @param task
-	 * @param mainName
 	 * @param storeId
-	 * @param L2seqs        example,L1 to database level,L2 to table level
-	 * @param writeTo
-	 * @param masterControl
+	 * @param L2seqs       example,L1 to database level,L2 to table level
+	 * @param destination
+	 * @param isReferenceInstance
 	 * @throws EFException
 	 */
 	private void processFlow(Task task, String storeId, List<String> L2seqs, String destination,
