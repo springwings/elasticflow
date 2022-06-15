@@ -105,10 +105,11 @@ public class Pipe extends Instruction {
 			rstate.setStatus(false);
 			return rstate;
 		}
-		if (dataPage.size() == 0) {
+		if (dataPage.getData().size()==0) {
 			//Prevent status from never being submitted
 			context.getReader().flush();
 			writer.flush(); 
+			writer.REALEASE(monopoly, freeConn); 
 			return rstate;
 		}
 		if(writer.getWriteHandler()!=null)
