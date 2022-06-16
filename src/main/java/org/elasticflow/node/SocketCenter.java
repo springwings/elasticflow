@@ -193,13 +193,14 @@ public final class SocketCenter {
 			if (whp == null) {
 				Common.LOG.error(resourceName + " resource not exist!");
 				Common.stopSystem(false);
-			}
+			} 
 			SearcherFlowSocket searcher = SearcherSocketFactory
 					.getInstance(
 							ConnectParams.getInstance(whp, L1seq,
 									Resource.nodeConfig.getInstanceConfigs().get(instance), null),
 							Resource.nodeConfig.getSearchConfigs().get(instance), null);
-			searcherSocketMap.put(tags, searcher);
+			if(searcher!=null)
+				searcherSocketMap.put(tags, searcher);
 		}
 		return searcherSocketMap.get(tags);
 	}
