@@ -198,6 +198,7 @@ public class VearchConnector {
 					EFHttpClientUtil.DEFAULT_CONTENT_TYPE);
 			JSONObject jr = JSONObject.parseObject(response);
 			JSONArray jsonArr = JSONArray.parseArray(jr.getString("data"));
+			@SuppressWarnings("unchecked")
 			Iterator<Object> it = jsonArr.iterator();
 			while (it.hasNext()) {
 				JSONObject jsonObj = (JSONObject) it.next();
