@@ -54,6 +54,10 @@ public final class SocketCenter {
 	public String getContextId(String instance, String L1seq,String tag) {
 		return Common.getResourceTag(instance, L1seq, tag, false);
 	} 
+	
+	public boolean containsKey(String instance, String L1seq,String tag) {
+		return pipePumpMap.containsKey(Common.getResourceTag(instance, L1seq, tag, false));
+	}
 
 	/**
 	 * 

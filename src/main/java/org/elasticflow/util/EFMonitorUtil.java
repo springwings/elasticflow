@@ -286,26 +286,26 @@ public class EFMonitorUtil {
 		res.put(END_TYPE.computer.name(), "Not started!");
 		res.put(END_TYPE.computer.name(), "Not started!");
 		res.put("status", "offline");
-		PipePump pipePump = null;
-		try {
-			pipePump = Resource.socketCenter.getPipePump(instance, L1seq, false,
-					GlobalParam.FLOW_TAG._DEFAULT.name());
-		} catch (EFException e) {
-			Common.LOG.error("",e);
-		} 
-		if(pipePump!=null) {
-			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
-			if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) { 
-				res.put(END_TYPE.reader.name(), pipePump.getReader().flowState.get());
-				res.put(END_TYPE.writer.name(), pipePump.getWriter().flowState.get());
-			}		
-			if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {	
-				res.put(END_TYPE.computer.name(), pipePump.getComputer().flowState.get());
+		
+		if(Resource.socketCenter.containsKey(instance, L1seq,GlobalParam.FLOW_TAG._DEFAULT.name())) { 
+			try {
+				PipePump pipePump = Resource.socketCenter.getPipePump(instance, L1seq, false,
+						GlobalParam.FLOW_TAG._DEFAULT.name());
+				InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
+				if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) { 
+					res.put(END_TYPE.reader.name(), pipePump.getReader().flowState.get());
+					res.put(END_TYPE.writer.name(), pipePump.getWriter().flowState.get());
+				}		
+				if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {	
+					res.put(END_TYPE.computer.name(), pipePump.getComputer().flowState.get());
+				}
+				res.put("status", "online");
+				res.put("nodeIP", GlobalParam.IP);
+				res.put("nodeID", GlobalParam.NODEID);
+			} catch (EFException e) {
+				Common.LOG.error(e.getMessage());
 			}
-			res.put("status", "online");
-			res.put("nodeIP", GlobalParam.IP);
-			res.put("nodeID", GlobalParam.NODEID);
-		}
+		} 
 		return res;
 	}
 	
@@ -350,7 +350,12 @@ public class EFMonitorUtil {
 					WarehouseParam wp = Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom());
 					JSONObject poolstatus = new JSONObject();
 					for(String seq:wp.getL1seq()) {
-						poolstatus.put(seq, getConnectionStatus(instance,wp.getPoolName(seq)));
+						if(seq=="") {
+							poolstatus.put("DEFAULT", getConnectionStatus(instance,wp.getPoolName(seq)));
+						}else {
+							poolstatus.put(seq, getConnectionStatus(instance,wp.getPoolName(seq)));
+						}
+						
 					}					
 					Reader.put("pool_status", poolstatus);
 				}
@@ -360,7 +365,11 @@ public class EFMonitorUtil {
 					WarehouseParam wp = Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getWriteTo());
 					JSONObject poolstatus = new JSONObject();
 					for(String seq:wp.getL1seq()) {
-						poolstatus.put(seq, getConnectionStatus(instance,wp.getPoolName(seq)));
+						if(seq=="") {
+							poolstatus.put("DEFAULT", getConnectionStatus(instance,wp.getPoolName(seq)));
+						}else {
+							poolstatus.put(seq, getConnectionStatus(instance,wp.getPoolName(seq)));
+						}						
 					}						
 					Writer.put("pool_status", poolstatus);
 				}

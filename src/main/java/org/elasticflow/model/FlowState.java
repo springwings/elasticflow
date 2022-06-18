@@ -79,10 +79,12 @@ final public class FlowState {
 			}							
 		}
 		this.flowEndStatus = toHashObject();
-		if(this.historyProcess == null)
+		if(this.historyProcess == null) 
 			this.historyProcess = new JSONObject();
 		if(this.historyProcess.containsKey(todayZero)) {
-			this.currentTimeProcess.set(this.historyProcess.getLongValue(todayZero));;
+			this.currentTimeProcess.set(this.historyProcess.getLongValue(todayZero));			
+		}else {
+			this.historyProcess.put(String.valueOf(Common.getNowZero()), 0);
 		}
 	} 
 	
@@ -100,7 +102,7 @@ final public class FlowState {
 		JO.put("totalProcess", this.totalProcess);
 		JO.put("currentTimeProcess", this.currentTimeProcess);
 		JO.put("flowStartTime", this.flowStartTime);
-		JO.put("historyProcess", this.historyProcess==null?"":this.historyProcess);
+		JO.put("historyProcess", this.historyProcess);
 		JO.put("performance", this.PERFORMANCE);
 		JO.put("avgload", this.LOAD);
 		JO.put("blockTime", this.BLOCKTIME);
@@ -160,7 +162,7 @@ final public class FlowState {
 			this.currentTimeProcess.addAndGet(delta);
 		}
 		this.totalProcess.addAndGet(delta);
-		this.historyProcess.put(todayZero, this.currentTimeProcess);
+		this.historyProcess.put(todayZero, this.currentTimeProcess.get());
 		this.updateDatas(this.flowEndStatus);
 	}
 }

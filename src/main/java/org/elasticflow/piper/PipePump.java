@@ -160,7 +160,7 @@ public final class PipePump extends Instruction implements Serializable {
 			task = incrementTask;
 		}
 		List<String> L2seqs = getInstanceConfig().getReadParams().getL2Seq();
-		GlobalParam.TASK_COORDER.setFlowInfo(instanceID, job_type.name(), instanceRunId + " L2seqs nums",
+		GlobalParam.TASK_COORDER.setFlowInfo(instanceID, job_type.name(), instanceRunId + "_L2seqs_nums",
 				String.valueOf(L2seqs.size()));
 		processFlow(task, storeId, L2seqs, destination, isReferenceInstance);
 		GlobalParam.TASK_COORDER.resetFlowInfo(instanceID, job_type.name());
