@@ -78,7 +78,6 @@ final public class FlowState {
 				this.historyProcess = _JO.getJSONObject("historyProcess");	
 			}							
 		}
-		this.flowEndStatus = toHashObject();
 		if(this.historyProcess == null) 
 			this.historyProcess = new JSONObject();
 		if(this.historyProcess.containsKey(todayZero)) {
@@ -86,6 +85,7 @@ final public class FlowState {
 		}else {
 			this.historyProcess.put(String.valueOf(Common.getNowZero()), 0);
 		}
+		this.flowEndStatus = toHashObject();
 	} 
 	
 	public HashMap<String, Object> get() {		
