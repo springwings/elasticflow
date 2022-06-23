@@ -124,6 +124,7 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 		return true;
 	}
 
+	@SuppressWarnings("deprecation")
 	private void getBulkProcessor(RestHighLevelClient _client) {
 		this.bulkProcessor = BulkProcessor
 				.builder((request, bulkListener) -> _client.bulkAsync(request, RequestOptions.DEFAULT, bulkListener),
