@@ -490,12 +490,18 @@ public class DistributeCoorder {
 			}
 			while (keepInstances.peek() != null) {
 				String instance = keepInstances.poll();
+				boolean needRedo = true;
 				for (EFNode node : nodes) {
 					if (node.getNodeId() == Resource.nodeConfig.getInstancesLocation().get(instance)) {
 						node.pushInstance(instance, true);
+						needRedo = false;
 						break;
 					}
 				}
+				if(needRedo) {
+					int index = (int) (Math.random()* nodes.size());
+					nodes.get(index).pushInstance(instance, true);
+				}					
 			}
 		}
 	}
