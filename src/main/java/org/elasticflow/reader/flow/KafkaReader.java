@@ -152,7 +152,7 @@ public class KafkaReader extends ReaderFlowSocket {
 			this.records = conn.poll(Duration.ofMillis(readms));
 			int totalNum = this.records.count();		
 			if (totalNum > 0) {
-				int pagenum = (int) Math.ceil(totalNum / pageSize);
+				int pagenum = (int) Math.ceil((totalNum+0.) / pageSize);
 				int curentpage = 0;
 				while (true) {
 					curentpage++;

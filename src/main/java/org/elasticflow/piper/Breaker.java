@@ -30,11 +30,11 @@ public class Breaker {
 
 	private long earlyFailTime;
 
-	private volatile boolean openBreaker = false;
+	private boolean openBreaker = false;
 
-	public volatile boolean isFirstNotify = true;
+	public boolean isFirstNotify = true;
 
-	private volatile int failTimes;
+	private int failTimes;
 
 	// per-fail use time in last period
 	private int perFailTime = 200;

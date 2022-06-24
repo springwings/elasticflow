@@ -1,13 +1,9 @@
 package org.elasticflow.ml;
 
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.model.reader.DataPage;
-import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.EFException;
@@ -39,13 +35,7 @@ public class ModelService extends ComputerFlowSocket {
 			this.computerHandler.handleData(this, context, DSR);
 		} else {
 			while (DSR.nextLine()) {
-				PipeDataUnit pdu = DSR.getLineData();
-				PipeDataUnit u = PipeDataUnit.getInstance();
-				Set<Entry<String, Object>> itr = pdu.getData().entrySet();  
-				for (Entry<String, Object> k : itr) { 
-					 
-				}
-				this.dataUnit.add(u);
+				//wait to implement
 			}
 			this.dataPage.put(GlobalParam.READER_LAST_STAMP, DSR.getScanStamp());
 			this.dataPage.putData(this.dataUnit);
