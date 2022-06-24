@@ -35,10 +35,20 @@ public class PipeDataUnit implements Cloneable{
 		this.SYSTEM_UPDATE_TIME = System.currentTimeMillis();
 	}
 	
+	/**
+	 * Virtual pre-write to process data fields using the write side definition format
+	 * @param transParams
+	 * @return
+	 * @throws EFException
+	 */
 	public PipeDataUnit virtualWrite(Map<String, EFField> transParams) throws EFException {
 		PipeDataUnit u = PipeDataUnit.getInstance();
-		for (Entry<String, Object> r : data.entrySet()) {
-			addFieldValue(r.getKey(), r.getValue(), transParams, u);
+		for (Entry<String, EFField> r : transParams.entrySet()) {
+			if(data.containsKey(r.getKey())) {
+				addFieldValue(r.getKey(), data.get(r.getKey()), transParams, u);
+			}else if(r.getValue().getDefaultvalue()!="") {
+				u.data.put(r.getKey(),r.getValue().getDefaultvalue());
+			}
 		}
 		u.setReaderKeyVal(this.getReaderKeyVal());
 		u.SYSTEM_UPDATE_TIME = this.SYSTEM_UPDATE_TIME;
