@@ -9,5 +9,5 @@ if [ $ProcNumber -le 0 ];then
    echo "$PROC_NAME start success!"
    ps aux | grep java |grep $PROC_NAME | awk '{print $2}'
 else
-   echo "$PROC_NAME is running.."
+   echo "WARNING $PROC_NAME is running.."
 fi

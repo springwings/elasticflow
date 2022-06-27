@@ -8,7 +8,8 @@ sleep 2 #wait kill port
 ProcNumber=`ps -ef |grep -w $PROC_NAME|grep -v grep|wc -l`
 while [ $ProcNumber -gt 0 ]
  do
-   ProcNumber=`ps -ef |grep -w $PROC_NAME|grep -v grep|wc -l`   
+   ProcNumber=`ps -ef |grep -w $PROC_NAME|grep -v grep|wc -l`
+   echo "$PROC_NAME stop success!"
  done 
-echo "$PROC_NAME stop success!"
+
 
