@@ -37,6 +37,10 @@ public final class GlobalParam {
 	
 	public static String LANG = "EN";
 	
+	/** ----- flow settting -----*/
+	/**statistics storage maximum time period**/
+	public static int INSTANCE_STATISTICS_KEEP_PERIOD = 7;
+	
 	/** error notify setting */
 	public static boolean SEND_EMAIL_ON = false;
 	public static String SEND_API_ON;

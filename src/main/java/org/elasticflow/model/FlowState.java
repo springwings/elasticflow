@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.util.Common;
 
@@ -17,8 +18,6 @@ import com.alibaba.fastjson.JSONObject;
  * @date 2018-11-08 16:49
  */
 final public class FlowState {
-	/**statistics storage maximum time period**/
-	private int keepPeriod = 30;
 	
 	/** FAIL processing data units statistics **/
 	private volatile AtomicInteger failProcess = new AtomicInteger(0);
@@ -46,7 +45,7 @@ final public class FlowState {
 	private volatile HashMap<String, Object> flowEndStatus;
 	
 	private String todayZero = String.valueOf(Common.getNowZero());
-	
+		
 	public static String getStoreKey(String L1seq) {
 		String storeKey;
 		if(L1seq!=null && L1seq.length()>0) {
@@ -153,7 +152,7 @@ final public class FlowState {
 	public void incrementCurrentTimeProcess(int delta) {
 		todayZero = String.valueOf(Common.getNowZero());
 		if(!this.historyProcess.containsKey(todayZero)) { 
-			if(this.historyProcess.size()>keepPeriod) {
+			if(this.historyProcess.size()>GlobalParam.INSTANCE_STATISTICS_KEEP_PERIOD) {
 				String minkey = (String) Common.getMinKey(this.historyProcess.keySet());
 				this.historyProcess.remove(minkey);
 			}

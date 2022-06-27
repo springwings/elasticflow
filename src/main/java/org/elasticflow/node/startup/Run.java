@@ -129,11 +129,13 @@ public final class Run {
 		GlobalParam.SEND_API_ON = GlobalParam.StartConfig.containsKey("send_api")?GlobalParam.StartConfig.getProperty("send_api"):"";
 		GlobalParam.DISTRIBUTE_RUN = GlobalParam.StartConfig.getProperty("distribute_run").equals("false") ? false : true;
 		GlobalParam.MASTER_HOST = GlobalParam.StartConfig.getProperty("master_host");
-		GlobalParam.SERVICE_LEVEL = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
-		if(!GlobalParam.StartConfig.get("node_ip").equals(""))
-			GlobalParam.IP = GlobalParam.StartConfig.get("node_ip").toString();
+		GlobalParam.SERVICE_LEVEL = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());		
 		GlobalParam.STS_THREADPOOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("sys_threadpool_size"));
 		GlobalParam.CLUSTER_MIN_NODES = Integer.parseInt(GlobalParam.StartConfig.getProperty("min_nodes"));
+		if(GlobalParam.StartConfig.containsKey("node_ip"))
+			GlobalParam.IP = GlobalParam.StartConfig.get("node_ip").toString();
+		if(GlobalParam.StartConfig.containsKey("instance_statistics_keep_period"))
+			GlobalParam.INSTANCE_STATISTICS_KEEP_PERIOD = Integer.parseInt(GlobalParam.StartConfig.getProperty("instance_statistics_keep_period"));
 		
 		switch(GlobalParam.StartConfig.getProperty("node_type")) {
 		case "master":
