@@ -17,8 +17,8 @@ import com.alibaba.fastjson.JSONObject;
  * @date 2018-11-08 16:49
  */
 final public class FlowState {
-	
-	private int keepPeriod = 7;
+	/**statistics storage maximum time period**/
+	private int keepPeriod = 30;
 	
 	/** FAIL processing data units statistics **/
 	private volatile AtomicInteger failProcess = new AtomicInteger(0);
