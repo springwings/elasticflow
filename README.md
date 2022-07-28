@@ -61,6 +61,7 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
     - Kafka 2.1.1
     - Mysql
     - Oracle
+    - files (txt,csv)
 
 # Computer Support
     - Rest API (POST/JSON)

@@ -14,4 +14,10 @@
 		<type>es</type>
 		<host>192.168.6.188</host>
 	</socket>
+	<socket>
+	    <name>csv_folder</name>
+	    <type>files</type>
+	    <host>/opt/train.data/ef</host>
+	    <defaultValue>{"extension":".csv"}</defaultValue>
+  </socket>
 </config>
