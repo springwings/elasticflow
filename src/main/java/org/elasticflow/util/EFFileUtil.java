@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.util.ArrayList;
 
 import org.elasticflow.config.GlobalParam;
 
@@ -14,61 +15,61 @@ import org.elasticflow.config.GlobalParam;
  * @version 1.0
  * @date 2018-11-07 14:12
  */
-public class EFFileUtil { 	
-	
+public class EFFileUtil {
+
 	public static String[] getInstancePath(String instance) {
 		String[] dt = new String[3];
-		dt[0] = GlobalParam.INSTANCE_PATH + "/" + instance + "/"+GlobalParam.JOB_INCREMENTINFO_PATH;
+		dt[0] = GlobalParam.INSTANCE_PATH + "/" + instance + "/" + GlobalParam.JOB_INCREMENTINFO_PATH;
 		dt[1] = GlobalParam.INSTANCE_PATH + "/" + instance + "/task.xml";
 		dt[2] = GlobalParam.INSTANCE_PATH + "/" + instance + "/stat";
 		return dt;
 	}
-	
-	public static String readText(String filePath,String encoding,boolean create) { 
+
+	public static String readText(String filePath, String encoding, boolean create) {
 		File file = new File(filePath);
 		Long filelength = file.length();
 		byte[] filecontent = new byte[filelength.intValue()];
-		try (FileInputStream in = new FileInputStream(file)) { 
-			in.read(filecontent); 
+		try (FileInputStream in = new FileInputStream(file)) {
+			in.read(filecontent);
 			return new String(filecontent, encoding);
 		} catch (FileNotFoundException e1) {
-			if(create) { 
-				createAndSave("",filePath);
-			}else {
-				Common.LOG.warn("read text Exception",e1); 
-			}			
-		}catch(Exception e2) {
-			Common.LOG.warn("read text Exception",e2); 
+			if (create) {
+				createAndSave("", filePath);
+			} else {
+				Common.LOG.warn("read text Exception", e1);
+			}
+		} catch (Exception e2) {
+			Common.LOG.warn("read text Exception", e2);
 		}
 		return null;
 	}
-	
-	public static void renameFile(String filePath, String oldName, String newName){
-		if(!oldName.equals(newName)){
-			File oldFile = new File(filePath+"/"+oldName);
-			File newFile = new File(filePath+"/"+newName);
-			if(newFile.exists()){
-				Common.LOG.warn(newName+" the file already exists！"); 
+
+	public static void renameFile(String filePath, String oldName, String newName) {
+		if (!oldName.equals(newName)) {
+			File oldFile = new File(filePath + "/" + oldName);
+			File newFile = new File(filePath + "/" + newName);
+			if (newFile.exists()) {
+				Common.LOG.warn(newName + " the file already exists！");
 			} else {
 				oldFile.renameTo(newFile);
 			}
 		}
 	}
-	
+
 	public static boolean delFile(String filePath) {
-		try{
-            File file = new File(filePath);
-            if(file.delete()){
-                return true;
-            }else{
-                return false;
-            }
-        }catch(Exception e){
-            return false;
-        }
+		try {
+			File file = new File(filePath);
+			if (file.delete()) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (Exception e) {
+			return false;
+		}
 	}
-	
-	public static boolean createAndSave(String content, String fileDest) { 
+
+	public static boolean createAndSave(String content, String fileDest) {
 		FileWriter writer = null;
 		try {
 			File file = new File(fileDest);
@@ -81,20 +82,20 @@ public class EFFileUtil {
 					file.createNewFile();
 				}
 			}
-			writer = new FileWriter(file, false); 
+			writer = new FileWriter(file, false);
 			writer.write(content);
 		} catch (Exception e) {
-			Common.LOG.warn("create File Exception",e);
+			Common.LOG.warn("create File Exception", e);
 			return false;
 		} finally {
 			try {
-				if(writer!=null)
-					writer.close(); 
+				if (writer != null)
+					writer.close();
 			} catch (Exception e) {
-				Common.LOG.warn("writer close Exception",e);
+				Common.LOG.warn("writer close Exception", e);
 				return false;
 			}
-		} 
+		}
 		return true;
 	}
 
@@ -114,7 +115,7 @@ public class EFFileUtil {
 			fis = new FileInputStream(in);
 			fos = new FileOutputStream(new File(destPath + "\\" + in.getName()));
 		} catch (Exception e) {
-			 Common.LOG.error("copy file exception",e);
+			Common.LOG.error("copy file exception", e);
 		}
 		int c;
 		byte[] b = new byte[1024 * 5];
@@ -131,6 +132,29 @@ public class EFFileUtil {
 		return false;
 	}
 	
+	/**
+	 * get file lists
+	 * @param folder
+	 * @param extension  such as ".csv"
+	 * @return
+	 */
+	public static ArrayList<String> scanFolder(String folder,String extension) {
+		ArrayList<String> res = new ArrayList<>();
+		File s1 = new File(folder);
+		File[] str = s1.listFiles();
+		for (File i : str) {
+			if (i.isFile()) {
+				if(extension != null) {
+					if (i.getName().endsWith(extension))
+						res.add(i.getPath());
+				}else {
+					res.add(i.getPath());
+				}
+			}
+		}
+		return res;
+	}
+
 	public static boolean copyFolder(String sourceFolder, String destFolder) {
 		File in = new File(sourceFolder);
 		File out = new File(destFolder);
@@ -146,17 +170,17 @@ public class EFFileUtil {
 		FileInputStream fis = null;
 		FileOutputStream fos = null;
 		File temp = null;
-		for (int i = 0; i < file.length; i++) {	 
+		for (int i = 0; i < file.length; i++) {
 			temp = new File(sourceFolder + "/" + file[i]);
 			if (temp.isFile()) {
 				try {
 					fis = new FileInputStream(temp.getAbsolutePath());
 					fos = new FileOutputStream(new File(destFolder + "/" + temp.getName()));
 				} catch (Exception e) {
-					Common.LOG.error("copy folder file exception",e);
+					Common.LOG.error("copy folder file exception", e);
 				}
-			}else if (temp.isDirectory()) {
-				copyFolder(temp.getAbsolutePath(), destFolder + "/" +temp.getName());
+			} else if (temp.isDirectory()) {
+				copyFolder(temp.getAbsolutePath(), destFolder + "/" + temp.getName());
 			}
 			int c;
 			byte[] b = new byte[1024 * 5];
@@ -168,9 +192,9 @@ public class EFFileUtil {
 				fos.flush();
 				fos.close();
 			} catch (Exception e) {
-				Common.LOG.error("copy folder exception",e);
+				Common.LOG.error("copy folder exception", e);
 			}
 		}
 		return false;
-	} 
+	}
 }
