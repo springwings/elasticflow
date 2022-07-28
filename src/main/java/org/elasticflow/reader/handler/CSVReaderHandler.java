@@ -37,22 +37,29 @@ public class CSVReaderHandler extends ReaderHandler {
 	public void handleData(Object invokeObject, Object datas, Page page, int pageSize) throws EFException {
 		FilesReader FR = (FilesReader) invokeObject;
 		try {
-			try (RandomAccessFile rf = new RandomAccessFile((String) datas, "r");) {
-				int pos = 0;
+			String filePath = String.valueOf(datas);
+	        String fileName = filePath.substring(filePath.lastIndexOf("/")+1);  
+	        fileName = fileName.replace(".csv", "");
+	        int pos = 0;
+			try (RandomAccessFile rf = new RandomAccessFile(filePath, "r");) {				
 				rf.seek(Integer.parseInt(page.getStart()));
 				while (pos < pageSize) {
 					if (page.getStart().equals("0") && pos == 0) {
 						csvHeader = rf.readLine().split(",");
 					} else {
 						String line;
-						while ((line = rf.readLine()) != null) {
+						if ((line = rf.readLine()) != null) {
 							String[] row = line.split(",");
 							PipeDataUnit u = PipeDataUnit.getInstance();
 							for (int i = 0; i < csvHeader.length; i++) {
 								PipeDataUnit.addFieldValue(csvHeader[i], row[i],
 										page.getInstanceConfig().getReadFields(), u);
 							}
+							PipeDataUnit.addFieldValue("DATA_FROM", fileName,
+									page.getInstanceConfig().getReadFields(), u);
 							FR.getDataUnit().add(u);							
+						}else {
+							break;
 						}
 					}
 					pos++;
@@ -60,6 +67,8 @@ public class CSVReaderHandler extends ReaderHandler {
 			}
 			FR.getDataPage().putData(FR.getDataUnit());
 			FR.getDataPage().put(GlobalParam.READER_STATUS, true);
+			FR.getDataPage().put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
+			FR.getDataPage().putDataBoundary(String.valueOf(Integer.parseInt(page.getStart())+pos));
 		} catch (Exception e) {
 			throw new EFException(e);
 		}
