@@ -86,7 +86,9 @@ public class FilesReader extends ReaderFlowSocket {
 		if (!ISLINK())
 			return page;
 		try {
-			Long startTime = Long.valueOf(task.getStartTime());
+			Long startTime = 0L;
+			if(task.getStartTime().length()>0)
+				startTime =  Long.valueOf(task.getStartTime());
 			scanTime = startTime;
 			filePath = null;
 			@SuppressWarnings("unchecked")
@@ -106,10 +108,13 @@ public class FilesReader extends ReaderFlowSocket {
 				lnr.skip(Long.MAX_VALUE);
 				int lineNo = lnr.getLineNumber() + 1;
 				lnr.close();
-				for (int pos = 0; lineNo - pos > GlobalParam.READ_PAGE_SIZE; pos += GlobalParam.READ_PAGE_SIZE) {
-					page.push(String.valueOf(pos));
-				}
-				page.push(String.valueOf(lineNo));
+				if(lineNo<=pageSize && lineNo>1) {
+					page.push("0");
+				}else {
+					for (int pos = 0; lineNo - pos > pageSize; pos += pageSize) {
+						page.push(String.valueOf(pos));
+					}
+				}				
 			}
 		} catch (Exception e) {
 			releaseConn = true;

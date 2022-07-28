@@ -51,13 +51,15 @@ public class CSVReaderHandler extends ReaderHandler {
 						if ((line = rf.readLine()) != null) {
 							String[] row = line.split(",");
 							PipeDataUnit u = PipeDataUnit.getInstance();
-							for (int i = 0; i < csvHeader.length; i++) {
-								PipeDataUnit.addFieldValue(csvHeader[i], row[i],
+							if(row.length==csvHeader.length) {
+								for (int i = 0; i < csvHeader.length; i++) {
+									PipeDataUnit.addFieldValue(csvHeader[i], row[i],
+											page.getInstanceConfig().getReadFields(), u);
+								}
+								PipeDataUnit.addFieldValue("DATA_FROM", fileName,
 										page.getInstanceConfig().getReadFields(), u);
-							}
-							PipeDataUnit.addFieldValue("DATA_FROM", fileName,
-									page.getInstanceConfig().getReadFields(), u);
-							FR.getDataUnit().add(u);							
+								FR.getDataUnit().add(u);	
+							}						
 						}else {
 							break;
 						}
