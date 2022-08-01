@@ -55,6 +55,9 @@ public class CSVReaderHandler extends ReaderHandler {
 								for (int i = 0; i < csvHeader.length; i++) {
 									PipeDataUnit.addFieldValue(csvHeader[i], row[i],
 											page.getInstanceConfig().getReadFields(), u);
+									if(csvHeader[i].equals(page.getReaderKey())){
+										u.setReaderKeyVal(row[i]);
+									}
 								}
 								PipeDataUnit.addFieldValue("DATA_FROM", fileName,
 										page.getInstanceConfig().getReadFields(), u);
