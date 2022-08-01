@@ -44,11 +44,11 @@ public class CSVReaderHandler extends ReaderHandler {
 			try (RandomAccessFile rf = new RandomAccessFile(filePath, "r");) {				
 				rf.seek(Integer.parseInt(page.getStart()));
 				while (pos < pageSize) {
+					String line = rf.readLine();					
 					if (page.getStart().equals("0") && pos == 0) {
-						csvHeader = rf.readLine().split(",");
-					} else {
-						String line;
-						if ((line = rf.readLine()) != null) {
+						csvHeader = line.split(",");						
+					} else { 
+						if (line != null) {
 							String[] row = line.split(",");
 							PipeDataUnit u = PipeDataUnit.getInstance();
 							if(row.length==csvHeader.length) {

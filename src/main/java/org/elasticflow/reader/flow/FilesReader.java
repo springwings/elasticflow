@@ -1,8 +1,6 @@
 package org.elasticflow.reader.flow;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.LineNumberReader;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -104,17 +102,16 @@ public class FilesReader extends ReaderFlowSocket {
 				}
 			}
 			if (filePath != null) {
-				LineNumberReader lnr = new LineNumberReader(new FileReader(filePath));
-				lnr.skip(Long.MAX_VALUE);
-				int lineNo = lnr.getLineNumber() + 1;
-				lnr.close();
-				if(lineNo<=pageSize && lineNo>1) {
-					page.push("0");
-				}else {
-					for (int pos = 0; lineNo - pos > pageSize; pos += pageSize) {
-						page.push(String.valueOf(pos));
-					}
-				}				
+				RandomAccessFile rf = new RandomAccessFile(filePath, "r");
+				rf.seek(0); 
+				int pos = 0;
+				page.push("0");
+	            while (rf.readLine() != null) {
+	            	pos+=1;	            		
+	            	if(pos%pageSize==0)
+	            		page.push(String.valueOf(rf.getFilePointer()));	            	
+	            }	
+	            rf.close();
 			}
 		} catch (Exception e) {
 			releaseConn = true;
