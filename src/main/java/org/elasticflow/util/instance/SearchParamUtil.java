@@ -46,11 +46,14 @@ public class SearchParamUtil {
 				fq.setCount(count);
 			}
 		}
+	 
 		if((start+count)>GlobalParam.SEARCH_MAX_WINDOW) {
 			request.addError("start+count<="+GlobalParam.SEARCH_MAX_WINDOW);
 		}
 		if (request.getParams().containsKey(GlobalParam.PARAM_SHOWQUERY))
 			fq.setShowQueryInfo(true);
+		if (request.getParams().containsKey(GlobalParam.INSATANCE_STAT))
+			fq.setShowStats(true);			
 		if (request.getParams().containsKey(GlobalParam.PARAM_FL))
 			fq.setFl((String) request.getParam(GlobalParam.PARAM_FL));
 		if (request.getParams().containsKey(GlobalParam.PARAM_FQ))

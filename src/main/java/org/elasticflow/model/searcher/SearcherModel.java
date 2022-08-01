@@ -17,6 +17,8 @@ public abstract class SearcherModel<T1, T2, T3> {
 	private String fq;
 
 	private String fl;
+	
+	private boolean showStats = false;
 
 	private int start = 0;
 
@@ -56,6 +58,10 @@ public abstract class SearcherModel<T1, T2, T3> {
 		return this.requesthandler;
 	}
 
+	/**
+	 * filter fields
+	 * @return
+	 */
 	public String getFl() {
 		return this.fl;
 	};
@@ -67,7 +73,10 @@ public abstract class SearcherModel<T1, T2, T3> {
 	public void setFl(String fl) {
 		this.fl = fl;
 	}
-
+	/**
+	 * filter query
+	 * @return
+	 */
 	public String getFq() {
 		return this.fq;
 	}
@@ -82,6 +91,14 @@ public abstract class SearcherModel<T1, T2, T3> {
 
 	public void setStart(int start) {
 		this.start = start;
+	}
+	
+	public boolean isShowStats() {
+		return showStats;
+	}
+
+	public void setShowStats(boolean showStats) {
+		this.showStats = showStats;
 	}
 
 	public int getCount() {

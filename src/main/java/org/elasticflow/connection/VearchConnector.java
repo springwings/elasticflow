@@ -57,6 +57,37 @@ public class VearchConnector {
 		this.dbObject = new JSONObject();
 		this.dbObject.put("name", this.dbName);
 	}
+	
+	public JSONArray getClusterStats() {
+		try {
+			String response = EFHttpClientUtil.process(
+					this.method + this.MASTER + "/_cluster/stats", HttpGet.METHOD_NAME,
+					EFHttpClientUtil.DEFAULT_CONTENT_TYPE);
+			return JSONObject.parseArray(response);			 
+		} catch (Exception e) {
+			log.warn("query stats Exception", e);
+		}
+		return null;
+	}
+	
+	public JSONObject getSpaceInfo() {
+		try {
+			String response = EFHttpClientUtil.process(
+					this.method + this.MASTER + "/list/space?db=" + this.dbName, HttpGet.METHOD_NAME,
+					EFHttpClientUtil.DEFAULT_CONTENT_TYPE);
+			return JSONObject.parseObject(response);
+		} catch (Exception e) {
+			log.warn("get space info Exception", e);
+		}
+		return null;
+	}
+	
+	public JSONObject getAllStatus() {
+		JSONObject res = new JSONObject();
+		res.put("_cluster", getClusterStats());
+		res.put("_table", getSpaceInfo());
+		return res;
+	}
 
 	public boolean deleteSpace(String space) {
 		try {

@@ -18,6 +18,7 @@ public class SearcherResult {
 	private Object facetInfo=null;   
 	private Object queryDetail = null;
 	private Object explainInfo;
+	private Object stat;
 	private boolean success = true;
 	private String errorInfo = "";
 	
@@ -80,6 +81,14 @@ public class SearcherResult {
 
 	public void setExplainInfo(Object explainInfo) {
 		this.explainInfo = explainInfo;
+	}	
+
+	public Object getStat() {
+		return stat;
+	}
+
+	public void setStat(Object stat) {
+		this.stat = stat;
 	}
 
 	public boolean isSuccess() {

@@ -47,12 +47,12 @@ public class VearchSearcher extends SearcherFlowSocket{
 				log.error("Init handler Exception",e);
 			}
 		} 
-	} 
+	}  
 	
 	@Override
 	public SearcherResult Search(SearcherModel<?, ?, ?> query, String instance, SearcherHandler handler)
 			throws EFException {
-		SearcherResult res = new SearcherResult();
+		SearcherResult res = new SearcherResult(); 
 		PREPARE(false, true);
 		boolean releaseConn = false;
 		if(!ISLINK())
@@ -82,13 +82,16 @@ public class VearchSearcher extends SearcherFlowSocket{
 						rn.addObject("_score", hits.getJSONObject(i).get("_score"));
 						unitSet.add(rn);
 					}
-				}			
+				}
+				if(query.isShowStats()) {
+					res.setStat(conn.getAllStatus());
+				}
 				res.setTotalHit(total);
 				res.setUnitSet(unitSet);
 			}else {
 				res.setSuccess(false);
 				res.setErrorInfo("please check the search parameters!");
-			}
+			} 
 		}catch(Exception e){
 			releaseConn = true; 
 			throw Common.getException(e);

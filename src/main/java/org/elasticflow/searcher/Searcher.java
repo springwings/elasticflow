@@ -109,6 +109,8 @@ public class Searcher {
 			contentMap.put("query", data.getQueryDetail()); 
 		if (data.getExplainInfo() != null)
 			contentMap.put("explain", data.getExplainInfo()); 
+		if (data.getStat() != null)
+			contentMap.put("__STATS", data.getStat()); 
 		if(data.isSuccess()==false) {
 			response.setStatus(data.getErrorInfo(), RESPONSE_STATUS.ParameterErr);
 		}
