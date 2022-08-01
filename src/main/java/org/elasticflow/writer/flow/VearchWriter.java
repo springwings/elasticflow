@@ -239,7 +239,7 @@ public class VearchWriter extends WriterFlowSocket {
 				if(entry.getValue().getIndexed().equals("true")) {
 					fields.put("index", true);
 				}
-				properties.put(entry.getKey(),fields);
+				properties.put(entry.getValue().getAlias(),fields);
 			}			
 		} 
 		tableMeta.put("properties", properties);
