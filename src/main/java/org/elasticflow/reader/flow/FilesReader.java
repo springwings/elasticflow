@@ -48,10 +48,10 @@ public class FilesReader extends ReaderFlowSocket {
 				try (RandomAccessFile rf = new RandomAccessFile(filePath, "r");) {
 					rf.seek(Integer.parseInt(page.getStart()));
 					while (pos < pageSize) {
-						String line;
-						if ((line = rf.readLine()) != null) {
+						String line = rf.readLine();
+						if (line != null) {
 							PipeDataUnit u = PipeDataUnit.getInstance();
-							PipeDataUnit.addFieldValue("datas", line, page.getInstanceConfig().getReadFields(),
+							PipeDataUnit.addFieldValue("datas", line.strip(), page.getInstanceConfig().getReadFields(),
 									u);
 							this.dataUnit.add(u);
 							pos++;

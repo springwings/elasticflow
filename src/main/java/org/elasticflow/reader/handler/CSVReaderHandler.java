@@ -46,10 +46,10 @@ public class CSVReaderHandler extends ReaderHandler {
 				while (pos < pageSize) {
 					String line = rf.readLine();					
 					if (page.getStart().equals("0") && pos == 0) {
-						csvHeader = line.split(",");						
+						csvHeader = line.strip().split(",");						
 					} else { 
 						if (line != null) {
-							String[] row = line.split(",");
+							String[] row = line.strip().split(",");
 							PipeDataUnit u = PipeDataUnit.getInstance();
 							if(row.length==csvHeader.length) {
 								for (int i = 0; i < csvHeader.length; i++) {
