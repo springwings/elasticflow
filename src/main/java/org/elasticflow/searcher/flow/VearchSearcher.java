@@ -84,7 +84,7 @@ public class VearchSearcher extends SearcherFlowSocket{
 					}
 				}
 				if(query.isShowStats()) {
-					res.setStat(conn.getAllStatus());
+					res.setStat(conn.getAllStatus(table));
 				}
 				res.setTotalHit(total);
 				res.setUnitSet(unitSet);

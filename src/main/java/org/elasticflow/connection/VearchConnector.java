@@ -70,10 +70,10 @@ public class VearchConnector {
 		return null;
 	}
 	
-	public JSONObject getSpaceInfo() {
+	public JSONObject getSpaceInfo(String space) {
 		try {
 			String response = EFHttpClientUtil.process(
-					this.method + this.MASTER + "/list/space?db=" + this.dbName, HttpGet.METHOD_NAME,
+					this.method + this.MASTER + "/space/" + this.dbName+"/"+space, HttpGet.METHOD_NAME,
 					EFHttpClientUtil.DEFAULT_CONTENT_TYPE);
 			return JSONObject.parseObject(response);
 		} catch (Exception e) {
@@ -82,10 +82,10 @@ public class VearchConnector {
 		return null;
 	}
 	
-	public JSONObject getAllStatus() {
+	public JSONObject getAllStatus(String space) {
 		JSONObject res = new JSONObject();
 		res.put("_cluster", getClusterStats());
-		res.put("_table", getSpaceInfo());
+		res.put("_table", getSpaceInfo(space));
 		return res;
 	}
 
