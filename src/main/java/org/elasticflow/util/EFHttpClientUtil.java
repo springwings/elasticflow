@@ -1,5 +1,7 @@
 package org.elasticflow.util;
 
+import java.io.IOException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
@@ -81,15 +83,15 @@ public class EFHttpClientUtil {
 	 * @return
 	 */
 	public static String process(String uri, String data) {
-		return process(uri,data,HttpPost.METHOD_NAME, DEFAULT_CONTENT_TYPE, DEFAUL_TIME_OUT);
+		return process(uri,data,HttpPost.METHOD_NAME, DEFAULT_CONTENT_TYPE, DEFAUL_TIME_OUT,true);
 	}
 	public static String process(String uri, String methodName,String contentType,String data) {
-		return process(uri,data,methodName,contentType, DEFAUL_TIME_OUT);
+		return process(uri,data,methodName,contentType, DEFAUL_TIME_OUT,true);
 	}
 	public static String process(String uri, String methodName,String contentType) {
-		return process(uri,null,methodName, contentType, DEFAUL_TIME_OUT);
+		return process(uri,null,methodName, contentType, DEFAUL_TIME_OUT,true);
 	}
-	public static String process(String uri, String data,String methodName, String contentType, int timeout) {
+	public static String process(String uri, String data,String methodName, String contentType, int timeout,boolean retry) {
 		long startTime = System.currentTimeMillis();
 		HttpRequestBase method = null;
 		HttpEntity httpEntity = null;
@@ -112,6 +114,9 @@ public class EFHttpClientUtil {
 		} catch (Exception e) {
 			if (method != null) {
 				method.abort();
+			} 
+			if (e instanceof IOException && retry) {
+				 return EFHttpClientUtil.process(uri, data, methodName, contentType, timeout,false);
 			}
 			logger.error("post request exception, url:" + uri + ", exception:" + e.toString() + ", cost time(ms):"
 					+ (System.currentTimeMillis() - startTime));
