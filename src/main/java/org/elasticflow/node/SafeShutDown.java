@@ -23,6 +23,7 @@ import org.elasticflow.yarn.monitor.ResourceMonitor;
 public class SafeShutDown extends Thread {
 	@Override
 	public void run() {
+		Common.LOG.warn("The system is interrupted externally.");
 		if (GlobalParam.DISTRIBUTE_RUN) {
 			if (EFNodeUtil.isMaster()) {
 				Common.LOG.warn("cluster master is closed.");
