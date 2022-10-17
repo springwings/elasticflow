@@ -11,14 +11,14 @@
 			</param>
 			<param>
 				<name>writeTo</name>
-				<value>testname</value>
+				<value>neo4j_db</value>
 			</param>
 
 			<!--- pipe start parameters -->
 
 			<param>
 				<name>readFrom</name>
-				<value>testexample</value>
+				<value>mysql_db</value>
 			</param>
 
 			<param>
@@ -41,11 +41,7 @@
 			<!--- pipe compute service parameters -->
 
 			<!--- pipe search service parameters -->
-			<param>
-				<name>searchFrom</name>
-				<value>testname</value>
-			</param>
-
+	 
 		</TransParam>
 
 		<ReadParam>

@@ -1,23 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
 	<socket>
-			<name>testexample</name>
-			<type>mysql</type>
-			<host>192.168.6.8</host>
-			<port>3306</port>
-			<user>user</user>
-			<password>pass</password> 
-			<L1name>ai_kg</L1name>
-	</socket> 
+		<name>mysql_db</name>
+		<type>mysql</type>
+		<host>192.168.6.8</host>
+		<port>3306</port>
+		<user>user</user>
+		<password>password</password>
+		<L1name>ai_kg</L1name>
+	</socket>
+		<socket>
+		<name>neo4j_db</name>
+		<type>neo4j</type>
+		<host>192.168.6.2</host>
+		<port>7474</port>
+		<user>user</user>
+		<password>password</password>
+		<!--- bolt -->
+	</socket>
 	<socket>
-		<name>testname</name>
+		<name>elasticsarch_position</name>
 		<type>es</type>
 		<host>192.168.6.188</host>
 	</socket>
 	<socket>
-	    <name>csv_folder</name>
-	    <type>files</type>
-	    <host>/opt/train.data/ef</host>
-	    <defaultValue>{"extension":".csv"}</defaultValue>
-  </socket>
+		<name>elasticsarch_position</name>
+		<type>es</type>
+		<host>192.168.6.188</host>
+	</socket>
+	<socket>
+		<name>csv_folder</name>
+		<type>files</type>
+		<host>/opt/train.data/ef</host>
+		<defaultValue>{"extension":".csv"}</defaultValue>
+	</socket>
 </config>

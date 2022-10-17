@@ -13,7 +13,8 @@
 			</param> 
 			<param>
 				<name>writeTo</name>
-				<value>mysql_db</value>
+				<value>
+	mysql_db</value>
 			</param>  
 
                        <!--- pipe start parameters -->
