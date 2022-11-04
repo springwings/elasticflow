@@ -7,6 +7,8 @@
  */
 package org.elasticflow.util;
 
+import java.io.File;
+
 import org.apache.log4j.PropertyConfigurator;
 import org.elasticflow.config.GlobalParam;
 import org.springframework.context.ApplicationContext;
@@ -23,15 +25,17 @@ public final class EFIoc {
 
 	private static ApplicationContext ACT;
 
-	static {
-		try {
+	static { 
+		String logpath = (String) Common.loadProperties(GlobalParam.configPath + "/log4j.properties").get("log4j.appender.EF.file");
+		File test_write = new File(logpath);
+		if(test_write.canWrite()) {			
 			PropertyConfigurator.configure(GlobalParam.configPath + "/log4j.properties");
-		} catch (Exception e) {
-			e.printStackTrace();
+			ACT = new ClassPathXmlApplicationContext("spring.xml");
+		} else {
+			System.out.println(logpath+" does not have write permission!");
+			System.exit(0);
 		}
-		ACT = new ClassPathXmlApplicationContext("spring.xml");
-	}
-
+	} 
 	public static Object getBean(String beanname) {
 		return ACT.getBean(beanname);
 	}
