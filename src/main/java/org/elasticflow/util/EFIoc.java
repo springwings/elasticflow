@@ -25,11 +25,11 @@ public final class EFIoc {
 
 	private static ApplicationContext ACT;
 
-	static { 
+	static {  
 		String logpath = (String) Common.loadProperties(GlobalParam.configPath + "/log4j.properties").get("log4j.appender.EF.file");
+		PropertyConfigurator.configure(GlobalParam.configPath + "/log4j.properties");
 		File test_write = new File(logpath);
-		if(test_write.canWrite()) {			
-			PropertyConfigurator.configure(GlobalParam.configPath + "/log4j.properties");
+		if(test_write.canWrite()) {
 			ACT = new ClassPathXmlApplicationContext("spring.xml");
 		} else {
 			System.out.println(logpath+" does not have write permission!");
