@@ -89,7 +89,7 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
       <dependency>
         <groupId>org.elasticflow</groupId>
         <artifactId>elasticflow</artifactId>
-        <version>5.4.1</version>
+        <version>5.4.3</version>
       </dependency>
    ```
    2. plugin开发测试代码，例如：

@@ -6,8 +6,14 @@ echo "$PROC_NAME wait to start..."
 ProcNumber=`ps -ef |grep -w $PROC_NAME|grep -v grep|wc -l`
 if [ $ProcNumber -le 0 ];then
    java ${JAVA_OPTS} -Dnodeid=16 -Dconfig=file:/work/EF/slaveconfig -jar -Dplugin=/work/EF/plugin -jar target/elasticflow.jar  
-   echo "$PROC_NAME start success!"
-   ps aux | grep java |grep $PROC_NAME | awk '{print $2}'
+   sleep 1
+   ProcNumber=`ps -ef |grep -w $PROC_NAME|grep -v grep|wc -l`
+   if [ $ProcNumber -gt 0 ];then  
+      echo "$PROC_NAME start success!"
+      ps aux | grep java |grep $PROC_NAME | awk '{print $2}'
+   else
+      echo "$PROC_NAME start failed."
+   fi
 else
    echo "WARNING $PROC_NAME is running.."
 fi

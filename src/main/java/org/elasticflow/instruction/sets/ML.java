@@ -56,6 +56,7 @@ public class ML extends Instruction {
 					context.getComputer().flowState
 							.setPerformance((long) ((dataNums * 1000) / (System.currentTimeMillis() - start + 1e-3)));
 				context.getComputer().flowState.incrementCurrentTimeProcess(dataNums);
+				context.getComputer().flowState.updateRealBlockTime((int) (System.currentTimeMillis() - start));
 			} catch (EFException e) {
 				throw e;
 			} finally {

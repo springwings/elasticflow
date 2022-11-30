@@ -42,6 +42,7 @@ public class RestService extends ComputerFlowSocket {
 
 	protected final static Logger log = LoggerFactory.getLogger("RestService");
 	protected boolean successRunAll = true;
+	protected final static int delayTime = 200;//ms
 
 	public static RestService getInstance(final ConnectParams connectParams) {
 		RestService o = new RestService();
@@ -97,10 +98,11 @@ public class RestService extends ComputerFlowSocket {
 					JSONObject _postdt = (JSONObject) post_data.clone();
 					@SuppressWarnings("unchecked")
 					ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();					 
-					try {
-						if(apiBlockingQueue.isEmpty())
-							this.flowState.incrementBlockTime();
+					try { 
+						long startTime = System.currentTimeMillis();
 						String api = apiBlockingQueue.take();
+						if(System.currentTimeMillis()-startTime>delayTime)
+							this.flowState.incrementBlockTime();
 						Resource.threadPools.execute(() -> {						
 							JSONObject tmp = null;	
 							try {
@@ -131,10 +133,11 @@ public class RestService extends ComputerFlowSocket {
 				JSONObject _postdt = (JSONObject) post_data.clone();
 				@SuppressWarnings("unchecked")
 				ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();
-				try {
-					if(apiBlockingQueue.isEmpty())
-						this.flowState.incrementBlockTime();
+				try { 
+					long startTime = System.currentTimeMillis();
 					String api = apiBlockingQueue.take();
+					if(System.currentTimeMillis()-startTime>delayTime)
+						this.flowState.incrementBlockTime();
 					Resource.threadPools.execute(() -> {						
 						try {
 							JSONObject tmp = null;	

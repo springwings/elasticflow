@@ -22,8 +22,14 @@ final public class FlowState {
 	/** FAIL processing data units statistics **/
 	private volatile AtomicInteger failProcess = new AtomicInteger(0);
 
-	/** Batch processing blocking statistics **/
+	/** Total processing blocking statistics **/
 	private volatile AtomicInteger BLOCKTIME = new AtomicInteger(0);
+	
+	/** Batch processing blocking statistics **/
+	private int BATCHBLOCKTIME = 0;
+	
+	/** AVG Batch processing blocking statistics **/
+	private volatile int REAL_BLOCKTIME = 0;
 
 	/** Average load of the flow,the amount of data processed per second **/
 	private volatile long LOAD = -1;
@@ -105,6 +111,7 @@ final public class FlowState {
 		JO.put("performance", this.PERFORMANCE);
 		JO.put("avgload", this.LOAD);
 		JO.put("blockTime", this.BLOCKTIME);
+		JO.put("realBlockTime", this.REAL_BLOCKTIME);
 		JO.put("failProcess", this.failProcess);
 	}
 	
@@ -139,6 +146,12 @@ final public class FlowState {
 
 	public void incrementBlockTime() {
 		this.BLOCKTIME.incrementAndGet();
+		this.BATCHBLOCKTIME++;
+	}
+	
+	public void updateRealBlockTime(int useMS) {
+		this.REAL_BLOCKTIME = this.BATCHBLOCKTIME/(1+useMS)*1000;
+		this.BATCHBLOCKTIME = 0;
 	}
 	
 	public void incrementFailUnitTime() {
