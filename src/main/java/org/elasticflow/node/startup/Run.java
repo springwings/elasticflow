@@ -214,6 +214,8 @@ public final class Run {
 				ResourceMonitor.start(); 
 				startService();
 			} 
+			Common.LOG.info("Environment {}, language {}",GlobalParam.RUN_ENV,
+					GlobalParam.LANG);
 			if(GlobalParam.DISTRIBUTE_RUN) {
 				Common.LOG.info("ElasticFlow {} {}, nodeID {} Start Success!",GlobalParam.VERSION,
 						GlobalParam.StartConfig.get("node_type"),GlobalParam.NODEID);
