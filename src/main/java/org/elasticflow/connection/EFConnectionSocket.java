@@ -5,6 +5,9 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.EFException;
 
 /** 
+ * Connect Abstract Interface
+ * When implementing inheritance, 
+ * it is necessary to pay attention to the file name, which should be a hump and can only be two uppercase letters
  * @author chengwen
  * @version 1.0
  * @param <T>
@@ -16,7 +19,11 @@ public abstract class EFConnectionSocket<T>{
 	
 	private boolean isShare = false;
 	
+	/**Store special error information in the connection for feedback to the upper level during debugging*/
 	private String infos="";
+	
+	/**Control whether the connection has expired.*/
+	private long version;
 	
 	protected T conn;
 	
@@ -64,4 +71,12 @@ public abstract class EFConnectionSocket<T>{
 		this.infos = "";
 		return tmp;
 	}
+
+	public long getVersion() {
+		return version;
+	}
+
+	public void setVersion(long version) {
+		this.version = version;
+	} 
 }

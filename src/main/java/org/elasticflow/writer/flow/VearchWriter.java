@@ -54,6 +54,7 @@ public class VearchWriter extends WriterFlowSocket {
 				conn.createSpace(this.getTableMeta(name,instanceConfig));
 				return true;
 			} catch (Exception e) {
+				log.error("create space exception",e);
 				throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
 			} finally {
 				REALEASE(false, false);

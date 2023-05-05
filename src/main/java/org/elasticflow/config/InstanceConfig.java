@@ -39,17 +39,24 @@ public class InstanceConfig {
 	private String configPath;
 	/** Use the configured file name **/
 	private String instanceID;
-	/**
-	 * Domain configuration when data at each end is written to the virtual channel
-	 */
+
+	/**reader Configured Field Information*/
 	private volatile Map<String, EFField> readFields;
+	/**writer Configured Field Information*/
 	private volatile Map<String, EFField> writeFields;
+	/**computer Configured Field Information*/
 	private volatile Map<String, EFField> computeFields;
+	/**searcher Configured parameters Information*/
 	private volatile Map<String, SearcherParam> searcherParams;
+	/**writer Configured parameters Information*/
 	private volatile WriterParam writerParams;
+	/**piper Configured parameters Information*/
 	private volatile PipeParam pipeParams;
+	/**reader Configured parameters Information*/
 	private volatile ReaderParam readParams;
+	/**computer Configured parameters Information*/
 	private volatile ComputerParam computeParams;
+	
 	private int instanceType = INSTANCE_TYPE.Blank.getVal();
 	private boolean hasFullJob = true;
 
@@ -69,6 +76,9 @@ public class InstanceConfig {
 		loadInstanceConfig();
 	}
 
+	/**
+	 * Reload all information in the configuration instance from the configuration file
+	 */
 	public void reload() {
 		Common.LOG.info("starting reload " + configPath);
 		init();

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Neo4j basic connection establishment management class
  * use bolt protocol
  * @author chengwen
  * @version 1.0

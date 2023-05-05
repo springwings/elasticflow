@@ -28,48 +28,54 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 /**
- * The message is confirmed manually 
- * when autoCommit is false.
+ * KafkaReader Running in fixed single connection mode The message format must
+ * be in JSON format, and the key must correspond one-to-one with the fields
+ * defined in the piper
+ * 
+ * NotThreadSafe 
+ * When starting multi-channel concurrency, careful consideration should be given to whether bugs will be introduced
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:24
  */
+
 @NotThreadSafe
 public class KafkaReader extends ReaderFlowSocket {
-	
+
 	private int readms = 3000;
-	
+
 	private boolean autoCommit = false;
-	
+
 	ConsumerRecords<String, String> records;
 
 	private final static Logger log = LoggerFactory.getLogger(KafkaReader.class);
-	
+
 	private KafkaConsumer<String, String> conn = null;
-		
+
+	/**
+	 * @param connectParams enable.auto.commit=false message is confirmed manually
+	 * @return
+	 */
 	public static KafkaReader getInstance(final ConnectParams connectParams) {
 		KafkaReader o = new KafkaReader();
 		o.initConn(connectParams);
-		if(connectParams.getWhp().getCustomParams()!=null) {
-			if(connectParams.getWhp().getCustomParams().containsKey("max.poll.interval.ms"))
+		if (connectParams.getWhp().getCustomParams() != null) {
+			if (connectParams.getWhp().getCustomParams().containsKey("max.poll.interval.ms"))
 				o.readms = connectParams.getWhp().getCustomParams().getIntValue("max.poll.interval.ms");
-			if(connectParams.getWhp().getCustomParams().containsKey("enable.auto.commit")) {
-				String tmp = connectParams.getWhp().getCustomParams().getString("enable.auto.commit");
-				if(tmp.toLowerCase().equals("true")) {
-					o.autoCommit = true;
-				}
-			} 
-		}  
+			if (connectParams.getWhp().getCustomParams().containsKey("enable.auto.commit")) {
+				o.autoCommit = connectParams.getWhp().getCustomParams().getBooleanValue("enable.auto.commit");
+			}
+		}
 		return o;
-	} 
-	
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initFlow() throws EFException {
 		PREPARE(true, false);
 		this.conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader);
 	}
-	 
+
 	@Override
 	public DataPage getPageData(final Page page, int pageSize) throws EFException {
 		if (this.records == null) {
@@ -82,22 +88,23 @@ public class KafkaReader extends ReaderFlowSocket {
 			String LAST_STAMP = null;
 			this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
 			this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
-			if(this.readHandler==null){
+			if (this.readHandler == null) {
 				for (ConsumerRecord<String, String> record : this.records) {
 					count++;
-					if (count >= Integer.valueOf(page.getStart()) && count < Integer.valueOf(page.getEnd())) {				
+					if (count >= Integer.valueOf(page.getStart()) && count < Integer.valueOf(page.getEnd())) {
 						PipeDataUnit u = PipeDataUnit.getInstance();
 						String val = record.value();
 						JSONObject jsonObject = JSON.parseObject(val);
-						Set<Entry<String, Object>> itr = jsonObject.entrySet();	
+						Set<Entry<String, Object>> itr = jsonObject.entrySet();
 						for (Entry<String, Object> k : itr) {
-							PipeDataUnit.addFieldValue(k.getKey(), k.getValue(), page.getInstanceConfig().getReadFields(),u);
+							PipeDataUnit.addFieldValue(k.getKey(), k.getValue(),
+									page.getInstanceConfig().getReadFields(), u);
 							if (k.getKey().equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))) {
 								LAST_STAMP = String.valueOf(k.getValue());
-							}else if(k.getKey().equals(this.dataPage.get(GlobalParam.READER_KEY))) {
+							} else if (k.getKey().equals(this.dataPage.get(GlobalParam.READER_KEY))) {
 								u.setReaderKeyVal(k.getValue());
 								dataBoundary = String.valueOf(k.getValue());
-							}						
+							}
 						}
 						this.dataUnit.add(u);
 					}
@@ -106,14 +113,14 @@ public class KafkaReader extends ReaderFlowSocket {
 					this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis());
 				} else {
 					this.dataPage.put(GlobalParam.READER_LAST_STAMP, LAST_STAMP);
-				} 
+				}
 				this.dataPage.putData(this.dataUnit);
-				this.dataPage.putDataBoundary(dataBoundary);		
-			}else {
-				//handler reference mysql flow getAllData function 
-				this.readHandler.handleData(this,this.records,page,pageSize);
-			}    
-			
+				this.dataPage.putDataBoundary(dataBoundary);
+			} else {
+				// handler reference mysql flow getAllData function
+				this.readHandler.handleData(this, this.records, page, pageSize);
+			}
+
 		} catch (Exception e) {
 			releaseConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS, false);
@@ -123,36 +130,37 @@ public class KafkaReader extends ReaderFlowSocket {
 			} catch (EFException e1) {
 				throw e1;
 			}
-			log.error("Kafka Reader get dataPage Exception, system will auto free connection!",e);
+			log.error("Kafka Reader get dataPage Exception, system will auto free connection!", e);
 			throw new EFException("Kafka Reader get dataPage Exception!");
-		}  
+		}
 		return this.dataPage;
 	}
-	
+
 	/**
 	 * Do not release the connection unless there is a processing error
-	 * @throws EFException 
+	 * 
+	 * @throws EFException
 	 */
 	@Override
-	public void flush() throws EFException { 
-		if(!this.autoCommit) { 
+	public void flush() throws EFException {
+		if (!this.autoCommit) {
 			try {
 				conn.commitSync();
 			} catch (Exception e) {
-				throw new EFException(e, ELEVEL.Dispose,ETYPE.RESOURCE_ERROR);
+				throw new EFException(e, ELEVEL.Dispose, ETYPE.RESOURCE_ERROR);
 			}
-		}	
+		}
 	}
-	
+
 	@Override
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) throws EFException {
 		boolean releaseConn = false;
-		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>(); 
+		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
 		try {
 			this.records = conn.poll(Duration.ofMillis(readms));
-			int totalNum = this.records.count();		
+			int totalNum = this.records.count();
 			if (totalNum > 0) {
-				int pagenum = (int) Math.ceil((totalNum+0.) / pageSize);
+				int pagenum = (int) Math.ceil((totalNum + 0.) / pageSize);
 				int curentpage = 0;
 				while (true) {
 					curentpage++;
@@ -170,9 +178,10 @@ public class KafkaReader extends ReaderFlowSocket {
 			} catch (EFException e1) {
 				throw e1;
 			}
-			log.error("{} Kafka Reader get page lists Exception, system will auto free connection!",task.getInstanceID(),e);
-			throw new EFException("Kafka Reader get page lists Exception!");	
-		}  
+			log.error("{} Kafka Reader get page lists Exception, system will auto free connection!",
+					task.getInstanceID(), e);
+			throw new EFException("Kafka Reader get page lists Exception!");
+		}
 		return page;
 	}
 

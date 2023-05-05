@@ -66,6 +66,9 @@ public class VearchSearcher extends SearcherFlowSocket{
 			if(query.getFl()!=null)
 				qu.put("fields", query.getFl().split(","));
 			JSONObject JO = conn.search(table, qu.toJSONString());
+			if (query.isShowQueryInfo()) {
+				res.setQueryDetail(qu.toString()); 
+			}
 			if(JO.getJSONObject("hits").containsKey("total")) {
 				List<ResponseDataUnit> unitSet = new ArrayList<ResponseDataUnit>();
 				int total = JO.getJSONObject("hits").getIntValue("total");

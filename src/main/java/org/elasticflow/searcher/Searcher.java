@@ -13,7 +13,6 @@ import org.elasticflow.model.searcher.ResponseDataUnit;
 import org.elasticflow.model.searcher.SearcherESModel;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherResult;
-import org.elasticflow.model.searcher.SearcherSolrModel;
 import org.elasticflow.model.searcher.SearcherVearchModel;
 import org.elasticflow.searcher.handler.SearcherHandler;
 import org.elasticflow.util.instance.SearchParamUtil;
@@ -21,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @description ElasticFlow search service base model
+ * ElasticFlow search service base model
  * @author chengwen
  * @version 2.0
  * @date 2018-11-01 17:01
@@ -68,10 +67,6 @@ public class Searcher {
 		switch (this.searcherFlowSocket.getType()) {
 		case ES:
 			searcherModel = SearcherESModel.getInstance(rq,instanceConfig);
-			SearchParamUtil.normalParam(rq, searcherModel,instanceConfig);
-			break;
-		case SOLR:
-			searcherModel = SearcherSolrModel.getInstance(rq,instanceConfig);
 			SearchParamUtil.normalParam(rq, searcherModel,instanceConfig);
 			break; 
 		case VEARCH:

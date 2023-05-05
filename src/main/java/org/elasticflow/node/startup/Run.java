@@ -79,10 +79,10 @@ public final class Run {
 		
 		Resource.scheduler = scheduler;		
 		Resource.EfNotifier = new EFNotifier();
-		Resource.tasks = new ConcurrentHashMap<String, FlowTask>();
-		Resource.taskJobCenter = new TaskJobCenter();
-		Resource.socketCenter =  new SocketCenter();
-		Resource.flowCenter = new FlowCenter();
+		Resource.tasks = new ConcurrentHashMap<String, FlowTask>();		
+		Resource.taskJobCenter = new TaskJobCenter();//shedule job manager 
+		Resource.socketCenter =  new SocketCenter();//data-flow builder 
+		Resource.flowCenter = new FlowCenter();//data-flow manager
 		Resource.nodeMonitor = new NodeMonitor(); 
 		Resource.threadPools = new ThreadPools(GlobalParam.STS_THREADPOOL_SIZE);
 		
@@ -117,6 +117,9 @@ public final class Run {
 		}		
 	}
 	
+	/**
+	 * Set global variables
+	 */
 	private void refreshGlobalParam() {
 		GlobalParam.RUN_ENV = String.valueOf(GlobalParam.StartConfig.get("run_environment"));
 		GlobalParam.LANG = String.valueOf(GlobalParam.StartConfig.get("language")).toUpperCase();

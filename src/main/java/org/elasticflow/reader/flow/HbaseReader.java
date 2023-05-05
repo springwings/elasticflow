@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ * Hbase database reader mainly consists of two parts: pagination query and detailed content query
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:24

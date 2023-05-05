@@ -6,7 +6,7 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.client.RestHighLevelClient;
 
 /**
- * 
+ * ElasticSearch Advanced Packaging Connection
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:25

@@ -7,10 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ * Vearch basic connection establishment management class
  * @author chengwen
  * @version 1.0
  * @date 2021-07-09 09:25
+ * @see https://vearch.github.io/
+ * 
  */
 public class VearchConnection extends EFConnectionSocket<VearchConnector> { 
 

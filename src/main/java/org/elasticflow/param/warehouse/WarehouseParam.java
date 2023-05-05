@@ -9,6 +9,7 @@ package org.elasticflow.param.warehouse;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.DATA_SOURCE_TYPE;
+import org.elasticflow.util.EFException;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -41,45 +42,14 @@ public class WarehouseParam {
 		return type;
 	}
 	
-	public void setType(String type) {
-		switch (type.toUpperCase()) {
-		case "SOLR":
-			this.type = DATA_SOURCE_TYPE.SOLR;
-			break;
-		case "ES":
-			this.type = DATA_SOURCE_TYPE.ES;
-			break;
-		case "HBASE":
-			this.type = DATA_SOURCE_TYPE.HBASE;
-			break;
-		case "FILES":
-			this.type = DATA_SOURCE_TYPE.FILES;
-			break;
-		case "KAFKA":
-			this.type = DATA_SOURCE_TYPE.KAFKA;
-			break;
-		case "VEARCH":
-			this.type = DATA_SOURCE_TYPE.VEARCH;
-			break;
-		case "HDFS":
-			this.type = DATA_SOURCE_TYPE.HDFS;
-			break;
-		case "FASTDFS":
-			this.type = DATA_SOURCE_TYPE.FASTDFS;
-			break;
-		case "MYSQL":
-			this.type = DATA_SOURCE_TYPE.MYSQL;
-			break;
-		case "ORACLE":
-			this.type = DATA_SOURCE_TYPE.ORACLE;
-			break;
-		case "HIVE":
-			this.type = DATA_SOURCE_TYPE.HIVE;
-			break;
-		case "NEO4J":
-			this.type = DATA_SOURCE_TYPE.NEO4J;
-			break;
+	public void setType(String type) throws EFException {
+		String _type = type.toUpperCase();
+		for (DATA_SOURCE_TYPE dtype : DATA_SOURCE_TYPE.values()) { 
+		    if(_type.equals(dtype.name()))
+		    	this.type = dtype;
 		} 
+		if(this.type==DATA_SOURCE_TYPE.UNKNOWN)
+			throw new EFException("Unrecognized data source type "+type);
 	}
 	public String getName(String seq) {
 		return (seq != null) ? this.name.replace("#{seq}", seq) : this.name;

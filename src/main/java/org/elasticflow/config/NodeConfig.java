@@ -29,9 +29,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * The EF node configuration control center, manages the abstract flow and data
- * source configuration.
- * 
+ * The EF node configuration control center.
+ * All types of critical configuration information management centers in run node.
+ *  
  * @author chengwen
  * @version 4.1
  * @date 2018-10-11 14:50

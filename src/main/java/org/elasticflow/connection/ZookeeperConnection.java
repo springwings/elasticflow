@@ -9,10 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ * Zookeeper basic connection establishment management class
  * @author chengwen
  * @version 2.0
  * @date 2019-01-09 15:02
+ * @see https://zookeeper.apache.org/
  */
 public class ZookeeperConnection extends EFConnectionSocket<ZooKeeper> {
 

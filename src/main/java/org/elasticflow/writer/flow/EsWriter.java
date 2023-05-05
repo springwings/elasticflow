@@ -345,7 +345,7 @@ public class EsWriter extends WriterFlowSocket {
 	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) throws EFException {
 		boolean a_alias = false;
 		boolean b_alias = false;
-		String select = "";
+		String select = "a";
 		try {
 			boolean a = this.storePositionExists(Common.getStoreName(mainName, "a"));
 			if (a)
@@ -408,6 +408,7 @@ public class EsWriter extends WriterFlowSocket {
 				}
 			}
 		} catch (Exception e) {
+			log.error("abMechanism exception",e);
 			throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
 		}
 		return select;

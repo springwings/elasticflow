@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ * Hbase basic connection establishment management class
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:25

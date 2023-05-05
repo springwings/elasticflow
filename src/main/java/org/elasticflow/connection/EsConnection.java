@@ -23,10 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ * ElasticSearch basic connection establishment management class
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:25
+ * @see https://www.elastic.co/ 
  */
 public class EsConnection extends EFConnectionSocket<EsConnector> {
 

@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+import javax.annotation.concurrent.ThreadSafe;
+
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.field.EFField;
@@ -22,11 +24,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ * Oracle database reader mainly consists of two parts: pagination query and detailed content query
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:24
  */
+
+@ThreadSafe
 public class OracleReader extends ReaderFlowSocket{ 
   
 	private final static Logger log = LoggerFactory.getLogger(OracleReader.class);

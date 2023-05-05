@@ -19,15 +19,17 @@ import org.slf4j.LoggerFactory;
  * Connection management of various resources
  * 
  * @author chengwen
- * @version 2.0
- * @date 2018-11-21 11:02
+ * @version 3.0
+ * @date 2018-11-21 11:02 
  */
 @ThreadSafe
 public final class EFConnectionPool {
-
+	
+	/**Connection pool control center instance*/
 	private final static EFConnectionPool EFCPool;
-
-	private ConcurrentHashMap<String, ConnectionPool> _pools = new ConcurrentHashMap<>();
+	
+	/**All Connection pool control centers of the system*/
+	private ConcurrentHashMap<String, ConnectionPool> _GPOOLS = new ConcurrentHashMap<>();
 	
 	/**re-connect wait time */
 	private int _waitTime = 1000;
@@ -37,37 +39,56 @@ public final class EFConnectionPool {
 	static {
 		EFCPool = new EFConnectionPool();
 	}
-
+ 
 	/**
-	 * @param acceptShareConn ,Accept using stateless shared links
+	 * External access to obtain connections
+	 * @param params
+	 * @param poolName
+	 * @param acceptShareConn
 	 * @return
 	 */
 	public static EFConnectionSocket<?> getConn(ConnectParams params, String poolName, boolean acceptShareConn) {
 		return EFCPool.getConnection(params, poolName, acceptShareConn);
 	}
 
+	/**
+	 * Entrance for external release connection
+	 * @param conn         the instance of connection
+	 * @param poolName     Connection pool name
+	 * @param clearConn    Whether to clean up the connection while releasing it
+	 */
 	public static void freeConn(EFConnectionSocket<?> conn, String poolName, boolean clearConn) {
 		EFCPool.freeConnection(poolName, conn, clearConn);
 	}
-
+	
+	/**
+	 * Get the specified Connection pool status
+	 * @param poolName Connection pool name
+	 * @return
+	 */
 	public static String getStatus(String poolName) {
 		return EFCPool.getState(poolName);
 	}
 
+	/**
+	 * clear the specified Connection pool status
+	 * @param poolName Connection pool name
+	 */
 	public static void clearPool(String poolName) {
 		EFCPool._clearPool(poolName);
 	}
 
 	/**
 	 * Clear all connections in the resource pool
+	 * @param poolName Connection pool name
 	 */
 	private void _clearPool(String poolName) {
-		synchronized (this._pools) {
+		synchronized (this._GPOOLS) {
 			if (poolName != null) {
-				if (this._pools.containsKey(poolName))
-					this._pools.get(poolName).releaseAll();
+				if (this._GPOOLS.containsKey(poolName))
+					this._GPOOLS.get(poolName).releaseAll();
 			} else {
-				for (Entry<String, ConnectionPool> ent : this._pools.entrySet()) {
+				for (Entry<String, ConnectionPool> ent : this._GPOOLS.entrySet()) {
 					ent.getValue().releaseAll();
 				}
 			}
@@ -78,26 +99,26 @@ public final class EFConnectionPool {
 	 * get connection from pool and waiting
 	 */
 	private EFConnectionSocket<?> getConnection(ConnectParams params, String poolName, boolean acceptShareConn) {
-		synchronized (this._pools) {
-			if (this._pools.get(poolName) == null) {
+		synchronized (this._GPOOLS) {
+			if (this._GPOOLS.get(poolName) == null) {
 				createPools(poolName, params);
 			}
 		}
-		return this._pools.get(poolName).getConnection(this._waitTime, acceptShareConn);
+		return this._GPOOLS.get(poolName).getConnection(this._waitTime, acceptShareConn);
 	}
 
 	private String getState(String poolName) {
-		if (this._pools.get(poolName) == null) {
+		if (this._GPOOLS.get(poolName) == null) {
 			return " pool not startup!";
 		} else {
-			return this._pools.get(poolName).getState();
+			return this._GPOOLS.get(poolName).getState();
 		}
 	}
-	/*
+	/**
 	 * Release resource possession
 	 */
 	private void freeConnection(String poolName, EFConnectionSocket<?> conn, boolean clearConn) {
-		ConnectionPool pool = (ConnectionPool) this._pools.get(poolName);
+		ConnectionPool pool = (ConnectionPool) this._GPOOLS.get(poolName);
 		if (pool != null) {
 			pool.freeConnection(conn, clearConn);
 		}
@@ -105,23 +126,32 @@ public final class EFConnectionPool {
 
 	private void createPools(String poolName, ConnectParams params) {
 		ConnectionPool pool = new ConnectionPool(poolName, params);
-		this._pools.put(poolName, pool);
+		this._GPOOLS.put(poolName, pool);
 		log.info("success create pool " + poolName);
 	}
  
+	
+	
 	/**
-	 * connection pools
+	 * Connection pool management class
 	 * @author chengwen
 	 * @version 2.0
 	 * @date 2018-11-21 11:18
 	 */
 	private class ConnectionPool {
+		/**The current number of active connections. These connections are unmanageable in the Connection pool*/
 		private AtomicInteger activeNum = new AtomicInteger(0);
+		/**Control the number of connections created*/
 		private int maxConn;
+		/**Unique ID of the Connection pool. The main part is determined by the name in the external configuration*/
 		private final String poolName;
 		private final ConnectParams params; 
-		private ConcurrentLinkedQueue<EFConnectionSocket<?>> freeConnections = new ConcurrentLinkedQueue<EFConnectionSocket<?>>();
+		/**Connect Resource Storage Recycle Pool*/
+		private ConcurrentLinkedQueue<EFConnectionSocket<?>> connectionPools = new ConcurrentLinkedQueue<EFConnectionSocket<?>>();
+		/**Shared connection, accessible to anyone*/
 		private EFConnectionSocket<?> shareConn;
+		/**Current resource pool version*/
+		private long version = Common.getNow();
 
 		public ConnectionPool(String poolName, final ConnectParams params) {
 			super();
@@ -134,6 +164,10 @@ public final class EFConnectionPool {
 			this.params = params;
 			this.shareConn = newConnection();
 			this.shareConn.setShare(true);
+		}
+		
+		public long getVersion() {
+			return this.version;
 		}
 
 		public EFConnectionSocket<?> getConnection(long timeout, boolean acceptShareConn) {
@@ -161,23 +195,24 @@ public final class EFConnectionPool {
 		}
 
 		public String getState() {
-			return "Active Connections:" + activeNum + ",Free Connections:" + freeConnections.size()
+			return "Active Connections:" + activeNum + ",Free Connections:" + connectionPools.size()
 					+ ",Max Connection:" + maxConn;
 		}
 
 		/**
 		 * Release all connections in the resource pool
 		 */
-		public void releaseAll() {
-			synchronized(freeConnections) {
-				for (EFConnectionSocket<?> conn : freeConnections) {
+		public void releaseAll() { 
+			synchronized(connectionPools) {
+				for (EFConnectionSocket<?> conn : connectionPools) {
 					if (!conn.free()) {
-						log.warn("error close one connection in pool " + this.poolName);
+						log.warn("connection cleaning encountered an error ",conn);
 					}
 				}
 				log.info("free connection pool " + this.poolName + " ,Active Connections:" + activeNum
-						+ ",Release Connections:" + freeConnections.size());
-				freeConnections.clear();
+						+ ",Release Connections:" + connectionPools.size()); 
+				connectionPools.clear();
+				this.version = Common.getNow();
 			} 
 		}
 
@@ -197,8 +232,9 @@ public final class EFConnectionPool {
 					if (clearConn) {
 						Common.LOG.info("clear connection {}.",conn);
 						conn.free();						
-					} else {
-						freeConnections.add(conn);
+					} else { 
+						if(conn.getVersion()==getVersion())
+							connectionPools.add(conn);
 					}
 					activeNum.decrementAndGet();
 				}
@@ -208,11 +244,11 @@ public final class EFConnectionPool {
 		private EFConnectionSocket<?> getConnection() {
 			synchronized (this) {
 				EFConnectionSocket<?> conn = null;
-				if (!freeConnections.isEmpty()) {
-					conn = freeConnections.poll();
-					while (conn.status() == false && !freeConnections.isEmpty()) {
+				if (!connectionPools.isEmpty()) {
+					conn = connectionPools.poll();
+					while (conn.status() == false && !connectionPools.isEmpty()) {
 						conn.free();
-						conn = freeConnections.poll();
+						conn = connectionPools.poll();
 					}
 					if (conn.status() == true) {
 						activeNum.incrementAndGet();
@@ -235,11 +271,12 @@ public final class EFConnectionPool {
 					Class<?> clz = Class.forName(_class_name); 
 					Method m = clz.getMethod("getInstance", ConnectParams.class);  
 					conn = (EFConnectionSocket<?>) m.invoke(null,params);
+					conn.setVersion(this.version);
 				}catch (Exception e) { 
-					log.error(_class_name+" Not Support!",e);
+					log.error(_class_name+" class does not exist!",e);
 				}
 			} else {
-				log.error("Parameter error,create " + this.poolName + " connection fail!");
+				log.error("parameters configuration error,create " + this.poolName + " connection fail!");
 			}
 			return conn;
 		}

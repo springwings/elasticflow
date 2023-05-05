@@ -179,23 +179,23 @@ public class Pond extends Instruction {
 	public static String getNewStoreId(Context context, Object[] args) throws EFException{
 		String storeId = null;
 		if (!isValid(2, args)) {
-			log.error("getNewStoreId parameter not match!");
-			return null;
-		}
-		String mainName = String.valueOf(args[0]);
-		boolean isIncrement = (boolean) args[1]; 
-		context.getWriter().PREPARE(false, false);
-		boolean release = false;
-		if (context.getWriter().ISLINK()) {
-			try {
-				storeId = context.getWriter().getNewStoreId(mainName, isIncrement, context.getInstanceConfig());
-			} catch (Exception e) {
-				release = true;
-				throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
-			}finally {
-				context.getWriter().REALEASE(false,release);
+			log.error("getNewStoreId parameter not match!"); 
+		}else {
+			String mainName = String.valueOf(args[0]);
+			boolean isIncrement = (boolean) args[1]; 
+			context.getWriter().PREPARE(false, false);
+			boolean release = false;
+			if (context.getWriter().ISLINK()) {
+				try {
+					storeId = context.getWriter().getNewStoreId(mainName, isIncrement, context.getInstanceConfig());
+				} catch (Exception e) {
+					release = true;
+					throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
+				}finally {
+					context.getWriter().REALEASE(false,release);
+				}
 			}
-		}
+		} 
 		return storeId;
 	}
 }

@@ -11,6 +11,12 @@ import org.elasticflow.param.warehouse.WarehouseParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Fastdfs basic connection establishment management class
+ * @author chengwen
+ * @version 1.0
+ * @date 2021-10-26 09:25
+ */
 public class FastdfsConnection extends EFConnectionSocket<StorageClient> { 
 	
 	private final static Logger log = LoggerFactory.getLogger(EsConnection.class);

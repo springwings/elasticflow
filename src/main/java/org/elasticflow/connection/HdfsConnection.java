@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ * Hdfs basic connection establishment management class
  * @author chengwen
  * @version 1.0
  * @date 2021-06-24 09:25

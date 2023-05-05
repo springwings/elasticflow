@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ * Files reader mainly consists of two parts: pagination scan and detailed content read
  * @author chengwen
  * @version 1.0
  * @date 2018-11-22 09:33
