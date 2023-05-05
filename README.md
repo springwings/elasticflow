@@ -57,8 +57,9 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
     - 系统关闭使用软关闭模式，会自动进行集群任务安全着落，防止脏数据进入末端和读端的数据丢失。
 
 # Reader Support
-    - Hbase 1.2.1
-    - Kafka 2.1.1
+    - Hbase     1.x
+    - Kafka     
+    - RocketMQ  4.x
     - Mysql
     - Oracle
     - files (txt,csv)
@@ -70,11 +71,10 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
 # Writer Support
     - ElasticSearch 7.x
     - Mysql
-    - Neo4j 3.5.1
+    - Neo4j 3.x
     - Vearch
-    - Solr 5.5.0
-    - Hbase 1.2.1
-    - Kafka 2.1.1
+    - Hbase 1.x
+    - Kafka 2.x
 
 # Document
 - [详细文档参照wiki](https://github.com/springwings/elasticflow/wiki)  
@@ -89,7 +89,7 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
       <dependency>
         <groupId>org.elasticflow</groupId>
         <artifactId>elasticflow</artifactId>
-        <version>5.4.3</version>
+        <version>5.5.1</version>
       </dependency>
    ```
    2. plugin开发测试代码，例如：
