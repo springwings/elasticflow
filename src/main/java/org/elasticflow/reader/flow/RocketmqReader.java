@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
+import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
@@ -64,6 +65,11 @@ public class RocketmqReader extends ReaderFlowSocket {
 	public void initFlow() throws EFException {
 		PREPARE(true, false);
 		this.conn = (DefaultLitePullConsumer) GETSOCKET().getConnection(END_TYPE.reader);
+		try {
+			this.conn.start();
+		} catch (MQClientException e) {
+			log.error("RocketMQ start Exception", e);
+		}
 	}
 
 	@Override
@@ -145,8 +151,7 @@ public class RocketmqReader extends ReaderFlowSocket {
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) throws EFException {
 		boolean releaseConn = false;
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
-		try {
-			this.conn.start();
+		try { 
 			this.records = this.conn.poll();
 			int totalNum = this.records.size();
 			if (totalNum > 0) {
@@ -161,9 +166,9 @@ public class RocketmqReader extends ReaderFlowSocket {
 			}
 		} catch (Exception e) {
 			releaseConn = true;
-			page.clear();
+			page.clear(); 
 			REALEASE(false, releaseConn);
-			try {
+			try { 
 				this.initFlow();
 			} catch (EFException e1) {
 				throw e1;
