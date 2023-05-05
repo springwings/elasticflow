@@ -77,7 +77,7 @@ public class MysqlWriter extends WriterFlowSocket {
 	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) throws EFException{
 		String name = Common.getStoreName(mainName, storeId);
 		String type = mainName;
-		PREPARE(false, false);
+		PREPARE(false, false, false);
 		if (!ISLINK())
 			return false;
 		if(!this.storePositionExists(name)) {
@@ -104,7 +104,7 @@ public class MysqlWriter extends WriterFlowSocket {
 	@Override
 	public void removeInstance(String instance, String storeId) throws EFException {
 		String name = Common.getStoreName(instance, storeId);
-		PREPARE(false, false);
+		PREPARE(false, false, false);
 		if (!ISLINK())
 			return;
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
@@ -149,7 +149,7 @@ public class MysqlWriter extends WriterFlowSocket {
 	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) throws EFException {
 		String select = "a";
 		boolean releaseConn = false;
-		PREPARE(false, false);
+		PREPARE(false, false, false);
 		if (!ISLINK())
 			return select;
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);

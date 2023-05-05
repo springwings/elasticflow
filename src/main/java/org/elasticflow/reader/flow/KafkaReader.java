@@ -72,7 +72,7 @@ public class KafkaReader extends ReaderFlowSocket {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initFlow() throws EFException {
-		PREPARE(true, false);
+		PREPARE(true, false, true);
 		this.conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader);
 	}
 

@@ -100,7 +100,7 @@ public class Pipe extends Instruction {
 		boolean freeConn = false;
 		
 		WriterFlowSocket writer = context.getWriter();
-		writer.PREPARE(monopoly, false);
+		writer.PREPARE(monopoly, false,true);
 		if (!writer.ISLINK()) {
 			rstate.setStatus(false);
 			return rstate;

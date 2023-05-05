@@ -434,7 +434,7 @@ public final class Common {
 	}
 
 	public static Object parseFieldValue(Object v, EFField fd, FIELD_PARSE_TYPE parsetype) throws EFException {
-		if (fd == null)
+		if (fd == null || fd.getParamtype().equals("KEEP_SAME"))
 			return v;
 		if (v == null) {
 			return fd.getDefaultvalue();
@@ -465,6 +465,7 @@ public final class Common {
 					return method.invoke(c, v);
 				}
 			} catch (Exception e) {
+				LOG.error("Field "+fd.getName(),e);
 				throw new EFException(e.getMessage() + ",Field " + fd.getName(), ELEVEL.Dispose);
 			}
 		}

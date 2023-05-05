@@ -39,7 +39,7 @@ public class Pond extends Instruction {
 			log.error("Pond createStorePosition parameter not match!");
 			return false;
 		} 
-		context.getWriter().PREPARE(false, false);
+		context.getWriter().PREPARE(false, false,false);
 		boolean state = false;
 		if (context.getWriter().ISLINK()) {
 			try { 
@@ -65,7 +65,7 @@ public class Pond extends Instruction {
 			log.error("deleteByKey parameter not match!");
 			return;
 		}
-		context.getWriter().PREPARE(false, false);
+		context.getWriter().PREPARE(false, false, false);
 		if (context.getWriter().ISLINK()) {
 			try {  
 				String storeId = String.valueOf(args[0]);
@@ -102,7 +102,7 @@ public class Pond extends Instruction {
 			log.error("optimizeInstance parameter not match!");
 			return;
 		}
-		context.getWriter().PREPARE(false, false);
+		context.getWriter().PREPARE(false, false, false);
 		if (context.getWriter().ISLINK()) {
 			try {
 				String mainName = String.valueOf(args[0]); 
@@ -145,7 +145,7 @@ public class Pond extends Instruction {
 		} 
 		GlobalParam.TASK_COORDER.setFlowStatus(mainName,"",GlobalParam.JOB_TYPE.INCREMENT.name(), STATUS.Blank, STATUS.Termination,
 				context.getInstanceConfig().getPipeParams().showInfoLog()); 
-		context.getWriter().PREPARE(false, false);  
+		context.getWriter().PREPARE(false, false, false);  
 		if (context.getWriter().ISLINK()) {
 			try {
 				if(context.getInstanceConfig().getPipeParams().getWriteMechanism()==MECHANISM.AB) {
@@ -183,7 +183,7 @@ public class Pond extends Instruction {
 		}else {
 			String mainName = String.valueOf(args[0]);
 			boolean isIncrement = (boolean) args[1]; 
-			context.getWriter().PREPARE(false, false);
+			context.getWriter().PREPARE(false, false, false);
 			boolean release = false;
 			if (context.getWriter().ISLINK()) {
 				try {

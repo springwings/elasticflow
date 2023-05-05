@@ -32,8 +32,9 @@ import com.alibaba.fastjson.JSONObject;
  * must be in JSON format, and the key must correspond one-to-one with the
  * fields defined in the piper when autoCommit is false.
  * 
- * NotThreadSafe 
- * When starting multi-channel concurrency, careful consideration should be given to whether bugs will be introduced
+ * NotThreadSafe When starting multi-channel concurrency, careful consideration
+ * should be given to whether bugs will be introduced
+ * 
  * @author chengwen
  * @version 1.0
  * @date 2023-05-04 09:24
@@ -63,7 +64,7 @@ public class RocketmqReader extends ReaderFlowSocket {
 
 	@Override
 	public void initFlow() throws EFException {
-		PREPARE(true, false);
+		PREPARE(true, false, true);
 		this.conn = (DefaultLitePullConsumer) GETSOCKET().getConnection(END_TYPE.reader);
 		try {
 			this.conn.start();
@@ -78,12 +79,11 @@ public class RocketmqReader extends ReaderFlowSocket {
 			return this.dataPage;
 		}
 		int count = 0;
-		boolean releaseConn = false;
+		String dataBoundary = null;
+		String LAST_STAMP = null;
+		this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
+		this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
 		try {
-			String dataBoundary = null;
-			String LAST_STAMP = null;
-			this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
-			this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
 			if (this.readHandler == null) {
 				for (MessageExt record : this.records) {
 					count++;
@@ -114,18 +114,10 @@ public class RocketmqReader extends ReaderFlowSocket {
 				this.dataPage.putDataBoundary(dataBoundary);
 			} else {
 				this.readHandler.handleData(this, this.records, page, pageSize);
-			}
-
+			} 
 		} catch (Exception e) {
-			releaseConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS, false);
-			REALEASE(false, releaseConn);
-			try {
-				this.initFlow();
-			} catch (EFException e1) {
-				throw e1;
-			}
-			log.error("RocketMQ Reader get dataPage Exception, system will auto free connection!", e);
+			log.error("RocketMQ Reader get dataPage Exception!", e);
 			throw new EFException("RocketMQ Reader get dataPage Exception!");
 		}
 		return this.dataPage;
@@ -151,7 +143,7 @@ public class RocketmqReader extends ReaderFlowSocket {
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) throws EFException {
 		boolean releaseConn = false;
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
-		try { 
+		try {
 			this.records = this.conn.poll();
 			int totalNum = this.records.size();
 			if (totalNum > 0) {
@@ -166,10 +158,10 @@ public class RocketmqReader extends ReaderFlowSocket {
 			}
 		} catch (Exception e) {
 			releaseConn = true;
-			page.clear(); 
-			REALEASE(false, releaseConn);
-			try { 
-				this.initFlow();
+			page.clear();
+			REALEASE(true, releaseConn);
+			try {
+				initFlow();
 			} catch (EFException e1) {
 				throw e1;
 			}

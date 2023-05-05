@@ -49,7 +49,7 @@ public final class EsSearcher extends SearcherFlowSocket {
 	@Override
 	public SearcherResult Search(SearcherModel<?, ?, ?> fq, String instance,SearcherHandler handler)
 			throws EFException {
-		PREPARE(false, true);
+		PREPARE(false, true, false);
 		boolean releaseConn = false;
 		SearcherResult res = new SearcherResult();
 		if(!ISLINK())

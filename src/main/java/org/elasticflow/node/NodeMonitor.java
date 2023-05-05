@@ -783,7 +783,7 @@ public final class NodeMonitor {
 							WriterFlowSocket wfs = Resource.socketCenter.getWriterSocket(
 									Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getWriteTo(),
 									instance, L1seq, tags);
-							wfs.PREPARE(false, false);
+							wfs.PREPARE(false, false, false);
 							if (wfs.ISLINK()) {
 								wfs.removeInstance(instance,
 										GlobalParam.TASK_COORDER.getStoreIdFromSave(instance, L1seq, true, false));

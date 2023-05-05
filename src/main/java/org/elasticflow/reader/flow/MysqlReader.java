@@ -44,7 +44,7 @@ public class MysqlReader extends ReaderFlowSocket{
 	@Override
 	public DataPage getPageData(final Page page,int pageSize) throws EFException {  
 		boolean releaseConn = false;
-		PREPARE(false,false); 
+		PREPARE(false,false, false); 
 		if(!ISLINK())
 			return this.dataPage; 
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.reader); 
@@ -103,7 +103,7 @@ public class MysqlReader extends ReaderFlowSocket{
 			sql = sql.replace(GlobalParam._seq, task.getL2seq()); 
 		 
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
-		PREPARE(false,false); 
+		PREPARE(false,false, false); 
 		if(!ISLINK())
 			return page;
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.reader); 

@@ -44,7 +44,7 @@ public class VearchWriter extends WriterFlowSocket {
 	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) throws EFException{
 		String name = Common.getStoreName(mainName, storeId);
 		String type = mainName;
-		PREPARE(false, false);
+		PREPARE(false, false,false);
 		if (!ISLINK())
 			return false;
 		if(!this.storePositionExists(name)) {
@@ -135,7 +135,7 @@ public class VearchWriter extends WriterFlowSocket {
 	@Override
 	public void removeInstance(String instance, String storeId) throws EFException {
 		String name = Common.getStoreName(instance, storeId);
-		PREPARE(false, false);
+		PREPARE(false, false,false);
 		if (!ISLINK())
 			return;
 		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);	

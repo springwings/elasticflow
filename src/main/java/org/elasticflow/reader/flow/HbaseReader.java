@@ -61,7 +61,7 @@ public class HbaseReader extends ReaderFlowSocket {
  
 	@Override
 	public DataPage getPageData(final Page page,int pageSize) throws EFException { 
-		PREPARE(false,false);
+		PREPARE(false,false, false);
 		boolean releaseConn = false;
 		try {
 			if(!ISLINK())
@@ -136,7 +136,7 @@ public class HbaseReader extends ReaderFlowSocket {
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) throws EFException {
 		int i = 0;
 		ConcurrentLinkedDeque<String> dt = new ConcurrentLinkedDeque<>(); 
-		PREPARE(false,false);
+		PREPARE(false,false, false);
 		if(!ISLINK())
 			return dt; 
 		boolean releaseConn = false;

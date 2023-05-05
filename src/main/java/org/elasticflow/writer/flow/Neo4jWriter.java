@@ -42,7 +42,7 @@ public class Neo4jWriter extends WriterFlowSocket {
 			String storeId, boolean isUpdate) throws EFException {
 		boolean releaseConn = false;
 		try { 
-			PREPARE(false, false);
+			PREPARE(false, false, false);
 			if (!ISLINK())
 				return;
 			Map<String, EFField> transParams = instanceConfig.getWriteFields();

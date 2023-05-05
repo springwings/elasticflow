@@ -228,8 +228,9 @@ public final class PipePump extends Instruction implements Serializable {
 				processListsPages(task, destination, pageList, storeId);
 			} catch (EFException e) {
 				if (task.getJobType().equals(JOB_TYPE.FULL) && !isReferenceInstance) {
+					//For similar rollback scenarios
 					for (int t = 0; t < 5; t++) {
-						getWriter().PREPARE(false, false);
+						getWriter().PREPARE(false, false,false);
 						if (getWriter().ISLINK()) {
 							try {
 								getWriter().removeInstance(instanceID, storeId);

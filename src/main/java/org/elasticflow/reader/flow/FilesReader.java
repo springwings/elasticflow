@@ -39,7 +39,7 @@ public class FilesReader extends ReaderFlowSocket {
 
 	@Override
 	public DataPage getPageData(final Page page, int pageSize) throws EFException {
-		PREPARE(false, false);
+		PREPARE(false, false, false);
 		try {
 			if (!ISLINK())
 				return this.dataPage;
@@ -80,7 +80,7 @@ public class FilesReader extends ReaderFlowSocket {
 	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) throws EFException {
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
 		boolean releaseConn = false;
-		PREPARE(false, false);
+		PREPARE(false, false, false);
 		if (!ISLINK())
 			return page;
 		try {

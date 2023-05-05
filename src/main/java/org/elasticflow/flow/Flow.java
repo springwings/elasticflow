@@ -62,17 +62,18 @@ public abstract class Flow {
 		switch (endType) {
 		case writer:
 			this.EFConnKey = Common.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",
-					this.instanceConfig.getPipeParams().isWriterPoolShareAlias());
+					this.instanceConfig.getPipeParams().isWriterPoolShareAlias())+"_writer";
 			break;
 		case reader:
 			this.EFConnKey = Common.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",
-					this.instanceConfig.getPipeParams().isReaderPoolShareAlias());
+					this.instanceConfig.getPipeParams().isReaderPoolShareAlias())+"_reader";
 			break;
 		default:
 			this.EFConnKey = Common.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",
-					this.instanceConfig.getPipeParams().isSearcherShareAlias());
+					this.instanceConfig.getPipeParams().isSearcherShareAlias())+"_other";
 			break;
 		}
+		//When splitting an instance into multiple parallel subtasks, it can share connection resources with each other
 		synchronized (Resource.EFConns) {
 			Resource.EFConns.put(this.EFConnKey, null);
 		}
@@ -84,12 +85,22 @@ public abstract class Flow {
 	 * 
 	 * @param isMonopoly      if true, the task will monopolize a specific
 	 *                        connection and will not release it
+	 * 						  Used in scenarios where connections cannot be mixed between different ends                       
 	 * @param acceptShareConn if true, Use global shared connections
+	 * 						  Share this connection globally
+	 * @param crossSubtasks  if true,This instance task shares a connection with all subtasks under the same end, 
+	 * 					mainly used to connect to scenarios with accompanying states
 	 * @return
 	 */
-	public synchronized EFConnectionSocket<?> PREPARE(boolean isMonopoly, boolean acceptShareConn) {
+	public synchronized EFConnectionSocket<?> PREPARE(boolean isMonopoly, boolean acceptShareConn,boolean crossSubtasks) {
 		if (isMonopoly) {
 			if (this.EFConn == null) {
+				if(!crossSubtasks) {
+					if(!this.EFConnKey.endsWith("_CROSS_RANDOM")) {
+						this.EFConnKey = this.EFConnKey+Common.getNow()+"_CROSS_RANDOM";
+						Resource.EFConns.put(this.EFConnKey, null);
+					}
+				}
 				if (Resource.EFConns.get(this.EFConnKey) == null) {
 					Resource.EFConns.put(this.EFConnKey,
 							EFConnectionPool.getConn(this.connectParams, this.poolName, acceptShareConn));
@@ -109,7 +120,12 @@ public abstract class Flow {
 	public InstanceConfig getInstanceConfig() {
 		return this.instanceConfig;
 	}
-
+	
+	/**
+	 * Release connection  resources
+	 * @param isMonopoly   Belongs to exclusive nature and does not require maintenance
+	 * @param releaseConn  forced release
+	 */
 	public void REALEASE(boolean isMonopoly, boolean releaseConn) {
 		if (isMonopoly == false || releaseConn) {
 			synchronized (this.retainer) {
@@ -119,6 +135,7 @@ public abstract class Flow {
 				if (retainer.decrementAndGet() <= 0) {
 					EFConnectionPool.freeConn(this.EFConn, this.poolName, releaseConn);
 					this.EFConn = null;
+					Resource.EFConns.put(this.EFConnKey, null);
 					retainer.set(0);
 				} else {
 					log.info(this.EFConn + " retainer is " + retainer.get());

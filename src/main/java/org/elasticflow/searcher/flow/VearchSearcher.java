@@ -53,7 +53,7 @@ public class VearchSearcher extends SearcherFlowSocket{
 	public SearcherResult Search(SearcherModel<?, ?, ?> query, String instance, SearcherHandler handler)
 			throws EFException {
 		SearcherResult res = new SearcherResult(); 
-		PREPARE(false, true);
+		PREPARE(false, true, false);
 		boolean releaseConn = false;
 		if(!ISLINK())
 			return res;
