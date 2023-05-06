@@ -67,9 +67,9 @@ public class VearchSearcher extends SearcherFlowSocket{
 				qu.put("fields", query.getFl().split(","));
 			JSONObject JO = conn.search(table, qu.toJSONString());
 			if (query.isShowQueryInfo()) {
-				res.setQueryDetail(qu.toString()); 
+				res.setQueryDetail(qu); 
 			}
-			if(JO.getJSONObject("hits").containsKey("total")) {
+			if(JO.containsKey("hits")) {
 				List<ResponseDataUnit> unitSet = new ArrayList<ResponseDataUnit>();
 				int total = JO.getJSONObject("hits").getIntValue("total");
 				if(total>0) {
@@ -93,7 +93,7 @@ public class VearchSearcher extends SearcherFlowSocket{
 				res.setUnitSet(unitSet);
 			}else {
 				res.setSuccess(false);
-				res.setErrorInfo("please check the search parameters!");
+				res.setErrorInfo("please check the search parameters!"+JO.toJSONString());
 			} 
 		}catch(Exception e){
 			releaseConn = true; 

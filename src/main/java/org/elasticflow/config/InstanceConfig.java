@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,9 +27,11 @@ import org.w3c.dom.NodeList;
 
 /**
  * instance Configuration model
+ * -Fields is Metadata describing data 
+ * -Params is Parameter of control end
  * 
  * @author chengwen
- * @version 3.1
+ * @version 5.1
  * @date 2018-10-11 15:13
  */
 public class InstanceConfig {
@@ -39,23 +42,25 @@ public class InstanceConfig {
 	private String configPath;
 	/** Use the configured file name **/
 	private String instanceID;
-
+	
 	/**reader Configured Field Information*/
 	private volatile Map<String, EFField> readFields;
 	/**writer Configured Field Information*/
 	private volatile Map<String, EFField> writeFields;
 	/**computer Configured Field Information*/
 	private volatile Map<String, EFField> computeFields;
-	/**searcher Configured parameters Information*/
+	/**searcher Configured Field Information*/
+	private volatile Map<String, EFField> searchFields;
+	/**searcher Configured parameters Information,Note that this will be a StrongReference be-careful*/
 	private volatile Map<String, SearcherParam> searcherParams;
 	/**writer Configured parameters Information*/
 	private volatile WriterParam writerParams;
 	/**piper Configured parameters Information*/
 	private volatile PipeParam pipeParams;
 	/**reader Configured parameters Information*/
-	private volatile ReaderParam readParams;
+	private volatile ReaderParam readerParams;
 	/**computer Configured parameters Information*/
-	private volatile ComputerParam computeParams;
+	private volatile ComputerParam computerParams;
 	
 	private int instanceType = INSTANCE_TYPE.Blank.getVal();
 	private boolean hasFullJob = true;
@@ -66,14 +71,21 @@ public class InstanceConfig {
 	}
 
 	public void init() {
-		this.pipeParams = new PipeParam();
+		this.searchFields = new HashMap<>();
 		this.writeFields = new HashMap<>();
 		this.computeFields = new HashMap<>();
 		this.readFields = new HashMap<>();
+		this.pipeParams = new PipeParam();
 		this.searcherParams = new HashMap<>();
-		this.computeParams = new ComputerParam();
+		this.computerParams = new ComputerParam();
 		this.writerParams = new WriterParam();
-		loadInstanceConfig();
+		loadInstanceConfig(); 
+		if(searchFields.size()==0) {
+			for (Entry<String, EFField> entry : writeFields.entrySet()) { 
+				EFField val = entry.getValue();
+				searchFields.put(val.getAlias(), val);
+			}
+		}
 	}
 
 	/**
@@ -93,15 +105,15 @@ public class InstanceConfig {
 	}
 
 	public ComputerParam getComputeParams() {
-		return this.computeParams;
+		return this.computerParams;
 	}
 
 	public WriterParam getWriterParams() {
 		return this.writerParams;
 	}
 
-	public ReaderParam getReadParams() {
-		return this.readParams;
+	public ReaderParam getReaderParams() {
+		return this.readerParams;
 	}
 
 	public PipeParam getPipeParams() {
@@ -110,6 +122,15 @@ public class InstanceConfig {
 
 	public Map<String, EFField> getWriteFields() {
 		return this.writeFields;
+	}
+	
+	/**
+	 * Note that this will be a StrongReference be-careful,
+	 * it is Reference to writeFields
+	 * @return
+	 */
+	public Map<String, EFField> getSearchFields(){
+		return this.searchFields;
 	}
 
 	public Map<String, EFField> getComputeFields() {
@@ -218,15 +239,15 @@ public class InstanceConfig {
 				return;
 			}
 
-			params = (Element) dataflow.getElementsByTagName("ReadParam").item(0);
+			params = (Element) dataflow.getElementsByTagName("ReaderParam").item(0);
 			if (params != null) {
-				readParams = new ReaderParam();
+				readerParams = new ReaderParam();
 				if (Resource.nodeConfig.getWarehouse().containsKey(pipeParams.getReadFrom())) {
-					readParams.setNoSql(false);
-					parseNode(params.getElementsByTagName("param"), "readParam", ReaderParam.class);
+					readerParams.setNoSql(false);
+					parseNode(params.getElementsByTagName("param"), "readerParam", ReaderParam.class);
 				} else {
-					readParams.setNoSql(true);
-					parseNode(params.getElementsByTagName("param"), "readParam", ReaderParam.class);
+					readerParams.setNoSql(true);
+					parseNode(params.getElementsByTagName("param"), "readerParam", ReaderParam.class);
 				}
 				params = (Element) params.getElementsByTagName("fields").item(0);
 				if (params != null) {
@@ -235,9 +256,9 @@ public class InstanceConfig {
 				}
 			}
 
-			params = (Element) dataflow.getElementsByTagName("ComputeParam").item(0);
+			params = (Element) dataflow.getElementsByTagName("ComputerParam").item(0);
 			if (params != null) {
-				parseNode(params.getElementsByTagName("param"), "computeParam", ComputerParam.class);
+				parseNode(params.getElementsByTagName("param"), "computerParam", ComputerParam.class);
 				params = (Element) params.getElementsByTagName("fields").item(0);
 				if (params != null) {
 					paramlist = params.getElementsByTagName("field");
@@ -245,11 +266,11 @@ public class InstanceConfig {
 				}
 			}
 
-			params = (Element) dataflow.getElementsByTagName("WriteParam").item(0);
+			params = (Element) dataflow.getElementsByTagName("WriterParam").item(0);
 			if (params != null) {
 				parseNode(params.getElementsByTagName("param"), "writerParam", BasicParam.class);
 				if (writerParams.getWriteKey() == null) {
-					WriterParam.setKeyValue(writerParams, "writekey", readParams.getKeyField());
+					WriterParam.setKeyValue(writerParams, "writekey", readerParams.getKeyField());
 					WriterParam.setKeyValue(writerParams, "keytype", "unique");
 				}
 				params = (Element) params.getElementsByTagName("fields").item(0);
@@ -259,7 +280,7 @@ public class InstanceConfig {
 				}
 			}
 
-			params = (Element) dataflow.getElementsByTagName("SearchParam").item(0);
+			params = (Element) dataflow.getElementsByTagName("SearcherParam").item(0);
 			if (params != null) {
 				paramlist = params.getElementsByTagName("param");
 				parseNode(paramlist, "SearchParam", SearcherParam.class);
@@ -278,6 +299,10 @@ public class InstanceConfig {
 						EFField wf = (EFField) Common.getXmlObj(param, c);
 						writeFields.put(wf.getName(), wf);
 						break;
+					case "searchFields":
+						EFField sf = (EFField) Common.getXmlObj(param, c);
+						searchFields.put(sf.getName(), sf);
+						break;
 					case "readFields":
 						EFField rf = (EFField) Common.getXmlObj(param, c);
 						readFields.put(rf.getName(), rf);
@@ -286,8 +311,8 @@ public class InstanceConfig {
 						EFField cf = (EFField) Common.getXmlObj(param, c);
 						computeFields.put(cf.getName(), cf);
 						break;
-					case "computeParam":
-						Common.getXmlParam(computeParams, param, c);
+					case "computerParam":
+						Common.getXmlParam(computerParams, param, c);
 						break;
 					case "writerParam":
 						BasicParam wpp = (BasicParam) Common.getXmlObj(param, c);
@@ -297,10 +322,10 @@ public class InstanceConfig {
 						Common.getXmlParam(pipeParams, param, c);
 						pipeParams.reInit();
 						break;
-					case "readParam":
-						Common.getXmlParam(readParams, param, c);
+					case "readerParam":
+						Common.getXmlParam(readerParams, param, c);
 						break;
-					case "SearchParam":
+					case "SearcherParam":
 						SearcherParam v = (SearcherParam) Common.getXmlObj(param, c);
 						searcherParams.put(v.getName(), v);
 						break;

@@ -516,8 +516,8 @@ public final class NodeMonitor {
 						obj = tmp.getPipeParams();
 						break;
 					case "ReadParam":
-						cls = tmp.getReadParams().getClass();
-						obj = tmp.getReadParams();
+						cls = tmp.getReaderParams().getClass();
+						obj = tmp.getReaderParams();
 						break;
 					case "ComputeParam":
 						cls = tmp.getComputeParams().getClass();

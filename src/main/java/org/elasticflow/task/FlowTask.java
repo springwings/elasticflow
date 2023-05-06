@@ -109,7 +109,7 @@ public class FlowTask {
 					pipePump.run(storeId, L1seq, true, isReferenceInstance);
 					GlobalParam.TASK_COORDER.scanPositionRecoverKeep(instanceID);
 					GlobalParam.TASK_COORDER.saveTaskInfo(instanceID, L1seq, storeId, false);
-					for (String L2seq : pipePump.getInstanceConfig().getReadParams().getL2Seq()) {
+					for (String L2seq : pipePump.getInstanceConfig().getReaderParams().getL2Seq()) {
 						GlobalParam.TASK_COORDER.setScanPosition(instanceID, L1seq, L2seq, "", true, true);
 					}
 					GlobalParam.TASK_COORDER.saveTaskInfo(instanceID, L1seq, storeId, true);

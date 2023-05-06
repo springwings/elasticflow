@@ -70,7 +70,7 @@ public final class EsSearcher extends SearcherFlowSocket {
 					returnFields.add(s);
 				}
 			} else {
-				Map<String, EFField> tmpFields = instanceConfig.getWriteFields();
+				Map<String, EFField> tmpFields = instanceConfig.getSearchFields();
 				for (Map.Entry<String, EFField> e : tmpFields.entrySet()) {
 					if (e.getValue().getStored().equalsIgnoreCase("true"))
 						returnFields.add(e.getKey());
@@ -102,7 +102,7 @@ public final class EsSearcher extends SearcherFlowSocket {
 			ResponseDataUnit u = ResponseDataUnit.getInstance();
 			for (Map.Entry<String, DocumentField> e : fieldMap.entrySet()) {
 				String name = e.getKey();
-				EFField param = instanceConfig.getWriteFields().get(name);
+				EFField param = instanceConfig.getSearchFields().get(name);
 				DocumentField v = e.getValue();  
 				if (param!=null && param.getSeparator() != null) { 
 					u.addObject(name, v.getValues());

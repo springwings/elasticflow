@@ -24,6 +24,15 @@ public class SearcherVearchModel extends SearcherModel<String, String, String> {
 		parse(request, sq, instanceConfig);
 		return sq;
 	}
+	
+	public static boolean containField(Map<String, EFField> fields,String k) {
+		for (Entry<String, EFField> entry : fields.entrySet()) {
+			if(entry.getValue().getAlias().equals(k)) {
+				return true;
+			}
+		}	
+		return false;
+	}
 
 	public static void parse(EFRequest request, SearcherVearchModel current, InstanceConfig instanceConfig) {
 		Map<String, Object> paramMap = request.getParams();
@@ -40,13 +49,13 @@ public class SearcherVearchModel extends SearcherModel<String, String, String> {
 			if (k.equals(GlobalParam.KEY_PARAM.__storeid.name())) {
 				current.storeId = String.valueOf(v);
 			} else {
-				if (instanceConfig.getWriteFields().containsKey(k)) { 
-					if(instanceConfig.getWriteFields().get(k).getIndextype().toLowerCase().equals("vector")) {
-						_feature.put("field",instanceConfig.getWriteFields().get(k).getAlias());
+				if (instanceConfig.getSearchFields().containsKey(k)) { 
+					if(instanceConfig.getSearchFields().get(k).getIndextype().toLowerCase().equals("vector")) {
+						_feature.put("field",instanceConfig.getSearchFields().get(k).getAlias());
 						_feature.put("feature",v); 
 					}else {
 						JSONObject filter = new JSONObject();
-						filter.put(instanceConfig.getWriteFields().get(k).getAlias(),v);
+						filter.put(instanceConfig.getSearchFields().get(k).getAlias(),v);
 						JSONObject row = new JSONObject();
 						row.put("term", filter);
 						filters.add(row);
@@ -64,7 +73,7 @@ public class SearcherVearchModel extends SearcherModel<String, String, String> {
 			current.storeId = String.valueOf(Common.getNowZero());
 		}
 		if(_feature.size()==0) {
-			Iterator<Map.Entry<String,EFField>> iter_tmp =  instanceConfig.getWriteFields().entrySet().iterator();
+			Iterator<Map.Entry<String,EFField>> iter_tmp =  instanceConfig.getSearchFields().entrySet().iterator();
 			while (iter_tmp.hasNext()) {
 				Entry<String, EFField> entry = iter_tmp.next();
 				if(entry.getValue().getIndextype().toLowerCase().equals("vector")) {					
@@ -81,7 +90,7 @@ public class SearcherVearchModel extends SearcherModel<String, String, String> {
 			}
 		}
 		_jarr.add(_feature);
-		query.put("sum",_jarr);
+		query.put("sum",_jarr);	
 		if(filters.size()>0)
 			query.put("filter", filters);
 		current.setFq(query.toJSONString());

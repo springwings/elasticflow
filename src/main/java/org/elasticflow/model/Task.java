@@ -64,7 +64,7 @@ public final class Task {
 	}
 
 	public ReaderParam getScanParam() {
-		return this.instanceConfig.getReadParams();
+		return this.instanceConfig.getReaderParams();
 	}
 
 	public String getStartTime() {
@@ -73,7 +73,7 @@ public final class Task {
 	}
 
 	public String getEndTime() {
-		return this.instanceConfig.getReadParams().getCurrentStamp();
+		return this.instanceConfig.getReaderParams().getCurrentStamp();
 	}
 
 	public JOB_TYPE getJobType() {

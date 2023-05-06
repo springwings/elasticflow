@@ -75,15 +75,15 @@ public final class PipePump extends Instruction implements Serializable {
 		fullTask = Task.getInstance(instanceID, L1seq, JOB_TYPE.FULL, instanceConfig, null);
 		incrementTask = Task.getInstance(instanceID, L1seq, JOB_TYPE.INCREMENT, instanceConfig, null);
 		try {
-			if (instanceConfig.getReadParams().getHandler() != null) {
+			if (instanceConfig.getReaderParams().getHandler() != null) {
 				try {
-					reader.setReaderHandler((ReaderHandler) Class.forName(instanceConfig.getReadParams().getHandler())
+					reader.setReaderHandler((ReaderHandler) Class.forName(instanceConfig.getReaderParams().getHandler())
 							.getDeclaredConstructor().newInstance());
 				} catch (Exception e) {
 					if (GlobalParam.PLUGIN_CLASS_LOADER != null) {
 						reader.setReaderHandler(
 								(ReaderHandler) Class
-										.forName(instanceConfig.getReadParams().getHandler(), true,
+										.forName(instanceConfig.getReaderParams().getHandler(), true,
 												GlobalParam.PLUGIN_CLASS_LOADER)
 										.getDeclaredConstructor().newInstance());
 					} else {
@@ -159,7 +159,7 @@ public final class PipePump extends Instruction implements Serializable {
 			job_type = JOB_TYPE.INCREMENT;
 			task = incrementTask;
 		}
-		List<String> L2seqs = getInstanceConfig().getReadParams().getL2Seq();
+		List<String> L2seqs = getInstanceConfig().getReaderParams().getL2Seq();
 		GlobalParam.TASK_COORDER.setFlowInfo(instanceID, job_type.name(), instanceRunId + "_L2seqs_nums",
 				String.valueOf(L2seqs.size()));
 		processFlow(task, storeId, L2seqs, destination, isReferenceInstance);
