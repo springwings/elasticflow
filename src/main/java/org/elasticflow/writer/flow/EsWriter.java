@@ -40,6 +40,7 @@ import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.UpdateByQueryRequest;
 import org.elasticsearch.script.Script;
@@ -210,17 +211,19 @@ public class EsWriter extends WriterFlowSocket {
 	@Override
 	public boolean create(String instance, String storeId, InstanceConfig instanceConfig) throws EFException{
 		String iName = Common.getStoreName(instance, storeId);
-		try {			
-			log.info("create Instance " + iName);
+		try {		 
 			if (!this.storePositionExists(iName)) {
-				CreateIndexRequest _CIR = new CreateIndexRequest(iName);
-				if(instanceConfig.getWriterParams().getStorageStructure().containsKey("number_of_shards")) {
+				CreateIndexRequest _CIR = new CreateIndexRequest(iName); 
+				if(instanceConfig.getWriterParams().getStorageStructure() != null && 
+						instanceConfig.getWriterParams().getStorageStructure().size()>0) {
+					_CIR.source(instanceConfig.getWriterParams().getStorageStructure().toJSONString(), XContentType.JSON);
+				}else if(instanceConfig.getWriterParams().getStorageStructure().containsKey("number_of_shards")) {
 					_CIR.settings(Settings.builder()
 							.put("index.number_of_shards",
 									instanceConfig.getWriterParams().getStorageStructure().getInteger("number_of_shards"))
 							.put("index.number_of_replicas",
 									instanceConfig.getWriterParams().getStorageStructure().getInteger("number_of_replicas"))); 
-				}				
+				}		 
 				_CIR.mapping(this.getSettingMap(instanceConfig));
 				CreateIndexResponse createIndexResponse = getESC().getClient().indices().create(_CIR,
 						RequestOptions.DEFAULT);
