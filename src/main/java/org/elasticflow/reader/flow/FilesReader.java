@@ -136,7 +136,7 @@ public class FilesReader extends ReaderFlowSocket {
 			if(paths.size()==1) {
 				File file = new File(paths.get(0));
 				Long lastModified = file.lastModified();
-				if (lastModified > startTime && lastModified > scanTime) {
+				if (lastModified > startTime) {
 					this.filePath.add(paths.get(0));
 					this.scanTime = lastModified;
 				} 
@@ -157,10 +157,8 @@ public class FilesReader extends ReaderFlowSocket {
 					File file = new File(path);
 					Long lastModified = file.lastModified();
 					if (lastModified > startTime) {
-						if (filePath==null || scanTime > lastModified) {
-							this.filePath.add(path);
-							this.scanTime = lastModified;
-						}
+						this.filePath.add(path);
+						this.scanTime = lastModified;
 					}
 				}
 				if(this.filePath.size()>0)
