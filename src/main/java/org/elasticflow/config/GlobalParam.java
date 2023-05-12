@@ -257,7 +257,11 @@ public final class GlobalParam {
 	public static enum QUERY_TYPE {
 		BOOLEAN_QUERY, DISJUNCTION_QUERY
 	}
-
+	
+	/** ------------searcher parameters response------------ */
+	public final static String RESPONSE_SCORE = "__SCORE";
+	public final static String RESPONSE_EXPLAINS = "__EXPLAINS";
+	
 	/** ------------reader parameters------------ */
 	public static final String _start = "#{page_start}";
 	public static final String _end = "#{page_end}";

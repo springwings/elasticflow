@@ -48,11 +48,11 @@ public class MysqlReader extends ReaderFlowSocket{
 		if(!ISLINK())
 			return this.dataPage; 
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.reader); 
+		this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
+		this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
 		try (PreparedStatement statement = conn.prepareStatement(page.getAdditional());){ 
 			statement.setFetchSize(pageSize); 
-			try(ResultSet rs = statement.executeQuery();){				
-				this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
-				this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
+			try(ResultSet rs = statement.executeQuery();){		 
 				if(this.readHandler!=null && this.readHandler.supportHandleData()){
 					//handler reference getAllData function 
 					this.readHandler.handleData(this,rs,page,pageSize);					

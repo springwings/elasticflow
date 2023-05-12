@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.connection.EsConnector;
 import org.elasticflow.field.EFField;
@@ -120,10 +121,10 @@ public final class EsSearcher extends SearcherFlowSocket {
 				} else if(returnFields.contains(name)) {
 					u.addObject(name, v.getValue());
 				}
-			}
-			if(fq.isShowQueryInfo()){ 
-				u.addObject("_SCORE", h.getExplanation().getValue()); 
-				u.addObject("_EXPLAINS", h.getExplanation().toString().replace("", ""));
+			} 
+			if(fq.isShowQueryInfo()){  
+				u.addObject(GlobalParam.RESPONSE_SCORE, h.getExplanation().getValue()); 
+				u.addObject(GlobalParam.RESPONSE_EXPLAINS, h.getExplanation().toString().replace("", ""));
 			}
 			res.getUnitSet().add(u);  
 		} 

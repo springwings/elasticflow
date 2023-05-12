@@ -45,8 +45,9 @@ public class FilesReader extends ReaderFlowSocket {
 	 * @return
 	 * @throws Exception
 	 */
-	private int processCsv(Page page, int pageSize) throws Exception {
-		int pos = 0;
+	private void processCsv(Page page, int pageSize) throws Exception {
+		int pos = 0;  
+		String LAST_STAMP = null;
 		String[] headers;
 		if(this.filePath.size()==1) { 
 			try (RandomAccessFile rf = new RandomAccessFile(this.filePath.get(0), "r");) {
@@ -62,7 +63,12 @@ public class FilesReader extends ReaderFlowSocket {
 						String[] datas = line.strip().split(",");
 						for(int i=0;i<headers.length;i++) {
 							PipeDataUnit.addFieldValue(headers[i], datas[i], page.getInstanceConfig().getReadFields(),
-									u);
+									u); 
+							if (headers[i].equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))) {
+								LAST_STAMP = datas[i];
+							} else if (headers[i].equals(this.dataPage.get(GlobalParam.READER_KEY))) {
+								u.setReaderKeyVal(datas[i]); 
+							}
 						} 
 						this.dataUnit.add(u);
 						pos++;
@@ -77,12 +83,18 @@ public class FilesReader extends ReaderFlowSocket {
 					headers = rf.readLine().split(","); 
 					String line = rf.readLine();
 					while(line !=null) {
+						line = new String(line.getBytes("ISO-8859-1"), GlobalParam.ENCODING);
 						PipeDataUnit u = PipeDataUnit.getInstance();
 						String[] datas = line.strip().split(",");
 						for(int i=0;i<headers.length;i++) {
 							PipeDataUnit.addFieldValue(headers[i], datas[i], page.getInstanceConfig().getReadFields(),
 									u);
-						} 
+							if (headers[i].equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))) {
+								LAST_STAMP = datas[i];
+							} else if (headers[i].equals(this.dataPage.get(GlobalParam.READER_KEY))) {
+								u.setReaderKeyVal(datas[i]); 
+							}
+						}  
 						this.dataUnit.add(u);
 						line = rf.readLine();
 					} 
@@ -91,7 +103,13 @@ public class FilesReader extends ReaderFlowSocket {
 			this.filePath.clear();
 			pos = 0;
 		}	
-		return pos;
+		if (LAST_STAMP == null) {
+			this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis());
+		} else {
+			this.dataPage.put(GlobalParam.READER_LAST_STAMP, LAST_STAMP);
+		}
+		this.dataPage.putData(this.dataUnit);
+		this.dataPage.putDataBoundary(String.valueOf(Integer.parseInt(page.getStart()) + pos)); 
 	}
 
 	@Override
@@ -100,12 +118,12 @@ public class FilesReader extends ReaderFlowSocket {
 		try {
 			if (!ISLINK())
 				return this.dataPage;
+			this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
+			this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
 			if (this.readHandler == null) {
-				int pos = this.processCsv(page, pageSize); 
+				this.processCsv(page, pageSize); 
 				this.dataPage.putData(this.dataUnit);
 				this.dataPage.put(GlobalParam.READER_STATUS, true);
-				this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
-				this.dataPage.putDataBoundary(String.valueOf(Integer.parseInt(page.getStart()) + pos));
 			} else {
 				this.readHandler.handleData(this, filePath, page, pageSize);
 			}

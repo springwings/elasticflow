@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.connection.VearchConnector;
 import org.elasticflow.connection.handler.ConnectionHandler;
@@ -82,7 +83,7 @@ public class VearchSearcher extends SearcherFlowSocket{
 							Entry<String, Object> entry = it.next();
 							rn.addObject(entry.getKey(), entry.getValue());
 				        } 
-						rn.addObject("_score", hits.getJSONObject(i).get("_score"));
+						rn.addObject(GlobalParam.RESPONSE_SCORE, hits.getJSONObject(i).get("_score"));
 						unitSet.add(rn);
 					}
 				}
