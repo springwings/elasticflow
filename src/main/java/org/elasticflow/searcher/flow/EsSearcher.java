@@ -20,6 +20,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
@@ -29,6 +30,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * 
@@ -47,7 +49,7 @@ public final class EsSearcher extends SearcherFlowSocket {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public SearcherResult Search(SearcherModel<?, ?, ?> fq, String instance,SearcherHandler handler)
+	public SearcherResult Search(SearcherModel<?, ?, ?> query, String instance,SearcherHandler handler)
 			throws EFException {
 		PREPARE(false, true, false);
 		boolean releaseConn = false;
@@ -57,16 +59,16 @@ public final class EsSearcher extends SearcherFlowSocket {
 		try{ 
 			EsConnector ESC = (EsConnector) GETSOCKET().getConnection(END_TYPE.searcher);
 			RestHighLevelClient conn = ESC.getClient();
-			int start = fq.getStart();
-			int count = fq.getCount(); 
-			List<SortBuilder<?>> sortFields = (List<SortBuilder<?>>) fq.getSortinfo();
-			QueryBuilder qb = (QueryBuilder) fq.getQuery();
-			List<AggregationBuilder> facetBuilders = (List<AggregationBuilder>) fq
+			int start = query.getStart();
+			int count = query.getCount(); 
+			List<SortBuilder<?>> sortFields = (List<SortBuilder<?>>) query.getSortinfo();
+			QueryBuilder qb = (QueryBuilder) query.getQuery();
+			List<AggregationBuilder> facetBuilders = (List<AggregationBuilder>) query
 					.getFacetsConfig(); 
 			
 			List<String> returnFields = new ArrayList<String>();
-			if (fq.getFl()!=null) {
-				for (String s : fq.getFl().split(",")) {
+			if (query.getFl()!=null) {
+				for (String s : query.getFl().split(",")) {
 					returnFields.add(s);
 				}
 			} else {
@@ -77,12 +79,21 @@ public final class EsSearcher extends SearcherFlowSocket {
 				}
 			} 
 			SearchResponse response = getSearchResponse(conn,qb, returnFields, instance,
-					start, count, sortFields, facetBuilders, fq,res);
+					start, count, sortFields, facetBuilders, query,res);
 			if(handler==null) {
-				addResult(res,response,fq,returnFields);
+				addResult(res,response,query,returnFields);
 			}else {
-				handler.Handle(res,response,fq,instanceConfig,returnFields);
+				handler.Handle(res,response,query,instanceConfig,returnFields);
 			} 
+			if(query.isShowStats()) {   
+				MainResponse tmp = conn.info(RequestOptions.DEFAULT); 
+				JSONObject jo = new JSONObject();
+				jo.put("clusterName", tmp.getClusterName());
+				jo.put("nodeName", tmp.getNodeName());
+				jo.put("version", tmp.getVersion());
+				jo.put("tagline", tmp.getTagline());
+				res.setStat(jo);
+			}
 		}catch(Exception e){ 
 			releaseConn = true;
 			throw Common.getException(e);
