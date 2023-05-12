@@ -210,10 +210,10 @@ public class EsWriter extends WriterFlowSocket {
 
 	@Override
 	public boolean create(String instance, String storeId, InstanceConfig instanceConfig) throws EFException{
-		String iName = Common.getStoreName(instance, storeId);
+		String indexName = Common.getStoreName(instance, storeId);
 		try {		 
-			if (!this.storePositionExists(iName)) {
-				CreateIndexRequest _CIR = new CreateIndexRequest(iName); 
+			if (!this.storePositionExists(indexName)) {
+				CreateIndexRequest _CIR = new CreateIndexRequest(indexName); 
 				if(instanceConfig.getWriterParams().getStorageStructure() != null && 
 						instanceConfig.getWriterParams().getStorageStructure().size()>0) {
 					_CIR.source(instanceConfig.getWriterParams().getStorageStructure().toJSONString(), XContentType.JSON);
@@ -227,7 +227,7 @@ public class EsWriter extends WriterFlowSocket {
 				_CIR.mapping(this.getSettingMap(instanceConfig));
 				CreateIndexResponse createIndexResponse = getESC().getClient().indices().create(_CIR,
 						RequestOptions.DEFAULT);
-				log.info("create new Instance " + iName + " response isAcknowledged:"
+				log.info("create new Instance store position " + indexName + " response isAcknowledged:"
 						+ createIndexResponse.isAcknowledged());
 			}
 			return true;

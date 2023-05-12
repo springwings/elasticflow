@@ -1,85 +1,90 @@
-<config>  
-<dataflow>
- 
-		<TransParam> 
+<config>
+	<dataflow>
+		<TransParam>
 			<param>
 				<name>fullCron</name>
 				<value>0 0 0/1 * * ?</value>
-			</param> 
+			</param>
 			<param>
 				<name>writeTo</name>
-				<value>elasticsarch_position</value>
-			</param>  
-
-                       <!--- pipe start parameters -->
-		 
-			<param> 
-				<name>readFrom</name> 
-				<value>csv_folder</value> 
+				<value>kges</value>
 			</param>
-                           
-                       <param>
-                             <name>writeMechanism</name>
-                             <value>normal</value>
-                       </param>
-                       <param>
+			<!--- pipe start parameters -->
+			<param>
+				<name>readFrom</name>
+				<value>csv_folder</value>
+			</param>
+			<param>
+				<name>writeMechanism</name>
+				<value>normal</value>
+			</param>
+			<param>
 				<name>writeType</name>
 				<value>full</value>
-		       </param>  
-			
-                        <!--- pipe compute service parameters -->
-                        
-                        <!--- pipe search service parameters -->
-                         <param>
+			</param>
+
+			<!--- pipe compute service parameters -->
+
+			<!--- pipe search service parameters -->
+			<param>
 				<name>searchFrom</name>
 				<value>kges</value>
-			</param>  
-			 
+			</param>
+
 		</TransParam>
 
-                <ReadParam>   
-                        <param>
+		<ReaderParam>
+			<param>
 				<name>keyField</name>
-				<value>subject_id</value>
+				<value>id</value>
 			</param>
 			<param>
 				<name>scanField</name>
 				<value>update_time</value>
-			</param> 
-</ReadParam>  
-<WriteParam>
-   <param>
-	<name>writeKey</name>
-	<value>subject_id</value>
-   </param>
-   <param>
-	<name>keyType</name>
-	<value>unique</value>
-   </param>
+			</param>
+		</ReaderParam>
+		<WriterParam>
+			<param>
+				<name>writeKey</name>
+				<value>id</value>
+			</param>
+			<param>
+				<name>keyType</name>
+				<value>unique</value>
+			</param>
+		   <param>
+			<name>storageStructure</name>
+			<value> <![CDATA[ {
+		    "settings" : {
+		        "index" : {
+		            "number_of_shards" : 1,
+		            "number_of_replicas" : 0
+		        }
+		    }
+			}' ]]></value>
+		   </param>
+			<fields>
+				<field name="id" indexed="true" stored="true" indextype="keyword" alias="id" paramtype="java.lang.String" />  
+				<field name="title" indexed="true" stored="true" indextype="keyword" alias="title" paramtype="java.lang.String" /> 
+				<field name="content" indexed="true" stored="true" indextype="text" alias="content" analyzer="ik_max_word" dsl='{"search_analyzer": "ik_smart"}' paramtype="java.lang.String" />  
+				<field name="update_time" indexed="true" stored="false" indextype="long" alias="update_time" paramtype="org.elasticflow.field.handler.LongRangeType" /> 
+			</fields>
+		</WriterParam>
 
-  <fields>
-<field name="subject_id" indexed="true" stored="true" indextype="keyword" alias="id" paramtype="java.lang.String" />  
-<field name="subject" indexed="true" stored="true" indextype="keyword" alias="subject" paramtype="java.lang.String" /> 
-<field name="alias" indexed="true" stored="true" indextype="keyword" separator="," alias="alias" paramtype="java.lang.String" /> 
-<field name="type" indexed="true" stored="true" indextype="keyword" alias="type" paramtype="java.lang.String" /> 
-<field name="update_time" indexed="true" stored="false" indextype="long" alias="update_time" paramtype="org.elasticflow.field.handler.LongRangeType" /> 
-  </fields>
-</WriteParam>
 
+		<SearcherParam>
+			<param>
+				<name>start</name>
+				<paramtype>java.lang.Integer</paramtype>
+				<defaultValue>0</defaultValue>
+			</param>
+			<param>
+				<name>count</name>
+				<paramtype>java.lang.Integer</paramtype>
+				<defaultValue>1</defaultValue>
+			</param>
 
-<SearchParam> 
-<param>
-		<name>start</name>
-		<paramtype>java.lang.Integer</paramtype>
-		<defaultValue>0</defaultValue>
-	</param>
-	<param>
-		<name>count</name>
-		<paramtype>java.lang.Integer</paramtype>
-		<defaultValue>1</defaultValue>
-	</param>
-	 
-</SearchParam>
-</dataflow>  
+		</SearcherParam>
+	</dataflow>
 
 </config> 

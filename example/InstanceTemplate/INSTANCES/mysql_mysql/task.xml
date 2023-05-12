@@ -1,7 +1,7 @@
-<config>  
-<dataflow>
- 
-		<TransParam> 
+<config>
+	<dataflow>
+
+		<TransParam>
 
 			<param>
 				<name>fullCron</name>
@@ -10,49 +10,50 @@
 			<param>
 				<name>deltaCron</name>
 				<value>0 1/5 * * * ?</value>
-			</param> 
+			</param>
 			<param>
 				<name>writeTo</name>
 				<value>
-	mysql_db</value>
-			</param>  
-
-                       <!--- pipe start parameters -->
-		 
-			<param> 
-				<name>readFrom</name> 
-				<value>mysql_db</value> 
+					mysql_db
+				</value>
 			</param>
-                           
-                       <param>
-                             <name>writeMechanism</name>
-                             <value>ab</value>
-                       </param>
-                       <param>
+
+			<!--- pipe start parameters -->
+
+			<param>
+				<name>readFrom</name>
+				<value>mysql_db</value>
+			</param>
+
+			<param>
+				<name>writeMechanism</name>
+				<value>ab</value>
+			</param>
+			<param>
 				<name>writeType</name>
 				<value>full</value>
-		       </param>
-                       <param>
+			</param>
+			<param>
 				<name>writerPoolShareAlias</name>
 				<value>true</value>
-			</param> 
-                        <param>
-                             <name>multiThread</name>
-                             <value>false</value>
-                        </param>
-			
-                        <!--- pipe compute service parameters -->
-                        
-                        <!--- pipe search service parameters -->
-                         <param>
+			</param>
+			<param>
+				<name>multiThread</name>
+				<value>false</value>
+			</param>
+
+			<!--- pipe compute service parameters -->
+
+			<!--- pipe search service parameters -->
+			<param>
 				<name>searchFrom</name>
 				<value>kges</value>
-			</param>  
-			 
+			</param>
+
 		</TransParam>
 
-                <ReadParam>   
-                        <param>
+		<ReaderParam>
+			<param>
 				<name>keyField</name>
 				<value>subject_id</value>
 			</param>
@@ -73,17 +74,18 @@ SELECT id FROM cms_table  WHERE  UNIX_TIMESTAMP(kg_subject.update_time) > '#{sta
 ]]>
 				</value>
 			</param>
-</ReadParam> 
+		</ReaderParam>
 
-       
-<WriteParam>
-   <param>kgtest_b
-	<name>writeKey</name>
-	<value>subject_id</value>
-   </param>
-   <param>
-       <name>storageStructure</name>
-       <value><![CDATA[ 
+
+		<WriterParam>
+			<param>
+				kgtest_b
+				<name>writeKey</name>
+				<value>subject_id</value>
+			</param>
+			<param>
+				<name>storageStructure</name>
+				<value><![CDATA[ 
 {
  "tablemeta":"(
   `id` varchar(32) NOT NULL,
@@ -94,33 +96,38 @@ SELECT id FROM cms_table  WHERE  UNIX_TIMESTAMP(kg_subject.update_time) > '#{sta
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"
 }
 ]]></value>
-   </param>
-   <param>
-	<name>keyType</name>
-	<value>unique</value>
-   </param>
+			</param>
+			<param>
+				<name>keyType</name>
+				<value>unique</value>
+			</param>
 
-  <fields>
-<field name="subject_id" indexed="true" stored="true" indextype="varchar" alias="id" paramtype="java.lang.String" />  
-<field name="subject" indexed="true" stored="true" indextype="varchar" alias="subject" paramtype="java.lang.String" /> 
-<field name="alias" indexed="false" stored="true" indextype="varchar" separator="," alias="alias" paramtype="java.lang.String" /> 
-<field name="type" indexed="false" stored="true" indextype="varchar" alias="type" paramtype="java.lang.String" /> 
-  </fields>
-</WriteParam>
+			<fields>
+				<field name="subject_id" indexed="true" stored="true"
+					indextype="varchar" alias="id" paramtype="java.lang.String" />
+				<field name="subject" indexed="true" stored="true"
+					indextype="varchar" alias="subject" paramtype="java.lang.String" />
+				<field name="alias" indexed="false" stored="true"
+					indextype="varchar" separator="," alias="alias"
+					paramtype="java.lang.String" />
+				<field name="type" indexed="false" stored="true"
+					indextype="varchar" alias="type" paramtype="java.lang.String" />
+			</fields>
+		</WriterParam>
 
 
-<SearchParam> 
-<param>
-		<name>start</name>
-		<paramtype>java.lang.Integer</paramtype>
-		<defaultValue>0</defaultValue>
-	</param>
-	<param>
-		<name>count</name>
-		<paramtype>java.lang.Integer</paramtype>
-		<defaultValue>1</defaultValue>
-	</param> 
-</SearchParam>
-</dataflow>  
+		<SearcherParam>
+			<param>
+				<name>start</name>
+				<paramtype>java.lang.Integer</paramtype>
+				<defaultValue>0</defaultValue>
+			</param>
+			<param>
+				<name>count</name>
+				<paramtype>java.lang.Integer</paramtype>
+				<defaultValue>1</defaultValue>
+			</param>
+		</SearcherParam>
+	</dataflow>
 
 </config> 

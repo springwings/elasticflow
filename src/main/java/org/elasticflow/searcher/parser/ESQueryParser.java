@@ -166,7 +166,7 @@ public class ESQueryParser implements QueryParser{
 				query = QueryBuilders.rangeQuery(key).from(_v[0]).to(_v[1])
 						.includeLower(sp == null ? true : sp.isIncludeLower())
 						.includeUpper(sp == null ? true : sp.isIncludeUpper());
-			}  else { 
+			} else { 
 				query = QueryBuilders.termQuery(key, String.valueOf(v));
 				QueryBoost(query, tp, request);
 			}
@@ -196,7 +196,7 @@ public class ESQueryParser implements QueryParser{
 					new BoolQueryBuilder().should(fzQuery).should(QueryBuilders.termQuery(field, queryStr).boost(1.2f)),
 					"must");
 		} else {
-			ESSimpleQuery.add(QueryBuilders.termQuery(field, queryStr), "must");
+			ESSimpleQuery.add(QueryBuilders.matchQuery(field, queryStr), "must");
 		}
 		return ESSimpleQuery.getQuery();
 	}

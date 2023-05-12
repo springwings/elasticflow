@@ -84,7 +84,7 @@ public abstract class WriterFlowSocket extends Flow {
 		String iName = Common.getStoreName(mainName, "");
 		if (this.storePositionExists(iName) == false) {
 			this.create(mainName, "", instanceConfig);
-			if (isIncrement == true)
+			if (isIncrement == true && !mainName.equals(instanceConfig.getAlias()))
 				this.setAlias(mainName, "", instanceConfig.getAlias());
 		}
 		return "";

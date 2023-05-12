@@ -49,7 +49,7 @@
 
 		</TransParam>
 
-		<ReadParam>
+		<ReaderParam>
 			<param>
 				<name>keyField</name>
 				<value>subject_id</value>
@@ -71,8 +71,8 @@ SELECT id FROM cms_table  WHERE  UNIX_TIMESTAMP(kg_subject.update_time) > '#{sta
 ]]>
 				</value>
 			</param>
-		</ReadParam>
-		<WriteParam>
+		</ReaderParam>
+		<WriterParam>
 			<param>
 				<name>writeKey</name>
 				<value>subject_id</value>
@@ -96,10 +96,10 @@ SELECT id FROM cms_table  WHERE  UNIX_TIMESTAMP(kg_subject.update_time) > '#{sta
 					indextype="long" alias="update_time"
 					paramtype="org.elasticflow.field.handler.LongRangeType" />
 			</fields>
-		</WriteParam>
+		</WriterParam>
 
 
-		<SearchParam>
+		<SearcherParam>
 			<param>
 				<name>start</name>
 				<paramtype>java.lang.Integer</paramtype>
@@ -111,7 +111,7 @@ SELECT id FROM cms_table  WHERE  UNIX_TIMESTAMP(kg_subject.update_time) > '#{sta
 				<defaultValue>1</defaultValue>
 			</param>
 
-		</SearchParam>
+		</SearcherParam>
 	</dataflow>
 
 </config> 

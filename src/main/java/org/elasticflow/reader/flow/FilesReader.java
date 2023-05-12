@@ -3,6 +3,7 @@ package org.elasticflow.reader.flow;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.elasticflow.config.GlobalParam;
@@ -27,7 +28,7 @@ public class FilesReader extends ReaderFlowSocket {
 
 	private final static Logger log = LoggerFactory.getLogger(FilesReader.class);
 
-	private String filePath;
+	private List<String> filePath = new ArrayList<>();
 	
 	private Long scanTime;
 
@@ -35,6 +36,62 @@ public class FilesReader extends ReaderFlowSocket {
 		FilesReader o = new FilesReader();
 		o.initConn(connectParams);
 		return o;
+	}
+	
+	/**
+	 * csv header map to fields define
+	 * @param page
+	 * @param pageSize
+	 * @return
+	 * @throws Exception
+	 */
+	private int processCsv(Page page, int pageSize) throws Exception {
+		int pos = 0;
+		String[] headers;
+		if(this.filePath.size()==1) { 
+			try (RandomAccessFile rf = new RandomAccessFile(this.filePath.get(0), "r");) {
+				headers = rf.readLine().split(",");
+				int startpos = Integer.parseInt(page.getStart());
+				if (startpos>0) 
+					rf.seek(startpos);
+				while (pos < pageSize) {
+					String line = rf.readLine();
+					if (line != null) {  
+						line = new String(line.getBytes("ISO-8859-1"), GlobalParam.ENCODING);
+						PipeDataUnit u = PipeDataUnit.getInstance();
+						String[] datas = line.strip().split(",");
+						for(int i=0;i<headers.length;i++) {
+							PipeDataUnit.addFieldValue(headers[i], datas[i], page.getInstanceConfig().getReadFields(),
+									u);
+						} 
+						this.dataUnit.add(u);
+						pos++;
+					} else {
+						break;
+					}
+				}
+			}
+		}else {
+			for(String fpath :this.filePath) {
+				try (RandomAccessFile rf = new RandomAccessFile(fpath, "r");) {
+					headers = rf.readLine().split(","); 
+					String line = rf.readLine();
+					while(line !=null) {
+						PipeDataUnit u = PipeDataUnit.getInstance();
+						String[] datas = line.strip().split(",");
+						for(int i=0;i<headers.length;i++) {
+							PipeDataUnit.addFieldValue(headers[i], datas[i], page.getInstanceConfig().getReadFields(),
+									u);
+						} 
+						this.dataUnit.add(u);
+						line = rf.readLine();
+					} 
+				}
+			}
+			this.filePath.clear();
+			pos = 0;
+		}	
+		return pos;
 	}
 
 	@Override
@@ -44,22 +101,7 @@ public class FilesReader extends ReaderFlowSocket {
 			if (!ISLINK())
 				return this.dataPage;
 			if (this.readHandler == null) {
-				int pos = 0;
-				try (RandomAccessFile rf = new RandomAccessFile(filePath, "r");) {
-					rf.seek(Integer.parseInt(page.getStart()));
-					while (pos < pageSize) {
-						String line = rf.readLine();
-						if (line != null) {
-							PipeDataUnit u = PipeDataUnit.getInstance();
-							PipeDataUnit.addFieldValue("datas", line.strip(), page.getInstanceConfig().getReadFields(),
-									u);
-							this.dataUnit.add(u);
-							pos++;
-						} else {
-							break;
-						}
-					}
-				}
+				int pos = this.processCsv(page, pageSize); 
 				this.dataPage.putData(this.dataUnit);
 				this.dataPage.put(GlobalParam.READER_STATUS, true);
 				this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
@@ -87,32 +129,44 @@ public class FilesReader extends ReaderFlowSocket {
 			Long startTime = 0L;
 			if(task.getStartTime().length()>0)
 				startTime =  Long.valueOf(task.getStartTime());
-			scanTime = startTime;
-			filePath = null;
+			this.scanTime = startTime;
+			this.filePath.clear();
 			@SuppressWarnings("unchecked")
 			ArrayList<String> paths = (ArrayList<String>) GETSOCKET().getConnection(END_TYPE.reader);
-			for (String path : paths) {
-				File file = new File(path);
+			if(paths.size()==1) {
+				File file = new File(paths.get(0));
 				Long lastModified = file.lastModified();
-				if (lastModified > startTime) {
-					if (filePath==null || scanTime > lastModified) {
-						filePath = path;
-						scanTime = lastModified;
+				if (lastModified > startTime && lastModified > scanTime) {
+					this.filePath.add(paths.get(0));
+					this.scanTime = lastModified;
+				} 
+				if (this.filePath.size()>0) {
+					RandomAccessFile rf = new RandomAccessFile(filePath.get(0), "r");
+					rf.seek(0); 
+					int pos = 0;
+					page.push("0");
+		            while (rf.readLine() != null) {
+		            	pos+=1;	            		
+		            	if(pos%pageSize==0)
+		            		page.push(String.valueOf(rf.getFilePointer()));	            	
+		            }	
+		            rf.close();
+				}
+			}else if(paths.size()>1) {
+				for (String path : paths) {
+					File file = new File(path);
+					Long lastModified = file.lastModified();
+					if (lastModified > startTime) {
+						if (filePath==null || scanTime > lastModified) {
+							this.filePath.add(path);
+							this.scanTime = lastModified;
+						}
 					}
 				}
+				if(this.filePath.size()>0)
+					page.push("0");
 			}
-			if (filePath != null) {
-				RandomAccessFile rf = new RandomAccessFile(filePath, "r");
-				rf.seek(0); 
-				int pos = 0;
-				page.push("0");
-	            while (rf.readLine() != null) {
-	            	pos+=1;	            		
-	            	if(pos%pageSize==0)
-	            		page.push(String.valueOf(rf.getFilePointer()));	            	
-	            }	
-	            rf.close();
-			}
+			
 		} catch (Exception e) {
 			releaseConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS, false);

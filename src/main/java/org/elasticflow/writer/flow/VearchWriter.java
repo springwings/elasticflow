@@ -50,11 +50,11 @@ public class VearchWriter extends WriterFlowSocket {
 		if(!this.storePositionExists(name)) {
 			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 			try {
-				log.info("create Instance " + name + ":" + type);
+				log.info("create Instance store position  " + name + ":" + type);
 				conn.createSpace(this.getTableMeta(name,instanceConfig));
 				return true;
 			} catch (Exception e) {
-				log.error("create space exception",e);
+				log.error("create Instance store position exception",e);
 				throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
 			} finally {
 				REALEASE(false, false);
