@@ -63,20 +63,19 @@ public class Searcher {
 			response.setStatus("searcher Flow Socket is null!",RESPONSE_STATUS.CodeException);
 			return ;
 		}
-		SearcherModel<?, ?, ?> searcherModel = null;
+		SearcherModel<?, ?> searcherModel = null;
 		switch (this.searcherFlowSocket.getType()) {
 		case ES:
-			searcherModel = SearcherESModel.getInstance(rq,instanceConfig);
-			SearchParamUtil.normalParam(rq, searcherModel,instanceConfig);
+			searcherModel = SearcherESModel.getInstance(rq,instanceConfig); 
 			break; 
 		case VEARCH:
-			searcherModel = SearcherVearchModel.getInstance(rq,instanceConfig);
-			SearchParamUtil.normalParam(rq, searcherModel,instanceConfig);
+			searcherModel = SearcherVearchModel.getInstance(rq,instanceConfig); 
 			break; 
 		default:
 			response.setStatus("Not Support Searcher Type "+this.searcherFlowSocket.getType(),RESPONSE_STATUS.ParameterErr);
 			return; 
 		}  
+		SearchParamUtil.normalParam(rq, searcherModel,instanceConfig); 
 		try {
 			if(rq.hasErrors()) {
 				response.setStatus(rq.getErrors(),RESPONSE_STATUS.CodeException);

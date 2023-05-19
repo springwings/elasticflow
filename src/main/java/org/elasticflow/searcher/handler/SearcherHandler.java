@@ -8,7 +8,7 @@
 package org.elasticflow.searcher.handler;
 
 /**
- * user defined read data process function
+ * user defined  data process function
  * @author chengwen
  * @version 1.0 
  */

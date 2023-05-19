@@ -63,7 +63,7 @@ public class NodeConfig {
 	}
 
 	public void init(String instanceSettings,String instancelocations) {
-		loadConfig(instanceSettings, true);
+		loadConfig(instanceSettings.strip(), true);
 		if(instancelocations!=null) {
 			for (String inst : instancelocations.split(",")) {
 				String[] strs = inst.split(":");

@@ -13,9 +13,12 @@ import org.elasticflow.config.GlobalParam.FIELD_PARSE_TYPE;
 import org.elasticflow.config.GlobalParam.QUERY_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
+import org.elasticflow.field.handler.FloatRangeType;
 import org.elasticflow.model.EFRequest;
+import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.param.end.SearcherParam;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFException;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.DisMaxQueryBuilder;
@@ -26,8 +29,11 @@ import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * 
@@ -42,22 +48,32 @@ public class ESQueryParser implements QueryParser{
 	static public QueryBuilder EmptyQuery() {
 		return QueryBuilders.termQuery("EMPTY", "0x000");
 	}
-
-	static public BoolQueryBuilder parseRequest(EFRequest request, InstanceConfig instanceConfig) {
-		BoolQueryBuilder bquery = QueryBuilders.boolQuery();
+ 
+	/**
+	 * Parameter parsing as query parser
+	 * @param request
+	 * @param instanceConfig
+	 * @param model
+	 * @param ssb
+	 */
+	static public void parseQuery(InstanceConfig instanceConfig,SearcherModel<?, ?> model,SearchSourceBuilder ssb) {
+		BoolQueryBuilder bquery = QueryBuilders.boolQuery(); 
 		try {
-			Map<String, Object> paramMap = request.getParams();
+			Map<String, Object> paramMap = model.efRequest.getParams();
 			Set<Entry<String, Object>> entries = paramMap.entrySet();
 			Iterator<Entry<String, Object>> iter = entries.iterator();
 			/** support fuzzy search */
 			int fuzzy = 0;
-			if (request.getParam(GlobalParam.PARAM_FUZZY) != null) {
-				fuzzy = Integer.parseInt((String) request.getParam(GlobalParam.PARAM_FUZZY));
+			if (model.efRequest.getParam(GlobalParam.PARAM_FUZZY) != null) {
+				fuzzy = Integer.parseInt((String) model.efRequest.getParam(GlobalParam.PARAM_FUZZY));
 			}
 			while (iter.hasNext()) {
 				Entry<String, Object> entry = iter.next();
 				String key = entry.getKey();
 				Object value = entry.getValue();
+				//sys define process
+				if (key.equalsIgnoreCase(GlobalParam.PARAM_POST_FILTER)) 
+					continue;
 				Occur occur = Occur.MUST;
 				/** support script search */
 				if (key.equalsIgnoreCase(GlobalParam.PARAM_DEFINEDSEARCH)) {
@@ -96,8 +112,7 @@ public class ESQueryParser implements QueryParser{
 						bquery.must(_q);
 					}
 					continue;
-				}
-
+				} 
 				if (key.endsWith(GlobalParam.NOT_SUFFIX)) {
 					key = key.substring(0, key.length() - GlobalParam.NOT_SUFFIX.length());
 					occur = Occur.MUST_NOT;
@@ -110,7 +125,7 @@ public class ESQueryParser implements QueryParser{
 				}
 				QueryBuilder query = null;
 				if (sp != null && sp.getFields() != null && sp.getFields().length() > 0)
-					query = buildMultiQuery(sp.getFields(), String.valueOf(value), instanceConfig, request, key, fuzzy);
+					query = buildMultiQuery(sp.getFields(), String.valueOf(value), instanceConfig, model.efRequest, key, fuzzy);
 				else if(tp.getIndextype().contentEquals("dense_vector")) {
 					Map<String, Object> _params = new HashMap<>();
 					_params.put("query_vector", value);
@@ -120,7 +135,7 @@ public class ESQueryParser implements QueryParser{
 					        "(cosineSimilarity(params.query_vector, doc['"+key+"']) + 1.0)", _params); 
 					bquery.must(QueryBuilders.scriptScoreQuery(QueryBuilders.matchAllQuery(), script));
 				}else {
-					query = buildSingleQuery(tp.getAlias(), String.valueOf(value), tp, sp, request, key, fuzzy); 
+					query = buildSingleQuery(tp.getAlias(), String.valueOf(value), tp, sp, model.efRequest, key, fuzzy); 
 				}
 				if (occur == Occur.MUST_NOT && query != null) {
 					bquery.mustNot(query);
@@ -129,14 +144,39 @@ public class ESQueryParser implements QueryParser{
 
 				if (query != null)
 					bquery.must(query);
-			}
-
+			} 
 		} catch (Exception e) {
 			log.error("buildBooleanQuery Exception", e);
-		}
-		return bquery;
+		} 
+		ssb.query(bquery);
 	}
-
+ 
+	/**
+	 * Parameter parsing as filter parser 
+	 * @param request
+	 * @param instanceConfig
+	 * @param model
+	 * @param ssb
+	 * @throws EFException
+	 */
+	static public void parseFilter(InstanceConfig instanceConfig,SearcherModel<?, ?> model,SearchSourceBuilder ssb) throws EFException {
+		BoolQueryBuilder bquery = QueryBuilders.boolQuery();   
+		if(model.efRequest.getParams().containsKey(GlobalParam.PARAM_POST_FILTER)) {
+			JSONObject JOS = JSONObject.parseObject(String.valueOf(model.efRequest.getParam(GlobalParam.PARAM_POST_FILTER)));
+			Set<Entry<String, Object>> itr = JOS.entrySet();
+			for (Entry<String, Object> k : itr) {
+				if (k.getKey().toUpperCase().equals(GlobalParam.RESPONSE_SCORE)) { 
+					Float[] vals = FloatRangeType.parse(k.getValue());
+					ssb.minScore(vals[0]);
+				}else {
+					bquery.must(QueryBuilders.queryStringQuery(String.valueOf(k.getValue())));
+				}
+			} 
+		} 
+		if(bquery.hasClauses())
+			ssb.postFilter(bquery); 
+	}
+	
 	static private void QueryBoost(QueryBuilder query, EFField tp, EFRequest request) throws Exception {
 		float boostValue = tp.getBoost();
 

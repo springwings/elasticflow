@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.elasticflow.config.GlobalParam;
@@ -15,6 +16,7 @@ import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFFileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +38,38 @@ public class FilesReader extends ReaderFlowSocket {
 		FilesReader o = new FilesReader();
 		o.initConn(connectParams);
 		return o;
+	}
+	
+	/**
+	 * Can only be two fixed fields title,content
+	 * It will generate a unique ID based on the title field hash
+	 * @param page
+	 * @param pageSize
+	 * @throws Exception
+	 */
+	private void processTxt(Page page, int pageSize) throws Exception {  
+		int pos = 0;  
+		String LAST_STAMP = null; 
+		for(String fpath :this.filePath) {
+			PipeDataUnit u = PipeDataUnit.getInstance();
+			String content = EFFileUtil.readText(fpath, GlobalParam.ENCODING, false);
+			String title = EFFileUtil.getFileObj(fpath).getName();
+			String id = UUID.nameUUIDFromBytes((title).getBytes()).toString().replace("-", "");
+			PipeDataUnit.addFieldValue("id", id, page.getInstanceConfig().getReadFields(),u);
+			PipeDataUnit.addFieldValue("title", title, page.getInstanceConfig().getReadFields(),u);
+			PipeDataUnit.addFieldValue("content", content, page.getInstanceConfig().getReadFields(),u);
+			LAST_STAMP = String.valueOf(EFFileUtil.getFileObj(fpath).lastModified());
+			u.setReaderKeyVal(id); 
+			this.dataUnit.add(u);
+		}
+		this.filePath.clear();
+		if (LAST_STAMP == null) {
+			this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis());
+		} else {
+			this.dataPage.put(GlobalParam.READER_LAST_STAMP, LAST_STAMP);
+		}
+		this.dataPage.putData(this.dataUnit);
+		this.dataPage.putDataBoundary(String.valueOf(Integer.parseInt(page.getStart()) + pos)); 
 	}
 	
 	/**
@@ -62,8 +96,7 @@ public class FilesReader extends ReaderFlowSocket {
 						PipeDataUnit u = PipeDataUnit.getInstance();
 						String[] datas = line.strip().split(",");
 						for(int i=0;i<headers.length;i++) {
-							PipeDataUnit.addFieldValue(headers[i], datas[i], page.getInstanceConfig().getReadFields(),
-									u); 
+							PipeDataUnit.addFieldValue(headers[i], datas[i], page.getInstanceConfig().getReadFields(),u); 
 							if (headers[i].equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))) {
 								LAST_STAMP = datas[i];
 							} else if (headers[i].equals(this.dataPage.get(GlobalParam.READER_KEY))) {
@@ -86,16 +119,20 @@ public class FilesReader extends ReaderFlowSocket {
 						line = new String(line.getBytes("ISO-8859-1"), GlobalParam.ENCODING);
 						PipeDataUnit u = PipeDataUnit.getInstance();
 						String[] datas = line.strip().split(",");
-						for(int i=0;i<headers.length;i++) {
-							PipeDataUnit.addFieldValue(headers[i], datas[i], page.getInstanceConfig().getReadFields(),
-									u);
-							if (headers[i].equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))) {
-								LAST_STAMP = datas[i];
-							} else if (headers[i].equals(this.dataPage.get(GlobalParam.READER_KEY))) {
-								u.setReaderKeyVal(datas[i]); 
-							}
-						}  
-						this.dataUnit.add(u);
+						if(headers.length==datas.length) {
+							for(int i=0;i<headers.length;i++) {
+								PipeDataUnit.addFieldValue(headers[i], datas[i], page.getInstanceConfig().getReadFields(),
+										u);
+								if (headers[i].equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))) {
+									LAST_STAMP = datas[i];
+								} else if (headers[i].equals(this.dataPage.get(GlobalParam.READER_KEY))) {
+									u.setReaderKeyVal(datas[i]); 
+								}
+							}  
+							this.dataUnit.add(u);
+						}else {
+							log.warn("dirty data headers length {},datas length {}, source {}",headers.length,datas.length,line);
+						}						
 						line = rf.readLine();
 					} 
 				}
@@ -111,7 +148,10 @@ public class FilesReader extends ReaderFlowSocket {
 		this.dataPage.putData(this.dataUnit);
 		this.dataPage.putDataBoundary(String.valueOf(Integer.parseInt(page.getStart()) + pos)); 
 	}
-
+	
+	/**
+	 * Can only support single file type processing
+	 */
 	@Override
 	public DataPage getPageData(final Page page, int pageSize) throws EFException {
 		PREPARE(false, false, false);
@@ -121,7 +161,16 @@ public class FilesReader extends ReaderFlowSocket {
 			this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
 			this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
 			if (this.readHandler == null) {
-				this.processCsv(page, pageSize); 
+				switch(EFFileUtil.getFileExtension(this.filePath.get(0))) {
+					case "csv":
+						this.processCsv(page, pageSize); 
+						break;
+					case "txt":
+						this.processTxt(page, pageSize); 
+						break;
+					default:
+						break;
+				} 
 				this.dataPage.putData(this.dataUnit);
 				this.dataPage.put(GlobalParam.READER_STATUS, true);
 			} else {
@@ -151,9 +200,8 @@ public class FilesReader extends ReaderFlowSocket {
 			this.filePath.clear();
 			@SuppressWarnings("unchecked")
 			ArrayList<String> paths = (ArrayList<String>) GETSOCKET().getConnection(END_TYPE.reader);
-			if(paths.size()==1) {
-				File file = new File(paths.get(0));
-				Long lastModified = file.lastModified();
+			if(paths.size()==1) { 
+				Long lastModified = EFFileUtil.getFileObj(paths.get(0)).lastModified();
 				if (lastModified > startTime) {
 					this.filePath.add(paths.get(0));
 					this.scanTime = lastModified;

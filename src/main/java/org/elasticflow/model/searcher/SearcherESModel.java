@@ -9,11 +9,7 @@ import java.util.Set;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.EFRequest;
-import org.elasticflow.searcher.parser.ESQueryParser;
 import org.elasticflow.util.instance.SearchParamUtil;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -26,48 +22,32 @@ import org.elasticsearch.search.sort.SortOrder;
 /**
  * @description
  * @author chengwen
- * @version 1.0
- * @date 2018-07-22 09:08
+ * @version 5.0
+ * @date 2023-02-22 09:08
  */
-public class SearcherESModel extends SearcherModel<QueryBuilder, SortBuilder<?>, AggregationBuilder> {
-
-	private QueryBuilder query;
+public class SearcherESModel extends SearcherModel<SortBuilder<?>, AggregationBuilder> {
+	 
 	private List<SortBuilder<?>> sortinfo;
-	Map<String, List<String[]>> facetSearchParams;
-	List<AggregationBuilder> facetsConfig = new ArrayList<AggregationBuilder>();
+	private Map<String, List<String[]>> facetSearchParams;
+	private List<AggregationBuilder> facetsConfig = new ArrayList<AggregationBuilder>();
 
 	private boolean needCorpfuncCnt = false;
 	private boolean cacheRequest = true;
 	private Set<Integer> excludeSet;
 	private String type;
-
+	 
 	public static SearcherESModel getInstance(EFRequest request, InstanceConfig instanceConfig) {
-		SearcherESModel eq = new SearcherESModel();
-		eq.setRequestHandler("");
-		eq.setSorts(SearchParamUtil.getSortField(request, instanceConfig));
-		eq.setFacetSearchParams(SearchParamUtil.getFacetParams(request, instanceConfig));
+		SearcherESModel SM = new SearcherESModel(); 
+		SM.setRequestHandler("");
+		SM.setSorts(SearchParamUtil.getSortField(request, instanceConfig));
+		SM.setFacetSearchParams(SearchParamUtil.getFacetParams(request, instanceConfig));
 		if (request.getParam("facet_ext") != null) {
-			eq.setFacet_ext((String) request.getParams().get("facet_ext"));
-		}
-		BoolQueryBuilder query = ESQueryParser.parseRequest(request, instanceConfig);
-		eq.setQuery(query);
-		return eq;
+			SM.setFacet_ext((String) request.getParams().get("facet_ext"));
+		} 
+		SM.setEfRequest(request);
+		return SM;
 	}
-
-	@Override
-	public QueryBuilder getQuery() {
-		if (query != null) {
-			BoolQueryBuilder bQuery = QueryBuilders.boolQuery();
-			bQuery.must(query);
-			return bQuery;
-		}
-		return query;
-	}
-
-	@Override
-	public void setQuery(QueryBuilder query) {
-		this.query = query;
-	}
+ 
 
 	@Override
 	public List<SortBuilder<?>> getSortinfo() {
@@ -224,6 +204,6 @@ public class SearcherESModel extends SearcherModel<QueryBuilder, SortBuilder<?>,
 				res.put(tmp[0], tmp[1]);
 		}
 		return res;
-	}
+	} 
 
 }

@@ -9,7 +9,7 @@ import org.elasticflow.searcher.handler.SearcherHandler;
 import org.elasticflow.util.EFException;
 
 /**
- * 
+ * Searcher Flow Socket
  * @author chengwen
  * @version 3.0
  * @date 2019-01-09 15:02
@@ -27,8 +27,16 @@ public abstract class SearcherFlowSocket extends Flow {
 	public void initFlow() {
 		//auto invoke in flow prepare
 	}
-
-	public abstract SearcherResult Search(SearcherModel<?, ?, ?> query, String instance, SearcherHandler handler)
+	
+	/**
+	 * Searcher main entrance
+	 * @param query
+	 * @param instance
+	 * @param handler
+	 * @return
+	 * @throws EFException
+	 */
+	public abstract SearcherResult Search(SearcherModel<?, ?> SModel, String instance, SearcherHandler handler)
 			throws EFException; 
 
 	public DATA_SOURCE_TYPE getType() {

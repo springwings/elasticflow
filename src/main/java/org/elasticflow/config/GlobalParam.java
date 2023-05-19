@@ -236,7 +236,7 @@ public final class GlobalParam {
 	public final static String SORT_DESC = "_desc";
 	public final static String PARAM_FL = "fl";
 
-	public final static String PARAM_FQ = "fq";
+	public final static String PARAM_POST_FILTER = "post_filter";
 	public final static String PARAM_FUZZY = "fuzzy";
 	public final static String PARAM_KEYWORD = "keyword";
 	public final static String PARAM_GROUP = "group";

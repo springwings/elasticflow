@@ -4,21 +4,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.elasticflow.model.EFRequest;
+
 /**
  * 
  * @author chengwen
  * @version 1.0
  * @date 2018-07-22 09:08
  */
-public abstract class SearcherModel<T1, T2, T3> {
+public abstract class SearcherModel<T1, T2> {
 
-	protected String storeId;
-
-	private String fq;
-
+	public String storeId; 
+	 
 	private String fl;
 	
 	private boolean showStats = false;
+	
+	public EFRequest efRequest; 
 
 	private int start = 0;
 
@@ -28,20 +30,16 @@ public abstract class SearcherModel<T1, T2, T3> {
 
 	private String requesthandler;
 
-	private String facet_ext = "";
-
-	public abstract T1 getQuery();
-
-	public abstract void setQuery(T1 query);
+	private String facet_ext = ""; 
 
 	public abstract Map<String, List<String[]>> getFacetSearchParams();
 
-	public abstract List<T2> getSortinfo();
+	public abstract List<T1> getSortinfo();
 
-	public abstract boolean cacheRequest();
+	public abstract boolean cacheRequest(); 
 	
-	public abstract List<T3> getFacetsConfig();
-
+	public abstract List<T2> getFacetsConfig(); 
+	
 	public boolean isShowQueryInfo() {
 		return this.showQueryInfo;
 	}
@@ -52,6 +50,10 @@ public abstract class SearcherModel<T1, T2, T3> {
 
 	public void setRequestHandler(String handler) {
 		this.requesthandler = handler;
+	}
+	
+	public void setEfRequest(EFRequest efRequest) {
+		this.efRequest = efRequest;
 	}
 
 	public String getRequestHandler() {
@@ -73,18 +75,7 @@ public abstract class SearcherModel<T1, T2, T3> {
 	public void setFl(String fl) {
 		this.fl = fl;
 	}
-	/**
-	 * filter query
-	 * @return
-	 */
-	public String getFq() {
-		return this.fq;
-	}
-
-	public void setFq(String fq) {
-		this.fq = fq;
-	}
-
+	  
 	public int getStart() {
 		return start;
 	}

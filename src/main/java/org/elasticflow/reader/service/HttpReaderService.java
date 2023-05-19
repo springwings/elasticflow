@@ -201,7 +201,7 @@ public class HttpReaderService {
 					case "delete":
 						if (RR.getParam("instance") != null && RR.getParam("seq") != null
 								&& RR.getParam("search_dsl") != null) {
-							SearcherModel<?, ?, ?> query = null;
+							SearcherModel<?, ?> SModel = null;
 							String instance = (String) RR.getParam("instance");
 							String seq = (String) RR.getParam("seq");
 							PipePump transFlow = Resource.socketCenter.getPipePump(instance, seq, false,
@@ -216,13 +216,13 @@ public class HttpReaderService {
 									.getWHP(transFlow.getInstanceConfig().getPipeParams().getWriteTo());
 							switch (param.getType()) {
 							case ES:
-								query = SearcherESModel.getInstance(Common.getRequest(rq),
-										transFlow.getInstanceConfig());
+								SModel = SearcherESModel.getInstance(Common.getRequest(rq),
+										transFlow.getInstanceConfig()); 
 								break;
 							default:
 								break;
 							}
-							CPU.RUN(transFlow.getID(), "Pond", "deleteByQuery", true, query, instance, storeid);
+							CPU.RUN(transFlow.getID(), "Pond", "deleteByQuery", true, SModel, instance, storeid);
 						} else {
 							rps.setStatus("instance,seq,search_dsl not set!", RESPONSE_STATUS.ParameterErr);
 						}

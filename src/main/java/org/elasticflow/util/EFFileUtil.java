@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import org.elasticflow.config.GlobalParam;
 
 /**
- * 
+ * read/delete/copy/create/scan/get filenmae and extension
  * @author chengwen
  * @version 1.0
  * @date 2018-11-07 14:12
@@ -196,5 +196,26 @@ public class EFFileUtil {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Resolve file suffix names based on file path
+	 * @param fpath
+	 * @return
+	 */
+	public static String getFileExtension(String fpath) {
+		String[] strArray = fpath.toLowerCase().split("\\.");
+		int suffixIndex = strArray.length -1;
+		return strArray[suffixIndex];
+	}
+	
+	/**
+	 * get lastModified,getName,...
+	 * @param fpath
+	 * @return
+	 */
+	public static File getFileObj(String fpath) {
+		File file = new File(fpath); 
+		return file;
 	}
 }

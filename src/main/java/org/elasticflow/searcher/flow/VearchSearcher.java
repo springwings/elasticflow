@@ -15,6 +15,7 @@ import org.elasticflow.model.searcher.SearcherResult;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.searcher.SearcherFlowSocket;
 import org.elasticflow.searcher.handler.SearcherHandler;
+import org.elasticflow.searcher.parser.VearchQueryParser;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.slf4j.Logger;
@@ -23,6 +24,13 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+
+/**
+ * Main Run Class for Searcher
+ * @author chengwen
+ * @version 2.0
+ * @date 2022-10-26 09:23
+ */
 public class VearchSearcher extends SearcherFlowSocket{
 		
 	private ConnectionHandler handler;
@@ -51,7 +59,7 @@ public class VearchSearcher extends SearcherFlowSocket{
 	}  
 	
 	@Override
-	public SearcherResult Search(SearcherModel<?, ?, ?> query, String instance, SearcherHandler handler)
+	public SearcherResult Search(SearcherModel<?, ?> SModel, String instance, SearcherHandler handler)
 			throws EFException {
 		SearcherResult res = new SearcherResult(); 
 		PREPARE(false, true, false);
@@ -59,15 +67,15 @@ public class VearchSearcher extends SearcherFlowSocket{
 		if(!ISLINK())
 			return res;
 		try {
-			String table = Common.getStoreName(instance, query.getStoreId());
+			String table = Common.getStoreName(instance, SModel.getStoreId());
 			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.searcher);  
 			JSONObject qu = new JSONObject();
-			qu.put("size", query.getCount());
-			qu.put("query", JSONObject.parse(query.getFq()));		
-			if(query.getFl()!=null)
-				qu.put("fields", query.getFl().split(","));
+			qu.put("size", SModel.getCount()); 
+			VearchQueryParser.parseQuery(instanceConfig,SModel,qu);
+			if(SModel.getFl()!=null)
+				qu.put("fields", SModel.getFl().split(","));
 			JSONObject JO = conn.search(table, qu.toJSONString());
-			if (query.isShowQueryInfo()) {
+			if (SModel.isShowQueryInfo()) {
 				res.setQueryDetail(qu); 
 			}
 			if(JO.containsKey("hits")) {
@@ -87,7 +95,7 @@ public class VearchSearcher extends SearcherFlowSocket{
 						unitSet.add(rn);
 					}
 				}
-				if(query.isShowStats()) {
+				if(SModel.isShowStats()) {
 					res.setStat(conn.getAllStatus(table));
 				}
 				res.setTotalHit(total);
