@@ -59,7 +59,7 @@ public class VearchSearcher extends SearcherFlowSocket{
 	}  
 	
 	@Override
-	public SearcherResult Search(SearcherModel<?, ?> SModel, String instance, SearcherHandler handler)
+	public SearcherResult Search(SearcherModel<?, ?> searcherModel, String instance, SearcherHandler handler)
 			throws EFException {
 		SearcherResult res = new SearcherResult(); 
 		PREPARE(false, true, false);
@@ -67,16 +67,16 @@ public class VearchSearcher extends SearcherFlowSocket{
 		if(!ISLINK())
 			return res;
 		try {
-			String table = Common.getStoreName(instance, SModel.getStoreId());
+			String table = Common.getStoreName(instance, searcherModel.getStoreId());
 			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.searcher);  
-			JSONObject qu = new JSONObject();
-			qu.put("size", SModel.getCount()); 
-			VearchQueryParser.parseQuery(instanceConfig,SModel,qu);
-			if(SModel.getFl()!=null)
-				qu.put("fields", SModel.getFl().split(","));
-			JSONObject JO = conn.search(table, qu.toJSONString());
-			if (SModel.isShowQueryInfo()) {
-				res.setQueryDetail(qu); 
+			VearchQueryParser VQP = new VearchQueryParser();
+			VQP.getSearchObj().put("size", searcherModel.getCount()); 
+			VQP.parseQuery(instanceConfig,searcherModel);
+			if(searcherModel.getFl()!=null)
+				VQP.getSearchObj().put("fields", searcherModel.getFl().split(","));
+			JSONObject JO = conn.search(table, VQP.getSearchObj().toJSONString());
+			if (searcherModel.isShowQueryInfo()) {
+				res.setQueryDetail(VQP.getSearchObj()); 
 			}
 			if(JO.containsKey("hits")) {
 				List<ResponseDataUnit> unitSet = new ArrayList<ResponseDataUnit>();
@@ -95,7 +95,7 @@ public class VearchSearcher extends SearcherFlowSocket{
 						unitSet.add(rn);
 					}
 				}
-				if(SModel.isShowStats()) {
+				if(searcherModel.isShowStats()) {
 					res.setStat(conn.getAllStatus(table));
 				}
 				res.setTotalHit(total);

@@ -12,29 +12,37 @@ import org.elasticflow.field.EFField;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 /**
- * 
+ * Convert query to vearch search statement
  * @author chengwen
- * @version 2.0
- * @date 2018-10-26 09:23
+ * @version 5.x
+ * @date 2022-10-26 09:23
+ * @modify 2023-05-28 09:19
  */
 public class VearchQueryParser implements QueryParser{
- 
+	
+	JSONObject searchObj;
+	
+	public VearchQueryParser() {
+		searchObj = new JSONObject();
+	}
+	
+	public JSONObject getSearchObj() {
+		return this.searchObj;
+	}
  
 	/**
-	 * Parameter parsing as query parser
-	 * @param request
+	 * Parameter parsing as query parser 
 	 * @param instanceConfig
-	 * @param model
-	 * @param ssb
-	 */
-	static public void parseQuery(InstanceConfig instanceConfig,SearcherModel<?, ?> model,JSONObject ssb) {
+	 * @param model 
+	 */ 
+	@Override
+	public void parseQuery(InstanceConfig instanceConfig,SearcherModel<?, ?> model) {
 		Map<String, Object> paramMap = model.efRequest.getParams();
 		Set<Entry<String, Object>> entries = paramMap.entrySet();
 		Iterator<Entry<String, Object>> iter = entries.iterator();
@@ -93,18 +101,17 @@ public class VearchQueryParser implements QueryParser{
 		query.put("sum",_jarr);	
 		if(filters.size()>0)
 			query.put("filter", filters);
-		ssb.put("query", query);		
+		searchObj.put("query", query);		
 	}
  
 	/**
-	 * Parameter parsing as filter parser 
-	 * @param request
+	 * Parameter parsing as filter parser  
 	 * @param instanceConfig
-	 * @param model
-	 * @param ssb
+	 * @param model  
 	 * @throws EFException
 	 */
-	static public void parseFilter(InstanceConfig instanceConfig,SearcherModel<?, ?> model,SearchSourceBuilder ssb) throws EFException {
+	@Override
+	public void parseFilter(InstanceConfig instanceConfig,SearcherModel<?, ?> model) throws EFException {
 		 
 	}
 	 
