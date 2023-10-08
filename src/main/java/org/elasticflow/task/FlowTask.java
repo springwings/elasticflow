@@ -7,21 +7,20 @@
  */
 package org.elasticflow.task;
 
-import static org.hamcrest.CoreMatchers.nullValue;
-
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.GlobalParam.STATUS;
+import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.Localization;
 import org.elasticflow.model.Localization.LAG_TYPE;
-import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.node.CPU;
 import org.elasticflow.piper.Breaker;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.piper.Valve;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.util.instance.EFTuple;
 import org.elasticflow.util.instance.EFWriterUtil;
@@ -206,16 +205,10 @@ public class FlowTask {
 			try {
 				storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), true,
 						(isReferenceInstance ? false : recompute));
-				if(storeId == null) {
-					//Determine whether the storage ID can be obtained. 
-					//If it cannot be obtained, interrupt the batch processing operation of the task.
-					breaker.log();
-					if (!isReferenceInstance) {
-						log.error("get {} storage location exception!", destination);
-						breaker.openBreaker();
-						Resource.EfNotifier.send(Localization.format(LAG_TYPE.FailPosition, destination), instanceID,
-								"Error in obtaining "+destination+" storage ID", ETYPE.RESOURCE_ERROR.name(), false);
-					}
+				//Determine whether the storage ID can be obtained. 
+				//If it cannot be obtained, interrupt the batch processing operation of the task.
+				if(storeId == null) { 
+					throw new EFException("get "+destination+" storage location exception!",ELEVEL.Dispose,ETYPE.RESOURCE_ERROR); 
 				}else {
 					GlobalParam.TASK_COORDER.saveTaskInfo(instanceID, L1seq, storeId, false);
 					pipePump.run(storeId, L1seq, false, isReferenceInstance);
