@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.elasticflow.config.GlobalParam;
 
 /**
- * 
+ * Data page model
  * @author chengwen
  * @version 1.0
  * @date 2018-07-22 09:08

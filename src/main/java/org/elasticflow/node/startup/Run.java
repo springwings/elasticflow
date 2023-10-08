@@ -180,7 +180,7 @@ public final class Run {
 	
 	/**
 	 * External loading plug-ins
-	 * @param plugin	Jar package storage path 
+	 * @param plugin	Jar package path 
 	 */
 	private void loadPlugins(String plugin) {
 		if(plugin!=null && plugin.length()>1) {
