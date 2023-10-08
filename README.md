@@ -114,3 +114,13 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
 # 开发计划
 1. 支持外部计算库，如so/dll 
 3. 优化搜索资源调度。
+
+## Citing ElasticFlow (伊塔)
+
+```bibtex
+@article{agtabular,
+  title={ElasticFlow (伊塔):ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任意类型数据端之间通过简单配置就可以建立可计算的弹性流管道，并进行定时、定量、高并发、多类型的交换数据服务。系统可应用于数据交换、通用搜索引擎、数据发布服务、数据仓库等项目。},
+  author={chengwen}, 
+  year={2023}
+}
+``` 
