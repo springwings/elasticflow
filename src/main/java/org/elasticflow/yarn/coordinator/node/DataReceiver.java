@@ -98,7 +98,7 @@ public class DataReceiver implements EFRPCService {
 					output.writeObject(result);
 				}
 			} catch (Exception e) {
-				log.error("{} rpc exception", socket.toString(), e);
+				log.error("{} cluster node exception", socket.toString(), e);
 			} finally {
 				if (output != null) {
 					try {

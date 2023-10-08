@@ -7,6 +7,8 @@
  */
 package org.elasticflow.task;
 
+import static org.hamcrest.CoreMatchers.nullValue;
+
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.MECHANISM;
@@ -204,9 +206,21 @@ public class FlowTask {
 			try {
 				storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), true,
 						(isReferenceInstance ? false : recompute));
-				GlobalParam.TASK_COORDER.saveTaskInfo(instanceID, L1seq, storeId, false);
-				pipePump.run(storeId, L1seq, false, isReferenceInstance);
-				runNextJobs(JOB_TYPE.INCREMENT);
+				if(storeId == null) {
+					//Determine whether the storage ID can be obtained. 
+					//If it cannot be obtained, interrupt the batch processing operation of the task.
+					breaker.log();
+					if (!isReferenceInstance) {
+						log.error("get {} storage location exception!", destination);
+						breaker.openBreaker();
+						Resource.EfNotifier.send(Localization.format(LAG_TYPE.FailPosition, destination), instanceID,
+								"Error in obtaining "+destination+" storage ID", ETYPE.RESOURCE_ERROR.name(), false);
+					}
+				}else {
+					GlobalParam.TASK_COORDER.saveTaskInfo(instanceID, L1seq, storeId, false);
+					pipePump.run(storeId, L1seq, false, isReferenceInstance);
+					runNextJobs(JOB_TYPE.INCREMENT);
+				} 
 			} catch (EFException e) {
 				breaker.log();
 				if (!isReferenceInstance && e.getErrorType() == ETYPE.RESOURCE_ERROR) {
