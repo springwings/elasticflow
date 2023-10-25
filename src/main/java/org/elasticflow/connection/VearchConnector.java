@@ -151,6 +151,8 @@ public class VearchConnector {
 		if (Integer.valueOf(String.valueOf(jr.get("status"))) == 200)
 			return;
 		else {
+			if(GlobalParam.DEBUG)
+				log.warn(datas.toString());
 			throw new EFException("Vearch error writing data," + jr.get("error"));
 		}
 	}

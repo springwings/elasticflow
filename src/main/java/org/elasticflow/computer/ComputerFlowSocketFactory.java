@@ -36,9 +36,10 @@ public final class ComputerFlowSocketFactory implements Socket<ComputerFlowSocke
 		try {
 			Class<?> clz = Class.forName(connectParams.getInstanceConfig().getComputeParams().getAlgorithm());
 			Method m = clz.getMethod("getInstance", ConnectParams.class);
+			Common.LOG.info(connectParams.getInstanceConfig().getInstanceID()+" mode of the computing end is "+connectParams.getInstanceConfig().getComputeParams().getComputeMode().name());
 			return (ComputerFlowSocket) m.invoke(null, connectParams);
 		} catch (Exception e) {
-			Common.LOG.error("the "+connectParams.getWhp().getType()+" ComputerFlowSocket does not exist!",e);
+			Common.LOG.error("The "+connectParams.getWhp().getType()+" ComputerFlowSocket does not exist!",e);
 		}  
 		return null;
 	}  
