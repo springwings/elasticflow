@@ -169,6 +169,7 @@ public class VearchConnector {
 			}
 
 		} catch (Exception e) {
+			log.error("Batch data deletion error", e);
 		}
 	}
 	

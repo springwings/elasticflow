@@ -10,7 +10,7 @@ import org.elasticflow.util.EFException;
 
 /**
  * Blank Compute
- * 
+ * Do not perform any data except for
  * @author chengwen
  * @version 1.0
  * @date 2018-05-22 09:08
