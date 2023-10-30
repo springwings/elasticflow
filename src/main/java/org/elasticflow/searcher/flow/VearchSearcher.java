@@ -106,7 +106,7 @@ public class VearchSearcher extends SearcherFlowSocket{
 			} 
 		}catch(Exception e){
 			releaseConn = true; 
-			throw Common.getException(e);
+			throw Common.convertException(e);
 		}finally{
 			REALEASE(false,releaseConn);
 		} 

@@ -274,7 +274,7 @@ public final class PipePump extends Instruction implements Serializable {
 				try {
 					taskSingal.await();
 				} catch (Exception e) {
-					throw Common.getException(e);
+					throw Common.convertException(e);
 				}
 				if (task.taskState.getEfException() != null)
 					throw task.taskState.getEfException();

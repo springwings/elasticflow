@@ -600,13 +600,21 @@ public final class Common {
 		}
 	}
 	
-	public static EFException getException(Exception e) {
-		Throwable except = e.getCause();
-		if (except instanceof EFException) {
-			return (EFException) except;
-		} else {
-			return new EFException(e);
+	public static EFException convertException(Exception e,String message) { 
+		EFException cause; 
+		if (e.getCause() instanceof EFException) {
+			cause = (EFException) e.getCause();   
+		}else {
+			cause = new EFException(e);  
+		}		
+		if (message!=null) { 
+			cause.track(message);
 		}
+		return cause;
+	}
+	
+	public static EFException convertException(Exception e) {  
+		return convertException(e,null);
 	}
 
 	public static void stopSystem(boolean soft) {

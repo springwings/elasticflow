@@ -63,7 +63,7 @@ public class CPU {
 				Common.LOG.error("{} context is not exists!",runId);
 			}
 		}catch (Exception e) {
-			throw Common.getException(e);
+			throw Common.convertException(e);
 		}
 		return rs;
 	}
