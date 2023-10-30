@@ -89,7 +89,7 @@ public final class EsSearcher extends SearcherFlowSocket {
 		} catch (Exception e) {
 			releaseConn = true;
 			if(ESC!=null) {
-				throw Common.convertException(e,ESC.getInfos());
+				throw Common.convertException(e,this.poolName);
 			}else {
 				throw Common.convertException(e);
 			}
