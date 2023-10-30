@@ -39,7 +39,7 @@ public class EFRPCService<T> {
 							input = new ObjectInputStream(socket.getInputStream());
 							return input.readObject();
 						} catch (Exception e) {
-							throw new EFException(e, "from node " + addr + " run method " + serviceInterface.getName()
+							throw new EFException(e, "from node " + addr.getHostString() + " run method " + serviceInterface.getName()
 									+ " > " + method.getName() + " exception!", ELEVEL.Dispose, ETYPE.RESOURCE_ERROR);
 						} finally {
 							if (socket.isConnected()) {
