@@ -55,8 +55,9 @@ public final class EsSearcher extends SearcherFlowSocket {
 		SearcherResult res = new SearcherResult();
 		if (!ISLINK())
 			return res;
+		EsConnector ESC = null;
 		try {
-			EsConnector ESC = (EsConnector) GETSOCKET().getConnection(END_TYPE.searcher);
+			ESC = (EsConnector) GETSOCKET().getConnection(END_TYPE.searcher);
 			RestHighLevelClient conn = ESC.getClient();  
 			List<String> returnFields = new ArrayList<String>();
 			if (searcherModel.getFl() != null) {
@@ -87,7 +88,11 @@ public final class EsSearcher extends SearcherFlowSocket {
 			}
 		} catch (Exception e) {
 			releaseConn = true;
-			throw Common.convertException(e);
+			if(ESC!=null) {
+				throw Common.convertException(e,ESC.getInfos());
+			}else {
+				throw Common.convertException(e);
+			}
 		} finally {
 			REALEASE(false, releaseConn);
 		}
