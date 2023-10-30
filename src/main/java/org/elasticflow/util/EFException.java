@@ -63,6 +63,13 @@ public class EFException extends Exception {
 		e_level = elevel;
 		e_type = etype;
 	}
+	
+	public EFException(Exception e,String appendMessage, ELEVEL elevel, ETYPE etype) { 
+		super(appendMessage);
+		initCause(e);
+		e_level = elevel;
+		e_type = etype;
+	}
 
 	public EFException(String msg, ELEVEL elevel, ETYPE etype) {
 		super(msg);

@@ -74,7 +74,11 @@ public class DataReceiver implements EFRPCService {
 		return port;
 	}
 
+	/**
+	 * Message synchronization 
+	 */
 	private static class Receiver implements Runnable {
+		
 		Socket socket = null;
 
 		public Receiver(Socket socket) {
@@ -83,9 +87,11 @@ public class DataReceiver implements EFRPCService {
 
 		public void run() {
 			ObjectOutputStream output = null;
+			String methodName = null;
+			String serviceName = null;
 			try (ObjectInputStream input = new ObjectInputStream(socket.getInputStream());) {
-				String serviceName = input.readUTF();
-				String methodName = input.readUTF();
+				serviceName = input.readUTF();
+				methodName = input.readUTF();
 				Class<?>[] parameterTypes = (Class<?>[]) input.readObject();
 				Object[] arguments = (Object[]) input.readObject();
 				Class<?> serviceClass = serviceRegistry.get(serviceName);
@@ -98,7 +104,7 @@ public class DataReceiver implements EFRPCService {
 					output.writeObject(result);
 				}
 			} catch (Exception e) {
-				log.error("{} cluster node exception", socket.toString(), e);
+				log.error("from node {} run method {} > {} exception!", socket.getInetAddress(),serviceName,methodName,e);
 			} finally {
 				if (output != null) {
 					try {
