@@ -389,7 +389,7 @@ public class EFMonitorUtil {
 			}
 			
 			if((type&2)>0) {
-				String[] L1seqs = Common.getL1seqs(config);
+				String[] L1seqs = Common.getL1seqs(config); 
 				for (String L1seq : L1seqs) {	 
 					String appendPipe = "";
 					if (L1seq != "") 

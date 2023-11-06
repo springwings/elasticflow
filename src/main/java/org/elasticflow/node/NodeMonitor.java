@@ -10,6 +10,7 @@ package org.elasticflow.node;
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.HashMap;
@@ -492,6 +493,7 @@ public final class NodeMonitor {
 		Map<String, InstanceConfig> instances = Resource.nodeConfig.getInstanceConfigs();
 		HashMap<String, Object> result = new HashMap<String, Object>();
 		HashMap<String, JSONObject> nodes = new HashMap<String, JSONObject>();
+		List<JSONObject> edges = new ArrayList<JSONObject>();
 		for (Map.Entry<String, InstanceConfig> entry : instances.entrySet()) {
 			InstanceConfig config = entry.getValue();
 			JSONObject instance = new JSONObject();
@@ -516,31 +518,36 @@ public final class NodeMonitor {
 			default:
 				break;
 			} 
-			instance.put("WriteTo", config.getPipeParams().getWriteTo().replace(",", ";"));
+			List<String> wt = Arrays.asList(config.getPipeParams().getWriteTo().split(",")); 
+			List<String> wt2 = new ArrayList<>();
 			switch(Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getWriteTo()).getType()) {
 			case KAFKA:
 			case ROCKETMQ: 
-				instance.put("WriteTo", Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getWriteTo()).getHost() +"_"+
-						config.getWriteFields().get("topic").getDefaultvalue());
+				for(String _wt:wt) {
+					wt2.add(Resource.nodeConfig.getWarehouse().get(_wt).getHost() +"_"+
+							config.getWriteFields().get("topic").getDefaultvalue());
+				}  
 				break;
 			default:
+				wt2=wt;
 				break;
 			}
+			instance.put("WriteTo", wt2);
 			instance.put("OpenTrans", config.openTrans());
 			instance.put("IsVirtualPipe", config.getPipeParams().isVirtualPipe());
-			instance.put("InstanceType", EFMonitorUtil.getInstanceType(config.getInstanceType()));
-			
+			instance.put("InstanceType", EFMonitorUtil.getInstanceType(config.getInstanceType())); 
 			nodes.put(config.getAlias(), instance); 
 		}
 				
-		//start map resource
-		List<JSONObject> edges = new ArrayList<JSONObject>();
+		//start map resource 
 		for (Entry<String, JSONObject> entry : nodes.entrySet()) { 
 			String readfrom = entry.getValue().getString("ReadFrom"); 
+			int weight = 0;   
 			for (Entry<String, JSONObject> _entry : nodes.entrySet()) {
-				if(!entry.getKey().equals(_entry.getKey()) && readfrom.equals(_entry.getValue().getString("WriteTo"))) {
+				if(!entry.getKey().equals(_entry.getKey()) && _entry.getValue().getJSONArray("WriteTo").contains(readfrom)) {
 					JSONObject edge = new JSONObject();
 					edge.put("from", _entry.getKey());
+					edge.put("weight", weight);
 					edge.put("to", entry.getKey());
 					edges.add(edge);
 				} 
