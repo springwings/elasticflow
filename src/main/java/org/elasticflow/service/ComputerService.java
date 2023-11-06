@@ -5,7 +5,7 @@
  * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
  * Side Public License, v 1.
  */
-package org.elasticflow.computer.service;
+package org.elasticflow.service;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,8 +20,6 @@ import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.EFResponse;
-import org.elasticflow.service.EFService;
-import org.elasticflow.service.HttpService;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.yarn.Resource;

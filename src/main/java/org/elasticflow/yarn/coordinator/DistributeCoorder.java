@@ -324,12 +324,14 @@ public class DistributeCoorder {
 		}
 	}
 	
+	
 	public synchronized void pushInstanceToCluster(String instanceSettting) {
 		EFNode addNode = null;
 		for (EFNode node : nodes) {
 			if (addNode == null) {
 				addNode = node;
 			} else {
+				//Obtain the lowest load node
 				if (node.getBindInstances().size() < addNode.getBindInstances().size()) {
 					addNode = node;
 				}
@@ -344,6 +346,7 @@ public class DistributeCoorder {
 	
 	/**
 	 * Priority check control
+	 * Check if the CPU and memory are extremely low, and if both are, start the task degradation service
 	 * @param node
 	 * @return
 	 */

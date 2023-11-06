@@ -15,8 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.EFRequest;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.yarn.Resource;
@@ -24,21 +24,21 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
 
-
 /**
- *  * Monitor node all instances running
+ * * Monitor node all instances running
+ * 
  * @author chengwen
  * @version 4.0
  * @date 2018-10-26 09:13
  */
-public class EFMonitorService {  
-	
+public class EFMonitorService {
+
 	public void start() {
 		HashMap<String, Object> serviceParams = new HashMap<String, Object>();
 		serviceParams.put("confident_port", "8601");
 		serviceParams.put("max_idle_time", "30000");
 		serviceParams.put("port", "8617");
-		serviceParams.put("thread_pool", "3");
+		serviceParams.put("thread_pool", "2");
 		serviceParams.put("httpHandle", new httpHandle());
 		try {
 			HttpService.getInstance(serviceParams).start();
@@ -46,38 +46,49 @@ public class EFMonitorService {
 			Common.stopSystem(false);
 		}
 	}
-	
+
 	public class httpHandle extends AbstractHandler {
+
 		@Override
-		public void handle(String target, HttpServletRequest request,
-				HttpServletResponse response, int dispatch) throws IOException,
-				ServletException {
-			response.setContentType("application/json;charset=utf8");
+		public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
+				throws IOException, ServletException {
 			response.setStatus(HttpServletResponse.SC_OK);
+			response.setHeader("Access-Control-Allow-Origin", "http://"+GlobalParam.IP+":8616");
+			response.setHeader("Access-Control-Allow-Methods", "*");
+			response.setHeader("Access-Control-Max-Age", "3600");
+			response.setHeader("Access-Control-Allow-Headers", "content-security-policy,content-type,x-content-type-options,x-xss-protection");
+			response.setHeader("Access-Control-Allow-Credentials", "true");
+			response.setHeader("Server", "EF");
 			Request rq = (request instanceof Request) ? (Request) request
-					: HttpConnection.getCurrentConnection().getRequest(); 
+					: HttpConnection.getCurrentConnection().getRequest();
 			String dataTo = rq.getPathInfo().substring(1);
 			EFResponse rps = EFResponse.getInstance();
-			EFRequest RR = Common.getEFRequest(rq, rps);
-			rps.setRequest(RR.getParams());
-			switch (dataTo) {  
-			case "efm.doaction":{
-				Resource.nodeMonitor.ac(rq,RR,rps);				
+			EFRequest EFR = Common.getEFRequest(rq, rps);
+			rps.setRequest(EFR.getParams());
+			switch (dataTo) {
+			case "efm.doaction": {
+				Resource.nodeMonitor.ac(rq, EFR, rps);
 			}
-				break;   
-			case "_version": 
-				rps.setInfo(GlobalParam.VERSION);  
+				break;
+			case "_version":
+				rps.setInfo(GlobalParam.VERSION);
 				break;
 			default:
 				HashMap<String, Object> info = new HashMap<>();
-				info.put("Method", new String[] {"/efm.doaction","/_version"});
+				info.put("Method", new String[] { "/efm.doaction", "/_version" });
 				info.put("Example", " /efm.doaction?ac=getInstanceInfo&instance=demo");
 				rps.setPayload(info);
 				break;
+			}
+			if (EFR.getParam("_showtype") != null
+					&& EFR.getParam("_showtype").toString().toLowerCase().equals("html")) {
+				response.setContentType("text/plain;charset=utf8");
+			} else {
+				response.setContentType("application/json;charset=utf8");
 			}
 			response.getWriter().println(rps.getResponse(true));
 			response.getWriter().flush();
 			response.getWriter().close();
 		}
-	}  
+	}
 }

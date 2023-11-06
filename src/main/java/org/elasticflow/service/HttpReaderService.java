@@ -5,7 +5,7 @@
  * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
  * Side Public License, v 1.
  */
-package org.elasticflow.reader.service;
+package org.elasticflow.service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -30,8 +30,6 @@ import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.node.CPU;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.piper.PipePump;
-import org.elasticflow.service.EFService;
-import org.elasticflow.service.HttpService;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.MD5Util;

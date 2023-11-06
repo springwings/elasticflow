@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.elasticflow.computer.service.ComputerService;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.NODE_TYPE;
 import org.elasticflow.config.InstanceConfig;
@@ -27,9 +26,11 @@ import org.elasticflow.node.RecoverMonitor;
 import org.elasticflow.node.SafeShutDown;
 import org.elasticflow.node.SocketCenter;
 import org.elasticflow.notifier.EFNotifier;
-import org.elasticflow.reader.service.HttpReaderService;
-import org.elasticflow.searcher.service.SearcherService;
+import org.elasticflow.service.ComputerService;
 import org.elasticflow.service.EFMonitorService;
+import org.elasticflow.service.EFWebService;
+import org.elasticflow.service.HttpReaderService;
+import org.elasticflow.service.SearcherService;
 import org.elasticflow.task.FlowTask;
 import org.elasticflow.task.schedule.TaskJobCenter;
 import org.elasticflow.util.Common;
@@ -171,6 +172,7 @@ public final class Run {
 				Resource.flowCenter.startInstructionsJob(); 
 			}				
 			new EFMonitorService().start();
+			new EFWebService().start();
 		} 		
 		if ((GlobalParam.SERVICE_LEVEL & 4) > 0) {
 			Resource.httpReaderService = new HttpReaderService();

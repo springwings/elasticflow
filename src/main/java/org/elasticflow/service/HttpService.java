@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * open http port
+ * Provide HTTP Service
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:23
@@ -61,12 +61,10 @@ public class HttpService implements EFService {
 				.valueOf(String.valueOf(this.serviceParams
 						.get("confident_port")))); 
 		server.addConnector(channelConnector);
-
 		Handler handler = (Handler) this.serviceParams.get("httpHandle");
-		HandlerCollection handlerC = new HandlerCollection();
-		handlerC.setHandlers(new Handler[] { handler });
-		server.setHandler(handlerC);
-
+		HandlerCollection handlers = new HandlerCollection();
+		handlers.setHandlers(new Handler[] {handler});
+		server.setHandler(handlers); 
 		server.setStopAtShutdown(true);
 		server.setSendServerVersion(true);
 	}

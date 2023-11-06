@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -108,6 +109,7 @@ public final class NodeMonitor {
 			put("removeinstance", "removeInstance");
 			put("deleteinstancedata", "deleteInstanceData");
 			put("getinstanceinfo", "getInstanceInfo");
+			put("instanceflowgraph","instanceFlowGraph");
 			// pipe xml-config manage
 			put("getinstancexml", "getInstanceXml");
 			put("updateinstancexml", "updateInstanceXml");
@@ -478,6 +480,75 @@ public final class NodeMonitor {
 				setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
 			}
 		}
+	}
+	
+	/**
+	 * Obtain the correlation relationship diagram between instance data streams.
+	 * @param rq
+	 * @param RR
+	 */
+	public void instanceFlowGraph(Request rq, EFRequest RR) {
+		//get instances
+		Map<String, InstanceConfig> instances = Resource.nodeConfig.getInstanceConfigs();
+		HashMap<String, Object> result = new HashMap<String, Object>();
+		HashMap<String, JSONObject> nodes = new HashMap<String, JSONObject>();
+		for (Map.Entry<String, InstanceConfig> entry : instances.entrySet()) {
+			InstanceConfig config = entry.getValue();
+			JSONObject instance = new JSONObject();
+			instance.put("Instance", entry.getKey());
+			instance.put("Alias", config.getAlias());
+			instance.put("OptimizeCron", config.getPipeParams().getOptimizeCron());
+			instance.put("DeltaCron", config.getPipeParams().getDeltaCron());
+			if (config.getPipeParams().getFullCron() == null && config.getPipeParams().getReadFrom() != null
+					&& config.getPipeParams().getWriteTo() != null) {
+				instance.put("FullCron", "0 0 0 1 1 ? 2099");
+			} else {
+				instance.put("FullCron", config.getPipeParams().getFullCron());
+			}
+			instance.put("SearchFrom", config.getPipeParams().getSearchFrom());
+			instance.put("ReadFrom", config.getPipeParams().getReadFrom());
+			switch(Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getType()) {
+				case KAFKA:
+				case ROCKETMQ:
+					instance.put("ReadFrom", Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getHost()+"_"+
+				    Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getDefaultValue().getString("consumer.topic")); 
+					break;
+			default:
+				break;
+			} 
+			instance.put("WriteTo", config.getPipeParams().getWriteTo().replace(",", ";"));
+			switch(Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getWriteTo()).getType()) {
+			case KAFKA:
+			case ROCKETMQ: 
+				instance.put("WriteTo", Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getWriteTo()).getHost() +"_"+
+						config.getWriteFields().get("topic").getDefaultvalue());
+				break;
+			default:
+				break;
+			}
+			instance.put("OpenTrans", config.openTrans());
+			instance.put("IsVirtualPipe", config.getPipeParams().isVirtualPipe());
+			instance.put("InstanceType", EFMonitorUtil.getInstanceType(config.getInstanceType()));
+			
+			nodes.put(config.getAlias(), instance); 
+		}
+				
+		//start map resource
+		List<JSONObject> edges = new ArrayList<JSONObject>();
+		for (Entry<String, JSONObject> entry : nodes.entrySet()) { 
+			String readfrom = entry.getValue().getString("ReadFrom"); 
+			for (Entry<String, JSONObject> _entry : nodes.entrySet()) {
+				if(!entry.getKey().equals(_entry.getKey()) && readfrom.equals(_entry.getValue().getString("WriteTo"))) {
+					JSONObject edge = new JSONObject();
+					edge.put("from", _entry.getKey());
+					edge.put("to", entry.getKey());
+					edges.add(edge);
+				} 
+			}
+		}
+		result.put("nodes", nodes);
+		result.put("edges", edges);
+		setResponse(RESPONSE_STATUS.Success, null, result);
 	}
 
 	public void getInstanceXml(Request rq, EFRequest RR) {
