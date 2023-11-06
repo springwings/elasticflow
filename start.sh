@@ -1,7 +1,7 @@
 #!/bin/bash
 #OPTS
 PROC_NAME=elasticflow
-JAVA_OPTS="$JAVA_OPTS -server -Xms4g -Xmx4g -Xmn512M -XX:+UseConcMarkSweepGC -XX:ParallelGCThreads=8 -XX:+HeapDumpOnOutOfMemoryError"
+JAVA_OPTS="$JAVA_OPTS -server -Xms4g -Xmx4g -Xmn512M -XX:ParallelGCThreads=8 -XX:+HeapDumpOnOutOfMemoryError"
 echo "$PROC_NAME wait to start..." 
 
 required_java_version="11"
@@ -22,7 +22,7 @@ fi
 
 ProcNumber=`ps -ef |grep -w $PROC_NAME|grep -v grep|wc -l`
 if [ $ProcNumber -le 0 ];then
-   java ${JAVA_OPTS} -Dnodeid=16 -Dconfig=file:/work/EF/slaveconfig -jar -Dplugin=/work/EF/plugin -jar target/elasticflow.jar  
+   java ${JAVA_OPTS} -Dnodeid=16 -Dconfig=file:/work/EF/config -jar -Dplugin=/work/EF/plugin -jar target/elasticflow.jar  
    sleep 1
    ProcNumber=`ps -ef |grep -w $PROC_NAME|grep -v grep|wc -l`
    if [ $ProcNumber -gt 0 ];then  
