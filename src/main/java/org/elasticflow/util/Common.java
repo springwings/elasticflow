@@ -586,9 +586,7 @@ public final class Common {
 		} catch (Exception e) { 
 			Common.LOG.error("load {} Config Exception", path,e);
 			Common.stopSystem(false);
-		}
-		GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");
-		GlobalParam.INSTANCE_PATH = (GlobalParam.CONFIG_PATH+"/INSTANCES").intern();		
+		} 
 	}
 	
 	public static void processErrorLevel(EFException e) {

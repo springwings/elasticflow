@@ -22,7 +22,7 @@ fi
 
 ProcNumber=`ps -ef |grep -w $PROC_NAME|grep -v grep|wc -l`
 if [ $ProcNumber -le 0 ];then
-   java ${JAVA_OPTS} -Dnodeid=16 -Dconfig=/work/EF/config -jar -Dplugin=/work/EF/plugin -jar target/elasticflow.jar  
+   java ${JAVA_OPTS} -Dnodeid=16 -Dconfig=/work/EF -jar -Dplugin=/work/EF/plugin -jar target/elasticflow.jar  
    sleep 1
    ProcNumber=`ps -ef |grep -w $PROC_NAME|grep -v grep|wc -l`
    if [ $ProcNumber -gt 0 ];then  

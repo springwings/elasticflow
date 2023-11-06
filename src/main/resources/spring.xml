@@ -15,9 +15,7 @@
 	<context:component-scan base-package="org.elasticflow" /> 
 	<util:properties id="nodeSystemInfo" location="classpath:config/node.properties"></util:properties>
 	<bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean"/>	
-	<bean id="EFLOWS" class="org.elasticflow.node.startup.Run">  
-		<constructor-arg type="String" index="0" value="#{systemProperties['config']}/config.properties"/>
-	</bean>
+	<bean id="EFLOWS" class="org.elasticflow.node.startup.Run"/>   
 </beans>
 
 

@@ -23,7 +23,7 @@ import org.elasticflow.config.GlobalParam;
  */
 public class EFLoader extends ClassLoader {
 
-	private String path = GlobalParam.configPath;  
+	private String path = GlobalParam.CONFIG_ROOT;  
 	
 	public EFLoader(String path) {
 		super();

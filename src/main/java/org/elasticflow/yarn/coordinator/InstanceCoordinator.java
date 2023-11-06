@@ -88,7 +88,7 @@ public class InstanceCoordinator implements InstanceCoord {
 	@Override
 	public void sendData(String content, String destination,boolean relative) {
 		if(relative) {
-			EFFileUtil.createAndSave(content, GlobalParam.CONFIG_PATH + destination);
+			EFFileUtil.createAndSave(content, GlobalParam.CONFIG_DATAS_PATH + destination);
 		}else {
 			EFFileUtil.createAndSave(content, destination);
 		}		
@@ -96,8 +96,8 @@ public class InstanceCoordinator implements InstanceCoord {
 
 	@Override
 	public void reloadResource() {
-		Resource.nodeConfig.parsePondFile(GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond"));
-		Resource.nodeConfig.parseInstructionsFile(GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("instructions"));
+		Resource.nodeConfig.parsePondFile(GlobalParam.CONFIG_DATAS_PATH + "/" + GlobalParam.StartConfig.getProperty("pond"));
+		Resource.nodeConfig.parseInstructionsFile(GlobalParam.CONFIG_DATAS_PATH + "/" + GlobalParam.StartConfig.getProperty("instructions"));
 	}
 	
 	@Override

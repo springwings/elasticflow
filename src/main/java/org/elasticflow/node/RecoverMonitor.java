@@ -54,7 +54,7 @@ public class RecoverMonitor {
 				try { 
 					client.connect(this.takeIp, 8617); 
 					Common.LOG.info("start restart and return Node "+this.takeIp);
-					EFNodeUtil.runShell(GlobalParam.StartConfig.getProperty("restart_shell"));
+					EFNodeUtil.runShell(GlobalParam.RESTART_SHELL_PATH);
 					return;
 				} catch (Exception e) { 
 					Thread.sleep(5000); 
@@ -66,7 +66,7 @@ public class RecoverMonitor {
 	}
 	
 	private void takeOverNode() throws EFException { 
-		Common.loadGlobalConfig(GlobalParam.CONFIG_PATH+"/EF_NODES/"+this.takeIp+"/configs"); 
+		Common.loadGlobalConfig(GlobalParam.CONFIG_DATAS_PATH+"/EF_NODES/"+this.takeIp+"/configs"); 
 		Resource.EFLOWS.init(true);
 		Resource.EFLOWS.startService();
 		Common.LOG.info(GlobalParam.IP+" has take Over Node "+this.takeIp);

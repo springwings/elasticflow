@@ -432,7 +432,7 @@ public class DistributeCoorder {
 	}
 
 	private void storeNodesStatus() {
-		String fpath = GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/status";
+		String fpath = GlobalParam.CONFIG_DATAS_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/status";
 		JSONArray JA = new JSONArray();
 		for (EFNode node : nodes) {
 			JA.add(node.getNodeInfos());

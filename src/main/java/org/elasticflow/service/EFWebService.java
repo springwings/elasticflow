@@ -9,6 +9,7 @@ package org.elasticflow.service;
 
 import java.util.HashMap;
 
+import org.elasticflow.config.GlobalParam;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.mortbay.jetty.handler.ContextHandler;
@@ -33,8 +34,8 @@ public class EFWebService {
 		try {
 			ContextHandler _CH = new ContextHandler("/");
 			ResourceHandler rh = new ResourceHandler();
-			try {
-				rh.setBaseResource(Resource.newResource("./src/main/resources/www"));
+			try { 
+				rh.setBaseResource(Resource.newResource(GlobalParam.CONFIG_ROOT+"/efhead"));
 			} catch (Exception e) {
 				throw new EFException(e);
 			}

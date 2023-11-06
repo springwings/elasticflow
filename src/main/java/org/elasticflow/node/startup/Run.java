@@ -61,13 +61,7 @@ public final class Run {
 	private String version;
 	
 	@Value("#{nodeSystemInfo['groupId']}")
-	private String groupId;	
-
-	private String startConfigPath;
-
-	public Run(String startConfigPath) {
-		this.startConfigPath = startConfigPath;
-	}
+	private String groupId;	 
 	
 	/**
 	 * Initialize relevant models and task execution parameters
@@ -208,9 +202,8 @@ public final class Run {
 	private void start() {
 		try {
 			Runtime.getRuntime().addShutdownHook(new SafeShutDown());
-			Common.loadGlobalConfig(this.startConfigPath);
-			loadPlugins(GlobalParam.pluginPath);
-			GlobalParam.CONFIG_PATH = GlobalParam.StartConfig.getProperty("config_path");							
+			Common.loadGlobalConfig(GlobalParam.CONFIG_PATH+"/config.properties");
+			loadPlugins(GlobalParam.pluginPath); 						
 			if (GlobalParam.StartConfig.get("node_type").equals(NODE_TYPE.backup.name())) {
 				init(false);
 				new RecoverMonitor().start();

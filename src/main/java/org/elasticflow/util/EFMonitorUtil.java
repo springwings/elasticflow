@@ -84,7 +84,7 @@ public class EFMonitorUtil {
 
 	public static void saveNodeConfig() throws Exception {
 		OutputStream os = null;
-		os = new FileOutputStream(GlobalParam.configPath.replace("file:", "") + "/config.properties");
+		os = new FileOutputStream(GlobalParam.CONFIG_PATH.replace("file:", "") + "/config.properties");
 		GlobalParam.StartConfig.store(os,null);
 	}
 	
@@ -453,7 +453,7 @@ public class EFMonitorUtil {
 		Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				EFNodeUtil.runShell(GlobalParam.StartConfig.getProperty("restart_shell"));
+				EFNodeUtil.runShell(GlobalParam.RESTART_SHELL_PATH);
 			}
 		});
 		thread.start();

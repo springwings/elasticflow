@@ -263,7 +263,7 @@
 			<version>1.0</version>
 		</dependency>
 	</dependencies>
-	<build>
+	<build> 
 		<finalName>elasticflow</finalName>
 		<plugins>
 			<plugin>

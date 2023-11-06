@@ -196,14 +196,14 @@ public final class NodeMonitor {
 	}
 
 	public void getResource(Request rq, EFRequest RR) {
-		String pondPath = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
+		String pondPath = GlobalParam.CONFIG_DATAS_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
 		byte[] resourceXml = EFDataStorer.getData(pondPath, false);
 		setResponse(RESPONSE_STATUS.Success, "", new String(resourceXml));
 	}
 
 	public void updateResource(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "content")) {
-			String pondPath = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
+			String pondPath = GlobalParam.CONFIG_DATAS_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
 			EFDataStorer.setData(pondPath, new String(decoder.decode(RR.getStringParam("content"))));
 			setResponse(RESPONSE_STATUS.Success, "update resource!", null);
 		}
@@ -256,7 +256,7 @@ public final class NodeMonitor {
 	public void setNodeConfig(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "content")) {
 			try {
-				String fpath = GlobalParam.configPath.replace("file:", "") + "/config.properties";
+				String fpath = GlobalParam.CONFIG_PATH.replace("file:", "") + "/config.properties";
 				EFDataStorer.setData(fpath, RR.getStringParam("content").strip());
 				Common.loadGlobalConfig(fpath);
 				setResponse(RESPONSE_STATUS.Success, "Config set success!", null);
@@ -878,7 +878,7 @@ public final class NodeMonitor {
 
 	private boolean updateResourceXml(JSONObject resourceData, boolean isDel) {
 		try {
-			String pondPath = GlobalParam.CONFIG_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
+			String pondPath = GlobalParam.CONFIG_DATAS_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
 			byte[] resourceXml = EFDataStorer.getData(pondPath, false);
 			String rname = resourceData.getString("name");
 			SAXReader reader = new SAXReader();

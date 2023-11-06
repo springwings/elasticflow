@@ -59,11 +59,7 @@ public final class GlobalParam {
 	 * #1 searcher service 2 writer service 4 http reader service 8 instruction
 	 * service 16 compute service
 	 */
-	public static int SERVICE_LEVEL;
-
-	public static String CONFIG_PATH;
-
-	public static String INSTANCE_PATH;
+	public static int SERVICE_LEVEL; 
 
 	public static String IP = "127.0.0.1";
 	
@@ -76,7 +72,15 @@ public final class GlobalParam {
 	public static Properties StartConfig = new FormatProperties();
 
 	/** configure file local path */
-	public static final String configPath = System.getProperty("config");
+	public static final String CONFIG_ROOT = System.getProperty("config"); 
+	
+	public static final String CONFIG_PATH = CONFIG_ROOT+"/config";
+
+	public static String CONFIG_DATAS_PATH = CONFIG_ROOT+"/datas";
+	
+	public static String RESTART_SHELL_PATH = CONFIG_ROOT+"/restart.sh";
+
+	public static String INSTANCE_PATH = (CONFIG_DATAS_PATH+"/INSTANCES").intern();
 
 	/** configure plugin local path */
 	public static final String pluginPath = System.getProperty("plugin");

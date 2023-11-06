@@ -59,33 +59,33 @@ public final class ReportStatus {
 
 	public static void nodeConfigs() {
 		try {
-			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH) == false) {
+			if (EFDataStorer.exists(GlobalParam.CONFIG_DATAS_PATH) == false) {
 				String path = "";
-				for (String str : GlobalParam.CONFIG_PATH.split("/")) {
+				for (String str : GlobalParam.CONFIG_DATAS_PATH.split("/")) {
 					path += "/" + str;
 					EFDataStorer.createPath(path, false);
 				}
 			}
-			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/INSTANCES") == false)
-				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/INSTANCES", false);
-			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/instructions.xml") == false)
-				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/instructions.xml", true);
-			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/resource.xml") == false)
-				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/resource.xml", true);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_DATAS_PATH + "/INSTANCES") == false)
+				EFDataStorer.createPath(GlobalParam.CONFIG_DATAS_PATH + "/INSTANCES", false);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_DATAS_PATH + "/instructions.xml") == false)
+				EFDataStorer.createPath(GlobalParam.CONFIG_DATAS_PATH + "/instructions.xml", true);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_DATAS_PATH + "/resource.xml") == false)
+				EFDataStorer.createPath(GlobalParam.CONFIG_DATAS_PATH + "/resource.xml", true);
 
-			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES") == false) {
-				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES", false);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_DATAS_PATH + "/EF_NODES") == false) {
+				EFDataStorer.createPath(GlobalParam.CONFIG_DATAS_PATH + "/EF_NODES", false);
 			}
-			if (EFDataStorer.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID) == false) {
-				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID, false);
-			}
-			if (EFDataStorer
-					.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/status") == false) {
-				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/status", true);
+			if (EFDataStorer.exists(GlobalParam.CONFIG_DATAS_PATH + "/EF_NODES/" + GlobalParam.NODEID) == false) {
+				EFDataStorer.createPath(GlobalParam.CONFIG_DATAS_PATH + "/EF_NODES/" + GlobalParam.NODEID, false);
 			}
 			if (EFDataStorer
-					.exists(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs") == false) {
-				EFDataStorer.createPath(GlobalParam.CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs", true);
+					.exists(GlobalParam.CONFIG_DATAS_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/status") == false) {
+				EFDataStorer.createPath(GlobalParam.CONFIG_DATAS_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/status", true);
+			}
+			if (EFDataStorer
+					.exists(GlobalParam.CONFIG_DATAS_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs") == false) {
+				EFDataStorer.createPath(GlobalParam.CONFIG_DATAS_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs", true);
 			}
 		} catch (Exception e) {
 			Common.LOG.error("environmentCheck Exception", e);
