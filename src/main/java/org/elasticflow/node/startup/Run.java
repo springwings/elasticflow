@@ -133,8 +133,8 @@ public final class Run {
 		GlobalParam.CLUSTER_MIN_NODES = Integer.parseInt(GlobalParam.SystemConfig.getProperty("min_nodes"));
 		if(GlobalParam.SystemConfig.containsKey("node_ip"))
 			GlobalParam.IP = GlobalParam.SystemConfig.get("node_ip").toString();
-		if(GlobalParam.SystemConfig.containsKey("proxy_id")) {
-			GlobalParam.PROXY_IP = GlobalParam.SystemConfig.get("proxy_id").toString();
+		if(GlobalParam.SystemConfig.containsKey("proxy_ip")) {
+			GlobalParam.PROXY_IP = GlobalParam.SystemConfig.get("proxy_ip").toString();
 		} else {
 			GlobalParam.PROXY_IP = GlobalParam.IP;
 		}

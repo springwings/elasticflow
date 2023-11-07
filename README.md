@@ -81,6 +81,13 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
 - [数据交换范例参考](./example)  
 - [安装部署参考](https://github.com/springwings/elasticflow/wiki/v5.x-%E9%83%A8%E7%BD%B2%E8%BF%90%E8%A1%8C) 
 
+# 可视化管理界面
+- http://ip:8616
+<div align="center">
+  <img src="images/manage.png" width="520px">
+</div>
+
+
 # Changes
 5.0 版本对之前版本在架构上全新升级，不再通过Java原生支持深度学习，计算流通过调用外部推断服务rest接口实现数据计算服务。
 

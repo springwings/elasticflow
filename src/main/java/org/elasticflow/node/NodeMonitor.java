@@ -542,7 +542,20 @@ public final class NodeMonitor {
 		//start map resource 
 		for (Entry<String, JSONObject> entry : nodes.entrySet()) { 
 			String readfrom = entry.getValue().getString("ReadFrom"); 
-			int weight = 0;   
+			int weight = 0;
+			try { 
+				JSONObject JO = EFMonitorUtil.getInstanceInfo(entry.getKey(), 2); 
+				JSONObject _datas = JO.getJSONObject("reader"); 
+				for (String _key : _datas.keySet()) {  
+					if(!_datas.get(_key).toString().equals("Not started!")) {
+						if(_datas.getJSONObject(_key).containsKey("totalProcess"))
+							weight+=_datas.getJSONObject(_key).getInteger("totalProcess");
+					}  
+				}
+			} catch (Exception e) { 
+				e.printStackTrace();
+			}  
+ 
 			for (Entry<String, JSONObject> _entry : nodes.entrySet()) {
 				if(!entry.getKey().equals(_entry.getKey()) && _entry.getValue().getJSONArray("WriteTo").contains(readfrom)) {
 					JSONObject edge = new JSONObject();
