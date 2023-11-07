@@ -72,7 +72,7 @@ public class EFEmailNotifier implements EFNotify {
 	}
 
 	public EmailConfig getEmailConfig() {
-		Properties p = Common.loadProperties(GlobalParam.CONFIG_PATH + "/mail.properties");
+		Properties p = Common.loadProperties(GlobalParam.SYS_CONFIG_PATH + "/mail.properties");
 		EmailConfig EC = new EmailConfig(p.getProperty("mail.host"), p.getProperty("mail.From"),
 				p.getProperty("mail.FromName"), p.getProperty("mail.Address"), p.getProperty("mail.Cc"),
 				p.getProperty("mail.username"), p.getProperty("mail.password"), p.getProperty("mail.Subject"),

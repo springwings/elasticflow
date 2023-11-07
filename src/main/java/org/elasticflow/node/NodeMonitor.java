@@ -197,14 +197,14 @@ public final class NodeMonitor {
 	}
 
 	public void getResource(Request rq, EFRequest RR) {
-		String pondPath = GlobalParam.CONFIG_DATAS_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
+		String pondPath = GlobalParam.DATAS_CONFIG_PATH + "/" + GlobalParam.SystemConfig.getProperty("pond");
 		byte[] resourceXml = EFDataStorer.getData(pondPath, false);
 		setResponse(RESPONSE_STATUS.Success, "", new String(resourceXml));
 	}
 
 	public void updateResource(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "content")) {
-			String pondPath = GlobalParam.CONFIG_DATAS_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
+			String pondPath = GlobalParam.DATAS_CONFIG_PATH + "/" + GlobalParam.SystemConfig.getProperty("pond");
 			EFDataStorer.setData(pondPath, new String(decoder.decode(RR.getStringParam("content"))));
 			setResponse(RESPONSE_STATUS.Success, "update resource!", null);
 		}
@@ -244,7 +244,7 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void getNodeConfig(Request rq, EFRequest RR) {
-		setResponse(RESPONSE_STATUS.Success, "", GlobalParam.StartConfig);
+		setResponse(RESPONSE_STATUS.Success, "", GlobalParam.SystemConfig);
 	}
 
 	/**
@@ -257,7 +257,7 @@ public final class NodeMonitor {
 	public void setNodeConfig(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "content")) {
 			try {
-				String fpath = GlobalParam.CONFIG_PATH.replace("file:", "") + "/config.properties";
+				String fpath = GlobalParam.SYS_CONFIG_PATH.replace("file:", "") + "/config.properties";
 				EFDataStorer.setData(fpath, RR.getStringParam("content").strip());
 				Common.loadGlobalConfig(fpath);
 				setResponse(RESPONSE_STATUS.Success, "Config set success!", null);
@@ -304,7 +304,7 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void stopHttpReaderServiceService(Request rq, EFRequest RR) {
-		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
+		int service_level = Integer.parseInt(GlobalParam.SystemConfig.get("service_level").toString());
 		if ((service_level & 4) > 0) {
 			service_level -= 4;
 		}
@@ -321,7 +321,7 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void startHttpReaderServiceService(Request rq, EFRequest RR) {
-		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
+		int service_level = Integer.parseInt(GlobalParam.SystemConfig.get("service_level").toString());
 		if ((service_level & 4) == 0) {
 			service_level += 4;
 			Resource.httpReaderService.start();
@@ -335,7 +335,7 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void stopSearcherService(Request rq, EFRequest RR) {
-		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
+		int service_level = Integer.parseInt(GlobalParam.SystemConfig.get("service_level").toString());
 		if ((service_level & 1) > 0) {
 			service_level -= 1;
 		}
@@ -352,7 +352,7 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void startSearcherService(Request rq, EFRequest RR) {
-		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
+		int service_level = Integer.parseInt(GlobalParam.SystemConfig.get("service_level").toString());
 		if ((service_level & 1) == 0) {
 			service_level += 1;
 			Resource.searcherService.start();
@@ -366,9 +366,9 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void getStatus(Request rq, EFRequest RR) {
-		int service_level = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());
+		int service_level = Integer.parseInt(GlobalParam.SystemConfig.get("service_level").toString());
 		JSONObject dt = new JSONObject();
-		dt.put("NODE_TYPE", GlobalParam.StartConfig.getProperty("node_type"));
+		dt.put("NODE_TYPE", GlobalParam.SystemConfig.getProperty("node_type"));
 		dt.put("NODE_IP", GlobalParam.IP);
 		dt.put("WRITE_BATCH", GlobalParam.WRITE_BATCH);
 		dt.put("SERVICE_LEVEL", service_level);
@@ -885,7 +885,7 @@ public final class NodeMonitor {
 
 	private boolean updateResourceXml(JSONObject resourceData, boolean isDel) {
 		try {
-			String pondPath = GlobalParam.CONFIG_DATAS_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
+			String pondPath = GlobalParam.DATAS_CONFIG_PATH + "/" + GlobalParam.SystemConfig.getProperty("pond");
 			byte[] resourceXml = EFDataStorer.getData(pondPath, false);
 			String rname = resourceData.getString("name");
 			SAXReader reader = new SAXReader();

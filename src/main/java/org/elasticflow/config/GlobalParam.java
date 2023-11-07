@@ -60,8 +60,11 @@ public final class GlobalParam {
 	 * service 16 compute service
 	 */
 	public static int SERVICE_LEVEL; 
-
+	
+	/** node ip **/
 	public static String IP = "127.0.0.1";
+	/**proxy ip **/
+	public static String PROXY_IP = "127.0.0.1";
 	
 	/**Computer parameters*/
 	public final static String MAIN_PY = "entrance";
@@ -69,18 +72,18 @@ public final class GlobalParam {
 	/** CONNECT_EXPIRED is milliseconds time */
 	public static int CONNECT_EXPIRED = 7200000;
 
-	public static Properties StartConfig = new FormatProperties();
+	public static Properties SystemConfig = new FormatProperties();
 
 	/** configure file local path */
 	public static final String CONFIG_ROOT = System.getProperty("config"); 
 	
-	public static final String CONFIG_PATH = CONFIG_ROOT+"/config";
+	public static final String SYS_CONFIG_PATH = CONFIG_ROOT+"/config";
 
-	public static String CONFIG_DATAS_PATH = CONFIG_ROOT+"/datas";
+	public static String DATAS_CONFIG_PATH = CONFIG_ROOT+"/datas";
 	
 	public static String RESTART_SHELL_PATH = CONFIG_ROOT+"/restart.sh";
 
-	public static String INSTANCE_PATH = (CONFIG_DATAS_PATH+"/INSTANCES").intern();
+	public static String INSTANCE_PATH = (DATAS_CONFIG_PATH+"/INSTANCES").intern();
 
 	/** configure plugin local path */
 	public static final String pluginPath = System.getProperty("plugin");

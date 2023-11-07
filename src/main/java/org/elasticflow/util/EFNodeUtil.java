@@ -98,9 +98,9 @@ public final class EFNodeUtil {
 			while (redo) {
 				try {
 					GlobalParam.TASK_COORDER = EFRPCService.getRemoteProxyObj(TaskStateCoord.class, 
-							new InetSocketAddress(GlobalParam.StartConfig.getProperty("master_host"), GlobalParam.MASTER_SYN_PORT));			
+							new InetSocketAddress(GlobalParam.SystemConfig.getProperty("master_host"), GlobalParam.MASTER_SYN_PORT));			
 					GlobalParam.DISCOVERY_COORDER = EFRPCService.getRemoteProxyObj(DiscoveryCoord.class, 
-							new InetSocketAddress(GlobalParam.StartConfig.getProperty("master_host"), GlobalParam.MASTER_SYN_PORT));
+							new InetSocketAddress(GlobalParam.SystemConfig.getProperty("master_host"), GlobalParam.MASTER_SYN_PORT));
 					redo = false;
 				} catch (Exception e) { 
 					GlobalParam.TASK_COORDER = null;

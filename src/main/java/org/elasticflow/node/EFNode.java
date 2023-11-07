@@ -184,12 +184,12 @@ public class EFNode {
 	}
 
 	public void pushResource() {
-		String resource = GlobalParam.CONFIG_DATAS_PATH + "/" + GlobalParam.StartConfig.getProperty("pond");
-		String instructions = GlobalParam.CONFIG_DATAS_PATH + "/" + GlobalParam.StartConfig.getProperty("instructions");
+		String resource = GlobalParam.DATAS_CONFIG_PATH + "/" + GlobalParam.SystemConfig.getProperty("pond");
+		String instructions = GlobalParam.DATAS_CONFIG_PATH + "/" + GlobalParam.SystemConfig.getProperty("instructions");
 		this.instanceCoord.sendData(EFFileUtil.readText(resource, GlobalParam.ENCODING, false),
-				"/" + GlobalParam.StartConfig.getProperty("pond"), true);
+				"/" + GlobalParam.SystemConfig.getProperty("pond"), true);
 		this.instanceCoord.sendData(EFFileUtil.readText(instructions, GlobalParam.ENCODING, false),
-				"/" + GlobalParam.StartConfig.getProperty("instructions"), true);
+				"/" + GlobalParam.SystemConfig.getProperty("instructions"), true);
 		this.instanceCoord.reloadResource();
 	}
 

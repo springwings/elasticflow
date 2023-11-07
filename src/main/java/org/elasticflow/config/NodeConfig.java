@@ -78,8 +78,8 @@ public class NodeConfig {
 	public void loadConfig(String instanceSettings, boolean reset) {
 		if (reset) {
 			this.reset();
-			parsePondFile(GlobalParam.CONFIG_DATAS_PATH + "/" + this.pondFile);
-			parseInstructionsFile(GlobalParam.CONFIG_DATAS_PATH + "/" + this.instructionsFile);
+			parsePondFile(GlobalParam.DATAS_CONFIG_PATH + "/" + this.pondFile);
+			parseInstructionsFile(GlobalParam.DATAS_CONFIG_PATH + "/" + this.instructionsFile);
 		}
 		if (EFNodeUtil.isMaster())
 			loadInstanceConfig(instanceSettings);

@@ -26,8 +26,8 @@ public final class EFIoc {
 	private static ApplicationContext ACT;
 
 	static {  
-		String logpath = (String) Common.loadProperties(GlobalParam.CONFIG_PATH + "/log4j.properties").get("log4j.appender.EF.file");
-		PropertyConfigurator.configure(GlobalParam.CONFIG_PATH + "/log4j.properties");
+		String logpath = (String) Common.loadProperties(GlobalParam.SYS_CONFIG_PATH + "/log4j.properties").get("log4j.appender.EF.file");
+		PropertyConfigurator.configure(GlobalParam.SYS_CONFIG_PATH + "/log4j.properties");
 		File test_write = new File(logpath);
 		if(test_write.canWrite()) {
 			ACT = new ClassPathXmlApplicationContext("spring.xml");

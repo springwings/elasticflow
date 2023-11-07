@@ -84,8 +84,8 @@ public class EFMonitorUtil {
 
 	public static void saveNodeConfig() throws Exception {
 		OutputStream os = null;
-		os = new FileOutputStream(GlobalParam.CONFIG_PATH.replace("file:", "") + "/config.properties");
-		GlobalParam.StartConfig.store(os,null);
+		os = new FileOutputStream(GlobalParam.SYS_CONFIG_PATH.replace("file:", "") + "/config.properties");
+		GlobalParam.SystemConfig.store(os,null);
 	}
 	
 	/**
@@ -96,7 +96,7 @@ public class EFMonitorUtil {
 		String[] instanceSets = instanceSetting.split(":");
 		boolean isset = false;
 		String tmp = "";
-		for (String str : GlobalParam.StartConfig.getProperty("instances").split(",")) {
+		for (String str : GlobalParam.SystemConfig.getProperty("instances").split(",")) {
 			String[] s = str.split(":");
 			if (s[0].equals(instanceSets[0])) {
 				tmp += ","+instanceSetting;	
@@ -110,7 +110,7 @@ public class EFMonitorUtil {
 		
 		if(tmp.length()>2)
 			tmp = tmp.substring(1); 
-		GlobalParam.StartConfig.setProperty("instances", tmp);
+		GlobalParam.SystemConfig.setProperty("instances", tmp);
 	}
 	
 	public static void addInstanceToSystem(String instance,String level) {
@@ -131,13 +131,13 @@ public class EFMonitorUtil {
 	 */
 	public static void removeConfigInstance(String instance) {
 		String tmp = "";
-		for (String str : GlobalParam.StartConfig.getProperty("instances").split(",")) {
+		for (String str : GlobalParam.SystemConfig.getProperty("instances").split(",")) {
 			String[] s = str.split(":");
 			if (s[0].equals(instance))
 				continue;
 			tmp += str + ",";
 		}
-		GlobalParam.StartConfig.setProperty("instances", tmp);
+		GlobalParam.SystemConfig.setProperty("instances", tmp);
 	}
 
 	

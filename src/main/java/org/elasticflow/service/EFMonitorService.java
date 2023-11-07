@@ -53,10 +53,10 @@ public class EFMonitorService {
 		public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
 				throws IOException, ServletException {
 			response.setStatus(HttpServletResponse.SC_OK);
-			response.setHeader("Access-Control-Allow-Origin", "http://"+GlobalParam.IP+":8616");
-			response.setHeader("Access-Control-Allow-Methods", "*");
+			response.setHeader("Access-Control-Allow-Origin", "http://"+GlobalParam.PROXY_IP+":8616");
+			response.setHeader("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS");
 			response.setHeader("Access-Control-Max-Age", "3600");
-			response.setHeader("Access-Control-Allow-Headers", "content-security-policy,content-type,x-content-type-options,x-xss-protection");
+			response.setHeader("Access-Control-Allow-Headers", "content-security-policy,X-Requested-With,content-type,x-content-type-options,x-xss-protection");
 			response.setHeader("Access-Control-Allow-Credentials", "true");
 			response.setHeader("Server", "EF");
 			Request rq = (request instanceof Request) ? (Request) request

@@ -60,7 +60,7 @@ public class DistributeCoorder {
 	private ConcurrentLinkedQueue<String> idleInstances = new ConcurrentLinkedQueue<>();
 	
 	public DistributeCoorder() {
-		String[] instances = GlobalParam.StartConfig.getProperty("instances").split(",");
+		String[] instances = GlobalParam.SystemConfig.getProperty("instances").split(",");
 		for (int i = 0; i < instances.length; i++) {
 			String[] strs = instances[i].split(":");
 			if (strs.length > 1 && Integer.parseInt(strs[1]) > 0) {
@@ -432,7 +432,7 @@ public class DistributeCoorder {
 	}
 
 	private void storeNodesStatus() {
-		String fpath = GlobalParam.CONFIG_DATAS_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/status";
+		String fpath = GlobalParam.DATAS_CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/status";
 		JSONArray JA = new JSONArray();
 		for (EFNode node : nodes) {
 			JA.add(node.getNodeInfos());

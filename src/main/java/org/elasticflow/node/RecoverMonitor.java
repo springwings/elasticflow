@@ -29,7 +29,7 @@ public class RecoverMonitor {
 		Common.LOG.info("Start Recover Monitor Service!");
 		while(true) {
 			try {
-				String ip = GlobalParam.StartConfig.getProperty("monitor_ip");
+				String ip = GlobalParam.SystemConfig.getProperty("monitor_ip");
 				TelnetClient client = new TelnetClient(); 
 				client.setDefaultTimeout(6000); 
 				try { 
@@ -66,7 +66,7 @@ public class RecoverMonitor {
 	}
 	
 	private void takeOverNode() throws EFException { 
-		Common.loadGlobalConfig(GlobalParam.CONFIG_DATAS_PATH+"/EF_NODES/"+this.takeIp+"/configs"); 
+		Common.loadGlobalConfig(GlobalParam.DATAS_CONFIG_PATH+"/EF_NODES/"+this.takeIp+"/configs"); 
 		Resource.EFLOWS.init(true);
 		Resource.EFLOWS.startService();
 		Common.LOG.info(GlobalParam.IP+" has take Over Node "+this.takeIp);

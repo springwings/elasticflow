@@ -52,7 +52,7 @@ public class SafeShutDown extends Thread {
 	 * Task stop controlling local operation mode
 	 */
 	public static void stopAllInstances() {
-		String[] instances = GlobalParam.StartConfig.getProperty("instances").split(",");
+		String[] instances = GlobalParam.SystemConfig.getProperty("instances").split(",");
 		for (int i = 0; i < instances.length; i++) {
 			String[] strs = instances[i].split(":");
 			if (strs.length <= 0 || strs[0].length() < 1)

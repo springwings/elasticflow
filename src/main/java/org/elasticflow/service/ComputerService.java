@@ -39,10 +39,10 @@ public class ComputerService {
 	
 	public boolean start() {
 		HashMap<String, Object> serviceParams = new HashMap<String, Object>();
-		serviceParams.put("confident_port", GlobalParam.StartConfig.get("computer_service_confident_port"));
-		serviceParams.put("max_idle_time", GlobalParam.StartConfig.get("computer_service_max_idle_time"));
-		serviceParams.put("port", GlobalParam.StartConfig.get("computer_service_port"));
-		serviceParams.put("thread_pool", GlobalParam.StartConfig.get("computer_service_thread_pool"));
+		serviceParams.put("confident_port", GlobalParam.SystemConfig.get("computer_service_confident_port"));
+		serviceParams.put("max_idle_time", GlobalParam.SystemConfig.get("computer_service_max_idle_time"));
+		serviceParams.put("port", GlobalParam.SystemConfig.get("computer_service_port"));
+		serviceParams.put("thread_pool", GlobalParam.SystemConfig.get("computer_service_thread_pool"));
 		serviceParams.put("httpHandle", new httpHandle());
 		FS=HttpService.getInstance(serviceParams);		
 		try {

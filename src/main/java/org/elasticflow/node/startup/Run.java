@@ -88,10 +88,11 @@ public final class Run {
 		
 		int openThreadPools = 0;
 		if (initInstance) {
-			Resource.nodeConfig = NodeConfig.getInstance(GlobalParam.StartConfig.getProperty("pond"), GlobalParam.StartConfig.getProperty("instructions"));			
+			Resource.nodeConfig = NodeConfig.getInstance(GlobalParam.SystemConfig.getProperty("pond"), 
+					GlobalParam.SystemConfig.getProperty("instructions"));			
 			if(EFNodeUtil.isMaster()) {	
-				Resource.nodeConfig.init(GlobalParam.StartConfig.getProperty("instances"),
-						GlobalParam.StartConfig.getProperty("instances_location"));
+				Resource.nodeConfig.init(GlobalParam.SystemConfig.getProperty("instances"),
+						GlobalParam.SystemConfig.getProperty("instances_location"));
 				Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 				for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {
 					InstanceConfig instanceConfig = entry.getValue();
@@ -116,26 +117,31 @@ public final class Run {
 	 * Set global variables
 	 */
 	private void refreshGlobalParam() {
-		GlobalParam.RUN_ENV = String.valueOf(GlobalParam.StartConfig.get("run_environment"));
-		GlobalParam.LANG = String.valueOf(GlobalParam.StartConfig.get("language")).toUpperCase();
+		GlobalParam.RUN_ENV = String.valueOf(GlobalParam.SystemConfig.get("run_environment"));
+		GlobalParam.LANG = String.valueOf(GlobalParam.SystemConfig.get("language")).toUpperCase();
 		GlobalParam.VERSION = version;
 		GlobalParam.GROUPID = groupId;
-		GlobalParam.DEBUG = GlobalParam.StartConfig.getProperty("is_debug").equals("false") ? false : true;
-		GlobalParam.CONNECTION_POOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("resource_pool_size"));
-		GlobalParam.WRITE_BATCH = GlobalParam.StartConfig.getProperty("write_batch").equals("false") ? false : true;
-		GlobalParam.SEND_EMAIL_ON = GlobalParam.StartConfig.getProperty("send_mail").equals("false") ? false : true;
-		GlobalParam.SEND_API_ON = GlobalParam.StartConfig.containsKey("send_api")?GlobalParam.StartConfig.getProperty("send_api"):"";
-		GlobalParam.DISTRIBUTE_RUN = GlobalParam.StartConfig.getProperty("distribute_run").equals("false") ? false : true;
-		GlobalParam.MASTER_HOST = GlobalParam.StartConfig.getProperty("master_host");
-		GlobalParam.SERVICE_LEVEL = Integer.parseInt(GlobalParam.StartConfig.get("service_level").toString());		
-		GlobalParam.STS_THREADPOOL_SIZE = Integer.parseInt(GlobalParam.StartConfig.getProperty("sys_threadpool_size"));
-		GlobalParam.CLUSTER_MIN_NODES = Integer.parseInt(GlobalParam.StartConfig.getProperty("min_nodes"));
-		if(GlobalParam.StartConfig.containsKey("node_ip"))
-			GlobalParam.IP = GlobalParam.StartConfig.get("node_ip").toString();
-		if(GlobalParam.StartConfig.containsKey("instance_statistics_keep_period"))
-			GlobalParam.INSTANCE_STATISTICS_KEEP_PERIOD = Integer.parseInt(GlobalParam.StartConfig.getProperty("instance_statistics_keep_period"));
+		GlobalParam.DEBUG = GlobalParam.SystemConfig.getProperty("is_debug").equals("false") ? false : true;
+		GlobalParam.CONNECTION_POOL_SIZE = Integer.parseInt(GlobalParam.SystemConfig.getProperty("resource_pool_size"));
+		GlobalParam.WRITE_BATCH = GlobalParam.SystemConfig.getProperty("write_batch").equals("false") ? false : true;
+		GlobalParam.SEND_EMAIL_ON = GlobalParam.SystemConfig.getProperty("send_mail").equals("false") ? false : true;
+		GlobalParam.SEND_API_ON = GlobalParam.SystemConfig.containsKey("send_api")?GlobalParam.SystemConfig.getProperty("send_api"):"";
+		GlobalParam.DISTRIBUTE_RUN = GlobalParam.SystemConfig.getProperty("distribute_run").equals("false") ? false : true;
+		GlobalParam.MASTER_HOST = GlobalParam.SystemConfig.getProperty("master_host");
+		GlobalParam.SERVICE_LEVEL = Integer.parseInt(GlobalParam.SystemConfig.get("service_level").toString());		
+		GlobalParam.STS_THREADPOOL_SIZE = Integer.parseInt(GlobalParam.SystemConfig.getProperty("sys_threadpool_size"));
+		GlobalParam.CLUSTER_MIN_NODES = Integer.parseInt(GlobalParam.SystemConfig.getProperty("min_nodes"));
+		if(GlobalParam.SystemConfig.containsKey("node_ip"))
+			GlobalParam.IP = GlobalParam.SystemConfig.get("node_ip").toString();
+		if(GlobalParam.SystemConfig.containsKey("proxy_id")) {
+			GlobalParam.PROXY_IP = GlobalParam.SystemConfig.get("proxy_id").toString();
+		} else {
+			GlobalParam.PROXY_IP = GlobalParam.IP;
+		}
+		if(GlobalParam.SystemConfig.containsKey("instance_statistics_keep_period"))
+			GlobalParam.INSTANCE_STATISTICS_KEEP_PERIOD = Integer.parseInt(GlobalParam.SystemConfig.getProperty("instance_statistics_keep_period"));
 		
-		switch(GlobalParam.StartConfig.getProperty("node_type")) {
+		switch(GlobalParam.SystemConfig.getProperty("node_type")) {
 		case "master":
 			GlobalParam.node_type = NODE_TYPE.master;
 			break;
@@ -202,9 +208,9 @@ public final class Run {
 	private void start() {
 		try {
 			Runtime.getRuntime().addShutdownHook(new SafeShutDown());
-			Common.loadGlobalConfig(GlobalParam.CONFIG_PATH+"/config.properties");
+			Common.loadGlobalConfig(GlobalParam.SYS_CONFIG_PATH+"/config.properties");
 			loadPlugins(GlobalParam.pluginPath); 						
-			if (GlobalParam.StartConfig.get("node_type").equals(NODE_TYPE.backup.name())) {
+			if (GlobalParam.SystemConfig.get("node_type").equals(NODE_TYPE.backup.name())) {
 				init(false);
 				new RecoverMonitor().start();
 			} else {
@@ -216,7 +222,7 @@ public final class Run {
 					GlobalParam.LANG);
 			if(GlobalParam.DISTRIBUTE_RUN) {
 				Common.LOG.info("ElasticFlow {} {}, nodeID {} Start Success!",GlobalParam.VERSION,
-						GlobalParam.StartConfig.get("node_type"),GlobalParam.NODEID);
+						GlobalParam.SystemConfig.get("node_type"),GlobalParam.NODEID);
 			}else {
 				Common.LOG.info("ElasticFlow {} nodeID {} standalone mode Start Success!",GlobalParam.VERSION,GlobalParam.NODEID);
 			}

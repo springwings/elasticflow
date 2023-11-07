@@ -30,8 +30,8 @@ public class ResourceMonitor {
 
 	public static void start() throws EFException {
 		ReportStatus.nodeConfigs();
-		EFDataStorer.setData(GlobalParam.CONFIG_DATAS_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs",
-				JSON.toJSONString(GlobalParam.StartConfig));
+		EFDataStorer.setData(GlobalParam.DATAS_CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs",
+				JSON.toJSONString(GlobalParam.SystemConfig));
 		distributeService.start();
 		if (EFNodeUtil.isSlave()) {
 			ReportStatus.openHeartBeat();
