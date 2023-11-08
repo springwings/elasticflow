@@ -7,11 +7,11 @@
  */
 package org.elasticflow.param.end;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.time.FastDateFormat;
 import org.elasticflow.util.Common;
 
 import com.alibaba.fastjson.JSONObject;
@@ -137,7 +137,7 @@ public class ReaderParam {
 	 */
 	public String getCurrentStamp() {
 		if(scanFieldType.contains("date")) {
-			SimpleDateFormat sdf = new SimpleDateFormat(scanFieldType.replace("data:", ""));   
+			FastDateFormat sdf = FastDateFormat.getInstance(scanFieldType.replace("data:", ""));   
 			return sdf.format(new Date());
 		}else {
 			if(scanFieldType.contains("millisecond")) {

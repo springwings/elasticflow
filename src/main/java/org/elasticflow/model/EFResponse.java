@@ -7,13 +7,13 @@
  */
 package org.elasticflow.model;
 
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
+import org.elasticflow.util.Common;
 
 import com.alibaba.fastjson.JSON;
 
@@ -27,7 +27,6 @@ import com.alibaba.fastjson.JSON;
 public class EFResponse {
 	
 	protected Map<String, String> parsedParams = new HashMap<>();
-	private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	protected Object payload = null;
 	private long startTime = 0;
 	private long endTime = 0;
@@ -114,7 +113,7 @@ public class EFResponse {
 			rsp.put("datas", payload);
 		}
 		response.put("response", rsp);
-		response.put("createTime", SDF.format(System.currentTimeMillis()));
+		response.put("createTime", Common.FormatTime(System.currentTimeMillis()));
 		response.put("__SOURCE", GlobalParam.PROJ);
 		response.put("__VERSION", GlobalParam.VERSION);
 		response.put("__NODEID", GlobalParam.NODEID);
@@ -122,7 +121,7 @@ public class EFResponse {
 		response.put("__NODETYPE", GlobalParam.node_type.name());
 		response.put("__ENV", GlobalParam.RUN_ENV);
 		response.put("__IS_DEBUG", GlobalParam.DEBUG);
-		response.put("__SYS_START_TIME", SDF.format(GlobalParam.SYS_START_TIME));
+		response.put("__SYS_START_TIME", Common.FormatTime(GlobalParam.SYS_START_TIME));
 		return response;
 	}
 }

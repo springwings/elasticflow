@@ -205,7 +205,7 @@ public class InstanceConfig {
 			in = new ByteArrayInputStream(bt, 0, bt.length);
 			configParse(in);
 			in.close();
-			Common.LOG.info(configPath + " config load success!");
+			Common.LOG.info(configPath + " instance task info load success!");
 		} catch (Exception e) {
 			in = null;
 			setStatus(false);

@@ -218,4 +218,22 @@ public class EFFileUtil {
 		File file = new File(fpath); 
 		return file;
 	}
+	
+	public static boolean checkResourceExists(String path) {
+		File file = new File(path);
+		if (file.exists()) {
+			return true;
+		}
+		return false;
+	}
+	
+	public static String getJarDir(){ 
+		try {
+			String jarPath = EFFileUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+			return new File(jarPath).getParent();
+		} catch (Exception e) { 
+			Common.LOG.warn("get jar dir exception",e);
+			return "/opt/EF";
+		} 
+	}
 }

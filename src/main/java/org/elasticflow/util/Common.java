@@ -62,7 +62,7 @@ import com.alibaba.fastjson.JSONObject;
  */
 public final class Common {
 
-	public static FastDateFormat SDF = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
+	private static FastDateFormat SDF = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
 
 	public final static Logger LOG = LoggerFactory.getLogger("Elasticflow");
 
@@ -91,7 +91,11 @@ public final class Common {
 		chars[0] ^= 32;
 		return String.valueOf(chars);
 	}
-
+	
+	public static String FormatTime(long timestamp) {
+		return SDF.format(timestamp);
+	}
+	
 	public static boolean isDefaultParam(String p) {
 		if (defaultParamSet.contains(p))
 			return true;
@@ -172,7 +176,7 @@ public final class Common {
 	}
 
 	/**
-	 * * Second timestamp of now
+	 * Second time stamp of now
 	 * 
 	 * @return
 	 */
@@ -181,7 +185,7 @@ public final class Common {
 	}
 
 	/**
-	 * Second timestamp of the current zero point
+	 * Second time stamp of the current day zero point
 	 * 
 	 * @return
 	 */
@@ -378,7 +382,7 @@ public final class Common {
 			L2seq = "None";
 		String update;
 		if (lastUpdateTime.length() > 9 && lastUpdateTime.matches("[0-9]+")) {
-			update = SDF.format(
+			update = FormatTime(
 					lastUpdateTime.length() < 12 ? Long.valueOf(lastUpdateTime + "000") : Long.valueOf(lastUpdateTime));
 		} else {
 			update = lastUpdateTime;

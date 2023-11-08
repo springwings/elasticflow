@@ -512,7 +512,7 @@ public final class NodeMonitor {
 			switch(Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getType()) {
 				case KAFKA:
 				case ROCKETMQ:
-					instance.put("ReadFrom", Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getHost()+"_"+
+					instance.put("ReadFrom", Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getHost()+"#"+
 				    Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getDefaultValue().getString("consumer.topic")); 
 					break;
 			default:
@@ -524,7 +524,7 @@ public final class NodeMonitor {
 			case KAFKA:
 			case ROCKETMQ: 
 				for(String _wt:wt) {
-					wt2.add(Resource.nodeConfig.getWarehouse().get(_wt).getHost() +"_"+
+					wt2.add(Resource.nodeConfig.getWarehouse().get(_wt).getHost() +"#"+
 							config.getWriteFields().get("topic").getDefaultvalue());
 				}  
 				break;
@@ -540,11 +540,11 @@ public final class NodeMonitor {
 		}
 				
 		//start map resource 
-		for (Entry<String, JSONObject> entry : nodes.entrySet()) { 
-			String readfrom = entry.getValue().getString("ReadFrom"); 
+		for (Entry<String, JSONObject> node : nodes.entrySet()) {
+			String readfrom = node.getValue().getString("ReadFrom"); 
 			int weight = 0;
 			try { 
-				JSONObject JO = EFMonitorUtil.getInstanceInfo(entry.getKey(), 2); 
+				JSONObject JO = EFMonitorUtil.getInstanceInfo(node.getKey(), 2); 
 				JSONObject _datas = JO.getJSONObject("reader"); 
 				for (String _key : _datas.keySet()) {  
 					if(!_datas.get(_key).toString().equals("Not started!")) {
@@ -557,14 +557,35 @@ public final class NodeMonitor {
 			}  
  
 			for (Entry<String, JSONObject> _entry : nodes.entrySet()) {
-				if(!entry.getKey().equals(_entry.getKey()) && _entry.getValue().getJSONArray("WriteTo").contains(readfrom)) {
+				if(!node.getKey().equals(_entry.getKey()) && _entry.getValue().getJSONArray("WriteTo").contains(readfrom)) {
 					JSONObject edge = new JSONObject();
 					edge.put("from", _entry.getKey());
 					edge.put("weight", weight);
-					edge.put("to", entry.getKey());
+					edge.put("to", node.getKey());
 					edges.add(edge);
 				} 
 			}
+		}
+		//Modify node attributes:Only egress E, only ingress B,both eg/in M, independent nodes S
+		for (Entry<String, JSONObject> node : nodes.entrySet()) {
+			int egress=0;
+			int ingress=0;
+			for(JSONObject edge:edges) {
+				if(node.getKey().equals(edge.get("from")))
+					egress+=1;
+				if(node.getKey().equals(edge.get("to")))
+					ingress+=1;
+			}
+			if(egress>0 && ingress>0) {
+				node.getValue().put("attribute", "M");
+			}else if(egress==0 && ingress>0) {
+				node.getValue().put("attribute", "E");
+			}else if(egress==0 && ingress==0) {
+				node.getValue().put("attribute", "S");
+			}else {
+				node.getValue().put("attribute", "B");
+			}
+			node.getValue().put("weight", egress+ingress);
 		}
 		result.put("nodes", nodes);
 		result.put("edges", edges);

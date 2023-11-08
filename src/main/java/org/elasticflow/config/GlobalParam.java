@@ -75,9 +75,9 @@ public final class GlobalParam {
 	public static Properties SystemConfig = new FormatProperties();
 
 	/** configure file local path */
-	public static final String CONFIG_ROOT = System.getProperty("config"); 
+	public static String CONFIG_ROOT = System.getProperty("config"); 
 	
-	public static final String SYS_CONFIG_PATH = CONFIG_ROOT+"/config";
+	public static String SYS_CONFIG_PATH = CONFIG_ROOT+"/config";
 
 	public static String DATAS_CONFIG_PATH = CONFIG_ROOT+"/datas";
 	

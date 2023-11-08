@@ -89,7 +89,7 @@ public class Breaker {
 		sb.append(",fail times:" + String.valueOf(this.failTimes));
 		sb.append(",fail interval:" + String.valueOf(failInterval()));
 		sb.append(",fail times > " + String.valueOf(maxFailTime) + " OR fail Interval < " + String.valueOf(perFailTime));
-		sb.append(",opening time of breaker "+Common.SDF.format(this.breakerOnTime));
+		sb.append(",opening time of breaker "+Common.FormatTime(this.breakerOnTime));
 		return sb.toString();
 	}
 

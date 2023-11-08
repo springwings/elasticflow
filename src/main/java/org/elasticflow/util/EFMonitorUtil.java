@@ -2,7 +2,6 @@ package org.elasticflow.util;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 import java.util.Map;
 
 import org.elasticflow.config.GlobalParam;
@@ -28,8 +27,6 @@ import com.alibaba.fastjson.JSONObject;
  */
 
 public class EFMonitorUtil {
-	
-	public static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	public static boolean checkParams(NodeMonitor obj,EFRequest rq,String checkParams){ 
 		for(String param:checkParams.split(",")) {

@@ -35,6 +35,8 @@ import org.elasticflow.task.FlowTask;
 import org.elasticflow.task.schedule.TaskJobCenter;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.EFException.ELEVEL;
+import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFIoc;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.yarn.Resource;
@@ -203,11 +205,11 @@ public final class Run {
 			GlobalParam.PLUGIN_CLASS_LOADER = new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
 			Thread.currentThread().setContextClassLoader(GlobalParam.PLUGIN_CLASS_LOADER);  
 		}
-	}
-
+	} 
 	private void start() {
 		try {
-			Runtime.getRuntime().addShutdownHook(new SafeShutDown());
+			Runtime.getRuntime().addShutdownHook(new SafeShutDown()); 
+			Common.LOG.info("system run space is {}",GlobalParam.CONFIG_ROOT);
 			Common.loadGlobalConfig(GlobalParam.SYS_CONFIG_PATH+"/config.properties");
 			loadPlugins(GlobalParam.pluginPath); 						
 			if (GlobalParam.SystemConfig.get("node_type").equals(NODE_TYPE.backup.name())) {
@@ -218,13 +220,14 @@ public final class Run {
 				ResourceMonitor.start(); 
 				startService();
 			} 
-			Common.LOG.info("Environment {}, language {}",GlobalParam.RUN_ENV,
-					GlobalParam.LANG);
+			Common.LOG.info("Environment {}, Language {}, Start time {}",GlobalParam.RUN_ENV,
+					GlobalParam.LANG,Common.FormatTime(System.currentTimeMillis()));
 			if(GlobalParam.DISTRIBUTE_RUN) {
-				Common.LOG.info("ElasticFlow {} {}, nodeID {} Start Success!",GlobalParam.VERSION,
-						GlobalParam.SystemConfig.get("node_type"),GlobalParam.NODEID);
+				Common.LOG.info("ElasticFlow {} {}, node ID {}, node IP {}, cluster mode Start Success!",GlobalParam.VERSION,
+						GlobalParam.SystemConfig.get("node_type"),GlobalParam.NODEID,GlobalParam.IP);
 			}else {
-				Common.LOG.info("ElasticFlow {} nodeID {} standalone mode Start Success!",GlobalParam.VERSION,GlobalParam.NODEID);
+				Common.LOG.info("ElasticFlow {}, node ID {}, node IP {}, standalone mode Start Success!",GlobalParam.VERSION,
+						GlobalParam.NODEID,GlobalParam.IP);
 			}
 		} catch (Exception e) {
 	    	Common.LOG.error("Init System Exception", e);
@@ -233,12 +236,34 @@ public final class Run {
 	} 
 	
 	/**
+	 * Environmental health check
+	 * @throws EFException 
+	 */
+	private static void ENVCheck() throws EFException {
+		if(!EFFileUtil.checkResourceExists(GlobalParam.CONFIG_ROOT)) {
+			GlobalParam.CONFIG_ROOT = EFFileUtil.getJarDir();
+			if(!EFFileUtil.checkResourceExists(GlobalParam.CONFIG_ROOT))
+				throw new EFException("run dependent folder not found!",ELEVEL.Stop);
+			GlobalParam.DATAS_CONFIG_PATH = GlobalParam.CONFIG_ROOT+"/datas";
+			GlobalParam.RESTART_SHELL_PATH = GlobalParam.CONFIG_ROOT+"/restart.sh";
+			GlobalParam.INSTANCE_PATH = (GlobalParam.DATAS_CONFIG_PATH+"/INSTANCES").intern();
+		} 
+		if(!EFFileUtil.checkResourceExists(GlobalParam.SYS_CONFIG_PATH))
+			throw new EFException("system configuration file not found!",ELEVEL.Stop);
+		if(!EFFileUtil.checkResourceExists(GlobalParam.DATAS_CONFIG_PATH))
+			throw new EFException("run data folder not found!",ELEVEL.Stop);
+		if(!EFFileUtil.checkResourceExists(GlobalParam.INSTANCE_PATH))
+			throw new EFException("instance data not found!",ELEVEL.Stop);
+	}
+
+	/**
 	 * System start position
 	 * @param args
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		Resource.EFLOWS = (Run) EFIoc.getBean("EFLOWS");
+		ENVCheck();
+		Resource.EFLOWS = (Run) EFIoc.getBean("EFLOWS"); 
 		Resource.EFLOWS.start(); 
 	}
 }
