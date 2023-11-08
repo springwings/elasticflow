@@ -42,6 +42,7 @@ public class EFWebService {
 			_CH.setHandler(rh); 
 			serviceParams.put("httpHandle",_CH);  
 			HttpService.getInstance(serviceParams).start();
+			Common.LOG.info("Management Backend startup, http://{}:8616",GlobalParam.IP);
 		} catch (EFException e) {
 			Common.stopSystem(false);
 		}
