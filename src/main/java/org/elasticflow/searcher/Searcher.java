@@ -71,6 +71,9 @@ public class Searcher {
 		case VEARCH:
 			searcherModel = SearcherVearchModel.getInstance(rq,instanceConfig); 
 			break; 
+		case KAFKA:
+			searcherModel = SearcherVearchModel.getInstance(rq,instanceConfig); 
+			break; 
 		default:
 			response.setStatus("Not Support Searcher Type "+this.searcherFlowSocket.getType(),RESPONSE_STATUS.ParameterErr);
 			return; 
@@ -83,8 +86,7 @@ public class Searcher {
 				formatResult(this.searcherFlowSocket.Search(searcherModel, instanceName,handler),response);
 			} 
 		} catch (Exception e) {
-			response.setStatus("searcher parameters may be wrong!",RESPONSE_STATUS.ParameterErr);
-			log.error(rq.getPipe()+" searcher Response Exception,", e);
+			response.setStatus(e.getMessage(),RESPONSE_STATUS.Unknown);
 		} 
 	}  
 	

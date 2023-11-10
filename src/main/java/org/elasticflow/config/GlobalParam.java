@@ -201,7 +201,7 @@ public final class GlobalParam {
 				put(200, "System Code Running Exception!");
 				put(300, "Parameter exception!");
 				put(400, "Unknown exception!");
-				put(500, "External run exception!");
+				put(500, "External exception!");
 			}
 		};
 
@@ -213,7 +213,7 @@ public final class GlobalParam {
 			return this.v;
 		}
 
-		public Object getMsg() {
+		public String getMsg() {
 			return MSG.get(this.v);
 		}
 	}

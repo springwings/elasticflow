@@ -37,10 +37,10 @@ public class SearchParamUtil {
 			if (start >= 0)
 				SM.setStart(start);
 		}
-		o = request.get(KEY_PARAM.count.name(), instanceConfig.getSearcherParam(KEY_PARAM.count.name()),
-				"java.lang.Integer");
+		 
+		o = request.getParam(KEY_PARAM.count.name());
 		if (o != null) {
-			count = (int) o;
+			count = Integer.parseInt(o.toString());
 			if (count >= 1 && count <= GlobalParam.SEARCH_MAX_PAGE) {
 				SM.setCount(count);
 			}

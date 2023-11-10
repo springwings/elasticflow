@@ -17,6 +17,7 @@ import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.field.EFField;
 import org.elasticflow.instruction.Context;
+import org.elasticflow.model.EFHttpResponse;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
@@ -183,9 +184,15 @@ public class RestService extends ComputerFlowSocket {
 	 * 
 	 * @param post_data
 	 * @return
+	 * @throws EFException 
 	 */
-	private String sentRequest(JSONObject post_data, String api) {
-		return EFHttpClientUtil.process(api, post_data.toString());
+	private String sentRequest(JSONObject post_data, String api) throws EFException {
+		EFHttpResponse response = EFHttpClientUtil.process(api, post_data.toString());
+		if(response.isSuccess()) {
+			return response.getPayload();
+		}else {
+			throw new EFException(response.getInfo(),ELEVEL.Dispose);
+		}		
 	}
 
 	private void write(Context context, JSONObject datas, JSONObject responseParams, ArrayList<JSONObject> keepDatas)

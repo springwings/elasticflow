@@ -30,8 +30,7 @@ public class SearcherESModel extends SearcherModel<SortBuilder<?>, AggregationBu
 	private List<SortBuilder<?>> sortinfo;
 	private Map<String, List<String[]>> facetSearchParams;
 	private List<AggregationBuilder> facetsConfig = new ArrayList<AggregationBuilder>();
-
-	private boolean needCorpfuncCnt = false;
+ 
 	private boolean cacheRequest = true;
 	private Set<Integer> excludeSet;
 	private String type;
@@ -85,15 +84,7 @@ public class SearcherESModel extends SearcherModel<SortBuilder<?>, AggregationBu
 			}
 		}
 		return facetsConfig;
-	}
-
-	public boolean isNeedCorpfuncCnt() {
-		return needCorpfuncCnt;
-	}
-
-	public void setNeedCorpfuncCnt(boolean needCorpfuncCnt) {
-		this.needCorpfuncCnt = needCorpfuncCnt;
-	}
+	} 
 
 	public Set<Integer> getExcludeSet() {
 		return excludeSet;

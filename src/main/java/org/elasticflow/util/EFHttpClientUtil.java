@@ -25,6 +25,8 @@ import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
+import org.elasticflow.model.EFHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,20 +84,20 @@ public class EFHttpClientUtil {
 	 * @param data request data
 	 * @return
 	 */
-	public static String process(String uri, String data) {
+	public static EFHttpResponse process(String uri, String data) {
 		return process(uri,data,HttpPost.METHOD_NAME, DEFAULT_CONTENT_TYPE, DEFAUL_TIME_OUT,true);
 	}
-	public static String process(String uri, String methodName,String contentType,String data) {
+	public static EFHttpResponse process(String uri, String methodName,String contentType,String data) {
 		return process(uri,data,methodName,contentType, DEFAUL_TIME_OUT,true);
 	}
-	public static String process(String uri, String methodName,String contentType) {
+	public static EFHttpResponse process(String uri, String methodName,String contentType) {
 		return process(uri,null,methodName, contentType, DEFAUL_TIME_OUT,true);
 	}
-	public static String process(String uri, String data,String methodName, String contentType, int timeout,boolean retry) {
+	public static EFHttpResponse process(String uri, String data,String methodName, String contentType, int timeout,boolean retry) {
 		long startTime = System.currentTimeMillis();
 		HttpRequestBase method = null;
 		HttpEntity httpEntity = null;
-		String responseBody = "";
+		EFHttpResponse response = EFHttpResponse.getInstance();
 		try {			
 			CloseableHttpResponse rps;
 			method = getRequest(uri, methodName, contentType, timeout);
@@ -109,7 +111,8 @@ public class EFHttpClientUtil {
 			}			
 			httpEntity = rps.getEntity();
 			if (httpEntity != null) {
-				responseBody = EntityUtils.toString(httpEntity, "UTF-8");
+				response.setPayload( EntityUtils.toString(httpEntity, "UTF-8"));
+				response.setUsems(System.currentTimeMillis() - startTime);
 			}
 		} catch (Exception e) {
 			if (method != null) {
@@ -117,21 +120,20 @@ public class EFHttpClientUtil {
 			} 
 			if (e instanceof IOException && retry) {
 				 return EFHttpClientUtil.process(uri, data, methodName, contentType, timeout,false);
-			}
-			logger.error("post request exception, url:" + uri + ", exception:" + e.toString() + ", cost time(ms):"
-					+ (System.currentTimeMillis() - startTime));
+			} 
+			response.setStatus(RESPONSE_STATUS.ExternErr);
+			response.setInfo(e.toString());
 		}finally {
 			if (httpEntity != null) {
 				try {
 					EntityUtils.consumeQuietly(httpEntity);
-				} catch (Exception e) {
-					logger.error("close response exception, url:" + uri + ", exception:" + e.toString()
+				} catch (Exception e2) { 
+					logger.error("close response exception, url:" + uri + ", exception:" + e2.toString()
 							+ ", cost time(ms):" + (System.currentTimeMillis() - startTime));
 				}
-			}
-			//logger.info("cost time(ms):" + (System.currentTimeMillis() - startTime));
+			} 
 		}
-		return responseBody;
+		return response;
 	} 
 
 	/**

@@ -26,7 +26,9 @@ import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.model.searcher.SearcherESModel;
+import org.elasticflow.model.searcher.SearcherKafkaModel;
 import org.elasticflow.model.searcher.SearcherModel;
+import org.elasticflow.model.searcher.SearcherVearchModel;
 import org.elasticflow.node.CPU;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.piper.PipePump;
@@ -216,6 +218,14 @@ public class HttpReaderService {
 							switch (param.getType()) {
 							case ES:
 								SModel = SearcherESModel.getInstance(Common.getRequest(rq),
+										transFlow.getInstanceConfig()); 
+								break;
+							case VEARCH:
+								SModel = SearcherVearchModel.getInstance(Common.getRequest(rq),
+										transFlow.getInstanceConfig()); 
+								break;
+							case KAFKA:
+								SModel = SearcherKafkaModel.getInstance(Common.getRequest(rq),
 										transFlow.getInstanceConfig()); 
 								break;
 							default:
