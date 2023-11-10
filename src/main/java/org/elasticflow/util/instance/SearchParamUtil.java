@@ -28,23 +28,28 @@ import org.elasticsearch.search.sort.SortOrder;
 public class SearchParamUtil {
 
 	public static void normalParam(EFRequest request, SearcherModel<?> SM, InstanceConfig instanceConfig) {
-		Object o = request.get(GlobalParam.KEY_PARAM.start.name(),
+		Object val = request.get(KEY_PARAM.start.name(),
 				instanceConfig.getSearcherParam(KEY_PARAM.start.name()), "java.lang.Integer");
 		int start = 0;
 		int count = 1;
-		if (o != null) {
-			start = (int) o;
+		if (val != null) {
+			start = (int) val;
 			if (start >= 0)
 				SM.setStart(start);
 		}
 		 
-		o = request.getParam(KEY_PARAM.count.name());
-		if (o != null) {
-			count = Integer.parseInt(o.toString());
-			if (count >= 1 && count <= GlobalParam.SEARCH_MAX_PAGE) {
-				SM.setCount(count);
-			}
-		}
+		val = request.get(KEY_PARAM.count.name(),
+				instanceConfig.getSearcherParam(KEY_PARAM.count.name()), "java.lang.Integer");
+		if (val != null) {
+			count = (int) val;
+			SM.setCount(count); 
+		} 
+		
+		val = request.get(GlobalParam.CUSTOM_QUERY,
+				instanceConfig.getSearcherParam(GlobalParam.CUSTOM_QUERY), "java.lang.String");
+		if (val != null) 
+			SM.setCustomquery(val.toString());
+		
 
 		if ((start + count) > GlobalParam.SEARCH_MAX_WINDOW) 
 			request.addError("start+count<=" + GlobalParam.SEARCH_MAX_WINDOW);

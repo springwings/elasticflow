@@ -96,15 +96,16 @@ public class EFRequest{
 		return this.params;
 	}
 
-	public Object get(String key, SearcherParam sp, String type) {
-		if (sp == null)
-			return null;
-		Object v;
+	public Object get(String key, SearcherParam sp, String type) { 
+		Object v = null;
 		if (params.containsKey(key)) {
 			v = params.get(key);
 		} else {
-			v = sp.getDefaultValue();
+			if(sp != null)
+				v = sp.getDefaultValue();
 		}
+		if(v==null)
+			return null;
 		try {
 			Class<?> c = Class.forName(type);
 			Method method = c.getMethod("valueOf", String.class);
