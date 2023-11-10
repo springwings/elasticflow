@@ -42,7 +42,7 @@ public class VearchQueryParser implements QueryParser{
 	 * @param model 
 	 */ 
 	@Override
-	public void parseQuery(InstanceConfig instanceConfig,SearcherModel<?, ?> model) {
+	public void parseQuery(InstanceConfig instanceConfig,SearcherModel<?> model) {
 		Map<String, Object> paramMap = model.efRequest.getParams();
 		Set<Entry<String, Object>> entries = paramMap.entrySet();
 		Iterator<Entry<String, Object>> iter = entries.iterator();
@@ -111,7 +111,7 @@ public class VearchQueryParser implements QueryParser{
 	 * @throws EFException
 	 */
 	@Override
-	public void parseFilter(InstanceConfig instanceConfig,SearcherModel<?, ?> model) throws EFException {
+	public void parseFilter(InstanceConfig instanceConfig,SearcherModel<?> model) throws EFException {
 		 
 	}
 	 

@@ -15,7 +15,7 @@ import org.elasticflow.model.EFRequest;
  * @version 5.0
  * @date 2023-02-22 09:08
  */
-public class SearcherVearchModel extends SearcherModel<String, String> {
+public class SearcherVearchModel extends SearcherModel<String> {
 	 
 	public static SearcherVearchModel getInstance(EFRequest request, InstanceConfig instanceConfig) {
 		SearcherVearchModel sq = new SearcherVearchModel();
@@ -33,26 +33,8 @@ public class SearcherVearchModel extends SearcherModel<String, String> {
 	} 
   
 	@Override
-	public Map<String, List<String[]>> getFacetSearchParams() {
-		// TODO Auto-generated method stub
-		return null;
-	}
- 
-	@Override
 	public List<String> getSortinfo() {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public List<String> getFacetsConfig() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean cacheRequest() {
-		// TODO Auto-generated method stub
-		return false;
-	} 
 }

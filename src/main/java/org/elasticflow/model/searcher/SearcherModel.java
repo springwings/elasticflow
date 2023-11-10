@@ -1,44 +1,66 @@
 package org.elasticflow.model.searcher;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.elasticflow.model.EFRequest;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
- * 
+ * Search Request Description Model
  * @author chengwen
  * @version 1.0
  * @date 2018-07-22 09:08
  */
-public abstract class SearcherModel<T1, T2> {
+public abstract class SearcherModel<T1> {
 
+	/**
+	 * Resource identification
+	 */
 	public String storeId; 
-	 
+	
+	/**
+	 * Fields returned by search results
+	 */
 	private String fl;
 	
+	/**
+	 * Whether to return the instance (cluster) status
+	 */
 	private boolean showStats = false;
 	
+	/**
+	 * User query parameters
+	 */
 	public EFRequest efRequest; 
-
+	
+	/**
+	 * User query start
+	 */
 	private int start = 0;
-
+	
+	/**
+	 * Number of data returned by user query
+	 */
 	private int count = 5;
 
+	/**
+	 * Whether to conduct a search and return content 
+	 * for score and sentence interpretation
+	 */
 	private boolean showQueryInfo = false;
-
+	
+	/**
+	 * search processor
+	 */
 	private String requesthandler;
-
-	private String facet_ext = ""; 
-
-	public abstract Map<String, List<String[]>> getFacetSearchParams();
+	
+	/**
+	 * Aggregate search parameters
+	 */
+	private JSONObject customquery;
 
 	public abstract List<T1> getSortinfo();
-
-	public abstract boolean cacheRequest(); 
-	
-	public abstract List<T2> getFacetsConfig(); 
 	
 	public boolean isShowQueryInfo() {
 		return this.showQueryInfo;
@@ -100,18 +122,11 @@ public abstract class SearcherModel<T1, T2> {
 		this.count = count;
 	} 
 
-	public void setFacet_ext(String facet_ext) {
-		this.facet_ext = facet_ext;
+	public void setCustomquery(String customquery) {
+		this.customquery = JSONObject.parseObject(customquery);
 	}
 
-	public Map<String, String> getFacetExt() {
-		Map<String, String> ext = new HashMap<String, String>();
-		if (this.facet_ext.length() > 0) {
-			for (String str : this.facet_ext.split(",")) {
-				String[] tmp = str.split(":");
-				ext.put(tmp[0], tmp[1]);
-			}
-		}
-		return ext;
+	public JSONObject getCustomQuery() { 
+		return this.customquery;
 	}
 }

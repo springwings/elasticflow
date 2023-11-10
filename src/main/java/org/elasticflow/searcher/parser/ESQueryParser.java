@@ -67,7 +67,7 @@ public class ESQueryParser implements QueryParser {
 	 * @param searcherModel
 	 */
 	@Override
-	public void parseQuery(InstanceConfig instanceConfig, SearcherModel<?, ?> searcherModel) {
+	public void parseQuery(InstanceConfig instanceConfig, SearcherModel<?> searcherModel) {
 		BoolQueryBuilder bquery = QueryBuilders.boolQuery();
 		try {
 			Map<String, Object> paramMap = searcherModel.efRequest.getParams();
@@ -171,7 +171,7 @@ public class ESQueryParser implements QueryParser {
 	 * @param searcherModel
 	 * @throws EFException
 	 */
-	public void parseFilter(InstanceConfig instanceConfig, SearcherModel<?, ?> searcherModel) throws EFException {
+	public void parseFilter(InstanceConfig instanceConfig, SearcherModel<?> searcherModel) throws EFException {
 		BoolQueryBuilder bquery = QueryBuilders.boolQuery();
 		if (searcherModel.efRequest.getParams().containsKey(GlobalParam.PARAM_POST_FILTER)) {
 			JSONObject JOS = JSONObject
@@ -188,6 +188,12 @@ public class ESQueryParser implements QueryParser {
 		}
 		if (bquery.hasClauses())
 			SSB.postFilter(bquery);
+	}
+	
+	public void customQueryParse(InstanceConfig instanceConfig, SearcherModel<?> searcherModel) {
+		if(searcherModel.getCustomQuery()!=null) {
+			SSB.query(QueryBuilders.wrapperQuery(searcherModel.getCustomQuery().toJSONString()));
+		} 
 	}
 
 	static private void QueryBoost(QueryBuilder query, EFField tp, EFRequest request) throws Exception {
@@ -253,7 +259,7 @@ public class ESQueryParser implements QueryParser {
 		}
 		return ESSimpleQuery.getQuery();
 	}
-
+	 
 	static private QueryBuilder buildMultiQuery(String multifield, String value, InstanceConfig instanceConfig,
 			EFRequest request, String paramKey, int fuzzy) throws Exception {
 		DisMaxQueryBuilder bquery = null;

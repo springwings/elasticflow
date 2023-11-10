@@ -20,7 +20,7 @@ public class MysqlSearcher extends SearcherFlowSocket{
 	}
 
 	@Override
-	public SearcherResult Search(SearcherModel<?, ?> searcherModel, String instance, SearcherHandler handler) throws EFException {
+	public SearcherResult Search(SearcherModel<?> searcherModel, String instance, SearcherHandler handler) throws EFException {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -202,7 +202,7 @@ public class HttpReaderService {
 					case "delete":
 						if (RR.getParam("instance") != null && RR.getParam("seq") != null
 								&& RR.getParam("search_dsl") != null) {
-							SearcherModel<?, ?> SModel = null;
+							SearcherModel<?> SModel = null;
 							String instance = (String) RR.getParam("instance");
 							String seq = (String) RR.getParam("seq");
 							PipePump transFlow = Resource.socketCenter.getPipePump(instance, seq, false,

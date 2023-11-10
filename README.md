@@ -75,7 +75,12 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
     - Vearch
     - Hbase 1.x
     - Kafka 2.x
-
+    
+# Searcher Support
+    - Vearch
+    - Kafka
+    - ElasticSearch
+    
 # Document
 - [详细文档参照wiki](https://github.com/springwings/elasticflow/wiki)  
 - [数据交换范例参考](./example)  

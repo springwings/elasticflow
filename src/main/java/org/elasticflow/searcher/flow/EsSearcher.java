@@ -25,7 +25,6 @@ import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 
 import com.alibaba.fastjson.JSON;
@@ -46,9 +45,9 @@ public final class EsSearcher extends SearcherFlowSocket {
 		o.initConn(connectParams);
 		return o;
 	}
-	   
+
 	@Override
-	public SearcherResult Search(SearcherModel<?, ?> searcherModel, String instance, SearcherHandler handler)
+	public SearcherResult Search(SearcherModel<?> searcherModel, String instance, SearcherHandler handler)
 			throws EFException {
 		PREPARE(false, true, false);
 		boolean releaseConn = false;
@@ -58,7 +57,7 @@ public final class EsSearcher extends SearcherFlowSocket {
 		EsConnector ESC = null;
 		try {
 			ESC = (EsConnector) GETSOCKET().getConnection(END_TYPE.searcher);
-			RestHighLevelClient conn = ESC.getClient();  
+			RestHighLevelClient conn = ESC.getClient();
 			List<String> returnFields = new ArrayList<String>();
 			if (searcherModel.getFl() != null) {
 				for (String s : searcherModel.getFl().split(",")) {
@@ -71,7 +70,7 @@ public final class EsSearcher extends SearcherFlowSocket {
 						returnFields.add(e.getKey());
 				}
 			}
-			SearchResponse response = getSearchResponse(conn, searcherModel, returnFields, instance,res);
+			SearchResponse response = getSearchResponse(conn, searcherModel, returnFields, instance, res);
 			if (handler == null) {
 				addResult(res, response, searcherModel, returnFields);
 			} else {
@@ -88,9 +87,9 @@ public final class EsSearcher extends SearcherFlowSocket {
 			}
 		} catch (Exception e) {
 			releaseConn = true;
-			if(ESC!=null) {
-				throw Common.convertException(e,this.poolName);
-			}else {
+			if (ESC != null) {
+				throw Common.convertException(e, this.poolName);
+			} else {
 				throw Common.convertException(e);
 			}
 		} finally {
@@ -99,7 +98,7 @@ public final class EsSearcher extends SearcherFlowSocket {
 		return res;
 	}
 
-	private void addResult(SearcherResult res, SearchResponse response, SearcherModel<?, ?> searcherModel,
+	private void addResult(SearcherResult res, SearchResponse response, SearcherModel<?> searcherModel,
 			List<String> returnFields) {
 		SearchHits searchHits = response.getHits();
 		res.setTotalHit(searchHits.getTotalHits().value);
@@ -125,13 +124,15 @@ public final class EsSearcher extends SearcherFlowSocket {
 			res.getUnitSet().add(u);
 		}
 
-		if (searcherModel.getFacetSearchParams() != null && response.getAggregations() != null) {
+		if (response.getAggregations() != null) {
 			res.setFacetInfo(JSON.parseObject(response.toString()).get("aggregations"));
 		}
 	}
- 
+
 	/**
-	 * Build run statements and execute them
+	 * Build run statements and execute them Facet search for revisions, implemented
+	 * through DSL
+	 * 
 	 * @param conn
 	 * @param searcherModel
 	 * @param returnFields
@@ -145,23 +146,19 @@ public final class EsSearcher extends SearcherFlowSocket {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	private SearchResponse getSearchResponse(RestHighLevelClient conn, SearcherModel<?, ?> searcherModel,
-			List<String> returnFields, String instance,SearcherResult res) throws Exception {
+	private SearchResponse getSearchResponse(RestHighLevelClient conn, SearcherModel<?> searcherModel,
+			List<String> returnFields, String instance, SearcherResult res) throws Exception {
 		SearchRequest searchRequest = new SearchRequest(instance);
 		ESQueryParser ESP = new ESQueryParser();
 		ESP.parseQuery(instanceConfig, searcherModel);
 		ESP.parseFilter(instanceConfig, searcherModel);
+		ESP.customQueryParse(instanceConfig, searcherModel);
 		ESP.getSSB().size(searcherModel.getCount());
 		ESP.getSSB().from(searcherModel.getStart());
-		List<SortBuilder<?>> sortFields = (List<SortBuilder<?>>) searcherModel.getSortinfo(); 
+		List<SortBuilder<?>> sortFields = (List<SortBuilder<?>>) searcherModel.getSortinfo();
 		if (sortFields != null)
 			for (SortBuilder<?> s : sortFields) {
 				ESP.getSSB().sort(s);
-			}
-		List<AggregationBuilder> facetBuilders = (List<AggregationBuilder>) searcherModel.getFacetsConfig(); 
-		if (facetBuilders != null)
-			for (AggregationBuilder facet : facetBuilders) {
-				ESP.getSSB().aggregation(facet);
 			}
 		ESP.getSSB().storedFields(returnFields);
 		if (searcherModel.isShowQueryInfo()) {
@@ -172,5 +169,4 @@ public final class EsSearcher extends SearcherFlowSocket {
 		SearchResponse response = conn.search(searchRequest, RequestOptions.DEFAULT);
 		return response;
 	}
-
 }

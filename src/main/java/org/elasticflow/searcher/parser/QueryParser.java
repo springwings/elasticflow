@@ -13,8 +13,8 @@ import org.elasticflow.util.EFException;
  */
 public interface QueryParser {
 	 
-	public void parseQuery(InstanceConfig instanceConfig,SearcherModel<?, ?> searcherModel);
+	public void parseQuery(InstanceConfig instanceConfig,SearcherModel<?> searcherModel);
 	
-	public void parseFilter(InstanceConfig instanceConfig,SearcherModel<?, ?> searcherModel) throws EFException;
+	public void parseFilter(InstanceConfig instanceConfig,SearcherModel<?> searcherModel) throws EFException;
 	
 }

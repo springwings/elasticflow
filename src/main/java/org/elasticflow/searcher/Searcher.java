@@ -63,7 +63,7 @@ public class Searcher {
 			response.setStatus("searcher Flow Socket is null!",RESPONSE_STATUS.CodeException);
 			return ;
 		}
-		SearcherModel<?, ?> searcherModel = null;
+		SearcherModel<?> searcherModel = null;
 		switch (this.searcherFlowSocket.getType()) {
 		case ES:
 			searcherModel = SearcherESModel.getInstance(rq,instanceConfig); 

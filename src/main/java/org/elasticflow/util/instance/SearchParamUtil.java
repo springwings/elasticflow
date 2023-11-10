@@ -20,14 +20,14 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 
 /**
- * 
+ * User search parameter processing auxiliary tool
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:14
  */
 public class SearchParamUtil {
 
-	public static void normalParam(EFRequest request, SearcherModel<?, ?> SM, InstanceConfig instanceConfig) {
+	public static void normalParam(EFRequest request, SearcherModel<?> SM, InstanceConfig instanceConfig) {
 		Object o = request.get(GlobalParam.KEY_PARAM.start.name(),
 				instanceConfig.getSearcherParam(KEY_PARAM.start.name()), "java.lang.Integer");
 		int start = 0;

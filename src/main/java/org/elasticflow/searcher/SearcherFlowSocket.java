@@ -36,7 +36,7 @@ public abstract class SearcherFlowSocket extends Flow {
 	 * @return
 	 * @throws EFException
 	 */
-	public abstract SearcherResult Search(SearcherModel<?, ?> searcherModel, String instance, SearcherHandler handler)
+	public abstract SearcherResult Search(SearcherModel<?> searcherModel, String instance, SearcherHandler handler)
 			throws EFException; 
 
 	public DATA_SOURCE_TYPE getType() {

@@ -95,7 +95,7 @@ public class SearcherService{
 							process(RR,rps); 
 						} catch (Exception e) {
 							Common.LOG.error("Searcher http handler error,",e);
-							rps.setStatus("Searcher http handler error!", RESPONSE_STATUS.CodeException); 
+							rps.setStatus(e.getMessage(), RESPONSE_STATUS.ParameterErr); 
 						}
 					} else {
 						rps.setStatus("The Alias is Not Exists OR Not Start Up!", RESPONSE_STATUS.ParameterErr); 

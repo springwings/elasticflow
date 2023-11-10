@@ -59,7 +59,7 @@ public class VearchSearcher extends SearcherFlowSocket{
 	}  
 	
 	@Override
-	public SearcherResult Search(SearcherModel<?, ?> searcherModel, String instance, SearcherHandler handler)
+	public SearcherResult Search(SearcherModel<?> searcherModel, String instance, SearcherHandler handler)
 			throws EFException {
 		SearcherResult res = new SearcherResult(); 
 		PREPARE(false, true, false);
