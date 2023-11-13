@@ -3,12 +3,14 @@ package org.elasticflow.searcher.flow;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.connection.VearchConnector;
 import org.elasticflow.connection.handler.ConnectionHandler;
+import org.elasticflow.field.EFField;
 import org.elasticflow.model.searcher.ResponseDataUnit;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherResult;
@@ -82,6 +84,19 @@ public class VearchSearcher extends SearcherFlowSocket{
 				List<ResponseDataUnit> unitSet = new ArrayList<ResponseDataUnit>();
 				int total = JO.getJSONObject("hits").getIntValue("total");
 				if(total>0) {
+					List<String> returnFields = new ArrayList<String>();
+					if (searcherModel.getFl() != null) {
+						for (String s : searcherModel.getFl().split(",")) {
+							returnFields.add(s);
+						}
+					} else {
+						Map<String, EFField> tmpFields = instanceConfig.getSearchFields();
+						for (Map.Entry<String, EFField> e : tmpFields.entrySet()) {
+							if (e.getValue().getStored().equalsIgnoreCase("true"))
+								returnFields.add(e.getKey());
+						}
+					}
+					
 					JSONArray hits = JO.getJSONObject("hits").getJSONArray("hits");
 					for(int i=0;i<hits.size();i++) {
 						ResponseDataUnit rn = ResponseDataUnit.getInstance();
@@ -89,7 +104,8 @@ public class VearchSearcher extends SearcherFlowSocket{
 						Iterator<Entry<String, Object>> it = row.entrySet().iterator();
 						while (it.hasNext()) {
 							Entry<String, Object> entry = it.next();
-							rn.addObject(entry.getKey(), entry.getValue());
+							if (returnFields.contains(entry.getKey()))
+								rn.addObject(entry.getKey(), entry.getValue());
 				        } 
 						rn.addObject(GlobalParam.RESPONSE_SCORE, hits.getJSONObject(i).get("_score"));
 						unitSet.add(rn);

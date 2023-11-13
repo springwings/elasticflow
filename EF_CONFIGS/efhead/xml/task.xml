@@ -12,15 +12,12 @@
 			<param>
 				<name>writeTo</name>
 				<value>testname_resource</value>
-			</param>
-
-			<!--- pipe start parameters -->
-
+			</param> 
+			<!--- pipe start parameters --> 
 			<param>
 				<name>readFrom</name>
 				<value>testwrite_resource</value>
-			</param>
-
+			</param> 
 			<param>
 				<name>writeMechanism</name>
 				<value>ab</value>
@@ -36,19 +33,13 @@
 			<param>
 				<name>multiThread</name>
 				<value>false</value>
-			</param>
-
-			<!--- pipe compute service parameters -->
-
-			<!--- pipe search service parameters -->
+			</param>  
 			<param>
 				<name>searchFrom</name>
 				<value>testname</value>
-			</param>
-
-		</TransParam>
-
-		<ReadParam>
+			</param> 
+		</TransParam> 
+		<ReaderParam>
 			<param>
 				<name>keyField</name>
 				<value>subject_id</value>
@@ -60,28 +51,30 @@
 			<param>
 				<name>dataScanDSL</name>
 				<value><![CDATA[  
-SELECT t.*, CONCAT('[',
-  GROUP_CONCAT(
-  CONCAT('{"predicate":"', REPLACE(kg_datas.predicate,'"',''), '",'),
-  CONCAT('"object":"', REPLACE(kg_datas.object,'"',' '), '"}')),
-  ']') as data
-from (SELECT subject_id,subject,alias,GROUP_CONCAT(kg_type.name) as type FROM `kg_subject`  JOIN kg_type
-ON FIND_IN_SET(kg_type.type_id,kg_subject.type) WHERE  kg_subject.subject_id>'#{page_start}' AND kg_subject.subject_id <='#{page_end}' AND kg_subject.modify_time > '#{start_time}'
-GROUP BY subject_id) t LEFT JOIN kg_datas on kg_datas.subject_id=t.subject_id 
-GROUP BY t.subject_id     
-]]></value>
+				SELECT t.*, CONCAT('[',
+				  GROUP_CONCAT(
+				  CONCAT('{"predicate":"', REPLACE(kg_datas.predicate,'"',''), '",'),
+				  CONCAT('"object":"', REPLACE(kg_datas.object,'"',' '), '"}')),
+				  ']') as data
+				from (SELECT subject_id,subject,alias,GROUP_CONCAT(kg_type.name) as type FROM `kg_subject`  JOIN kg_type
+				ON FIND_IN_SET(kg_type.type_id,kg_subject.type) WHERE  kg_subject.subject_id>'#{page_start}' AND kg_subject.subject_id <='#{page_end}' AND kg_subject.modify_time > '#{start_time}'
+				GROUP BY subject_id) t LEFT JOIN kg_datas on kg_datas.subject_id=t.subject_id 
+				GROUP BY t.subject_id     
+				]]>
+				</value>
 			</param>
 			<param>
 				<name>pageScanDSL</name>
 				<value><![CDATA[ 
-SELECT subject_id FROM `kg_subject` 
-			   WHERE  modify_time > '#{start_time}'
-]]>
+					SELECT subject_id FROM `kg_subject` 
+								   WHERE  modify_time > '#{start_time}'
+					]]>
 				</value>
 			</param>
-		</ReadParam>
-
-		<WriteParam>
+		</ReaderParam>
+		<ComputerParam>    
+		</ComputerParam> 
+		<WriterParam>
 			<param>
 				<name>writeKey</name>
 				<value>subject_id</value>
@@ -111,10 +104,10 @@ SELECT subject_id FROM `kg_subject`
 					indextype="long" analyzer="" paramname="modify_time"
 					paramtype="org.elasticflow.field.handler.LongRangeType" />
 			</fields>
-		</WriteParam>
+		</WriterParam>
 
 		<!--- 可选 -->
-		<SearchParam>
+		<SearcherParam>
 			<param>
 				<name>start</name>
 				<paramtype>java.lang.Integer</paramtype>
@@ -130,7 +123,7 @@ SELECT subject_id FROM `kg_subject`
 				<name>q</name>
 				<paramtype>java.lang.String</paramtype>
 			</param>
-		</SearchParam>
+		</SearcherParam>
 	</dataflow>
 
 </config> 

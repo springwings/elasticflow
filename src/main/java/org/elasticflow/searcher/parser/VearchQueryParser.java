@@ -69,9 +69,15 @@ public class VearchQueryParser implements QueryParser{
 						filters.add(row);
 					}
 				} else {
-					switch(k) {
+					switch(k.toLowerCase()) {
 					case "max_score":
 						_feature.put("max_score",Float.parseFloat(String.valueOf(v))); 
+						break; 
+					case "min_score":
+						_feature.put("min_score",Float.parseFloat(String.valueOf(v))); 
+						break; 
+					case "boost":
+						_feature.put("boost",Float.parseFloat(String.valueOf(v))); 
 						break; 
 					} 
 				}
