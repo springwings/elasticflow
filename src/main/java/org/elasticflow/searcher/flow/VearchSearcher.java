@@ -66,14 +66,14 @@ public class VearchSearcher extends SearcherFlowSocket{
 		boolean releaseConn = false;
 		if(!ISLINK())
 			return res;
-		try {
-			String table = Common.getStoreName(instance, searcherModel.getStoreId());
+		try { 
 			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.searcher);  
 			VearchQueryParser VQP = new VearchQueryParser();
 			VQP.getSearchObj().put("size", searcherModel.getCount()); 
 			VQP.parseQuery(instanceConfig,searcherModel);
 			if(searcherModel.getFl()!=null)
 				VQP.getSearchObj().put("fields", searcherModel.getFl().split(","));
+			String table = Common.getStoreName(instance, searcherModel.getStoreId());
 			JSONObject JO = conn.search(table, VQP.getSearchObj().toJSONString());
 			if (searcherModel.isShowQueryInfo()) {
 				res.setQueryDetail(VQP.getSearchObj()); 
