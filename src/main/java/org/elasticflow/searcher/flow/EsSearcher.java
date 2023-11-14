@@ -8,6 +8,7 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.connection.EsConnector;
 import org.elasticflow.field.EFField;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.searcher.ResponseDataUnit;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherResult;
@@ -47,55 +48,55 @@ public final class EsSearcher extends SearcherFlowSocket {
 	}
 
 	@Override
-	public SearcherResult Search(SearcherModel<?> searcherModel, String instance, SearcherHandler handler)
+	public void Search(SearcherModel<?> searcherModel, String instance, SearcherHandler handler, EFResponse efResponse)
 			throws EFException {
 		PREPARE(false, true, false);
 		boolean releaseConn = false;
 		SearcherResult res = new SearcherResult();
-		if (!ISLINK())
-			return res;
-		EsConnector ESC = null;
-		try {
-			ESC = (EsConnector) GETSOCKET().getConnection(END_TYPE.searcher);
-			RestHighLevelClient conn = ESC.getClient();
-			List<String> returnFields = new ArrayList<String>();
-			if (searcherModel.getFl() != null) {
-				for (String s : searcherModel.getFl().split(",")) {
-					returnFields.add(s);
+		if (ISLINK()) {
+			EsConnector ESC = null;
+			try {
+				ESC = (EsConnector) GETSOCKET().getConnection(END_TYPE.searcher);
+				RestHighLevelClient conn = ESC.getClient();
+				List<String> returnFields = new ArrayList<String>();
+				if (searcherModel.getFl() != null) {
+					for (String s : searcherModel.getFl().split(",")) {
+						returnFields.add(s);
+					}
+				} else {
+					Map<String, EFField> tmpFields = instanceConfig.getSearchFields();
+					for (Map.Entry<String, EFField> e : tmpFields.entrySet()) {
+						if (e.getValue().getStored().equalsIgnoreCase("true"))
+							returnFields.add(e.getKey());
+					}
 				}
-			} else {
-				Map<String, EFField> tmpFields = instanceConfig.getSearchFields();
-				for (Map.Entry<String, EFField> e : tmpFields.entrySet()) {
-					if (e.getValue().getStored().equalsIgnoreCase("true"))
-						returnFields.add(e.getKey());
+				SearchResponse sr = getSearchResponse(conn, searcherModel, returnFields, instance, res);
+				if (handler == null) {
+					addResult(res, sr, searcherModel, returnFields);
+				} else {
+					handler.Handle(res, sr, searcherModel, instanceConfig, returnFields);
 				}
+				if (searcherModel.isShowStats()) {
+					MainResponse tmp = conn.info(RequestOptions.DEFAULT);
+					JSONObject jo = new JSONObject();
+					jo.put("clusterName", tmp.getClusterName());
+					jo.put("nodeName", tmp.getNodeName());
+					jo.put("version", tmp.getVersion());
+					jo.put("tagline", tmp.getTagline());
+					res.setStat(jo);
+				}
+			} catch (Exception e) {
+				releaseConn = true;
+				if (ESC != null) {
+					throw Common.convertException(e, this.poolName);
+				} else {
+					throw Common.convertException(e);
+				}
+			} finally {
+				REALEASE(false, releaseConn);
 			}
-			SearchResponse response = getSearchResponse(conn, searcherModel, returnFields, instance, res);
-			if (handler == null) {
-				addResult(res, response, searcherModel, returnFields);
-			} else {
-				handler.Handle(res, response, searcherModel, instanceConfig, returnFields);
-			}
-			if (searcherModel.isShowStats()) {
-				MainResponse tmp = conn.info(RequestOptions.DEFAULT);
-				JSONObject jo = new JSONObject();
-				jo.put("clusterName", tmp.getClusterName());
-				jo.put("nodeName", tmp.getNodeName());
-				jo.put("version", tmp.getVersion());
-				jo.put("tagline", tmp.getTagline());
-				res.setStat(jo);
-			}
-		} catch (Exception e) {
-			releaseConn = true;
-			if (ESC != null) {
-				throw Common.convertException(e, this.poolName);
-			} else {
-				throw Common.convertException(e);
-			}
-		} finally {
-			REALEASE(false, releaseConn);
 		}
-		return res;
+		this.formatResult(res, efResponse);
 	}
 
 	private void addResult(SearcherResult res, SearchResponse response, SearcherModel<?> searcherModel,

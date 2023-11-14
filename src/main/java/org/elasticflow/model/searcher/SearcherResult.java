@@ -11,6 +11,7 @@ import java.util.List;
  */
 public class SearcherResult {
 	
+	private boolean success = true; 
 	private float useTime;
 	private String callDateTime; 
 	private long totalHit;
@@ -18,8 +19,7 @@ public class SearcherResult {
 	private Object facetInfo=null;   
 	private Object queryDetail = null;
 	private Object explainInfo;
-	private Object stat;
-	private boolean success = true;
+	private Object stat; 
 	private String errorInfo = "";
 	
 	public SearcherResult() {
@@ -105,5 +105,6 @@ public class SearcherResult {
 
 	public void setErrorInfo(String errorInfo) {
 		this.errorInfo = errorInfo;
-	}   
+	} 
+	
 }

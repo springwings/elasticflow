@@ -59,6 +59,10 @@ public class EFResponse {
 	public void setRequest(Map<String, Object> request) {
 		this.request = request;
 	} 
+	
+	public Map<String, Object> getRequest() {
+		return this.request;
+	} 
 
 	public Object getPayload() {
 		return payload;

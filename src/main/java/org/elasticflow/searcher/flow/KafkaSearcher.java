@@ -21,6 +21,7 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.TopicPartitionInfo;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.searcher.ResponseDataUnit;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherResult;
@@ -66,7 +67,7 @@ public final class KafkaSearcher extends SearcherFlowSocket {
 	}
 
 	@Override
-	public SearcherResult Search(SearcherModel<?> searcherModel, String instance, SearcherHandler handler)
+	public void Search(SearcherModel<?> searcherModel, String instance, SearcherHandler handler, EFResponse efResponse)
 			throws EFException {
 		SearcherResult res = new SearcherResult();
 		String content = searcherModel.efRequest.getStringParam("content");
@@ -131,7 +132,7 @@ public final class KafkaSearcher extends SearcherFlowSocket {
 		} finally {
 			consumer.close();
 		}
-		return res;
+		this.formatResult(res, efResponse);
 	}
 
 }

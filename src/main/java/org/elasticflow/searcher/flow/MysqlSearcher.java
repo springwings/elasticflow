@@ -1,7 +1,7 @@
 package org.elasticflow.searcher.flow;
 
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.searcher.SearcherModel;
-import org.elasticflow.model.searcher.SearcherResult;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.searcher.SearcherFlowSocket;
 import org.elasticflow.searcher.handler.SearcherHandler;
@@ -20,8 +20,10 @@ public class MysqlSearcher extends SearcherFlowSocket{
 	}
 
 	@Override
-	public SearcherResult Search(SearcherModel<?> searcherModel, String instance, SearcherHandler handler) throws EFException {
+	public void Search(SearcherModel<?> searcherModel, String instance, SearcherHandler handler, EFResponse efResponse)
+			throws EFException {
 		// TODO Auto-generated method stub
-		return null;
+		
 	}
+ 
 }
