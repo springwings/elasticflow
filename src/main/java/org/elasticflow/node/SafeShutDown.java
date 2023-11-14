@@ -53,8 +53,8 @@ public class SafeShutDown extends Thread {
 	 */
 	public static void stopAllInstances() {
 		String[] instances = GlobalParam.SystemConfig.getProperty("instances").split(",");
-		for (int i = 0; i < instances.length; i++) {
-			String[] strs = instances[i].split(":");
+		for (int i = 0; i < instances.length; i++) { 
+			String[] strs = instances[i].strip().split(":"); 
 			if (strs.length <= 0 || strs[0].length() < 1)
 				continue;
 			if (Integer.parseInt(strs[1]) > 0) {

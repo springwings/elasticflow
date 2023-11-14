@@ -27,7 +27,6 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.GlobalParam.STATUS;
@@ -143,7 +142,7 @@ public final class NodeMonitor {
 			}
 		} catch (Exception e) {
 			RS.setStatus("Actions Exception!", RESPONSE_STATUS.CodeException);
-			Common.LOG.error("ac " + RR.getParams().get("ac") + " Exception ", e);
+			Common.LOG.error("Management Operations " + RR.getParams().get("ac") + " Exception ", e);
 		}
 	}
 
@@ -755,7 +754,12 @@ public final class NodeMonitor {
 			}
 		}
 	}
-
+	
+	/**
+	 * Only delete tasks from the configuration file without processing data
+	 * @param rq
+	 * @param RR
+	 */
 	public void removeInstance(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "instance")) {
 			removeInstance(RR.getStringParam("instance"));
@@ -865,7 +869,8 @@ public final class NodeMonitor {
 
 	/**
 	 * delete Instance Data through alias or Instance data name
-	 * 
+	 * The time mechanism deletes the current time index 
+	 * The A/B mechanism deletes the currently used index
 	 * @param alias
 	 * @return
 	 */
@@ -877,10 +882,6 @@ public final class NodeMonitor {
 			for (Map.Entry<String, InstanceConfig> ents : configMap.entrySet()) {
 				String instance = ents.getKey();
 				InstanceConfig instanceConfig = ents.getValue();
-				if (instanceConfig.getPipeParams().getWriteMechanism() != MECHANISM.AB) {
-					setResponse(RESPONSE_STATUS.Success, "delete " + _instance + " Success!", null);
-					return;
-				}
 				if (instance.equals(_instance) || instanceConfig.getAlias().equals(_instance)) {
 					String[] L1seqs = EFMonitorUtil.getInstanceL1seqs(instance);
 					if (L1seqs.length == 0) {

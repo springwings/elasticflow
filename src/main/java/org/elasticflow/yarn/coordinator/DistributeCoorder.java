@@ -62,7 +62,7 @@ public class DistributeCoorder {
 	public DistributeCoorder() {
 		String[] instances = GlobalParam.SystemConfig.getProperty("instances").split(",");
 		for (int i = 0; i < instances.length; i++) {
-			String[] strs = instances[i].split(":");
+			String[] strs = instances[i].strip().split(":");
 			if (strs.length > 1 && Integer.parseInt(strs[1]) > 0) {
 				totalInstanceNum++; // summary run instance
 				this.idleInstances.add(instances[i]);
