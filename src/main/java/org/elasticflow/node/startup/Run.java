@@ -209,6 +209,7 @@ public final class Run {
 	private void start() {
 		try {
 			Runtime.getRuntime().addShutdownHook(new SafeShutDown()); 
+			Common.LOG.info("System Ready To Start...");
 			Common.LOG.info("system run space is {}",GlobalParam.CONFIG_ROOT);
 			Common.loadGlobalConfig(GlobalParam.SYS_CONFIG_PATH+"/config.properties");
 			loadPlugins(GlobalParam.pluginPath); 						
@@ -223,10 +224,10 @@ public final class Run {
 			Common.LOG.info("Environment {}, Language {}, Start time {}",GlobalParam.RUN_ENV,
 					GlobalParam.LANG,Common.FormatTime(System.currentTimeMillis()));
 			if(GlobalParam.DISTRIBUTE_RUN) {
-				Common.LOG.info("ElasticFlow {} {}, node ID {}, node IP {}, cluster mode Start Success!",GlobalParam.VERSION,
+				Common.LOG.info("ElasticFlow {} {}, node ID {}, IP {}, Cluster Mode Start Success!",GlobalParam.VERSION,
 						GlobalParam.SystemConfig.get("node_type"),GlobalParam.NODEID,GlobalParam.IP);
 			}else {
-				Common.LOG.info("ElasticFlow {}, node ID {}, node IP {}, standalone mode Start Success!",GlobalParam.VERSION,
+				Common.LOG.info("ElasticFlow {}, node ID {}, IP {}, Standalone Mode Start Success!",GlobalParam.VERSION,
 						GlobalParam.NODEID,GlobalParam.IP);
 			}
 		} catch (Exception e) {

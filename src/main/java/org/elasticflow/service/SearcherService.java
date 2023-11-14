@@ -47,7 +47,7 @@ public class SearcherService{
 		FS=HttpService.getInstance(serviceParams);		
 		try {
 			FS.start();
-			Common.LOG.info("Search Service startup, http://{}:{}",GlobalParam.IP,GlobalParam.SystemConfig.get("searcher_service_port"));
+			Common.LOG.info("Searcher Service, http://{}:{}",GlobalParam.IP,GlobalParam.SystemConfig.get("searcher_service_port"));
 		} catch (EFException e) {
 			Common.stopSystem(false);
 		}

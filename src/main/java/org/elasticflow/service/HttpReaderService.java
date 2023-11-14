@@ -67,7 +67,7 @@ public class HttpReaderService {
 		FS = HttpService.getInstance(serviceParams);
 		try {
 			FS.start();
-			Common.LOG.info("Http Reader service startup, http://{}:{}",GlobalParam.IP,GlobalParam.SystemConfig.get("reader_service_port"));
+			Common.LOG.info("Http Reader Service, http://{}:{}",GlobalParam.IP,GlobalParam.SystemConfig.get("reader_service_port"));
 		} catch (EFException e) {
 			Common.stopSystem(false);
 		}

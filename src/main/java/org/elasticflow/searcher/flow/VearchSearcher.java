@@ -122,13 +122,14 @@ public class VearchSearcher extends SearcherFlowSocket {
 					res.setSuccess(false);
 					res.setErrorInfo("please check the search parameters!" + JO.toJSONString());
 				}
+				 
 			} catch (Exception e) {
 				releaseConn = true;
 				throw Common.convertException(e);
 			} finally {
 				REALEASE(false, releaseConn);
 			}
-		} 
+		}  
 		this.formatResult(res, efResponse);
 	}
 

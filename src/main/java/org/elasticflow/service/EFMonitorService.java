@@ -42,7 +42,7 @@ public class EFMonitorService {
 		serviceParams.put("httpHandle", new httpHandle());
 		try {
 			HttpService.getInstance(serviceParams).start();
-			Common.LOG.info("Management API service startup, http://{}:8617",GlobalParam.IP);
+			Common.LOG.info("Management API Service, http://{}:8617",GlobalParam.IP);
 		} catch (EFException e) {
 			Common.stopSystem(false);
 		}

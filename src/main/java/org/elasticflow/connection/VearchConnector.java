@@ -91,11 +91,34 @@ public class VearchConnector {
 		}
 		return null;
 	}
+	 
+	public JSONObject getSpaceStats(String space) {
+		try {
+			EFHttpResponse response = EFHttpClientUtil.process(
+					this.method + this.MASTER + "/_cluster/health", HttpGet.METHOD_NAME,
+					EFHttpClientUtil.DEFAULT_CONTENT_TYPE);
+			if(response.isSuccess()) {
+				JSONArray jarr = JSONArray.parseArray(response.getPayload());
+				jarr = jarr.getJSONObject(0).getJSONArray("spaces");
+				for (int i = 0; i < jarr.size(); i++) {
+		            JSONObject jsonObject = jarr.getJSONObject(i);
+		            if(jsonObject.get("name").equals(space))
+		            	return jsonObject;
+				}		            
+			}else {
+				log.error(response.getInfo());
+			}			
+		} catch (Exception e) {
+			log.warn("get space info Exception", e);
+		}
+		return null;
+	}
 	
 	public JSONObject getAllStatus(String space) {
 		JSONObject res = new JSONObject();
 		res.put("_cluster", getClusterStats());
 		res.put("_table", getSpaceInfo(space));
+		res.put("_table_stats", getSpaceStats(space));
 		return res;
 	}
 
