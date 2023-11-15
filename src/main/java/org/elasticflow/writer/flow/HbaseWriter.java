@@ -123,17 +123,10 @@ public class HbaseWriter extends WriterFlowSocket {
 	public boolean create(String instantcName, String batchId, InstanceConfig instanceConfig) {
 		return true;
 	}
-
+ 
 	@Override
-	public String getNewStoreId(String mainName,boolean isIncrement,InstanceConfig instanceConfig) {
-		// TODO Auto-generated method stub
+	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) { 
 		return "a";
-	}
-
-	@Override
-	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override

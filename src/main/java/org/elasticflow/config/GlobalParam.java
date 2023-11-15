@@ -49,11 +49,14 @@ public final class GlobalParam {
 	public static String RUN_ENV;
 
 	public static String VERSION;
-
+	
+    /**Package and class prefix identification*/
 	public static String GROUPID;
-
+	
+	/**The maximum number of connections that can be created by default for each source*/
 	public static int CONNECTION_POOL_SIZE = 6;
-
+	
+	/**Whether to enable batch writing of identifiers depends on the type of writing end*/
 	public static boolean WRITE_BATCH = false;
 	/**
 	 * #1 searcher service 2 writer service 4 http reader service 8 instruction
@@ -97,7 +100,8 @@ public final class GlobalParam {
 	public static final long NODE_LIVE_TIME = 6000;
 
 	public static int CLUSTER_MIN_NODES;
-
+	
+	/**Machine node identification*/
 	public final static int NODEID = Integer.valueOf(System.getProperty("nodeid"));
 	
 	public static int STS_THREADPOOL_SIZE = 100;
@@ -266,11 +270,11 @@ public final class GlobalParam {
 		BOOLEAN_QUERY, DISJUNCTION_QUERY
 	}
 	
-	/** ------------searcher parameters response------------ */
+	/**searcher parameters of response*/
 	public final static String RESPONSE_SCORE = "__SCORE";
 	public final static String RESPONSE_EXPLAINS = "__EXPLAINS";
 	
-	/** ------------reader parameters------------ */
+	/** ------------reader data scan parameters------------ */
 	public static final String _start = "#{page_start}";
 	public static final String _end = "#{page_end}";
 	public static final String _seq = "#{seq}";

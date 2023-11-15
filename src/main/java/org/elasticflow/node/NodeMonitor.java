@@ -79,15 +79,10 @@ public final class NodeMonitor {
 	private HashMap<String, String> actions = new HashMap<String, String>() {
 		private static final long serialVersionUID = -8313429841889556616L;
 		{
-			// node manage
-			put("getresource", "getResource");
-			put("updateresource", "updateResource");
-			put("addresource", "addResource");
-			put("removeresource", "removeResource");
+			// node manage 
 			put("getnodeconfig", "getNodeConfig");
 			put("setnodeconfig", "setNodeConfig");
-			put("getstatus", "getStatus");
-			put("getinstances", "getInstances");
+			put("getstatus", "getStatus"); 
 			put("startsearcherservice", "startSearcherService");
 			put("stopsearcherservice", "stopSearcherService");
 			put("starthttpreaderserviceservice", "startHttpReaderServiceService");
@@ -96,6 +91,7 @@ public final class NodeMonitor {
 			put("loadhandler", "loadHandler");
 			put("runcode", "runCode");
 			// instance manage
+			put("getinstances", "getInstances");
 			put("addinstance", "addInstance");
 			put("cloneinstance", "cloneInstance");
 			put("resetinstancestate", "resetInstanceState");
@@ -110,9 +106,13 @@ public final class NodeMonitor {
 			put("deleteinstancedata", "deleteInstanceData");
 			put("getinstanceinfo", "getInstanceInfo");
 			put("instanceflowgraph","instanceFlowGraph");
-			// pipe xml-config manage
 			put("getinstancexml", "getInstanceXml");
 			put("updateinstancexml", "updateInstanceXml");
+			// other manage
+			put("getresource", "getResource");
+			put("updateresource", "updateResource");
+			put("addresource", "addResource");
+			put("removeresource", "removeResource"); 
 			put("setinstancepipeconfig", "setInstancePipeConfig");
 		}
 	};
@@ -145,7 +145,9 @@ public final class NodeMonitor {
 			Common.LOG.error("Management Operations " + RR.getParams().get("ac") + " Exception ", e);
 		}
 	}
-
+	
+	/*-----------------------// node manage------------------ */  
+	
 	/**
 	 * Be care full,this will remove all relative instance
 	 * 
@@ -598,18 +600,23 @@ public final class NodeMonitor {
 			setResponse(RESPONSE_STATUS.Success, "", new String(datas));
 		}
 	}
-
+	
+	/**
+	 * Direct coverage, therefore the content must be complete
+	 * @param rq
+	 * @param RR
+	 */
 	public void updateInstanceXml(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "instance,content")) {
 			String xmlPath = GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instance") + "/task.xml";
 			EFDataStorer.setData(xmlPath, new String(decoder.decode(RR.getStringParam("content"))));
 		}
 	}
-
+ 
 	/**
-	 * eg instance=inscance_name&param.name=TransParam.multiThread&param.value=true
-	 * 
+	 * Modify task configure	
 	 * @param rq
+	 * @param RR
 	 */
 	public void setInstancePipeConfig(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "instance,param.name,param.value")) {
@@ -626,15 +633,15 @@ public final class NodeMonitor {
 						cls = tmp.getPipeParams().getClass();
 						obj = tmp.getPipeParams();
 						break;
-					case "ReadParam":
+					case "ReaderParam":
 						cls = tmp.getReaderParams().getClass();
 						obj = tmp.getReaderParams();
 						break;
-					case "ComputeParam":
+					case "ComputerParam":
 						cls = tmp.getComputeParams().getClass();
 						obj = tmp.getComputeParams();
 						break;
-					case "WriteParam":
+					case "WriterParam":
 						cls = tmp.getWriterParams().getClass();
 						obj = tmp.getWriterParams();
 						break;
@@ -756,7 +763,7 @@ public final class NodeMonitor {
 	}
 	
 	/**
-	 * Only delete tasks from the configuration file without processing data
+	 * Only delete tasks from the configuration file and keep data
 	 * @param rq
 	 * @param RR
 	 */
@@ -820,7 +827,12 @@ public final class NodeMonitor {
 			}
 		}
 	}
-
+	
+	/**
+	 * push instance to system	
+	 * @param rq
+	 * @param RR
+	 */
 	public void addInstance(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "instance,content,level")) {
 			String xmlPath = GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instance") + "/task.xml";
@@ -848,11 +860,11 @@ public final class NodeMonitor {
 			setResponse(RESPONSE_STATUS.Success, RR.getStringParam("new_instance_name") + " clone success!", null);
 		}
 	}
-
+ 
 	/**
 	 * add instance setting into system and add it to configure file also.
-	 * 
-	 * @param rq instance
+	 * @param rq
+	 * @param RR
 	 */
 	public void addInstanceToSystem(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "instance,level")) {
@@ -917,7 +929,13 @@ public final class NodeMonitor {
 			}
 		}
 	}
-
+	
+	/**
+	 * Update resource node information
+	 * @param resourceData
+	 * @param isDel
+	 * @return
+	 */
 	private boolean updateResourceXml(JSONObject resourceData, boolean isDel) {
 		try {
 			String pondPath = GlobalParam.DATAS_CONFIG_PATH + "/" + GlobalParam.SystemConfig.getProperty("pond");
@@ -981,7 +999,8 @@ public final class NodeMonitor {
 	}
 
 	/**
-	 * remove instance from system, stop all jobs and save to configure file.
+	 * remove instance 
+	 * stop all jobs and remove from configure file.
 	 * 
 	 * @param instance
 	 */

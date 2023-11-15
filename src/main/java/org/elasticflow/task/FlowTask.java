@@ -208,7 +208,7 @@ public class FlowTask {
 				//Determine whether the storage ID can be obtained. 
 				//If it cannot be obtained, interrupt the batch processing operation of the task.
 				if(storeId == null) { 
-					throw new EFException("get "+destination+" storage location exception!",ELEVEL.Dispose,ETYPE.RESOURCE_ERROR); 
+					throw new EFException("get "+destination+" increment storage location exception!",ELEVEL.Dispose,ETYPE.RESOURCE_ERROR); 
 				}else {
 					GlobalParam.TASK_COORDER.saveTaskInfo(instanceID, L1seq, storeId, false);
 					pipePump.run(storeId, L1seq, false, isReferenceInstance);
@@ -217,7 +217,7 @@ public class FlowTask {
 			} catch (EFException e) {
 				breaker.log();
 				if (!isReferenceInstance && e.getErrorType() == ETYPE.RESOURCE_ERROR) {
-					log.error("get {} storage location exception!", destination, e);
+					log.error("get {} increment storage location exception!", destination, e);
 					breaker.openBreaker();
 					Resource.EfNotifier.send(Localization.format(LAG_TYPE.FailPosition, destination), instanceID,
 							e.getMessage(), e.getErrorType().name(), false);
