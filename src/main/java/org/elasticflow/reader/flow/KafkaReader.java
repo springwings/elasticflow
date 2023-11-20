@@ -81,8 +81,7 @@ public class KafkaReader extends ReaderFlowSocket {
 		if (this.records == null) {
 			return this.dataPage;
 		}
-		int count = 0;
-		boolean releaseConn = false;
+		int count = 0; 
 		try {
 			String dataBoundary = null;
 			String LAST_STAMP = null;
@@ -122,15 +121,8 @@ public class KafkaReader extends ReaderFlowSocket {
 			}
 
 		} catch (Exception e) {
-			releaseConn = true;
-			this.dataPage.put(GlobalParam.READER_STATUS, false);
-			REALEASE(false, releaseConn);
-			try {
-				this.initFlow();
-			} catch (EFException e1) {
-				throw e1;
-			}
-			log.error("Kafka Reader get dataPage Exception, system will auto free connection!", e);
+			log.error("Kafka Reader get dataPage Exception!", e); 
+			this.dataPage.put(GlobalParam.READER_STATUS, false); 
 			throw new EFException("Kafka Reader get dataPage Exception!");
 		}
 		return this.dataPage;
