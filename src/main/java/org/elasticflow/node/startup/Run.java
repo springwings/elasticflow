@@ -209,7 +209,9 @@ public final class Run {
 	private void start() {
 		try {
 			Runtime.getRuntime().addShutdownHook(new SafeShutDown()); 
-			Common.LOG.info("System Ready To Start...");
+			Common.LOG.info("～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～");
+			Common.LOG.info("--～----～----～------～---～----～-----～-～-～---～～--");
+			Common.LOG.info("～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～");
 			Common.LOG.info("system run space is {}",GlobalParam.CONFIG_ROOT);
 			Common.loadGlobalConfig(GlobalParam.SYS_CONFIG_PATH+"/config.properties");
 			loadPlugins(GlobalParam.pluginPath); 						
