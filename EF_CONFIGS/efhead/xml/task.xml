@@ -1,26 +1,34 @@
-<config>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><config>
 	<dataflow>
 		<TransParam>
 			<param>
-				<name>fullCron</name>
-				<value>0 0 0/1 * * ?</value>
+				<name>logLevel</name>
+				<value>1</value>
+			</param>
+			<param>
+				<name>maxFailTime</name>
+				<value>5</value>
 			</param>
 			<param>
 				<name>deltaCron</name>
-				<value>0 0/5 * * * ?</value>
+				<value>*/2 * * * * ?</value>
 			</param>
 			<param>
 				<name>writeTo</name>
-				<value>testname_resource</value>
-			</param> 
-			<!--- pipe start parameters --> 
+				<value>object_predict</value>
+			</param>
+			<!--- pipe start parameters -->
 			<param>
 				<name>readFrom</name>
-				<value>testwrite_resource</value>
-			</param> 
+				<value>object_predict</value>
+			</param>
 			<param>
 				<name>writeMechanism</name>
-				<value>ab</value>
+				<value>norm</value>
+			</param>
+			<param>
+				<name>keepNums</name>
+				<value>2d</value>
 			</param>
 			<param>
 				<name>writeType</name>
@@ -31,82 +39,100 @@
 				<value>true</value>
 			</param>
 			<param>
-				<name>multiThread</name>
-				<value>false</value>
-			</param>  
-			<param>
-				<name>searchFrom</name>
-				<value>testname</value>
-			</param> 
-		</TransParam> 
+				<name>readPageSize</name>
+				<value>3000</value>
+			</param>
+		</TransParam>
 		<ReaderParam>
 			<param>
 				<name>keyField</name>
-				<value>subject_id</value>
+				<value>id</value>
 			</param>
 			<param>
 				<name>scanField</name>
-				<value>modify_time</value>
+				<value>create_time</value>
 			</param>
 			<param>
 				<name>dataScanDSL</name>
-				<value><![CDATA[  
-				SELECT t.*, CONCAT('[',
-				  GROUP_CONCAT(
-				  CONCAT('{"predicate":"', REPLACE(kg_datas.predicate,'"',''), '",'),
-				  CONCAT('"object":"', REPLACE(kg_datas.object,'"',' '), '"}')),
-				  ']') as data
-				from (SELECT subject_id,subject,alias,GROUP_CONCAT(kg_type.name) as type FROM `kg_subject`  JOIN kg_type
-				ON FIND_IN_SET(kg_type.type_id,kg_subject.type) WHERE  kg_subject.subject_id>'#{page_start}' AND kg_subject.subject_id <='#{page_end}' AND kg_subject.modify_time > '#{start_time}'
-				GROUP BY subject_id) t LEFT JOIN kg_datas on kg_datas.subject_id=t.subject_id 
-				GROUP BY t.subject_id     
-				]]>
+				<value>
+					<![CDATA[ ]]>
 				</value>
 			</param>
 			<param>
 				<name>pageScanDSL</name>
-				<value><![CDATA[ 
-					SELECT subject_id FROM `kg_subject` 
-								   WHERE  modify_time > '#{start_time}'
-					]]>
+				<value>
+					<![CDATA[ ]]>
 				</value>
 			</param>
 		</ReaderParam>
-		<ComputerParam>    
-		</ComputerParam> 
+		<ComputerParam>
+			<param>
+				<name>computeMode</name>
+				<value>rest</value>
+			</param>
+			<param>
+				<name>api</name>
+				<value>http://10.231.6.158:5001/predict</value>
+			</param>
+			<param>
+				<name>apiRequest</name>
+				<value>
+					<![CDATA[
+				{"paths":{"field":"data.pic_source_path","type":"list"}}
+				]]>
+				</value>
+			</param>
+			<param>
+				<name>apiRequestMaxDatas</name>
+				<value>30</value>
+			</param>
+			<param>
+				<name>keyField</name>
+				<value>id</value>
+			</param>
+			<param>
+				<name>apiResponse</name>
+				<value>
+					<![CDATA[
+				{"dataField":{"name":"data","type":"list"},"datasdomain":"http://192.168.175.5"}
+				]]>
+				</value>
+			</param>
+			<param>
+				<name>customParams</name>
+				<value>{"usefastdfs":true,"keepFields":["bbox","sourceId","cameraId","vendorName","algorithmType","pass_datetime","pic_source_path","pic_path","timeZone"]}</value>
+			</param>
+			<param>
+				<name>keyField</name>
+				<value>id</value>
+			</param>
+			<param>
+				<name>scanField</name>
+				<value>pass_create_time</value>
+			</param>
+			<fields>
+				<field indexed="true" indextype="keyword" name="id" paramname="id" stored="false"/>
+				<field indexed="true" indextype="keyword" name="from" paramname="from" stored="false"/>
+				<field indexed="true" indextype="keyword" name="data" paramname="data" stored="true"/>
+				<field indexed="true" indextype="keyword" name="create_time" paramname="create_time" stored="false"/>
+				<field defaultvalue="{}" indexed="true" indextype="keyword" name="parsemap" paramname="parsemap" stored="false"/>
+			</fields>
+		</ComputerParam>
 		<WriterParam>
 			<param>
 				<name>writeKey</name>
-				<value>subject_id</value>
+				<value>id</value>
 			</param>
 			<param>
 				<name>keyType</name>
 				<value>unique</value>
 			</param>
-
 			<fields>
-				<field name="subject_id" indexed="true" stored="true"
-					indextype="text" analyzer="" paramname="id"
-					paramtype="java.lang.String" />
-				<field name="subject" indexed="true" stored="false"
-					indextype="text" analyzer="" paramname="subject"
-					paramtype="java.lang.String" />
-				<field name="alias" indexed="true" stored="false"
-					indextype="text" analyzer="" separator="," paramname="alias"
-					paramtype="java.lang.String" />
-				<field name="type" indexed="true" stored="false"
-					indextype="text" analyzer="" paramname="type"
-					paramtype="java.lang.String" />
-				<field name="data" indexed="true" stored="false"
-					indextype="nested" analyzer="" paramname="data"
-					paramtype="java.lang.String" />
-				<field name="modify_time" indexed="true" stored="false"
-					indextype="long" analyzer="" paramname="modify_time"
-					paramtype="org.elasticflow.field.handler.LongRangeType" />
+				<field indexed="true" indextype="keyword" name="id" paramname="id" stored="false"/>
+				<field defaultvalue="object_predict" indexed="false" indextype="keyword" name="topic" paramname="topic" stored="false"/>
+				<field indexed="false" indextype="keyword" name="data" paramname="data" stored="true"/>
 			</fields>
 		</WriterParam>
-
-		<!--- 可选 -->
 		<SearcherParam>
 			<param>
 				<name>start</name>
@@ -117,13 +143,20 @@
 				<name>count</name>
 				<paramtype>java.lang.Integer</paramtype>
 				<defaultValue>1</defaultValue>
-			</param>			
+			</param>
 			<param>
-				<fields>title,content</fields>
+				<name>sort</name>
+				<paramtype>java.lang.String</paramtype>
+			</param>
+			<param>
+				<name>facet</name>
+				<paramtype>java.lang.String</paramtype>
+			</param>
+			<param>
+				<fields>LaneNo,VehicleBrand</fields>
 				<name>q</name>
 				<paramtype>java.lang.String</paramtype>
 			</param>
 		</SearcherParam>
 	</dataflow>
-
-</config> 
+</config>
