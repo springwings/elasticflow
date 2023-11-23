@@ -59,9 +59,9 @@ public class TaskControl extends Instruction {
 			return;
 		}
 		int position = Integer.parseInt(args[0].toString());
-		String[] l1seqs = Common.getL1seqs(context.getInstanceConfig());
+		String[] l1seqs = Common.getL1seqs(context.getInstanceConfig()); //database level
 		for (String l1seq : l1seqs) {
-			List<String> L2Seq = context.getInstanceConfig().getReaderParams().getL2Seq();
+			List<String> L2Seq = context.getInstanceConfig().getReaderParams().getL2Seq(); //table level
 			PipePump pipePump = Resource.socketCenter.getPipePump(context.getInstanceConfig().getInstanceID(), l1seq,
 					false, GlobalParam.FLOW_TAG._DEFAULT.name());
 			String storeId = GlobalParam.TASK_COORDER.getStoreId(context.getInstanceConfig().getInstanceID(), l1seq,

@@ -97,8 +97,7 @@ public class MysqlWriter extends WriterFlowSocket {
 
 	@Override
 	public void delete(String instance, String storeId, String keyColumn, String keyVal) throws EFException {
-		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
@@ -126,8 +125,24 @@ public class MysqlWriter extends WriterFlowSocket {
 
 	@Override
 	public void optimize(String instance, String storeId) {
-		// TODO Auto-generated method stub
-
+		String name = Common.getStoreName(instance, storeId);
+		String type = instance;
+		PREPARE(false, false, false);  
+		try {
+			if(ISLINK() && this.storePositionExists(name)) {
+				Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
+				try (PreparedStatement statement = conn.prepareStatement(this.getTableSql(name, instanceConfig));) {
+					log.info("remove Instance " + name + ":" + type);
+					statement.execute(); 
+				} catch (Exception e) {
+					throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
+				} finally {
+					REALEASE(false, false);
+				}
+			}  
+		} catch (Exception e) { 
+			log.warn("optimize Instance " + name + ":" + type+" exception!",e);
+		} 
 	}
 	
 	@Override

@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * schedule task description,to manage task job
- * 
+ * L1seq level create task
  * @author chengwen
  * @version 2.0
  * @date 2018-11-27 10:23
