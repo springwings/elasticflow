@@ -34,6 +34,7 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.EFResponse;
+import org.elasticflow.model.FlowState;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.util.Common;
@@ -429,11 +430,26 @@ public final class NodeMonitor {
 				if (RR.getParams().get("set_value") != null)
 					val = RR.getStringParam("set_value");
 				String[] L1seqs = EFMonitorUtil.getInstanceL1seqs(instance);
-				for (String L1seq : L1seqs) {
+				for (String L1seq : L1seqs) { 
 					GlobalParam.TASK_COORDER.batchUpdateSeqPos(instance, val, false);
 					GlobalParam.TASK_COORDER.saveTaskInfo(instance, L1seq,
 							GlobalParam.TASK_COORDER.getStoreIdFromSave(instance, L1seq, false, false), false);
+					if(GlobalParam.DISTRIBUTE_RUN) {						
+						GlobalParam.INSTANCE_COORDER.distributeCoorder().resetPipeEndStatus(instance, L1seq);						
+					} else {						
+						EFMonitorUtil.resetPipeEndStatus(instance, L1seq);
+					}  
+					// update flow status,Distributed environment synchronization status
+					if (GlobalParam.DISTRIBUTE_RUN) {
+						Resource.flowStates.get(instance).put(FlowState.getStoreKey(L1seq),
+								GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(instance, L1seq));
+					} else {
+						Resource.flowStates.get(instance).put(FlowState.getStoreKey(L1seq),
+								EFMonitorUtil.getPipeEndStatus(instance, L1seq));
+					}
 				}
+				EFFileUtil.createAndSave(Resource.flowStates.get(instance).toJSONString(),
+						EFFileUtil.getInstancePath(instance)[2]);	
 				setResponse(RESPONSE_STATUS.Success, RR.getStringParam("instance") + " reset Success!", null);
 			} catch (Exception e) {
 				setResponse(RESPONSE_STATUS.DataErr, RR.getStringParam("instance") + " not exists!", null);

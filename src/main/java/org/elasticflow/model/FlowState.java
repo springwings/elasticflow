@@ -97,6 +97,19 @@ final public class FlowState {
 		return this.flowEndStatus;
 	}
 	
+	public void reset() {
+		this.totalProcess.set(0);
+		this.currentTimeProcess.set(0);
+		this.flowStartTime = Common.getNow();
+		this.historyProcess  = new JSONObject();
+		this.BLOCKTIME.set(0);
+		this.REAL_BLOCKTIME= 0;
+		this.failProcess.set(0);
+		this.LOAD = 0;
+		this.PERFORMANCE = -1;
+		this.flowEndStatus = toHashObject();
+	}
+	
 	private HashMap<String, Object> toHashObject() {
 		HashMap<String, Object> JO = new HashMap<>();
 		this.updateDatas(JO);

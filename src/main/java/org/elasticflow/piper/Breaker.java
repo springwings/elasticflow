@@ -75,7 +75,7 @@ public class Breaker {
 		if (queue.size() > 3) {
 			return queue.getLast() - queue.getFirst();
 		} else {
-			return Integer.MAX_VALUE;
+			return -1;
 		}
 	}
 

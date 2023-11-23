@@ -31,6 +31,11 @@ public class EFMonitorCoordinator implements EFMonitorCoord {
 	public JSONObject getPipeEndStatus(String instance, String L1seq) {
 		return EFMonitorUtil.getPipeEndStatus(instance, L1seq);
 	}
+	
+	@Override
+	public void resetPipeEndStatus(String instance, String L1seq) {
+		EFMonitorUtil.resetPipeEndStatus(instance, L1seq);
+	}
 
 	@Override
 	public HashMap<String, Object> getNodeStatus() {

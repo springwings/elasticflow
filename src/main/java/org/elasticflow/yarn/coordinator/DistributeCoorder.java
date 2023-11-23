@@ -157,6 +157,14 @@ public class DistributeCoorder {
 		}
 		return JO;
 	}
+	
+	public void resetPipeEndStatus(String instance, String L1seq) {
+		for (EFNode node : nodes) {
+			if (node.containInstace(instance) && node.isLive()) {
+				node.getEFMonitorCoord().resetPipeEndStatus(instance, L1seq); 
+			}
+		}
+	}
 
 	public JSONObject getPipeEndStatus(String instance, String L1seq) {
 		for (EFNode node : nodes) {

@@ -19,4 +19,6 @@ public interface EFMonitorCoord extends Coordination{
 	
 	public JSONObject getPipeEndStatus(String instance, String L1seq);
 	
+	public void resetPipeEndStatus(String instance, String L1seq);
+	
 }

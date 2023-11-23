@@ -271,6 +271,24 @@ public class EFMonitorUtil {
 		}
 	}
 	
+	public static void resetPipeEndStatus(String instance, String L1seq) {
+		if(Resource.socketCenter.containsKey(instance, L1seq,GlobalParam.FLOW_TAG._DEFAULT.name())) { 
+			try {
+				PipePump pipePump = Resource.socketCenter.getPipePump(instance, L1seq, false,
+						GlobalParam.FLOW_TAG._DEFAULT.name());
+				InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
+				if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) { 
+					pipePump.getReader().flowState.reset();
+					pipePump.getWriter().flowState.reset();
+				}		
+				if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) 	
+					pipePump.getComputer().flowState.reset(); 
+			} catch (EFException e) {
+				Common.LOG.error(e.getMessage());
+			}
+		} 
+	}
+	
 	/**
 	 * get Pipe End Status
 	 * @param instance
