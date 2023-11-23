@@ -367,7 +367,7 @@ public final class PipePump extends Instruction implements Serializable {
 		try {
 			pageList = getReader().getPageSplit(task, getInstanceConfig().getPipeParams().getReadPageSize());
 		} catch (Exception e) {
-			log.error("get Page lists Exception]", e);
+			log.error("get Page lists Exception!", e);
 		} finally {
 			getReader().lock.unlock();
 		}

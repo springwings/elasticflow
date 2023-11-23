@@ -1,10 +1,18 @@
 package org.elasticflow.writer.flow;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Map.Entry;
 
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.DeleteTopicsOptions;
+import org.apache.kafka.clients.admin.DeleteTopicsResult;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.KafkaFuture;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.field.EFField;
@@ -13,6 +21,7 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.writer.WriterFlowSocket;
+import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,8 +90,26 @@ public class KafkaWriter extends WriterFlowSocket {
 	}
 
 	@Override
-	public void removeInstance(String instance, String storeId) {
-		
+	public void removeInstance(String instance, String storeId) { 
+        DeleteTopicsOptions options = new DeleteTopicsOptions();
+        options.timeoutMs(5000);  
+        Properties conf = new Properties();
+		conf.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, connectParams.getWhp().getHost());
+		conf.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, "5000");
+        AdminClient adminClient = AdminClient.create(conf);
+        DeleteTopicsResult deleteTopicsResult = adminClient.deleteTopics(Collections.singletonList(Resource.nodeConfig.getInstanceConfigs().get(instance).getWriteFields().get("topic").getDefaultvalue()), options); 
+        Map<String, Boolean> map = new HashMap<>();
+        try {
+            for (Map.Entry<String, KafkaFuture<Void>> entry : deleteTopicsResult.topicNameValues().entrySet()) {
+                String topic = entry.getKey();
+                KafkaFuture<Void> future = entry.getValue();
+                future.get(); 
+                map.put(topic, !future.isCompletedExceptionally());
+                log.info("remove kafka topic {} success!", topic);
+            }
+        } catch (Exception e) {
+        	log.error("remove kafka topic exception!", e);
+        }
 	}
 
 	@Override

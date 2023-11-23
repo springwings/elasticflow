@@ -118,10 +118,15 @@ public abstract class WriterFlowSocket extends Flow {
 		}
 		return String.valueOf(dTuple.v1);
 	}
+	
+	/**A/B switching write mechanism*/
+	protected abstract String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig)
+			throws EFException;
 
 	/** Create storage instance */
 	public abstract boolean create(String mainName, String storeId, InstanceConfig instanceConfig) throws EFException;
-
+	
+	/**Determine whether there are instance storage tables or indexes*/
 	public abstract boolean storePositionExists(String storeName) throws EFException;
 
 	/** write one row data **/
@@ -130,20 +135,18 @@ public abstract class WriterFlowSocket extends Flow {
 
 	/** Delete a single record through the key id */
 	public abstract void delete(String instance, String storeId, String keyColumn, String keyVal) throws EFException;
-
+	
+	/**Delete entire instance data*/
 	public abstract void removeInstance(String instance, String storeId) throws EFException;
-
-	protected abstract String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig)
-			throws EFException;
-
+	
+	/**Set instance alias (used for naming across multiple instances)*/
 	public abstract void setAlias(String instance, String storeId, String aliasName) throws EFException;
 
 	/**
 	 * Transaction confirmation
 	 */
-	public void flush() throws EFException {
-
-	}
+	public void flush() throws EFException {}
 	
+	/**Optimize instance storage or index class information*/
 	public abstract void optimize(String instance, String storeId);
 }
