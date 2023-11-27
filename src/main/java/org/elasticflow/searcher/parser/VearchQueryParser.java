@@ -78,11 +78,12 @@ public class VearchQueryParser implements QueryParser{
 						break; 
 					case "boost":
 						_feature.put("boost",Float.parseFloat(String.valueOf(v))); 
-						break; 
+						break;  
 					} 
 				}
 			}
 		}
+		
 		if(model.storeId==null && instanceConfig.getPipeParams().getWriteMechanism().equals(MECHANISM.Time)) {
 			model.storeId = String.valueOf(Common.getNowZero());
 		}
@@ -107,6 +108,7 @@ public class VearchQueryParser implements QueryParser{
 		query.put("sum",_jarr);	
 		if(filters.size()>0)
 			query.put("filter", filters);
+		searchObj.put("size", model.getSortinfo());
 		searchObj.put("query", query);		
 	}
  

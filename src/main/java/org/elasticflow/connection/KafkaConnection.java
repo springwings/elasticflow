@@ -5,6 +5,8 @@ import java.util.Properties;
 
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.elasticflow.config.GlobalParam;
@@ -58,26 +60,29 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 	
 	private void genConsumer(WarehouseParam wnp) {
 		Properties props = new Properties();
-        props.put("bootstrap.servers", wnp.getHost());		        
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, wnp.getHost());		        
         props.put("group.id",wnp.getDefaultValue().getString(CUSTOM_GROUP_ID));
         props.put("key.deserializer", StringDeserializer.class);
         props.put("value.deserializer", StringDeserializer.class);
-        props.put("max.poll.records",GlobalParam.READ_PAGE_SIZE);
-        props.put("max.partition.fetch.bytes", MAX_FETCH_BYTES);
-        props.put("enable.auto.commit", "false");
-        props.put("session.timeout.ms", "30000");
-        props.put("heartbeat.interval.ms", "3000");
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,GlobalParam.READ_PAGE_SIZE);
+        props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, MAX_FETCH_BYTES); 
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "30000");
+        props.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, "60000");
+        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, "3000");
         if(wnp.getCustomParams()!=null) {
         	if(wnp.getCustomParams().containsKey("max.poll.records"))
-        		props.put("max.poll.records",wnp.getCustomParams().getString("max.poll.records"));
+        		props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,wnp.getCustomParams().getString("max.poll.records"));
         	if(wnp.getCustomParams().containsKey("max.partition.fetch.bytes"))
-        		props.put("max.partition.fetch.bytes",wnp.getCustomParams().getString("max.partition.fetch.bytes"));
+        		props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG,wnp.getCustomParams().getString("max.partition.fetch.bytes"));
         	if(wnp.getCustomParams().containsKey("session.timeout.ms"))
-        		props.put("session.timeout.ms",wnp.getCustomParams().getString("session.timeout.ms"));
+        		props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG,wnp.getCustomParams().getString("session.timeout.ms"));
         	if(wnp.getCustomParams().containsKey("heartbeat.interval.ms"))
-        		props.put("heartbeat.interval.ms",wnp.getCustomParams().getString("heartbeat.interval.ms"));
+        		props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG,wnp.getCustomParams().getString("heartbeat.interval.ms"));
         	if(wnp.getCustomParams().containsKey("enable.auto.commit"))
-        		props.put("enable.auto.commit",wnp.getCustomParams().getString("enable.auto.commit"));
+        		props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,wnp.getCustomParams().getString("enable.auto.commit"));
+        	if(wnp.getCustomParams().containsKey("request.timeout.ms"))
+        		props.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG,wnp.getCustomParams().getString("request.timeout.ms"));
         }
         this.cconn = new KafkaConsumer<String, String>(props);
 		this.cconn.subscribe(Arrays.asList(wnp.getDefaultValue().getString(CUSTOM_CONSUMER_TOPIC).split(",")));
@@ -85,19 +90,22 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 	
 	private void genProducer(WarehouseParam wnp) {
 		Properties props = new Properties();
-        props.put("bootstrap.servers", wnp.getHost());
-        props.put("acks", "all");
-        props.put("retries", 0);
-        props.put("batch.size", 16384);
-        props.put("linger.ms", 1);
-        props.put("buffer.memory", 33554432);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, wnp.getHost());
+        props.put(ProducerConfig.ACKS_CONFIG, "all"); 
+        props.put(ProducerConfig.RETRIES_CONFIG, 0);
+        props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, "90000");
+        props.put(ProducerConfig.BATCH_SIZE_CONFIG, 1048576);
+        props.put(ProducerConfig.LINGER_MS_CONFIG, 1);
+        props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);
         props.put("key.serializer",StringSerializer.class);
         props.put("value.serializer",StringSerializer.class);
         if(wnp.getCustomParams()!=null) {
         	if(wnp.getCustomParams().containsKey("batch.size"))
-        		props.put("batch.size",wnp.getCustomParams().getString("batch.size"));
+        		props.put(ProducerConfig.BATCH_SIZE_CONFIG,wnp.getCustomParams().getString("batch.size"));
+        	if(wnp.getCustomParams().containsKey("buffer.memory"))
+        		props.put(ProducerConfig.BUFFER_MEMORY_CONFIG,wnp.getCustomParams().getString("buffer.memory"));
         	if(wnp.getCustomParams().containsKey("acks"))
-        		props.put("acks",wnp.getCustomParams().getString("acks"));
+        		props.put(ProducerConfig.ACKS_CONFIG,wnp.getCustomParams().getString("acks"));
         }
         this.pconn = new KafkaProducer<>(props);
 	}
