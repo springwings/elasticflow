@@ -115,24 +115,21 @@ public class FlowCenter{
 				Resource.flowStates.put(instanceID,new JSONObject());
 			}
 		}
-		synchronized(Resource.tasks) {
-			try {
-				for (String L1seq : L1seqs) {
-					if (L1seq == null)
-						continue; 
-					if(!Resource.tasks.containsKey(Common.getInstanceRunId(instanceID, L1seq)) || needClear){
-						PipePump pipePump = Resource.socketCenter.getPipePump(instanceID, L1seq,needClear,GlobalParam.FLOW_TAG._DEFAULT.name());
-						Resource.tasks.put(Common.getInstanceRunId(instanceID, L1seq), FlowTask.createTask(pipePump, L1seq));
-					}  
-					if(createSchedule)
-						createFlowScheduleJob(Common.getInstanceRunId(instanceID, L1seq), Resource.tasks.get(Common.getInstanceRunId(instanceID, L1seq)),
-							instanceConfig,needClear);
-				}
-			} catch (Exception e) {
-				Common.LOG.error("Add "+instanceID+" Flow Govern Exception", e);
-			}	
-		}
-		
+		try {
+			for (String L1seq : L1seqs) {
+				if (L1seq == null)
+					continue; 
+				if(!Resource.tasks.containsKey(Common.getInstanceRunId(instanceID, L1seq)) || needClear){
+					PipePump pipePump = Resource.socketCenter.getPipePump(instanceID, L1seq,needClear,GlobalParam.FLOW_TAG._DEFAULT.name());
+					Resource.tasks.put(Common.getInstanceRunId(instanceID, L1seq), FlowTask.createTask(pipePump, L1seq));
+				}  
+				if(createSchedule)
+					createFlowScheduleJob(Common.getInstanceRunId(instanceID, L1seq), Resource.tasks.get(Common.getInstanceRunId(instanceID, L1seq)),
+						instanceConfig,needClear);
+			}
+		} catch (Exception e) {
+			Common.LOG.error("Add "+instanceID+" Flow Govern Exception", e);
+		} 
 	}
 
 	

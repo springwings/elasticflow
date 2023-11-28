@@ -128,7 +128,7 @@ public abstract class Flow {
 	 */
 	public void REALEASE(boolean isMonopoly, boolean releaseConn) {
 		if (isMonopoly == false || releaseConn) {
-			synchronized (this.retainer) {
+			synchronized (this) {
 				if (releaseConn) {
 					retainer.set(0);
 				}

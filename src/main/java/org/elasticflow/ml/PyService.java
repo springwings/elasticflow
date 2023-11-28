@@ -58,10 +58,8 @@ public class PyService extends ComputerFlowSocket {
 		if (this.computerHandler != null) {
 			this.computerHandler.handleData(this, context, DSR);
 		} else {
-			synchronized(portNum) {
-				if(this.clients.size()==0) {
-					this.addService(39000+portNum.getAndIncrement(),context.getInstanceConfig().getComputeParams().getPyPath());
-				}
+			if(this.clients.size()==0) {
+				this.addService(39000+portNum.getAndIncrement(),context.getInstanceConfig().getComputeParams().getPyPath());
 			}
 			while (DSR.nextLine()) {
 				PipeDataUnit pdu = DSR.getLineData();

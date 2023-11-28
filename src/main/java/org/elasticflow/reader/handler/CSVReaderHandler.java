@@ -27,7 +27,7 @@ public class CSVReaderHandler extends ReaderHandler {
 
 	private String[] csvHeader;
 	
-	protected boolean supportHandleData = true;
+	boolean supportHandleData = true;
 
 	@Override
 	public <T> T handlePage(Object invokeObject, TaskModel task, int pageSize) throws EFException {

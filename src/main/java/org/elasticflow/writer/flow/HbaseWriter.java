@@ -84,9 +84,7 @@ public class HbaseWriter extends WriterFlowSocket {
 			put.addColumn(Bytes.toBytes(this.columnFamily), Bytes.toBytes(transParam.getAlias()),
 					Bytes.toBytes(value));  
 		} 
-		synchronized (data) {
-			data.add(put); 
-		}
+		data.add(put); 
 	} 
 
 	@Override

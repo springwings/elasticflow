@@ -83,14 +83,12 @@ public final class EFConnectionPool {
 	 * @param poolName Connection pool name
 	 */
 	private void _clearPool(String poolName) {
-		synchronized (this._GPOOLS) {
-			if (poolName != null) {
-				if (this._GPOOLS.containsKey(poolName))
-					this._GPOOLS.get(poolName).releaseAll();
-			} else {
-				for (Entry<String, ConnectionPool> ent : this._GPOOLS.entrySet()) {
-					ent.getValue().releaseAll();
-				}
+		if (poolName != null) {
+			if (this._GPOOLS.containsKey(poolName))
+				this._GPOOLS.get(poolName).releaseAll();
+		} else {
+			for (Entry<String, ConnectionPool> ent : this._GPOOLS.entrySet()) {
+				ent.getValue().releaseAll();
 			}
 		}
 	}
@@ -99,10 +97,8 @@ public final class EFConnectionPool {
 	 * get connection from pool and waiting
 	 */
 	private EFConnectionSocket<?> getConnection(ConnectParams params, String poolName, boolean acceptShareConn) {
-		synchronized (this._GPOOLS) {
-			if (this._GPOOLS.get(poolName) == null) {
-				createPools(poolName, params);
-			}
+		if (this._GPOOLS.get(poolName) == null) {
+			createPools(poolName, params);
 		}
 		return this._GPOOLS.get(poolName).getConnection(this._waitTime, acceptShareConn);
 	}
@@ -203,17 +199,15 @@ public final class EFConnectionPool {
 		 * Release all connections in the resource pool
 		 */
 		public void releaseAll() { 
-			synchronized(connectionPools) {
-				for (EFConnectionSocket<?> conn : connectionPools) {
-					if (!conn.free()) {
-						log.warn("connection cleaning encountered an error ",conn);
-					}
+			for (EFConnectionSocket<?> conn : connectionPools) {
+				if (!conn.free()) {
+					log.warn("connection cleaning encountered an error ",conn);
 				}
-				log.info("free connection pool " + this.poolName + " ,Active Connections:" + activeNum
-						+ ",Release Connections:" + connectionPools.size()); 
-				connectionPools.clear();
-				this.version = Common.getNow();
-			} 
+			}
+			log.info("free connection pool " + this.poolName + " ,Active Connections:" + activeNum
+					+ ",Release Connections:" + connectionPools.size()); 
+			connectionPools.clear();
+			this.version = Common.getNow();
 		}
 
 		/**

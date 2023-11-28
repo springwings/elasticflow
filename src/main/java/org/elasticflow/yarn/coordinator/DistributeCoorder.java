@@ -190,7 +190,7 @@ public class DistributeCoorder {
 	 */
 	public void updateCluster(String ip, Integer nodeId) {
 		if (!this.containsNode(nodeId)) {
-			synchronized (nodes) {
+			synchronized (this) {
 				EFNode node = EFNode.getInstance(ip, nodeId);
 				node.init(this, true);
 				nodes.add(node);
@@ -205,23 +205,20 @@ public class DistributeCoorder {
 			} catch (InterruptedException e) {
 				Common.stopSystem(false);
 			}
-			synchronized (rebalanceCount) {
-				if (rebalanceCount.decrementAndGet() == 0) {
-					if (clusterConditionMatch()) {						
-						if (isOnStart.get()) {
-							isOnStart.set(false);
-							this.rebalanceOnStart();							
-						} else {
-							this.rebalanceOnNewNodeJoin();
-						}						
-					}
+			if (rebalanceCount.decrementAndGet() == 0) {
+				if (clusterConditionMatch()) {						
+					if (isOnStart.get()) {
+						isOnStart.set(false);
+						this.rebalanceOnStart();							
+					} else {
+						this.rebalanceOnNewNodeJoin();
+					}						
 				}
-			}
-
+			} 
 		} else {
 			//Flash section recovery
 			if(this.getNode(nodeId).needRecover()) {
-				synchronized (nodes) {
+				synchronized (this) {
 					EFNode node = EFNode.getInstance(ip, nodeId);
 					node.init(this, true);
 					node.getBindInstances().addAll(this.getNode(nodeId).getBindInstances());
@@ -464,7 +461,7 @@ public class DistributeCoorder {
 	private void distributeInstances() {
 		if (this.idleInstances.size() > 0) {
 			Queue<String> keepInstances = new LinkedList<String>();
-			synchronized (nodes) {
+			synchronized (this) {
 				EFNode removeNode = null;
 				for (EFNode node : nodes) {
 					while (node.getBindInstances().size() < avgInstanceNum) {

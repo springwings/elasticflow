@@ -114,11 +114,9 @@ public class VearchWriter extends WriterFlowSocket {
 	
 	public void deleteAndInsert() throws Exception {
 		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
-		synchronized (this.DATAS) {			
-			conn.deleteBatch(this.curTable, this.DATAS);
-			conn.writeBatch(this.curTable, this.DATAS);
-			this.DATAS.clear();
-		}		
+		conn.deleteBatch(this.curTable, this.DATAS);
+		conn.writeBatch(this.curTable, this.DATAS);
+		this.DATAS.clear();		
 	}
 
 	@Override
@@ -179,7 +177,7 @@ public class VearchWriter extends WriterFlowSocket {
 	@Override
 	public void flush() throws EFException {
 		if (this.isBatch) {
-			synchronized (this.DATAS) {
+			synchronized (this) {
 				if(this.DATAS.size()>0) {
 					VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);	
 					try {
