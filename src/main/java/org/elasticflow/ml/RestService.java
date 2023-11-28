@@ -164,7 +164,7 @@ public class RestService extends ComputerFlowSocket {
 			
 			try {
 				if (this.successRunAll == true)
-					taskSingal.await(600,TimeUnit.SECONDS);
+					taskSingal.await(90,TimeUnit.SECONDS);
 			} catch (Exception e) { 
 				throw new EFException(e.getMessage(), ELEVEL.BreakOff);
 			}	

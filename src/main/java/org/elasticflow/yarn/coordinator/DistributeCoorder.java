@@ -283,7 +283,7 @@ public class DistributeCoorder {
 			});
 			if (wait) {
 				try {
-					singal.await(300,TimeUnit.SECONDS);
+					singal.await(90,TimeUnit.SECONDS);
 				} catch (Exception e) {
 					Common.LOG.error(e.getMessage());
 				}

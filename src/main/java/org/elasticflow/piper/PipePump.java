@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.computer.ComputerFlowSocket;
@@ -272,7 +273,7 @@ public final class PipePump extends Instruction implements Serializable {
 				Resource.threadPools.pushTask(
 						new PumpThread(taskSingal, task, storeId, pageList, destination, total, getInstanceConfig()));
 				try {
-					taskSingal.await();
+					taskSingal.await(90,TimeUnit.SECONDS);
 				} catch (Exception e) {
 					throw Common.convertException(e);
 				}
