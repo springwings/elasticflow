@@ -59,8 +59,10 @@ public class FlowCenter{
 		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instance); 
 		boolean state = true; 
 		try {
-			if (instanceConfig.openTrans() == false)
+			if (instanceConfig.openTrans() == false) {
+				Common.LOG.info("instance {} data exchange service not enabled!",instance);
 				return false;   
+			} 
 			String[] L1seqs = Common.getL1seqs(instanceConfig);  
 			for (String L1seq : L1seqs) {
 				if (L1seq == null)
@@ -70,17 +72,17 @@ public class FlowCenter{
 					if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready))
 						state = EFPipeUtil.jobAction(Common.getInstanceRunId(instance, L1seq), GlobalParam.JOB_TYPE.FULL.name(), "start") && state;
 						if(state && !asyn) {
-							Thread.sleep(1000);//waiting to start job
+							Thread.sleep(500);//waiting to start job
 							while(GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,STATUS.Ready)==false)
-								Thread.sleep(1000);
+								Thread.sleep(500);
 						} 
 				}else {
 					if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready))
 						state = EFPipeUtil.jobAction(Common.getInstanceRunId(instance, L1seq), GlobalParam.JOB_TYPE.INCREMENT.name(), "start") && state;
 						if(state && asyn) {
-							Thread.sleep(1000);//waiting to start job
+							Thread.sleep(500);//waiting to start job
 							while(GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,STATUS.Ready)==false)
-								Thread.sleep(1000);
+								Thread.sleep(500);
 						} 
 				}				
 			}
