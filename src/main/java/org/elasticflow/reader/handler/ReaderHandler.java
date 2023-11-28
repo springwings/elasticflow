@@ -7,8 +7,8 @@
  */
 package org.elasticflow.reader.handler;
 
-import org.elasticflow.model.Page;
-import org.elasticflow.model.Task;
+import org.elasticflow.model.task.TaskCursor;
+import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.util.EFException;
 
 
@@ -31,12 +31,10 @@ public abstract class ReaderHandler{
 	public boolean supportHandleData() {
 		return supportHandleData;
 	}
+	/**Custom processing of page data  > getPageData*/
+	public abstract <T>T handlePage(Object invokeObject,final TaskModel taskModel,int pageSize) throws EFException;
 	
-	public abstract <T>T handlePage(Object invokeObject,final Task task,int pageSize) throws EFException;
-	
-	public abstract void handleData(Object invokeObject,Object datas,Page page,int pageSize) throws EFException;
-	
-	public boolean loopScan(Task task) {
-		return false;
-	}
+	/**Custom processing of data pagination information > getDataPages*/
+	public abstract void handleData(Object invokeObject,Object datas,TaskCursor taskCursor,int pageSize) throws EFException;
+	 
 }

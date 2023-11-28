@@ -1,4 +1,4 @@
-package org.elasticflow.model;
+package org.elasticflow.model.task;
 
 import org.elasticflow.config.InstanceConfig;
 
@@ -9,7 +9,7 @@ import org.elasticflow.config.InstanceConfig;
  * @version 2.0
  * @date 2018-11-08 16:49
  */
-public final class Page {
+public final class TaskCursor {
 
 	private String readerScanKey;
 	private String readerKey;
@@ -18,9 +18,9 @@ public final class Page {
 	private InstanceConfig instanceConfig;
 	private String additional;
 
-	public static Page getInstance(String readerKey, String readerScanKey, String start, String end,
+	public static TaskCursor getInstance(String readerKey, String readerScanKey, String start, String end,
 			 InstanceConfig instanceConfig, String additional) {
-		Page o = new Page();
+		TaskCursor o = new TaskCursor();
 		o.readerKey = readerKey;
 		o.readerScanKey = readerScanKey;
 		o.start = start;

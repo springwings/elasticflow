@@ -18,10 +18,10 @@ import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
-import org.elasticflow.model.Page;
-import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
+import org.elasticflow.model.task.TaskCursor;
+import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.util.EFException;
@@ -60,7 +60,7 @@ public class HbaseReader extends ReaderFlowSocket {
 	}
  
 	@Override
-	public DataPage getPageData(final Page page,int pageSize) throws EFException { 
+	public DataPage getPageData(final TaskCursor taskCursor,int pageSize) throws EFException { 
 		PREPARE(false,false, false);
 		boolean releaseConn = false;
 		try {
@@ -70,26 +70,26 @@ public class HbaseReader extends ReaderFlowSocket {
 			Scan scan = new Scan();
 			List<Filter> filters = new ArrayList<Filter>();
 			SingleColumnValueFilter range = new SingleColumnValueFilter(
-					Bytes.toBytes(this.columnFamily), Bytes.toBytes(page.getReaderScanKey()),
+					Bytes.toBytes(this.columnFamily), Bytes.toBytes(taskCursor.getReaderScanKey()),
 					CompareFilter.CompareOp.GREATER_OR_EQUAL,
-					new BinaryComparator(Bytes.toBytes(page.getStart())));
+					new BinaryComparator(Bytes.toBytes(taskCursor.getStart())));
 			range.setLatestVersionOnly(true);
 			range.setFilterIfMissing(true);
 			filters.add(range);
 			scan.setFilter(new FilterList(FilterList.Operator.MUST_PASS_ALL,
 					filters));
-			scan.setStartRow(Bytes.toBytes(page.getStart()));
-			scan.setStopRow(Bytes.toBytes(page.getEnd()));
+			scan.setStartRow(Bytes.toBytes(taskCursor.getStart()));
+			scan.setStopRow(Bytes.toBytes(taskCursor.getEnd()));
 			scan.setCaching(pageSize);
 			scan.addFamily(Bytes.toBytes(this.columnFamily));
 			ResultScanner resultScanner = table.getScanner(scan);
 			try {   
 				String dataBoundary = null;
 				String updateFieldValue=null; 
-				this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
-				this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey()); 
+				this.dataPage.put(GlobalParam.READER_KEY, taskCursor.getReaderKey());
+				this.dataPage.put(GlobalParam.READER_SCAN_KEY, taskCursor.getReaderScanKey()); 
 				if(this.readHandler!=null && this.readHandler.supportHandleData()){
-					this.readHandler.handleData(this,resultScanner,page,pageSize);
+					this.readHandler.handleData(this,resultScanner,taskCursor,pageSize);
 				}else {
 					for (Result r : resultScanner) { 
 						PipeDataUnit u = PipeDataUnit.getInstance();
@@ -103,7 +103,7 @@ public class HbaseReader extends ReaderFlowSocket {
 							if(k.equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))){
 								updateFieldValue = v;
 							}
-							PipeDataUnit.addFieldValue(k, v, page.getInstanceConfig().getReadFields(),u);
+							PipeDataUnit.addFieldValue(k, v, taskCursor.getInstanceConfig().getReadFields(),u);
 						} 
 						this.dataUnit.add(u);
 					} 
@@ -133,7 +133,7 @@ public class HbaseReader extends ReaderFlowSocket {
 	}
 
 	@Override
-	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) throws EFException {
+	public ConcurrentLinkedDeque<String> getDataPages(final TaskModel task,int pageSize) throws EFException {
 		int i = 0;
 		ConcurrentLinkedDeque<String> dt = new ConcurrentLinkedDeque<>(); 
 		PREPARE(false,false, false);

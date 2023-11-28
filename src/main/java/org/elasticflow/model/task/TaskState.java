@@ -1,4 +1,4 @@
-package org.elasticflow.model;
+package org.elasticflow.model.task;
 
 import org.elasticflow.util.EFException;
 

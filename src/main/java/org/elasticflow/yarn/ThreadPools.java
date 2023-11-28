@@ -49,9 +49,9 @@ public class ThreadPools {
 				new ArrayBlockingQueue<Runnable>(minthread * 5));
 	}
 
-	public void submitTask(TaskThread jobPage) throws EFException {
+	public void pushTask(TaskThread task) throws EFException {
 		try {
-			waitTask.put(jobPage);
+			waitTask.put(task);
 		} catch (Exception e) {
 			throw new EFException(e, ELEVEL.Dispose);
 		}

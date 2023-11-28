@@ -1,4 +1,4 @@
-package org.elasticflow.task.schedule;
+package org.elasticflow.model.task;
 
 /**
  * ScheduleJob model
@@ -7,7 +7,7 @@ package org.elasticflow.task.schedule;
  * @version 2.0
  * @date 2018-10-26 09:21
  */
-public class JobModel {
+public class TaskJobModel {
 	
 	private String instanceID;
 	private String jobName;
@@ -16,7 +16,7 @@ public class JobModel {
 	private String methodName;
 	private Object object;
 
-	public JobModel(String instanceID,String jobName, String cronExpression, 
+	public TaskJobModel(String instanceID,String jobName, String cronExpression, 
 			String className, String methodName, Object object) {
 		this.jobName = jobName;
 		this.cron = cronExpression;

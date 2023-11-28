@@ -1,4 +1,4 @@
-package org.elasticflow.model;
+package org.elasticflow.model.task;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
@@ -7,13 +7,13 @@ import org.elasticflow.param.end.ReaderParam;
 import org.elasticflow.util.Common;
 
 /**
- * Task
+ * Task Definition and Description
  * 
  * @author chengwen
  * @version 1.0
  * @date 2018-11-23 14:36
  */
-public final class Task {
+public final class TaskModel {
 	
 	private String id;
 	private String instanceID;
@@ -25,9 +25,9 @@ public final class Task {
 	private JOB_TYPE jobType;
 	public TaskState taskState;
 
-	public static Task getInstance(String instanceID, String L1seq, JOB_TYPE jobType, InstanceConfig instanceConfig,
+	public static TaskModel getInstance(String instanceID, String L1seq, JOB_TYPE jobType, InstanceConfig instanceConfig,
 			String additional) {
-		Task o = new Task();
+		TaskModel o = new TaskModel();
 		o.id = Common.getInstanceRunId(instanceID, L1seq);
 		o.instanceID = instanceID;
 		o.L1seq = L1seq;

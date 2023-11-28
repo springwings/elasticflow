@@ -15,7 +15,10 @@ package org.elasticflow.task;
  * @date 2018-11-13 10:54 
  */
 public interface TaskThread extends Runnable{
+	
 	/**task id **/
 	public String getId();
+	
 	public int needThreads();
+	
 }

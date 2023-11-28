@@ -20,10 +20,10 @@ import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.instruction.Instruction;
-import org.elasticflow.model.Page;
-import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.ReaderState;
+import org.elasticflow.model.task.TaskCursor;
+import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.node.CPU;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.handler.ReaderHandler;
@@ -52,9 +52,9 @@ public final class PipePump extends Instruction implements Serializable {
 
 	private final static Logger log = LoggerFactory.getLogger("PipePump");
 
-	private Task fullTask;
+	private TaskModel fullTask;
 
-	private Task incrementTask;
+	private TaskModel incrementTask;
 
 	private String instanceID;
 
@@ -72,8 +72,8 @@ public final class PipePump extends Instruction implements Serializable {
 		setID(contextID);
 		CPU.prepare(contextID, instanceConfig, writer, reader, computer);
 		this.instanceID = instanceID;
-		fullTask = Task.getInstance(instanceID, L1seq, JOB_TYPE.FULL, instanceConfig, null);
-		incrementTask = Task.getInstance(instanceID, L1seq, JOB_TYPE.INCREMENT, instanceConfig, null);
+		fullTask = TaskModel.getInstance(instanceID, L1seq, JOB_TYPE.FULL, instanceConfig, null);
+		incrementTask = TaskModel.getInstance(instanceID, L1seq, JOB_TYPE.INCREMENT, instanceConfig, null);
 		try {
 			if (instanceConfig.getReaderParams().getHandler() != null) {
 				try {
@@ -151,7 +151,7 @@ public final class PipePump extends Instruction implements Serializable {
 		String instanceRunId = Common.getInstanceRunId(instanceID, L1seq);
 		String destination = isReferenceInstance ? getInstanceConfig().getPipeParams().getReferenceInstance()
 				: instanceID;
-		Task task;
+		TaskModel task;
 		if (isFull) {
 			job_type = JOB_TYPE.FULL;
 			task = fullTask;
@@ -213,7 +213,7 @@ public final class PipePump extends Instruction implements Serializable {
 	 * @param isReferenceInstance
 	 * @throws EFException
 	 */
-	private void processFlow(Task task, String storeId, List<String> L2seqs, String destination,
+	private void processFlow(TaskModel task, String storeId, List<String> L2seqs, String destination,
 			boolean isReferenceInstance) throws EFException {
 		for (String L2seq : L2seqs) {
 			try {
@@ -247,7 +247,7 @@ public final class PipePump extends Instruction implements Serializable {
 		}
 	}
 
-	private void processListsPages(Task task, String destination, ConcurrentLinkedDeque<String> pageList,
+	private void processListsPages(TaskModel task, String destination, ConcurrentLinkedDeque<String> pageList,
 			String storeId) throws EFException {
 		String instanceRunId = Common.getInstanceRunId(task.getInstanceID(), task.getL1seq());
 		int pageNum = pageList.size();
@@ -269,7 +269,7 @@ public final class PipePump extends Instruction implements Serializable {
 			AtomicInteger total = new AtomicInteger(0);
 			if (getInstanceConfig().getPipeParams().isMultiThread()) {
 				CountDownLatch taskSingal = new CountDownLatch(PipeUtil.estimateThreads(pageNum));
-				Resource.threadPools.submitTask(
+				Resource.threadPools.pushTask(
 						new PumpThread(taskSingal, task, storeId, pageList, destination, total, getInstanceConfig()));
 				try {
 					taskSingal.await();
@@ -290,7 +290,7 @@ public final class PipePump extends Instruction implements Serializable {
 		}
 	}
 
-	private void breakCheck(Task task) throws EFException {
+	private void breakCheck(TaskModel task) throws EFException {
 		if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstanceID(), task.getL1seq(), task.getJobType(),
 				STATUS.Termination)) {
 			throw new EFException(task.getInstanceID() + " " + task.getJobType().name() + " job has been Terminated!",
@@ -308,7 +308,7 @@ public final class PipePump extends Instruction implements Serializable {
 	 * @param total       process total data nums
 	 * @throws EFException
 	 */
-	private void currentThreadRun(Task task, String storeId, ConcurrentLinkedDeque<String> pageList, String destination,
+	private void currentThreadRun(TaskModel task, String storeId, ConcurrentLinkedDeque<String> pageList, String destination,
 			AtomicInteger total) throws EFException {
 		ReaderState rState = null;
 		int progressPos = 0;
@@ -331,7 +331,7 @@ public final class PipePump extends Instruction implements Serializable {
 			this.breakCheck(task);
 
 			DataPage pagedata = this.getPageData(
-					Page.getInstance(keyField, scanField, startId, dataBoundary, getInstanceConfig(), dataScanDSL));
+					TaskCursor.getInstance(keyField, scanField, startId, dataBoundary, getInstanceConfig(), dataScanDSL));
 			if (getInstanceConfig().openCompute()) {
 				long start = Common.getNow();
 				int dataSize = pagedata.getData().size();
@@ -361,11 +361,11 @@ public final class PipePump extends Instruction implements Serializable {
 	}
 
 	// thread safe get page list
-	private ConcurrentLinkedDeque<String> getPageLists(Task task) {
+	private ConcurrentLinkedDeque<String> getPageLists(TaskModel task) {
 		ConcurrentLinkedDeque<String> pageList = null;
 		getReader().lock.lock();
 		try {
-			pageList = getReader().getPageSplit(task, getInstanceConfig().getPipeParams().getReadPageSize());
+			pageList = getReader().getDataPages(task, getInstanceConfig().getPipeParams().getReadPageSize());
 		} catch (Exception e) {
 			log.error("get Page lists Exception!", e);
 		} finally {
@@ -375,7 +375,7 @@ public final class PipePump extends Instruction implements Serializable {
 	}
 
 	// thread safe get page data
-	private DataPage getPageData(Page pager) throws EFException {
+	private DataPage getPageData(TaskCursor pager) throws EFException {
 		getReader().lock.lock();
 		DataPage pagedata = null;
 		try {
@@ -406,7 +406,7 @@ public final class PipePump extends Instruction implements Serializable {
 		final AtomicInteger total;
 		boolean isUpdate = false;
 
-		Task task;
+		TaskModel task;
 		CountDownLatch taskSingal;
 		ReaderState rState = null;
 		AtomicInteger progressPos = new AtomicInteger(0);
@@ -414,7 +414,7 @@ public final class PipePump extends Instruction implements Serializable {
 		ConcurrentLinkedDeque<String> pageList;
 		InstanceConfig instanceConfig;
 
-		public PumpThread(CountDownLatch taskSingal, Task task, String storeId, ConcurrentLinkedDeque<String> pageList,
+		public PumpThread(CountDownLatch taskSingal, TaskModel task, String storeId, ConcurrentLinkedDeque<String> pageList,
 				String destination, AtomicInteger total, InstanceConfig instanceConfig) {
 			this.pageList = pageList;
 			this.destination = destination;
@@ -458,7 +458,7 @@ public final class PipePump extends Instruction implements Serializable {
 
 				try {
 					DataPage pagedata = getPageData(
-							Page.getInstance(task.getScanParam().getKeyField(), task.getScanParam().getScanField(),
+							TaskCursor.getInstance(task.getScanParam().getKeyField(), task.getScanParam().getScanField(),
 									startId, dataBoundary, getInstanceConfig(), dataScanDSL));
 					if (getInstanceConfig().openCompute()) {
 						long start = Common.getNow();

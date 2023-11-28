@@ -13,10 +13,10 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.field.EFField;
-import org.elasticflow.model.Page;
-import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
+import org.elasticflow.model.task.TaskCursor;
+import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.util.EFException;
@@ -42,22 +42,22 @@ public class MysqlReader extends ReaderFlowSocket{
 	}  
  
 	@Override
-	public DataPage getPageData(final Page page,int pageSize) throws EFException {  
+	public DataPage getPageData(final TaskCursor taskCursor,int pageSize) throws EFException {  
 		boolean releaseConn = false;
 		PREPARE(false,false, false); 
 		if(!ISLINK())
 			return this.dataPage; 
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.reader); 
-		this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
-		this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
-		try (PreparedStatement statement = conn.prepareStatement(page.getAdditional());){ 
+		this.dataPage.put(GlobalParam.READER_KEY, taskCursor.getReaderKey());
+		this.dataPage.put(GlobalParam.READER_SCAN_KEY, taskCursor.getReaderScanKey());
+		try (PreparedStatement statement = conn.prepareStatement(taskCursor.getAdditional());){ 
 			statement.setFetchSize(pageSize); 
 			try(ResultSet rs = statement.executeQuery();){		 
 				if(this.readHandler!=null && this.readHandler.supportHandleData()){
 					//handler reference getAllData function 
-					this.readHandler.handleData(this,rs,page,pageSize);					
+					this.readHandler.handleData(this,rs,taskCursor,pageSize);					
 				}else{
-					getAllData(rs,page.getInstanceConfig().getReadFields()); 
+					getAllData(rs,taskCursor.getInstanceConfig().getReadFields()); 
 				} 
 			} catch (Exception e) {
 				this.dataPage.put(GlobalParam.READER_STATUS,false); 
@@ -67,7 +67,7 @@ public class MysqlReader extends ReaderFlowSocket{
 		} catch (SQLException e){ 
 			this.dataPage.put(GlobalParam.READER_STATUS,false);
 			EFException err = new EFException(e);
-			err.track(page.getAdditional());
+			err.track(taskCursor.getAdditional());
 			throw err; 
 		} catch (Exception e) { 
 			releaseConn = true;
@@ -81,7 +81,7 @@ public class MysqlReader extends ReaderFlowSocket{
 	} 
 	
 	@Override
-	public ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) throws EFException {
+	public ConcurrentLinkedDeque<String> getDataPages(final TaskModel task,int pageSize) throws EFException {
 		String sql;
 		if(task.getScanParam().getPageScanDSL()!=null){
 			sql = " select "+GlobalParam._page_field+" as id,(@a:=@a+1) AS EF_ROW_ID from ("

@@ -10,9 +10,9 @@ package org.elasticflow.reader.handler;
 import java.io.RandomAccessFile;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.model.Page;
-import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.PipeDataUnit;
+import org.elasticflow.model.task.TaskCursor;
+import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.reader.flow.FilesReader;
 import org.elasticflow.util.EFException;
 
@@ -26,15 +26,17 @@ import org.elasticflow.util.EFException;
 public class CSVReaderHandler extends ReaderHandler {
 
 	private String[] csvHeader;
+	
+	protected boolean supportHandleData = true;
 
 	@Override
-	public <T> T handlePage(Object invokeObject, Task task, int pageSize) throws EFException {
+	public <T> T handlePage(Object invokeObject, TaskModel task, int pageSize) throws EFException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void handleData(Object invokeObject, Object datas, Page page, int pageSize) throws EFException {
+	public void handleData(Object invokeObject, Object datas, TaskCursor taskCursor, int pageSize) throws EFException {
 		FilesReader FR = (FilesReader) invokeObject;
 		try {
 			String filePath = String.valueOf(datas);
@@ -42,10 +44,10 @@ public class CSVReaderHandler extends ReaderHandler {
 	        fileName = fileName.replace(".csv", "");
 	        int pos = 0;
 			try (RandomAccessFile rf = new RandomAccessFile(filePath, "r");) {				
-				rf.seek(Integer.parseInt(page.getStart()));
+				rf.seek(Integer.parseInt(taskCursor.getStart()));
 				while (pos < pageSize) {
 					String line = rf.readLine();					
-					if (page.getStart().equals("0") && pos == 0) {
+					if (taskCursor.getStart().equals("0") && pos == 0) {
 						csvHeader = line.strip().split(",");						
 					} else { 
 						if (line != null) {
@@ -54,13 +56,13 @@ public class CSVReaderHandler extends ReaderHandler {
 							if(row.length==csvHeader.length) {
 								for (int i = 0; i < csvHeader.length; i++) {
 									PipeDataUnit.addFieldValue(csvHeader[i], row[i],
-											page.getInstanceConfig().getReadFields(), u);
-									if(csvHeader[i].equals(page.getReaderKey())){
+											taskCursor.getInstanceConfig().getReadFields(), u);
+									if(csvHeader[i].equals(taskCursor.getReaderKey())){
 										u.setReaderKeyVal(row[i]);
 									}
 								}
 								PipeDataUnit.addFieldValue("DATA_FROM", fileName,
-										page.getInstanceConfig().getReadFields(), u);
+										taskCursor.getInstanceConfig().getReadFields(), u);
 								FR.getDataUnit().add(u);	
 							}						
 						}else {
@@ -72,8 +74,8 @@ public class CSVReaderHandler extends ReaderHandler {
 			}
 			FR.getDataPage().putData(FR.getDataUnit());
 			FR.getDataPage().put(GlobalParam.READER_STATUS, true);
-			FR.getDataPage().put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
-			FR.getDataPage().putDataBoundary(String.valueOf(Integer.parseInt(page.getStart())+pos));
+			FR.getDataPage().put(GlobalParam.READER_SCAN_KEY, taskCursor.getReaderScanKey());
+			FR.getDataPage().putDataBoundary(String.valueOf(Integer.parseInt(taskCursor.getStart())+pos));
 		} catch (Exception e) {
 			throw new EFException(e);
 		}

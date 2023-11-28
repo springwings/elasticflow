@@ -5,7 +5,7 @@
  * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
  * Side Public License, v 1.
  */
-package org.elasticflow.task;
+package org.elasticflow.task.mode;
 
 import java.util.ArrayList;
 

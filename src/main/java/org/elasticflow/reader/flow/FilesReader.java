@@ -14,10 +14,10 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
-import org.elasticflow.model.Page;
-import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
+import org.elasticflow.model.task.TaskCursor;
+import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.util.EFException;
@@ -55,7 +55,7 @@ public class FilesReader extends ReaderFlowSocket {
 	 * @param pageSize
 	 * @throws Exception
 	 */
-	private void processTxt(Page page, int pageSize) throws Exception {
+	private void processTxt(TaskCursor page, int pageSize) throws Exception {
 		int pos = 0;
 		String LAST_STAMP = null;
 		for (String fpath : this.filePath) {
@@ -88,7 +88,7 @@ public class FilesReader extends ReaderFlowSocket {
 	 * @return
 	 * @throws Exception
 	 */
-	private void processCsv(Page page, int pageSize) throws Exception {
+	private void processCsv(TaskCursor page, int pageSize) throws Exception {
 		int pos = 0;
 		String LAST_STAMP = null;
 		if (this.filePath.size() == 1) {
@@ -169,20 +169,20 @@ public class FilesReader extends ReaderFlowSocket {
 	 * Can only support single file type processing
 	 */
 	@Override
-	public DataPage getPageData(final Page page, int pageSize) throws EFException {
+	public DataPage getPageData(final TaskCursor taskCursor, int pageSize) throws EFException {
 		PREPARE(false, false, false);
 		try {
 			if (!ISLINK())
 				return this.dataPage;
-			this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
-			this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
+			this.dataPage.put(GlobalParam.READER_KEY, taskCursor.getReaderKey());
+			this.dataPage.put(GlobalParam.READER_SCAN_KEY, taskCursor.getReaderScanKey());
 			if (this.readHandler == null) {
 				switch (EFFileUtil.getFileExtension(this.filePath.get(0))) {
 				case "csv":
-					this.processCsv(page, pageSize);
+					this.processCsv(taskCursor, pageSize);
 					break;
 				case "txt":
-					this.processTxt(page, pageSize);
+					this.processTxt(taskCursor, pageSize);
 					break;
 				default:
 					break;
@@ -190,7 +190,7 @@ public class FilesReader extends ReaderFlowSocket {
 				this.dataPage.putData(this.dataUnit);
 				this.dataPage.put(GlobalParam.READER_STATUS, true);
 			} else {
-				this.readHandler.handleData(this, filePath, page, pageSize);
+				this.readHandler.handleData(this, filePath, taskCursor, pageSize);
 			}
 			this.dataPage.put(GlobalParam.READER_LAST_STAMP, scanTime);
 		} catch (Exception e) {
@@ -202,7 +202,7 @@ public class FilesReader extends ReaderFlowSocket {
 	}
 
 	@Override
-	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) throws EFException {
+	public ConcurrentLinkedDeque<String> getDataPages(final TaskModel task, int pageSize) throws EFException {
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
 		boolean releaseConn = false;
 		PREPARE(false, false, false);

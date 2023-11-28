@@ -12,10 +12,10 @@ import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
-import org.elasticflow.model.Page;
-import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
+import org.elasticflow.model.task.TaskCursor;
+import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.util.EFException;
@@ -74,27 +74,27 @@ public class RocketmqReader extends ReaderFlowSocket {
 	}
 
 	@Override
-	public DataPage getPageData(final Page page, int pageSize) throws EFException {
+	public DataPage getPageData(final TaskCursor taskCursor, int pageSize) throws EFException {
 		if (this.records == null) {
 			return this.dataPage;
 		}
 		int count = 0;
 		String dataBoundary = null;
 		String LAST_STAMP = null;
-		this.dataPage.put(GlobalParam.READER_KEY, page.getReaderKey());
-		this.dataPage.put(GlobalParam.READER_SCAN_KEY, page.getReaderScanKey());
+		this.dataPage.put(GlobalParam.READER_KEY, taskCursor.getReaderKey());
+		this.dataPage.put(GlobalParam.READER_SCAN_KEY, taskCursor.getReaderScanKey());
 		try {
 			if (this.readHandler == null) {
 				for (MessageExt record : this.records) {
 					count++;
-					if (count >= Integer.valueOf(page.getStart()) && count < Integer.valueOf(page.getEnd())) {
+					if (count >= Integer.valueOf(taskCursor.getStart()) && count < Integer.valueOf(taskCursor.getEnd())) {
 						PipeDataUnit u = PipeDataUnit.getInstance();
 						String val = new String(record.getBody(), "utf-8");
 						JSONObject jsonObject = JSON.parseObject(val);
 						Set<Entry<String, Object>> itr = jsonObject.entrySet();
 						for (Entry<String, Object> k : itr) {
 							PipeDataUnit.addFieldValue(k.getKey(), k.getValue(),
-									page.getInstanceConfig().getReadFields(), u);
+									taskCursor.getInstanceConfig().getReadFields(), u);
 							if (k.getKey().equals(this.dataPage.get(GlobalParam.READER_SCAN_KEY))) {
 								LAST_STAMP = String.valueOf(k.getValue());
 							} else if (k.getKey().equals(this.dataPage.get(GlobalParam.READER_KEY))) {
@@ -113,7 +113,7 @@ public class RocketmqReader extends ReaderFlowSocket {
 				this.dataPage.putData(this.dataUnit);
 				this.dataPage.putDataBoundary(dataBoundary);
 			} else {
-				this.readHandler.handleData(this, this.records, page, pageSize);
+				this.readHandler.handleData(this, this.records, taskCursor, pageSize);
 			} 
 		} catch (Exception e) {
 			this.dataPage.put(GlobalParam.READER_STATUS, false);
@@ -140,7 +140,7 @@ public class RocketmqReader extends ReaderFlowSocket {
 	}
 
 	@Override
-	public ConcurrentLinkedDeque<String> getPageSplit(final Task task, int pageSize) throws EFException {
+	public ConcurrentLinkedDeque<String> getDataPages(final TaskModel task, int pageSize) throws EFException {
 		boolean releaseConn = false;
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
 		try {

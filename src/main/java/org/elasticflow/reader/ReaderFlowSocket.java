@@ -8,10 +8,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import org.elasticflow.flow.Flow;
-import org.elasticflow.model.Page;
-import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
+import org.elasticflow.model.task.TaskCursor;
+import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.handler.ReaderHandler;
 import org.elasticflow.util.EFException;
@@ -60,10 +60,12 @@ public abstract class ReaderFlowSocket extends Flow{
 	public DataPage getDataPage() {
 		return dataPage;
 	}
-	 
-	public abstract DataPage getPageData(final Page page,int pageSize) throws EFException;
-
-	public abstract ConcurrentLinkedDeque<String> getPageSplit(final Task task,int pageSize) throws EFException;
+	
+	/**Retrieve data from the data page*/
+	public abstract DataPage getPageData(final TaskCursor page,int pageSize) throws EFException;
+	
+	/**Obtain data pagination information*/
+	public abstract ConcurrentLinkedDeque<String> getDataPages(final TaskModel task,int pageSize) throws EFException;
 	
 	/**
 	 * Transaction confirmation

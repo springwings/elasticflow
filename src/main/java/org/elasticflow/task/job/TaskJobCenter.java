@@ -1,6 +1,7 @@
-package org.elasticflow.task.schedule;
+package org.elasticflow.task.job;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.model.task.TaskJobModel;
 import org.elasticflow.util.Common;
 import org.elasticflow.yarn.Resource;
 import org.quartz.CronScheduleBuilder;
@@ -20,7 +21,7 @@ import org.quartz.TriggerKey;
  */
 public class TaskJobCenter {
 
-	public boolean addJob(JobModel job) throws SchedulerException {
+	public boolean addJob(TaskJobModel job) throws SchedulerException {
 		if (job == null) {
 			Common.LOG.error("task is null,add nothing!");
 			return false;

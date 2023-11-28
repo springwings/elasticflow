@@ -9,10 +9,10 @@ package org.elasticflow.instruction.sets;
 
 import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
-import org.elasticflow.model.Page;
-import org.elasticflow.model.Task;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.ReaderState;
+import org.elasticflow.model.task.TaskCursor;
+import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.util.DataSetReader;
 import org.elasticflow.util.Common;
@@ -63,7 +63,7 @@ public class Pipe extends Instruction {
 			log.error("fetchPage parameter not match!");
 			return null;
 		}
-		Page page = (Page) args[0]; 
+		TaskCursor page = (TaskCursor) args[0]; 
 		ReaderFlowSocket RFS = (ReaderFlowSocket) args[1]; 
 		long start = System.currentTimeMillis();
 		DataPage tmp = (DataPage) RFS.getPageData(page,context.getInstanceConfig().getPipeParams().getReadPageSize());	
@@ -91,7 +91,7 @@ public class Pipe extends Instruction {
 		String jobType = String.valueOf(args[0]);
 		String instance = String.valueOf(args[1]);
 		String storeId = String.valueOf(args[2]);
-		Task task = (Task) args[3];
+		TaskModel task = (TaskModel) args[3];
 		DataPage dataPage = (DataPage) args[4];
 		String info = String.valueOf(args[5]);
 		boolean isUpdate = (boolean) args[6];

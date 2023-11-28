@@ -12,12 +12,12 @@ import java.util.Map;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.STATUS;
+import org.elasticflow.model.task.TaskJobModel;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.param.pipe.InstructionParam;
 import org.elasticflow.piper.PipePump;
-import org.elasticflow.task.FlowTask;
-import org.elasticflow.task.InstructionTask;
-import org.elasticflow.task.schedule.JobModel;
+import org.elasticflow.task.mode.FlowTask;
+import org.elasticflow.task.mode.InstructionTask;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFFileUtil;
@@ -137,7 +137,7 @@ public class FlowCenter{
 
 	
 	private void createInstructionScheduleJob(InstructionParam param, InstructionTask task) {
-		JobModel _sj = new JobModel(param.getId(),
+		TaskJobModel _sj = new TaskJobModel(param.getId(),
 				EFPipeUtil.getJobName(param.getId(), GlobalParam.JOB_TYPE.INSTRUCTION.name()), param.getCron(),
 				"org.elasticflow.task.InstructionTask", "runInstructions", task); 
 		try {
@@ -160,7 +160,7 @@ public class FlowCenter{
 		if (instanceConfig.getPipeParams().getFullCron() != null) { 
 			if(needclear)
 				EFPipeUtil.jobAction(instanceID, GlobalParam.JOB_TYPE.FULL.name(), "remove"); 
-			JobModel _sj = new JobModel(instanceID,
+			TaskJobModel _sj = new TaskJobModel(instanceID,
 					EFPipeUtil.getJobName(instanceID, GlobalParam.JOB_TYPE.FULL.name()), instanceConfig.getPipeParams().getFullCron(),
 					"org.elasticflow.task.FlowTask", fullFun, task); 
 			Resource.taskJobCenter.addJob(_sj); 
@@ -169,7 +169,7 @@ public class FlowCenter{
 			if(needclear)
 				EFPipeUtil.jobAction(instanceID, GlobalParam.JOB_TYPE.FULL.name(), "remove");
 			//Add valid full tasks to prevent other program errors
-			JobModel _sj = new JobModel(instanceID,
+			TaskJobModel _sj = new TaskJobModel(instanceID,
 					EFPipeUtil.getJobName(instanceID,GlobalParam.JOB_TYPE.FULL.name()), not_run_cron,
 					"org.elasticflow.task.FlowTask", fullFun, task); 
 			Resource.taskJobCenter.addJob(_sj); 
@@ -191,7 +191,7 @@ public class FlowCenter{
 			}else{
 				this.cron_exists.add(cron);
 			}
-			JobModel _sj = new JobModel(instanceID,
+			TaskJobModel _sj = new TaskJobModel(instanceID,
 					EFPipeUtil.getJobName(instanceID, GlobalParam.JOB_TYPE.INCREMENT.name()),
 					instanceConfig.getPipeParams().getDeltaCron(), "org.elasticflow.task.FlowTask",
 					incrementFun, task); 
@@ -200,7 +200,7 @@ public class FlowCenter{
 			if(needclear)
 				EFPipeUtil.jobAction(instanceID, GlobalParam.JOB_TYPE.INCREMENT.name(), "remove");
 			//Add valid full tasks to prevent other program errors
-			JobModel _sj = new JobModel(instanceID,
+			TaskJobModel _sj = new TaskJobModel(instanceID,
 					EFPipeUtil.getJobName(instanceID,GlobalParam.JOB_TYPE.INCREMENT.name()),
 					not_run_cron, "org.elasticflow.task.FlowTask",
 					incrementFun, task); 
@@ -219,7 +219,7 @@ public class FlowCenter{
 	}
 	
 	private void createOptimizeJob(String instanceID, FlowTask batch,String cron) throws SchedulerException{
-		JobModel _sj = new JobModel(instanceID,
+		TaskJobModel _sj = new TaskJobModel(instanceID,
 				EFPipeUtil.getJobName(instanceID, GlobalParam.JOB_TYPE.OPTIMIZE.name()),cron,
 				"org.elasticflow.manager.Task", "optimizeInstance", batch); 
 		Resource.taskJobCenter.addJob(_sj); 

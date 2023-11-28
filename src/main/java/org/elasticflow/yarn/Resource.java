@@ -20,8 +20,8 @@ import org.elasticflow.node.startup.Run;
 import org.elasticflow.notifier.EFNotifier;
 import org.elasticflow.service.HttpReaderService;
 import org.elasticflow.service.SearcherService;
-import org.elasticflow.task.FlowTask;
-import org.elasticflow.task.schedule.TaskJobCenter;
+import org.elasticflow.task.job.TaskJobCenter;
+import org.elasticflow.task.mode.FlowTask;
 import org.quartz.Scheduler;
 
 import com.alibaba.fastjson.JSONObject;

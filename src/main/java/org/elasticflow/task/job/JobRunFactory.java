@@ -1,4 +1,4 @@
-package org.elasticflow.task.schedule;
+package org.elasticflow.task.job;
 
 import java.lang.reflect.Method;
 
@@ -9,6 +9,7 @@ import org.quartz.JobExecutionException;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.model.Localization;
 import org.elasticflow.model.Localization.LAG_TYPE;
+import org.elasticflow.model.task.TaskJobModel;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.yarn.Resource;
@@ -23,7 +24,7 @@ public class JobRunFactory implements Job {
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
-		JobModel job = (JobModel) context.getMergedJobDataMap().get(GlobalParam.FLOW_TAG._DEFAULT.name());
+		TaskJobModel job = (TaskJobModel) context.getMergedJobDataMap().get(GlobalParam.FLOW_TAG._DEFAULT.name());
 		if (!invokeMethod(job)) {			
 			Resource.EfNotifier.send(Localization.format(LAG_TYPE.JobstartFailed, job.getInstanceID()),job.getInstanceID(),
 					Localization.format(LAG_TYPE.JobstartFailed, job.getInstanceID()),EFException.ETYPE.PARAMETER_ERROR.name(),true);
@@ -33,7 +34,7 @@ public class JobRunFactory implements Job {
 	/**
 	 * if get static method jobModel.getObject() set null
 	 */
-	private boolean invokeMethod(JobModel jobModel) {
+	private boolean invokeMethod(TaskJobModel jobModel) {
 		Object object = jobModel.getObject();
 		try {
 			Class<?> CL = object.getClass();

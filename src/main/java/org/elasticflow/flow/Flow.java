@@ -13,7 +13,7 @@ import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.connection.EFConnectionSocket;
-import org.elasticflow.model.FlowState;
+import org.elasticflow.model.task.FlowState;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
