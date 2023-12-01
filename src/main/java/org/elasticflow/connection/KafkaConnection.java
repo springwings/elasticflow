@@ -34,7 +34,9 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 
 	private final static Logger log = LoggerFactory.getLogger("Kafka Socket");
 	
-	private final int MAX_FETCH_BYTES = 1048576 * 10; //1M * n
+	private final int MAX_FETCH_BYTES = 1048576 * 4; //1M * n
+	
+	private final int MAX_REQUEST_SIZE = 1048576; //1M * n
 
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
 		EFConnectionSocket<?> o = new KafkaConnection();
@@ -65,14 +67,16 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
         props.put("key.deserializer", StringDeserializer.class);
         props.put("value.deserializer", StringDeserializer.class);
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,GlobalParam.READ_PAGE_SIZE);
-        props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, MAX_FETCH_BYTES); 
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "30000");
         props.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, "60000");
         props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, "3000");
+        props.put(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, MAX_FETCH_BYTES);
         if(wnp.getCustomParams()!=null) {
         	if(wnp.getCustomParams().containsKey("max.poll.records"))
         		props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,wnp.getCustomParams().getString("max.poll.records"));
+        	if(wnp.getCustomParams().containsKey("fetch.max.bytes"))
+        		props.put(ConsumerConfig.FETCH_MAX_BYTES_CONFIG,wnp.getCustomParams().getString("fetch.max.bytes"));
         	if(wnp.getCustomParams().containsKey("max.partition.fetch.bytes"))
         		props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG,wnp.getCustomParams().getString("max.partition.fetch.bytes"));
         	if(wnp.getCustomParams().containsKey("session.timeout.ms"))
@@ -94,7 +98,8 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
         props.put(ProducerConfig.ACKS_CONFIG, "all"); 
         props.put(ProducerConfig.RETRIES_CONFIG, 0);
         props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, "90000");
-        props.put(ProducerConfig.BATCH_SIZE_CONFIG, 1048576);
+        props.put(ProducerConfig.BATCH_SIZE_CONFIG, MAX_REQUEST_SIZE/8);
+        props.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, MAX_REQUEST_SIZE);
         props.put(ProducerConfig.LINGER_MS_CONFIG, 1);
         props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);
         props.put("key.serializer",StringSerializer.class);
@@ -102,6 +107,10 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
         if(wnp.getCustomParams()!=null) {
         	if(wnp.getCustomParams().containsKey("batch.size"))
         		props.put(ProducerConfig.BATCH_SIZE_CONFIG,wnp.getCustomParams().getString("batch.size"));
+        	if(wnp.getCustomParams().containsKey("max.request.size"))
+        		props.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG,wnp.getCustomParams().getString("max.request.size")); 
+        	if(wnp.getCustomParams().containsKey("request.timeout.ms"))
+        		props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG,wnp.getCustomParams().getString("request.timeout.ms")); 
         	if(wnp.getCustomParams().containsKey("buffer.memory"))
         		props.put(ProducerConfig.BUFFER_MEMORY_CONFIG,wnp.getCustomParams().getString("buffer.memory"));
         	if(wnp.getCustomParams().containsKey("acks"))
