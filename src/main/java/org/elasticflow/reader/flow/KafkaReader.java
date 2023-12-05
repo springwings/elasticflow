@@ -60,8 +60,8 @@ public class KafkaReader extends ReaderFlowSocket {
 		KafkaReader o = new KafkaReader();
 		o.initConn(connectParams);
 		if (connectParams.getWhp().getCustomParams() != null) {
-			if (connectParams.getWhp().getCustomParams().containsKey("max.poll.interval.ms"))
-				o.readms = connectParams.getWhp().getCustomParams().getIntValue("max.poll.interval.ms");
+			if (connectParams.getWhp().getCustomParams().containsKey("timeout.ms"))
+				o.readms = connectParams.getWhp().getCustomParams().getIntValue("timeout.ms");
 			if (connectParams.getWhp().getCustomParams().containsKey("enable.auto.commit")) {
 				o.autoCommit = connectParams.getWhp().getCustomParams().getBooleanValue("enable.auto.commit");
 			}
