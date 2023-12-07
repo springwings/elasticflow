@@ -62,13 +62,12 @@ public class EFMonitorUtil {
 		if(GlobalParam.DISTRIBUTE_RUN) {
 			GlobalParam.INSTANCE_COORDER.distributeCoorder().removeInstanceFromCluster(instanceConfig,true);
 		}	
-		if (reset != null && reset.equals("true")) {
-			EFPipeUtil.removeInstance(instance, true, true);
+		String alias = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
+		Resource.nodeConfig.getSearchConfigs().remove(alias);
+		EFPipeUtil.removeInstance(instance, true, true);
+		if (reset != null && reset.equals("true")) {			
 			Resource.nodeConfig.loadConfig(instanceConfig, true);
-		} else {
-			String alias = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
-			Resource.nodeConfig.getSearchConfigs().remove(alias);
-			EFPipeUtil.removeInstance(instance, true, true);
+		} else {  
 			Resource.nodeConfig.loadConfig(instanceConfig, false);			
 		} 
 		EFMonitorUtil.rebuildFlowGovern(instanceConfig, !GlobalParam.DISTRIBUTE_RUN);

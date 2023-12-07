@@ -820,8 +820,9 @@ public final class NodeMonitor {
 	/**
 	 * reload instance configure rebuild instance in memory
 	 * 
-	 * @param rq instance=xx&reset=true|false&runType=1 reset true will recreate the
+	 * @param rq instance=xx&reset=true|false&runtype=1 reset true will recreate the
 	 *           instance in java from instance configure.
+	 *           runType=-1 Use the original task run type
 	 * @throws EFException
 	 * 
 	 */
@@ -834,6 +835,8 @@ public final class NodeMonitor {
 				setResponse(RESPONSE_STATUS.DataErr, instance + " not exists!", null);
 			} else {
 				try {
+					if(runType==null)
+						runType = String.valueOf(Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType());
 					EFMonitorUtil.reloadInstance(instance, reset, runType);
 					setResponse(RESPONSE_STATUS.Success, RR.getStringParam("instance") + " reload config Success!",
 							null);
