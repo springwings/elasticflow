@@ -820,9 +820,9 @@ public final class NodeMonitor {
 	/**
 	 * reload instance configure rebuild instance in memory
 	 * 
-	 * @param rq instance=xx&reset=true|false&runtype=1 reset true will recreate the
-	 *           instance in java from instance configure.
+	 * @param rq instance=xx&reset=true|false&runtype=1 reset true will clear all instance settings.
 	 *           runType=-1 Use the original task run type
+	 *           
 	 * @throws EFException
 	 * 
 	 */
