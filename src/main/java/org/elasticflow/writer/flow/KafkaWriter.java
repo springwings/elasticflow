@@ -13,6 +13,7 @@ import org.apache.kafka.clients.admin.DeleteTopicsResult;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.KafkaFuture;
+import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.field.EFField;

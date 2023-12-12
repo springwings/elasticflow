@@ -579,6 +579,9 @@ public final class NodeMonitor {
 					edge.put("from", _entry.getKey());
 					edge.put("weight", weight);
 					edge.put("to", node.getKey());
+					edge.put("isconnect", true);
+					if(node.getValue().getBoolean("OpenTrans")==false)
+						edge.put("isconnect", false);
 					edges.add(edge);
 				} 
 			}

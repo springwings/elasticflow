@@ -198,6 +198,7 @@ public final class Run {
 			for (int i = 0; i < jars.size(); i++) {
 			    try { 
 			        urls[i] = jars.get(i).toURI().toURL();
+			        Common.LOG.info("load plugin {}",jars.get(i).toURI().toURL());
 			    } catch (Exception e) {
 			    	Common.LOG.error("load Plugins Exception", e);
 			    }
@@ -223,8 +224,8 @@ public final class Run {
 				ResourceMonitor.start(); 
 				startService();
 			} 
-			Common.LOG.info("Environment {}, Language {}, Start time {}",GlobalParam.RUN_ENV,
-					GlobalParam.LANG,Common.FormatTime(System.currentTimeMillis()));
+			Common.LOG.info("Environment {}, Language {}, IS_DEBUG {}, Start time {}",GlobalParam.RUN_ENV,
+					GlobalParam.LANG,GlobalParam.DEBUG,Common.FormatTime(System.currentTimeMillis()));
 			if(GlobalParam.DISTRIBUTE_RUN) {
 				Common.LOG.info("ElasticFlow {} {}, node ID {}, IP {}, Cluster Mode Start Success!",GlobalParam.VERSION,
 						GlobalParam.SystemConfig.get("node_type"),GlobalParam.NODEID,GlobalParam.IP);
@@ -253,6 +254,8 @@ public final class Run {
 		} 
 		if(!EFFileUtil.checkResourceExists(GlobalParam.SYS_CONFIG_PATH))
 			throw new EFException("system configuration file not found!",ELEVEL.Stop);
+		if(!EFFileUtil.checkResourceExists(GlobalParam.CONFIG_ROOT+"/efhead"))
+			Common.LOG.warn("efhead not found in {}",GlobalParam.CONFIG_ROOT+"/efhead");
 		if(!EFFileUtil.checkResourceExists(GlobalParam.DATAS_CONFIG_PATH))
 			throw new EFException("run data folder not found!",ELEVEL.Stop);
 		if(!EFFileUtil.checkResourceExists(GlobalParam.INSTANCE_PATH))
