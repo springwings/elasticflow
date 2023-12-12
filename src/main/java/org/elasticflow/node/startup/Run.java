@@ -198,9 +198,9 @@ public final class Run {
 			for (int i = 0; i < jars.size(); i++) {
 			    try { 
 			        urls[i] = jars.get(i).toURI().toURL();
-			        Common.LOG.info("load plugin {}",jars.get(i).toURI().toURL());
+			        Common.LOG.info("load plugin from {}",jars.get(i).toURI().toURL());
 			    } catch (Exception e) {
-			    	Common.LOG.error("load Plugins Exception", e);
+			    	Common.LOG.error("load plugins exception", e);
 			    }
 			}
 			GlobalParam.PLUGIN_CLASS_LOADER = new URLClassLoader(urls, ClassLoader.getSystemClassLoader());

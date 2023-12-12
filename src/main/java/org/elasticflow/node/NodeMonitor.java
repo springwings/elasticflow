@@ -841,7 +841,7 @@ public final class NodeMonitor {
 					if(runType==null)
 						runType = String.valueOf(Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType());
 					EFMonitorUtil.reloadInstance(instance, reset, runType);
-					setResponse(RESPONSE_STATUS.Success, RR.getStringParam("instance") + " reload config Success!",
+					setResponse(RESPONSE_STATUS.Success, RR.getStringParam("instance") + " reload instance settings success!",
 							null);
 				} catch (EFException e) {
 					setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);

@@ -586,9 +586,9 @@ public final class Common {
 	public static void loadGlobalConfig(String path) {
 		try {	
 			GlobalParam.SystemConfig = Common.loadProperties(path);
-			Common.LOG.info("load {} Config success!", path);
+			Common.LOG.info("load system configuration from {} success!", path);
 		} catch (Exception e) { 
-			Common.LOG.error("load {} Config Exception", path,e);
+			Common.LOG.error("load system configuration from {} Exception", path,e);
 			Common.stopSystem(false);
 		} 
 	}
