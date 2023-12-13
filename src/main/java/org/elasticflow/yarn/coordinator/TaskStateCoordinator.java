@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
-import org.elasticflow.config.GlobalParam.STATUS;
+import org.elasticflow.config.GlobalParam.TASK_STATUS;
 import org.elasticflow.model.EFState;
 import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.model.task.FlowState;
@@ -85,7 +85,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 		}
 	}
 
-	public boolean checkFlowStatus(String instance, String seq, JOB_TYPE type, STATUS state) {
+	public boolean checkFlowStatus(String instance, String seq, JOB_TYPE type, TASK_STATUS state) {
 		if ((FLOW_RUN_STATUS.get(instance, seq, type.name()).get() & state.getVal()) > 0)
 			return true;
 		return false;
@@ -101,10 +101,10 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	 * @param removeState
 	 * @return boolean,lock status
 	 */
-	public boolean setFlowStatus(String instance, String L1seq, String type, STATUS needState, STATUS setState,
+	public boolean setFlowStatus(String instance, String L1seq, String type, TASK_STATUS needState, TASK_STATUS setState,
 			boolean showLog) {
 		synchronized (FLOW_RUN_STATUS.get(instance, L1seq, type)) {
-			if (needState.equals(STATUS.Blank)
+			if (needState.equals(TASK_STATUS.Blank)
 					|| (FLOW_RUN_STATUS.get(instance, L1seq, type).get() == needState.getVal())) {
 				FLOW_RUN_STATUS.get(instance, L1seq, type).set(setState.getVal());
 				return true;

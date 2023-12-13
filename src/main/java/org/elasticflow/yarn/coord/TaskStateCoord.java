@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
-import org.elasticflow.config.GlobalParam.STATUS;
+import org.elasticflow.config.GlobalParam.TASK_STATUS;
 import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.util.EFException;
 
@@ -33,9 +33,9 @@ public interface TaskStateCoord extends Coordination {
 	public void setScanPosition(String instance, String L1seq, String L2seq, String scanStamp, boolean reset,
 			boolean isfull);
 
-	public boolean checkFlowStatus(String instance, String seq, JOB_TYPE type, STATUS state);
+	public boolean checkFlowStatus(String instance, String seq, JOB_TYPE type, TASK_STATUS state);
 
-	public boolean setFlowStatus(String instance, String L1seq, String type, STATUS needState, STATUS setState,
+	public boolean setFlowStatus(String instance, String L1seq, String type, TASK_STATUS needState, TASK_STATUS setState,
 			boolean showLog);
 
 	public String getStoreIdFromSave(String instance, String L1seq, boolean reload, boolean isfull);

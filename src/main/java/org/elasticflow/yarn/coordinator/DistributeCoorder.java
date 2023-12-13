@@ -133,9 +133,16 @@ public class DistributeCoorder {
 				node.resetBreaker(instance, L1seq);
 		}
 	}
-
+	
+	/**
+	 * The data auto obtained from the master/slave
+	 * @param instance
+	 * @param L1seq
+	 * @param appendPipe
+	 * @return
+	 */
 	public JSONObject getBreakerStatus(String instance, String L1seq, String appendPipe) {
-		for (EFNode node : nodes) {
+		for (EFNode node : nodes) {//check slave first
 			if (node.containInstace(instance) && node.isLive()) {
 				return node.getBreakerStatus(instance, L1seq, appendPipe);
 			}
@@ -150,7 +157,7 @@ public class DistributeCoorder {
 			}
 			JO.put(appendPipe + "valve_turn_level",
 					Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).valve.getTurnLevel());
-			JO.put(appendPipe + "current_fail_freq",
+			JO.put(appendPipe + "current_fail_interval",
 					Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.failInterval());
 			JO.put(appendPipe + "total_fail_times",
 					Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.getFailTimes());

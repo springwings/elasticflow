@@ -27,9 +27,10 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.INSTANCE_STATUS;
 import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
-import org.elasticflow.config.GlobalParam.STATUS;
+import org.elasticflow.config.GlobalParam.TASK_STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.model.EFRequest;
@@ -509,7 +510,7 @@ public final class NodeMonitor {
 		//get instances
 		Map<String, InstanceConfig> instances = Resource.nodeConfig.getInstanceConfigs();
 		HashMap<String, Object> result = new HashMap<String, Object>();
-		HashMap<String, JSONObject> nodes = new HashMap<String, JSONObject>();
+		HashMap<String, JSONObject> graphnodes = new HashMap<String, JSONObject>();
 		List<JSONObject> edges = new ArrayList<JSONObject>();
 		for (Map.Entry<String, InstanceConfig> entry : instances.entrySet()) {
 			InstanceConfig config = entry.getValue();
@@ -552,28 +553,37 @@ public final class NodeMonitor {
 			instance.put("WriteTo", wt2);
 			instance.put("OpenTrans", config.openTrans());
 			instance.put("IsVirtualPipe", config.getPipeParams().isVirtualPipe());
-			instance.put("InstanceType", EFMonitorUtil.getInstanceType(config.getInstanceType())); 
-			nodes.put(config.getAlias(), instance); 
+			instance.put("InstanceType", EFMonitorUtil.getInstanceType(config.getInstanceType()));  
+			graphnodes.put(config.getAlias(), instance); 
+			try {
+				if(!graphnodes.get(config.getAlias()).containsKey("instance_status")) {
+					JSONObject JO = EFMonitorUtil.getInstanceInfo(config.getAlias(), 8); 
+					graphnodes.get(config.getAlias()).put("instance_status", JO.getInteger("instance_status"));
+				} 
+			} catch (Exception e) { 
+				
+			} 
 		}
 				
-		//start map resource 
-		for (Entry<String, JSONObject> node : nodes.entrySet()) {
+		//start map resource  
+		for (Entry<String, JSONObject> node : graphnodes.entrySet()) {  
 			String readfrom = node.getValue().getString("ReadFrom"); 
 			int weight = 0;
 			try { 
 				JSONObject JO = EFMonitorUtil.getInstanceInfo(node.getKey(), 2); 
-				JSONObject _datas = JO.getJSONObject("reader"); 
+				JSONObject _datas = JO.getJSONObject("reader");  
 				for (String _key : _datas.keySet()) {  
-					if(!_datas.get(_key).toString().equals("Not started!")) {
+					if(_datas.get(_key)!=null && !_datas.get(_key).toString().equals("Not started!")) {
 						if(_datas.getJSONObject(_key).containsKey("totalProcess"))
 							weight+=_datas.getJSONObject(_key).getInteger("totalProcess");
 					}  
 				}
 			} catch (Exception e) { 
+				node.getValue().put("instance_status", INSTANCE_STATUS.Error.getVal());
 				e.printStackTrace();
 			}  
  
-			for (Entry<String, JSONObject> _entry : nodes.entrySet()) {
+			for (Entry<String, JSONObject> _entry : graphnodes.entrySet()) {
 				if(!node.getKey().equals(_entry.getKey()) && _entry.getValue().getJSONArray("WriteTo").contains(readfrom)) {
 					JSONObject edge = new JSONObject();
 					edge.put("from", _entry.getKey());
@@ -587,7 +597,7 @@ public final class NodeMonitor {
 			}
 		}
 		//Modify node attributes:Only egress E, only ingress B,both eg/in M, independent nodes S
-		for (Entry<String, JSONObject> node : nodes.entrySet()) {
+		for (Entry<String, JSONObject> node : graphnodes.entrySet()) {
 			int egress=0;
 			int ingress=0;
 			for(JSONObject edge:edges) {
@@ -607,7 +617,7 @@ public final class NodeMonitor {
 			}
 			node.getValue().put("weight", egress+ingress);
 		}
-		result.put("nodes", nodes);
+		result.put("nodes", graphnodes);
 		result.put("edges", edges);
 		setResponse(RESPONSE_STATUS.Success, null, result);
 	}
@@ -922,7 +932,7 @@ public final class NodeMonitor {
 						L1seqs = new String[1];
 						L1seqs[0] = GlobalParam.DEFAULT_RESOURCE_SEQ;
 					}
-					EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
+					EFMonitorUtil.controlInstanceState(instance, TASK_STATUS.Stop, true);
 					for (String L1seq : L1seqs) {
 						String tags = Common.getResourceTag(instance, L1seq, GlobalParam.FLOW_TAG._DEFAULT.name(),
 								false);
@@ -941,7 +951,7 @@ public final class NodeMonitor {
 							Common.LOG.error("delete Instance Data", e);
 						}
 					}
-					EFMonitorUtil.controlInstanceState(instance, STATUS.Ready, true);
+					EFMonitorUtil.controlInstanceState(instance, TASK_STATUS.Ready, true);
 				}
 			}
 			if (state) {

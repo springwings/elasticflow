@@ -133,12 +133,12 @@ public final class GlobalParam {
 	}
 
 	/** Task Running status define */
-	public static enum STATUS {
+	public static enum TASK_STATUS {
 		Blank(0), Ready(1), Running(2), Termination(4), Stop(8), Waiting(16);
 
 		private int v;
 
-		private STATUS(int val) {
+		private TASK_STATUS(int val) {
 			this.v = val;
 		}
 
@@ -146,7 +146,21 @@ public final class GlobalParam {
 			return v;
 		}
 	}
+	
+	/** instance status define**/
+	public static enum INSTANCE_STATUS {
+		Normal(0), Warning(1), Error(2);
 
+		private int v;
+
+		private INSTANCE_STATUS(int val) {
+			this.v = val;
+		}
+
+		public int getVal() {
+			return v;
+		}
+	}
 	public static enum DATA_SOURCE_TYPE {
 		MYSQL, ORACLE, HIVE, ES, HBASE, UNKNOWN, H2, FILES, NEO4J, KAFKA, VEARCH, HDFS, FASTDFS,ROCKETMQ
 	}

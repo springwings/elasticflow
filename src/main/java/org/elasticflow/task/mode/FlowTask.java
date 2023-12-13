@@ -10,7 +10,7 @@ package org.elasticflow.task.mode;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.MECHANISM;
-import org.elasticflow.config.GlobalParam.STATUS;
+import org.elasticflow.config.GlobalParam.TASK_STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.Localization;
 import org.elasticflow.model.Localization.LAG_TYPE;
@@ -97,8 +97,8 @@ public class FlowTask {
 	public void runFull() {
 		if (runConditionCheck() == false)
 			return;
-		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(), STATUS.Ready,
-				STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
+		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(), TASK_STATUS.Ready,
+				TASK_STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
 				String storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), false,
 						false);
@@ -123,7 +123,7 @@ public class FlowTask {
 						EFException.ETYPE.DATA_ERROR.name(), false);
 			} finally {
 				GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(),
-						STATUS.Blank, STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
+						TASK_STATUS.Blank, TASK_STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
 			}
 		} else {
 			if (pipePump.getInstanceConfig().getPipeParams().getLogLevel() == 0)
@@ -137,8 +137,8 @@ public class FlowTask {
 	public void runVirtualFull() {
 		if (runConditionCheck() == false)
 			return;
-		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(), STATUS.Ready,
-				STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
+		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(), TASK_STATUS.Ready,
+				TASK_STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
 				String storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), false,
 						false);
@@ -154,7 +154,7 @@ public class FlowTask {
 						EFException.ETYPE.DATA_ERROR.name(), false);
 			} finally {
 				GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(),
-						STATUS.Blank, STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
+						TASK_STATUS.Blank, TASK_STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
 			}
 		} else {
 			if (pipePump.getInstanceConfig().getPipeParams().getLogLevel() == 0)
@@ -171,7 +171,7 @@ public class FlowTask {
 		if (runConditionCheck() == false)
 			return;
 		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
-				STATUS.Ready, STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
+				TASK_STATUS.Ready, TASK_STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
 				String storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), true,
 						recompute);
@@ -184,7 +184,7 @@ public class FlowTask {
 						EFException.ETYPE.DATA_ERROR.name(), false);
 			} finally {
 				GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
-						STATUS.Blank, STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
+						TASK_STATUS.Blank, TASK_STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
 				recompute = false;
 			}
 		} else {
@@ -200,7 +200,7 @@ public class FlowTask {
 		if (runConditionCheck() == false) 
 			return;
 		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
-				STATUS.Ready, STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
+				TASK_STATUS.Ready, TASK_STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			String storeId = null;
 			try {
 				storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), true,
@@ -229,7 +229,7 @@ public class FlowTask {
 			} finally {
 				recompute = this.checkReCompute(storeId);
 				GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
-						STATUS.Blank, STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
+						TASK_STATUS.Blank, TASK_STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
 			}
 		} else {
 			if (pipePump.getInstanceConfig().getPipeParams().getLogLevel() == 0)

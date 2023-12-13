@@ -6,10 +6,11 @@ import java.util.Map;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.config.GlobalParam.INSTANCE_STATUS;
 import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
-import org.elasticflow.config.GlobalParam.STATUS;
+import org.elasticflow.config.GlobalParam.TASK_STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.model.EFRequest;
@@ -46,7 +47,7 @@ public class EFMonitorUtil {
 	 * @throws EFException 
 	 */
 	public static void reloadInstance(String instance,String reset,String runType) throws EFException {
-		EFMonitorUtil.controlInstanceState(instance, STATUS.Stop, true);
+		EFMonitorUtil.controlInstanceState(instance, TASK_STATUS.Stop, true);
 		int type = Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType();
 		if(runType !=null) {
 			type = Integer.parseInt(runType);
@@ -75,7 +76,7 @@ public class EFMonitorUtil {
 		if(GlobalParam.DISTRIBUTE_RUN) {
 			GlobalParam.INSTANCE_COORDER.distributeCoorder().reloadClusterInstance(instanceConfig, reset.equals("true"));
 		}		
-		EFMonitorUtil.controlInstanceState(instance, STATUS.Ready, true);
+		EFMonitorUtil.controlInstanceState(instance, TASK_STATUS.Ready, true);
 	}
 
 	public static void saveNodeConfig() throws Exception {
@@ -190,13 +191,13 @@ public class EFMonitorUtil {
 		JSONObject info = new JSONObject();
 		for (String seq : seqs) {
 			String state = "";
-			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, STATUS.Stop))
+			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, TASK_STATUS.Stop))
 				state = "stop";
-			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, STATUS.Ready))				
+			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, TASK_STATUS.Ready))				
 				state = "Ready";
-			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, STATUS.Running))
+			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, TASK_STATUS.Running))
 				state = "Running";
-			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, STATUS.Termination))
+			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, TASK_STATUS.Termination))
 				state = "Termination";
 			info.put(seq.length() == 0 ? "MAIN " : seq, state);
 		}
@@ -211,7 +212,7 @@ public class EFMonitorUtil {
 	 * @param state
 	 * @param isIncrement control thread type
 	 */
-	public static void controlInstanceState(String instance, STATUS state, boolean isIncrement) {
+	public static void controlInstanceState(String instance, TASK_STATUS state, boolean isIncrement) {
 		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instance);
 		if ((GlobalParam.SERVICE_LEVEL & 6) == 0) {
 			return;
@@ -233,9 +234,9 @@ public class EFMonitorUtil {
 			String[] seqs = EFMonitorUtil.getInstanceL1seqs(instance);
 			Common.LOG.info("Instance {} seq nums {},job type {},waitting set state {} ...",inst,seqs.length,controlType.name(),state);
 			for (String L1seq : seqs) {
-				if (GlobalParam.TASK_COORDER.checkFlowStatus(inst, L1seq, controlType, STATUS.Running)) {
-					GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), STATUS.Blank, STATUS.Termination, true);
-					while (!GlobalParam.TASK_COORDER.checkFlowStatus(inst, L1seq, controlType, STATUS.Ready)) {
+				if (GlobalParam.TASK_COORDER.checkFlowStatus(inst, L1seq, controlType, TASK_STATUS.Running)) {
+					GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), TASK_STATUS.Blank, TASK_STATUS.Termination, true);
+					while (!GlobalParam.TASK_COORDER.checkFlowStatus(inst, L1seq, controlType, TASK_STATUS.Ready)) {
 						try {
 							waittime++;
 							Thread.sleep(100);
@@ -246,13 +247,13 @@ public class EFMonitorUtil {
 							Common.LOG.error("currentThreadState InterruptedException", e);
 						}
 					}
-					if (GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), STATUS.Termination, state, true)) {
+					if (GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), TASK_STATUS.Termination, state, true)) {
 						Common.LOG.info("Instance {} L1seq {},job type {} success set state {}.",inst,(L1seq.length()==0?GlobalParam.DEFAULT_SEQ:L1seq),controlType.name(),state);
 					} else {
 						Common.LOG.info("Instance {} L1seq {},job type {} fail set state {}.",inst,(L1seq.length()==0?GlobalParam.DEFAULT_SEQ:L1seq),controlType.name(),state);
 					}
 				}else {
-					if (GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), STATUS.Blank, state, true)) {
+					if (GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), TASK_STATUS.Blank, state, true)) {
 						Common.LOG.info("Instance {} L1seq {},job type {} success set state {}.",inst,(L1seq.length()==0?GlobalParam.DEFAULT_SEQ:L1seq),controlType.name(),state);
 					} else {
 						Common.LOG.info("Instance {} L1seq {},job type {} fail set state {}.",inst,(L1seq.length()==0?GlobalParam.DEFAULT_SEQ:L1seq),controlType.name(),state);
@@ -346,6 +347,7 @@ public class EFMonitorUtil {
  * 1 pool status ++
  * 2 Performance status ++
  * 4 task status ++
+ * 8 task total status ++
  * @return
  * @throws EFException 
  */
@@ -407,8 +409,7 @@ public class EFMonitorUtil {
 				for (String L1seq : L1seqs) {	 
 					String appendPipe = "";
 					if (L1seq != "") 
-						appendPipe = "L1seq(" + L1seq + ")_";
-					Task.putAll(GlobalParam.INSTANCE_COORDER.distributeCoorder().getBreakerStatus(config.getInstanceID(), L1seq, appendPipe));
+						appendPipe = "L1seq(" + L1seq + ")_"; 
 					JSONObject tmp;
 					if(GlobalParam.DISTRIBUTE_RUN) {						
 						tmp = GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(config.getInstanceID(), L1seq);						
@@ -433,6 +434,13 @@ public class EFMonitorUtil {
 				
 			if((type&4)>0) {
 				if (config.openTrans()) { 
+					String[] L1seqs = Common.getL1seqs(config); 
+					for (String L1seq : L1seqs) {	
+						String appendPipe = "";
+						if (L1seq != "") 
+							appendPipe = "L1seq(" + L1seq + ")_";
+						Task.putAll(GlobalParam.INSTANCE_COORDER.distributeCoorder().getBreakerStatus(config.getInstanceID(), L1seq, appendPipe));
+					}
 					Task.put("incremental_storage_status", GlobalParam.TASK_COORDER.getInstanceScanDatas(instance,false));
 					Task.put("full_storage_status",GlobalParam.TASK_COORDER.getInstanceScanDatas(instance,true));
 					Task.put("full_progress", new JSONObject());
@@ -452,6 +460,30 @@ public class EFMonitorUtil {
 					Task.put("full_thread_status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
 					Task.put("incremental_thread_status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));					
 				}	
+			}
+			
+			if((type&8)>0) {
+				if (config.openTrans()) { 
+					String[] L1seqs = Common.getL1seqs(config); 
+					boolean breakerOn = false;
+					int current_fail_interval = Integer.MAX_VALUE;
+					for (String L1seq : L1seqs) {	 
+						JSONObject tmp = GlobalParam.INSTANCE_COORDER.distributeCoorder().getBreakerStatus(config.getInstanceID(), L1seq, "");
+						if(tmp.getBoolean("breaker_is_on"))
+							breakerOn = true;
+						if(tmp.getInteger("current_fail_interval") < current_fail_interval)
+							current_fail_interval = tmp.getInteger("current_fail_interval");
+					}
+					if(breakerOn) {
+						JO.put("instance_status", INSTANCE_STATUS.Error.getVal());
+					}else if(current_fail_interval<180) {
+						JO.put("instance_status", INSTANCE_STATUS.Warning.getVal());
+					}else {
+						JO.put("instance_status", INSTANCE_STATUS.Normal.getVal());
+					}
+				}else {
+					JO.put("instance_status", INSTANCE_STATUS.Normal.getVal());
+				}
 			}
 			JO.put("reader", Reader);
 			JO.put("computer", Computer);

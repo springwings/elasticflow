@@ -18,7 +18,7 @@ import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.computer.handler.ComputerHandler;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
-import org.elasticflow.config.GlobalParam.STATUS;
+import org.elasticflow.config.GlobalParam.TASK_STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.model.reader.DataPage;
@@ -293,7 +293,7 @@ public final class PipePump extends Instruction implements Serializable {
 
 	private void breakCheck(TaskModel task) throws EFException {
 		if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstanceID(), task.getL1seq(), task.getJobType(),
-				STATUS.Termination)) {
+				TASK_STATUS.Termination)) {
 			throw new EFException(task.getInstanceID() + " " + task.getJobType().name() + " job has been Terminated!",
 					ELEVEL.Dispose, ETYPE.EXTINTERRUPT);
 		}
@@ -450,7 +450,7 @@ public final class PipePump extends Instruction implements Serializable {
 						PipeUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
 								task.getEndTime(), task.getScanParam().getScanField()));
 				if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstanceID(), task.getL1seq(), task.getJobType(),
-						STATUS.Termination)) {
+						TASK_STATUS.Termination)) {
 					Resource.threadPools.cleanWaitJob(getId());
 					Common.LOG
 							.warn(task.getInstanceID() + " " + task.getJobType().name() + " job has been Terminated!");
@@ -473,7 +473,7 @@ public final class PipePump extends Instruction implements Serializable {
 								",progress:" + progressPos + "/" + pageNum));
 					}
 					if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstanceID(), task.getL1seq(),
-							task.getJobType(), STATUS.Termination)) {
+							task.getJobType(), TASK_STATUS.Termination)) {
 						Resource.threadPools.cleanWaitJob(getId());
 						Common.LOG.warn(
 								task.getInstanceID() + " " + task.getJobType().name() + " job has been Terminated!");
@@ -492,7 +492,7 @@ public final class PipePump extends Instruction implements Serializable {
 						return;
 					}
 					GlobalParam.TASK_COORDER.setFlowStatus(task.getInstanceID(), task.getL1seq(),
-							GlobalParam.JOB_TYPE.FULL.name(), STATUS.Blank, STATUS.Ready,
+							GlobalParam.JOB_TYPE.FULL.name(), TASK_STATUS.Blank, TASK_STATUS.Ready,
 							getInstanceConfig().getPipeParams().showInfoLog());
 				}
 				total.addAndGet(rState.getCount());
