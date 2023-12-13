@@ -227,10 +227,10 @@ public final class Run {
 			Common.LOG.info("Environment {}, Language {}, IS_DEBUG {}, Start time {}",GlobalParam.RUN_ENV,
 					GlobalParam.LANG,GlobalParam.DEBUG,Common.FormatTime(System.currentTimeMillis()));
 			if(GlobalParam.DISTRIBUTE_RUN) {
-				Common.LOG.info("ElasticFlow {} {}, node ID {}, IP {}, Cluster Mode Start Success!",GlobalParam.VERSION,
-						GlobalParam.SystemConfig.get("node_type"),GlobalParam.NODEID,GlobalParam.IP);
+				Common.LOG.info("ElasticFlow {} {}, node ID {}, node IP {}, master IP {}, Cluster Mode Start Success!",GlobalParam.VERSION,
+						GlobalParam.SystemConfig.get("node_type"),GlobalParam.NODEID,GlobalParam.IP,GlobalParam.MASTER_HOST);
 			}else {
-				Common.LOG.info("ElasticFlow {}, node ID {}, IP {}, Standalone Mode Start Success!",GlobalParam.VERSION,
+				Common.LOG.info("ElasticFlow {}, node ID {}, node IP {}, Standalone Mode Start Success!",GlobalParam.VERSION,
 						GlobalParam.NODEID,GlobalParam.IP);
 			}
 		} catch (Exception e) {
