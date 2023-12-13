@@ -507,9 +507,8 @@ public final class NodeMonitor {
 	 * @param RR
 	 */
 	public void instanceFlowGraph(Request rq, EFRequest RR) {
-		//get instances
-		Map<String, InstanceConfig> instances = Resource.nodeConfig.getInstanceConfigs();
-		HashMap<String, Object> result = new HashMap<String, Object>();
+		HashMap<String, Object> result = new HashMap<String, Object>(); 
+		Map<String, InstanceConfig> instances = Resource.nodeConfig.getInstanceConfigs();		
 		HashMap<String, JSONObject> graphnodes = new HashMap<String, JSONObject>();
 		List<JSONObject> edges = new ArrayList<JSONObject>();
 		for (Map.Entry<String, InstanceConfig> entry : instances.entrySet()) {

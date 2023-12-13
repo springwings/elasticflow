@@ -249,9 +249,8 @@ public class FilesReader extends ReaderFlowSocket {
 
 		} catch (Exception e) {
 			releaseConn = true;
-			this.dataPage.put(GlobalParam.READER_STATUS, false);
-			log.error("{} file get dataPage Exception will auto free connection!", task.getInstanceID(), e);
-			throw new EFException("Files Reader get dataPage Exception!");
+			this.dataPage.put(GlobalParam.READER_STATUS, false); 
+			throw new EFException(e,task.getInstanceID()+ " Files Reader get dataPage Exception!");
 		} finally {
 			REALEASE(false, releaseConn);
 		}

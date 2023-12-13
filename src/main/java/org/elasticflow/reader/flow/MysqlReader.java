@@ -20,8 +20,6 @@ import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.util.EFException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Mysql database reader mainly consists of two parts: pagination query and detailed content query
@@ -32,8 +30,6 @@ import org.slf4j.LoggerFactory;
 
 @ThreadSafe
 public class MysqlReader extends ReaderFlowSocket{    
-
-	private final static Logger log = LoggerFactory.getLogger(MysqlReader.class);  
 
 	public static MysqlReader getInstance(final ConnectParams connectParams) {
 		MysqlReader o = new MysqlReader();
@@ -61,19 +57,15 @@ public class MysqlReader extends ReaderFlowSocket{
 				} 
 			} catch (Exception e) {
 				this.dataPage.put(GlobalParam.READER_STATUS,false); 
-				log.error("get dataPage ResultSet Exception");
-				throw new EFException(e);	
+				throw new EFException(e,taskCursor.getInstanceConfig().getInstanceID()+ " mysql get dataPage ResultSet exception");
 			} 
 		} catch (SQLException e){ 
-			this.dataPage.put(GlobalParam.READER_STATUS,false);
-			EFException err = new EFException(e);
-			err.track(taskCursor.getAdditional());
-			throw err; 
+			this.dataPage.put(GlobalParam.READER_STATUS,false); 
+			throw new EFException(e,taskCursor.getAdditional());
 		} catch (Exception e) { 
 			releaseConn = true;
-			this.dataPage.put(GlobalParam.READER_STATUS,false);
-			log.error("get dataPage Exception will auto free connection!");
-			throw new EFException(e);	
+			this.dataPage.put(GlobalParam.READER_STATUS,false); 
+			throw new EFException(e,taskCursor.getInstanceConfig().getInstanceID()+ " mysql get dataPage exception");
 		}finally{
 			REALEASE(false,releaseConn);
 		} 
@@ -139,15 +131,12 @@ public class MysqlReader extends ReaderFlowSocket{
 				}
 			} 
 		}catch(SQLException e){
-			page = null;
-			EFException err = new EFException(e);
-			err.track(sql);
-			throw err;
+			page = null; 
+			throw new EFException(e,sql);
 		}catch (Exception e) {
 			releaseConn = true;
-			page = null;
-			log.error("{} Mysql Reader get page lists Exception, system will auto free connection!",task.getInstanceID(),e);
-			throw new EFException("Mysql Reader get page lists Exception!");
+			page = null; 
+			throw new EFException(e,task.getInstanceID()+ " mysql reader get page lists exception");
 		}finally{ 
 			try {
 				if(statement!=null && rs!=null) {
@@ -155,9 +144,8 @@ public class MysqlReader extends ReaderFlowSocket{
 					rs.close();
 				}
 			} catch (Exception e) {
-				releaseConn = true;
-				log.error("Mysql close connection resource Exception!",e);
-				throw new EFException("Mysql close connection Exception!");
+				releaseConn = true;   
+				throw new EFException(e,task.getInstanceID()+ " mysql close connection exception");
 			} 
 			REALEASE(false,releaseConn);  
 		}  
@@ -188,8 +176,7 @@ public class MysqlReader extends ReaderFlowSocket{
 			}
 			rs.close();
 		} catch (Exception e) { 
-			log.error("get page data exception!");
-			throw new EFException(e);	
+			throw new EFException(e,"mysql get page data exception");
 		}
 		if (LAST_STAMP==null){ 
 			if(this.dataUnit.size()>0)

@@ -26,10 +26,6 @@ import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ELEVEL;
-import org.elasticflow.util.EFException.ETYPE;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -54,8 +50,6 @@ public class KafkaReader extends ReaderFlowSocket {
 	private boolean autoCommit = false;
 
 	ConsumerRecords<String, String> records;
-
-	private final static Logger log = LoggerFactory.getLogger(KafkaReader.class);
 
 	private KafkaConsumer<String, String> conn = null;
 
@@ -127,10 +121,9 @@ public class KafkaReader extends ReaderFlowSocket {
 				this.readHandler.handleData(this, this.records, taskCursor, pageSize);
 			}
 
-		} catch (Exception e) {
-			log.error("Kafka Reader get dataPage Exception!", e); 
-			this.dataPage.put(GlobalParam.READER_STATUS, false); 
-			throw new EFException("Kafka Reader get dataPage Exception!");
+		} catch (Exception e) { 
+			this.dataPage.put(GlobalParam.READER_STATUS, false);  
+			throw  new EFException(e,taskCursor.getInstanceConfig().getInstanceID()+ " Kafka Reader get dataPage Exception");
 		}
 		return this.dataPage;
 	}
@@ -146,14 +139,13 @@ public class KafkaReader extends ReaderFlowSocket {
 			try {
 				conn.commitSync();
 			} catch (Exception e) {
-				throw new EFException(e, ELEVEL.Dispose, ETYPE.RESOURCE_ERROR);
+				throw new EFException(e,"kafka data flush exception!");
 			}
 		}
 	}
 
 	@Override
-	public ConcurrentLinkedDeque<String> getDataPages(final TaskModel task, int pageSize) throws EFException {
-		boolean releaseConn = false;
+	public ConcurrentLinkedDeque<String> getDataPages(final TaskModel task, int pageSize) throws EFException { 
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
 		try {
 			this.records = conn.poll(Duration.ofMillis(readms));
@@ -168,18 +160,15 @@ public class KafkaReader extends ReaderFlowSocket {
 						break;
 				}
 			}
-		} catch (Exception e) {
-			releaseConn = true;
+		} catch (Exception e) { 
 			page.clear();
-			REALEASE(false, releaseConn);
+			REALEASE(false, true);
 			try {
 				this.initFlow();
 			} catch (EFException e1) {
 				throw e1;
-			}
-			log.error("{} Kafka Reader get page lists Exception, system will auto free connection!",
-					task.getInstanceID(), e);
-			throw new EFException("Kafka Reader get page lists Exception!");
+			}  
+			throw new EFException(e,task.getInstanceID()+ " Kafka Reader get page lists Exception!");
 		}
 		return page;
 	}

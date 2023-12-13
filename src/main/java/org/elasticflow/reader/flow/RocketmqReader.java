@@ -19,10 +19,6 @@ import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ELEVEL;
-import org.elasticflow.util.EFException.ETYPE;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -43,9 +39,7 @@ import com.alibaba.fastjson.JSONObject;
 @NotThreadSafe
 public class RocketmqReader extends ReaderFlowSocket {
 
-	private boolean autoCommit = false;
-
-	private final static Logger log = LoggerFactory.getLogger(RocketmqReader.class);
+	private boolean autoCommit = false; 
 
 	private DefaultLitePullConsumer conn = null;
 
@@ -68,8 +62,8 @@ public class RocketmqReader extends ReaderFlowSocket {
 		this.conn = (DefaultLitePullConsumer) GETSOCKET().getConnection(END_TYPE.reader);
 		try {
 			this.conn.start();
-		} catch (MQClientException e) {
-			log.error("RocketMQ start Exception", e);
+		} catch (MQClientException e) { 
+			throw new EFException(e,"RocketMQ start Exception!");
 		}
 	}
 
@@ -116,9 +110,8 @@ public class RocketmqReader extends ReaderFlowSocket {
 				this.readHandler.handleData(this, this.records, taskCursor, pageSize);
 			} 
 		} catch (Exception e) {
-			this.dataPage.put(GlobalParam.READER_STATUS, false);
-			log.error("RocketMQ Reader get dataPage Exception!", e);
-			throw new EFException("RocketMQ Reader get dataPage Exception!");
+			this.dataPage.put(GlobalParam.READER_STATUS, false); 
+			throw new EFException(e,taskCursor.getInstanceConfig().getInstanceID()+ " RocketMQ Reader get dataPage Exception!");
 		}
 		return this.dataPage;
 	}
@@ -134,7 +127,7 @@ public class RocketmqReader extends ReaderFlowSocket {
 			try {
 				conn.commitSync();
 			} catch (Exception e) {
-				throw new EFException(e, ELEVEL.Dispose, ETYPE.RESOURCE_ERROR);
+				throw new EFException(e, "RocketMQ Reader flush Exception");
 			}
 		}
 	}
@@ -164,10 +157,8 @@ public class RocketmqReader extends ReaderFlowSocket {
 				initFlow();
 			} catch (EFException e1) {
 				throw e1;
-			}
-			log.error("{} RocketMQ Reader get page lists Exception, system will auto free connection!",
-					task.getInstanceID(), e);
-			throw new EFException("RocketMQ Reader get page lists Exception!");
+			} 
+			throw new EFException(e,task.getInstanceID()+ " RocketMQ Reader get page lists Exception!");
 		}
 		return page;
 	}

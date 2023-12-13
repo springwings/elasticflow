@@ -94,6 +94,10 @@ public class DistributeCoorder {
 			return "down";
 		}
 	}
+	
+	public int getClusterStatus() {
+		return clusterStatus.get();
+	}
 
 	public void updateNodeConfigs(String instance, String end, String fieldName, String value) {
 		nodes.forEach(n -> {
@@ -206,9 +210,9 @@ public class DistributeCoorder {
 				if (isOnStart.get())
 					clusterStatus.set(2);
 			}
-			// cluster Steady checking
+			// cluster Steady checking 
 			try {
-				Thread.sleep(9000);
+				Thread.sleep(9500);
 			} catch (InterruptedException e) {
 				Common.stopSystem(false);
 			}

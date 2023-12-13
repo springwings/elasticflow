@@ -233,7 +233,7 @@ public class EsWriter extends WriterFlowSocket {
 			return true;
 		} catch (Exception e) {
 			reconn = true;
-			throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);			
+			throw new EFException(e,"ElasticSearch create index exception!",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);			
 		}
 	}
 
@@ -410,9 +410,8 @@ public class EsWriter extends WriterFlowSocket {
 					}
 				}
 			}
-		} catch (Exception e) {
-			log.error("abMechanism exception",e);
-			throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
+		} catch (Exception e) { 
+			throw new EFException(e,"abMechanism exception",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
 		}
 		return select;
 	}

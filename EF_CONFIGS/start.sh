@@ -22,15 +22,16 @@ fi
 
 ProcNumber=`ps -ef |grep -w $PROC_NAME|grep -v grep|wc -l`
 if [ $ProcNumber -le 0 ];then
-   java ${JAVA_OPTS} -Dnodeid=16 -Dconfig=/opt/EF -jar -Dplugin=/opt/EF/plugin -jar elasticflow.jar  
+   nanoseconds=$(expr $(date +%N) + 0)
+   nohup java ${JAVA_OPTS} -Dnodeid=${nanoseconds} -Dconfig=/opt/EF -jar -Dplugin=/opt/EF/plugin -jar elasticflow.jar >/dev/null 2>&1 &
    sleep 1
    ProcNumber=`ps -ef |grep -w $PROC_NAME|grep -v grep|wc -l`
    if [ $ProcNumber -gt 0 ];then  
-      echo "$PROC_NAME start success!"
-      ps aux | grep java |grep $PROC_NAME | awk '{print $2}'
+      pid=$(pgrep -f "$PROC_NAME")
+      echo "$PROC_NAME start success! nodeID $nanoseconds, PID $pid"
    else
-      echo "$PROC_NAME start failed."
+      echo "$PROC_NAME start failed!"
    fi
 else
-   echo "WARNING $PROC_NAME is running.."
+   echo "WARNING $PROC_NAME is running..."
 fi

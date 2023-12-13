@@ -87,7 +87,7 @@ public class MysqlWriter extends WriterFlowSocket {
 				statement.execute();
 				return true;
 			} catch (Exception e) {
-				throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
+				throw new EFException(e,"mysql create table exception",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
 			} finally {
 				REALEASE(false, false);
 			}
@@ -135,7 +135,7 @@ public class MysqlWriter extends WriterFlowSocket {
 					log.info("remove Instance " + name + ":" + type);
 					statement.execute(); 
 				} catch (Exception e) {
-					throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
+					throw new EFException(e,"mysql optimze table exception",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
 				} finally {
 					REALEASE(false, false);
 				}

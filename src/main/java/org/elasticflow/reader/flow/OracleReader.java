@@ -20,8 +20,6 @@ import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.util.EFException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Oracle database reader mainly consists of two parts: pagination query and detailed content query
@@ -31,9 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 
 @ThreadSafe
-public class OracleReader extends ReaderFlowSocket{ 
-  
-	private final static Logger log = LoggerFactory.getLogger(OracleReader.class);
+public class OracleReader extends ReaderFlowSocket{  
 
 	public static OracleReader getInstance(final ConnectParams connectParams) {
 		OracleReader o = new OracleReader();
@@ -64,14 +60,11 @@ public class OracleReader extends ReaderFlowSocket{
 			} catch (Exception e) {
 				throw new EFException(e);
 			} 
-		} catch (SQLException e){  
-			EFException err = new EFException(e);
-			err.track(taskCursor.getAdditional());
-			throw err;
+		} catch (SQLException e){   
+			throw new EFException(e,taskCursor.getAdditional());
 		} catch (Exception e) { 
-			releaseConn = true;
-			log.error("get dataPage Exception will auto free connection!");
-			throw new EFException(e);
+			releaseConn = true; 
+			throw new EFException(e,taskCursor.getInstanceConfig().getInstanceID()+ " Oracle get dataPage Exception!"); 
 		}finally{
 			REALEASE(false,releaseConn);
 		} 
@@ -138,14 +131,11 @@ public class OracleReader extends ReaderFlowSocket{
 			} 
 		}catch(SQLException e){
 			page = null;
-			EFException err = new EFException(e);
-			err.track(sql);
-			throw err;
+			throw new EFException(e,sql);
 		}catch (Exception e) {
 			releaseConn = true;
 			page = null;
-			log.error("{} Oracle Reader get page lists Exception, system will auto free connection!",task.getInstanceID(),e);
-			throw new EFException("Oracle Reader get page lists Exception");			
+			throw new EFException(e,task.getInstanceID()+ " Oracle Reader get page lists Exception!"); 
 		}finally{ 
 			try {
 				if(statement!=null && rs!=null) {
@@ -153,9 +143,8 @@ public class OracleReader extends ReaderFlowSocket{
 					rs.close();
 				}
 			} catch (Exception e) {
-				releaseConn = true; 
-				log.error("close connection resource Exception!",e);
-				throw new EFException("Oracle close connection Exception!");	
+				releaseConn = true;  
+				throw new EFException(e,task.getInstanceID()+ " Oracle close connection Exception!");
 			} 
 			REALEASE(false,releaseConn);  
 		}  
@@ -188,9 +177,7 @@ public class OracleReader extends ReaderFlowSocket{
 			rs.close();
 		} catch (Exception e) {
 			this.dataPage.put(GlobalParam.READER_STATUS,false);
-			EFException err = new EFException(e);
-			err.track("get page data exception");
-			throw err;
+			throw new EFException(e,"get page data exception");
 		}
 		if (LAST_STAMP==null){ 
 			this.dataPage.put(GlobalParam.READER_LAST_STAMP, System.currentTimeMillis()); 

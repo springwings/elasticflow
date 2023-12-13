@@ -3,8 +3,8 @@ package org.elasticflow.writer.flow;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
@@ -13,9 +13,8 @@ import org.apache.kafka.clients.admin.DeleteTopicsResult;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.KafkaFuture;
-import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
@@ -68,9 +67,8 @@ public class KafkaWriter extends WriterFlowSocket {
 					getconn().send(new ProducerRecord<String, String>(transParams.get("topic").getDefaultvalue(), unit.getReaderKeyVal(),val.toString()));
 				}						
 			}			
-		} catch (Exception e) {
-			log.error("Kafka error writing data", e);
-			throw new EFException("Kafka error writing data",ELEVEL.Dispose);
+		} catch (Exception e) { 
+			throw new EFException(e,instanceConfig.getInstanceID()+ " Kafka write data Exception!",ELEVEL.Dispose); 
 		}
 	}
 

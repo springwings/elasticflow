@@ -25,8 +25,6 @@ import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.util.EFException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Hbase database reader mainly consists of two parts: pagination query and detailed content query
@@ -38,9 +36,7 @@ public class HbaseReader extends ReaderFlowSocket {
  
 	private String columnFamily;
 	
-	final String DEFAULT_KEY = "tableColumnFamily";
-	 
-	private final static Logger log = LoggerFactory.getLogger(HbaseReader.class); 
+	final String DEFAULT_KEY = "tableColumnFamily"; 
 
 	public static HbaseReader getInstance(ConnectParams connectParams) {
 		HbaseReader o = new HbaseReader();
@@ -119,13 +115,11 @@ public class HbaseReader extends ReaderFlowSocket {
 			} catch (Exception e) {
 				releaseConn = true;
 				this.dataPage.put(GlobalParam.READER_LAST_STAMP, -1);
-				log.error("Hbase Reader get dataPage Exception, system will auto free connection!",e);
-				throw new EFException("Hbase Reader get dataPage Exception");
+				throw new EFException(e,taskCursor.getInstanceConfig().getInstanceID()+ " Hbase Reader get dataPage Exception!"); 
 			} 
 		} catch (Exception e) {
-			releaseConn = true;
-			log.error("Hbase Reader get dataPage Exception, system will auto free connection!",e);
-			throw new EFException("Hbase Reader get dataPage Exception");
+			releaseConn = true; 
+			throw new EFException(e,taskCursor.getInstanceConfig().getInstanceID()+ " Hbase Reader get dataPage Exception!");
 		}finally{
 			REALEASE(false,releaseConn);
 		} 
@@ -165,8 +159,7 @@ public class HbaseReader extends ReaderFlowSocket {
 			}
 		} catch (Exception e) {
 			releaseConn = true;
-			log.error("Hbase Reader get page lists Exception, system will auto free connection!",e);
-			throw new EFException("Hbase Reader get page lists Exception!");
+			throw new EFException(e,task.getInstanceID()+ " Hbase Reader get page lists Exception!");  
 		}finally{ 
 			REALEASE(false,releaseConn);
 		}

@@ -353,6 +353,8 @@ public class EFMonitorUtil {
  */
 	public static JSONObject getInstanceInfo(String instance,int type) throws EFException {
 		JSONObject JO = new JSONObject();
+		if(GlobalParam.INSTANCE_COORDER.distributeCoorder().getClusterStatus()!=0) 
+			return JO;
 		if (Resource.nodeConfig.getInstanceConfigs().containsKey(instance)) {			
 			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
 			JSONObject Reader = new JSONObject();

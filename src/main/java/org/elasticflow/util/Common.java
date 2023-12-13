@@ -607,10 +607,7 @@ public final class Common {
 		if (e.getCause() instanceof EFException) {
 			cause = (EFException) e.getCause();   
 		}else {
-			cause = new EFException(e);  
-		}		
-		if (message!=null) { 
-			cause.track(message);
+			cause = new EFException(e,message);  
 		}
 		return cause;
 	}

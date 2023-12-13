@@ -383,7 +383,7 @@ public final class PipePump extends Instruction implements Serializable {
 			pagedata = (DataPage) CPU.RUN(getID(), "Pipe", "fetchPage", false, pager, getReader());
 			getReader().freeJobPage();
 		} catch (Exception e) {
-			throw new EFException(e, ELEVEL.Dispose, ETYPE.DATA_ERROR);
+			throw new EFException(e,"pipepump get page data exception", ELEVEL.Dispose, ETYPE.DATA_ERROR);
 		} finally {
 			getReader().lock.unlock();
 		}

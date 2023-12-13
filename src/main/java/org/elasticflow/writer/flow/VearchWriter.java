@@ -53,9 +53,8 @@ public class VearchWriter extends WriterFlowSocket {
 				log.info("create Instance store position  " + name + ":" + type);
 				conn.createSpace(this.getTableMeta(name,instanceConfig));
 				return true;
-			} catch (Exception e) {
-				log.error("create Instance store position exception",e);
-				throw new EFException(e,ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
+			} catch (Exception e) { 
+				throw new EFException(e,"vearch create store position exception",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
 			} finally {
 				REALEASE(false, false);
 			}
@@ -105,7 +104,7 @@ public class VearchWriter extends WriterFlowSocket {
 			}
 		} catch (Exception e) {
 			if(e.getMessage().contains("spaceName param not build")) {
-				throw new EFException(e,ELEVEL.Dispose,ETYPE.RESOURCE_ERROR);
+				throw new EFException(e,"vearch write data exception",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);
 			}else {
 				throw new EFException(e,ELEVEL.Dispose);
 			} 
@@ -184,7 +183,7 @@ public class VearchWriter extends WriterFlowSocket {
 						conn.writeBatch(this.curTable, this.DATAS);
 					} catch (Exception e) {
 						if(e.getMessage().contains("spaceName param not build")) {
-							throw new EFException(e,ELEVEL.Dispose,ETYPE.RESOURCE_ERROR);
+							throw new EFException(e,"vearch flush data exception!",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);
 						}else {
 							throw new EFException(e,ELEVEL.Termination);
 						}
