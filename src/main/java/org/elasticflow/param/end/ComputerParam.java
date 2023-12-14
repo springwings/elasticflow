@@ -52,6 +52,8 @@ public class ComputerParam {
 			this.computeMode = COMPUTER_MODE.MODEL;
 		}else if(COMPUTER_MODE.REST.name().toLowerCase().equals(computeMode)) {
 			this.computeMode = COMPUTER_MODE.REST;
+		}else if(COMPUTER_MODE.PYSERVICE.name().toLowerCase().equals(computeMode)) {
+			this.computeMode = COMPUTER_MODE.PYSERVICE;
 		}else { 
 			this.computeMode = COMPUTER_MODE.BLANK;
 		}
@@ -63,6 +65,8 @@ public class ComputerParam {
 			return "org.elasticflow.ml.RestService";
 		case MODEL:
 			return "org.elasticflow.ml.ModelService";
+		case PYSERVICE:
+			return "org.elasticflow.ml.PyService";
 		default:
 			return "org.elasticflow.ml.BlankService";
 		}

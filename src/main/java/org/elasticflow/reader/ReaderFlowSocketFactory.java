@@ -7,8 +7,10 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 
 /**
- * @param args getInstance function parameters:ConnectParams param, String
- *             L1Seq,String handler
+ * @param args getInstance function parameters:
+ * 				ConnectParams param, 
+ * 				String  L1Seq, 
+ *              String  readerFlowhandler, 
  * @author chengwen
  * @version 2.0
  * @date 2019-01-09 11:32

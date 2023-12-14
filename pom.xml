@@ -31,16 +31,6 @@
 	</scm>
 	<dependencies>
 		<dependency>
-			<groupId>org.elasticsearch.client</groupId>
-			<artifactId>elasticsearch-rest-client</artifactId>
-			<version>${elasticsearch.version}</version>
-		</dependency>		
-		<dependency>
-			<groupId>org.elasticsearch.client</groupId>
-			<artifactId>elasticsearch-rest-high-level-client</artifactId>
-			<version>${elasticsearch.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
 			<version>${spring.version}</version>
@@ -70,6 +60,16 @@
 					<artifactId>slf4j-api</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency> 
+		<dependency>
+			<groupId>org.elasticsearch.client</groupId>
+			<artifactId>elasticsearch-rest-client</artifactId>
+			<version>${elasticsearch.version}</version>
+		</dependency>		
+		<dependency>
+			<groupId>org.elasticsearch.client</groupId>
+			<artifactId>elasticsearch-rest-high-level-client</artifactId>
+			<version>${elasticsearch.version}</version>
 		</dependency> 
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -448,6 +448,6 @@
 		<fastdfs.version>1.29-SNAPSHOT</fastdfs.version>
 		<hadoop.version>3.1.1</hadoop.version>
 		<commons-io.version>2.9.0</commons-io.version>
-		<fastjson.version>2.0.7.graal</fastjson.version>
+		<fastjson.version>2.0.7.graal</fastjson.version> 
 	</properties>
 </project>

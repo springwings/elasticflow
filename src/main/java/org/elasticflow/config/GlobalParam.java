@@ -246,7 +246,7 @@ public final class GlobalParam {
 
 	/** ------------computer parameters------------ */
 	public static enum COMPUTER_MODE {
-		REST, MODEL,BLANK
+		REST, MODEL,PYSERVICE,BLANK
 	}
 
 	/** ------------searcher parameters------------ */

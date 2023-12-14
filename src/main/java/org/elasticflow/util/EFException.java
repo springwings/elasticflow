@@ -1,8 +1,5 @@
 package org.elasticflow.util;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 /**
  * System global error definition
  * 
@@ -74,17 +71,8 @@ public class EFException extends Exception {
 	} 
  
 	@Override
-	public String getMessage() {
-		String stackTrace = "track error";
-        try (StringWriter sw = new StringWriter();
-        		PrintWriter pw = new PrintWriter(sw);){
-        	this.getTrack(sw);
-        	super.printStackTrace(pw); 
-        	stackTrace = sw.toString(); 
-        } catch (Exception ex) { 
-            ex.printStackTrace();
-        } 
-		return stackTrace;
+	public String getMessage() { 
+		return this.getTrack()+System.getProperty("line.separator")+super.getMessage();
 	}   
 
 	public ELEVEL getErrorLevel() {
@@ -100,8 +88,9 @@ public class EFException extends Exception {
 		track_info.append(" >> ");
 	}
 	
-	private void getTrack(StringWriter sw) {
+	private String getTrack() {
 		if(track_info.length()>0)
-			sw.write("TRACK INFOS:" + track_info.toString()+" error level "+e_level.name());  
+			return "TRACK INFOS:" + track_info.toString()+" error level "+e_level.name();  
+		return "";
 	}
 }
