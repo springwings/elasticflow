@@ -22,6 +22,7 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFPipeUtil;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.yarn.Resource;
 import org.quartz.SchedulerException;
 
@@ -63,14 +64,14 @@ public class FlowCenter{
 				Common.LOG.info("instance {} data exchange service not enabled!",instance);
 				return false;   
 			} 
-			String[] L1seqs = Common.getL1seqs(instanceConfig);  
+			String[] L1seqs = TaskUtil.getL1seqs(instanceConfig);  
 			for (String L1seq : L1seqs) {
 				if (L1seq == null)
 					continue;
 				
 				if(GlobalParam.JOB_TYPE.FULL.name().equals(type.toUpperCase())) {
 					if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,TASK_STATUS.Ready))
-						state = EFPipeUtil.jobAction(Common.getInstanceRunId(instance, L1seq), GlobalParam.JOB_TYPE.FULL.name(), "start") && state;
+						state = EFPipeUtil.jobAction(TaskUtil.getInstanceProcessId(instance, L1seq), GlobalParam.JOB_TYPE.FULL.name(), "start") && state;
 						if(state && !asyn) {
 							Thread.sleep(500);//waiting to start job
 							while(GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,TASK_STATUS.Ready)==false)
@@ -78,7 +79,7 @@ public class FlowCenter{
 						} 
 				}else {
 					if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,TASK_STATUS.Ready))
-						state = EFPipeUtil.jobAction(Common.getInstanceRunId(instance, L1seq), GlobalParam.JOB_TYPE.INCREMENT.name(), "start") && state;
+						state = EFPipeUtil.jobAction(TaskUtil.getInstanceProcessId(instance, L1seq), GlobalParam.JOB_TYPE.INCREMENT.name(), "start") && state;
 						if(state && asyn) {
 							Thread.sleep(500);//waiting to start job
 							while(GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,TASK_STATUS.Ready)==false)
@@ -108,7 +109,7 @@ public class FlowCenter{
 	public void addFlowGovern(String instanceID, InstanceConfig instanceConfig,boolean needClear,boolean createSchedule) throws EFException { 
 		if (instanceConfig.checkStatus()==false || instanceConfig.openTrans() == false)
 			return;
-		String[] L1seqs = Common.getL1seqs(instanceConfig);  
+		String[] L1seqs = TaskUtil.getL1seqs(instanceConfig);  
 		if(!Resource.flowStates.containsKey(instanceID)) {
 			String content = EFFileUtil.readText(EFFileUtil.getInstancePath(instanceID)[2], GlobalParam.ENCODING, true);
 			if (content!=null && content.length()>0) {
@@ -121,12 +122,12 @@ public class FlowCenter{
 			for (String L1seq : L1seqs) {
 				if (L1seq == null)
 					continue; 
-				if(!Resource.tasks.containsKey(Common.getInstanceRunId(instanceID, L1seq)) || needClear){
+				if(!Resource.tasks.containsKey(TaskUtil.getInstanceProcessId(instanceID, L1seq)) || needClear){
 					PipePump pipePump = Resource.socketCenter.getPipePump(instanceID, L1seq,needClear,GlobalParam.FLOW_TAG._DEFAULT.name());
-					Resource.tasks.put(Common.getInstanceRunId(instanceID, L1seq), FlowTask.createTask(pipePump, L1seq));
+					Resource.tasks.put(TaskUtil.getInstanceProcessId(instanceID, L1seq), FlowTask.createTask(pipePump, L1seq));
 				}  
 				if(createSchedule)
-					createFlowScheduleJob(Common.getInstanceRunId(instanceID, L1seq), Resource.tasks.get(Common.getInstanceRunId(instanceID, L1seq)),
+					createFlowScheduleJob(TaskUtil.getInstanceProcessId(instanceID, L1seq), Resource.tasks.get(TaskUtil.getInstanceProcessId(instanceID, L1seq)),
 						instanceConfig,needClear);
 			}
 		} catch (Exception e) {

@@ -17,6 +17,7 @@ import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.EFPipeUtil;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coord.InstanceCoord;
 
@@ -161,19 +162,19 @@ public class InstanceCoordinator implements InstanceCoord {
 	
 	@Override
 	public void resetBreaker(String instance,String L1seq) {
-		Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.reset();
+		Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.reset();
 	}
 	
 	@Override
 	public JSONObject getBreakerStatus(String instance,String L1seq,String appendPipe) {
 		JSONObject JO = new JSONObject(); 
-		JO.put(appendPipe + "breaker_is_on", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.isOn());
-		if(Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.isOn()) {
-			JO.put(appendPipe + "breaker_is_on_reason", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.getReason());
+		JO.put(appendPipe + "breaker_is_on", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.isOn());
+		if(Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.isOn()) {
+			JO.put(appendPipe + "breaker_is_on_reason", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.getReason());
 		}
-		JO.put(appendPipe + "valve_turn_level", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).valve.getTurnLevel());
-		JO.put(appendPipe + "current_fail_interval", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.failInterval());
-		JO.put(appendPipe + "total_fail_times", Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.getFailTimes());
+		JO.put(appendPipe + "valve_turn_level", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).valve.getTurnLevel());
+		JO.put(appendPipe + "current_fail_interval", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.failInterval());
+		JO.put(appendPipe + "total_fail_times", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.getFailTimes());
 		return JO;
 	}	 
 	

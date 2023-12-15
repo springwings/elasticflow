@@ -1,4 +1,4 @@
-package org.elasticflow.ml.common;
+package org.elasticflow.computer.algorithm;
 
 /**
  * 

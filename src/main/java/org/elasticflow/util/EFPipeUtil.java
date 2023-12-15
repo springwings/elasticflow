@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.yarn.Resource;
 import org.quartz.SchedulerException;
 
@@ -23,13 +24,13 @@ public class EFPipeUtil {
 		if (configMap.containsKey(instanceID)) {
 			try {
 				InstanceConfig instanceConfig = configMap.get(instanceID);
-				String[] L1seqs = Common.getL1seqs(instanceConfig);
+				String[] L1seqs = TaskUtil.getL1seqs(instanceConfig);
 				for (String L1seq : L1seqs) {
 					if (L1seq == null)
 						continue;
-					if (removeTask && Resource.tasks.containsKey(Common.getInstanceRunId(instanceID, L1seq))) {
-						Resource.tasks.remove(Common.getInstanceRunId(instanceID, L1seq));
-						state = removeFlowScheduleJob(Common.getInstanceRunId(instanceID, L1seq), instanceConfig)
+					if (removeTask && Resource.tasks.containsKey(TaskUtil.getInstanceProcessId(instanceID, L1seq))) {
+						Resource.tasks.remove(TaskUtil.getInstanceProcessId(instanceID, L1seq));
+						state = removeFlowScheduleJob(TaskUtil.getInstanceProcessId(instanceID, L1seq), instanceConfig)
 								&& state;
 					}
 

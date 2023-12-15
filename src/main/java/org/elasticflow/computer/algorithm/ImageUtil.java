@@ -1,4 +1,4 @@
-package org.elasticflow.ml.common;
+package org.elasticflow.computer.algorithm;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;

@@ -21,6 +21,7 @@ import org.elasticflow.searcher.handler.SearcherHandler;
 import org.elasticflow.searcher.parser.VearchQueryParser;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.instance.TaskUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +76,7 @@ public class VearchSearcher extends SearcherFlowSocket {
 				VQP.parseQuery(instanceConfig, searcherModel);
 				if (searcherModel.getFl() != null)
 					VQP.getSearchObj().put("fields", searcherModel.getFl().split(","));
-				String table = Common.getStoreName(instance, searcherModel.getStoreId());
+				String table = TaskUtil.getStoreName(instance, searcherModel.getStoreId());
 				VQP.getSearchObj().put("size", searcherModel.getCount());
 				if(searcherModel.getSortinfo().size()>0)
 					VQP.getSearchObj().put("sort", searcherModel.getSortinfo());

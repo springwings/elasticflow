@@ -2,7 +2,7 @@ package org.elasticflow.model;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.elasticflow.util.Common;
+import org.elasticflow.util.instance.TaskUtil;
 
 /**
  * 
@@ -19,23 +19,23 @@ public class EFState<T> extends ConcurrentHashMap<String,T>{
 	} 
 	
 	public void set(String instance,String L1seq,T dt) {
-		put(Common.getInstanceRunId(instance, L1seq), dt);
+		put(TaskUtil.getInstanceProcessId(instance, L1seq), dt);
 	} 
 	
 	public void set(String instance,String L1seq,String tag,T dt) {
-		put(Common.getInstanceRunId(instance, L1seq)+tag, dt);
+		put(TaskUtil.getInstanceProcessId(instance, L1seq)+tag, dt);
 	}  
 	
 	public T get(String instance,String L1seq) {
-		return get(Common.getInstanceRunId(instance, L1seq));
+		return get(TaskUtil.getInstanceProcessId(instance, L1seq));
 	}
 	
 	public T get(String instance,String L1seq,String tag) {
-		return get(Common.getInstanceRunId(instance, L1seq)+tag);
+		return get(TaskUtil.getInstanceProcessId(instance, L1seq)+tag);
 	}
 	
 	public boolean containsKey(String instance,String L1seq) {
-		return containsKey(Common.getInstanceRunId(instance, L1seq));
+		return containsKey(TaskUtil.getInstanceProcessId(instance, L1seq));
 	}
 	 
 }

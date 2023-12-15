@@ -16,6 +16,7 @@ import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.util.instance.PipeUtil;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,7 @@ public class MysqlWriter extends WriterFlowSocket {
 	@Override
 	public void write(InstanceConfig instanceConfig,PipeDataUnit unit, String instance,
 			String storeId, boolean isUpdate) throws EFException {
-		String table = Common.getStoreName(instance, storeId);
+		String table = TaskUtil.getStoreName(instance, storeId);
 		Map<String, EFField> transParams = instanceConfig.getWriteFields();
 		try {
 			if (!ISLINK())
@@ -75,7 +76,7 @@ public class MysqlWriter extends WriterFlowSocket {
 
 	@Override
 	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) throws EFException{
-		String name = Common.getStoreName(mainName, storeId);
+		String name = TaskUtil.getStoreName(mainName, storeId);
 		String type = mainName;
 		PREPARE(false, false, false);
 		if (!ISLINK())
@@ -102,7 +103,7 @@ public class MysqlWriter extends WriterFlowSocket {
 
 	@Override
 	public void removeInstance(String instance, String storeId) throws EFException {
-		String name = Common.getStoreName(instance, storeId);
+		String name = TaskUtil.getStoreName(instance, storeId);
 		PREPARE(false, false, false);
 		if (!ISLINK())
 			return;
@@ -125,7 +126,7 @@ public class MysqlWriter extends WriterFlowSocket {
 
 	@Override
 	public void optimize(String instance, String storeId) {
-		String name = Common.getStoreName(instance, storeId);
+		String name = TaskUtil.getStoreName(instance, storeId);
 		String type = instance;
 		PREPARE(false, false, false);  
 		try {
@@ -168,11 +169,11 @@ public class MysqlWriter extends WriterFlowSocket {
 		if (!ISLINK())
 			return select;
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
-		String checkSql = "show tables like \"" + Common.getStoreName(mainName, select) + "\";";
+		String checkSql = "show tables like \"" + TaskUtil.getStoreName(mainName, select) + "\";";
 		try (PreparedStatement statement = conn.prepareStatement(checkSql);) {
 			try (ResultSet rs = statement.executeQuery();) {
 				if (!rs.next()) {
-					checkSql = "show tables like \"" + Common.getStoreName(mainName, "b") + "\";";
+					checkSql = "show tables like \"" + TaskUtil.getStoreName(mainName, "b") + "\";";
 					try (PreparedStatement stat2 = conn.prepareStatement(checkSql);) {
 						ResultSet rs2 = stat2.executeQuery();
 						if (rs2.next()) 

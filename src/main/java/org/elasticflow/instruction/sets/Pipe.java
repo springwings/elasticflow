@@ -14,10 +14,11 @@ import org.elasticflow.model.reader.ReaderState;
 import org.elasticflow.model.task.TaskCursor;
 import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.reader.ReaderFlowSocket;
-import org.elasticflow.reader.util.DataSetReader;
+import org.elasticflow.reader.model.DataSetReader;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ETYPE;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,7 +135,7 @@ public class Pipe extends Instruction {
 				writer.flowState.incrementCurrentTimeProcess(num);
 				context.getReader().flush();
 				writer.flush(); 
-				log.info(Common.formatLog("onepage",jobType + " Write", task.getId(), 
+				log.info(TaskUtil.formatLog("onepage",jobType + " Write", task.getInstanceProcessId(), 
 						storeId, task.getL2seq(), num,
 						DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));
 			} catch (EFException e) {

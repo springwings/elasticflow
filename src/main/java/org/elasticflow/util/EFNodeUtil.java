@@ -14,6 +14,7 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.NODE_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.reader.ScanPosition;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.yarn.EFRPCService;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coord.DiscoveryCoord;
@@ -37,7 +38,7 @@ public final class EFNodeUtil {
 	 */
 	public static void loadInstanceDatas(InstanceConfig instanceConfig) throws EFException {
 		String instance = instanceConfig.getInstanceID();
-		String[] L1seqs = Common.getL1seqs(instanceConfig);
+		String[] L1seqs = TaskUtil.getL1seqs(instanceConfig);
 		ScanPosition sp = new ScanPosition(instance, "");
 		for (String L1seq : L1seqs) {
 			GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.FULL.name(), new AtomicInteger(1));
@@ -45,8 +46,8 @@ public final class EFNodeUtil {
 			GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.VIRTUAL.name(), new AtomicInteger(1));			
 		}
 		try {
-			sp.loadInfos(Common.getStoreTaskInfo(instance,false),false);
-			sp.loadInfos(Common.getStoreTaskInfo(instance,true),true);
+			sp.loadInfos(TaskUtil.getStoreTaskInfo(instance,false),false);
+			sp.loadInfos(TaskUtil.getStoreTaskInfo(instance,true),true);
 		} catch (Exception e) {
 			Common.LOG.error("instance {} load Instance Datas exception.",instance,e);
 		}

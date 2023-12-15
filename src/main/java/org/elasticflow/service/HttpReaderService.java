@@ -35,6 +35,7 @@ import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.MD5Util;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
@@ -140,7 +141,7 @@ public class HttpReaderService {
 							try {
 								String writeTo = pipePump.getInstanceConfig().getPipeParams().getReferenceInstance();
 								if (writeTo == null) {
-									writeTo = Common.getInstanceRunId(instance, seq);
+									writeTo = TaskUtil.getInstanceProcessId(instance, seq);
 								}
 								DataPage pagedata = this.getPageData(RR.getParam("data"), keycolumn, updatecolumn,
 										pipePump.getInstanceConfig().getWriteFields());

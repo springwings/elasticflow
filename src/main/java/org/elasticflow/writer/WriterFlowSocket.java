@@ -20,6 +20,7 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.instance.EFTuple;
 import org.elasticflow.util.instance.EFWriterUtil;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.writer.handler.WriterHandler;
 import org.elasticflow.yarn.Resource;
 
@@ -81,7 +82,7 @@ public abstract class WriterFlowSocket extends Flow {
 
 	protected String normMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig)
 			throws EFException {
-		String iName = Common.getStoreName(mainName, "");
+		String iName = TaskUtil.getStoreName(mainName, "");
 		if (this.storePositionExists(iName) == false) {
 			this.create(mainName, "", instanceConfig);
 			if (isIncrement == true && !mainName.equals(instanceConfig.getAlias()))
@@ -101,7 +102,7 @@ public abstract class WriterFlowSocket extends Flow {
 	protected String timeMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig)
 			throws EFException {
 		EFTuple<Long, Long> dTuple = EFWriterUtil.timeMechanism(instanceConfig);
-		String iName = Common.getStoreName(mainName, String.valueOf(dTuple.v2));
+		String iName = TaskUtil.getStoreName(mainName, String.valueOf(dTuple.v2));
 		try {
 			// remove out of date instance ,but this function not support cross L1Seqs
 			// destination
@@ -111,7 +112,7 @@ public abstract class WriterFlowSocket extends Flow {
 		} catch (Exception e) {
 			Common.LOG.error("remove instance　" + iName + " Exception!", e);
 		}
-		if (this.storePositionExists(Common.getStoreName(mainName, String.valueOf(dTuple.v1))) == false) {
+		if (this.storePositionExists(TaskUtil.getStoreName(mainName, String.valueOf(dTuple.v1))) == false) {
 			this.create(mainName, String.valueOf(dTuple.v1), instanceConfig);
 			if (isIncrement == true)
 				this.setAlias(mainName, String.valueOf(dTuple.v1), instanceConfig.getAlias());

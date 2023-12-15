@@ -17,6 +17,7 @@ import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.instance.EFDataStorer;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.yarn.Resource;
 
 import com.alibaba.fastjson.JSONObject;
@@ -49,7 +50,7 @@ public class TaskControl extends Instruction {
 			}
 		}
 		EFDataStorer.setData(
-				Common.getTaskStorePath(context.getInstanceConfig().getInstanceID(), GlobalParam.JOB_FULLINFO_PATH),
+				TaskUtil.getInstanceStorePath(context.getInstanceConfig().getInstanceID(), GlobalParam.JOB_FULLINFO_PATH),
 				saveInfo.toJSONString());
 	}
 
@@ -59,7 +60,7 @@ public class TaskControl extends Instruction {
 			return;
 		}
 		int position = Integer.parseInt(args[0].toString());
-		String[] l1seqs = Common.getL1seqs(context.getInstanceConfig()); //database level
+		String[] l1seqs = TaskUtil.getL1seqs(context.getInstanceConfig()); //database level
 		for (String l1seq : l1seqs) {
 			List<String> L2Seq = context.getInstanceConfig().getReaderParams().getL2Seq(); //table level
 			PipePump pipePump = Resource.socketCenter.getPipePump(context.getInstanceConfig().getInstanceID(), l1seq,

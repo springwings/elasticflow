@@ -15,7 +15,7 @@ import org.elasticflow.instruction.Context;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.reader.util.DataSetReader;
+import org.elasticflow.reader.model.DataSetReader;
 import org.elasticflow.util.EFException;
 
 /**

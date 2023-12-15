@@ -1,11 +1,11 @@
-package org.elasticflow.ml;
+package org.elasticflow.computer.flow;
 
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.reader.util.DataSetReader;
+import org.elasticflow.reader.model.DataSetReader;
 import org.elasticflow.util.EFException;
  
 
@@ -16,10 +16,10 @@ import org.elasticflow.util.EFException;
  * @version 1.0
  * @date 2018-05-22 09:08
  */
-public class ModelService extends ComputerFlowSocket {
+public class ModelComputer extends ComputerFlowSocket {
 
-	public static ModelService getInstance(final ConnectParams connectParams) {
-		ModelService o = new ModelService();
+	public static ModelComputer getInstance(final ConnectParams connectParams) {
+		ModelComputer o = new ModelComputer();
 		o.initConn(connectParams);
 		o.init();
 		return o;

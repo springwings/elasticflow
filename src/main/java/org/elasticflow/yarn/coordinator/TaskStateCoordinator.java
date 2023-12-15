@@ -25,6 +25,7 @@ import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.util.instance.PipeUtil;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coord.TaskStateCoord;
 
@@ -70,8 +71,8 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 
 	public void setScanPosition(String instance, String L1seq, String L2seq, String scanStamp,boolean reset,boolean isfull) {
 		if (reset || PipeUtil.scanPosCompare(scanStamp,
-				SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq),isfull))) {
-			SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), scanStamp,isfull);
+				SCAN_POSITION.get(instance).getLSeqPos(TaskUtil.getLseq(L1seq, L2seq),isfull))) {
+			SCAN_POSITION.get(instance).updateLSeqPos(TaskUtil.getLseq(L1seq, L2seq), scanStamp,isfull);
 			// update flow status,Distributed environment synchronization status
 			if (GlobalParam.DISTRIBUTE_RUN) {
 				Resource.flowStates.get(instance).put(FlowState.getStoreKey(L1seq),
@@ -125,7 +126,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	 */
 	public String getStoreIdFromSave(String instance, String L1seq, boolean reload,boolean isfull) {
 		if (reload) {
-			String path = Common.getTaskStorePath(instance,
+			String path = TaskUtil.getInstanceStorePath(instance,
 					isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH);			
 			ScanPosition sp = new ScanPosition(instance, GlobalParam.DEFAULT_RESOURCE_SEQ);
 			synchronized (SCAN_POSITION) {
@@ -158,7 +159,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 
 	public String getNewStoreId(String contextId, String instance, String L1seq, boolean isIncrement)
 			throws EFException {
-		return (String) CPU.RUN(contextId, "Pond", "getNewStoreId", false, Common.getInstanceRunId(instance, L1seq),
+		return (String) CPU.RUN(contextId, "Pond", "getNewStoreId", false, TaskUtil.getInstanceProcessId(instance, L1seq),
 				isIncrement);
 	}
 
@@ -172,7 +173,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	public void saveTaskInfo(String instance, String L1seq, String storeId, boolean isfull) {
 		synchronized(SCAN_POSITION) {
 			SCAN_POSITION.get(instance).updateStoreId(storeId,isfull);
-			EFDataStorer.setData(Common.getTaskStorePath(instance, 
+			EFDataStorer.setData(TaskUtil.getInstanceStorePath(instance, 
 					isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH),
 					SCAN_POSITION.get(instance).getString(isfull));
 		}
@@ -216,12 +217,12 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	}
 
 	public String getScanPositon(String instance, String L1seq, String L2seq,boolean isfull) {
-		return SCAN_POSITION.get(instance).getLSeqPos(Common.getLseq(L1seq, L2seq),isfull);
+		return SCAN_POSITION.get(instance).getLSeqPos(TaskUtil.getLseq(L1seq, L2seq),isfull);
 	}
 
 	public void setScanPositon(String instance, String L1seq, String L2seq, String position,boolean isfull) {
 		synchronized (SCAN_POSITION.get(instance)) {
-			SCAN_POSITION.get(instance).updateLSeqPos(Common.getLseq(L1seq, L2seq), position,isfull);
+			SCAN_POSITION.get(instance).updateLSeqPos(TaskUtil.getLseq(L1seq, L2seq), position,isfull);
 		}
 	}
 

@@ -17,6 +17,7 @@ import org.elasticflow.model.task.FlowState;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,15 +62,15 @@ public abstract class Flow {
 		this.flowState = new FlowState(Resource.flowStates.get(instanceConfig.getInstanceID()), endType, L1seq);
 		switch (endType) {
 		case writer:
-			this.EFConnKey = Common.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",
+			this.EFConnKey = TaskUtil.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",
 					this.instanceConfig.getPipeParams().isWriterPoolShareAlias())+"_writer";
 			break;
 		case reader:
-			this.EFConnKey = Common.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",
+			this.EFConnKey = TaskUtil.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",
 					this.instanceConfig.getPipeParams().isReaderPoolShareAlias())+"_reader";
 			break;
 		default:
-			this.EFConnKey = Common.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",
+			this.EFConnKey = TaskUtil.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",
 					this.instanceConfig.getPipeParams().isSearcherShareAlias())+"_other";
 			break;
 		}

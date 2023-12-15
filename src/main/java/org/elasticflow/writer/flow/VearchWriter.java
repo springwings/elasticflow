@@ -10,10 +10,10 @@ import org.elasticflow.connection.VearchConnector;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ public class VearchWriter extends WriterFlowSocket {
 	
 	@Override
 	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) throws EFException{
-		String name = Common.getStoreName(mainName, storeId);
+		String name = TaskUtil.getStoreName(mainName, storeId);
 		String type = mainName;
 		PREPARE(false, false,false);
 		if (!ISLINK())
@@ -72,7 +72,7 @@ public class VearchWriter extends WriterFlowSocket {
 	@Override
 	public void write(InstanceConfig instanceConfig,PipeDataUnit unit, String instance,
 			String storeId, boolean isUpdate) throws EFException {
-		String table = Common.getStoreName(instance, storeId);
+		String table = TaskUtil.getStoreName(instance, storeId);
 		if (!ISLINK())
 			return;
 		Map<String, EFField> transParams = instanceConfig.getWriteFields();
@@ -120,7 +120,7 @@ public class VearchWriter extends WriterFlowSocket {
 
 	@Override
 	public void delete(String instance, String storeId, String keyColumn, String keyVal) throws EFException {
-		String name = Common.getStoreName(instance, storeId);
+		String name = TaskUtil.getStoreName(instance, storeId);
 		try {
 			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);	
 			conn.deleteSpace(name);
@@ -131,7 +131,7 @@ public class VearchWriter extends WriterFlowSocket {
 
 	@Override
 	public void removeInstance(String instance, String storeId) throws EFException {
-		String name = Common.getStoreName(instance, storeId);
+		String name = TaskUtil.getStoreName(instance, storeId);
 		PREPARE(false, false,false);
 		if (!ISLINK())
 			return;
@@ -149,8 +149,8 @@ public class VearchWriter extends WriterFlowSocket {
 	@Override
 	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) throws EFException{
 		String select = "a";
-		boolean a = this.storePositionExists(Common.getStoreName(mainName, "a"));
-		boolean b = this.storePositionExists(Common.getStoreName(mainName, "b"));
+		boolean a = this.storePositionExists(TaskUtil.getStoreName(mainName, "a"));
+		boolean b = this.storePositionExists(TaskUtil.getStoreName(mainName, "b"));
 		
 		if (isIncrement) {
 			if(a && b) {

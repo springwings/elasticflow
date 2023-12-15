@@ -1,4 +1,4 @@
-package org.elasticflow.ml;
+package org.elasticflow.computer.flow;
 
 import java.io.InputStream;
 import java.net.Socket;
@@ -14,7 +14,7 @@ import org.elasticflow.model.EFSocket;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.reader.util.DataSetReader;
+import org.elasticflow.reader.model.DataSetReader;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.yarn.Resource;
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * @date 2018-05-22 09:08
  */
 
-public class PyService extends ComputerFlowSocket {
+public class PyComputer extends ComputerFlowSocket {
 
 	private CopyOnWriteArrayList<EFSocket> clients = new CopyOnWriteArrayList<>();
 	
@@ -42,8 +42,8 @@ public class PyService extends ComputerFlowSocket {
 	
 	private final static Logger log = LoggerFactory.getLogger("PyService");
 
-	public static ModelService getInstance(final ConnectParams connectParams) {
-		ModelService o = new ModelService();
+	public static ModelComputer getInstance(final ConnectParams connectParams) {
+		ModelComputer o = new ModelComputer();
 		o.initConn(connectParams);
 		o.init();
 		return o;

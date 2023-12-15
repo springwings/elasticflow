@@ -9,7 +9,7 @@ package org.elasticflow.computer.handler;
 
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.instruction.Context;
-import org.elasticflow.reader.util.DataSetReader;
+import org.elasticflow.reader.model.DataSetReader;
 import org.elasticflow.util.EFException;
 
 /**

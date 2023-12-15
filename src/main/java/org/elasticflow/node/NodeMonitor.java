@@ -46,6 +46,7 @@ import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.PipeXMLUtil;
 import org.elasticflow.util.SystemInfoUtil;
 import org.elasticflow.util.instance.EFDataStorer;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.Request;
@@ -933,7 +934,7 @@ public final class NodeMonitor {
 					}
 					EFMonitorUtil.controlInstanceState(instance, TASK_STATUS.Stop, true);
 					for (String L1seq : L1seqs) {
-						String tags = Common.getResourceTag(instance, L1seq, GlobalParam.FLOW_TAG._DEFAULT.name(),
+						String tags = TaskUtil.getResourceTag(instance, L1seq, GlobalParam.FLOW_TAG._DEFAULT.name(),
 								false);
 						try {
 							WriterFlowSocket wfs = Resource.socketCenter.getWriterSocket(

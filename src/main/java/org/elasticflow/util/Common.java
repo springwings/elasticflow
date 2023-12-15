@@ -32,17 +32,14 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.FIELD_PARSE_TYPE;
 import org.elasticflow.config.GlobalParam.KEY_PARAM;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
-import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
-import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.EFRequest;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.FormatProperties;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.model.NMRequest;
 import org.elasticflow.node.SafeShutDown;
-import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.util.EFException.ELEVEL;
-import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.Request;
 import org.slf4j.Logger;
@@ -91,11 +88,11 @@ public final class Common {
 		chars[0] ^= 32;
 		return String.valueOf(chars);
 	}
-	
+
 	public static String FormatTime(long timestamp) {
 		return SDF.format(timestamp);
 	}
-	
+
 	public static boolean isDefaultParam(String p) {
 		if (defaultParamSet.contains(p))
 			return true;
@@ -233,8 +230,8 @@ public final class Common {
 			res += s + "s";
 		else if (s >= 0)
 			res += "0" + s + "s";
-		
-		if (res=="")
+
+		if (res == "")
 			res = "00s";
 
 		return res;
@@ -256,157 +253,16 @@ public final class Common {
 		return sf.toString();
 	}
 
-	// get hashmap min key
+	/**
+	 * get hashmap min key
+	 * 
+	 * @param keySets
+	 * @return
+	 */
 	public static Object getMinKey(Set<String> keySets) {
 		Object[] obj = keySets.toArray();
 		Arrays.sort(obj);
 		return obj[0];
-	}
-
-	public static String getLseq(String L1seq, String L2seq) {
-		if(L1seq=="" && L2seq=="")
-			return "_";
-		if(L1seq!="") {
-			if(L2seq!="")
-				return L1seq + "." + L2seq;
-			return L1seq;
-		}
-		return L2seq;		
-	}
-
-	/**
-	 * @param instanceName data source main tag name
-	 * @param storeId      a/b or time mechanism tags
-	 * @return String
-	 */
-	public static String getStoreName(String instanceName, String storeId) {
-		if (storeId != null && storeId.length() > 0) {
-			return instanceName + "_" + storeId;
-		} else {
-			return instanceName;
-		}
-
-	}
-		
-	/**
-	 * get Store Task Info,if file not exists will create
-	 * @param instance
-	 * @param isfull
-	 * @return
-	 */
-	public static String getStoreTaskInfo(String instance,boolean isfull) {
-		String info = "{}";
-		String path = Common.getTaskStorePath(instance, 
-				isfull?GlobalParam.JOB_FULLINFO_PATH:GlobalParam.JOB_INCREMENTINFO_PATH);
-		byte[] b = EFDataStorer.getData(path, true);
-		if (b != null && b.length > 0) {
-			String str = new String(b);
-			if (str.length() > 1) {
-				info = str;
-			}
-		}
-		return info;
-	}
-
-	/**
-	 * @param L1seq    for data source sequence tag
-	 * @param instance data source main tag name
-	 * @return String
-	 */
-	public static String getInstanceRunId(String instance, String L1seq) {
-		if (L1seq != null && L1seq.length() > 0) {
-			return instance + L1seq;
-		} else {
-			return instance;
-		}
-	}
-
-	/**
-	 * seq for split data
-	 * 
-	 * @param indexname
-	 * @param L1seq,for series data source fetch
-	 * @return
-	 */
-	public static String getTaskStorePath(String instanceName, String location) {
-		return GlobalParam.INSTANCE_PATH + "/" + instanceName + "/" + location;
-	}
-
-	public static String getResourceTag(String instance, String L1seq, String tag, boolean ignoreSeq) {
-		StringBuilder tags = new StringBuilder();
-		if (!ignoreSeq && L1seq != null && L1seq.length() > 0) {
-			tags.append(instance).append(L1seq);
-		} else {
-			tags.append(instance).append(GlobalParam.DEFAULT_RESOURCE_SEQ);
-		}
-		return tags.append(tag).toString();
-	}
-
-	/**
-	 * get read data source seq flags
-	 * 
-	 * @param instanceName
-	 * @param fillDefault  if empty fill with system default blank seq
-	 * @return
-	 * @throws EFException 
-	 */
-	public static String[] getL1seqs(InstanceConfig instanceConfig) throws EFException {
-		String[] seqs = {};
-		WarehouseParam wp = Resource.nodeConfig.getWarehouse().get(instanceConfig.getPipeParams().getReadFrom());
-		if (null != wp) {
-			seqs = wp.getL1seq();
-		} else {
-			throw new EFException(instanceConfig.getPipeParams().getReadFrom()+" resource is null.", ELEVEL.Termination);
-		}
-		return seqs;
-	}
-
-	/**
-	 * 
-	 * @param heads
-	 * @param instanceName
-	 * @param storeId
-	 * @param seq            table seq
-	 * @param total
-	 * @param dataBoundary
-	 * @param lastUpdateTime
-	 * @param useTime
-	 * @param types
-	 * @param moreinfo
-	 */
-
-	public static String formatLog(String types, String heads, String instanceName, String storeId, String L2seq,
-			int total, String dataBoundary, String lastUpdateTime, long useTime, String moreinfo) {
-		String useTimeFormat = Common.seconds2time(useTime);
-		if (L2seq.length() < 1)
-			L2seq = "None";
-		String update;
-		if (lastUpdateTime.length() > 9 && lastUpdateTime.matches("[0-9]+")) {
-			update = FormatTime(
-					lastUpdateTime.length() < 12 ? Long.valueOf(lastUpdateTime + "000") : Long.valueOf(lastUpdateTime));
-		} else {
-			update = lastUpdateTime;
-		}
-		StringBuilder sb = new StringBuilder();
-		switch (types) {
-		case "complete":
-			sb.append("[Complete " + heads + " " + instanceName + "_" + storeId + "] " + (" L2seq:" + L2seq));
-			sb.append(" Docs:" + total);
-			sb.append(" scanAt:" + update);
-			sb.append(" useTime:" + useTimeFormat);
-			break;
-		case "start":
-			sb.append("[Start " + heads + " " + instanceName + "_" + storeId + "] " + (" L2seq:" + L2seq));
-			sb.append(" scanAt:" + update);
-			break;
-		default:
-			sb.append("[ -- " + heads + " " + instanceName + "_" + storeId + "] " + (" L2seq:" + L2seq));
-			sb.append(
-					" Docs:" + total + (total == 0 || dataBoundary.length() < 1 ? "" : " dataBoundary:" + dataBoundary)
-							+ " scanAt:" + update + " useTime:" + useTimeFormat);
-			break;
-		}
-		return sb.append(moreinfo).toString();
 	}
 
 	public static ArrayList<InstructionTree> compileCodes(String code, String contextId) {
@@ -469,7 +325,7 @@ public final class Common {
 					return method.invoke(c, v);
 				}
 			} catch (Exception e) {
-				LOG.error("Field "+fd.getName(),e);
+				LOG.error("Field " + fd.getName(), e);
 				throw new EFException(e.getMessage() + ",Field " + fd.getName(), ELEVEL.Dispose);
 			}
 		}
@@ -538,7 +394,7 @@ public final class Common {
 		Set<Map.Entry<String, Object>> entSets = rq.getParameterMap().entrySet();
 		for (Map.Entry<String, Object> entry : entSets) {
 			rr.addParam(entry.getKey(), rq.getParameter(entry.getKey()));
-		}		
+		}
 		return rr;
 	}
 
@@ -582,38 +438,38 @@ public final class Common {
 		calendar.set(Calendar.MILLISECOND, 0);
 		return calendar.getTimeInMillis();
 	}
-	
+
 	public static void loadGlobalConfig(String path) {
-		try {	
+		try {
 			GlobalParam.SystemConfig = Common.loadProperties(path);
 			Common.LOG.info("load system configuration from {} success!", path);
-		} catch (Exception e) { 
-			Common.LOG.error("load system configuration from {} Exception", path,e);
+		} catch (Exception e) {
+			Common.LOG.error("load system configuration from {} Exception", path, e);
 			Common.stopSystem(false);
-		} 
+		}
 	}
-	
+
 	public static void processErrorLevel(EFException e) {
 		if (e.getErrorLevel().equals(ELEVEL.Termination)) {
-			LOG.error("The current thread automatically interrupt!",e);
-			Thread.currentThread().interrupt();			
+			LOG.error("The current thread automatically interrupt!", e);
+			Thread.currentThread().interrupt();
 		} else if (e.getErrorLevel().equals(ELEVEL.Stop)) {
 			stopSystem(true);
 		}
 	}
-	
-	public static EFException convertException(Exception e,String message) { 
-		EFException cause; 
+
+	public static EFException convertException(Exception e, String message) {
+		EFException cause;
 		if (e.getCause() instanceof EFException) {
-			cause = (EFException) e.getCause();   
-		}else {
-			cause = new EFException(e,message);  
+			cause = (EFException) e.getCause();
+		} else {
+			cause = new EFException(e, message);
 		}
 		return cause;
 	}
-	
-	public static EFException convertException(Exception e) {  
-		return convertException(e,null);
+
+	public static EFException convertException(Exception e) {
+		return convertException(e, null);
 	}
 
 	public static void stopSystem(boolean soft) {

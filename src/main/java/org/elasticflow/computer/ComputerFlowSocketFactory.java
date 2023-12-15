@@ -33,8 +33,8 @@ public final class ComputerFlowSocketFactory implements Socket<ComputerFlowSocke
 	}
 
 	private static ComputerFlowSocket flowChannel(final ConnectParams connectParams) { 
-		try {
-			Class<?> clz = Class.forName(connectParams.getInstanceConfig().getComputeParams().getAlgorithm());
+		try { 
+			Class<?> clz = Class.forName("org.elasticflow.computer.flow."+Common.changeFirstCase(connectParams.getInstanceConfig().getComputeParams().getComputeMode().name().toLowerCase())+"Computer");
 			Method m = clz.getMethod("getInstance", ConnectParams.class);
 			Common.LOG.info(connectParams.getInstanceConfig().getInstanceID()+" mode of the computing end is "+connectParams.getInstanceConfig().getComputeParams().getComputeMode().name());
 			return (ComputerFlowSocket) m.invoke(null, connectParams);

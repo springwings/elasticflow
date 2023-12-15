@@ -18,12 +18,12 @@ import org.elasticflow.node.CPU;
 import org.elasticflow.piper.Breaker;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.piper.Valve;
-import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.util.instance.EFTuple;
 import org.elasticflow.util.instance.EFWriterUtil;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,8 +82,8 @@ public class FlowTask {
 	 * @throws EFException
 	 */
 	public void optimizeInstance() throws EFException {
-		String storeName = Common.getInstanceRunId(pipePump.getInstanceID(), L1seq);
-		CPU.RUN(pipePump.getID(), "Pond", "optimizeInstance", true, storeName,
+		String instanceProcessId = TaskUtil.getInstanceProcessId(pipePump.getInstanceID(), L1seq);
+		CPU.RUN(pipePump.getID(), "Pond", "optimizeInstance", true, instanceProcessId,
 				GlobalParam.TASK_COORDER.getStoreId(pipePump.getInstanceID(), L1seq, pipePump.getID(), true, false));
 	}
 
@@ -104,7 +104,7 @@ public class FlowTask {
 						false);
 				if (!isReferenceInstance)
 					CPU.RUN(pipePump.getID(), "Pond", "createStorePosition", true,
-							Common.getInstanceRunId(destination, L1seq), storeId);
+							TaskUtil.getInstanceProcessId(destination, L1seq), storeId);
 				if (storeId != null) {
 					GlobalParam.TASK_COORDER.scanPositionkeepCurrentPos(instanceID);
 					pipePump.run(storeId, L1seq, true, isReferenceInstance);
@@ -143,7 +143,7 @@ public class FlowTask {
 				String storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), false,
 						false);
 				CPU.RUN(pipePump.getID(), "Pond", "createStorePosition", true,
-						Common.getInstanceRunId(destination, L1seq), storeId);
+						TaskUtil.getInstanceProcessId(destination, L1seq), storeId);
 				GlobalParam.TASK_COORDER.setFlowInfo(instanceID, GlobalParam.JOB_TYPE.VIRTUAL.name(),
 						GlobalParam.FLOWINFO.FULL_JOBS.name(),
 						getNextJobs(pipePump.getInstanceConfig().getPipeParams().getNextJob()));
@@ -300,11 +300,11 @@ public class FlowTask {
 		for (String job : nextJobs) {
 			InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(job);
 			if (instanceConfig.openTrans()) {
-				String[] _seqs = Common.getL1seqs(instanceConfig);
+				String[] _seqs = TaskUtil.getL1seqs(instanceConfig);
 				for (String seq : _seqs) {
 					if (seq == null)
 						continue;
-					sf.append(Common.getInstanceRunId(job, seq) + " ");
+					sf.append(TaskUtil.getInstanceProcessId(job, seq) + " ");
 				}
 			}
 		}

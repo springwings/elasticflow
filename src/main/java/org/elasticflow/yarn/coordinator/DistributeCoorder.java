@@ -23,6 +23,7 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.node.EFNode;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.instance.EFDataStorer;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.yarn.Resource;
 import org.elasticflow.yarn.coordinator.node.DistributeService;
 
@@ -152,19 +153,19 @@ public class DistributeCoorder {
 			}
 		}
 		JSONObject JO = new JSONObject();
-		if(Resource.tasks.containsKey(Common.getInstanceRunId(instance, L1seq))) {
+		if(Resource.tasks.containsKey(TaskUtil.getInstanceProcessId(instance, L1seq))) {
 			JO.put(appendPipe + "breaker_is_on",
-					Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.isOn());
-			if (Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.isOn()) {
+					Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.isOn());
+			if (Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.isOn()) {
 				JO.put(appendPipe + "breaker_is_on_reason",
-						Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.getReason());
+						Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.getReason());
 			}
 			JO.put(appendPipe + "valve_turn_level",
-					Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).valve.getTurnLevel());
+					Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).valve.getTurnLevel());
 			JO.put(appendPipe + "current_fail_interval",
-					Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.failInterval());
+					Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.failInterval());
 			JO.put(appendPipe + "total_fail_times",
-					Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.getFailTimes());
+					Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.getFailTimes());
 		}
 		return JO;
 	}

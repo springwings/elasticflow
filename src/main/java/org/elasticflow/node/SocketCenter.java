@@ -26,6 +26,7 @@ import org.elasticflow.searcher.SearcherFlowSocket;
 import org.elasticflow.searcher.SearcherSocketFactory;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.writer.WriterSocketFactory;
 import org.elasticflow.yarn.Resource;
@@ -52,11 +53,11 @@ public final class SocketCenter {
 	private Map<String, SearcherFlowSocket> searcherSocketMap = new ConcurrentHashMap<>();
 
 	public String getContextId(String instance, String L1seq,String tag) {
-		return Common.getResourceTag(instance, L1seq, tag, false);
+		return TaskUtil.getResourceTag(instance, L1seq, tag, false);
 	} 
 	
 	public boolean containsKey(String instance, String L1seq,String tag) {
-		return pipePumpMap.containsKey(Common.getResourceTag(instance, L1seq, tag, false));
+		return pipePumpMap.containsKey(TaskUtil.getResourceTag(instance, L1seq, tag, false));
 	}
 
 	/**
@@ -70,7 +71,7 @@ public final class SocketCenter {
 	 * @throws EFException 
 	 */
 	public synchronized PipePump getPipePump(String instance, String L1seq, boolean needReset, String tag) throws EFException {
-		String tags = Common.getResourceTag(instance, L1seq, tag, false);
+		String tags = TaskUtil.getResourceTag(instance, L1seq, tag, false);
 		if (!pipePumpMap.containsKey(tags) || needReset) {
 			List<WriterFlowSocket> wfs = new ArrayList<>();
 			// Balanced write to multiple targets
@@ -110,20 +111,27 @@ public final class SocketCenter {
 		return searcherMap.get(instance);
 	}
 
+	/**
+	 * Dismantling pipelines
+	 * @param instance
+	 * @param L1seq
+	 * @param tag
+	 */
 	public synchronized void clearPipePump(String instance, String L1seq, String tag) {
-		String tags = Common.getResourceTag(instance, L1seq, tag, false);
-		if (pipePumpMap.containsKey(tags)) {
-			pipePumpMap.remove(tags);
+		String resourceTag = TaskUtil.getResourceTag(instance, L1seq, tag, false);
+		if (pipePumpMap.containsKey(resourceTag)) {
+			pipePumpMap.remove(resourceTag);
 			boolean ignoreSeqUseAlias = false;
 			if (Resource.nodeConfig.getInstanceConfigs().get(instance) != null)
 				ignoreSeqUseAlias = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
-						.isReaderPoolShareAlias();
+						.isReaderPoolShareAlias(); //Determine whether to share resources
+			//Branch determined by the reader
 			String tagInstance = instance;
 			if (ignoreSeqUseAlias)
 				tagInstance = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
-			tags = Common.getResourceTag(tagInstance, L1seq, tag, ignoreSeqUseAlias);
-			readerSocketMap.remove(tags);
-			writerSocketMap.remove(tags);
+			resourceTag = TaskUtil.getResourceTag(tagInstance, L1seq, tag, ignoreSeqUseAlias);
+			readerSocketMap.remove(resourceTag); 
+			writerSocketMap.remove(resourceTag);
 		}
 	}
 
@@ -131,11 +139,11 @@ public final class SocketCenter {
 		boolean ignoreSeqUseAlias = false;
 		if (Resource.nodeConfig.getInstanceConfigs().get(instance) != null)
 			ignoreSeqUseAlias = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
-					.isReaderPoolShareAlias();
+					.isReaderPoolShareAlias();//Determine whether to share resources
 		String tagInstance = instance;
 		if (ignoreSeqUseAlias)
 			tagInstance = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
-		String tags = Common.getResourceTag(tagInstance, L1seq, tag, ignoreSeqUseAlias);
+		String tags = TaskUtil.getResourceTag(tagInstance, L1seq, tag, ignoreSeqUseAlias);
 
 		if (!readerSocketMap.containsKey(tags)) {
 			WarehouseParam whp = getWHP(resourceName);
@@ -154,7 +162,7 @@ public final class SocketCenter {
 	}
 
 	public synchronized ComputerFlowSocket getComputerSocket(String instance, String L1seq, String tag, boolean reload) throws EFException {
-		String tags = Common.getResourceTag(instance, L1seq, tag, false);
+		String tags = TaskUtil.getResourceTag(instance, L1seq, tag, false);
 		if (reload || !computerSocketMap.containsKey(tags)) {
 			computerSocketMap.put(tags, ComputerFlowSocketFactory.getInstance(ConnectParams.getInstance(null,
 					null, Resource.nodeConfig.getInstanceConfigs().get(instance), null)));
@@ -164,7 +172,7 @@ public final class SocketCenter {
 	}
 
 	public synchronized WriterFlowSocket getWriterSocket(String resourceName, String instance, String L1seq, String tag) throws EFException {		
-		String tags = Common.getResourceTag(instance, L1seq, tag, false);
+		String tags = TaskUtil.getResourceTag(instance, L1seq, tag, false);
 		if (!writerSocketMap.containsKey(tags)) {
 			WarehouseParam whp = getWHP(resourceName);
 			if (whp == null) {
@@ -186,11 +194,11 @@ public final class SocketCenter {
 		boolean ignoreSeqUseAlias = false;
 		if (Resource.nodeConfig.getInstanceConfigs().get(instance) != null)
 			ignoreSeqUseAlias = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
-					.isSearcherShareAlias();
+					.isSearcherShareAlias();//Determine whether to share resources
 		String tagInstance = instance;
 		if (ignoreSeqUseAlias)
 			tagInstance = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
-		String tags = Common.getResourceTag(tagInstance, L1seq, tag, ignoreSeqUseAlias);
+		String tags = TaskUtil.getResourceTag(tagInstance, L1seq, tag, ignoreSeqUseAlias);
 
 		if (reload || !searcherSocketMap.containsKey(tags)) {
 			WarehouseParam whp = getWHP(resourceName);

@@ -1,4 +1,4 @@
-package org.elasticflow.ml;
+package org.elasticflow.computer.flow;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +21,7 @@ import org.elasticflow.model.EFHttpResponse;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
-import org.elasticflow.reader.util.DataSetReader;
+import org.elasticflow.reader.model.DataSetReader;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFHttpClientUtil;
@@ -39,14 +39,14 @@ import com.alibaba.fastjson.JSONObject;
  * @version 1.0
  * @date 2018-05-22 09:08
  */
-public class RestService extends ComputerFlowSocket {
+public class RestComputer extends ComputerFlowSocket {
 
 	protected final static Logger log = LoggerFactory.getLogger("RestService");
 	protected boolean successRunAll = true;
 	protected final static int delayTime = 200;//ms
 
-	public static RestService getInstance(final ConnectParams connectParams) {
-		RestService o = new RestService();
+	public static RestComputer getInstance(final ConnectParams connectParams) {
+		RestComputer o = new RestComputer();
 		o.initConn(connectParams);
 		return o;
 	}

@@ -17,6 +17,7 @@ import org.elasticflow.model.EFRequest;
 import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.piper.PipePump;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.yarn.Resource;
 
 import com.alibaba.fastjson.JSONObject;
@@ -327,12 +328,12 @@ public class EFMonitorUtil {
 	public static boolean resetBreaker(String instance) throws EFException {
 		if (Resource.nodeConfig.getInstanceConfigs().containsKey(instance)) {		
 			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
-			String[] L1seqs = Common.getL1seqs(config);
+			String[] L1seqs = TaskUtil.getL1seqs(config);
 			for (String L1seq : L1seqs) {
 				if(GlobalParam.DISTRIBUTE_RUN) {
 					GlobalParam.INSTANCE_COORDER.distributeCoorder().resetBreaker(instance, L1seq);
 				}else {
-					Resource.tasks.get(Common.getInstanceRunId(instance, L1seq)).breaker.reset();
+					Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.reset();
 				}				
 			}
 			return true;
@@ -407,7 +408,7 @@ public class EFMonitorUtil {
 			}
 			
 			if((type&2)>0) {
-				String[] L1seqs = Common.getL1seqs(config); 
+				String[] L1seqs = TaskUtil.getL1seqs(config); 
 				for (String L1seq : L1seqs) {	 
 					String appendPipe = "";
 					if (L1seq != "") 
@@ -436,7 +437,7 @@ public class EFMonitorUtil {
 				
 			if((type&4)>0) {
 				if (config.openTrans()) { 
-					String[] L1seqs = Common.getL1seqs(config); 
+					String[] L1seqs = TaskUtil.getL1seqs(config); 
 					for (String L1seq : L1seqs) {	
 						String appendPipe = "";
 						if (L1seq != "") 
@@ -466,7 +467,7 @@ public class EFMonitorUtil {
 			
 			if((type&8)>0) {
 				if (config.openTrans()) { 
-					String[] L1seqs = Common.getL1seqs(config); 
+					String[] L1seqs = TaskUtil.getL1seqs(config); 
 					boolean breakerOn = false;
 					int current_fail_interval = Integer.MAX_VALUE;
 					for (String L1seq : L1seqs) {	 

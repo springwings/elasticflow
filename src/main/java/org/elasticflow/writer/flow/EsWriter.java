@@ -22,6 +22,7 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
+import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest.AliasActions;
@@ -74,7 +75,7 @@ public class EsWriter extends WriterFlowSocket {
 	@Override
 	public void write(InstanceConfig instanceConfig,PipeDataUnit unit,String instance,
 			String storeId, boolean isUpdate) throws EFException {
-		String name = Common.getStoreName(instance, storeId);
+		String name = TaskUtil.getStoreName(instance, storeId);
 		String type = instance;
 		Map<String, EFField> transParams = instanceConfig.getWriteFields();
 		WriterParam writerParam = instanceConfig.getWriterParams();
@@ -184,7 +185,7 @@ public class EsWriter extends WriterFlowSocket {
 
 	@Override
 	public void delete(String instance, String storeId, String keyColumn, String keyVal) throws EFException {
-		String name = Common.getStoreName(instance, storeId);
+		String name = TaskUtil.getStoreName(instance, storeId);
 		try {
 			getESC().getClient().delete(new DeleteRequest(name, keyVal), RequestOptions.DEFAULT);
 		} catch (IOException e) {
@@ -210,7 +211,7 @@ public class EsWriter extends WriterFlowSocket {
 
 	@Override
 	public boolean create(String instance, String storeId, InstanceConfig instanceConfig) throws EFException{
-		String indexName = Common.getStoreName(instance, storeId);
+		String indexName = TaskUtil.getStoreName(instance, storeId);
 		try {		 
 			if (!this.storePositionExists(indexName)) {
 				CreateIndexRequest _CIR = new CreateIndexRequest(indexName); 
@@ -239,7 +240,7 @@ public class EsWriter extends WriterFlowSocket {
 
 	@Override
 	public void optimize(String instance, String storeId) {
-		String name = Common.getStoreName(instance, storeId);
+		String name = TaskUtil.getStoreName(instance, storeId);
 		try {
 			ForceMergeRequest request = new ForceMergeRequest(name);
 			request.maxNumSegments(2);
@@ -261,7 +262,7 @@ public class EsWriter extends WriterFlowSocket {
 	public void removeInstance(String instance, String storeId) {
 		if (storeId == null || storeId.length() == 0)
 			storeId = "a";
-		String iName = Common.getStoreName(instance, storeId);
+		String iName = TaskUtil.getStoreName(instance, storeId);
 		try {
 			log.info("trying to remove Instance " + iName);
 			GetIndexRequest _GIR = new GetIndexRequest(iName);
@@ -283,7 +284,7 @@ public class EsWriter extends WriterFlowSocket {
 
 	@Override
 	public void setAlias(String instanceName, String storeId, String aliasName) {
-		String iName = Common.getStoreName(instanceName, storeId);
+		String iName = TaskUtil.getStoreName(instanceName, storeId);
 		try {
 			log.info("trying to setting Alias " + aliasName + " to index " + iName);
 			IndicesAliasesRequest _IAR = new IndicesAliasesRequest();
@@ -350,10 +351,10 @@ public class EsWriter extends WriterFlowSocket {
 		boolean b_alias = false;
 		String select = "a";
 		try {
-			boolean a = this.storePositionExists(Common.getStoreName(mainName, "a"));
+			boolean a = this.storePositionExists(TaskUtil.getStoreName(mainName, "a"));
 			if (a)
 				a_alias = getIndexAlias(mainName, "a", instanceConfig.getAlias());
-			boolean b = this.storePositionExists(Common.getStoreName(mainName, "b"));
+			boolean b = this.storePositionExists(TaskUtil.getStoreName(mainName, "b"));
 			if (b)
 				b_alias = getIndexAlias(mainName, "b", instanceConfig.getAlias());
 			if (isIncrement) {
@@ -389,12 +390,12 @@ public class EsWriter extends WriterFlowSocket {
 						if (b_alias) {
 							if (getDocumentNums(mainName, "a") > getDocumentNums(mainName, "b")) {
 								getESC().getClient().indices().delete(
-										new DeleteIndexRequest(Common.getStoreName(mainName, "b")),
+										new DeleteIndexRequest(TaskUtil.getStoreName(mainName, "b")),
 										RequestOptions.DEFAULT);
 								select = "b";
 							} else {
 								getESC().getClient().indices().delete(
-										new DeleteIndexRequest(Common.getStoreName(mainName, "a")),
+										new DeleteIndexRequest(TaskUtil.getStoreName(mainName, "a")),
 										RequestOptions.DEFAULT);
 								select = "a";
 							}
@@ -429,14 +430,14 @@ public class EsWriter extends WriterFlowSocket {
 	}
 	
 	private long getDocumentNums(String instance, String storeId) throws Exception {
-		String iName = Common.getStoreName(instance, storeId);
+		String iName = TaskUtil.getStoreName(instance, storeId);
 		CountRequest countRequest = new CountRequest(iName);
 		CountResponse response = getESC().getClient().count(countRequest, RequestOptions.DEFAULT);
 		return response.getCount();
 	}
 
 	private boolean getIndexAlias(String instanceName, String storeId, String alias) throws Exception {
-		String iName = Common.getStoreName(instanceName, storeId);
+		String iName = TaskUtil.getStoreName(instanceName, storeId);
 		GetIndexRequest request = new GetIndexRequest(iName);
 		boolean exists = getESC().getClient().indices().exists(request, RequestOptions.DEFAULT);
 		return exists;
