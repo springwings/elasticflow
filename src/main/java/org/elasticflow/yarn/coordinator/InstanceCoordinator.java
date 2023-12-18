@@ -121,7 +121,7 @@ public class InstanceCoordinator implements InstanceCoord {
 				EFNodeUtil.loadInstanceDatas(instanceConfig);
 			EFMonitorUtil.rebuildFlowGovern(instanceSettting, createSchedule);
 		} catch (EFException e) {
-			Common.LOG.error(e.getMessage());
+			Common.LOG.error("load Instance "+instanceName+" exception",e);
 		}
 	}
 

@@ -297,7 +297,7 @@ public class DistributeCoorder {
 				try {
 					singal.await(90,TimeUnit.SECONDS);
 				} catch (Exception e) {
-					Common.LOG.error(e.getMessage());
+					Common.LOG.error("stop node singal exception",e);
 				}
 			}
 		}

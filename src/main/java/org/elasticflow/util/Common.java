@@ -324,9 +324,8 @@ public final class Common {
 				} else {
 					return method.invoke(c, v);
 				}
-			} catch (Exception e) {
-				LOG.error("Field " + fd.getName(), e);
-				throw new EFException(e.getMessage() + ",Field " + fd.getName(), ELEVEL.Dispose);
+			} catch (Exception e) { 
+				throw new EFException(e, "field " + fd.getName() +" parse value exception", ELEVEL.Dispose);
 			}
 		}
 	}

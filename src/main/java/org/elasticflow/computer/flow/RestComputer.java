@@ -166,7 +166,7 @@ public class RestComputer extends ComputerFlowSocket {
 				if (this.successRunAll == true)
 					taskSingal.await(90,TimeUnit.SECONDS);
 			} catch (Exception e) { 
-				throw new EFException(e.getMessage(), ELEVEL.BreakOff);
+				throw new EFException(e,"task singal exception", ELEVEL.BreakOff);
 			}	
 			
 			if (this.successRunAll == false)

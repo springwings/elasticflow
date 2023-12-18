@@ -108,17 +108,17 @@ public class FlowCenter{
 	 */
 	public void addFlowGovern(String instanceID, InstanceConfig instanceConfig,boolean needClear,boolean createSchedule) throws EFException { 
 		if (instanceConfig.checkStatus()==false || instanceConfig.openTrans() == false)
-			return;
-		String[] L1seqs = TaskUtil.getL1seqs(instanceConfig);  
-		if(!Resource.flowStates.containsKey(instanceID)) {
-			String content = EFFileUtil.readText(EFFileUtil.getInstancePath(instanceID)[2], GlobalParam.ENCODING, true);
-			if (content!=null && content.length()>0) {
-				Resource.flowStates.put(instanceID, JSONObject.parseObject(content));
-			}else {
-				Resource.flowStates.put(instanceID,new JSONObject());
-			}
-		}
+			return; 
 		try {
+			String[] L1seqs = TaskUtil.getL1seqs(instanceConfig);  
+			if(!Resource.flowStates.containsKey(instanceID)) {
+				String content = EFFileUtil.readText(EFFileUtil.getInstancePath(instanceID)[2], GlobalParam.ENCODING, true);
+				if (content!=null && content.length()>0) {
+					Resource.flowStates.put(instanceID, JSONObject.parseObject(content));
+				}else {
+					Resource.flowStates.put(instanceID,new JSONObject());
+				}
+			}
 			for (String L1seq : L1seqs) {
 				if (L1seq == null)
 					continue; 

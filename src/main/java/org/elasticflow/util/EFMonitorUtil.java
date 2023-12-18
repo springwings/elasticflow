@@ -285,7 +285,7 @@ public class EFMonitorUtil {
 				if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) 	
 					pipePump.getComputer().flowState.reset(); 
 			} catch (EFException e) {
-				Common.LOG.error(e.getMessage());
+				Common.LOG.error("reset PipeEnd status exception",e);
 			}
 		} 
 	}
@@ -319,7 +319,7 @@ public class EFMonitorUtil {
 				res.put("nodeIP", GlobalParam.IP);
 				res.put("nodeID", GlobalParam.NODEID);
 			} catch (EFException e) {
-				Common.LOG.error(e.getMessage());
+				Common.LOG.error("get PipeEnd Status exception",e);
 			}
 		} 
 		return res;

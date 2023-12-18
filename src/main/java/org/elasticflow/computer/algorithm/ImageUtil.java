@@ -47,7 +47,7 @@ public class ImageUtil {
 			try {
 				bf[i] = resize(readImage(imageFile[i]),newWidth,newHeight);
 			} catch (IOException e) {
-				throw new EFException(e.getMessage(),ELEVEL.Dispose);
+				throw new EFException(e,"read image exception",ELEVEL.Dispose);
 			}
 		}
 		return convertTO4DArray(bf);

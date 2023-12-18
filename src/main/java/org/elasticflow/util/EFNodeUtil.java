@@ -14,6 +14,7 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.NODE_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.reader.ScanPosition;
+import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.yarn.EFRPCService;
 import org.elasticflow.yarn.Resource;
@@ -36,20 +37,20 @@ public final class EFNodeUtil {
 	 * @param instanceConfig
 	 * @throws EFException 
 	 */
-	public static void loadInstanceDatas(InstanceConfig instanceConfig) throws EFException {
+	public static void loadInstanceDatas(InstanceConfig instanceConfig) throws EFException { 
 		String instance = instanceConfig.getInstanceID();
-		String[] L1seqs = TaskUtil.getL1seqs(instanceConfig);
 		ScanPosition sp = new ScanPosition(instance, "");
-		for (String L1seq : L1seqs) {
-			GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.FULL.name(), new AtomicInteger(1));
-			GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(), new AtomicInteger(1));
-			GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.VIRTUAL.name(), new AtomicInteger(1));			
-		}
-		try {
+		try { 
+			String[] L1seqs = TaskUtil.getL1seqs(instanceConfig);
+			for (String L1seq : L1seqs) {
+				GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.FULL.name(), new AtomicInteger(1));
+				GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(), new AtomicInteger(1));
+				GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.VIRTUAL.name(), new AtomicInteger(1));			
+			}
 			sp.loadInfos(TaskUtil.getStoreTaskInfo(instance,false),false);
 			sp.loadInfos(TaskUtil.getStoreTaskInfo(instance,true),true);
-		} catch (Exception e) {
-			Common.LOG.error("instance {} load Instance Datas exception.",instance,e);
+		} catch (Exception e) { 
+			throw new EFException(e,"instance "+instance+" load Instance Datas exception.",ELEVEL.Stop);
 		}
 		GlobalParam.TASK_COORDER.initTaskDatas(instance,sp);
 	}
