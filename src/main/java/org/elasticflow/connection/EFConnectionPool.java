@@ -180,7 +180,7 @@ public final class EFConnectionPool {
 					tryTime++;
 					Thread.sleep(timeout);
 				} catch (Exception e) {
-					log.error(this.poolName + " Thread Exception", e);
+					log.error("{} thread sleep exception",this.poolName,e);
 				}
 				if (tryTime > 10)
 					break;
@@ -267,10 +267,10 @@ public final class EFConnectionPool {
 					conn = (EFConnectionSocket<?>) m.invoke(null,params);
 					conn.setVersion(this.version);
 				}catch (Exception e) { 
-					log.error(_class_name+" class does not exist!",e);
+					log.error("connection class {} not exist!",_class_name,e);
 				}
 			} else {
-				log.error("parameters configuration error,create " + this.poolName + " connection fail!");
+				log.error("{} connection parameters is null!",this.poolName);
 			}
 			return conn;
 		}

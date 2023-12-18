@@ -39,18 +39,18 @@ public class Pond extends Instruction {
 	 */
 	public static boolean createStorePosition(Context context, Object[] args) {
 		if (!isValid(2, args)) {
-			log.error("Pond createStorePosition parameter not match!");
+			log.error("instruction.set.Pond.createStorePosition parameter not match!");
 			return false;
 		}
 		context.getWriter().PREPARE(false, false, false);
 		boolean state = false;
 		if (context.getWriter().ISLINK()) {
+			String instanceID = String.valueOf(args[0]);
 			try {
-				String mainName = String.valueOf(args[0]);
 				String storeId = String.valueOf(args[1]);
-				state = context.getWriter().create(mainName, storeId, context.getInstanceConfig());
+				state = context.getWriter().create(instanceID, storeId, context.getInstanceConfig());
 			} catch (Exception e) {
-				log.error("Create Store Position Exception", e);
+				log.error("instruction.set.Pond.createStorePosition run instance {} exception",instanceID, e);
 			} finally {
 				context.getWriter().REALEASE(false, state ? false : true);
 			}
@@ -66,18 +66,18 @@ public class Pond extends Instruction {
 	public static void deleteByKey(Context context, Object[] args) {
 		boolean freeConn = false;
 		if (!isValid(3, args)) {
-			log.error("deleteByKey parameter not match!");
+			log.error("instruction.set.Pond.deleteByKey parameter not match!");
 			return;
 		}
 		context.getWriter().PREPARE(false, false, false);
 		if (context.getWriter().ISLINK()) {
-			try {
-				String storeId = String.valueOf(args[0]);
+			String storeId = String.valueOf(args[0]);
+			try {				
 				String keyColumn = String.valueOf(args[1]);
 				String keyVal = String.valueOf(args[2]);
 				context.getWriter().delete(context.getInstanceConfig().getInstanceID(), storeId, keyColumn, keyVal);
 			} catch (Exception e) {
-				log.error("deleteByKey Exception", e);
+				log.error("instruction.set.Pond.deleteByKey store id {} exception",storeId, e);
 				freeConn = true;
 			} finally {
 				context.getWriter().REALEASE(false, freeConn);
@@ -91,7 +91,7 @@ public class Pond extends Instruction {
 	 */
 	public static void deleteByQuery(Context context, Object[] args) {
 		if (!isValid(1, args)) {
-			log.error("deleteByQuery parameter not match!");
+			log.error("instruction.set.Pond.deleteByQuery parameter not match!");
 			return;
 		}
 
@@ -104,7 +104,7 @@ public class Pond extends Instruction {
 	 */
 	public static void optimizeInstance(Context context, Object[] args) {
 		if (!isValid(2, args)) {
-			log.error("optimizeInstance parameter not match!");
+			log.error("instruction.set.Pond.optimizeInstance parameter not match!");
 			return;
 		}
 		context.getWriter().PREPARE(false, false, false);
@@ -126,7 +126,7 @@ public class Pond extends Instruction {
 	 */
 	public static boolean switchInstance(Context context, Object[] args) {
 		if (!isValid(3, args)) {
-			log.error("switchInstance parameter not match!");
+			log.error("instruction.set.Pond.switchInstance parameter not match!");
 			return false;
 		}
 		String removeId = "";
@@ -146,7 +146,7 @@ public class Pond extends Instruction {
 						break;
 					}
 				} catch (InterruptedException e) {
-					log.error("currentThreadState InterruptedException", e);
+					log.error("current thread sleep exception", e);
 				}
 			}
 		}
@@ -168,7 +168,7 @@ public class Pond extends Instruction {
 				context.getWriter().setAlias(instanceProcessId, storeId, context.getInstanceConfig().getAlias());
 				return true;
 			} catch (Exception e) {
-				log.error("switchInstance Exception", e);
+				log.error("instruction.set.Pond.switchInstance instance {} exception",instanceProcessId, e);
 			} finally {
 				GlobalParam.TASK_COORDER.saveTaskInfo(String.valueOf(args[0]), String.valueOf(args[1]), storeId, false);
 				GlobalParam.TASK_COORDER.setFlowStatus(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(),
@@ -188,7 +188,7 @@ public class Pond extends Instruction {
 	public static String getNewStoreId(Context context, Object[] args) throws EFException {
 		String storeId = null;
 		if (!isValid(2, args)) {
-			log.error("getNewStoreId parameter not match!");
+			log.error("instruction.set.Pond.getNewStoreId parameter not match!");
 		} else {
 			String mainName = String.valueOf(args[0]);
 			boolean isIncrement = (boolean) args[1];

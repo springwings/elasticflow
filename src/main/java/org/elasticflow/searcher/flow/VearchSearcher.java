@@ -58,7 +58,7 @@ public class VearchSearcher extends SearcherFlowSocket {
 						.getDeclaredConstructor().newInstance();
 				this.handler.init(connectParams);
 			} catch (Exception e) {
-				log.error("Init handler Exception", e);
+				log.error("Init {} vearch searcher handler Exception", this.poolName,e);
 			}
 		}
 	}

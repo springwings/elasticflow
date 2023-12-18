@@ -42,7 +42,7 @@ public class JobRunFactory implements Job {
 			method.invoke(object);
 			return true;
 		} catch (Exception e) {
-			Common.LOG.error(jobModel.getJobName() + " invoke method " + jobModel.getMethodName() + " Exception", e);
+			Common.LOG.error("task {} invoke method {} exception",jobModel.getJobName(),jobModel.getMethodName(), e);
 		}
 		return false;
 	}

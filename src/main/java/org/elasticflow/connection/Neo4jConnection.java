@@ -34,7 +34,7 @@ public class Neo4jConnection extends EFConnectionSocket<Connection> {
 			}
 			return true;
 		} catch (Exception e) {
-			log.error(this.connectParams.getWhp().getHost() + " connect Exception,", e);
+			log.error("{} Neo4j {} connect exception", this.connectParams.getWhp().getAlias(),endType.name(),e);
 			return false;
 		}
 	}
@@ -46,7 +46,7 @@ public class Neo4jConnection extends EFConnectionSocket<Connection> {
 				return true;
 			}
 		} catch (Exception e) {
-			log.error("get status Exception,", e);
+			log.error("{} get Neo4j status exception", this.connectParams.getWhp().getAlias(),e);
 		}
 		return false;
 	}
@@ -58,7 +58,7 @@ public class Neo4jConnection extends EFConnectionSocket<Connection> {
 			this.conn = null;
 			this.connectParams = null;
 		} catch (Exception e) {
-			log.warn("free connect Exception,", e);
+			log.warn("{} free Neorj connection exception", this.connectParams.getWhp().getAlias(),e);
 			return false;
 		}
 		return true;

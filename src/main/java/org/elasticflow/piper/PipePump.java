@@ -133,7 +133,7 @@ public final class PipePump extends Instruction implements Serializable {
 			}
 
 		} catch (Exception e) {
-			log.error("PipePump init Exception,", e);
+			log.error("instance {} PipePump init exception",instanceID, e);
 			Common.stopSystem(false);
 		}
 	}
@@ -369,7 +369,7 @@ public final class PipePump extends Instruction implements Serializable {
 		try {
 			pageList = getReader().getDataPages(task, getInstanceConfig().getPipeParams().getReadPageSize());
 		} catch (Exception e) {
-			log.error("get Page lists Exception!", e);
+			log.error("instance {} get page lists exception",task.getInstanceID(), e);
 		} finally {
 			getReader().lock.unlock();
 		}
@@ -485,11 +485,11 @@ public final class PipePump extends Instruction implements Serializable {
 							",progress:" + progressPos + "/" + pageNum, this.isUpdate,
 							false);
 				} catch (EFException e) {
-					log.error("PumpThread", e);
+					log.error("instance {} process page data exception", this.instanceConfig.getInstanceID(),e);
 					task.taskState.setEfException(e);
 				} finally {
 					if (rState == null || rState.isStatus() == false) {
-						Common.LOG.warn("read data exception!");
+						Common.LOG.warn("instance {} read data exception!",instanceConfig.getInstanceID());
 						return;
 					}
 					GlobalParam.TASK_COORDER.setFlowStatus(task.getInstanceID(), task.getL1seq(),

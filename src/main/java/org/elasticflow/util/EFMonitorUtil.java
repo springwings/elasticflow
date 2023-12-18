@@ -245,7 +245,7 @@ public class EFMonitorUtil {
 								break;
 							}
 						} catch (InterruptedException e) {
-							Common.LOG.error("currentThreadState InterruptedException", e);
+							Common.LOG.error("current Thread sleep Exception", e);
 						}
 					}
 					if (GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), TASK_STATUS.Termination, state, true)) {
@@ -285,7 +285,7 @@ public class EFMonitorUtil {
 				if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) 	
 					pipePump.getComputer().flowState.reset(); 
 			} catch (EFException e) {
-				Common.LOG.error("reset PipeEnd status exception",e);
+				Common.LOG.error("reset instance {} PipeEnd status exception",instance,e);
 			}
 		} 
 	}
@@ -319,7 +319,7 @@ public class EFMonitorUtil {
 				res.put("nodeIP", GlobalParam.IP);
 				res.put("nodeID", GlobalParam.NODEID);
 			} catch (EFException e) {
-				Common.LOG.error("get PipeEnd Status exception",e);
+				Common.LOG.error("get instance {} PipeEnd Status exception",instance,e);
 			}
 		} 
 		return res;
@@ -354,7 +354,7 @@ public class EFMonitorUtil {
  */
 	public static JSONObject getInstanceInfo(String instance,int type) throws EFException {
 		JSONObject JO = new JSONObject();
-		if(GlobalParam.INSTANCE_COORDER.distributeCoorder().getClusterStatus()!=0) 
+		if(GlobalParam.DISTRIBUTE_RUN && GlobalParam.INSTANCE_COORDER.distributeCoorder().getClusterStatus()!=0) 
 			return JO;
 		if (Resource.nodeConfig.getInstanceConfigs().containsKey(instance)) {			
 			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);

@@ -184,11 +184,11 @@ public final class Run {
 	
 	/**
 	 * External loading plug-ins
-	 * @param plugin	Jar package path 
+	 * @param pluginPath	Jar package path 
 	 */
-	private void loadPlugins(String plugin) {
-		if(plugin!=null && plugin.length()>1) {
-			List<File> jars = Arrays.asList(new File(plugin).listFiles(new FilenameFilter() {
+	private void loadPlugins(String pluginPath) {
+		if(pluginPath!=null && pluginPath.length()>1) {
+			List<File> jars = Arrays.asList(new File(pluginPath).listFiles(new FilenameFilter() {
 	            @Override
 	            public boolean accept(File dir, String name) {
 	                return name.toLowerCase().endsWith(".jar");
@@ -200,7 +200,7 @@ public final class Run {
 			        urls[i] = jars.get(i).toURI().toURL();
 			        Common.LOG.info("load plugin from {}",jars.get(i).toURI().toURL());
 			    } catch (Exception e) {
-			    	Common.LOG.error("load plugins exception", e);
+			    	Common.LOG.error("load plugins from {} exception",pluginPath, e);
 			    }
 			}
 			GlobalParam.PLUGIN_CLASS_LOADER = new URLClassLoader(urls, ClassLoader.getSystemClassLoader());

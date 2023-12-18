@@ -164,11 +164,11 @@ public class NodeConfig {
 		}
 	}
 
-	public void parseInstructionsFile(String src) {
+	public void parseInstructionsFile(String fpath) {
 		InputStream in = null;
 		instructions.clear();
 		try {
-			byte[] bt = EFDataStorer.getData(src, false);
+			byte[] bt = EFDataStorer.getData(fpath, false);
 			if (bt.length <= 0)
 				return;
 			in = new ByteArrayInputStream(bt, 0, bt.length);
@@ -181,23 +181,23 @@ public class NodeConfig {
 			parseNode(paramlist, InstructionParam.class);
 
 		} catch (Exception e) {
-			Common.LOG.error("parse (" + src + ") error,", e);
+			Common.LOG.error("parse instructions file {} exception",fpath,e);
 		} finally {
 			try {
 				if (null != in) {
 					in.close();
 				}
 			} catch (Exception e) {
-				Common.LOG.error("parse (" + src + ") error,", e);
+				Common.LOG.error("instructions file {} close exception",fpath,e);
 			}
 		}
 	}
 
-	public void parsePondFile(String src) {
+	public void parsePondFile(String fpath) {
 		InputStream in = null;
 		warehouse.clear();
 		try {
-			byte[] bt = EFDataStorer.getData(src, false);
+			byte[] bt = EFDataStorer.getData(fpath, false);
 			if (bt.length <= 0)
 				return;
 			in = new ByteArrayInputStream(bt, 0, bt.length);
@@ -209,14 +209,14 @@ public class NodeConfig {
 			paramlist = doc.getElementsByTagName("socket");
 			parseNode(paramlist, WarehouseParam.class);
 		} catch (Exception e) {
-			Common.LOG.error("parse (" + src + ") error,", e);
+			Common.LOG.error("parse pond file {} exception", fpath,e);
 		} finally {
 			try {
 				if (null != in) {
 					in.close();
 				}
 			} catch (Exception e) {
-				Common.LOG.error("parse (" + src + ") error,", e);
+				Common.LOG.error("close pond file {} exception",fpath, e);
 			}
 		}
 	}

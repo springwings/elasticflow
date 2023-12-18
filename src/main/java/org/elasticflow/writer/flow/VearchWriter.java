@@ -138,9 +138,9 @@ public class VearchWriter extends WriterFlowSocket {
 		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);	
 		try {
 			conn.deleteSpace(name);
-			log.info("Remove Instance " + name + " success!");
+			log.info("remove instance {} storeId {} success!",instance,storeId);
 		} catch (Exception e) {
-			log.error("Remove Instancee " + name + " failed!", e);
+			log.error("remove instance {} storeId {} exception!",instance,storeId, e);
 		} finally {
 			REALEASE(false, false);
 		}

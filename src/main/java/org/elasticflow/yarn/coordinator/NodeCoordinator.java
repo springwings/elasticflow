@@ -39,7 +39,7 @@ public class NodeCoordinator implements NodeCoord {
 			sum[0] = SystemInfoUtil.getCpuUsage();
 			sum[1] = SystemInfoUtil.getMemUsage();
 		} catch (Exception e) {
-			Common.LOG.error("summary Resource Exception ", e);
+			Common.LOG.error("summary system resource usage exception", e);
 			sum[0] = 80.;
 			sum[1] = 80.;
 		}

@@ -23,7 +23,7 @@ public class MysqlConnection extends EFConnectionSocket<Connection> {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 		} catch (Exception e) {
-			log.error("MysqlConnection Exception,", e);
+			log.error("mysql connection class init exception", e);
 		}
 	}
 
@@ -40,12 +40,11 @@ public class MysqlConnection extends EFConnectionSocket<Connection> {
 				WarehouseParam wsp = this.connectParams.getWhp();
 				this.conn = DriverManager.getConnection(getConnectionUrl(),
 						wsp.getUser(),
-						wsp.getPassword());
-				log.info("build connect to " + getConnectionUrl());
+						wsp.getPassword()); 
 			}
 			return true;
 		} catch (Exception e) {
-			log.error(this.connectParams.getWhp().getHost() + " connect Exception,", e);
+			log.error("{} mysql {} connect exception", this.connectParams.getWhp().getAlias(),endType.name(),e);
 			return false;
 		}
 	}
@@ -58,7 +57,7 @@ public class MysqlConnection extends EFConnectionSocket<Connection> {
 			this.conn = null;
 			this.connectParams = null;
 		} catch (Exception e) {
-			log.warn("free connect Exception,", e);
+			log.warn("{} free mysql connection exception", this.connectParams.getWhp().getAlias(),e);
 			return false;
 		}
 		return true;
@@ -71,7 +70,7 @@ public class MysqlConnection extends EFConnectionSocket<Connection> {
 				return true;
 			}
 		} catch (Exception e) {
-			log.error("get status Exception,", e);
+			log.error("{} get mysql status exception", this.connectParams.getWhp().getAlias(),e);
 		}
 		return false;
 	}

@@ -68,10 +68,10 @@ public class VearchConnector {
 			if(response.isSuccess()) {
 				return JSONObject.parseArray(response.getPayload());		
 			}else {
-				log.error(response.getInfo());
+				log.error("vearch query stats exception, {}",response.getInfo());
 			}				 
 		} catch (Exception e) {
-			log.warn("query stats Exception", e);
+			log.warn("vearch query stats exception", e);
 		}
 		return null;
 	}
@@ -84,10 +84,10 @@ public class VearchConnector {
 			if(response.isSuccess()) {
 				return JSONObject.parseObject(response.getPayload());
 			}else {
-				log.error(response.getInfo());
+				log.error("vearch get space {} information exception,{}",space,response.getInfo());
 			}			
 		} catch (Exception e) {
-			log.warn("get space info Exception", e);
+			log.warn("vearch get space {} information exception",space, e);
 		}
 		return null;
 	}
@@ -106,10 +106,10 @@ public class VearchConnector {
 		            	return jsonObject;
 				}		            
 			}else {
-				log.error(response.getInfo());
+				log.error("vearch get space {} status Exception,{}",space,response.getInfo());
 			}			
 		} catch (Exception e) {
-			log.warn("get space info Exception", e);
+			log.warn("vearch get space {} status Exception",space, e);
 		}
 		return null;
 	}
@@ -132,13 +132,13 @@ public class VearchConnector {
 				if (Integer.valueOf(String.valueOf(jr.get("code"))) == 200) {
 					return true;
 				} else {
-					log.warn("delete Space {} Exception,",space,jr.get("msg"));
+					log.warn("vearch delete space {} exception, {}",space,jr.get("msg"));
 				}
 			}else {
-				log.error(response.getInfo());
+				log.error("vearch delete space {} exception, {}",space,response.getInfo());
 			}			
 		} catch (Exception e) {
-			log.warn("delete Space {} Exception",space, e);
+			log.warn("vearch delete space {} exception",space, e);
 		}
 		return false;
 	}
@@ -157,10 +157,10 @@ public class VearchConnector {
 					}
 				}
 			}else {
-				log.error(response.getInfo());
+				log.error("vearch check space {} exists exception, {}",table,response.getInfo());
 			}			
 		} catch (Exception e) {
-			log.error("check Space {} Exists Exception",table, e);
+			log.error("vearch check space {} exists exception",table, e);
 		}
 		return false;
 	}
@@ -175,16 +175,16 @@ public class VearchConnector {
 				if (Integer.valueOf(String.valueOf(jr.get("code"))) == 200)
 					return true;
 				else if (Integer.valueOf(String.valueOf(jr.get("code"))) == 564) {
-					log.warn("space exists!");
+					log.warn("vearch create space warn,space exists!");
 					return true;
 				} else {
-					throw new EFException("create Space "+this.dbName+" Exception," + jr.get("msg"));
+					throw new EFException("vearch create space "+this.dbName+" exception," + jr.get("msg"));
 				}
 			}else {
 				throw new EFException(response.getInfo(),ELEVEL.Dispose);
 			}			
 		} catch (Exception e) {
-			log.error("create Space {} Exception",this.dbName, e);
+			log.error("vearch create space {} exception",this.dbName, e);
 			throw new EFException(e);
 		}
 	}
@@ -218,7 +218,7 @@ public class VearchConnector {
 			}
 
 		} catch (Exception e) {
-			log.error("Batch data deletion error", e);
+			log.error("vearch {} delete batch data exception",table, e);
 		}
 	}
 	
@@ -270,7 +270,7 @@ public class VearchConnector {
 			if (Integer.valueOf(String.valueOf(jo.get("status"))) != 200) {
 				if(GlobalParam.DEBUG)
 					log.warn(dt.toString());
-				throw new EFException("Vearch error writing data," + jo.get("error"));
+				throw new EFException("Vearch write data to "+ table +" exception," + jo.get("error"));
 			}				
 		}
 	}
@@ -301,10 +301,10 @@ public class VearchConnector {
 				master_post.setEntity(stringEntity);
 				this.httpClient.execute(master_post);
 			} else {
-				log.error(response.getInfo());
+				log.error("vearch get space list exception {}",response.getInfo());
 			}  
 		} catch (IOException e) {
-			log.error("create Space Exception", e);
+			log.error("vearch create space exception", e);
 			return;
 		}
 	}

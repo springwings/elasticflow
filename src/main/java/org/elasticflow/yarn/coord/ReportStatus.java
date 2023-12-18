@@ -88,7 +88,7 @@ public final class ReportStatus {
 				EFDataStorer.createPath(GlobalParam.DATAS_CONFIG_PATH + "/EF_NODES/" + GlobalParam.NODEID + "/configs", true);
 			}
 		} catch (Exception e) {
-			Common.LOG.error("environmentCheck Exception", e);
+			Common.LOG.error("environment prepare exception", e);
 		}
 	}
 

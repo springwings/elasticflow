@@ -41,7 +41,7 @@ public class EFPipeUtil {
 					}
 				}
 			} catch (Exception e) {
-				Common.LOG.error("remove Instance " + instanceID + " Exception", e);
+				Common.LOG.error("remove Instance {} exception", instanceID,e);
 				return false;
 			}
 			configMap.remove(instanceID);

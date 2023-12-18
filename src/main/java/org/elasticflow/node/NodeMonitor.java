@@ -145,7 +145,7 @@ public final class NodeMonitor {
 			}
 		} catch (Exception e) {
 			RS.setStatus("Actions Exception!", RESPONSE_STATUS.CodeException);
-			Common.LOG.error("Management Operations " + RR.getParams().get("ac") + " Exception ", e);
+			Common.LOG.error("Management Operations {} exception",RR.getParams().get("ac"), e);
 		}
 	}
 	
@@ -365,9 +365,9 @@ public final class NodeMonitor {
 	}
 
 	/**
-	 * get node environmental state.
-	 * 
+	 * get node environmental state
 	 * @param rq
+	 * @param RR
 	 */
 	public void getStatus(Request rq, EFRequest RR) {
 		int service_level = Integer.parseInt(GlobalParam.SystemConfig.get("service_level").toString());
@@ -392,7 +392,7 @@ public final class NodeMonitor {
 			dt.put("CPU", SystemInfoUtil.getCpuUsage());
 			dt.put("MEMORY", SystemInfoUtil.getMemUsage());
 		} catch (Exception e) {
-			Common.LOG.error("getStatus Exception ", e);
+			Common.LOG.error("get node status exception ", e);
 		}
 		if (GlobalParam.DISTRIBUTE_RUN) {
 			dt.put("SLAVES", GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodeStatus());
@@ -402,8 +402,8 @@ public final class NodeMonitor {
 
 	/**
 	 * Data source level delimited sequence
-	 * 
 	 * @param rq
+	 * @param RR
 	 */
 	public void getInstanceSeqs(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "instance")) {
@@ -948,7 +948,7 @@ public final class NodeMonitor {
 							}
 						} catch (EFException e) {
 							state = false;
-							Common.LOG.error("delete Instance Data", e);
+							Common.LOG.error("delete {} Instance Data",instance, e);
 						}
 					}
 					EFMonitorUtil.controlInstanceState(instance, TASK_STATUS.Ready, true);
@@ -969,8 +969,8 @@ public final class NodeMonitor {
 	 * @return
 	 */
 	private boolean updateResourceXml(JSONObject resourceData, boolean isDel) {
+		String pondPath = GlobalParam.DATAS_CONFIG_PATH + "/" + GlobalParam.SystemConfig.getProperty("pond");
 		try {
-			String pondPath = GlobalParam.DATAS_CONFIG_PATH + "/" + GlobalParam.SystemConfig.getProperty("pond");
 			byte[] resourceXml = EFDataStorer.getData(pondPath, false);
 			String rname = resourceData.getString("name");
 			SAXReader reader = new SAXReader();
@@ -1023,7 +1023,7 @@ public final class NodeMonitor {
 			}
 			EFDataStorer.setData(pondPath, Common.formatXml(doc));
 		} catch (Exception e) {
-			Common.LOG.error(e.getMessage());
+			Common.LOG.error("update resource node information to {} exception",pondPath,e);
 			setResponse(RESPONSE_STATUS.CodeException, "save resource exception " + e.getMessage(), null);
 			return false;
 		}

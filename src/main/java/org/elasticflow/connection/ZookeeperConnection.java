@@ -36,7 +36,7 @@ public class ZookeeperConnection extends EFConnectionSocket<ZooKeeper> {
 						this.connectParams.getWhp().getHost(),
 						CONNECTION_TIMEOUT, (Watcher) this.connectParams.getPlugin()); 
 			} catch (Exception e) {
-				log.error("connection Exception", e);
+				log.error("{} zookeeper {} connect exception", this.connectParams.getWhp().getAlias(),endType.name(),e);
 				return false;
 			}
 		}
@@ -59,7 +59,7 @@ public class ZookeeperConnection extends EFConnectionSocket<ZooKeeper> {
 			this.conn = null;
 			this.connectParams = null;
 		} catch (Exception e) {
-			log.warn("free connect Exception,", e);
+			log.warn("{} free zookeeper connection exception", this.connectParams.getWhp().getAlias(),e);
 			return false;
 		}
 		return true;

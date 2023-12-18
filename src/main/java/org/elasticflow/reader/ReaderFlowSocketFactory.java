@@ -44,9 +44,9 @@ public final class ReaderFlowSocketFactory implements Socket<ReaderFlowSocket> {
 			return (ReaderFlowSocket) m.invoke(null,connectParams);
 		}catch (Exception e) { 
 			if(readerFlowhandler!=null) {
-				Common.LOG.error("custom ReaderFlowSocket "+connectParams.getWhp().getType()+" not exists!",e); 
+				Common.LOG.error("reader flow handler {} not exists!",readerFlowhandler,e); 
 			}else { 
-				Common.LOG.error("the "+connectParams.getWhp().getType()+" ReaderFlowSocket does not exist!",e); 
+				Common.LOG.error("reader flow socket type {} not exist!",connectParams.getWhp().getType(),e); 
 			}			
 			Common.stopSystem(false);
 		}  

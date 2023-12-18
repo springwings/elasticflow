@@ -159,7 +159,7 @@ public class ESQueryParser implements QueryParser {
 					bquery.must(query);
 			}
 		} catch (Exception e) {
-			log.error("buildBooleanQuery Exception", e);
+			log.error("build es Boolean Query Exception", e);
 		}
 		SSB.query(bquery);
 	}

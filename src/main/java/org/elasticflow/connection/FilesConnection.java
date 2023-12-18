@@ -39,7 +39,7 @@ public class FilesConnection extends EFConnectionSocket<ArrayList<String>> {
 				}				
 				return true;
 			} catch (Exception e) {
-				 log.error("folder scan exception",e);
+				 log.error("{} folder {} scan exception",connectParams.getWhp().getAlias(),endType.name(),e);
 			}
 		} 
 		return false;
@@ -60,7 +60,7 @@ public class FilesConnection extends EFConnectionSocket<ArrayList<String>> {
 				this.conn.clear();
 			this.conn = null;
 		} catch (Exception e) {
-			 log.warn("free connect Exception,",e);
+			 log.warn("{} free file connection exception", this.connectParams.getWhp().getAlias(),e);
 		}
 		return false;
 	} 

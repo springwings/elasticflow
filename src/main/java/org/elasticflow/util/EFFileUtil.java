@@ -115,7 +115,7 @@ public class EFFileUtil {
 			fis = new FileInputStream(in);
 			fos = new FileOutputStream(new File(destPath + "\\" + in.getName()));
 		} catch (Exception e) {
-			Common.LOG.error("copy file exception", e);
+			Common.LOG.error("copy file {} exception",sourcePath, e);
 		}
 		int c;
 		byte[] b = new byte[1024 * 5];
@@ -177,7 +177,7 @@ public class EFFileUtil {
 					fis = new FileInputStream(temp.getAbsolutePath());
 					fos = new FileOutputStream(new File(destFolder + "/" + temp.getName()));
 				} catch (Exception e) {
-					Common.LOG.error("copy folder file exception", e);
+					Common.LOG.error("copy folder {} exception", sourceFolder,e);
 				}
 			} else if (temp.isDirectory()) {
 				copyFolder(temp.getAbsolutePath(), destFolder + "/" + temp.getName());
@@ -192,7 +192,7 @@ public class EFFileUtil {
 				fos.flush();
 				fos.close();
 			} catch (Exception e) {
-				Common.LOG.error("copy folder exception", e);
+				Common.LOG.error("copy folder {} exception",sourceFolder, e);
 			}
 		}
 		return false;

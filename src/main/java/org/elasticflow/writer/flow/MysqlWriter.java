@@ -68,9 +68,8 @@ public class MysqlWriter extends WriterFlowSocket {
 			} else {
 				this.insertDb(PipeUtil.getWriteSql(table, unit, transParams));
 			}
-		} catch (Exception e) { 
-			log.error("Mysql error writing data", e);
-			throw new EFException("Mysql error writing data",ELEVEL.Dispose);
+		} catch (Exception e) {  
+			throw new EFException(e,"mysql write data exception",ELEVEL.Dispose);
 		}
 	}
 
@@ -109,10 +108,10 @@ public class MysqlWriter extends WriterFlowSocket {
 			return;
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
 		try (PreparedStatement statement = conn.prepareStatement("DROP table if exists " + name);) {
-			log.info("Remove Instance " + name + " success!");
+			log.info("remove instance data {} success!",name);
 			statement.execute();
 		} catch (Exception e) {
-			log.error("Remove Instancee " + name + " failed!", e);
+			log.error("remove instance data {} failed!",name,e);
 		} finally {
 			REALEASE(false, false);
 		}
@@ -156,7 +155,7 @@ public class MysqlWriter extends WriterFlowSocket {
 				return true;
 			}
 		} catch (Exception e) {
-			log.error("store Position check Exception", e);
+			log.error("mysql store position {} check exists exception", storeName,e);
 		}
 		return false;
 	}
@@ -181,10 +180,10 @@ public class MysqlWriter extends WriterFlowSocket {
 					}
 				}
 			} catch (Exception e) {
-				log.error("ResultSet Exception", e);
+				log.error("instance {}, mysql ab Mechanism exception", mainName,e);
 			}
 		} catch (Exception e) {
-			log.error("PreparedStatement Exception", e);
+			log.error("instance {}, PreparedStatement exception",mainName, e);
 		} finally {
 			REALEASE(false, releaseConn);
 		}
@@ -238,7 +237,7 @@ public class MysqlWriter extends WriterFlowSocket {
 		try (PreparedStatement statement = conn.prepareStatement(sql);) {
 			statement.execute();
 		} catch (Exception e) {
-			log.error("PreparedStatement Exception", e);
+			log.error("insert data Exception", e);
 		}
 	} 
 

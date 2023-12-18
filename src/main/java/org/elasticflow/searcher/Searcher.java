@@ -41,7 +41,7 @@ public class Searcher {
 						.getDeclaredConstructor().newInstance();
 			}
 		} catch (Exception e) {
-			log.error("Searcher Handler Exception", e);
+			log.error("instance {} Searcher Handler exception", instanceName,e);
 		}
 	}
 

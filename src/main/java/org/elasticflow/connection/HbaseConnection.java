@@ -69,7 +69,7 @@ public class HbaseConnection extends EFConnectionSocket<Table>{
 				return true;
 			}
 		} catch (Exception e) {
-			log.error("get status Exception,", e);
+			log.error("{} get hbase connection status exception,", this.connectParams.getWhp().getAlias(),e);
 		}
 		return false;
 	}
@@ -84,7 +84,7 @@ public class HbaseConnection extends EFConnectionSocket<Table>{
 			this.conn = null;
 			this.connectParams = null;
 		} catch (Exception e) {
-			log.error("free connect Exception,", e);
+			log.warn("{} free hbase connection exception", this.connectParams.getWhp().getAlias(),e);
 			return false;
 		}
 		return true;

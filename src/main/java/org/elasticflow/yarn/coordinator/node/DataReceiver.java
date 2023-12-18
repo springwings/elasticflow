@@ -110,14 +110,14 @@ public class DataReceiver implements EFRPCService {
 					try {
 						output.close();
 					} catch (Exception e) {
-						log.error("ObjectOutputStream close Exception", e);
+						log.error("message receiver output stream close exception", e);
 					}
 				}
 				if (socket != null) {
 					try {
 						socket.close();
 					} catch (Exception e) {
-						log.error("socket close Exception", e);
+						log.error("message receiver socket close Exception", e);
 					}
 				}
 			}

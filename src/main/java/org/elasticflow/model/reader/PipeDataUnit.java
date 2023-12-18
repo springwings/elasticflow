@@ -100,7 +100,7 @@ public class PipeDataUnit implements Cloneable{
 		try {
 			return super.clone();
 		} catch (Exception e) {
-			Common.LOG.error("Clone not support!"); 
+			Common.LOG.error("pipe data unit clone not support!"); 
 		}
 		return null;
 	}

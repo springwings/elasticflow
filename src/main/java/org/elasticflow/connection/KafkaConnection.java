@@ -128,7 +128,7 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 				Thread.sleep(1000+tryTime*500);
 			}
 		} catch (Exception e) {
-			log.error("get connection exception", e);
+			log.error("{} get kafka {} connection exception",this.connectParams.getWhp().getAlias(),endType.name(), e);
 		}
 		if(endType==END_TYPE.reader) {
 			return this.cconn;
@@ -158,7 +158,7 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 			}
 			this.connectParams = null;
 		} catch (Exception e) {
-			log.warn("free connection Exception!", e);
+			log.warn("{} free kafka connection exception", this.connectParams.getWhp().getAlias(),e);
 			return false;
 		}
 		return true;

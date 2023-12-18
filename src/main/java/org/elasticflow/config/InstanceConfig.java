@@ -199,17 +199,17 @@ public class InstanceConfig {
 			byte[] bt = EFDataStorer.getData(this.configPath, false);
 			if (bt.length <= 0) {
 				setStatus(false);
-				Common.LOG.error("{} configuration information does not exist!", this.configPath);
+				Common.LOG.error("instance {} configuration file {} not exists!", this.instanceID,this.configPath);
 				return;
 			}				
 			in = new ByteArrayInputStream(bt, 0, bt.length);
 			configParse(in);
 			in.close();
-			Common.LOG.info(configPath + " instance task info load success!");
+			Common.LOG.info("instance {} configuration load from {} success!",this.instanceID,this.configPath);
 		} catch (Exception e) {
 			in = null;
 			setStatus(false);
-			Common.LOG.error("load {} config exception", this.configPath, e);
+			Common.LOG.error("instance {} configuration parse from {} exception",this.instanceID, this.configPath, e);
 		}
 	}
 
@@ -235,7 +235,7 @@ public class InstanceConfig {
 			if (params != null) {
 				parseNode(params.getElementsByTagName("param"), "pipeParam", PipeParam.class);
 			} else {
-				Common.LOG.error(this.configPath + " file not correct");
+				Common.LOG.error("{} TransParam not set",this.configPath);
 				return;
 			}
 

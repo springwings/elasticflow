@@ -93,11 +93,11 @@ public class SearcherService{
 						try {
 							process(efRq,rps); 
 						} catch (Exception e) {
-							Common.LOG.error("Searcher http handler error,",e);
+							Common.LOG.error("searcher service http handler error,",e);
 							rps.setStatus(e.getMessage(), RESPONSE_STATUS.ParameterErr); 
 						}
 					} else {
-						rps.setStatus("The Alias is Not Exists OR Not Start Up!", RESPONSE_STATUS.ParameterErr); 
+						rps.setStatus(efRq.getPipe()+" alias is not exists or not start up!", RESPONSE_STATUS.ParameterErr); 
 					}
 				} 
 			} catch (Exception e) {

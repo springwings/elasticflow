@@ -51,13 +51,11 @@ public class Neo4jWriter extends WriterFlowSocket {
 			try (PreparedStatement statement = conn.prepareStatement(
 					getWriteSQL(writerParam, unit, transParams));) {
 				statement.execute();
-			} catch (Exception e) {
-				log.error("PreparedStatement Exception", e);
-				log.info(getWriteSQL(writerParam, unit, transParams));
+			} catch (Exception e) { 
+				throw new EFException(e,getWriteSQL(writerParam, unit, transParams),ELEVEL.Dispose);
 			}
-		} catch (Exception e) { 
-			log.error("Neo4j error writing data", e);
-			throw new EFException("Neo4j error writing data",ELEVEL.Dispose);
+		} catch (Exception e) {  
+			throw new EFException(e,instance+" Neo4j error writing data",ELEVEL.Dispose);
 		} finally {
 			REALEASE(false, releaseConn);
 		}
@@ -95,11 +93,11 @@ public class Neo4jWriter extends WriterFlowSocket {
 			if (rs.next()) {
 				try (PreparedStatement statement2 = conn.prepareStatement("match (n) detach delete n");){
 					statement2.execute();
-					log.info("success clean instance.");
+					log.info("success clean instance {}.",mainName);
 				} 
 			} 
 		} catch (Exception e) {
-			log.error("clean instance failed!", e); 
+			log.error("clean instance {} failed!",mainName, e); 
 		}  
 		return "a";
 	}

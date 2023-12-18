@@ -57,7 +57,7 @@ public class Track extends Instruction {
 		String[] writeDests = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
 				.getWriteTo().split(",");
 		if(writeDests.length<1)
-			Common.LOG.error("build write pipe socket error!Misconfiguration writer destination!");
+			Common.LOG.error("instruction.set.Track.cpuPrepare Misconfiguration writer destination!");
 		for (String dest : writeDests) {
 			wfs.add(Resource.socketCenter.getWriterSocket(dest, instance,L1seq, ""));
 		}
@@ -96,7 +96,7 @@ public class Track extends Instruction {
 			}
 			tmpStore.get(id).put(key, val);
 		} else {
-			log.error("store parameter not match!");
+			log.error("instruction.set.Track.store parameter not match!");
 		}
 	}
 
@@ -112,7 +112,7 @@ public class Track extends Instruction {
 				return tmpStore.get(id).get(key);
 			}
 		} else {
-			log.error("fetch parameter not match!");
+			log.error("instruction.set.Track.fetch parameter not match!");
 		}
 		return null;
 	}

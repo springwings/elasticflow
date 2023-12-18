@@ -144,10 +144,9 @@ public class PyComputer extends ComputerFlowSocket {
 			StringBuilder recive = new StringBuilder();
 			for (int len = is.read(buf); len > 0; len = is.read(buf)) {
 				recive.append(new String(buf, 0, len));
-			}
-			System.out.println(recive);
+			} 
 		} catch (Exception e) {
-			log.error("send message exception",e);
+			log.error("model service send message exception",e);
 		}
 	}
 }

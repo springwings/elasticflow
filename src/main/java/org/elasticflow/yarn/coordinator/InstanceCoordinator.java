@@ -77,7 +77,7 @@ public class InstanceCoordinator implements InstanceCoord {
 			}  
 			Common.setConfigObj(obj, cls, fieldName,value);
 		} catch (Exception e) {
-			Common.LOG.error("update Instance Config Exception",e);
+			Common.LOG.error("update instance {} config exception",instance,e);
 		}	
 	}
 	
@@ -121,7 +121,7 @@ public class InstanceCoordinator implements InstanceCoord {
 				EFNodeUtil.loadInstanceDatas(instanceConfig);
 			EFMonitorUtil.rebuildFlowGovern(instanceSettting, createSchedule);
 		} catch (EFException e) {
-			Common.LOG.error("load Instance "+instanceName+" exception",e);
+			Common.LOG.error("load instance {} exception",instanceName,e);
 		}
 	}
 

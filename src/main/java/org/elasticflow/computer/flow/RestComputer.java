@@ -111,17 +111,15 @@ public class RestComputer extends ComputerFlowSocket {
 								apiBlockingQueue.put(api);
 								this.write(context, tmp, responseParams, _keepdt); 
 							} catch (Exception e) { 
-								this.successRunAll = false;
-								log.error(api);
-								log.error("rest post data process error", e);
+								this.successRunAll = false; 
+								log.error("rest post data process error,api {}", api,e);
 							} finally {
 								taskSingal.countDown();
 							}
 			            }); 
 					} catch (Exception e) { 
-						this.successRunAll = false;
-						log.error(apis.get(0));
-						log.error("rest post data process error", e);
+						this.successRunAll = false; 
+						log.error("rest post data process error,api {}",apis.get(0), e);
 					}finally {
 						count = 0;
 						post_data.clear();
@@ -146,17 +144,15 @@ public class RestComputer extends ComputerFlowSocket {
 							apiBlockingQueue.put(api);
 							this.write(context, tmp, responseParams, _keepdt); 
 						} catch (Exception e) { 
-							this.successRunAll = false;
-							log.error(api);
-							log.error("rest post data process error", e);
+							this.successRunAll = false; 
+							log.error("rest post data process error,api {}",api, e);
 						} finally {
 							taskSingal.countDown();
 						}
 		            }); 
 				} catch (Exception e) { 
-					this.successRunAll = false;
-					log.error(apis.get(0));
-					log.error("rest post data process error", e);
+					this.successRunAll = false; 
+					log.error("rest post data process error,api [}",apis.get(0), e);
 				}
 				post_data.clear();
 				keepDatas.clear();

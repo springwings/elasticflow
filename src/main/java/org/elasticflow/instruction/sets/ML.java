@@ -35,7 +35,7 @@ public class ML extends Instruction {
 	public static DataPage compute(Context context, Object[] args) throws EFException {
 		DataPage res = new DataPage();
 		if (!isValid(4, args)) {
-			log.error("Compute parameter not match!");
+			log.error("instruction.set.ML Compute parameter not match!");
 			return res;
 		}
 		DataPage dp = (DataPage) args[3];

@@ -88,7 +88,7 @@ public class FlowCenter{
 				}				
 			}
 		} catch (Exception e) {
-			Common.LOG.error("run instance now "+instance+" Exception", e);
+			Common.LOG.error("run instance {} exception",instance, e);
 			return false;
 		}
 
@@ -99,12 +99,11 @@ public class FlowCenter{
 	
 	/**
 	 * Add flow pipeline management
-	 * @param instanceName
+	 * @param instanceID
 	 * @param instanceConfig
 	 * @param needClear
 	 * @param createSchedule
-	 * @param contextId
-	 * @throws EFException 
+	 * @throws EFException
 	 */
 	public void addFlowGovern(String instanceID, InstanceConfig instanceConfig,boolean needClear,boolean createSchedule) throws EFException { 
 		if (instanceConfig.checkStatus()==false || instanceConfig.openTrans() == false)
@@ -131,7 +130,7 @@ public class FlowCenter{
 						instanceConfig,needClear);
 			}
 		} catch (Exception e) {
-			Common.LOG.error("Add "+instanceID+" Flow Govern Exception", e);
+			Common.LOG.error("add instance {} Flow Govern exception",instanceID, e);
 		} 
 	}
 
@@ -143,7 +142,7 @@ public class FlowCenter{
 		try {
 			Resource.taskJobCenter.addJob(_sj); 
 		}catch (Exception e) {
-			Common.LOG.error("create Instruction Job "+param.getId()+" Exception", e);
+			Common.LOG.error("create instruction job {} exception", param.getId(),e);
 		} 
 	}
 

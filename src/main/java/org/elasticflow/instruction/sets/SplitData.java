@@ -16,7 +16,7 @@ public class SplitData extends Instruction{
 	public static double getSplitDayPoint(Context context, Object[] args) {
 		double time = 0;
 		if (!isValid(1, args)) {
-			Common.LOG.error("getSplitDayPoint parameter not match!");
+			Common.LOG.error("instruction.set.SplitData.getSplitDayPoint parameter not match!");
 			return time;
 		}
 		int days = Integer.parseInt(String.valueOf(args[0]));

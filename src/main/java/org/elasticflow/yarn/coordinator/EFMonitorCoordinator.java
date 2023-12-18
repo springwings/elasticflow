@@ -51,7 +51,7 @@ public class EFMonitorCoordinator implements EFMonitorCoord {
 			dt.put("CPU", SystemInfoUtil.getCpuUsage());
 			dt.put("MEMORY", SystemInfoUtil.getMemUsage());
 		} catch (Exception e) {
-			Common.LOG.error(" getStatus Exception ", e);
+			Common.LOG.error("get node system information exception", e);
 		}
 		return dt;
 	}

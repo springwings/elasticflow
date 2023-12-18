@@ -34,7 +34,7 @@ public class TaskControl extends Instruction {
 
 	public static void moveFullPosition(Context context, Object[] args) {
 		if (!isValid(3, args)) {
-			Common.LOG.error("moveFullPosition parameter not match!");
+			Common.LOG.error("instruction.set.TaskControl.moveFullPosition parameter not match!");
 			return;
 		}
 		int start = Integer.parseInt(args[0].toString());
@@ -56,7 +56,7 @@ public class TaskControl extends Instruction {
 
 	public static void setIncrementPosition(Context context, Object[] args) throws EFException {
 		if (!isValid(1, args)) {
-			Common.LOG.error("move full position parameter not match!");
+			Common.LOG.error("instruction.set.TaskControl.setIncrementPosition parameter not match!");
 			return;
 		}
 		int position = Integer.parseInt(args[0].toString());

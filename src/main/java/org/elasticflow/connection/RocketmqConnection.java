@@ -48,7 +48,7 @@ public class RocketmqConnection extends EFConnectionSocket<Object> {
 					else if(endType==END_TYPE.writer)
 						this.genProducer(wnp);
 				} catch (Exception e) {
-					log.error("get connection exception", e);
+					log.error("{} Rocketmq {} connect exception", this.connectParams.getWhp().getAlias(),endType.name(),e);
 				}			
 			}
 		} else {
@@ -109,7 +109,7 @@ public class RocketmqConnection extends EFConnectionSocket<Object> {
 				Thread.sleep(1000+tryTime*500);
 			}
 		} catch (Exception e) {
-			log.error("get connection exception", e);
+			log.error("{} get Rocketmq {} connection exception", this.connectParams.getWhp().getAlias(),endType.name(),e);
 		}
 		if(endType==END_TYPE.reader) {
 			return this.cconn;
@@ -139,7 +139,7 @@ public class RocketmqConnection extends EFConnectionSocket<Object> {
 			}
 			this.connectParams = null;
 		} catch (Exception e) {
-			log.warn("free connection Exception!", e);
+			log.warn("{} free Rocketmq connection exception", this.connectParams.getWhp().getAlias(),e);
 			return false;
 		}
 		return true;

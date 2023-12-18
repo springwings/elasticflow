@@ -40,7 +40,7 @@ public class HdfsConnection extends EFConnectionSocket<FileSystem> {
 					this.conn = FileSystem.get(new URI(wnp.getHost()), conf, 
 							wnp.getDefaultValue().getString(DEFAULT_KEY));
 				} catch (Exception e) {
-					log.error("Hdfs connect Exception",e);
+					log.error("{} get hdfs {} connect exception,", wnp.getAlias(),endType.name(),e);
 					this.conn = null;
 				}
 			}
@@ -66,7 +66,7 @@ public class HdfsConnection extends EFConnectionSocket<FileSystem> {
 			this.conn = null;
 			this.connectParams = null;
 		} catch (Exception e) {
-			log.warn("free connect Exception,", e);
+			log.warn("{} free hdfs connection exception", this.connectParams.getWhp().getAlias(),e);
 			return false;
 		}
 		return true;

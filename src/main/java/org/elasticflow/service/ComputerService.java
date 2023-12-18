@@ -93,8 +93,8 @@ public class ComputerService {
 					rps = process(RR);
 					response.getWriter().println(rps.getResponse(true));
 				} catch (Exception e) {
-					Common.LOG.error("Computer http handler error,",e);
-					rps.setStatus("Computer http handler error!", RESPONSE_STATUS.CodeException);
+					Common.LOG.error("computer service http handler exception",e);
+					rps.setStatus("computer service http handler exception!", RESPONSE_STATUS.CodeException);
 					response.getWriter().println(rps.getResponse(true));
 				}
 			} else {

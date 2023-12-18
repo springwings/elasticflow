@@ -111,9 +111,8 @@ public class EsWriter extends WriterFlowSocket {
 			_UR.setScript(script).setQuery(QueryBuilders.termQuery(writerParam.getWriteKey(), unit.getReaderKeyVal()));
 			_UR.setRefresh(true);
 			getESC().getClient().updateByQuery(_UR, RequestOptions.DEFAULT);
-		} catch (Exception e) {
-			log.error("ElasticSearch error writing data", e);
-			throw new EFException("ElasticSearch error writing data");
+		} catch (Exception e) { 
+			throw new EFException(e,"ElasticSearch write data exception");
 		}
 	}
 
@@ -173,12 +172,11 @@ public class EsWriter extends WriterFlowSocket {
 					getESC().getClient().index(_IR, RequestOptions.DEFAULT);
 				}
 			}
-		} catch (Exception e) {
-			log.error("ElasticSearch error writing data", e);
+		} catch (Exception e) { 
 			if (Common.exceptionCheckContain(e, "IndexNotFoundException")) {
 				throw new EFException(e,"storeId not found", ELEVEL.Termination, ETYPE.RESOURCE_ERROR);
 			} else {
-				throw new EFException(e,ELEVEL.Dispose);
+				throw new EFException(e,"ElasticSearch write data exception",ELEVEL.Dispose);
 			}
 		}
 	}
@@ -249,12 +247,12 @@ public class EsWriter extends WriterFlowSocket {
 
 			int failed_cnt = response.getFailedShards();
 			if (failed_cnt > 0) {
-				log.warn("Instance " + name + " optimize getFailedShards " + failed_cnt);
+				log.warn("instance {} optimize failed,Failed Shards",instance,failed_cnt);
 			} else {
-				log.info("Instance " + name + " optimize Success!");
+				log.info("instance {} optimize Success!",instance);
 			}
 		} catch (Exception e) {
-			log.error("Instance " + name + " optimize failed.", e);
+			log.error("instance {} optimize exception",instance, e);
 		}
 	}
 
@@ -264,21 +262,21 @@ public class EsWriter extends WriterFlowSocket {
 			storeId = "a";
 		String iName = TaskUtil.getStoreName(instance, storeId);
 		try {
-			log.info("trying to remove Instance " + iName);
+			log.info("trying to remove instance {} storeId {}.",instance,storeId);
 			GetIndexRequest _GIR = new GetIndexRequest(iName);
 			boolean exists = getESC().getClient().indices().exists(_GIR, RequestOptions.DEFAULT);
 			if (!exists) {
-				log.info("Instance " + iName + " didn't exist.");
+				log.info("instance {} storeId {} not exist.",instance,storeId);
 			} else {
 				DeleteIndexRequest _DIR = new DeleteIndexRequest(iName);
 				AcknowledgedResponse deleteResponse = getESC().getClient().indices().delete(_DIR,
 						RequestOptions.DEFAULT);
 				if (deleteResponse.isAcknowledged()) {
-					log.info("Instance " + iName + " removed ");
+					log.info("instance {} storeId {} success removed.",instance,storeId);
 				}
 			}
 		} catch (Exception e) {
-			log.error("remove Instance " + iName + " Exception", e);
+			log.error("remove instance {} storeId {} exception",instance,storeId, e);
 		}
 	}
 
@@ -286,16 +284,16 @@ public class EsWriter extends WriterFlowSocket {
 	public void setAlias(String instanceName, String storeId, String aliasName) {
 		String iName = TaskUtil.getStoreName(instanceName, storeId);
 		try {
-			log.info("trying to setting Alias " + aliasName + " to index " + iName);
+			log.info("trying to set Alias{} to index {}",aliasName,iName);
 			IndicesAliasesRequest _IAR = new IndicesAliasesRequest();
 			AliasActions aliasAction = new AliasActions(AliasActions.Type.ADD).index(iName).alias(aliasName);
 			_IAR.addAliasAction(aliasAction);
 			AcknowledgedResponse response = getESC().getClient().indices().updateAliases(_IAR, RequestOptions.DEFAULT);
 			if (response.isAcknowledged()) {
-				log.info("alias " + aliasName + " setted to " + iName);
+				log.info("alias {} success setted to index {}.",aliasName,iName);
 			}
 		} catch (Exception e) {
-			log.error("alias " + aliasName + " set to " + iName + " Exception.", e);
+			log.error("alias {} set to index {} Exception.",aliasName,iName, e);
 		}
 	}
 
@@ -341,7 +339,7 @@ public class EsWriter extends WriterFlowSocket {
 			});
 			root_map.put("properties", settingMap);
 		} catch (Exception e) {
-			log.error("getSettingMap Exception", e);
+			log.error("{} get SettingMap exception",instanceConfig.getInstanceID(), e);
 		}  
 		return root_map;
 	}
@@ -412,7 +410,7 @@ public class EsWriter extends WriterFlowSocket {
 				}
 			}
 		} catch (Exception e) { 
-			throw new EFException(e,"abMechanism exception",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
+			throw new EFException(e,mainName+" abMechanism exception",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
 		}
 		return select;
 	}

@@ -152,8 +152,8 @@ public class HttpReaderService {
 								CPU.RUN(pipePump.getID(), "Pipe", "writeDataSet", false, "HTTP PUT", writeTo, storeid,
 										"", pagedata, "", isUpdate, monopoly);
 							} catch (Exception e) {
-								Common.LOG.error("Http Write Exception,", e);
-								rps.setStatus("Write failure data error!", RESPONSE_STATUS.DataErr);
+								Common.LOG.error("http reader service exception,", e);
+								rps.setStatus("write failure data error!", RESPONSE_STATUS.DataErr);
 								try {
 									throw new EFException("写入参数错误，instance:" + instance + ",seq:" + seq);
 								} catch (EFException fe) {

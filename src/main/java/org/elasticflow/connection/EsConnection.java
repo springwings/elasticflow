@@ -66,7 +66,7 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 					try {
 						httpHosts[i] = new HttpHost(hosts[i], 9200, "http");
 					} catch (Exception e) {
-						log.error("connect Exception", e);
+						log.error("{} es {} connect exception",wnp.getAlias() , endType.name(),e);
 					}
 				}
 				if(credentialsProvider!=null) {
@@ -119,7 +119,7 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 			this.conn = null;
 			this.connectParams = null;
 		} catch (Exception e) {
-			log.warn("free connect Exception,", e);
+			log.warn("{} free es connection exception", this.connectParams.getWhp().getAlias(),e);
 			return false;
 		}
 		return true;

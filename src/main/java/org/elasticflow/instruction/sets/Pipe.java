@@ -40,7 +40,7 @@ public class Pipe extends Instruction {
 	 */
 	public static void create(Context context, Object[] args) {
 		if (!isValid(2, args)) {
-			log.error("Pipe create parameter not match!");
+			log.error("instruction.set.Pipe create parameter not match!");
 			return;
 		}
 
@@ -48,7 +48,7 @@ public class Pipe extends Instruction {
 
 	public static void remove(Context context, Object[] args) {
 		if (!isValid(2, args)) {
-			log.error("Pipe remove parameter not match!");
+			log.error("instruction.set.Pipe remove parameter not match!");
 			return;
 		}
 

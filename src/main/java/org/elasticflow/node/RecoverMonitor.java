@@ -27,9 +27,9 @@ public class RecoverMonitor {
 	
 	public void start() {
 		Common.LOG.info("Start Recover Monitor Service!");
+		String ip = GlobalParam.SystemConfig.getProperty("monitor_ip");
 		while(true) {
 			try {
-				String ip = GlobalParam.SystemConfig.getProperty("monitor_ip");
 				TelnetClient client = new TelnetClient(); 
 				client.setDefaultTimeout(6000); 
 				try { 
@@ -41,11 +41,14 @@ public class RecoverMonitor {
 				}
 				Thread.sleep(6000);
 			}catch (Exception e) {
-				Common.LOG.error("RecoverMonitor start Exception",e);
+				Common.LOG.error("try to start Recover Monitor Service {} exception",ip,e);
 			}  
 		} 
 	} 
 	
+	/**
+	 * Take over the operation from the original node again
+	 */
 	private void returnNode() {
 		TelnetClient client = new TelnetClient(); 
 		client.setDefaultTimeout(2000); 
@@ -53,14 +56,14 @@ public class RecoverMonitor {
 			try {
 				try { 
 					client.connect(this.takeIp, 8617); 
-					Common.LOG.info("start restart and return Node "+this.takeIp);
+					Common.LOG.info("restart and return Node {}.",this.takeIp);
 					EFNodeUtil.runShell(GlobalParam.RESTART_SHELL_PATH);
 					return;
 				} catch (Exception e) { 
 					Thread.sleep(5000); 
 				} 
 			}catch (Exception e) {
-				Common.LOG.error("returnNode Exception",e);
+				Common.LOG.error("try to return Node {} exception",this.takeIp,e);
 			}  
 		}
 	}
@@ -69,7 +72,7 @@ public class RecoverMonitor {
 		Common.loadGlobalConfig(GlobalParam.DATAS_CONFIG_PATH+"/EF_NODES/"+this.takeIp+"/configs"); 
 		Resource.EFLOWS.init(true);
 		Resource.EFLOWS.startService();
-		Common.LOG.info(GlobalParam.IP+" has take Over Node "+this.takeIp);
+		Common.LOG.info("{} has take Over Node {}",GlobalParam.IP,this.takeIp);
 		new Thread() {
 			public void run() {
 				returnNode();

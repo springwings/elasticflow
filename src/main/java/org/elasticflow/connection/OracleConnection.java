@@ -23,7 +23,7 @@ public class OracleConnection extends EFConnectionSocket<Connection> {
 		try {
 			Class.forName("oracle.jdbc.OracleDriver");
 		} catch (Exception e) {
-			log.error("OracleConnection Exception,", e);
+			log.error("oracle connection class init exception", e);
 		}
 	}
 
@@ -40,12 +40,11 @@ public class OracleConnection extends EFConnectionSocket<Connection> {
 				WarehouseParam wsp = this.connectParams.getWhp();
 				this.conn = DriverManager.getConnection(getConnectionUrl(),
 						wsp.getUser(),
-						wsp.getPassword());
-				log.info("build connect to " + getConnectionUrl());
+						wsp.getPassword()); 
 			}
 			return true;
 		} catch (Exception e) {
-			log.error(this.connectParams.getWhp().getHost() + "connect Exception,", e);
+			log.error("{} oracle {} connect exception", this.connectParams.getWhp().getAlias(),endType.name(),e);
 			return false;
 		}
 	}
@@ -57,7 +56,7 @@ public class OracleConnection extends EFConnectionSocket<Connection> {
 			this.conn = null;
 			this.connectParams = null;
 		} catch (Exception e) {
-			log.error("free connect Exception,", e);
+			log.warn("{} free oracle connection exception", this.connectParams.getWhp().getAlias(),e);
 			return false;
 		}
 		return true;

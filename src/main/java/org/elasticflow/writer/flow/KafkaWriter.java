@@ -107,7 +107,7 @@ public class KafkaWriter extends WriterFlowSocket {
                 log.info("remove kafka topic {} success!", topic);
             }
         } catch (Exception e) {
-        	log.error("remove kafka topic exception!", e);
+        	log.error("instance {}, remove kafka topic exception!", instance,e);
         }
 	}
 

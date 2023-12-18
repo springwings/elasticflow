@@ -47,12 +47,12 @@ public class EFEmailNotifier implements EFNotify {
 			try {
 				boolean b = sendHtmlMailSyncMode(subject,instance, content,errorType);
 				if (b) {
-					log.info("email send success!");
+					log.info("{} email send success!",subject);
 				} else {
-					log.error("email send error!");
+					log.error("{} email send error!",subject);
 				}
 			} catch (Exception e) {
-				log.error("Asynchronous Mode send email exception:", e);
+				log.error("Asynchronous Mode send email {} exception",subject, e);
 			}
 		});
 	}
@@ -110,7 +110,7 @@ public class EFEmailNotifier implements EFNotify {
 			Transport.send(mailMessage);
 			return true;
 		} catch (Exception e) {
-			log.error("sendHtmlMail Exception", e);
+			log.error("{} send HtmlM ail exception",mailInfo.getSubject(), e);
 		}
 		return false;
 	}

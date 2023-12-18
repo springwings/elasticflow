@@ -38,7 +38,7 @@ public class EFlowMonitor{
 			try {
 				Thread.sleep(100);
 			} catch (Exception e) {
-				Common.LOG.error("threadPools sumarize excetion",e);
+				Common.LOG.error("get thread pools usage information excetion",e);
 			}
 		}
 		double[] res = NodeCoordinator.systemResource();

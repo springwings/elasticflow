@@ -38,7 +38,7 @@ public class FastdfsConnection extends EFConnectionSocket<StorageClient> {
 					ClientGlobal.initByProperties(props);  
 					this.conn = new StorageClient(new TrackerClient().getTrackerServer(), null);
 				} catch (Exception e) {
-					log.error("Fastdfs connect Exception,", e);
+					log.error("{} Fastdfs {} connect exception",wnp.getAlias(),endType.name(), e);
 					return false;
 				}				
 			}
@@ -55,7 +55,7 @@ public class FastdfsConnection extends EFConnectionSocket<StorageClient> {
 				return true;
 			}
 		} catch (Exception e) {
-			log.error("get status Exception", e);
+			log.error("{} fastdfs get status exception",this.connectParams.getWhp().getAlias(), e);
 		}
 		this.conn = null;
 		return false;
@@ -69,7 +69,7 @@ public class FastdfsConnection extends EFConnectionSocket<StorageClient> {
 			this.conn = null;
 			this.connectParams = null;
 		} catch (Exception e) {
-			log.warn("free connect Exception,", e);
+			log.warn("{} free fastdfs connection exception", this.connectParams.getWhp().getAlias(),e);
 			return false;
 		}
 		return true;

@@ -102,7 +102,7 @@ public abstract class WriterFlowSocket extends Flow {
 	protected String timeMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig)
 			throws EFException {
 		EFTuple<Long, Long> dTuple = EFWriterUtil.timeMechanism(instanceConfig);
-		String iName = TaskUtil.getStoreName(mainName, String.valueOf(dTuple.v2));
+		String storeName = TaskUtil.getStoreName(mainName, String.valueOf(dTuple.v2));
 		try {
 			// remove out of date instance ,but this function not support cross L1Seqs
 			// destination
@@ -110,7 +110,7 @@ public abstract class WriterFlowSocket extends Flow {
 					GlobalParam.FLOW_TAG._DEFAULT.name());
 			pipePump.getWriter(dTuple.v2).removeInstance(mainName, String.valueOf(dTuple.v2));
 		} catch (Exception e) {
-			Common.LOG.error("remove instance　" + iName + " Exception!", e);
+			Common.LOG.error("remove instance data {} exception!", storeName,e);
 		}
 		if (this.storePositionExists(TaskUtil.getStoreName(mainName, String.valueOf(dTuple.v1))) == false) {
 			this.create(mainName, String.valueOf(dTuple.v1), instanceConfig);

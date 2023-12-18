@@ -100,15 +100,16 @@ public final class Common {
 			return false;
 	}
 
-	public static FormatProperties loadProperties(String path) {
-		FormatProperties fp = new FormatProperties();
+	public static FormatProperties loadProperties(String configPath) {
+		FormatProperties fp = null;
 		String replaceStr = System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") == -1
 				? "file:"
 				: "file:/";
-		try (FileInputStream in = new FileInputStream(path.replace(replaceStr, ""))) {
+		try (FileInputStream in = new FileInputStream(configPath.replace(replaceStr, ""))) {
+			fp = new FormatProperties();
 			fp.load(in);
 		} catch (Exception e) {
-			Common.LOG.error("load Global Properties file Exception", e);
+			Common.LOG.error("load configuration from {} exception",configPath, e);
 		}
 		return fp;
 	}
@@ -154,7 +155,11 @@ public final class Common {
 			if (param.getNodeName().equals(fieldName)) {
 				value = param.getTextContent();
 			}
-			setConfigObj(o, c, fieldName, value);
+			try {
+				setConfigObj(o, c, fieldName, value);
+			}catch(Exception e) {
+				throw new EFException(e,"task.xml field "+fieldName+" parse exception!",ELEVEL.Dispose);
+			}
 		}
 		return o;
 	}
@@ -441,9 +446,14 @@ public final class Common {
 	public static void loadGlobalConfig(String path) {
 		try {
 			GlobalParam.SystemConfig = Common.loadProperties(path);
-			Common.LOG.info("load system configuration from {} success!", path);
+			if(GlobalParam.SystemConfig!=null) {
+				Common.LOG.info("load system configuration from {} success!", path);
+			}else {
+				Common.LOG.error("load system configuration from {} exception", path);
+				Common.stopSystem(false);
+			}				
 		} catch (Exception e) {
-			Common.LOG.error("load system configuration from {} Exception", path, e);
+			Common.LOG.error("load system configuration from {} exception", path, e);
 			Common.stopSystem(false);
 		}
 	}

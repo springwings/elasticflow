@@ -16,43 +16,44 @@ import org.elasticflow.util.Common;
  */
 public class EFDataStorer {
 
-	public static boolean exists(String path) {
+	public static boolean exists(String filePath) {
 		try {
-			File file = new File(path);
+			File file = new File(filePath);
 			return file.exists();
 		} catch (Exception e) {
+			Common.LOG.error("file {} exists check exception",filePath, e);
 			return false;
 		}
 	}
 
-	public static void createPath(String path,boolean isFile) {
+	public static void createPath(String filePath,boolean isFile) {
 		try {
-			File fd = new File(path);
+			File fd = new File(filePath);
 			if(isFile) {
 				fd.createNewFile();
 			}else {
 				fd.mkdirs();
 			}
 		} catch (Exception e) {
-			Common.LOG.error("create path exception", e);
+			Common.LOG.error("create path {} exception",filePath, e);
 		}
 	}
 
-	public static void setData(String path, String data) {
+	public static void setData(String filePath, String data) {
 		try {
-			try (FileWriter fw = new FileWriter(path);) {
+			try (FileWriter fw = new FileWriter(filePath);) {
 				fw.write(data);
 			} catch (Exception e) {
 				throw e;
 			}
 		} catch (Exception e) {
-			Common.LOG.error(path+" error writing data", e);
+			Common.LOG.error("write data to {} exception",filePath,e);
 		}
 	}
 	
-	public static byte[] getData(String path,boolean create) {
-		try (FileInputStream fi = new FileInputStream(path);) {
-			File f = new File(path);
+	public static byte[] getData(String filePath,boolean create) {
+		try (FileInputStream fi = new FileInputStream(filePath);) {
+			File f = new File(filePath);
             int length = (int) f.length();
             byte[] data = new byte[length];
             fi.read(data);
@@ -60,7 +61,7 @@ public class EFDataStorer {
 		}catch (FileNotFoundException e1) {
 			try {
 				if(create) { 
-					File f = new File(path);
+					File f = new File(filePath);
 					File fileParent = f.getParentFile();
 					if(!fileParent.exists()){
 						fileParent.mkdirs();
@@ -69,11 +70,11 @@ public class EFDataStorer {
 				}
 				return "".getBytes();
 			}catch(Exception e2) {
-				Common.LOG.error("create file exception", e2);
+				Common.LOG.error("create file {} exception",filePath, e2);
 				return null;
 			}
 		} catch (Exception e) {
-			Common.LOG.error("read data exception", e);
+			Common.LOG.error("read data from {} exception",filePath, e);
 			return null;
 		}
 	}

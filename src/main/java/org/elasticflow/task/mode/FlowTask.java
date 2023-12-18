@@ -118,7 +118,7 @@ public class FlowTask {
 				runNextJobs(JOB_TYPE.FULL);
 			} catch (Exception e) {
 				breaker.log();
-				log.error(instanceID + " Full Exception", e);
+				log.error("instance {} run full job Exception",instanceID, e);
 				Resource.EfNotifier.send(Localization.format(LAG_TYPE.fullFail, instanceID), instanceID, e.getMessage(),
 						EFException.ETYPE.DATA_ERROR.name(), false);
 			} finally {
@@ -127,7 +127,7 @@ public class FlowTask {
 			}
 		} else {
 			if (pipePump.getInstanceConfig().getPipeParams().getLogLevel() == 0)
-				log.info(instanceID + " still running，new full job is aborted!");
+				log.info("instance {} is running，new full job is aborted!",instanceID);
 		}
 	}
 
@@ -149,7 +149,7 @@ public class FlowTask {
 						getNextJobs(pipePump.getInstanceConfig().getPipeParams().getNextJob()));
 				runNextJobs(JOB_TYPE.FULL);
 			} catch (Exception e) {
-				log.error(instanceID + " Virtual Full Exception", e);
+				log.error("instance {} run Virtual Full Exception",instanceID, e);
 				Resource.EfNotifier.send(instanceID + " Virtual Full Exception", instanceID, e.getMessage(),
 						EFException.ETYPE.DATA_ERROR.name(), false);
 			} finally {
@@ -179,7 +179,7 @@ public class FlowTask {
 						GlobalParam.FLOWINFO.INCRE_STOREID.name(), storeId);
 				runNextJobs(JOB_TYPE.INCREMENT);
 			} catch (Exception e) {
-				log.error(instanceID + " Virtual Increment Exception", e);
+				log.error("instance {} Virtual Increment Exception",instanceID, e);
 				Resource.EfNotifier.send(instanceID + " Virtual Increment Exception", instanceID, e.getMessage(),
 						EFException.ETYPE.DATA_ERROR.name(), false);
 			} finally {
@@ -189,7 +189,7 @@ public class FlowTask {
 			}
 		} else {
 			if (pipePump.getInstanceConfig().getPipeParams().getLogLevel() == 0)
-				log.info(instanceID + " still running，new virtual increment job is aborted!");
+				log.info("instance {} is running，new virtual increment job is aborted!",instanceID);
 		}
 	}
 
