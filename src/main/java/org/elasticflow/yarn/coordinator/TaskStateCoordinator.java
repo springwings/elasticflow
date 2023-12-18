@@ -136,7 +136,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 					try {
 						sp.loadInfos(str, isfull);
 					} catch (Exception e) {
-						Common.LOG.error("instance {} L1seq {}, parse json exception!", instance, L1seq, e);
+						Common.LOG.error("instance {} L1seq {}, parse json exception", instance, L1seq, e);
 					}					
 				} 
 				SCAN_POSITION.put(instance,sp);

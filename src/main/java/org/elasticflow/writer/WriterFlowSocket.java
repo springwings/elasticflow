@@ -110,7 +110,7 @@ public abstract class WriterFlowSocket extends Flow {
 					GlobalParam.FLOW_TAG._DEFAULT.name());
 			pipePump.getWriter(dTuple.v2).removeInstance(mainName, String.valueOf(dTuple.v2));
 		} catch (Exception e) {
-			Common.LOG.error("remove instance data {} exception!", storeName,e);
+			Common.LOG.error("remove instance data {} exception", storeName,e);
 		}
 		if (this.storePositionExists(TaskUtil.getStoreName(mainName, String.valueOf(dTuple.v1))) == false) {
 			this.create(mainName, String.valueOf(dTuple.v1), instanceConfig);

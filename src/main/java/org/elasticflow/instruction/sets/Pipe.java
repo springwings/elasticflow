@@ -40,7 +40,7 @@ public class Pipe extends Instruction {
 	 */
 	public static void create(Context context, Object[] args) {
 		if (!isValid(2, args)) {
-			log.error("instruction.set.Pipe create parameter not match!");
+			log.error("instruction.set.Pipe.create parameter not match!");
 			return;
 		}
 
@@ -48,7 +48,7 @@ public class Pipe extends Instruction {
 
 	public static void remove(Context context, Object[] args) {
 		if (!isValid(2, args)) {
-			log.error("instruction.set.Pipe remove parameter not match!");
+			log.error("instruction.set.Pipe.remove parameter not match!");
 			return;
 		}
 
@@ -61,7 +61,7 @@ public class Pipe extends Instruction {
 	 */
 	public static DataPage fetchPage(Context context, Object[] args) throws EFException { 
 		if (!isValid(2, args)) {
-			log.error("fetchPage parameter not match!");
+			log.error("instruction.set.Pipe.fetchPage parameter not match!");
 			return null;
 		}
 		TaskCursor page = (TaskCursor) args[0]; 
@@ -86,7 +86,7 @@ public class Pipe extends Instruction {
 	public static ReaderState writeDataSet(Context context, Object[] args) throws EFException {
 		ReaderState rstate = new ReaderState();
 		if (!isValid(8, args)) {
-			log.error("writeDataSet parameter not match!");
+			log.error("instruction.set.Pipe.writeDataSet parameter not match!");
 			return rstate;
 		}
 		String jobType = String.valueOf(args[0]);

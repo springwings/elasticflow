@@ -75,7 +75,7 @@ public class HttpService implements EFService {
 			this.status = false;
 			server.stop();
 		} catch (Exception e) {
-			log.error("close http service exception,",e);
+			log.error("close http service exception",e);
 		}
 	}
 
@@ -86,7 +86,7 @@ public class HttpService implements EFService {
 			this.status = true;
 		} catch (Exception e) {
 			this.status = false;
-			log.error("start http service exception,",e);
+			log.error("start http service exception",e);
 			throw new EFException(e.getMessage(), ELEVEL.Stop);
 		} 
 	}

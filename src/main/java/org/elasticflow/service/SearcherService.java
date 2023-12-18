@@ -93,7 +93,7 @@ public class SearcherService{
 						try {
 							process(efRq,rps); 
 						} catch (Exception e) {
-							Common.LOG.error("searcher service http handler error,",e);
+							Common.LOG.error("searcher service http handler error",e);
 							rps.setStatus(e.getMessage(), RESPONSE_STATUS.ParameterErr); 
 						}
 					} else {
