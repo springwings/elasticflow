@@ -217,14 +217,14 @@ public class FlowTask {
 			} catch (EFException e) {
 				breaker.log();
 				if (!isReferenceInstance && e.getErrorType() == ETYPE.RESOURCE_ERROR) {
-					log.error("get {} increment storage location exception!", destination, e);
+					log.error("{}_{} increment job exception!",instanceID,L1seq, e);
 					breaker.openBreaker();
 					Resource.EfNotifier.send(Localization.format(LAG_TYPE.FailPosition, destination), instanceID,
 							e.getMessage(), e.getErrorType().name(), false);
 				} else if (e.getErrorType() == ETYPE.EXTINTERRUPT) {
 					log.warn("{}_{} increment external interrupt!",instanceID,L1seq);
 				} else {
-					log.error(instanceID + "_" +L1seq+ " increment job exception", e);
+					log.error("{}_{} increment job exception",instanceID,L1seq, e);
 				} 
 			} finally {
 				recompute = this.checkReCompute(storeId);

@@ -104,10 +104,10 @@ public class KafkaWriter extends WriterFlowSocket {
                 KafkaFuture<Void> future = entry.getValue();
                 future.get(); 
                 map.put(topic, !future.isCompletedExceptionally());
-                log.info("remove kafka topic {} success!", topic);
+                log.info("remove kafka instance {} success!", topic);
             }
         } catch (Exception e) {
-        	log.error("instance {}, remove kafka topic exception!", instance,e);
+        	log.error("remove kafka instance {} exception", instance,e);
         }
 	}
 

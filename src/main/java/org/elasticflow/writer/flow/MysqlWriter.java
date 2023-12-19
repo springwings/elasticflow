@@ -108,10 +108,10 @@ public class MysqlWriter extends WriterFlowSocket {
 			return;
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
 		try (PreparedStatement statement = conn.prepareStatement("DROP table if exists " + name);) {
-			log.info("remove instance data {} success!",name);
+			log.info("remove instance {} success!",name);
 			statement.execute();
 		} catch (Exception e) {
-			log.error("remove instance data {} failed!",name,e);
+			log.error("remove instance {} exception!",name,e);
 		} finally {
 			REALEASE(false, false);
 		}

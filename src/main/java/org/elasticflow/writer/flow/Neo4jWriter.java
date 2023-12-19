@@ -93,11 +93,11 @@ public class Neo4jWriter extends WriterFlowSocket {
 			if (rs.next()) {
 				try (PreparedStatement statement2 = conn.prepareStatement("match (n) detach delete n");){
 					statement2.execute();
-					log.info("success clean instance {}.",mainName);
+					log.info("ab-Mechanism success remove instance {}.",mainName);
 				} 
 			} 
 		} catch (Exception e) {
-			log.error("clean instance {} failed!",mainName, e); 
+			log.error("ab-Mechanism try to remove instance {} failed!",mainName, e); 
 		}  
 		return "a";
 	}

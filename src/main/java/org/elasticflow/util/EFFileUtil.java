@@ -49,7 +49,7 @@ public class EFFileUtil {
 			File oldFile = new File(filePath + "/" + oldName);
 			File newFile = new File(filePath + "/" + newName);
 			if (newFile.exists()) {
-				Common.LOG.warn(newName + " the file already exists！");
+				Common.LOG.warn("the file {} already exists！",newName);
 			} else {
 				oldFile.renameTo(newFile);
 			}
@@ -85,7 +85,7 @@ public class EFFileUtil {
 			writer = new FileWriter(file, false);
 			writer.write(content);
 		} catch (Exception e) {
-			Common.LOG.warn("create File Exception", e);
+			Common.LOG.warn("create file {} exception",fileDest, e);
 			return false;
 		} finally {
 			try {
@@ -103,7 +103,7 @@ public class EFFileUtil {
 		File in = new File(sourcePath);
 		File out = new File(destPath);
 		if (!in.exists()) {
-			Common.LOG.warn(in.getAbsolutePath() + " copy file not exists!");
+			Common.LOG.warn("copy file {} not exists!",sourcePath);
 			return false;
 		}
 		if (!out.exists()) {
@@ -115,7 +115,7 @@ public class EFFileUtil {
 			fis = new FileInputStream(in);
 			fos = new FileOutputStream(new File(destPath + "\\" + in.getName()));
 		} catch (Exception e) {
-			Common.LOG.error("copy file {} exception",sourcePath, e);
+			Common.LOG.error("copy file {} to {} exception",sourcePath,destPath, e);
 		}
 		int c;
 		byte[] b = new byte[1024 * 5];
@@ -160,7 +160,7 @@ public class EFFileUtil {
 		File out = new File(destFolder);
 
 		if (!in.exists()) {
-			Common.LOG.warn(in.getAbsolutePath() + " copy folder not exists");
+			Common.LOG.warn("copy folder {} not exists",sourceFolder);
 			return false;
 		}
 		if (!out.exists()) {
@@ -177,7 +177,7 @@ public class EFFileUtil {
 					fis = new FileInputStream(temp.getAbsolutePath());
 					fos = new FileOutputStream(new File(destFolder + "/" + temp.getName()));
 				} catch (Exception e) {
-					Common.LOG.error("copy folder {} exception", sourceFolder,e);
+					Common.LOG.error("copy file {} to {} exception", sourceFolder + "/" + file[i],destFolder,e);
 				}
 			} else if (temp.isDirectory()) {
 				copyFolder(temp.getAbsolutePath(), destFolder + "/" + temp.getName());
@@ -192,7 +192,7 @@ public class EFFileUtil {
 				fos.flush();
 				fos.close();
 			} catch (Exception e) {
-				Common.LOG.error("copy folder {} exception",sourceFolder, e);
+				Common.LOG.error("copy folder {} to {} exception",sourceFolder,destFolder, e);
 			}
 		}
 		return false;

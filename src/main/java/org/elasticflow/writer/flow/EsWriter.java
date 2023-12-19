@@ -247,12 +247,12 @@ public class EsWriter extends WriterFlowSocket {
 
 			int failed_cnt = response.getFailedShards();
 			if (failed_cnt > 0) {
-				log.warn("instance {} optimize failed,Failed Shards",instance,failed_cnt);
+				log.warn("instance {} optimize failed,Failed Shards:",instance,failed_cnt);
 			} else {
-				log.info("instance {} optimize Success!",instance);
+				log.info("instance {} optimize success!",instance);
 			}
 		} catch (Exception e) {
-			log.error("instance {} optimize exception",instance, e);
+			log.error("es instance {} try to optimize exception",instance, e);
 		}
 	}
 
@@ -261,22 +261,21 @@ public class EsWriter extends WriterFlowSocket {
 		if (storeId == null || storeId.length() == 0)
 			storeId = "a";
 		String iName = TaskUtil.getStoreName(instance, storeId);
-		try {
-			log.info("trying to remove instance {} storeId {}.",instance,storeId);
+		try { 
 			GetIndexRequest _GIR = new GetIndexRequest(iName);
 			boolean exists = getESC().getClient().indices().exists(_GIR, RequestOptions.DEFAULT);
 			if (!exists) {
-				log.info("instance {} storeId {} not exist.",instance,storeId);
+				log.info("es instance {} index {} not exist.",instance,iName);
 			} else {
 				DeleteIndexRequest _DIR = new DeleteIndexRequest(iName);
 				AcknowledgedResponse deleteResponse = getESC().getClient().indices().delete(_DIR,
 						RequestOptions.DEFAULT);
 				if (deleteResponse.isAcknowledged()) {
-					log.info("instance {} storeId {} success removed.",instance,storeId);
+					log.info("es instance {} remove index {} success!",instance,iName);
 				}
 			}
 		} catch (Exception e) {
-			log.error("remove instance {} storeId {} exception",instance,storeId, e);
+			log.error("es instance {} remove index {} exception",instance,iName, e);
 		}
 	}
 
@@ -290,10 +289,10 @@ public class EsWriter extends WriterFlowSocket {
 			_IAR.addAliasAction(aliasAction);
 			AcknowledgedResponse response = getESC().getClient().indices().updateAliases(_IAR, RequestOptions.DEFAULT);
 			if (response.isAcknowledged()) {
-				log.info("alias {} success setted to index {}.",aliasName,iName);
+				log.info("es instance {} success set alias {} to index {}.",instanceName,aliasName,iName);
 			}
 		} catch (Exception e) {
-			log.error("alias {} set to index {} Exception.",aliasName,iName, e);
+			log.error("es instance {} set alias {} to index {} Exception.",instanceName,aliasName,iName, e);
 		}
 	}
 
@@ -339,7 +338,7 @@ public class EsWriter extends WriterFlowSocket {
 			});
 			root_map.put("properties", settingMap);
 		} catch (Exception e) {
-			log.error("{} get SettingMap exception",instanceConfig.getInstanceID(), e);
+			log.error("es instance {} get settingmap exception",instanceConfig.getInstanceID(), e);
 		}  
 		return root_map;
 	}

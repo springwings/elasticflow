@@ -330,7 +330,7 @@ public final class Common {
 					return method.invoke(c, v);
 				}
 			} catch (Exception e) { 
-				throw new EFException(e, "field " + fd.getName() +" parse value exception", ELEVEL.Dispose);
+				throw new EFException(e, "field " + fd.getName() +" parse value "+String.valueOf(v)+" exception", ELEVEL.Dispose);
 			}
 		}
 	}

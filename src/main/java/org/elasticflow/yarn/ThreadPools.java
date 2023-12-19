@@ -80,7 +80,7 @@ public class ThreadPools {
 						execute(job);
 				}
 			} catch (Exception e) {
-				Common.LOG.error("Start Thread Pools Exception", e);
+				Common.LOG.error("start system thread pools exception", e);
 			}
 		}).start();
 	}

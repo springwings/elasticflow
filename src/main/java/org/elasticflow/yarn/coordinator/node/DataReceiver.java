@@ -104,7 +104,7 @@ public class DataReceiver implements EFRPCService {
 					output.writeObject(result);
 				}
 			} catch (Exception e) {
-				log.error("from node {} run method {} > {} exception!", socket.getInetAddress(),serviceName,methodName,e);
+				log.error("from node {} try to run method {} > {} exception", socket.getInetAddress(),serviceName,methodName,e);
 			} finally {
 				if (output != null) {
 					try {

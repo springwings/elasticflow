@@ -77,7 +77,7 @@ public class InstanceCoordinator implements InstanceCoord {
 			}  
 			Common.setConfigObj(obj, cls, fieldName,value);
 		} catch (Exception e) {
-			Common.LOG.error("update instance {} config exception",instance,e);
+			Common.LOG.error("update instance {} task config exception",instance,e);
 		}	
 	}
 	
