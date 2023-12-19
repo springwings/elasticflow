@@ -63,7 +63,8 @@ public class NodeConfig {
 	}
 
 	public void init(String instanceSettings,String instancelocations) {
-		loadConfig(instanceSettings.strip(), true);
+		if(instanceSettings!=null)
+			loadConfig(instanceSettings.strip(), true);
 		if(instancelocations!=null) {
 			for (String inst : instancelocations.split(",")) {
 				String[] strs = inst.split(":");
@@ -72,7 +73,7 @@ public class NodeConfig {
 				String name = strs[0].trim();
 				this.instancesLocation.put(name, Integer.parseInt(strs[1]));
 			}
-		}		
+		}	
 	}
 
 	public void loadConfig(String instanceSettings, boolean reset) {

@@ -22,39 +22,41 @@ import com.alibaba.fastjson.JSONObject;
 
 /**
  * Vearch Flow Writer Manager
+ * 
  * @author chengwen
- * @version 1.0 
+ * @version 1.0
  */
 
 public class VearchWriter extends WriterFlowSocket {
-	
+
 	protected CopyOnWriteArrayList<Object> DATAS = new CopyOnWriteArrayList<Object>();
-	 	
+
 	private final static Logger log = LoggerFactory.getLogger("VearchFlow");
-	
+
 	private String curTable;
-	
+
 	public static VearchWriter getInstance(ConnectParams connectParams) {
 		VearchWriter o = new VearchWriter();
 		o.initConn(connectParams);
 		return o;
-	}	
-	
+	}
+
 	@Override
-	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) throws EFException{
+	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) throws EFException {
 		String name = TaskUtil.getStoreName(mainName, storeId);
-		String type = mainName;
-		PREPARE(false, false,false);
+		PREPARE(false, false, false);
 		if (!ISLINK())
 			return false;
-		if(!this.storePositionExists(name)) {
+		if (!this.storePositionExists(name)) {
 			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 			try {
-				log.info("create Instance store position  " + name + ":" + type);
-				conn.createSpace(this.getTableMeta(name,instanceConfig));
+				log.info("create vearch instance store position {}:{}", name, mainName);
+				conn.createSpace(this.getTableMeta(name, instanceConfig));
 				return true;
-			} catch (Exception e) { 
-				throw new EFException(e,"vearch create store position exception",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
+			} catch (Exception e) {
+				throw new EFException(e,
+						"create vearch instance store position " + name + ":" + mainName + " exception",
+						ELEVEL.Termination, ETYPE.RESOURCE_ERROR);
 			} finally {
 				REALEASE(false, false);
 			}
@@ -62,187 +64,187 @@ public class VearchWriter extends WriterFlowSocket {
 		return true;
 	}
 
-
 	@Override
-	public boolean storePositionExists(String storeName) throws EFException {		
+	public boolean storePositionExists(String storeName) throws EFException {
 		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 		return conn.checkSpaceExists(storeName);
 	}
 
 	@Override
-	public void write(InstanceConfig instanceConfig,PipeDataUnit unit, String instance,
-			String storeId, boolean isUpdate) throws EFException {
+	public void write(InstanceConfig instanceConfig, PipeDataUnit unit, String instance, String storeId,
+			boolean isUpdate) throws EFException {
 		String table = TaskUtil.getStoreName(instance, storeId);
 		if (!ISLINK())
 			return;
 		Map<String, EFField> transParams = instanceConfig.getWriteFields();
 		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
-		try {				
+		try {
 			JSONObject row = new JSONObject();
 			for (Entry<String, Object> r : unit.getData().entrySet()) {
 				String field = r.getKey();
 				if (r.getValue() == null)
-					continue;				
+					continue;
 				Object value = r.getValue();
 				EFField transParam = transParams.get(field);
-				if(transParam==null)
+				if (transParam == null)
 					continue;
-				if(transParam.getIndextype().equals("vector")) {
+				if (transParam.getIndextype().equals("vector")) {
 					JSONObject _feature = new JSONObject();
 					_feature.put("feature", value);
-					row.put(transParam.getAlias(),_feature);
-				}else {
+					row.put(transParam.getAlias(), _feature);
+				} else {
 					row.put(transParam.getAlias(), value);
-				}		
-			} 
+				}
+			}
 			if (this.isBatch) {
 				this.curTable = table;
-				this.DATAS.add("{\"index\": {\"_id\": \""+unit.getReaderKeyVal()+"\"}}");				
+				this.DATAS.add("{\"index\": {\"_id\": \"" + unit.getReaderKeyVal() + "\"}}");
 				this.DATAS.add(row);
-			} else {	
+			} else {
 				conn.writeSingle(table, row);
 			}
 		} catch (Exception e) {
-			if(e.getMessage().contains("spaceName param not build")) {
-				throw new EFException(e,"vearch write data exception",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);
-			}else {
-				throw new EFException(e,ELEVEL.Dispose);
-			} 
-		} 
+			if (e.getMessage().contains("spaceName param not build")) {
+				throw new EFException(e, "vearch write data exception", ELEVEL.Termination, ETYPE.RESOURCE_ERROR);
+			} else {
+				throw new EFException(e, ELEVEL.Dispose);
+			}
+		}
 	}
-	
+
 	public void deleteAndInsert() throws Exception {
 		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 		conn.deleteBatch(this.curTable, this.DATAS);
 		conn.writeBatch(this.curTable, this.DATAS);
-		this.DATAS.clear();		
+		this.DATAS.clear();
 	}
 
 	@Override
 	public void delete(String instance, String storeId, String keyColumn, String keyVal) throws EFException {
 		String name = TaskUtil.getStoreName(instance, storeId);
 		try {
-			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);	
+			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 			conn.deleteSpace(name);
 		} catch (Exception e) {
-			throw new EFException(e,ELEVEL.Termination);
-		} 
+			throw new EFException(e, ELEVEL.Termination);
+		}
 	}
 
 	@Override
 	public void removeInstance(String instance, String storeId) throws EFException {
 		String name = TaskUtil.getStoreName(instance, storeId);
-		PREPARE(false, false,false);
+		PREPARE(false, false, false);
 		if (!ISLINK())
 			return;
-		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);	
+		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 		try {
 			conn.deleteSpace(name);
-			log.info("remove vearch instance {} success!",name);
+			log.info("remove vearch instance {} success!", name);
 		} catch (Exception e) {
-			log.error("remove vearch instance {} exception!",name, e);
+			log.error("remove vearch instance {} exception!", name, e);
 		} finally {
 			REALEASE(false, false);
 		}
 	}
 
 	@Override
-	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig) throws EFException{
+	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig)
+			throws EFException {
 		String select = "a";
 		boolean a = this.storePositionExists(TaskUtil.getStoreName(mainName, "a"));
 		boolean b = this.storePositionExists(TaskUtil.getStoreName(mainName, "b"));
-		
+
 		if (isIncrement) {
-			if(a && b) {
+			if (a && b) {
 				select = "a";
-			}else {
+			} else {
 				select = a ? "a" : (b ? "b" : "a");
 			}
 			if ((select.equals("a") && !a) || (select.equals("b") && !b)) {
 				this.create(mainName, select, instanceConfig);
-			}			
-		}else {
+			}
+		} else {
 			this.create(mainName, select, instanceConfig);
-		} 		
+		}
 		return select;
 	}
 
 	@Override
 	public void setAlias(String instance, String storeId, String aliasName) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void flush() throws EFException {
 		if (this.isBatch) {
 			synchronized (this) {
-				if(this.DATAS.size()>0) {
-					VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);	
+				if (this.DATAS.size() > 0) {
+					VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 					try {
 						conn.writeBatch(this.curTable, this.DATAS);
 					} catch (Exception e) {
-						if(e.getMessage().contains("spaceName param not build")) {
-							throw new EFException(e,"vearch flush data exception!",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);
-						}else {
-							throw new EFException(e,ELEVEL.Termination);
+						if (e.getMessage().contains("spaceName param not build")) {
+							throw new EFException(e, "vearch flush data exception!", ELEVEL.Termination,
+									ETYPE.RESOURCE_ERROR);
+						} else {
+							throw new EFException(e, ELEVEL.Termination);
 						}
-					} 
+					}
 					this.DATAS.clear();
-				}				
+				}
 			}
-		}		
+		}
 	}
 
 	@Override
 	public void optimize(String instance, String storeId) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
-	
-	private JSONObject getTableMeta(String tableName,InstanceConfig instanceConfig) {		
+
+	private JSONObject getTableMeta(String tableName, InstanceConfig instanceConfig) {
 		JSONObject tableMeta = new JSONObject();
-		if(instanceConfig.getWriterParams().getStorageStructure() != null && 
-				instanceConfig.getWriterParams().getStorageStructure().size()>0) {
+		if (instanceConfig.getWriterParams().getStorageStructure() != null
+				&& instanceConfig.getWriterParams().getStorageStructure().size() > 0) {
 			tableMeta = instanceConfig.getWriterParams().getStorageStructure();
 			tableMeta.put("name", tableName);
-		}else {
+		} else {
 			tableMeta.put("name", tableName);
 			tableMeta.put("partition_num", 1);
 			tableMeta.put("replica_num", 1);
-			
+
 			JSONObject engine = new JSONObject();
-			engine.put("name","gamma");
-			engine.put("index_size",200000);
-			engine.put("id_type","String");
-			engine.put("retrieval_type","IVFPQ");
-			
+			engine.put("name", "gamma");
+			engine.put("index_size", 200000);
+			engine.put("id_type", "String");
+			engine.put("retrieval_type", "IVFPQ");
+
 			JSONObject retrieval_param = new JSONObject();
-			retrieval_param.put("metric_type","L2");
-			retrieval_param.put("ncentroids",2048);
-			retrieval_param.put("nsubvector",32);
-			engine.put("retrieval_param",retrieval_param);
-			
-			tableMeta.put("engine", engine);			
+			retrieval_param.put("metric_type", "L2");
+			retrieval_param.put("ncentroids", 2048);
+			retrieval_param.put("nsubvector", 32);
+			engine.put("retrieval_param", retrieval_param);
+
+			tableMeta.put("engine", engine);
 		}
 		JSONObject properties = new JSONObject();
 		Map<String, EFField> writefields = instanceConfig.getWriteFields();
 		for (Map.Entry<String, EFField> entry : writefields.entrySet()) {
-			if(entry.getValue().getDsl()!=null) {
-				properties.put(entry.getKey(),JSONObject.parse(entry.getValue().getDsl()));
-			}else { 
+			if (entry.getValue().getDsl() != null) {
+				properties.put(entry.getKey(), JSONObject.parse(entry.getValue().getDsl()));
+			} else {
 				JSONObject fields = new JSONObject();
 				fields.put("type", entry.getValue().getIndextype());
-				if(entry.getValue().getIndexed().equals("true")) {
+				if (entry.getValue().getIndexed().equals("true")) {
 					fields.put("index", true);
 				}
-				properties.put(entry.getValue().getAlias(),fields);
-			}			
-		} 
+				properties.put(entry.getValue().getAlias(), fields);
+			}
+		}
 		tableMeta.put("properties", properties);
 		return tableMeta;
-		
+
 	}
 
 }

@@ -13,17 +13,17 @@ import org.elasticflow.util.Common;
  * @version 2.0
  * @date 2018-10-26 09:24
  */
-public class SearcherSocketFactory implements Socket<SearcherFlowSocket>{
+public class SearcherSocketFactory implements Socket<SearcherFlowSocket> {
 
 	private static SearcherSocketFactory o = new SearcherSocketFactory();
-	
+
 	public static SearcherFlowSocket getInstance(Object... args) {
 		return o.getSocket(args);
-	} 
-	 
-	/** 
+	}
+
+	/**
 	 * @param args final WarehouseParam param, final InstanceConfig instanceConfig,
-			String L1seq
+	 *             String L1seq
 	 * @return
 	 */
 	@Override
@@ -32,19 +32,22 @@ public class SearcherSocketFactory implements Socket<SearcherFlowSocket>{
 		InstanceConfig instanceConfig = (InstanceConfig) args[1];
 		String L1seq = (String) args[2];
 		return getFlowSocket(param, instanceConfig, L1seq);
-	} 
+	}
 
-	private static SearcherFlowSocket getFlowSocket(ConnectParams connectParams, InstanceConfig instanceConfig, String L1seq) {
+	private static SearcherFlowSocket getFlowSocket(ConnectParams connectParams, InstanceConfig instanceConfig,
+			String L1seq) {
 		connectParams.setInstanceConfig(instanceConfig);
-		String _class_name = "org.elasticflow.searcher.flow."+Common.changeFirstCase(connectParams.getWhp().getType().name().toLowerCase())+"Searcher";
-		try {					
-			Class<?> clz = Class.forName(_class_name); 
-			Method m = clz.getMethod("getInstance", ConnectParams.class);  
-			return (SearcherFlowSocket) m.invoke(null,connectParams);
-		}catch (Exception e) { 
-			Common.LOG.error("searcher flow socket type {} not exist",connectParams.getWhp().getType(),e); 
-		} 
+		String _class_name = "org.elasticflow.searcher.flow."
+				+ Common.changeFirstCase(connectParams.getWhp().getType().name().toLowerCase()) + "Searcher";
+		try {
+			Class<?> clz = Class.forName(_class_name);
+			Method m = clz.getMethod("getInstance", ConnectParams.class);
+			return (SearcherFlowSocket) m.invoke(null, connectParams);
+		} catch (Exception e) {
+			Common.LOG.error("The searcher flow socket type {} configured by {} does not exist!",
+					connectParams.getWhp().getType(), connectParams.getInstanceConfig().getInstanceID(), e);
+		}
 		return null;
 	}
- 
+
 }

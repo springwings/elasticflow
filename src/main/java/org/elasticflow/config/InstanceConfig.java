@@ -92,7 +92,7 @@ public class InstanceConfig {
 	 * Reload all information in the configuration instance from the configuration file
 	 */
 	public void reload() {
-		Common.LOG.info("starting reload " + configPath);
+		Common.LOG.info("start to reload from {}",configPath);
 		init();
 	}
 
@@ -205,11 +205,11 @@ public class InstanceConfig {
 			in = new ByteArrayInputStream(bt, 0, bt.length);
 			configParse(in);
 			in.close();
-			Common.LOG.info("instance {} configuration load from {} success!",this.instanceID,this.configPath);
+			Common.LOG.info("load instance configuration from {} success!",this.configPath);
 		} catch (Exception e) {
 			in = null;
 			setStatus(false);
-			Common.LOG.error("instance {} configuration parse from {} exception",this.instanceID, this.configPath, e);
+			Common.LOG.error("load instance configuration from {} exception",this.configPath, e);
 		}
 	}
 

@@ -55,7 +55,7 @@ public class Neo4jWriter extends WriterFlowSocket {
 				throw new EFException(e,getWriteSQL(writerParam, unit, transParams),ELEVEL.Dispose);
 			}
 		} catch (Exception e) {  
-			throw new EFException(e,instance+" Neo4j error writing data",ELEVEL.Dispose);
+			throw new EFException(e,instance+" neo4j error writing data",ELEVEL.Dispose);
 		} finally {
 			REALEASE(false, releaseConn);
 		}
@@ -93,11 +93,11 @@ public class Neo4jWriter extends WriterFlowSocket {
 			if (rs.next()) {
 				try (PreparedStatement statement2 = conn.prepareStatement("match (n) detach delete n");){
 					statement2.execute();
-					log.info("ab-Mechanism success remove instance {}.",mainName);
+					log.info("ab-Mechanism success remove neo4j instance {}.",mainName);
 				} 
 			} 
 		} catch (Exception e) {
-			log.error("ab-Mechanism try to remove instance {} failed!",mainName, e); 
+			log.error("ab-Mechanism try to remove neo4j instance {} exception!",mainName, e); 
 		}  
 		return "a";
 	}

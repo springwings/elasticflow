@@ -30,7 +30,7 @@ public class Neo4jConnection extends EFConnectionSocket<Connection> {
 		try {
 			if (!status()) {
 				this.conn = DriverManager.getConnection(this.getConnectionUrl());
-				log.info("build connect to " + getConnectionUrl());
+				log.info("success build connect to {}",getConnectionUrl());
 			}
 			return true;
 		} catch (Exception e) {

@@ -56,7 +56,7 @@ public class HbaseWriter extends WriterFlowSocket {
 	@Override
 	public void write(InstanceConfig instanceConfig,PipeDataUnit unit,String instantcName, String storeId,boolean isUpdate) throws EFException { 
 		if (unit.getData().size() == 0){
-			log.info("Empty IndexUnit for " + instantcName + " " + storeId);
+			log.info("Empty IndexUnit for {} {}",instantcName,storeId);
 			return;
 		}  
 		Map<String, EFField> transParams = instanceConfig.getWriteFields();

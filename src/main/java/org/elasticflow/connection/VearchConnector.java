@@ -198,7 +198,7 @@ public class VearchConnector {
 				return;
 			else {
 				if(GlobalParam.DEBUG)
-					log.warn(datas.toString());
+					log.warn("vearch {}  write data:{}",table,datas.toString());
 				throw new EFException("Vearch error writing data," + jr.get("error"));
 			}
 		}else {
@@ -241,7 +241,7 @@ public class VearchConnector {
 		StringBuffer dt = new StringBuffer();
 		int i = 0;
 		if(datas.size()%2!=0) {
-			throw new EFException("Dirty data Exception.");
+			throw new EFException("dirty data exception.");
 		}
 		while (i < datas.size()) {
 			dt.append("\n" + String.valueOf(datas.get(i)) + "\n");
@@ -269,7 +269,7 @@ public class VearchConnector {
 			JSONObject jo = JSONObject.parseObject(ja.getString(j));
 			if (Integer.valueOf(String.valueOf(jo.get("status"))) != 200) {
 				if(GlobalParam.DEBUG)
-					log.warn(dt.toString());
+					log.warn("vearch {} write data:{}",table,dt.toString());
 				throw new EFException("Vearch write data to "+ table +" exception," + jo.get("error"));
 			}				
 		}

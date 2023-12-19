@@ -43,7 +43,7 @@ public class RestComputer extends ComputerFlowSocket {
 
 	protected final static Logger log = LoggerFactory.getLogger("RestService");
 	protected boolean successRunAll = true;
-	protected final static int delayTime = 200;//ms
+	protected final static int delayTime = 200;// ms
 
 	public static RestComputer getInstance(final ConnectParams connectParams) {
 		RestComputer o = new RestComputer();
@@ -61,17 +61,17 @@ public class RestComputer extends ComputerFlowSocket {
 					context.getInstanceConfig().getComputeParams().getScanField());
 			JSONObject requstParams = context.getInstanceConfig().getComputeParams().getApiRequest();
 			JSONObject responseParams = context.getInstanceConfig().getComputeParams().getApiResponse();
-			
-			CountDownLatch taskSingal = new CountDownLatch((int) Math.ceil((DSR.getDataNums()+0.)/
-					context.getInstanceConfig().getComputeParams().apiRequestMaxDatas()));
-			
+
+			CountDownLatch taskSingal = new CountDownLatch((int) Math.ceil(
+					(DSR.getDataNums() + 0.) / context.getInstanceConfig().getComputeParams().apiRequestMaxDatas()));
+
 			// construct thread pool
 			CopyOnWriteArrayList<String> apis = context.getInstanceConfig().getComputeParams().getApi();
-			if(apis.size()==0)
+			if (apis.size() == 0)
 				throw new EFException("No API is available", ELEVEL.BreakOff);
 			ArrayBlockingQueue<String> apiBlockingQueue = new ArrayBlockingQueue<>(apis.size());
 			for (String api : apis)
-				apiBlockingQueue.add(api);			
+				apiBlockingQueue.add(api);
 			// construct rest post data
 			JSONObject post_data = new JSONObject();
 			this.successRunAll = true;
@@ -98,29 +98,29 @@ public class RestComputer extends ComputerFlowSocket {
 				if (count >= context.getInstanceConfig().getComputeParams().apiRequestMaxDatas()) {
 					JSONObject _postdt = (JSONObject) post_data.clone();
 					@SuppressWarnings("unchecked")
-					ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();					 
-					try { 
+					ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();
+					try {
 						long startTime = System.currentTimeMillis();
 						String api = apiBlockingQueue.take();
-						if(System.currentTimeMillis()-startTime>delayTime)
+						if (System.currentTimeMillis() - startTime > delayTime)
 							this.flowState.incrementBlockTime();
-						Resource.threadPools.execute(() -> {						
-							JSONObject tmp = null;	
+						Resource.threadPools.execute(() -> {
+							JSONObject tmp = null;
 							try {
 								tmp = JSONObject.parseObject(this.sentRequest(_postdt, api));
 								apiBlockingQueue.put(api);
-								this.write(context, tmp, responseParams, _keepdt); 
-							} catch (Exception e) { 
-								this.successRunAll = false; 
-								log.error("rest post data process error,api {}", api,e);
+								this.write(context, tmp, responseParams, _keepdt);
+							} catch (Exception e) {
+								this.successRunAll = false;
+								log.error("rest post data process error,api {}", api, e);
 							} finally {
 								taskSingal.countDown();
 							}
-			            }); 
-					} catch (Exception e) { 
-						this.successRunAll = false; 
-						log.error("rest post data process error,api {}",apis.get(0), e);
-					}finally {
+						});
+					} catch (Exception e) {
+						this.successRunAll = false;
+						log.error("rest post data process error,api {}", apis.get(0), e);
+					} finally {
 						count = 0;
 						post_data.clear();
 						keepDatas.clear();
@@ -132,46 +132,46 @@ public class RestComputer extends ComputerFlowSocket {
 				JSONObject _postdt = (JSONObject) post_data.clone();
 				@SuppressWarnings("unchecked")
 				ArrayList<JSONObject> _keepdt = (ArrayList<JSONObject>) keepDatas.clone();
-				try { 
+				try {
 					long startTime = System.currentTimeMillis();
 					String api = apiBlockingQueue.take();
-					if(System.currentTimeMillis()-startTime>delayTime)
+					if (System.currentTimeMillis() - startTime > delayTime)
 						this.flowState.incrementBlockTime();
-					Resource.threadPools.execute(() -> {						
+					Resource.threadPools.execute(() -> {
 						try {
-							JSONObject tmp = null;	
+							JSONObject tmp = null;
 							tmp = JSONObject.parseObject(this.sentRequest(_postdt, api));
 							apiBlockingQueue.put(api);
-							this.write(context, tmp, responseParams, _keepdt); 
-						} catch (Exception e) { 
-							this.successRunAll = false; 
-							log.error("rest post data process error,api {}",api, e);
+							this.write(context, tmp, responseParams, _keepdt);
+						} catch (Exception e) {
+							this.successRunAll = false;
+							log.error("rest post data process error,api {}", api, e);
 						} finally {
 							taskSingal.countDown();
 						}
-		            }); 
-				} catch (Exception e) { 
-					this.successRunAll = false; 
-					log.error("rest post data process error,api [}",apis.get(0), e);
+					});
+				} catch (Exception e) {
+					this.successRunAll = false;
+					log.error("rest post data process error,api [}", apis.get(0), e);
 				}
 				post_data.clear();
 				keepDatas.clear();
 			}
-			
+
 			try {
 				if (this.successRunAll == true)
-					taskSingal.await(90,TimeUnit.SECONDS);
-			} catch (Exception e) { 
-				throw new EFException(e,"task singal exception", ELEVEL.BreakOff);
-			}	
-			
+					taskSingal.await(90, TimeUnit.SECONDS);
+			} catch (Exception e) {
+				throw new EFException(e, "task singal exception", ELEVEL.BreakOff);
+			}
+
 			if (this.successRunAll == false)
 				throw new EFException("job executorService exception", ELEVEL.BreakOff);
 
 			this.dataPage.put(GlobalParam.READER_LAST_STAMP, DSR.getScanStamp());
 			this.dataPage.putData(this.dataUnit);
 			this.dataPage.putDataBoundary(DSR.getDataBoundary());
-		} 
+		}
 		return this.dataPage;
 	}
 
@@ -180,34 +180,34 @@ public class RestComputer extends ComputerFlowSocket {
 	 * 
 	 * @param post_data
 	 * @return
-	 * @throws EFException 
+	 * @throws EFException
 	 */
 	private String sentRequest(JSONObject post_data, String api) throws EFException {
 		EFHttpResponse response = EFHttpClientUtil.process(api, post_data.toString());
-		if(response.isSuccess()) {
+		if (response.isSuccess()) {
 			return response.getPayload();
-		}else {
-			throw new EFException(response.getInfo(),ELEVEL.Dispose);
-		}		
+		} else {
+			throw new EFException(response.getInfo(), ELEVEL.Dispose);
+		}
 	}
 
 	private void write(Context context, JSONObject datas, JSONObject responseParams, ArrayList<JSONObject> keepDatas)
 			throws EFException {
-		if(responseParams.containsKey("statusField")) {
+		if (responseParams.containsKey("statusField")) {
 			String status = responseParams.getJSONObject("statusField").getString("success");
-			if(datas.getString("status")!=status) {//response status check
+			if (datas.getString("status") != status) {// response status check
 				this.flowState.incrementFailUnitTime(keepDatas.size());
-				log.warn(context.getInstanceConfig().getInstanceID()+" predict warn.");
-				log.warn(datas.getString(responseParams.getJSONObject("statusField").getString("errorInfo")));
+				log.warn("{} compute warn,info:{}", context.getInstanceConfig().getInstanceID(),
+						datas.getString(responseParams.getJSONObject("statusField").getString("errorInfo")));
 				return;
 			}
-		}		
+		}
 		String datafield = responseParams.getJSONObject("dataField").getString("name");
 		JSONArray JA = datas.getJSONArray(datafield);
 		if (keepDatas != null && JA.size() != keepDatas.size()) {
 			this.flowState.incrementFailUnitTime(keepDatas.size());
-			throw new EFException("predict exception,"+datas.toString(), ELEVEL.BreakOff);
-		}			
+			throw new EFException("predict exception," + datas.toString(), ELEVEL.BreakOff);
+		}
 		for (int i = 0; i < JA.size(); i++) {
 			JSONObject jr = keepDatas.get(i);
 			jr.putAll((JSONObject) JA.get(i));

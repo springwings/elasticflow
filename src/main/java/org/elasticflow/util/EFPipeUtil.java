@@ -51,26 +51,26 @@ public class EFPipeUtil {
 	}
 
 	public static boolean jobAction(String instanceID, String type, String actype) {
-		String jobname = getJobName(instanceID, type);
+		String taskJobName = getJobName(instanceID, type);
 		boolean state = false;
 		switch (actype) {
 		case "stop":
-			state = Resource.taskJobCenter.stopJob(jobname);
+			state = Resource.taskJobCenter.stopJob(taskJobName);
 			break;
 		case "start":
-			state = Resource.taskJobCenter.startNow(jobname);
+			state = Resource.taskJobCenter.startNow(taskJobName);
 			break;
 		case "resume":
-			state = Resource.taskJobCenter.restartJob(jobname);
+			state = Resource.taskJobCenter.restartJob(taskJobName);
 			break;
 		case "remove":
-			state = Resource.taskJobCenter.deleteJob(jobname);
+			state = Resource.taskJobCenter.deleteJob(taskJobName);
 			break;
 		}
 		if (state) {
-			Common.LOG.info("success " + actype + " task " + jobname);
+			Common.LOG.info("success {} {} task {}",actype,instanceID,taskJobName);
 		} else {
-			Common.LOG.info("fail " + actype + " task " + jobname);
+			Common.LOG.info("fail {} {} task {}",actype,instanceID,taskJobName);
 		}
 		return state;
 	}

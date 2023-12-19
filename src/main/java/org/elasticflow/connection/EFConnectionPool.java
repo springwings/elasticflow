@@ -123,7 +123,7 @@ public final class EFConnectionPool {
 	private void createPools(String poolName, ConnectParams params) {
 		ConnectionPool pool = new ConnectionPool(poolName, params);
 		this._GPOOLS.put(poolName, pool);
-		log.info("success create pool " + poolName);
+		log.info("success create pool {}",poolName);
 	}
  
 	
@@ -204,8 +204,7 @@ public final class EFConnectionPool {
 					log.warn("connection cleaning encountered an error ",conn);
 				}
 			}
-			log.info("free connection pool " + this.poolName + " ,Active Connections:" + activeNum
-					+ ",Release Connections:" + connectionPools.size()); 
+			log.info("free connection pool {},Active Connections:{},Release Connections:{}",this.poolName,activeNum,connectionPools.size()); 
 			connectionPools.clear();
 			this.version = Common.getNow();
 		}

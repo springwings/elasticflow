@@ -139,7 +139,7 @@ public abstract class Flow {
 					Resource.EFConns.put(this.EFConnKey, null);
 					retainer.set(0);
 				} else {
-					log.info(this.EFConn + " retainer is " + retainer.get());
+					log.info("connection {} retainer:{}",this.EFConn,retainer.get());
 				}
 			}
 		}

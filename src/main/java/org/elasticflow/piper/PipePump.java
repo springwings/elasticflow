@@ -476,8 +476,7 @@ public final class PipePump extends Instruction implements Serializable {
 					if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstanceID(), task.getL1seq(),
 							task.getJobType(), TASK_STATUS.Termination)) {
 						Resource.threadPools.cleanWaitJob(getId());
-						Common.LOG.warn(
-								task.getInstanceID() + " " + task.getJobType().name() + " job has been Terminated!");
+						Common.LOG.warn("{} {} job has been Terminated!",task.getInstanceID(),task.getJobType().name());
 						break;
 					}
 					rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),

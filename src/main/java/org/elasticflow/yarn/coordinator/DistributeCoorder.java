@@ -71,7 +71,7 @@ public class DistributeCoorder {
 				}
 			}
 		}else {
-			Common.LOG.warn("config.properties instances not configured");
+			Common.LOG.warn("config.properties instances parameter not configured");
 		}
 	}
 

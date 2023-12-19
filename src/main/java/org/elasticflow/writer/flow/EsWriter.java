@@ -80,7 +80,7 @@ public class EsWriter extends WriterFlowSocket {
 		Map<String, EFField> transParams = instanceConfig.getWriteFields();
 		WriterParam writerParam = instanceConfig.getWriterParams();
 		if (unit == null || unit.getData().size() == 0) {
-			log.info(instance + " WriteUnit contain Dirty data!");
+			log.info("{} WriteUnit contain Dirty data!",instance);
 			return;
 		}
 		if (writerParam.getKeyType().equals("scan")) {
@@ -226,13 +226,13 @@ public class EsWriter extends WriterFlowSocket {
 				_CIR.mapping(this.getSettingMap(instanceConfig));
 				CreateIndexResponse createIndexResponse = getESC().getClient().indices().create(_CIR,
 						RequestOptions.DEFAULT);
-				log.info("create new Instance store position " + indexName + " response isAcknowledged:"
-						+ createIndexResponse.isAcknowledged());
+				log.info("create new instance store position {} response isAcknowledged:{}"
+						,indexName,createIndexResponse.isAcknowledged());
 			}
 			return true;
 		} catch (Exception e) {
 			reconn = true;
-			throw new EFException(e,"ElasticSearch create index exception!",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);			
+			throw new EFException(e,"es create index exception!",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);			
 		}
 	}
 

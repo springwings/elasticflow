@@ -54,9 +54,11 @@ public class WriterSocketFactory implements Socket<WriterFlowSocket> {
 			return (WriterFlowSocket) m.invoke(null, connectParams);
 		} catch (Exception e) {
 			if (writerFlowhandler != null) {
-				Common.LOG.error("custom writer flow handler {} exception",writerFlowhandler,e);
+				Common.LOG.error("instance {} custom writer flow handler {} exception",
+						connectParams.getInstanceConfig().getInstanceID(), writerFlowhandler, e);
 			} else {
-				Common.LOG.error("writer flow socket type {} not exist", connectParams.getWhp().getType(),e);
+				Common.LOG.error("The writer flow socket type {} configured by {} does not exist!",
+						connectParams.getWhp().getType(), connectParams.getInstanceConfig().getInstanceID(), e);
 			}
 			Common.stopSystem(false);
 		}

@@ -58,7 +58,7 @@ public final class EFNodeUtil {
 	public static void runShell(String shellPath) {
 		Process pc = null;
 		try {
-			Common.LOG.info("system start try to run {}",shellPath);
+			Common.LOG.info("system start to run {}",shellPath);
 			pc = Runtime.getRuntime().exec(shellPath);
 			pc.waitFor();
 		} catch (InterruptedException e) {
@@ -73,7 +73,7 @@ public final class EFNodeUtil {
 	} 
 	
 	/**
-	 * Non distributed default master mode startup
+	 * Non-distributed default is master mode startup
 	 * @return
 	 */
 	public static boolean isMaster() {

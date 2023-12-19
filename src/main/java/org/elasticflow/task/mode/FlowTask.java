@@ -158,7 +158,7 @@ public class FlowTask {
 			}
 		} else {
 			if (pipePump.getInstanceConfig().getPipeParams().getLogLevel() == 0)
-				log.info(instanceID + " still running，new virtual full job is aborted!");
+				log.info("instance {} is running，new virtual full job is aborted!",instanceID);
 		}
 	}
 
@@ -233,7 +233,7 @@ public class FlowTask {
 			}
 		} else {
 			if (pipePump.getInstanceConfig().getPipeParams().getLogLevel() == 0)
-				log.info(instanceID + " still running，new increment job is aborted!");
+				log.info("instance {} is running，new increment job is aborted!",instanceID);
 		}
 	}
 

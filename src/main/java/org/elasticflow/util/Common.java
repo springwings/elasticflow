@@ -109,7 +109,7 @@ public final class Common {
 			fp = new FormatProperties();
 			fp.load(in);
 		} catch (Exception e) {
-			Common.LOG.error("load configuration from {} exception",configPath, e);
+			Common.LOG.error("load configuration from {} exception", configPath, e);
 		}
 		return fp;
 	}
@@ -155,11 +155,7 @@ public final class Common {
 			if (param.getNodeName().equals(fieldName)) {
 				value = param.getTextContent();
 			}
-			try {
-				setConfigObj(o, c, fieldName, value);
-			}catch(Exception e) {
-				throw new EFException(e,"task.xml field "+fieldName+" parse exception!",ELEVEL.Dispose);
-			}
+			setConfigObj(o, c, fieldName, value);
 		}
 		return o;
 	}
@@ -171,8 +167,13 @@ public final class Common {
 		} else {
 			if (value != null && value.length() > 0) {
 				String setMethodName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-				Method setMethod = c.getMethod(setMethodName, new Class[] { String.class });
-				setMethod.invoke(Obj, new Object[] { value });
+				try {
+					Method setMethod = c.getMethod(setMethodName, new Class[] { String.class });
+					setMethod.invoke(Obj, new Object[] { value });
+				} catch (Exception e) {
+					throw new EFException(e,
+							"field name " + fieldName + " value " + String.valueOf(value) + " parse exception");
+				}
 			}
 		}
 	}
@@ -329,8 +330,9 @@ public final class Common {
 				} else {
 					return method.invoke(c, v);
 				}
-			} catch (Exception e) { 
-				throw new EFException(e, "field " + fd.getName() +" parse value "+String.valueOf(v)+" exception", ELEVEL.Dispose);
+			} catch (Exception e) {
+				throw new EFException(e, "field " + fd.getName() + " parse value " + String.valueOf(v) + " exception",
+						ELEVEL.Dispose);
 			}
 		}
 	}
@@ -446,12 +448,12 @@ public final class Common {
 	public static void loadGlobalConfig(String path) {
 		try {
 			GlobalParam.SystemConfig = Common.loadProperties(path);
-			if(GlobalParam.SystemConfig!=null) {
+			if (GlobalParam.SystemConfig != null) {
 				Common.LOG.info("load system configuration from {} success!", path);
-			}else {
+			} else {
 				Common.LOG.error("load system configuration from {} exception", path);
 				Common.stopSystem(false);
-			}				
+			}
 		} catch (Exception e) {
 			Common.LOG.error("load system configuration from {} exception", path, e);
 			Common.stopSystem(false);
