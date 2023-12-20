@@ -207,6 +207,8 @@ public class DistributeCoorder {
 	 */
 	public void updateCluster(String ip, Integer nodeId) {
 		if (!this.containsNode(nodeId)) {
+			if (clusterStatus.get() == 3)
+				return;
 			synchronized (this) {
 				EFNode node = EFNode.getInstance(ip, nodeId);
 				node.init(this, true);
@@ -291,9 +293,12 @@ public class DistributeCoorder {
 	 */
 	public synchronized void restartCluster() {
 		if (clusterStatus.get() != 1) {
-			clusterStatus.set(1);
+			clusterStatus.set(3);
 			DistributeService.closeMonitor();
 			Resource.threadPools.execute(() -> {
+				nodes.forEach(n -> {					
+					n.stopAllInstance();
+				});
 				nodes.forEach(n -> { 
 					this.restartNode(n.getNodeId());
 				}); 
@@ -308,7 +313,7 @@ public class DistributeCoorder {
 	 * @param int nodeID
 	 */
 	public synchronized void stopNode(int nodeID) {
-		if (clusterStatus.get() == 0) { 			
+		if (clusterStatus.get() == 0) { 
 			Resource.threadPools.execute(() -> { 
 				EFNode node = this.getNode(nodeID);
 				this.removeNode(node.getIp(), nodeID, true);
@@ -349,7 +354,7 @@ public class DistributeCoorder {
 	 */
 	public synchronized void stopSlaves(boolean wait) {
 		if (clusterStatus.get() != 1) {
-			clusterStatus.set(1);
+			clusterStatus.set(3);
 			DistributeService.closeMonitor();
 			CountDownLatch singal = new CountDownLatch(nodes.size());
 			Resource.threadPools.execute(() -> {
@@ -364,8 +369,7 @@ public class DistributeCoorder {
 				});
 				nodes.clear();
 				isOnStart.set(true);
-				DistributeService.openMonitor();
-				clusterStatus.set(3);
+				DistributeService.openMonitor(); 
 				Common.LOG.info("cluster all slave nodes are offline.");
 			});
 			if (wait) {
