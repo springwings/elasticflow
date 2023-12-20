@@ -513,7 +513,8 @@ public class EFMonitorUtil {
 		Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				EFNodeUtil.runShell(GlobalParam.RESTART_SHELL_PATH);
+				Common.LOG.info("system restart...");  
+				EFNodeUtil.runShell(new String[] {"bash","-c",GlobalParam.RESTART_SHELL_COMMAND});
 			}
 		});
 		thread.start();

@@ -1,6 +1,7 @@
 package org.elasticflow.yarn.coordinator;
 
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.SystemInfoUtil;
 import org.elasticflow.yarn.coord.NodeCoord;
@@ -17,11 +18,19 @@ import org.elasticflow.yarn.monitor.ResourceMonitor;
 public class NodeCoordinator implements NodeCoord {
 
 	@Override
-	public void stopNode() {
-		if (EFNodeUtil.isSlave()) {
+	public void stopNode(boolean closeMoniter) {
+		if (EFNodeUtil.isSlave() && closeMoniter) {
 			ResourceMonitor.stop();
 		}
 		Common.stopSystem(false);
+	}
+	
+	@Override
+	public void restartNode(boolean closeMoniter) {
+		if (EFNodeUtil.isSlave() && closeMoniter) {
+			ResourceMonitor.stop();
+		} 
+		EFMonitorUtil.restartSystem();
 	}
 	
 	@Override

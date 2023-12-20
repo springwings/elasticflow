@@ -249,7 +249,6 @@ public final class Run {
 			if(!EFFileUtil.checkResourceExists(GlobalParam.CONFIG_ROOT))
 				throw new EFException("run dependent folder not found!",ELEVEL.Stop);
 			GlobalParam.DATAS_CONFIG_PATH = GlobalParam.CONFIG_ROOT+"/datas";
-			GlobalParam.RESTART_SHELL_PATH = GlobalParam.CONFIG_ROOT+"/restart.sh";
 			GlobalParam.INSTANCE_PATH = (GlobalParam.DATAS_CONFIG_PATH+"/INSTANCES").intern();
 		} 
 		if(!EFFileUtil.checkResourceExists(GlobalParam.SYS_CONFIG_PATH))

@@ -22,6 +22,7 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.node.EFNode;
 import org.elasticflow.util.Common;
+import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.yarn.Resource;
@@ -253,16 +254,28 @@ public class DistributeCoorder {
 		}
 		return true;
 	}
-
+	
+	/**
+	 * Removing nodes from the cluster
+	 * @param ip
+	 * @param nodeId
+	 * @param rebalace
+	 */
 	public synchronized void removeNode(String ip, Integer nodeId, boolean rebalace) {
 		if (this.containsNode(nodeId)) {
-			clusterStatus.set(2);
+			if(rebalace)
+				clusterStatus.set(2);
 			EFNode node = this.removeNode(nodeId);
 			idleInstances.addAll(node.getBindInstances());
+			try {
+				node.stopAllInstance();
+			}catch(Exception e) {
+				Common.LOG.warn("try to stop node instance fail.");
+			}
 			Common.LOG.warn("ip {},nodeId {},leave cluster!", ip, nodeId);
 			if (!clusterConditionMatch()) {
 				Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed.");
-				stopAllNodes(false);
+				stopSlaves(false);
 			} else {
 				if (rebalace)
 					Resource.threadPools.execute(() -> {
@@ -273,10 +286,68 @@ public class DistributeCoorder {
 	}
 	
 	/**
-	 * 
-	 * @param wait, asyn or syn
+	 * restart cluster
+	 * mechanism: restart slave nodes first,then restart master itself.
 	 */
-	public synchronized void stopAllNodes(boolean wait) {
+	public synchronized void restartCluster() {
+		if (clusterStatus.get() != 1) {
+			clusterStatus.set(1);
+			DistributeService.closeMonitor();
+			Resource.threadPools.execute(() -> {
+				nodes.forEach(n -> { 
+					this.restartNode(n.getNodeId());
+				}); 
+				Common.LOG.info("cluster all slave nodes restart finish."); 
+				EFMonitorUtil.restartSystem();
+			}); 
+		}
+	}
+	
+	/**
+	 * stop node 
+	 * @param int nodeID
+	 */
+	public synchronized void stopNode(int nodeID) {
+		if (clusterStatus.get() == 0) { 			
+			Resource.threadPools.execute(() -> { 
+				EFNode node = this.getNode(nodeID);
+				this.removeNode(node.getIp(), nodeID, true);
+				while(true) {
+					if(clusterStatus.get() == 0) {
+						node.getNodeCoord().stopNode(false);
+						Common.LOG.info("nodeIP {} nodeId {} stop success", node.getIp(), node.getNodeId());
+						break;
+					}
+				} 
+			}); 
+		}
+	}
+	
+	/**
+	 * restart node
+	 * @param int nodeID 
+	 */
+	public synchronized void restartNode(int nodeID) {
+		if (clusterStatus.get() == 0) { 
+			Resource.threadPools.execute(() -> { 
+				EFNode node = this.getNode(nodeID); 
+				this.removeNode(node.getIp(), nodeID, false);
+				while(true) {
+					if(clusterStatus.get() == 0) {
+						node.getNodeCoord().restartNode(false);
+						Common.LOG.info("nodeIP {} nodeId {} restart success", node.getIp(), node.getNodeId());
+						break;
+					}
+				} 
+			}); 
+		}
+	}
+	
+	/**
+	 * stop all slave nodes
+	 * @param boolean wait   true syn,false asyn
+	 */
+	public synchronized void stopSlaves(boolean wait) {
 		if (clusterStatus.get() != 1) {
 			clusterStatus.set(1);
 			DistributeService.closeMonitor();
@@ -286,7 +357,7 @@ public class DistributeCoorder {
 					Common.LOG.info("node {},nodeId {}, is stopped!", n.getIp(), n.getNodeId());
 					try {
 						n.stopAllInstance();
-						n.getNodeCoord().stopNode();
+						n.getNodeCoord().stopNode(true);
 					}finally {
 						singal.countDown();
 					}
@@ -414,7 +485,7 @@ public class DistributeCoorder {
 	private synchronized void rebalanceOnNodeLeave() {
 		if (!clusterConditionMatch()) {
 			Common.LOG.warn("cluster not meet the requirements, all slave node tasks automatically closed.");
-			stopAllNodes(false);
+			stopSlaves(false);
 		} else {
 			this.avgInstanceNum = avgInstanceNum();
 			Common.LOG.info("start NodeLeave rebalance on {} nodes,avgInstanceNum {}...", nodes.size(), avgInstanceNum);
@@ -513,19 +584,13 @@ public class DistributeCoorder {
 				}
 			}
 			while (keepInstances.peek() != null) {
-				String instance = keepInstances.poll();
-				boolean needRedo = true;
+				String instance = keepInstances.poll(); 
 				for (EFNode node : nodes) {
-					if (node.getNodeId() == Resource.nodeConfig.getInstancesLocation().get(instance)) {
-						node.pushInstance(instance, true);
-						needRedo = false;
+					if (node.getBindInstances().size() < avgInstanceNum) {
+						node.pushInstance(instance, true); 
 						break;
 					}
-				}
-				if(needRedo) {
-					int index = (int) (Math.random()* nodes.size());
-					nodes.get(index).pushInstance(instance, true);
-				}					
+				} 			
 			}
 		}
 	}

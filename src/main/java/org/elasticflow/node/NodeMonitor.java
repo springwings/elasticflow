@@ -91,6 +91,9 @@ public final class NodeMonitor {
 			put("starthttpreaderserviceservice", "startHttpReaderServiceService");
 			put("stopHttpreaderserviceservice", "stopHttpReaderServiceService");
 			put("restartnode", "restartNode");
+			put("stopnode", "stopNode");
+			put("restartcluster", "restartCluster");
+			put("stopcluster", "stopCluster");
 			put("loadhandler", "loadHandler");
 			put("runcode", "runCode");
 			// instance manage
@@ -277,10 +280,62 @@ public final class NodeMonitor {
 	 * @param rq
 	 */
 	public void restartNode(Request rq, EFRequest RR) {
-		EFMonitorUtil.restartSystem();
-		setResponse(RESPONSE_STATUS.CodeException, "current node is in restarting...", null);
+		if (RR.getStringParam("node_id") != null) {
+			int nodeId = Integer.parseInt(RR.getStringParam("node_id")); 
+			if(nodeId == GlobalParam.NODEID) {
+				EFMonitorUtil.restartSystem();
+			}else {
+				GlobalParam.INSTANCE_COORDER.distributeCoorder().restartNode(nodeId);
+			}
+			setResponse(RESPONSE_STATUS.Success,null, null);
+		} else {
+			setResponse(RESPONSE_STATUS.ParameterErr, "parameters node_id not exists!", null);
+		} 
+	}
+	
+	/**
+	 * stop node
+	 * 
+	 * @param rq
+	 */
+	public void stopNode(Request rq, EFRequest RR) {
+		if (RR.getStringParam("node_id") != null) {
+			int nodeId = Integer.parseInt(RR.getStringParam("node_id")); 
+			if(nodeId != GlobalParam.NODEID) 
+				GlobalParam.INSTANCE_COORDER.distributeCoorder().stopNode(nodeId); 
+			setResponse(RESPONSE_STATUS.Success,null, null);
+		} else {
+			setResponse(RESPONSE_STATUS.ParameterErr, "parameters node_id not exists!", null);
+		} 
 	}
 
+	/**
+	 * restart Cluster
+	 * 
+	 * @param rq
+	 */
+	public void restartCluster(Request rq, EFRequest RR) {
+		if (GlobalParam.DISTRIBUTE_RUN) {
+			GlobalParam.INSTANCE_COORDER.distributeCoorder().restartCluster();			
+		} else {
+			EFMonitorUtil.restartSystem();
+		} 
+		setResponse(RESPONSE_STATUS.Success,null, null);
+	}
+	
+	/**
+	 * stop Cluster
+	 * 
+	 * @param rq
+	 */
+	public void stopCluster(Request rq, EFRequest RR) {
+		if (GlobalParam.DISTRIBUTE_RUN) {
+			GlobalParam.INSTANCE_COORDER.distributeCoorder().stopSlaves(true); 
+		} 
+		Common.stopSystem(false);
+		setResponse(RESPONSE_STATUS.Success,null, null);
+	}
+	
 	/**
 	 * Loading Java handler classes in real time only support no dependency handler
 	 * like org.elasticflow.writerUnit.handler org.elasticflow.reader.handler
@@ -374,6 +429,7 @@ public final class NodeMonitor {
 		JSONObject dt = new JSONObject();
 		dt.put("NODE_TYPE", GlobalParam.SystemConfig.getProperty("node_type"));
 		dt.put("NODE_IP", GlobalParam.IP);
+		dt.put("NODE_ID", GlobalParam.NODEID);
 		dt.put("WRITE_BATCH", GlobalParam.WRITE_BATCH);
 		dt.put("SERVICE_LEVEL", service_level);
 		dt.put("LANG", GlobalParam.LANG);
@@ -392,7 +448,7 @@ public final class NodeMonitor {
 			dt.put("CPU", SystemInfoUtil.getCpuUsage());
 			dt.put("MEMORY", SystemInfoUtil.getMemUsage());
 		} catch (Exception e) {
-			Common.LOG.error("get node status exception ", e);
+			Common.LOG.error("get cluster node status exception ", e);
 		}
 		if (GlobalParam.DISTRIBUTE_RUN) {
 			dt.put("SLAVES", GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodeStatus());

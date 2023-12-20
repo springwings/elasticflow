@@ -57,7 +57,7 @@ public class RecoverMonitor {
 				try { 
 					client.connect(this.takeIp, 8617); 
 					Common.LOG.info("restart and return Node {}.",this.takeIp);
-					EFNodeUtil.runShell(GlobalParam.RESTART_SHELL_PATH);
+					EFNodeUtil.runShell(new String[] {"bash","-c",GlobalParam.RESTART_SHELL_COMMAND});
 					return;
 				} catch (Exception e) { 
 					Thread.sleep(5000); 

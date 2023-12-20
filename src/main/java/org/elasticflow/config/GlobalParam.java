@@ -84,7 +84,7 @@ public final class GlobalParam {
 
 	public static String DATAS_CONFIG_PATH = CONFIG_ROOT+"/datas";
 	
-	public static String RESTART_SHELL_PATH = CONFIG_ROOT+"/restart.sh";
+	public static String RESTART_SHELL_COMMAND = "nohup "+CONFIG_ROOT+"/restart.sh"+" > /dev/null 2&1";
 
 	public static String INSTANCE_PATH = (DATAS_CONFIG_PATH+"/INSTANCES").intern();
 

@@ -28,15 +28,17 @@ import org.elasticflow.yarn.coordinator.TaskStateCoordinator;
 
 /**
  * Rebalance Tasks over all nodes.
+ * Each end registers its own external data receiving service port
  * 
  * @author chengwen
  * @version 2.0
- * @date 2018-11-21 15:43
+ * @date 2017-11-21 15:43
  */
 public class DistributeService {
 
 	DataReceiver dataReceiver;
-
+	
+	/**whether to enable cluster state scanning monitoring*/
 	private static boolean openMonitor = true;
 
 	public static void closeMonitor() {

@@ -55,16 +55,15 @@ public final class EFNodeUtil {
 		GlobalParam.TASK_COORDER.initTaskDatas(instance,sp);
 	}
 
-	public static void runShell(String shellPath) {
+	public static void runShell(String[] commands) {
 		Process pc = null;
-		try {
-			Common.LOG.info("system start to run {}",shellPath);
-			pc = Runtime.getRuntime().exec(shellPath);
+		try { 
+			pc = Runtime.getRuntime().exec(commands);
 			pc.waitFor();
 		} catch (InterruptedException e) {
-			Common.LOG.warn("system progress of {} is killed!",shellPath);
+			Common.LOG.warn("system progress is killed!");
 		} catch (Exception e) {
-			Common.LOG.error("system try to run {} Exception",shellPath, e);
+			Common.LOG.error("system try to run {} Exception",commands.toString(), e);
 		} finally {
 			if (pc != null) {
 				pc.destroy();

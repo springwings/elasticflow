@@ -27,7 +27,7 @@ public class SafeShutDown extends Thread {
 		if (GlobalParam.DISTRIBUTE_RUN) {
 			if (EFNodeUtil.isMaster()) {
 				Common.LOG.warn("cluster master is closed.");
-				GlobalParam.INSTANCE_COORDER.distributeCoorder().stopAllNodes(true);
+				GlobalParam.INSTANCE_COORDER.distributeCoorder().stopSlaves(true);
 				Common.stopSystem(false);
 			} else {
 				// close heartBeat and try leave cluster
@@ -59,7 +59,7 @@ public class SafeShutDown extends Thread {
 				continue;
 			if (Integer.parseInt(strs[1]) > 0) {
 				GlobalParam.INSTANCE_COORDER.stopInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());
-				GlobalParam.INSTANCE_COORDER.stopInstance(strs[0], GlobalParam.JOB_TYPE.FULL.name());
+				GlobalParam.INSTANCE_COORDER.stopInstance(strs[0], GlobalParam.JOB_TYPE.INCREMENT.name());
 			}
 		}
 	}

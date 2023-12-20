@@ -176,6 +176,5 @@ public class InstanceCoordinator implements InstanceCoord {
 		JO.put(appendPipe + "current_fail_interval", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.failInterval());
 		JO.put(appendPipe + "total_fail_times", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.getFailTimes());
 		return JO;
-	}	 
-	
+	}	
 }
