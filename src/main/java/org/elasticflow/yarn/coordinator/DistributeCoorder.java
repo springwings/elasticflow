@@ -299,8 +299,13 @@ public class DistributeCoorder {
 				nodes.forEach(n -> {					
 					n.stopAllInstance();
 				});
-				nodes.forEach(n -> { 
-					this.restartNode(n.getNodeId());
+				nodes.forEach(n -> {   
+					this.removeNode(n.getIp(), n.getNodeId(), false);
+					while(true) {
+						n.getNodeCoord().restartNode(false);
+						Common.LOG.info("nodeIP {} nodeId {} restart success", n.getIp(), n.getNodeId());
+						break;
+					} 
 				}); 
 				Common.LOG.info("cluster all slave nodes restart finish."); 
 				EFMonitorUtil.restartSystem();
