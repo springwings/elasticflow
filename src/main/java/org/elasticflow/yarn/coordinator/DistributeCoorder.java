@@ -156,21 +156,27 @@ public class DistributeCoorder {
 			if (node.containInstace(instance) && node.isLive()) {
 				return node.getBreakerStatus(instance, L1seq, appendPipe);
 			}
-		}
+		} 
 		JSONObject JO = new JSONObject();
 		if(Resource.tasks.containsKey(TaskUtil.getInstanceProcessId(instance, L1seq))) {
-			JO.put(appendPipe + "breaker_is_on",
+			JSONObject row = new JSONObject();
+			row.put("breaker_is_on",
 					Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.isOn());
 			if (Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.isOn()) {
-				JO.put(appendPipe + "breaker_is_on_reason",
+				row.put("breaker_is_on_reason",
 						Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.getReason());
 			}
-			JO.put(appendPipe + "valve_turn_level",
+			row.put("valve_turn_level",
 					Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).valve.getTurnLevel());
-			JO.put(appendPipe + "current_fail_interval",
+			row.put("current_fail_interval",
 					Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.failInterval());
-			JO.put(appendPipe + "total_fail_times",
+			row.put("total_fail_times",
 					Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.getFailTimes());
+			if(appendPipe!="") {
+				JO.put(appendPipe, row);
+			}else {
+				return row;
+			}
 		}
 		return JO;
 	}

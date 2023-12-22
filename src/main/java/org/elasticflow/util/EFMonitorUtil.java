@@ -202,7 +202,7 @@ public class EFMonitorUtil {
 				state = "Running";
 			if (GlobalParam.TASK_COORDER.checkFlowSingal(instance, seq, type, TASK_FLOW_SINGAL.Termination))
 				state = "Termination";
-			info.put(seq.length() == 0 ? "MAIN " : seq, state);
+			info.put(seq.length() == 0 ? "single" : seq, state);
 		}
 		return info;
 	}
@@ -426,20 +426,19 @@ public class EFMonitorUtil {
 								L1seq);
 					} else {
 						tmp = getPipeEndStatus(config.getInstanceID(), L1seq);
-					}
-					Searcher.put(appendPipe + "flow_state", tmp.get(END_TYPE.searcher.name()));
-					Reader.put(appendPipe + "flow_state", tmp.get(END_TYPE.reader.name()));
-					if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {
-						Computer.put(appendPipe + "flow_state", tmp.get(END_TYPE.computer.name()));
-					}
-					if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
-						Writer.put(appendPipe + "flow_state", tmp.get(END_TYPE.writer.name()));
-					}
-					nodeInfo.put(appendPipe + "node_ip", tmp.get("nodeIP"));
-					nodeInfo.put(appendPipe + "node_id", tmp.get("nodeID"));
-					nodeInfo.put(appendPipe + "pipe_size",
-							Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadPageSize());
-					nodeInfo.put(appendPipe + "status", tmp.get("status"));
+					} 
+					groupL1SeqData(Searcher,appendPipe,"flow_state",tmp.get(END_TYPE.searcher.name()));
+					groupL1SeqData(Reader,appendPipe,"flow_state",tmp.get(END_TYPE.reader.name()));
+					if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) 
+						groupL1SeqData(Computer,appendPipe,"flow_state",tmp.get(END_TYPE.computer.name()));
+					
+					if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) 
+						groupL1SeqData(Writer,appendPipe,"flow_state",tmp.get(END_TYPE.writer.name()));
+					
+					groupL1SeqData(nodeInfo,appendPipe,"node_ip",tmp.get("nodeIP"));
+					groupL1SeqData(nodeInfo,appendPipe,"node_id",tmp.get("nodeID"));
+					groupL1SeqData(nodeInfo,appendPipe,"status",tmp.get("status"));
+					groupL1SeqData(nodeInfo,appendPipe,"pipe_size",Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadPageSize());
 				}
 			}
 
@@ -496,6 +495,16 @@ public class EFMonitorUtil {
 			JO.put("node_info", nodeInfo);
 		}
 		return JO;
+	}
+	
+	public static void groupL1SeqData(JSONObject data,String appendPipe,String key,Object val) {
+		if(appendPipe=="") {
+			data.put(key, val);
+		}else {
+			if(!data.containsKey(appendPipe))
+				data.put(appendPipe, new JSONObject());
+			data.getJSONObject(appendPipe).put(key, val);
+		}			
 	}
 
 	public static void restartSystem() {
