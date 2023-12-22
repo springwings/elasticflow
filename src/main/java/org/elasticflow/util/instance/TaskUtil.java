@@ -27,8 +27,8 @@ public class TaskUtil {
 	 
 	
 	/**
-	 * get Store Task Info
-	 * if file not exists will create
+	 * get Task Info from local file
+	 * if file not exists will auto create
 	 * @param instance
 	 * @param isfull
 	 * @return

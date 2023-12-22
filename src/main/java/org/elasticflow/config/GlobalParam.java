@@ -132,13 +132,13 @@ public final class GlobalParam {
 		WAREHOUSE, INSTRUCTION
 	}
 
-	/** Task Running status define */
-	public static enum TASK_STATUS {
+	/** Task Running SINGAL define */
+	public static enum TASK_FLOW_SINGAL {
 		Blank(0), Ready(1), Running(2), Termination(4), Stop(8), Waiting(16);
 
 		private int v;
 
-		private TASK_STATUS(int val) {
+		private TASK_FLOW_SINGAL(int val) {
 			this.v = val;
 		}
 

@@ -10,10 +10,11 @@ import org.elasticflow.config.GlobalParam.INSTANCE_STATUS;
 import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
-import org.elasticflow.config.GlobalParam.TASK_STATUS;
+import org.elasticflow.config.GlobalParam.TASK_FLOW_SINGAL;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.model.EFRequest;
+import org.elasticflow.model.task.FlowStatistic;
 import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.piper.PipePump;
@@ -49,7 +50,7 @@ public class EFMonitorUtil {
 	 * @throws EFException
 	 */
 	public static void reloadInstance(String instance, String reset, String runType) throws EFException {
-		EFMonitorUtil.controlInstanceState(instance, TASK_STATUS.Stop, true);
+		EFMonitorUtil.controlInstanceState(instance, TASK_FLOW_SINGAL.Stop, true);
 		int type = Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType();
 		if (runType != null) {
 			type = Integer.parseInt(runType);
@@ -58,8 +59,8 @@ public class EFMonitorUtil {
 		if (type > 0) {
 			instanceConfig = instance + ":" + type;
 		}
-		Resource.flowInfos.remove(instance, JOB_TYPE.FULL.name());
-		Resource.flowInfos.remove(instance, JOB_TYPE.INCREMENT.name());
+		Resource.flowProgress.remove(instance, JOB_TYPE.FULL.name());
+		Resource.flowProgress.remove(instance, JOB_TYPE.INCREMENT.name());
 
 		// control slave node
 		if (GlobalParam.DISTRIBUTE_RUN) {
@@ -79,7 +80,7 @@ public class EFMonitorUtil {
 			GlobalParam.INSTANCE_COORDER.distributeCoorder().reloadClusterInstance(instanceConfig,
 					reset.equals("true"));
 		}
-		EFMonitorUtil.controlInstanceState(instance, TASK_STATUS.Ready, true);
+		EFMonitorUtil.controlInstanceState(instance, TASK_FLOW_SINGAL.Ready, true);
 	}
 
 	public static void saveNodeConfig() throws Exception {
@@ -193,13 +194,13 @@ public class EFMonitorUtil {
 		JSONObject info = new JSONObject();
 		for (String seq : seqs) {
 			String state = "";
-			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, TASK_STATUS.Stop))
+			if (GlobalParam.TASK_COORDER.checkFlowSingal(instance, seq, type, TASK_FLOW_SINGAL.Stop))
 				state = "stop";
-			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, TASK_STATUS.Ready))
+			if (GlobalParam.TASK_COORDER.checkFlowSingal(instance, seq, type, TASK_FLOW_SINGAL.Ready))
 				state = "Ready";
-			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, TASK_STATUS.Running))
+			if (GlobalParam.TASK_COORDER.checkFlowSingal(instance, seq, type, TASK_FLOW_SINGAL.Running))
 				state = "Running";
-			if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, seq, type, TASK_STATUS.Termination))
+			if (GlobalParam.TASK_COORDER.checkFlowSingal(instance, seq, type, TASK_FLOW_SINGAL.Termination))
 				state = "Termination";
 			info.put(seq.length() == 0 ? "MAIN " : seq, state);
 		}
@@ -213,7 +214,7 @@ public class EFMonitorUtil {
 	 * @param state
 	 * @param isIncrement control thread type
 	 */
-	public static void controlInstanceState(String instance, TASK_STATUS state, boolean isIncrement) {
+	public static void controlInstanceState(String instance, TASK_FLOW_SINGAL state, boolean isIncrement) {
 		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instance);
 		if ((GlobalParam.SERVICE_LEVEL & 6) == 0) {
 			return;
@@ -235,10 +236,10 @@ public class EFMonitorUtil {
 			Common.LOG.info("Instance {} seq nums {},job type {},waitting set state {} ...", inst, seqs.length,
 					controlType.name(), state);
 			for (String L1seq : seqs) {
-				if (GlobalParam.TASK_COORDER.checkFlowStatus(inst, L1seq, controlType, TASK_STATUS.Running)) {
-					GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), TASK_STATUS.Blank,
-							TASK_STATUS.Termination, true);
-					while (!GlobalParam.TASK_COORDER.checkFlowStatus(inst, L1seq, controlType, TASK_STATUS.Ready)) {
+				if (GlobalParam.TASK_COORDER.checkFlowSingal(inst, L1seq, controlType, TASK_FLOW_SINGAL.Running)) {
+					GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(), TASK_FLOW_SINGAL.Blank,
+							TASK_FLOW_SINGAL.Termination, true);
+					while (!GlobalParam.TASK_COORDER.checkFlowSingal(inst, L1seq, controlType, TASK_FLOW_SINGAL.Ready)) {
 						try {
 							waittime++;
 							Thread.sleep(100);
@@ -249,7 +250,7 @@ public class EFMonitorUtil {
 							Common.LOG.error("control instance state thread sleep is interrupted exception", e);
 						}
 					}
-					if (GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), TASK_STATUS.Termination,
+					if (GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(), TASK_FLOW_SINGAL.Termination,
 							state, true)) {
 						Common.LOG.info("Instance {} L1seq {},job type {} success set state {}.", inst,
 								(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
@@ -258,7 +259,7 @@ public class EFMonitorUtil {
 								(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
 					}
 				} else {
-					if (GlobalParam.TASK_COORDER.setFlowStatus(inst, L1seq, controlType.name(), TASK_STATUS.Blank,
+					if (GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(), TASK_FLOW_SINGAL.Blank,
 							state, true)) {
 						Common.LOG.info("Instance {} L1seq {},job type {} success set state {}.", inst,
 								(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
@@ -286,11 +287,11 @@ public class EFMonitorUtil {
 						GlobalParam.FLOW_TAG._DEFAULT.name());
 				InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
 				if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
-					pipePump.getReader().flowState.reset();
-					pipePump.getWriter().flowState.reset();
+					pipePump.getReader().flowStatistic.reset();
+					pipePump.getWriter().flowStatistic.reset();
 				}
 				if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0)
-					pipePump.getComputer().flowState.reset();
+					pipePump.getComputer().flowStatistic.reset();
 			} catch (EFException e) {
 				Common.LOG.error("reset instance {} L1seq {} PipeEnd status exception", instance, L1seq, e);
 			}
@@ -306,9 +307,9 @@ public class EFMonitorUtil {
 	 */
 	public static JSONObject getPipeEndStatus(String instance, String L1seq) {
 		JSONObject res = new JSONObject();
-		res.put(END_TYPE.reader.name(), new JSONObject(Map.of("enabled", false)));
-		res.put(END_TYPE.computer.name(), new JSONObject(Map.of("enabled", false)));
-		res.put(END_TYPE.writer.name(), new JSONObject(Map.of("enabled", false)));
+		res.put(END_TYPE.reader.name(), new FlowStatistic());
+		res.put(END_TYPE.computer.name(), new FlowStatistic());
+		res.put(END_TYPE.writer.name(), new FlowStatistic());
 		res.put("status", "offline");
 
 		if (Resource.socketCenter.containsKey(instance, L1seq, GlobalParam.FLOW_TAG._DEFAULT.name())) {
@@ -317,11 +318,11 @@ public class EFMonitorUtil {
 						GlobalParam.FLOW_TAG._DEFAULT.name());
 				InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
 				if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) {
-					res.put(END_TYPE.reader.name(), pipePump.getReader().flowState.get());
-					res.put(END_TYPE.writer.name(), pipePump.getWriter().flowState.get());
+					res.put(END_TYPE.reader.name(), pipePump.getReader().flowStatistic.get());
+					res.put(END_TYPE.writer.name(), pipePump.getWriter().flowStatistic.get());
 				}
 				if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) {
-					res.put(END_TYPE.computer.name(), pipePump.getComputer().flowState.get());
+					res.put(END_TYPE.computer.name(), pipePump.getComputer().flowStatistic.get());
 				}
 				res.put("status", "online");
 				res.put("nodeIP", GlobalParam.IP);
@@ -454,24 +455,12 @@ public class EFMonitorUtil {
 					}
 					Task.put("incremental_storage_status",
 							GlobalParam.TASK_COORDER.getInstanceScanDatas(instance, false));
-					Task.put("full_storage_status", GlobalParam.TASK_COORDER.getInstanceScanDatas(instance, true));
-					Task.put("full_progress", new JSONObject());
-					if (!Resource.flowInfos.containsKey(instance, JOB_TYPE.FULL.name())
-							|| Resource.flowInfos.get(instance, JOB_TYPE.FULL.name()).size() == 0) {
-						Task.getJSONObject("full_progress").put("full", "none");
-					} else {
-						Task.getJSONObject("full_progress").put("full",
-								Resource.flowInfos.get(instance, JOB_TYPE.FULL.name()));
-					}
-					if (!Resource.flowInfos.containsKey(instance, JOB_TYPE.INCREMENT.name())
-							|| Resource.flowInfos.get(instance, JOB_TYPE.INCREMENT.name()).size() == 0) {
-						Task.put("incremental_progress", "none");
-					} else {
-						Task.put("incremental_progress", Resource.flowInfos.get(instance, JOB_TYPE.INCREMENT.name()));
-					}
+					Task.put("full_storage_status", GlobalParam.TASK_COORDER.getInstanceScanDatas(instance, true));   
 					Task.put("full_thread_status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
 					Task.put("incremental_thread_status",
 							EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
+					Task.put("full_progress", Resource.flowProgress.get(instance, JOB_TYPE.FULL.name()));
+					Task.put("incremental_progress", Resource.flowProgress.get(instance, JOB_TYPE.INCREMENT.name()));
 				}
 			}
 

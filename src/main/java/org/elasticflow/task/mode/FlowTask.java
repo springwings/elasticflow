@@ -10,7 +10,7 @@ package org.elasticflow.task.mode;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.MECHANISM;
-import org.elasticflow.config.GlobalParam.TASK_STATUS;
+import org.elasticflow.config.GlobalParam.TASK_FLOW_SINGAL;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.Localization;
 import org.elasticflow.model.Localization.LAG_TYPE;
@@ -97,8 +97,8 @@ public class FlowTask {
 	public void runFull() {
 		if (runConditionCheck() == false)
 			return;
-		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(), TASK_STATUS.Ready,
-				TASK_STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
+		if (GlobalParam.TASK_COORDER.setFlowSingal(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(), TASK_FLOW_SINGAL.Ready,
+				TASK_FLOW_SINGAL.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
 				String storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), false,
 						false);
@@ -122,8 +122,8 @@ public class FlowTask {
 				Resource.EfNotifier.send(Localization.format(LAG_TYPE.fullFail, instanceID), instanceID, e.getMessage(),
 						EFException.ETYPE.DATA_ERROR.name(), false);
 			} finally {
-				GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(),
-						TASK_STATUS.Blank, TASK_STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
+				GlobalParam.TASK_COORDER.setFlowSingal(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(),
+						TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
 			}
 		} else {
 			if (pipePump.getInstanceConfig().getPipeParams().getLogLevel() == 0)
@@ -137,14 +137,14 @@ public class FlowTask {
 	public void runVirtualFull() {
 		if (runConditionCheck() == false)
 			return;
-		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(), TASK_STATUS.Ready,
-				TASK_STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
+		if (GlobalParam.TASK_COORDER.setFlowSingal(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(), TASK_FLOW_SINGAL.Ready,
+				TASK_FLOW_SINGAL.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
 				String storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), false,
 						false);
 				CPU.RUN(pipePump.getID(), "Pond", "createStorePosition", true,
 						TaskUtil.getInstanceProcessId(destination, L1seq), storeId);
-				GlobalParam.TASK_COORDER.setFlowInfo(instanceID, GlobalParam.JOB_TYPE.VIRTUAL.name(),
+				GlobalParam.TASK_COORDER.setFlowProgressInfo(instanceID, GlobalParam.JOB_TYPE.VIRTUAL.name(),
 						GlobalParam.FLOWINFO.FULL_JOBS.name(),
 						getNextJobs(pipePump.getInstanceConfig().getPipeParams().getNextJob()));
 				runNextJobs(JOB_TYPE.FULL);
@@ -153,8 +153,8 @@ public class FlowTask {
 				Resource.EfNotifier.send(instanceID + " Virtual Full Exception", instanceID, e.getMessage(),
 						EFException.ETYPE.DATA_ERROR.name(), false);
 			} finally {
-				GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(),
-						TASK_STATUS.Blank, TASK_STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
+				GlobalParam.TASK_COORDER.setFlowSingal(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(),
+						TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
 			}
 		} else {
 			if (pipePump.getInstanceConfig().getPipeParams().getLogLevel() == 0)
@@ -170,12 +170,12 @@ public class FlowTask {
 	public void runVirtualIncrement() {
 		if (runConditionCheck() == false)
 			return;
-		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
-				TASK_STATUS.Ready, TASK_STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
+		if (GlobalParam.TASK_COORDER.setFlowSingal(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
+				TASK_FLOW_SINGAL.Ready,TASK_FLOW_SINGAL.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			try {
 				String storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), true,
 						recompute);
-				GlobalParam.TASK_COORDER.setFlowInfo(instanceID, GlobalParam.JOB_TYPE.VIRTUAL.name(),
+				GlobalParam.TASK_COORDER.setFlowProgressInfo(instanceID, GlobalParam.JOB_TYPE.VIRTUAL.name(),
 						GlobalParam.FLOWINFO.INCRE_STOREID.name(), storeId);
 				runNextJobs(JOB_TYPE.INCREMENT);
 			} catch (Exception e) {
@@ -183,8 +183,8 @@ public class FlowTask {
 				Resource.EfNotifier.send(instanceID + " Virtual Increment Exception", instanceID, e.getMessage(),
 						EFException.ETYPE.DATA_ERROR.name(), false);
 			} finally {
-				GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
-						TASK_STATUS.Blank, TASK_STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
+				GlobalParam.TASK_COORDER.setFlowSingal(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
+						TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
 				recompute = false;
 			}
 		} else {
@@ -199,8 +199,8 @@ public class FlowTask {
 	public void runIncrement() {
 		if (runConditionCheck() == false) 
 			return;
-		if (GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
-				TASK_STATUS.Ready, TASK_STATUS.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
+		if (GlobalParam.TASK_COORDER.setFlowSingal(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
+				TASK_FLOW_SINGAL.Ready, TASK_FLOW_SINGAL.Running, pipePump.getInstanceConfig().getPipeParams().showInfoLog())) {
 			String storeId = null;
 			try {
 				storeId = GlobalParam.TASK_COORDER.getStoreId(destination, L1seq, pipePump.getID(), true,
@@ -228,8 +228,8 @@ public class FlowTask {
 				} 
 			} finally {
 				recompute = this.checkReCompute(storeId);
-				GlobalParam.TASK_COORDER.setFlowStatus(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
-						TASK_STATUS.Blank, TASK_STATUS.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
+				GlobalParam.TASK_COORDER.setFlowSingal(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
+						TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
 			}
 		} else {
 			if (pipePump.getInstanceConfig().getPipeParams().getLogLevel() == 0)

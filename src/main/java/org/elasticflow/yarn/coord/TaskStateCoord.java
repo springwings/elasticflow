@@ -8,10 +8,9 @@
 package org.elasticflow.yarn.coord;
 
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
-import org.elasticflow.config.GlobalParam.TASK_STATUS;
+import org.elasticflow.config.GlobalParam.TASK_FLOW_SINGAL;
 import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.util.EFException;
 
@@ -26,16 +25,19 @@ import com.alibaba.fastjson.JSONObject;
  */
 public interface TaskStateCoord extends Coordination {
 
-	public String getContextId(String instance, String L1seq, String tag);
-
-	public void setFlowStatus(String instance, String L1seq, String tag, AtomicInteger ai);
+	public String getContextId(String instance, String L1seq, String tag); 
 
 	public void setScanPosition(String instance, String L1seq, String L2seq, String scanStamp, boolean reset,
 			boolean isfull);
-
-	public boolean checkFlowStatus(String instance, String seq, JOB_TYPE type, TASK_STATUS state);
-
-	public boolean setFlowStatus(String instance, String L1seq, String type, TASK_STATUS needState, TASK_STATUS setState,
+	
+	/**init task flow control signal status*/
+	public void initFlowSingal(String instance, String L1seq);
+	
+	/**check task flow control signal status*/
+	public boolean checkFlowSingal(String instance, String seq, JOB_TYPE type, TASK_FLOW_SINGAL singal);
+	
+	/**set the control signal status for task flow*/
+	public boolean setFlowSingal(String instance, String L1seq, String type, TASK_FLOW_SINGAL needState, TASK_FLOW_SINGAL setState,
 			boolean showLog);
 
 	public String getStoreIdFromSave(String instance, String L1seq, boolean reload, boolean isfull);
@@ -67,12 +69,15 @@ public interface TaskStateCoord extends Coordination {
 	public void batchUpdateSeqPos(String instance, String val, boolean isfull);
 
 	public String getStoreId(String instance, boolean isfull);
+	
+	public void initFlowProgressInfo(String instanceID);
+	/**set flow progress info**/
+	public void setFlowProgressInfo(String instanceID, String jobType, String key, String data);
+	
+	/**clear flow progress info**/
+	public void resetFlowProgressInfo(String instanceID, String jobType);
 
-	public void setFlowInfo(String formKeyVal1, String formKeyVal2, String key, String data);
-
-	public void resetFlowInfo(String formKeyVal1, String formKeyVal2);
-
-	public HashMap<String, String> getFlowInfo(String formKeyVal1, String formKeyVal2);
+	public HashMap<String, String> getFlowInfo(String instanceID, String jobType);
 
 	public void updateStoreData(String instance, Object data);
 

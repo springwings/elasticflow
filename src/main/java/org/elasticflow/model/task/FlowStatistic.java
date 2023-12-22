@@ -17,7 +17,7 @@ import com.alibaba.fastjson.JSONObject;
  * @version 2.0
  * @date 2018-11-08 16:49
  */
-final public class FlowState {
+final public class FlowStatistic {
 	
 	/** FAIL processing data units statistics **/
 	private volatile AtomicInteger failProcess = new AtomicInteger(0);
@@ -62,6 +62,12 @@ final public class FlowState {
 		return storeKey;
 	}
 	
+	public FlowStatistic() {
+		this.historyProcess = new JSONObject();
+		this.flowEndStatus = toHashObject();
+		this.flowStartTime = 0;
+	}
+	
 	/**
 	 * example
 	 * {
@@ -72,17 +78,15 @@ final public class FlowState {
 	 * @param endType
 	 * @param L1seq
 	 */
-	public FlowState(JSONObject stat,END_TYPE endType,String L1seq) {
+	public FlowStatistic(JSONObject stat,END_TYPE endType,String L1seq) {
 		String storeKey = getStoreKey(L1seq);
 		if(stat.containsKey(storeKey)) {
 			JSONObject JO = stat.getJSONObject(storeKey);
 			if(JO.containsKey(endType.name())) {
-				if(JO.getJSONObject(endType.name()).getBooleanValue("enable")) {
-					JSONObject _JO = JO.getJSONObject(endType.name());
-					this.totalProcess.set(_JO.getLong("totalProcess"));
-					this.flowStartTime = _JO.getLong("flowStartTime");
-					this.historyProcess = _JO.getJSONObject("historyProcess");	
-				}				
+				JSONObject _JO = JO.getJSONObject(endType.name());
+				this.totalProcess.set(_JO.getLong("totalProcess"));
+				this.flowStartTime = _JO.getLong("flowStartTime");
+				this.historyProcess = _JO.getJSONObject("historyProcess");					
 			}							
 		}
 		if(this.historyProcess == null) 
@@ -128,8 +132,6 @@ final public class FlowState {
 		JO.put("blockTime", this.BLOCKTIME);
 		JO.put("realBlockTime", this.REAL_BLOCKTIME);
 		JO.put("failProcess", this.failProcess);
-		//Determine whether the end is enabled
-		JO.put("enabled", true);
 	}
 	
 	

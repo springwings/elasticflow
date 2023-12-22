@@ -13,7 +13,7 @@ import org.elasticflow.util.instance.TaskUtil;
 public class EFState<T> extends ConcurrentHashMap<String,T>{
  
 	private static final long serialVersionUID = 7134367712318896122L;
-	
+	 
 	public void set(String instance,T dt) {
 		put(instance, dt);
 	} 

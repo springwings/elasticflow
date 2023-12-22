@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.GlobalParam.TASK_STATUS;
+import org.elasticflow.config.GlobalParam.TASK_FLOW_SINGAL;
 import org.elasticflow.model.task.TaskJobModel;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.param.pipe.InstructionParam;
@@ -70,19 +70,19 @@ public class FlowCenter{
 					continue;
 				
 				if(GlobalParam.JOB_TYPE.FULL.name().equals(type.toUpperCase())) {
-					if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,TASK_STATUS.Ready))
+					if (GlobalParam.TASK_COORDER.checkFlowSingal(instance, L1seq,GlobalParam.JOB_TYPE.FULL,TASK_FLOW_SINGAL.Ready))
 						state = EFPipeUtil.jobAction(TaskUtil.getInstanceProcessId(instance, L1seq), GlobalParam.JOB_TYPE.FULL.name(), "start") && state;
 						if(state && !asyn) {
 							Thread.sleep(500);//waiting to start job
-							while(GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.FULL,TASK_STATUS.Ready)==false)
+							while(GlobalParam.TASK_COORDER.checkFlowSingal(instance, L1seq,GlobalParam.JOB_TYPE.FULL,TASK_FLOW_SINGAL.Ready)==false)
 								Thread.sleep(500);
 						} 
 				}else {
-					if (GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,TASK_STATUS.Ready))
+					if (GlobalParam.TASK_COORDER.checkFlowSingal(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,TASK_FLOW_SINGAL.Ready))
 						state = EFPipeUtil.jobAction(TaskUtil.getInstanceProcessId(instance, L1seq), GlobalParam.JOB_TYPE.INCREMENT.name(), "start") && state;
 						if(state && asyn) {
 							Thread.sleep(500);//waiting to start job
-							while(GlobalParam.TASK_COORDER.checkFlowStatus(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,TASK_STATUS.Ready)==false)
+							while(GlobalParam.TASK_COORDER.checkFlowSingal(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,TASK_FLOW_SINGAL.Ready)==false)
 								Thread.sleep(500);
 						} 
 				}				

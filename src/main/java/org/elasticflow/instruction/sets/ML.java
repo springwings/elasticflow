@@ -49,14 +49,14 @@ public class ML extends Instruction {
 				long start = System.currentTimeMillis();
 				int dataNums = DSReader.getDataNums(); 
 				res = context.getComputer().predict(context, DSReader);
-				context.getComputer().flowState
+				context.getComputer().flowStatistic
 						.setLoad((long) ((dataNums * 1000) / (start - context.getComputer().lastGetPageTime)));
 				context.getComputer().lastGetPageTime = start;
 				if (res.getData().size() > 0)
-					context.getComputer().flowState
+					context.getComputer().flowStatistic
 							.setPerformance((long) ((dataNums * 1000) / (System.currentTimeMillis() - start + 1e-3)));
-				context.getComputer().flowState.incrementCurrentTimeProcess(dataNums);
-				context.getComputer().flowState.updateRealBlockTime((int) (System.currentTimeMillis() - start));
+				context.getComputer().flowStatistic.incrementCurrentTimeProcess(dataNums);
+				context.getComputer().flowStatistic.updateRealBlockTime((int) (System.currentTimeMillis() - start));
 			} catch (EFException e) {
 				throw e;
 			} finally {

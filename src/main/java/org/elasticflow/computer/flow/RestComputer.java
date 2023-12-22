@@ -103,7 +103,7 @@ public class RestComputer extends ComputerFlowSocket {
 						long startTime = System.currentTimeMillis();
 						String api = apiBlockingQueue.take();
 						if (System.currentTimeMillis() - startTime > delayTime)
-							this.flowState.incrementBlockTime();
+							this.flowStatistic.incrementBlockTime();
 						Resource.threadPools.execute(() -> {
 							JSONObject tmp = null;
 							try {
@@ -136,7 +136,7 @@ public class RestComputer extends ComputerFlowSocket {
 					long startTime = System.currentTimeMillis();
 					String api = apiBlockingQueue.take();
 					if (System.currentTimeMillis() - startTime > delayTime)
-						this.flowState.incrementBlockTime();
+						this.flowStatistic.incrementBlockTime();
 					Resource.threadPools.execute(() -> {
 						try {
 							JSONObject tmp = null;
@@ -196,7 +196,7 @@ public class RestComputer extends ComputerFlowSocket {
 		if (responseParams.containsKey("statusField")) {
 			String status = responseParams.getJSONObject("statusField").getString("success");
 			if (datas.getString("status") != status) {// response status check
-				this.flowState.incrementFailUnitTime(keepDatas.size());
+				this.flowStatistic.incrementFailUnitTime(keepDatas.size());
 				log.warn("{} compute warn,info:{}", context.getInstanceConfig().getInstanceID(),
 						datas.getString(responseParams.getJSONObject("statusField").getString("errorInfo")));
 				return;
@@ -205,7 +205,7 @@ public class RestComputer extends ComputerFlowSocket {
 		String datafield = responseParams.getJSONObject("dataField").getString("name");
 		JSONArray JA = datas.getJSONArray(datafield);
 		if (keepDatas != null && JA.size() != keepDatas.size()) {
-			this.flowState.incrementFailUnitTime(keepDatas.size());
+			this.flowStatistic.incrementFailUnitTime(keepDatas.size());
 			throw new EFException("predict exception," + datas.toString(), ELEVEL.BreakOff);
 		}
 		for (int i = 0; i < JA.size(); i++) {

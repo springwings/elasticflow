@@ -18,7 +18,7 @@ import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.computer.handler.ComputerHandler;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
-import org.elasticflow.config.GlobalParam.TASK_STATUS;
+import org.elasticflow.config.GlobalParam.TASK_FLOW_SINGAL;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.model.reader.DataPage;
@@ -162,10 +162,12 @@ public final class PipePump extends Instruction implements Serializable {
 			task = incrementTask;
 		}
 		List<String> L2seqs = getInstanceConfig().getReaderParams().getL2Seq();
-		GlobalParam.TASK_COORDER.setFlowInfo(instanceID, job_type.name(), instanceProcessId + "_L2seqs_nums",
-				String.valueOf(L2seqs.size()));
+		if(L2seqs.size()>0)
+			GlobalParam.TASK_COORDER.setFlowProgressInfo(instanceID, job_type.name(), instanceProcessId + "_L2seqs_nums",
+					String.valueOf(L2seqs.size()));
 		processFlow(task, storeId, L2seqs, destination, isReferenceInstance);
-		GlobalParam.TASK_COORDER.resetFlowInfo(instanceID, job_type.name());
+		GlobalParam.TASK_COORDER.resetFlowProgressInfo(instanceID, job_type.name());
+		//if is full,start to switch instance
 		if (isFull) {
 			if (isReferenceInstance) {
 				synchronized (GlobalParam.TASK_COORDER.getFlowInfo(destination, GlobalParam.JOB_TYPE.VIRTUAL.name())) {
@@ -173,7 +175,7 @@ public final class PipePump extends Instruction implements Serializable {
 							.getFlowInfo(destination, GlobalParam.JOB_TYPE.VIRTUAL.name())
 							.get(GlobalParam.FLOWINFO.FULL_JOBS.name());
 					remainJobs = remainJobs.replace(instanceID, "").trim();
-					GlobalParam.TASK_COORDER.setFlowInfo(destination, GlobalParam.JOB_TYPE.VIRTUAL.name(),
+					GlobalParam.TASK_COORDER.setFlowProgressInfo(destination, GlobalParam.JOB_TYPE.VIRTUAL.name(),
 							GlobalParam.FLOWINFO.FULL_JOBS.name(), remainJobs);
 					if (remainJobs.length() == 0)
 						CPU.RUN(getID(), "Pond", "switchInstance", true, instanceID, L1seq, storeId);
@@ -220,11 +222,13 @@ public final class PipePump extends Instruction implements Serializable {
 		for (String L2seq : L2seqs) {
 			try {
 				task.setL2seq(L2seq);
-				GlobalParam.TASK_COORDER.setFlowInfo(task.getInstanceID(), task.getJobType().name(),
-						task.getInstanceProcessId() + L2seq, "start count page...");
+				GlobalParam.TASK_COORDER.setFlowProgressInfo(task.getInstanceID(), task.getJobType().name(),
+						task.getInstanceProcessId(L2seq) , "start count page...");
 				ConcurrentLinkedDeque<String> pageList = this.getPageLists(task);
 				if (pageList == null) {
 					log.warn("{} get data page list is null.",task.getInstanceProcessId());
+					GlobalParam.TASK_COORDER.setFlowProgressInfo(task.getInstanceID(), task.getJobType().name(),
+							task.getInstanceProcessId(L2seq), "0/0");
 					continue;
 				}
 				processListsPages(task, destination, pageList, storeId);
@@ -258,6 +262,8 @@ public final class PipePump extends Instruction implements Serializable {
 				log.info(TaskUtil.formatLog("start", task.getJobType().name(), instanceProcessId, storeId, task.getL2seq(), 0,
 						"", GlobalParam.TASK_COORDER.getScanPositon(task.getInstanceID(), task.getL1seq(), task.getL2seq(),task.isfull()),
 						0, " no data!"));
+			GlobalParam.TASK_COORDER.setFlowProgressInfo(task.getInstanceID(), task.getJobType().name(),
+					task.getInstanceProcessId(task.getL2seq()), "0/0");
 		} else {
 			if (task.getInstanceConfig().getPipeParams().getLogLevel() < 2)
 				log.info(TaskUtil.formatLog("start",
@@ -293,8 +299,8 @@ public final class PipePump extends Instruction implements Serializable {
 	}
 
 	private void breakCheck(TaskModel task) throws EFException {
-		if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstanceID(), task.getL1seq(), task.getJobType(),
-				TASK_STATUS.Termination)) {
+		if (GlobalParam.TASK_COORDER.checkFlowSingal(task.getInstanceID(), task.getL1seq(), task.getJobType(),
+				TASK_FLOW_SINGAL.Termination)) {
 			throw new EFException(task.getInstanceID() + " " + task.getJobType().name() + " job has been Terminated!",
 					ELEVEL.Dispose, ETYPE.EXTINTERRUPT);
 		}
@@ -325,8 +331,8 @@ public final class PipePump extends Instruction implements Serializable {
 		while (!pageList.isEmpty()) {
 			dataBoundary = pageList.poll();
 			progressPos++;
-			GlobalParam.TASK_COORDER.setFlowInfo(task.getInstanceID(), task.getJobType().name(),
-					task.getInstanceProcessId() + task.getL2seq(), progressPos + "/" + pageList.size());
+			GlobalParam.TASK_COORDER.setFlowProgressInfo(task.getInstanceID(), task.getJobType().name(),
+					task.getInstanceProcessId(task.getL2seq()), progressPos + "/" + pageList.size());
 			String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(), PipeUtil.getScanParam(
 					task.getL2seq(), startId, dataBoundary, task.getStartTime(), task.getEndTime(), scanField));
 
@@ -445,13 +451,13 @@ public final class PipePump extends Instruction implements Serializable {
 			while (!pageList.isEmpty()) {
 				dataBoundary = pageList.poll();
 				progressPos.incrementAndGet();
-				GlobalParam.TASK_COORDER.setFlowInfo(task.getInstanceID(), task.getJobType().name(),
-						task.getInstanceProcessId() + task.getL2seq(), progressPos + "/" + this.pageNum);
+				GlobalParam.TASK_COORDER.setFlowProgressInfo(task.getInstanceID(), task.getJobType().name(),
+						task.getInstanceProcessId(task.getL2seq()), progressPos + "/" + this.pageNum);
 				String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(),
 						PipeUtil.getScanParam(task.getL2seq(), startId, dataBoundary, task.getStartTime(),
 								task.getEndTime(), task.getScanParam().getScanField()));
-				if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstanceID(), task.getL1seq(), task.getJobType(),
-						TASK_STATUS.Termination)) {
+				if (GlobalParam.TASK_COORDER.checkFlowSingal(task.getInstanceID(), task.getL1seq(), task.getJobType(),
+						TASK_FLOW_SINGAL.Termination)) {
 					Resource.threadPools.cleanWaitJob(getId());
 					Common.LOG
 							.warn(task.getInstanceID() + " " + task.getJobType().name() + " job has been Terminated!");
@@ -473,8 +479,8 @@ public final class PipePump extends Instruction implements Serializable {
 								storeId, task.getL2seq(), dataSize, datab, scanStamp, Common.getNow() - start,
 								",progress:" + progressPos + "/" + pageNum));
 					}
-					if (GlobalParam.TASK_COORDER.checkFlowStatus(task.getInstanceID(), task.getL1seq(),
-							task.getJobType(), TASK_STATUS.Termination)) {
+					if (GlobalParam.TASK_COORDER.checkFlowSingal(task.getInstanceID(), task.getL1seq(),
+							task.getJobType(), TASK_FLOW_SINGAL.Termination)) {
 						Resource.threadPools.cleanWaitJob(getId());
 						Common.LOG.warn("{} {} job has been Terminated!",task.getInstanceID(),task.getJobType().name());
 						break;
@@ -491,8 +497,8 @@ public final class PipePump extends Instruction implements Serializable {
 						Common.LOG.warn("instance {} read data exception!",instanceConfig.getInstanceID());
 						return;
 					}
-					GlobalParam.TASK_COORDER.setFlowStatus(task.getInstanceID(), task.getL1seq(),
-							GlobalParam.JOB_TYPE.FULL.name(), TASK_STATUS.Blank, TASK_STATUS.Ready,
+					GlobalParam.TASK_COORDER.setFlowSingal(task.getInstanceID(), task.getL1seq(),
+							GlobalParam.JOB_TYPE.FULL.name(), TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Ready,
 							getInstanceConfig().getPipeParams().showInfoLog());
 				}
 				total.addAndGet(rState.getCount());

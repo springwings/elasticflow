@@ -30,13 +30,13 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.INSTANCE_STATUS;
 import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
-import org.elasticflow.config.GlobalParam.TASK_STATUS;
+import org.elasticflow.config.GlobalParam.TASK_FLOW_SINGAL;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.InstructionTree;
-import org.elasticflow.model.task.FlowState;
+import org.elasticflow.model.task.FlowStatistic;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
@@ -499,10 +499,10 @@ public final class NodeMonitor {
 					}  
 					// update flow status,Distributed environment synchronization status
 					if (GlobalParam.DISTRIBUTE_RUN) {
-						Resource.flowStates.get(instance).put(FlowState.getStoreKey(L1seq),
+						Resource.flowStates.get(instance).put(FlowStatistic.getStoreKey(L1seq),
 								GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(instance, L1seq));
 					} else {
-						Resource.flowStates.get(instance).put(FlowState.getStoreKey(L1seq),
+						Resource.flowStates.get(instance).put(FlowStatistic.getStoreKey(L1seq),
 								EFMonitorUtil.getPipeEndStatus(instance, L1seq));
 					}
 				}
@@ -629,10 +629,8 @@ public final class NodeMonitor {
 				JSONObject JO = EFMonitorUtil.getInstanceInfo(node.getKey(), 2); 
 				JSONObject _datas = JO.getJSONObject("reader");  
 				for (String _key : _datas.keySet()) {  
-					if(_datas.getJSONObject(_key).getBooleanValue("is_open")) {
-						if(_datas.getJSONObject(_key).containsKey("totalProcess"))
-							weight+=_datas.getJSONObject(_key).getInteger("totalProcess");
-					}  
+					if(_datas.getJSONObject(_key).containsKey("totalProcess"))
+						weight+=_datas.getJSONObject(_key).getInteger("totalProcess"); 
 				}
 			} catch (Exception e) { 
 				node.getValue().put("instance_status", INSTANCE_STATUS.Error.getVal());
@@ -988,7 +986,7 @@ public final class NodeMonitor {
 						L1seqs = new String[1];
 						L1seqs[0] = GlobalParam.DEFAULT_RESOURCE_SEQ;
 					}
-					EFMonitorUtil.controlInstanceState(instance, TASK_STATUS.Stop, true);
+					EFMonitorUtil.controlInstanceState(instance, TASK_FLOW_SINGAL.Stop, true);
 					for (String L1seq : L1seqs) {
 						String tags = TaskUtil.getResourceTag(instance, L1seq, GlobalParam.FLOW_TAG._DEFAULT.name(),
 								false);
@@ -1007,7 +1005,7 @@ public final class NodeMonitor {
 							Common.LOG.error("delete {} Instance Data",instance, e);
 						}
 					}
-					EFMonitorUtil.controlInstanceState(instance, TASK_STATUS.Ready, true);
+					EFMonitorUtil.controlInstanceState(instance, TASK_FLOW_SINGAL.Ready, true);
 				}
 			}
 			if (state) {

@@ -9,7 +9,7 @@ package org.elasticflow.yarn.coordinator;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
-import org.elasticflow.config.GlobalParam.TASK_STATUS;
+import org.elasticflow.config.GlobalParam.TASK_FLOW_SINGAL;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
@@ -128,28 +128,28 @@ public class InstanceCoordinator implements InstanceCoord {
 	@Override
 	public void stopInstance(String instance, String jobtype) {
 		if (jobtype.toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
-			EFMonitorUtil.controlInstanceState(instance, TASK_STATUS.Stop, false);
+			EFMonitorUtil.controlInstanceState(instance, TASK_FLOW_SINGAL.Stop, false);
 		} else {
-			EFMonitorUtil.controlInstanceState(instance, TASK_STATUS.Stop, true);
+			EFMonitorUtil.controlInstanceState(instance, TASK_FLOW_SINGAL.Stop, true);
 		}
 	}
 
 	@Override
 	public void resumeInstance(String instance, String jobtype) {
 		if (jobtype.toUpperCase().equals(GlobalParam.JOB_TYPE.FULL.name())) {
-			EFMonitorUtil.controlInstanceState(instance, TASK_STATUS.Ready, false);
+			EFMonitorUtil.controlInstanceState(instance, TASK_FLOW_SINGAL.Ready, false);
 		} else {
-			EFMonitorUtil.controlInstanceState(instance, TASK_STATUS.Ready, true);
+			EFMonitorUtil.controlInstanceState(instance, TASK_FLOW_SINGAL.Ready, true);
 		}
 	}
 
 	@Override
 	public void removeInstance(String instance,boolean waitComplete) {
 		if(waitComplete)
-			EFMonitorUtil.controlInstanceState(instance, TASK_STATUS.Stop, true);
+			EFMonitorUtil.controlInstanceState(instance, TASK_FLOW_SINGAL.Stop, true);
 		if (Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType() > 0) {
-			Resource.flowInfos.remove(instance, JOB_TYPE.FULL.name());
-			Resource.flowInfos.remove(instance, JOB_TYPE.INCREMENT.name());
+			Resource.flowProgress.remove(instance, JOB_TYPE.FULL.name());
+			Resource.flowProgress.remove(instance, JOB_TYPE.INCREMENT.name());
 		}		
 		EFPipeUtil.removeInstance(instance, true, true);
 		EFMonitorUtil.removeConfigInstance(instance);

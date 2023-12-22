@@ -14,10 +14,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
-import org.elasticflow.config.GlobalParam.TASK_STATUS;
+import org.elasticflow.config.GlobalParam.TASK_FLOW_SINGAL;
 import org.elasticflow.model.EFState;
 import org.elasticflow.model.reader.ScanPosition;
-import org.elasticflow.model.task.FlowState;
+import org.elasticflow.model.task.FlowStatistic;
 import org.elasticflow.node.CPU;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
@@ -32,7 +32,9 @@ import org.elasticflow.yarn.coord.TaskStateCoord;
 import com.alibaba.fastjson.JSONObject;
 
 /**
- * task status cluster Coordinator, Coordinate pipeline status and information
+ * task status cluster Coordinator, 
+ * Coordinate pipeline status and information
+ * run standlone/cluster mode
  * 
  * @author chengwen
  * @version 0.1
@@ -48,16 +50,50 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	/** Store intermediate calculation result data **/
 	private final static ConcurrentHashMap<String, Object> TMP_STORE_DATA = new ConcurrentHashMap<>();
 
-	/** FLOW_STATUS store current flow running control status */
-	final static EFState<AtomicInteger> FLOW_RUN_STATUS = new EFState<>();
+	/** flow control signal */
+	final static EFState<AtomicInteger> FLOW_CONTROL_SINGAL = new EFState<>();
+
+	public void initFlowSingal(String instance, String L1seq) {
+		FLOW_CONTROL_SINGAL.set(instance, L1seq, GlobalParam.JOB_TYPE.FULL.name(), new AtomicInteger(TASK_FLOW_SINGAL.Ready.getVal()));
+		FLOW_CONTROL_SINGAL.set(instance, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(), new AtomicInteger(TASK_FLOW_SINGAL.Ready.getVal()));
+		FLOW_CONTROL_SINGAL.set(instance, L1seq, GlobalParam.JOB_TYPE.VIRTUAL.name(), new AtomicInteger(TASK_FLOW_SINGAL.Ready.getVal())); 
+	}
+	
+	public boolean checkFlowSingal(String instance, String seq, JOB_TYPE type, TASK_FLOW_SINGAL singal) {
+		if ((FLOW_CONTROL_SINGAL.get(instance, seq, type.name()).get() & singal.getVal()) > 0)
+			return true;
+		return false;
+	}
+
+	/**
+	 * 
+	 * @param instance
+	 * @param seq
+	 * @param type        tag for flow status,with job_type
+	 * @param needState   equal 0 no need check
+	 * @param plusState
+	 * @param removeState
+	 * @return boolean,lock status
+	 */
+	public boolean setFlowSingal(String instance, String L1seq, String type, TASK_FLOW_SINGAL needState,
+			TASK_FLOW_SINGAL setState, boolean showLog) {
+		synchronized (FLOW_CONTROL_SINGAL.get(instance, L1seq, type)) {
+			if (needState.equals(TASK_FLOW_SINGAL.Blank)
+					|| (FLOW_CONTROL_SINGAL.get(instance, L1seq, type).get() == needState.getVal())) {
+				FLOW_CONTROL_SINGAL.get(instance, L1seq, type).set(setState.getVal());
+				return true;
+			} else {
+				if (showLog)
+					Common.LOG.info("{} {} flow can not set to {} state!", instance, type, needState.name());
+				return false;
+			}
+		}
+	}
+
 
 	public String getContextId(String instance, String L1seq, String tag) {
 		return Resource.socketCenter.getContextId(instance, L1seq, tag);
-	}
-
-	public void setFlowStatus(String instance, String L1seq, String tag, AtomicInteger ai) {
-		FLOW_RUN_STATUS.set(instance, L1seq, tag, ai);
-	}
+	} 
 
 	public void updateStoreData(String instance, Object data) {
 		synchronized (TMP_STORE_DATA.get(instance)) {
@@ -76,10 +112,10 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 			SCAN_POSITION.get(instance).updateLSeqPos(TaskUtil.getLseq(L1seq, L2seq), scanStamp, isfull);
 			// update flow status,Distributed environment synchronization status
 			if (GlobalParam.DISTRIBUTE_RUN) {
-				Resource.flowStates.get(instance).put(FlowState.getStoreKey(L1seq),
+				Resource.flowStates.get(instance).put(FlowStatistic.getStoreKey(L1seq),
 						GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(instance, L1seq));
 			} else {
-				Resource.flowStates.get(instance).put(FlowState.getStoreKey(L1seq),
+				Resource.flowStates.get(instance).put(FlowStatistic.getStoreKey(L1seq),
 						EFMonitorUtil.getPipeEndStatus(instance, L1seq));
 			}
 			EFFileUtil.createAndSave(Resource.flowStates.get(instance).toJSONString(),
@@ -87,36 +123,6 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 		}
 	}
 
-	public boolean checkFlowStatus(String instance, String seq, JOB_TYPE type, TASK_STATUS state) {
-		if ((FLOW_RUN_STATUS.get(instance, seq, type.name()).get() & state.getVal()) > 0)
-			return true;
-		return false;
-	}
-
-	/**
-	 * 
-	 * @param instance
-	 * @param seq
-	 * @param type        tag for flow status,with job_type
-	 * @param needState   equal 0 no need check
-	 * @param plusState
-	 * @param removeState
-	 * @return boolean,lock status
-	 */
-	public boolean setFlowStatus(String instance, String L1seq, String type, TASK_STATUS needState,
-			TASK_STATUS setState, boolean showLog) {
-		synchronized (FLOW_RUN_STATUS.get(instance, L1seq, type)) {
-			if (needState.equals(TASK_STATUS.Blank)
-					|| (FLOW_RUN_STATUS.get(instance, L1seq, type).get() == needState.getVal())) {
-				FLOW_RUN_STATUS.get(instance, L1seq, type).set(setState.getVal());
-				return true;
-			} else {
-				if (showLog)
-					Common.LOG.info("{} {} flow can not set to {} state!", instance, type, needState.name());
-				return false;
-			}
-		}
-	}
 
 	/**
 	 * Retrieve storage ID from disk storage
@@ -239,18 +245,23 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	public String getStoreId(String instance, boolean isfull) {
 		return SCAN_POSITION.get(instance).getStoreId(isfull);
 	}
-
-	public void setFlowInfo(String formKeyVal1, String formKeyVal2, String key, String data) {
-		if (!Resource.flowInfos.containsKey(formKeyVal1, formKeyVal2))
-			Resource.flowInfos.set(formKeyVal1, formKeyVal2, new HashMap<String, String>());
-		Resource.flowInfos.get(formKeyVal1, formKeyVal2).put(key, data);
+ 
+	public void initFlowProgressInfo(String instanceID) {
+		Resource.flowProgress.set(instanceID, JOB_TYPE.FULL.name(), new HashMap<String, String>());
+		Resource.flowProgress.set(instanceID, JOB_TYPE.INCREMENT.name(), new HashMap<String, String>());
+		Resource.flowProgress.set(instanceID, JOB_TYPE.VIRTUAL.name(), new HashMap<String, String>());
+		Resource.flowProgress.set(instanceID, JOB_TYPE.INSTRUCTION.name(), new HashMap<String, String>());
+	}
+	
+	public void setFlowProgressInfo(String instanceID, String jobType, String key, String data) { 
+		Resource.flowProgress.get(instanceID, jobType).put(key, data);
+	}
+	
+	public void resetFlowProgressInfo(String instanceID, String jobType) {
+		Resource.flowProgress.get(instanceID, jobType).clear();
 	}
 
-	public void resetFlowInfo(String formKeyVal1, String formKeyVal2) {
-		Resource.flowInfos.get(formKeyVal1, formKeyVal2).clear();
-	}
-
-	public HashMap<String, String> getFlowInfo(String formKeyVal1, String formKeyVal2) {
-		return Resource.flowInfos.get(formKeyVal1, formKeyVal2);
+	public HashMap<String, String> getFlowInfo(String instanceID, String jobType) {
+		return Resource.flowProgress.get(instanceID, jobType);
 	}
 }

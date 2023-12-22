@@ -8,7 +8,6 @@
 package org.elasticflow.util;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.NODE_TYPE;
@@ -42,10 +41,9 @@ public final class EFNodeUtil {
 		ScanPosition sp = new ScanPosition(instance, "");
 		try { 
 			String[] L1seqs = TaskUtil.getL1seqs(instanceConfig);
+			GlobalParam.TASK_COORDER.initFlowProgressInfo(instance);
 			for (String L1seq : L1seqs) {
-				GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.FULL.name(), new AtomicInteger(1));
-				GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(), new AtomicInteger(1));
-				GlobalParam.TASK_COORDER.setFlowStatus(instance, L1seq, GlobalParam.JOB_TYPE.VIRTUAL.name(), new AtomicInteger(1));			
+				GlobalParam.TASK_COORDER.initFlowSingal(instance, L1seq);					
 			}
 			sp.loadInfos(TaskUtil.getStoreTaskInfo(instance,false),false);
 			sp.loadInfos(TaskUtil.getStoreTaskInfo(instance,true),true);

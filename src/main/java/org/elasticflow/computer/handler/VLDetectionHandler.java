@@ -101,7 +101,7 @@ public class VLDetectionHandler extends ComputerHandler {
 					long startTime = System.currentTimeMillis();
 					String api = apiBlockingQueue.take();
 					if (System.currentTimeMillis() - startTime > delayTime)
-						RS.flowState.incrementBlockTime();
+						RS.flowStatistic.incrementBlockTime();
 					Resource.threadPools.execute(() -> {
 						JSONObject tmp = null;
 						try {
@@ -118,7 +118,7 @@ public class VLDetectionHandler extends ComputerHandler {
 								}
 								apiBlockingQueue.put(api);
 								if (tmp.getInteger("status") != 0) {// response status check
-									RS.flowState.incrementFailUnitTime(1);
+									RS.flowStatistic.incrementFailUnitTime(1);
 									Common.LOG.warn(context.getInstanceConfig().getInstanceID() + " predict warn.");
 									Common.LOG.warn(jo.toJSONString());
 									Common.LOG.warn(tmp.toJSONString());
@@ -161,7 +161,7 @@ public class VLDetectionHandler extends ComputerHandler {
 				long startTime = System.currentTimeMillis();
 				String api = apiBlockingQueue.take();
 				if (System.currentTimeMillis() - startTime > delayTime)
-					RS.flowState.incrementBlockTime();
+					RS.flowStatistic.incrementBlockTime();
 				Resource.threadPools.execute(() -> {
 					JSONObject tmp = null;
 					try {
@@ -172,7 +172,7 @@ public class VLDetectionHandler extends ComputerHandler {
 							tmp = this.sentRequest(jo, api);
 							apiBlockingQueue.put(api);
 							if (tmp.getInteger("status") != 0) {// response status check
-								RS.flowState.incrementFailUnitTime(1);
+								RS.flowStatistic.incrementFailUnitTime(1);
 								Common.LOG.warn(context.getInstanceConfig().getInstanceID() + " predict warn.");
 								Common.LOG.warn(tmp.toJSONString());
 								Common.LOG.warn(((JSONObject) dts.get(0)).toJSONString());

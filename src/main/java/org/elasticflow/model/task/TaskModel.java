@@ -47,8 +47,19 @@ public final class TaskModel {
 		return this.instanceID;
 	}
 	
+	/**
+	 * instance_L1seq
+	 * @return
+	 */
 	public String getInstanceProcessId() {
 		return this.instanceProcessId;
+	}
+	/**
+	 * instance_L1seq_L2seq
+	 * @return
+	 */
+	public String getInstanceProcessId(String L2seq) {
+		return this.instanceProcessId+"_"+L2seq;
 	}
 
 	public String getL1seq() {

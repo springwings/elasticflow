@@ -9,7 +9,7 @@ package org.elasticflow.instruction.sets;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.MECHANISM;
-import org.elasticflow.config.GlobalParam.TASK_STATUS;
+import org.elasticflow.config.GlobalParam.TASK_FLOW_SINGAL;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.util.EFException;
@@ -134,11 +134,11 @@ public class Pond extends Instruction {
 		instanceProcessId = TaskUtil.getInstanceProcessId(String.valueOf(args[0]), String.valueOf(args[1]));
 		storeId = String.valueOf(args[2]);
 		int waittime = 0;
-		if (GlobalParam.TASK_COORDER.checkFlowStatus(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT, TASK_STATUS.Running)) {
-			GlobalParam.TASK_COORDER.setFlowStatus(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(), TASK_STATUS.Blank,
-					TASK_STATUS.Termination, context.getInstanceConfig().getPipeParams().showInfoLog());
-			while (!GlobalParam.TASK_COORDER.checkFlowStatus(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT,
-					TASK_STATUS.Ready)) {
+		if (GlobalParam.TASK_COORDER.checkFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT, TASK_FLOW_SINGAL.Running)) {
+			GlobalParam.TASK_COORDER.setFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(), TASK_FLOW_SINGAL.Blank,
+					TASK_FLOW_SINGAL.Termination, context.getInstanceConfig().getPipeParams().showInfoLog());
+			while (!GlobalParam.TASK_COORDER.checkFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT,
+					TASK_FLOW_SINGAL.Ready)) {
 				try {
 					waittime++;
 					Thread.sleep(2000);
@@ -150,8 +150,8 @@ public class Pond extends Instruction {
 				}
 			}
 		}
-		GlobalParam.TASK_COORDER.setFlowStatus(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(), TASK_STATUS.Blank,
-				TASK_STATUS.Termination, context.getInstanceConfig().getPipeParams().showInfoLog());
+		GlobalParam.TASK_COORDER.setFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(), TASK_FLOW_SINGAL.Blank,
+				TASK_FLOW_SINGAL.Termination, context.getInstanceConfig().getPipeParams().showInfoLog());
 		context.getWriter().PREPARE(false, false, false);
 		if (context.getWriter().ISLINK()) {
 			try {
@@ -171,8 +171,8 @@ public class Pond extends Instruction {
 				log.error("instruction.set.Pond.switchInstance instance {} exception",instanceProcessId, e);
 			} finally {
 				GlobalParam.TASK_COORDER.saveTaskInfo(String.valueOf(args[0]), String.valueOf(args[1]), storeId, false);
-				GlobalParam.TASK_COORDER.setFlowStatus(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(),
-						TASK_STATUS.Blank, TASK_STATUS.Ready, context.getInstanceConfig().getPipeParams().showInfoLog());
+				GlobalParam.TASK_COORDER.setFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(),
+						TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Ready, context.getInstanceConfig().getPipeParams().showInfoLog());
 				context.getWriter().REALEASE(false, false);
 			}
 		}

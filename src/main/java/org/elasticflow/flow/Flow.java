@@ -13,7 +13,7 @@ import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.connection.EFConnectionSocket;
-import org.elasticflow.model.task.FlowState;
+import org.elasticflow.model.task.FlowStatistic;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
@@ -44,7 +44,7 @@ public abstract class Flow {
 
 	public long lastGetPageTime = Common.getNow();
 
-	public FlowState flowState;
+	public FlowStatistic flowStatistic;
 
 	protected ConnectParams connectParams;
 
@@ -59,7 +59,7 @@ public abstract class Flow {
 	public void prepareFlow(InstanceConfig instanceConfig, END_TYPE endType, String L1seq) throws EFException {
 		this.instanceConfig = instanceConfig;
 		this.L1seq = L1seq;
-		this.flowState = new FlowState(Resource.flowStates.get(instanceConfig.getInstanceID()), endType, L1seq);
+		this.flowStatistic = new FlowStatistic(Resource.flowStates.get(instanceConfig.getInstanceID()), endType, L1seq);
 		switch (endType) {
 		case writer:
 			this.EFConnKey = TaskUtil.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",
