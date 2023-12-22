@@ -1,0 +1,168 @@
+<config>  
+<dataflow>
+ 
+		<TransParam> 
+			<param>
+				<name>logLevel</name>
+				<value>1</value>
+			</param> 
+		        <param>
+			      <name>maxFailTime</name>
+		              <value>5</value>
+		        </param>	      
+			<param>
+				<name>deltaCron</name>
+				<value>*/3 * * * * ?</value>
+			</param> 
+			<param>
+				<name>writeTo</name>
+				<value>person_event</value>
+			</param>  
+
+                       <!--- pipe start parameters -->
+		 
+			<param> 
+				<name>readFrom</name> 
+				<value>person_event</value> 
+			</param>
+                           
+                       <param>
+                             <name>writeMechanism</name>
+                             <value>norm</value>
+                       </param>
+			<param>
+                             <name>keepNums</name>
+                             <value>7d</value>
+                       </param>
+                       <param>
+				<name>writeType</name>
+				<value>full</value>
+		       </param>
+                       <param>
+				<name>writerPoolShareAlias</name>
+				<value>true</value>
+			</param> 
+                        <param>
+                             <name>multiThread</name>
+                             <value>false</value>
+                        </param>
+ 
+			 
+		</TransParam>
+
+                <ReaderParam>   
+                        <param>
+				<name>keyField</name>
+				<value>id</value>
+			</param>
+			<param>
+				<name>scanField</name>
+				<value>create_time</value>
+			</param>
+			<param>
+				<name>dataScanDSL</name>
+				<value><![CDATA[ ]]></value>
+			</param> 
+			<param>
+				<name>pageScanDSL</name>
+				<value><![CDATA[ ]]>
+				</value>
+			</param> 
+			<param>
+				<name>customParams</name>
+				<value>{"filter_config":{"data.class":{"values":["person"],"comparetype":"equal"},"data.algorithmType":{"values":["person"],"comparetype":"contain"}}}</value>  
+
+			</param>
+             </ReaderParam> 
+
+ <ComputerParam> 
+                       <param>
+				<name>computeMode</name>
+				<value>rest</value>
+			</param>
+                        <param>
+				<name>api</name>
+				<value>http://10.10.6.10:9006/predict</value>
+			</param> 
+			<param>
+				<name>apiRequestMaxDatas</name>
+				<value>10</value>
+			</param>
+			<param>
+				<name>apiRequest</name>
+				<value><![CDATA[ 
+				{"paths":{"field":"data.pic_path","type":"list"},"event_desc":{"values":["图中是否有端茶杯的人，只回答true或false"],"type":"list"}}
+				]]></value> 
+			</param>
+			<param>
+				<name>keyField</name>
+				<value>id</value>
+			</param>
+ 
+			<param>
+				<name>customParams</name>
+				<value>{"keepFields":["id","bbox","sourceId","cameraId","vendorName","algorithmType","pass_datetime","pic_source_path","pic_path","timeZone"]}</value>  
+
+			</param>
+			<param>
+				<name>keyField</name>
+				<value>id</value>
+			</param>
+			<param>
+				<name>scanField</name>
+				<value>pass_create_time</value>
+			</param>
+			<param>
+				<name>handler</name>
+				<value>org.elasticflow.computer.handler.VLDetectionHandler</value>
+			</param> 
+			<fields>
+			<field name="id" indexed="true" stored="false" indextype="keyword"  paramname="id"  />  
+			<field name="from" indexed="true" stored="false" indextype="keyword"  paramname="from"  /> 
+			<field name="data" indexed="true" stored="true" indextype="keyword" paramname="data" />
+			<field name="create_time" indexed="true" stored="false" indextype="keyword" paramname="create_time"  />			
+			<field name="parsemap" indexed="true" stored="false" indextype="keyword"  paramname="parsemap" defaultvalue='{}' />
+			</fields>
+</ComputerParam> 
+  
+<WriterParam>
+   <param>
+	<name>writeKey</name>
+	<value>id</value>
+   </param>
+   <param>
+	<name>keyType</name>
+	<value>unique</value>
+   </param>
+
+  <fields>
+  <field name="id" indexed="true" stored="false" indextype="keyword" paramname="id"  />  
+<field name="topic" indexed="false" stored="false" indextype="keyword" defaultvalue="person_event_es" paramname="topic"  /> 
+<field name="data" indexed="false" stored="true" indextype="keyword" paramname="data"  /> 
+ </fields>
+</WriterParam>
+
+
+<SearcherParam> 
+<param>
+		<name>start</name>
+		<paramtype>java.lang.Integer</paramtype>
+		<defaultValue>0</defaultValue>
+	</param>
+	<param>
+		<name>count</name>
+		<paramtype>java.lang.Integer</paramtype>
+		<defaultValue>1</defaultValue>
+	</param>
+	<param>
+		<name>sort</name>
+		<paramtype>java.lang.String</paramtype>
+	</param>
+	<param>
+		<name>facet</name>
+		<paramtype>java.lang.String</paramtype>
+	</param>					
+</SearcherParam>
+</dataflow>  
+
+</config> 
