@@ -72,12 +72,12 @@ public interface TaskStateCoord extends Coordination {
 	
 	public void initFlowProgressInfo(String instanceID);
 	/**set flow progress info**/
-	public void setFlowProgressInfo(String instanceID, String jobType, String key, String data);
+	public void setFlowProgressInfo(String instanceID, String jobType, String key, Object data);
 	
 	/**clear flow progress info**/
 	public void resetFlowProgressInfo(String instanceID, String jobType);
 
-	public HashMap<String, String> getFlowInfo(String instanceID, String jobType);
+	public HashMap<String, Object> getFlowInfo(String instanceID, String jobType);
 
 	public void updateStoreData(String instance, Object data);
 

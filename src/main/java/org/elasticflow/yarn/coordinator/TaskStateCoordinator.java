@@ -247,13 +247,13 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	}
  
 	public void initFlowProgressInfo(String instanceID) {
-		Resource.flowProgress.set(instanceID, JOB_TYPE.FULL.name(), new HashMap<String, String>());
-		Resource.flowProgress.set(instanceID, JOB_TYPE.INCREMENT.name(), new HashMap<String, String>());
-		Resource.flowProgress.set(instanceID, JOB_TYPE.VIRTUAL.name(), new HashMap<String, String>());
-		Resource.flowProgress.set(instanceID, JOB_TYPE.INSTRUCTION.name(), new HashMap<String, String>());
+		Resource.flowProgress.set(instanceID, JOB_TYPE.FULL.name(), new HashMap<String, Object>());
+		Resource.flowProgress.set(instanceID, JOB_TYPE.INCREMENT.name(), new HashMap<String, Object>());
+		Resource.flowProgress.set(instanceID, JOB_TYPE.VIRTUAL.name(), new HashMap<String, Object>());
+		Resource.flowProgress.set(instanceID, JOB_TYPE.INSTRUCTION.name(), new HashMap<String, Object>());
 	}
 	
-	public void setFlowProgressInfo(String instanceID, String jobType, String key, String data) { 
+	public void setFlowProgressInfo(String instanceID, String jobType, String key, Object data) { 
 		Resource.flowProgress.get(instanceID, jobType).put(key, data);
 	}
 	
@@ -261,7 +261,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 		Resource.flowProgress.get(instanceID, jobType).clear();
 	}
 
-	public HashMap<String, String> getFlowInfo(String instanceID, String jobType) {
+	public HashMap<String, Object> getFlowInfo(String instanceID, String jobType) {
 		return Resource.flowProgress.get(instanceID, jobType);
 	}
 }

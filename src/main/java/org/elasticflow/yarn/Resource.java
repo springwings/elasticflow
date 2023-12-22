@@ -52,7 +52,7 @@ public final class Resource {
 	public static Run EFLOWS;
 
 	/**flow running progress information */
-	public final static EFState<HashMap<String, String>> flowProgress = new EFState<HashMap<String, String>>();
+	public final static EFState<HashMap<String, Object>> flowProgress = new EFState<HashMap<String, Object>>();
 	
 	/**flow process data position information*/
 	public final static ConcurrentHashMap<String, JSONObject> flowStates = new ConcurrentHashMap<>();

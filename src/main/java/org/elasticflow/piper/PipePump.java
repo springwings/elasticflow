@@ -164,16 +164,16 @@ public final class PipePump extends Instruction implements Serializable {
 		List<String> L2seqs = getInstanceConfig().getReaderParams().getL2Seq();
 		if(L2seqs.size()>0)
 			GlobalParam.TASK_COORDER.setFlowProgressInfo(instanceID, job_type.name(), instanceProcessId + "_L2seqs_nums",
-					String.valueOf(L2seqs.size()));
+					L2seqs.size());
 		processFlow(task, storeId, L2seqs, destination, isReferenceInstance);
 		GlobalParam.TASK_COORDER.resetFlowProgressInfo(instanceID, job_type.name());
 		//if is full,start to switch instance
 		if (isFull) {
 			if (isReferenceInstance) {
 				synchronized (GlobalParam.TASK_COORDER.getFlowInfo(destination, GlobalParam.JOB_TYPE.VIRTUAL.name())) {
-					String remainJobs = GlobalParam.TASK_COORDER
+					String remainJobs = String.valueOf( GlobalParam.TASK_COORDER
 							.getFlowInfo(destination, GlobalParam.JOB_TYPE.VIRTUAL.name())
-							.get(GlobalParam.FLOWINFO.FULL_JOBS.name());
+							.get(GlobalParam.FLOWINFO.FULL_JOBS.name()));
 					remainJobs = remainJobs.replace(instanceID, "").trim();
 					GlobalParam.TASK_COORDER.setFlowProgressInfo(destination, GlobalParam.JOB_TYPE.VIRTUAL.name(),
 							GlobalParam.FLOWINFO.FULL_JOBS.name(), remainJobs);
