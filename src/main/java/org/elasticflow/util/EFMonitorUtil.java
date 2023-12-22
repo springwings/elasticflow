@@ -306,9 +306,9 @@ public class EFMonitorUtil {
 	 */
 	public static JSONObject getPipeEndStatus(String instance, String L1seq) {
 		JSONObject res = new JSONObject();
-		res.put(END_TYPE.reader.name(), "Not started!");
-		res.put(END_TYPE.computer.name(), "Not started!");
-		res.put(END_TYPE.computer.name(), "Not started!");
+		res.put(END_TYPE.reader.name(), new JSONObject(Map.of("enabled", false)));
+		res.put(END_TYPE.computer.name(), new JSONObject(Map.of("enabled", false)));
+		res.put(END_TYPE.writer.name(), new JSONObject(Map.of("enabled", false)));
 		res.put("status", "offline");
 
 		if (Resource.socketCenter.containsKey(instance, L1seq, GlobalParam.FLOW_TAG._DEFAULT.name())) {

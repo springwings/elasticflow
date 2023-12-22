@@ -50,7 +50,7 @@ public final class EFNodeUtil {
 			sp.loadInfos(TaskUtil.getStoreTaskInfo(instance,false),false);
 			sp.loadInfos(TaskUtil.getStoreTaskInfo(instance,true),true);
 		} catch (Exception e) { 
-			throw new EFException(e,"instance "+instance+" load Instance Datas exception.",ELEVEL.Stop);
+			throw new EFException(e,"instance "+instance+" init exception.",ELEVEL.Stop);
 		}
 		GlobalParam.TASK_COORDER.initTaskDatas(instance,sp);
 	}

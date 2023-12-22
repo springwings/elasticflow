@@ -77,10 +77,12 @@ final public class FlowState {
 		if(stat.containsKey(storeKey)) {
 			JSONObject JO = stat.getJSONObject(storeKey);
 			if(JO.containsKey(endType.name())) {
-				JSONObject _JO = JO.getJSONObject(endType.name());
-				this.totalProcess.set(_JO.getLong("totalProcess"));
-				this.flowStartTime = _JO.getLong("flowStartTime");
-				this.historyProcess = _JO.getJSONObject("historyProcess");	
+				if(JO.getJSONObject(endType.name()).getBooleanValue("enable")) {
+					JSONObject _JO = JO.getJSONObject(endType.name());
+					this.totalProcess.set(_JO.getLong("totalProcess"));
+					this.flowStartTime = _JO.getLong("flowStartTime");
+					this.historyProcess = _JO.getJSONObject("historyProcess");	
+				}				
 			}							
 		}
 		if(this.historyProcess == null) 
@@ -126,6 +128,8 @@ final public class FlowState {
 		JO.put("blockTime", this.BLOCKTIME);
 		JO.put("realBlockTime", this.REAL_BLOCKTIME);
 		JO.put("failProcess", this.failProcess);
+		//Determine whether the end is enabled
+		JO.put("enabled", true);
 	}
 	
 	

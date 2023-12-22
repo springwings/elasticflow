@@ -629,7 +629,7 @@ public final class NodeMonitor {
 				JSONObject JO = EFMonitorUtil.getInstanceInfo(node.getKey(), 2); 
 				JSONObject _datas = JO.getJSONObject("reader");  
 				for (String _key : _datas.keySet()) {  
-					if(_datas.get(_key)!=null && !_datas.get(_key).toString().equals("Not started!")) {
+					if(_datas.getJSONObject(_key).getBooleanValue("is_open")) {
 						if(_datas.getJSONObject(_key).containsKey("totalProcess"))
 							weight+=_datas.getJSONObject(_key).getInteger("totalProcess");
 					}  

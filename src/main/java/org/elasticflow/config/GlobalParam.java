@@ -126,8 +126,8 @@ public final class GlobalParam {
 	/** ------------instance parameters------------ */
 	public static enum END_TYPE {
 		reader, computer, writer, searcher
-	}
-
+	} 
+			
 	public static enum RESOURCE_TYPE {
 		WAREHOUSE, INSTRUCTION
 	}
