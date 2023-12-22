@@ -199,7 +199,7 @@ public class InstanceConfig {
 			byte[] bt = EFDataStorer.getData(this.configPath, false);
 			if (bt.length <= 0) {
 				setStatus(false);
-				Common.LOG.error("instance {} configuration file {} not exists!", this.instanceID,this.configPath);
+				Common.LOG.error("load instance failed, task configuration file {} not exists!", this.configPath);
 				return;
 			}				
 			in = new ByteArrayInputStream(bt, 0, bt.length);

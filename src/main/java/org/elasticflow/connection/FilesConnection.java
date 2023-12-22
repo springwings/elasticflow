@@ -32,8 +32,8 @@ public class FilesConnection extends EFConnectionSocket<ArrayList<String>> {
 	protected boolean connect(END_TYPE endType) {
 		if (!status()) {
 			try { 
-				if(connectParams.getWhp().getDefaultValue()!=null) {
-					this.conn = EFFileUtil.scanFolder(String.valueOf(connectParams.getWhp().getHost()),connectParams.getWhp().getDefaultValue().getString(EXTENSION));
+				if(connectParams.getWhp().getCustomParams()!=null) {
+					this.conn = EFFileUtil.scanFolder(String.valueOf(connectParams.getWhp().getHost()),connectParams.getWhp().getCustomParams().getString(EXTENSION));
 				}else {
 					this.conn = EFFileUtil.scanFolder(String.valueOf(connectParams.getWhp().getHost()),null);
 				}				
