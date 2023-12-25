@@ -210,6 +210,7 @@ public final class NodeMonitor {
 		for (Map.Entry<String, WarehouseParam> entry : resources.entrySet()) {
 			WarehouseParam wp = entry.getValue();
 			res.put(entry.getKey(),  new JSONObject());
+			res.getJSONObject(entry.getKey()).put("name",entry.getKey());
 			res.getJSONObject(entry.getKey()).put("hosts",wp.getHost());
 			res.getJSONObject(entry.getKey()).put("type",wp.getType()); 
 			JSONObject pools = new JSONObject();
@@ -217,7 +218,12 @@ public final class NodeMonitor {
 				pools.put((seq==""?"DEFAULT":seq),EFMonitorUtil.getConnectionStatus(wp.getPoolName(seq))); 
 			}
 			res.getJSONObject(entry.getKey()).put("pools",pools); 
-			res.getJSONObject(entry.getKey()).put("status",Resource.resourceStates.get(entry.getKey()).getBoolean("status"));  
+			String[] hosts = wp.getHost().split(","); 
+			if(EFMonitorUtil.isPortOpen(hosts[0])) {
+				res.getJSONObject(entry.getKey()).put("status",Resource.resourceStates.get(entry.getKey()).getString("status")); 
+			}else {
+				res.getJSONObject(entry.getKey()).put("status",GlobalParam.RESOURCE_STATUS.Error.name()); 
+			}
 		}
 		setResponse(RESPONSE_STATUS.Success, "", res);
 	}

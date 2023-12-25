@@ -2,6 +2,8 @@ package org.elasticflow.util;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.net.Socket;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -525,6 +527,32 @@ public class EFMonitorUtil {
 			data.getJSONObject(appendPipe).put(key, val);
 		}			
 	}
+	
+	/**
+	 * 
+	 * @param host  http://xx.xx.xx.xx:8191/
+	 * @return
+	 */
+	public static boolean isPortOpen(String host) {
+		try {
+			URL url = new URL(host); 
+			int port = url.getPort(); 
+	        if (port == -1) {
+	            if ("http".equalsIgnoreCase(url.getProtocol())) {
+	            	port = 80; 
+	            } else if ("https".equalsIgnoreCase(url.getProtocol())) {
+	            	port = 443;  
+	            }
+	        } 
+	        try (Socket socket = new Socket(url.getHost(), port)) {
+				return true;
+			} catch (Exception e) {
+				return false;
+			}
+		}catch (Exception e) {
+	        return true;
+	    }  
+	} 
 
 	public static void restartSystem() {
 		Thread thread = new Thread(new Runnable() {
