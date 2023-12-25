@@ -47,7 +47,7 @@ public class DistributeCoorder {
 
 	private volatile AtomicInteger rebalanceCount = new AtomicInteger();
 
-	/** cluster status :0 normal, 1 freeze, 2 rebalance, 3 down **/
+	/** cluster status :0 normal, 1 freeze（Insufficient resources）, 2 rebalance, 3 down （Cluster is currently shutting down）**/
 	private AtomicInteger clusterStatus = new AtomicInteger(1);
 
 	/** Check whether the system is initialized */
@@ -213,7 +213,7 @@ public class DistributeCoorder {
 	 */
 	public void updateCluster(String ip, Integer nodeId) {
 		if (!this.containsNode(nodeId)) {
-			if (clusterStatus.get() == 3)
+			if (clusterStatus.get() == 2 || clusterStatus.get() == 3)
 				return;
 			synchronized (this) {
 				EFNode node = EFNode.getInstance(ip, nodeId);
@@ -503,16 +503,14 @@ public class DistributeCoorder {
 			stopSlaves(false);
 		} else {
 			this.avgInstanceNum = avgInstanceNum();
-			Common.LOG.info("start NodeLeave rebalance on {} nodes,avgInstanceNum {}...", nodes.size(), avgInstanceNum);
-			this.distributeInstances();			
-			clusterStatus.set(0);
+			Common.LOG.info("start NodeLeave rebalance on {} nodes,avgInstanceNum {}...", nodes.size(), avgInstanceNum); 
+			this.distributeInstances();			 
 			this.storeNodesStatus();
 			Common.LOG.info("finish NodeLeave rebalance instance!");
 		}
 	}
 
-	private synchronized void rebalanceOnNewNodeJoin() {
-		clusterStatus.set(2);
+	private synchronized void rebalanceOnNewNodeJoin() { 
 		this.avgInstanceNum = avgInstanceNum();
 		Common.LOG.info("start NewNodeJoin rebalance on {} nodes, avgInstanceNum {}...", nodes.size(),
 				avgInstanceNum);
@@ -522,19 +520,17 @@ public class DistributeCoorder {
 			}
 		}
 		// re-balance nodes
-		this.distributeInstances();
-		clusterStatus.set(0);
+		this.distributeInstances(); 
 		this.storeNodesStatus();
 		Common.LOG.info("finish NewNodeJoin rebalance!");
 	}
 
 	private synchronized void rebalanceOnStart() {		
 		Common.LOG.info("start cluster init rebalance, with {} nodes, total number of instances is {}...", nodes.size(),
-				totalInstanceNum);
+				totalInstanceNum); 
 		this.avgInstanceNum = avgInstanceNum();
 		this.distributeInstances();
-		this.storeNodesStatus();
-		clusterStatus.set(0);
+		this.storeNodesStatus(); 
 		Common.LOG.info("finish cluster init rebalance!");
 	}
 
@@ -561,6 +557,7 @@ public class DistributeCoorder {
 	 * @param runInstances
 	 */
 	private void distributeInstances() {
+		clusterStatus.set(2);
 		if (this.idleInstances.size() > 0) {
 			Queue<String> keepInstances = new LinkedList<String>();
 			synchronized (this) {
@@ -608,6 +605,7 @@ public class DistributeCoorder {
 				} 			
 			}
 		}
+		clusterStatus.set(0);
 	}
 
 	private int avgInstanceNum() {
