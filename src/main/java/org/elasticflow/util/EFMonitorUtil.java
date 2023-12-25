@@ -2,6 +2,7 @@ package org.elasticflow.util;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.elasticflow.config.GlobalParam;
@@ -297,7 +298,15 @@ public class EFMonitorUtil {
 			}
 		}
 	}
-
+	
+	/**
+	 * warehouse resource status
+	 * @return
+	 */
+	public static HashMap<String, JSONObject> getResourceStates() {
+		return Resource.resourceStates;
+	}
+	
 	/**
 	 * get Pipe End Status
 	 * 

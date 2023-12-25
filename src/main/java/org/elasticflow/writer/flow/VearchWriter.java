@@ -185,7 +185,7 @@ public class VearchWriter extends WriterFlowSocket {
 						conn.writeBatch(this.curTable, this.DATAS);
 					} catch (Exception e) {
 						if (e.getMessage().contains("spaceName param not build")) {
-							throw new EFException(e, "vearch flush data exception!", ELEVEL.Termination,
+							throw new EFException(e, conn.getHosts(), ELEVEL.Termination,
 									ETYPE.RESOURCE_ERROR);
 						} else {
 							throw new EFException(e, ELEVEL.Termination);

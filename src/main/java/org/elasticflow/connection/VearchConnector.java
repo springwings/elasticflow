@@ -60,6 +60,10 @@ public class VearchConnector {
 		this.dbObject.put("name", this.dbName);
 	}
 	
+	public String getHosts() {
+		return this.MASTER+","+this.ROOTER;
+	}
+	
 	public JSONArray getClusterStats() {
 		try {
 			EFHttpResponse response = EFHttpClientUtil.process(

@@ -81,7 +81,7 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 				}else {
 					this.conn = new RestHighLevelClient(RestClient.builder(httpHosts));
 				}
-				this.ESC.setClient(this.conn);
+				this.ESC.setClient(this.conn,wnp.getAlias());
 			}
 		} else {
 			return false;

@@ -11,11 +11,13 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import com.alibaba.fastjson.JSONObject;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
+import org.elasticflow.config.GlobalParam.RESOURCE_STATUS;
 import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
 import org.elasticflow.param.pipe.InstructionParam;
 import org.elasticflow.param.warehouse.WarehouseParam;
@@ -23,6 +25,7 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.instance.EFDataStorer;
+import org.elasticflow.yarn.Resource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -156,6 +159,9 @@ public class NodeConfig {
 		case WAREHOUSE:
 			WarehouseParam e1 = (WarehouseParam) o;
 			warehouse.put(e1.getAlias(), e1);
+			Resource.resourceStates.put(e1.getAlias(), new JSONObject(Map.of(
+	                "status", RESOURCE_STATUS.Normal.getVal()
+	        )));
 			break;
 
 		case INSTRUCTION:

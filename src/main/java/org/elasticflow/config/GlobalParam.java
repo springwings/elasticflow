@@ -147,6 +147,21 @@ public final class GlobalParam {
 		}
 	}
 	
+	/** resource status define**/
+	public static enum RESOURCE_STATUS {
+		Normal(0), Warning(1), Error(2);
+
+		private int v;
+
+		private RESOURCE_STATUS(int val) {
+			this.v = val;
+		}
+
+		public int getVal() {
+			return v;
+		}
+	}
+	
 	/** instance status define**/
 	public static enum INSTANCE_STATUS {
 		Normal(0), Warning(1), Error(2);

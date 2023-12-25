@@ -18,7 +18,9 @@ public interface EFMonitorCoord extends Coordination{
 	public HashMap<String, Object> getNodeStatus();
 	
 	public JSONObject getPipeEndStatus(String instance, String L1seq);
-	
+		
 	public void resetPipeEndStatus(String instance, String L1seq);
+	/**warehouse resource status */
+	public HashMap<String, JSONObject> getResourceStates();
 	
 }

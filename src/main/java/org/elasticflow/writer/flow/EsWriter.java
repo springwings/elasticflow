@@ -12,6 +12,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.config.GlobalParam.RESOURCE_STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EsConnector;
 import org.elasticflow.field.EFField;
@@ -24,6 +25,7 @@ import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.writer.WriterFlowSocket;
+import org.elasticflow.yarn.Resource;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest.AliasActions;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
@@ -197,8 +199,9 @@ public class EsWriter extends WriterFlowSocket {
 			try {
 				getESC().getBulkProcessor().flush();
 			} catch (Exception e) {
+				Resource.resourceStates.get(getESC().getAlias()).put("status",RESOURCE_STATUS.Warning.getVal());
 				getESC().setBulkProcessor(null);
-				throw new EFException(e);
+				throw new EFException(e,Resource.nodeConfig.getWarehouse().get(getESC().getAlias()).getHost(),ELEVEL.Dispose);
 			} 
 			if (getESC().getRunState() == false) {
 				getESC().setRunState(true);

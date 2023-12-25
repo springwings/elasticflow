@@ -56,6 +56,9 @@ public final class Resource {
 	
 	/**flow process data position information*/
 	public final static ConcurrentHashMap<String, JSONObject> flowStates = new ConcurrentHashMap<>();
+	
+	/**warehouse resource status ;instance->JSONObject*/
+	public final static HashMap<String, JSONObject> resourceStates = new HashMap<>();
 
 	public volatile static HashMap<String, EFConnectionSocket<?>> EFConns = new HashMap<>();
 

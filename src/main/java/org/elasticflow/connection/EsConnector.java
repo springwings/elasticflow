@@ -17,13 +17,20 @@ public final class EsConnector {
 	private volatile BulkProcessor bulkProcessor;
 	private AtomicBoolean bulkRunState  = new AtomicBoolean(true);
 	private String infos="";
+	private String alias = "";
 	
 	public RestHighLevelClient getClient() {
 		return client;
 	}
-	public void setClient(RestHighLevelClient client) {
+	public void setClient(RestHighLevelClient client,String alias) {
 		this.client = client;
+		this.alias = alias;
 	}
+	
+	public String getAlias() {
+		return this.alias;
+	}
+	
 	public boolean getRunState() {
 		return bulkRunState.get();
 	}
