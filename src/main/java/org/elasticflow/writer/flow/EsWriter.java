@@ -199,7 +199,7 @@ public class EsWriter extends WriterFlowSocket {
 			try {
 				getESC().getBulkProcessor().flush();
 			} catch (Exception e) {
-				Resource.resourceStates.get(getESC().getAlias()).put("status",RESOURCE_STATUS.Warning.getVal());
+				Resource.resourceStates.get(getESC().getAlias()).put("status",RESOURCE_STATUS.Warning.name());
 				getESC().setBulkProcessor(null);
 				throw new EFException(e,Resource.nodeConfig.getWarehouse().get(getESC().getAlias()).getHost(),ELEVEL.Dispose);
 			} 

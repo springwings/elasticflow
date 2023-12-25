@@ -136,6 +136,14 @@ public class DistributeCoorder {
 		}
 		return "";
 	}
+	
+	public JSONObject getConnectionStatus(String poolName) {
+		JSONObject res = new JSONObject();
+		for (EFNode node : nodes) {
+			res.put(node.getIp()+"_"+String.valueOf(node.getNodeId()), node.getEFMonitorCoord().getPoolStatus(poolName)); 
+		}
+		return res;
+	}
 
 	public void resetBreaker(String instance, String L1seq) {
 		for (EFNode node : nodes) {

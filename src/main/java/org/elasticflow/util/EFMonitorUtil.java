@@ -280,6 +280,16 @@ public class EFMonitorUtil {
 			return EFConnectionPool.getStatus(poolName);
 		}
 	}
+	
+	public static JSONObject getConnectionStatus(String poolName) { 
+		if (GlobalParam.DISTRIBUTE_RUN) {
+			return GlobalParam.INSTANCE_COORDER.distributeCoorder().getConnectionStatus(poolName);
+		} else {
+			return new JSONObject(Map.of(
+               GlobalParam.IP, EFConnectionPool.getStatus(poolName)
+            ));
+		} 
+	}
 
 	public static void resetPipeEndStatus(String instance, String L1seq) {
 		if (Resource.socketCenter.containsKey(instance, L1seq, GlobalParam.FLOW_TAG._DEFAULT.name())) {

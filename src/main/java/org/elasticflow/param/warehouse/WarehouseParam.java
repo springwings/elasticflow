@@ -31,12 +31,15 @@ public class WarehouseParam {
 	private String host = "";
 	private String user = "";
 	private String password = "";
+	/**Maximum resource pool size*/
 	private int maxPoolSize = 0;
 	private int port;
 	private JSONObject defaultValue;
+	/**Custom parameters to expand the configurable fields of resources*/
 	private JSONObject customParams;
 	private String handler;
 	private String[] L1seq = {};
+	private String remarks= "";
 	
 	public DATA_SOURCE_TYPE getType() {
 		return type;
@@ -76,11 +79,18 @@ public class WarehouseParam {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
-	
-	
+	 
 	public int getPort() {
 		return port;
+	}
+	
+	public String getRemarks() {
+		return remarks;
+	}
+	
+	public void setRemarks(String remarks) {
+		if(remarks!=null) 
+			this.remarks = remarks;
 	}
 
 	public void setPort(String port) {

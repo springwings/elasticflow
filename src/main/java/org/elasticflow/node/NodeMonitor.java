@@ -116,6 +116,7 @@ public final class NodeMonitor {
 			put("updateinstancexml", "updateInstanceXml");
 			// other manage
 			put("getresource", "getResource");
+			put("getresourcexml", "getResourcexml");
 			put("updateresource", "updateResource");
 			put("addresource", "addResource");
 			put("removeresource", "removeResource"); 
@@ -202,8 +203,26 @@ public final class NodeMonitor {
 			updateResourceXml(jsonObject, true);
 		}
 	}
+	
+	public void getResource(Request rq, EFRequest RR) { 
+		JSONObject res = new JSONObject();
+		Map<String, WarehouseParam> resources = Resource.nodeConfig.getWarehouse();		
+		for (Map.Entry<String, WarehouseParam> entry : resources.entrySet()) {
+			WarehouseParam wp = entry.getValue();
+			res.put(entry.getKey(),  new JSONObject());
+			res.getJSONObject(entry.getKey()).put("hosts",wp.getHost());
+			res.getJSONObject(entry.getKey()).put("type",wp.getType()); 
+			JSONObject pools = new JSONObject();
+			for (String seq : wp.getL1seq()) {
+				pools.put((seq==""?"DEFAULT":seq),EFMonitorUtil.getConnectionStatus(wp.getPoolName(seq))); 
+			}
+			res.getJSONObject(entry.getKey()).put("pools",pools); 
+			res.getJSONObject(entry.getKey()).put("status",Resource.resourceStates.get(entry.getKey()).getBoolean("status"));  
+		}
+		setResponse(RESPONSE_STATUS.Success, "", res);
+	}
 
-	public void getResource(Request rq, EFRequest RR) {
+	public void getResourcexml(Request rq, EFRequest RR) {
 		String pondPath = GlobalParam.DATAS_CONFIG_PATH + "/" + GlobalParam.SystemConfig.getProperty("pond");
 		byte[] resourceXml = EFDataStorer.getData(pondPath, false);
 		setResponse(RESPONSE_STATUS.Success, "", new String(resourceXml));

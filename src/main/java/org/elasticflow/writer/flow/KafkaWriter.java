@@ -14,7 +14,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.KafkaFuture;
 import org.elasticflow.config.GlobalParam.END_TYPE;
-import org.elasticflow.config.GlobalParam.INSTANCE_STATUS;
+import org.elasticflow.config.GlobalParam.RESOURCE_STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
@@ -78,7 +78,7 @@ public class KafkaWriter extends WriterFlowSocket {
 		try {
 			this.getconn().flush();
 		} catch (Exception e) {
-			Resource.resourceStates.get(connectParams.getWhp().getAlias()).put("status",INSTANCE_STATUS.Warning.getVal());
+			Resource.resourceStates.get(connectParams.getWhp().getAlias()).put("status",RESOURCE_STATUS.Warning.name());
 			throw new EFException(e,Resource.nodeConfig.getWarehouse().get(connectParams.getWhp().getAlias()).getHost(),ELEVEL.Dispose);
 		} 
 	}

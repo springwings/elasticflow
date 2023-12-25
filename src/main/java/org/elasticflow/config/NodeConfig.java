@@ -160,7 +160,7 @@ public class NodeConfig {
 			WarehouseParam e1 = (WarehouseParam) o;
 			warehouse.put(e1.getAlias(), e1);
 			Resource.resourceStates.put(e1.getAlias(), new JSONObject(Map.of(
-	                "status", RESOURCE_STATUS.Normal.getVal()
+	                "status", RESOURCE_STATUS.Normal.name()
 	        )));
 			break;
 
