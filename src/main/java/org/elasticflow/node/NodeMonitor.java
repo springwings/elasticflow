@@ -115,7 +115,7 @@ public final class NodeMonitor {
 			put("getinstancexml", "getInstanceXml");
 			put("updateinstancexml", "updateInstanceXml");
 			// other manage
-			put("getresource", "getResource");
+			put("getresources", "getResources");
 			put("getresourcexml", "getResourcexml");
 			put("updateresource", "updateResource");
 			put("addresource", "addResource");
@@ -204,7 +204,7 @@ public final class NodeMonitor {
 		}
 	}
 	
-	public void getResource(Request rq, EFRequest RR) { 
+	public void getResources(Request rq, EFRequest RR) { 
 		JSONObject res = new JSONObject();
 		Map<String, WarehouseParam> resources = Resource.nodeConfig.getWarehouse();		
 		for (Map.Entry<String, WarehouseParam> entry : resources.entrySet()) {
