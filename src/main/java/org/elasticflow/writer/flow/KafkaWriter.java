@@ -77,6 +77,7 @@ public class KafkaWriter extends WriterFlowSocket {
 	public void flush() throws EFException {
 		try {
 			this.getconn().flush();
+			Resource.resourceStates.get(connectParams.getWhp().getAlias()).put("status",RESOURCE_STATUS.Normal.name());
 		} catch (Exception e) {
 			Resource.resourceStates.get(connectParams.getWhp().getAlias()).put("status",RESOURCE_STATUS.Warning.name());
 			throw new EFException(e,Resource.nodeConfig.getWarehouse().get(connectParams.getWhp().getAlias()).getHost(),ELEVEL.Dispose);

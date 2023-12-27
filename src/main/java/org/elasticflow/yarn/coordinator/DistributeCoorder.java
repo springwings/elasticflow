@@ -75,6 +75,10 @@ public class DistributeCoorder {
 			Common.LOG.warn("config.properties instances parameter not configured");
 		}
 	}
+	
+	public CopyOnWriteArrayList<EFNode> getNodes(){
+		return this.nodes;
+	}
 
 	/** control master instance local state */
 	public void resumeInstance(String instance) {
@@ -140,7 +144,7 @@ public class DistributeCoorder {
 	public JSONObject getConnectionStatus(String poolName) {
 		JSONObject res = new JSONObject();
 		for (EFNode node : nodes) {
-			res.put(node.getIp()+"_"+String.valueOf(node.getNodeId()), node.getEFMonitorCoord().getPoolStatus(poolName)); 
+			res.put(node.getIp()+"_nodeid("+String.valueOf(node.getNodeId())+")", node.getEFMonitorCoord().getPoolStatus(poolName)); 
 		}
 		return res;
 	}

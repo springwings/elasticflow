@@ -17,7 +17,6 @@ import org.elasticflow.config.GlobalParam.TASK_FLOW_SINGAL;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.model.EFRequest;
-import org.elasticflow.model.task.FlowStatistic;
 import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.piper.PipePump;
@@ -328,9 +327,19 @@ public class EFMonitorUtil {
 	 */
 	public static JSONObject getPipeEndStatus(String instance, String L1seq) {
 		JSONObject res = new JSONObject();
-		res.put(END_TYPE.reader.name(), new FlowStatistic());
-		res.put(END_TYPE.computer.name(), new FlowStatistic());
-		res.put(END_TYPE.writer.name(), new FlowStatistic());
+		HashMap<String, Object> JO = new HashMap<>();
+		JO.put("totalProcess", 0);
+		JO.put("currentTimeProcess", 0);
+		JO.put("flowStartTime", 0);
+		JO.put("historyProcess", new JSONObject());
+		JO.put("performance", -1);
+		JO.put("avgload", 0);
+		JO.put("blockTime", 0);
+		JO.put("realBlockTime", 0);
+		JO.put("failProcess", 0);
+		res.put(END_TYPE.reader.name(), JO);
+		res.put(END_TYPE.computer.name(), JO);
+		res.put(END_TYPE.writer.name(), JO);
 		res.put("status", "offline");
 
 		if (Resource.socketCenter.containsKey(instance, L1seq, GlobalParam.FLOW_TAG._DEFAULT.name())) {
@@ -382,8 +391,7 @@ public class EFMonitorUtil {
 	 */
 	public static JSONObject getInstanceInfo(String instance, int type) throws EFException {
 		JSONObject JO = new JSONObject();
-		if (GlobalParam.DISTRIBUTE_RUN && GlobalParam.INSTANCE_COORDER.distributeCoorder().getClusterStatus() != 0)
-			return JO;
+	 
 		if (Resource.nodeConfig.getInstanceConfigs().containsKey(instance)) {
 			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
 			JSONObject Reader = new JSONObject();

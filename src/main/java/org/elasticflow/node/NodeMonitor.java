@@ -85,7 +85,8 @@ public final class NodeMonitor {
 			// node manage 
 			put("getnodeconfig", "getNodeConfig");
 			put("setnodeconfig", "setNodeConfig");
-			put("getstatus", "getStatus"); 
+			put("globalstatus", "globalStatus"); 
+			put("getstatus", "getStatus");
 			put("startsearcherservice", "startSearcherService");
 			put("stopsearcherservice", "stopSearcherService");
 			put("starthttpreaderserviceservice", "startHttpReaderServiceService");
@@ -443,7 +444,116 @@ public final class NodeMonitor {
 		}
 		setResponse(RESPONSE_STATUS.Success, "Start Searcher Service Successed!", null);
 	}
-
+	
+	/**
+	 * Cluster Global Statistics 
+	 * @param rq
+	 * @param RR
+	 */
+	public void globalStatus(Request rq, EFRequest RR) {
+		JSONObject res = new JSONObject();
+		res.put("cluster_mode", GlobalParam.DISTRIBUTE_RUN?"集群模式":"单机模式");
+		res.put("task_num", Resource.tasks.size());
+		res.put("resource_num", Resource.nodeConfig.getWarehouse().size());
+		if (GlobalParam.DISTRIBUTE_RUN) {
+			res.put("node_num", GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodes().size()+1);
+			HashMap<String, Object> nodeinfos = GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodeStatus();
+			double mem_use = SystemInfoUtil.getMemUsage();
+			double total_mem = SystemInfoUtil.getMemTotal();
+			double cpu_use = SystemInfoUtil.getCpuUsage();
+	        for (Map.Entry<String, Object> entry : nodeinfos.entrySet()) {
+	        	@SuppressWarnings("unchecked")
+				HashMap<String, Object> datas = (HashMap<String, Object>) entry.getValue();
+	        	mem_use += Double.parseDouble(datas.get("MEMORY_USAGE").toString());
+	        	cpu_use += Double.parseDouble(datas.get("CPU_USAGE").toString());
+	        	total_mem += Double.parseDouble(datas.get("MEMORY").toString());
+	        }
+	        res.put("memory_usage", mem_use/( GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodes().size()+1.));
+	        res.put("cpu_usage", cpu_use/( GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodes().size()+1.));
+	        res.put("total_memory", total_mem);
+		}else {
+			res.put("node_num", 1);
+			res.put("total_memory", SystemInfoUtil.getMemTotal());
+			res.put("memory_usage", SystemInfoUtil.getMemUsage());
+			res.put("cpu_usage", SystemInfoUtil.getCpuUsage());
+		} 
+		res.put("version", GlobalParam.VERSION);
+		boolean health = true;
+		for (Map.Entry<String, WarehouseParam> entry : Resource.nodeConfig.getWarehouse().entrySet()) {
+			WarehouseParam wp = entry.getValue(); 
+			String[] hosts = wp.getHost().split(","); 
+			if(!EFMonitorUtil.isPortOpen(hosts[0])) {
+				health = false;
+			} 
+		}
+		res.put("is_debug", GlobalParam.DEBUG);
+		res.put("lang", GlobalParam.LANG);
+		res.put("run_env", GlobalParam.RUN_ENV);
+		res.put("write_batch", GlobalParam.WRITE_BATCH);
+		res.put("proxy_ip", GlobalParam.PROXY_IP);
+		res.put("sys_config_path", GlobalParam.SYS_CONFIG_PATH);
+		res.put("datas_config_path", GlobalParam.DATAS_CONFIG_PATH);
+		res.put("plugin_path", GlobalParam.pluginPath);
+		res.put("health", health?"正常":"异常");
+		res.put("system_start_time", Common.FormatTime(GlobalParam.SYS_START_TIME));
+		//reader computer writer data statistics 
+		try {  
+			JSONObject reader = null;
+			JSONObject computer = null;
+			JSONObject writer = null;
+			for (Map.Entry<String, InstanceConfig> entry : Resource.nodeConfig.getInstanceConfigs().entrySet()) { 
+				JSONObject JO = EFMonitorUtil.getInstanceInfo(entry.getKey(), 2);
+				if (!JO.isEmpty()) { 
+					if(reader == null && JO.getJSONObject("reader").containsKey("flow_state")) 
+						reader = JO.getJSONObject("reader").getJSONObject("flow_state").getJSONObject("historyProcess");
+					if(computer == null && JO.getJSONObject("computer").containsKey("flow_state")) 
+						computer = JO.getJSONObject("computer").getJSONObject("flow_state").getJSONObject("historyProcess");
+					if(writer == null && JO.getJSONObject("writer").containsKey("flow_state")) 
+						writer = JO.getJSONObject("writer").getJSONObject("flow_state").getJSONObject("historyProcess");
+					 
+					if(reader!=null && JO.getJSONObject("reader").containsKey("flow_state")) {
+						JSONObject _reader = JO.getJSONObject("reader").getJSONObject("flow_state").getJSONObject("historyProcess");
+						for (String key : reader.keySet()) {
+							if(_reader.containsKey(key)) {
+								reader.put(key, reader.getIntValue(key)+_reader.getIntValue(key));
+							}else {
+								reader.put(key, _reader.getIntValue(key));
+							}
+						}
+					} 
+					
+					if(writer!=null && JO.getJSONObject("writer").containsKey("flow_state")) {
+						JSONObject _writer = JO.getJSONObject("writer").getJSONObject("flow_state").getJSONObject("historyProcess");
+						for (String key : writer.keySet()) {
+							if(_writer.containsKey(key)) {
+								writer.put(key, writer.getIntValue(key)+_writer.getIntValue(key));
+							}else {
+								writer.put(key, _writer.getIntValue(key));
+							}
+						}
+					} 
+					
+					if(computer!=null && JO.getJSONObject("computer").containsKey("flow_state")) {
+						JSONObject _computer = JO.getJSONObject("computer").getJSONObject("flow_state").getJSONObject("historyProcess");
+						for (String key : computer.keySet()) {
+							if(_computer.containsKey(key)) {
+								computer.put(key, computer.getIntValue(key)+_computer.getIntValue(key));
+							}else {
+								computer.put(key, _computer.getIntValue(key));
+							}
+						}
+					} 
+				}			 
+			}   
+			res.put("reader", reader);
+			res.put("writer", writer);
+			res.put("computer", computer);
+		} catch (EFException e) {
+			setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
+		}
+		setResponse(RESPONSE_STATUS.Success, null, res);
+	}
+	
 	/**
 	 * get node environmental state
 	 * @param rq
@@ -469,12 +579,8 @@ public final class NodeMonitor {
 		dt.put("SYS_THREAD_POOL_SIZE", GlobalParam.STS_THREADPOOL_SIZE);
 		dt.put("THREAD_ACTIVE_COUNT", Resource.threadPools.getActiveCount());
 		dt.put("DISTRIBUTE_RUN", GlobalParam.DISTRIBUTE_RUN);
-		try {
-			dt.put("CPU", SystemInfoUtil.getCpuUsage());
-			dt.put("MEMORY", SystemInfoUtil.getMemUsage());
-		} catch (Exception e) {
-			Common.LOG.error("get cluster node status exception ", e);
-		}
+		dt.put("CPU_USAGE", SystemInfoUtil.getCpuUsage());
+		dt.put("MEMORY_USAGE", SystemInfoUtil.getMemUsage());
 		if (GlobalParam.DISTRIBUTE_RUN) {
 			dt.put("SLAVES", GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodeStatus());
 		}
@@ -615,6 +721,8 @@ public final class NodeMonitor {
 				    Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getDefaultValue().getString("consumer.topic")); 
 					break;
 			default:
+				instance.put("ReadFrom", Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getHost()+"#"+
+					    Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getL1seq());
 				break;
 			} 
 			List<String> wt = Arrays.asList(config.getPipeParams().getWriteTo().split(",")); 
@@ -628,7 +736,10 @@ public final class NodeMonitor {
 				}  
 				break;
 			default:
-				wt2=wt;
+				for(String _wt:wt) {
+					wt2.add(Resource.nodeConfig.getWarehouse().get(_wt).getHost() +"#"+
+							Resource.nodeConfig.getWarehouse().get(_wt).getL1seq());
+				}  
 				break;
 			}
 			instance.put("WriteTo", wt2);
@@ -642,7 +753,7 @@ public final class NodeMonitor {
 					graphnodes.get(config.getAlias()).put("instance_status", JO.getInteger("instance_status"));
 				} 
 			} catch (Exception e) { 
-				
+				Common.LOG.warn("getInstanceInfo exception",e);
 			} 
 		}
 				
@@ -799,6 +910,22 @@ public final class NodeMonitor {
 			instance.put("ReadFrom", config.getPipeParams().getReadFrom());
 			instance.put("WriteTo", config.getPipeParams().getWriteTo().replace(",", ";"));
 			instance.put("OpenTrans", config.openTrans());
+			instance.put("RunState", true); 
+			try {
+				if(config.openTrans()) {
+					String[] L1seqs = TaskUtil.getL1seqs(config); 
+					for (String L1seq : L1seqs) {
+						JSONObject tmp = GlobalParam.INSTANCE_COORDER.distributeCoorder()
+								.getBreakerStatus(config.getInstanceID(), L1seq, "");
+						if (tmp.getBoolean("breaker_is_on"))
+							instance.put("RunState", false); 
+					}
+				}else {
+					instance.put("RunState", true); 
+				}
+			}catch(Exception e) {
+				Common.LOG.warn("TaskUtil.getL1seqs exception",e);
+			}  
 			instance.put("IsVirtualPipe", config.getPipeParams().isVirtualPipe());
 			instance.put("InstanceType", EFMonitorUtil.getInstanceType(config.getInstanceType()));
 

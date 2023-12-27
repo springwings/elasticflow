@@ -98,13 +98,13 @@ public class DataReceiver implements EFRPCService {
 				if (serviceClass == null) {
 					log.warn("service {} is null.", serviceName);
 				} else {
-					Method method = serviceClass.getMethod(methodName, parameterTypes);
-					Object result = method.invoke(serviceClass.getDeclaredConstructor().newInstance(), arguments);
+					Method method = serviceClass.getMethod(methodName, parameterTypes); 
+					Object result = method.invoke(serviceClass.getDeclaredConstructor().newInstance(), arguments); 
 					output = new ObjectOutputStream(socket.getOutputStream());
 					output.writeObject(result);
 				}
 			} catch (Exception e) {
-				log.error("from node {} try to run method {} > {} exception", socket.getInetAddress(),serviceName,methodName,e);
+				log.error("node {} try to run method {} > {} exception", socket.getInetAddress(),serviceName,methodName,e);
 			} finally {
 				if (output != null) {
 					try {

@@ -198,6 +198,7 @@ public class EsWriter extends WriterFlowSocket {
 		if (this.isBatch) {
 			try {
 				getESC().getBulkProcessor().flush();
+				Resource.resourceStates.get(getESC().getAlias()).put("status",RESOURCE_STATUS.Normal.name());
 			} catch (Exception e) {
 				Resource.resourceStates.get(getESC().getAlias()).put("status",RESOURCE_STATUS.Warning.name());
 				getESC().setBulkProcessor(null);

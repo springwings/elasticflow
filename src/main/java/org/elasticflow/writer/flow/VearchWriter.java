@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.config.GlobalParam.RESOURCE_STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.VearchConnector;
 import org.elasticflow.field.EFField;
@@ -15,6 +16,7 @@ import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.writer.WriterFlowSocket;
+import org.elasticflow.yarn.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -183,12 +185,14 @@ public class VearchWriter extends WriterFlowSocket {
 					VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 					try {
 						conn.writeBatch(this.curTable, this.DATAS);
+						Resource.resourceStates.get(connectParams.getWhp().getAlias()).put("status",RESOURCE_STATUS.Normal.name());
 					} catch (Exception e) {
 						if (e.getMessage().contains("spaceName param not build")) {
 							throw new EFException(e, conn.getHosts(), ELEVEL.Termination,
 									ETYPE.RESOURCE_ERROR);
 						} else {
-							throw new EFException(e, ELEVEL.Termination);
+							Resource.resourceStates.get(connectParams.getWhp().getAlias()).put("status",RESOURCE_STATUS.Warning.name());
+							throw new EFException(e,Resource.nodeConfig.getWarehouse().get(connectParams.getWhp().getAlias()).getHost(), ELEVEL.Termination);
 						}
 					}
 					this.DATAS.clear();

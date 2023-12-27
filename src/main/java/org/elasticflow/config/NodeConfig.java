@@ -159,9 +159,8 @@ public class NodeConfig {
 		case WAREHOUSE:
 			WarehouseParam e1 = (WarehouseParam) o;
 			warehouse.put(e1.getAlias(), e1);
-			Resource.resourceStates.put(e1.getAlias(), new JSONObject(Map.of(
-	                "status", RESOURCE_STATUS.Normal.name()
-	        )));
+			Resource.resourceStates.put(e1.getAlias(), new JSONObject());
+			Resource.resourceStates.get(e1.getAlias()).put("status", RESOURCE_STATUS.Normal.name());
 			break;
 
 		case INSTRUCTION:

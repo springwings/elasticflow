@@ -60,13 +60,7 @@ final public class FlowStatistic {
 			storeKey = "__"; 
 		} 
 		return storeKey;
-	}
-	
-	public FlowStatistic() {
-		this.historyProcess = new JSONObject();
-		this.flowEndStatus = toHashObject();
-		this.flowStartTime = 0;
-	}
+	} 
 	
 	/**
 	 * example

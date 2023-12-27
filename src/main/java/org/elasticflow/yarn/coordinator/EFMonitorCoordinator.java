@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.connection.EFConnectionPool;
-import org.elasticflow.util.Common;
 import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.SystemInfoUtil;
 import org.elasticflow.yarn.Resource;
@@ -28,7 +27,7 @@ public class EFMonitorCoordinator implements EFMonitorCoord {
 	}
 
 	@Override
-	public JSONObject getPipeEndStatus(String instance, String L1seq) {
+	public JSONObject getPipeEndStatus(String instance, String L1seq) { 
 		return EFMonitorUtil.getPipeEndStatus(instance, L1seq);
 	}
 	
@@ -53,12 +52,9 @@ public class EFMonitorCoordinator implements EFMonitorCoord {
 		dt.put("THREAD_POOL_SIZE", Resource.threadPools.getPoolSize());
 		dt.put("THREAD_ACTIVE_COUNT", Resource.threadPools.getActiveCount());
 		dt.put("SYS_THREAD_POOL_SIZE", GlobalParam.STS_THREADPOOL_SIZE);
-		try {
-			dt.put("CPU", SystemInfoUtil.getCpuUsage());
-			dt.put("MEMORY", SystemInfoUtil.getMemUsage());
-		} catch (Exception e) {
-			Common.LOG.error("get node system information exception", e);
-		}
+		dt.put("MEMORY", SystemInfoUtil.getMemTotal());
+		dt.put("MEMORY_USAGE", SystemInfoUtil.getMemUsage());
+		dt.put("CPU_USAGE", SystemInfoUtil.getCpuUsage());
 		return dt;
 	}
 
