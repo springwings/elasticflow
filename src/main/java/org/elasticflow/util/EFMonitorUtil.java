@@ -450,14 +450,14 @@ public class EFMonitorUtil {
 					if (L1seq != "")
 						appendPipe = "L1seq(" + L1seq + ")_";
 					JSONObject tmp;
-					if (GlobalParam.DISTRIBUTE_RUN) {
+					if (GlobalParam.DISTRIBUTE_RUN && GlobalParam.INSTANCE_COORDER.distributeCoorder().getClusterStatus()==0) {
 						tmp = GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(config.getInstanceID(),
 								L1seq);
 					} else {
 						tmp = getPipeEndStatus(config.getInstanceID(), L1seq);
-					} 
-					groupL1SeqData(Searcher,appendPipe,"flow_state",tmp.get(END_TYPE.searcher.name()));
-					groupL1SeqData(Reader,appendPipe,"flow_state",tmp.get(END_TYPE.reader.name()));
+					}
+					groupL1SeqData(Searcher,appendPipe,"flow_state",tmp.getJSONObject(END_TYPE.searcher.name()));
+					groupL1SeqData(Reader,appendPipe,"flow_state",tmp.getJSONObject(END_TYPE.reader.name()));  
 					if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) 
 						groupL1SeqData(Computer,appendPipe,"flow_state",tmp.get(END_TYPE.computer.name()));
 					

@@ -82,10 +82,12 @@ public final class NodeMonitor {
 	private HashMap<String, String> actions = new HashMap<String, String>() {
 		private static final long serialVersionUID = -8313429841889556616L;
 		{
-			// node manage 
+			// node manage
 			put("getnodeconfig", "getNodeConfig");
 			put("setnodeconfig", "setNodeConfig");
-			put("globalstatus", "globalStatus"); 
+			put("getnodeconfigcontent", "getNodeConfigContent");
+			put("updatenodeconfigcontent", "updateNodeConfigContent");
+			put("globalstatus", "globalStatus");
 			put("getstatus", "getStatus");
 			put("startsearcherservice", "startSearcherService");
 			put("stopsearcherservice", "stopSearcherService");
@@ -112,7 +114,7 @@ public final class NodeMonitor {
 			put("removeinstance", "removeInstance");
 			put("deleteinstancedata", "deleteInstanceData");
 			put("getinstanceinfo", "getInstanceInfo");
-			put("instanceflowgraph","instanceFlowGraph");
+			put("instanceflowgraph", "instanceFlowGraph");
 			put("getinstancexml", "getInstanceXml");
 			put("updateinstancexml", "updateInstanceXml");
 			// other manage
@@ -120,7 +122,7 @@ public final class NodeMonitor {
 			put("getresourcexml", "getResourcexml");
 			put("updateresource", "updateResource");
 			put("addresource", "addResource");
-			put("removeresource", "removeResource"); 
+			put("removeresource", "removeResource");
 			put("setinstancepipeconfig", "setInstancePipeConfig");
 		}
 	};
@@ -150,12 +152,12 @@ public final class NodeMonitor {
 			}
 		} catch (Exception e) {
 			RS.setStatus("Actions Exception!", RESPONSE_STATUS.CodeException);
-			Common.LOG.error("Management Operations {} exception",RR.getParams().get("ac"), e);
+			Common.LOG.error("Management Operations {} exception", RR.getParams().get("ac"), e);
 		}
 	}
-	
-	/*-----------------------// node manage------------------ */  
-	
+
+	/*-----------------------// node manage------------------ */
+
 	/**
 	 * Be care full,this will remove all relative instance
 	 * 
@@ -204,26 +206,27 @@ public final class NodeMonitor {
 			updateResourceXml(jsonObject, true);
 		}
 	}
-	
-	public void getResources(Request rq, EFRequest RR) { 
+
+	public void getResources(Request rq, EFRequest RR) {
 		JSONObject res = new JSONObject();
-		Map<String, WarehouseParam> resources = Resource.nodeConfig.getWarehouse();		
+		Map<String, WarehouseParam> resources = Resource.nodeConfig.getWarehouse();
 		for (Map.Entry<String, WarehouseParam> entry : resources.entrySet()) {
 			WarehouseParam wp = entry.getValue();
-			res.put(entry.getKey(),  new JSONObject());
-			res.getJSONObject(entry.getKey()).put("name",entry.getKey());
-			res.getJSONObject(entry.getKey()).put("hosts",wp.getHost());
-			res.getJSONObject(entry.getKey()).put("type",wp.getType()); 
+			res.put(entry.getKey(), new JSONObject());
+			res.getJSONObject(entry.getKey()).put("name", entry.getKey());
+			res.getJSONObject(entry.getKey()).put("hosts", wp.getHost());
+			res.getJSONObject(entry.getKey()).put("type", wp.getType());
 			JSONObject pools = new JSONObject();
 			for (String seq : wp.getL1seq()) {
-				pools.put((seq==""?"DEFAULT":seq),EFMonitorUtil.getConnectionStatus(wp.getPoolName(seq))); 
+				pools.put((seq == "" ? "DEFAULT" : seq), EFMonitorUtil.getConnectionStatus(wp.getPoolName(seq)));
 			}
-			res.getJSONObject(entry.getKey()).put("pools",pools); 
-			String[] hosts = wp.getHost().split(","); 
-			if(EFMonitorUtil.isPortOpen(hosts[0])) {
-				res.getJSONObject(entry.getKey()).put("status",Resource.resourceStates.get(entry.getKey()).getString("status")); 
-			}else {
-				res.getJSONObject(entry.getKey()).put("status",GlobalParam.RESOURCE_STATUS.Error.name()); 
+			res.getJSONObject(entry.getKey()).put("pools", pools);
+			String[] hosts = wp.getHost().split(",");
+			if (EFMonitorUtil.isPortOpen(hosts[0])) {
+				res.getJSONObject(entry.getKey()).put("status",
+						Resource.resourceStates.get(entry.getKey()).getString("status"));
+			} else {
+				res.getJSONObject(entry.getKey()).put("status", GlobalParam.RESOURCE_STATUS.Error.name());
 			}
 		}
 		setResponse(RESPONSE_STATUS.Success, "", res);
@@ -280,6 +283,22 @@ public final class NodeMonitor {
 		setResponse(RESPONSE_STATUS.Success, "", GlobalParam.SystemConfig);
 	}
 
+	public void getNodeConfigContent(Request rq, EFRequest RR) {
+		byte[] configs = EFDataStorer.getData(GlobalParam.SYS_CONFIG_PATH + "/config.properties", false);
+		setResponse(RESPONSE_STATUS.Success, "", new String(configs));
+	}
+
+	public void updateNodeConfigContent(Request rq, EFRequest RR) {
+		try {
+			String configPath = GlobalParam.SYS_CONFIG_PATH + "/config.properties";
+			EFDataStorer.setData(configPath, new String(decoder.decode(RR.getStringParam("content"))));
+			Common.loadProperties(configPath);
+			setResponse(RESPONSE_STATUS.Success, "Config set success!", null);
+		} catch (Exception e) {
+			setResponse(RESPONSE_STATUS.CodeException, "Config save Exception " + e.getMessage(), null);
+		}
+	}
+
 	/**
 	 * set node start configure parameters,will auto write into file.
 	 * 
@@ -307,18 +326,18 @@ public final class NodeMonitor {
 	 */
 	public void restartNode(Request rq, EFRequest RR) {
 		if (RR.getStringParam("node_id") != null) {
-			int nodeId = Integer.parseInt(RR.getStringParam("node_id")); 
-			if(nodeId == GlobalParam.NODEID) {
+			int nodeId = Integer.parseInt(RR.getStringParam("node_id"));
+			if (nodeId == GlobalParam.NODEID) {
 				EFMonitorUtil.restartSystem();
-			}else {
+			} else {
 				GlobalParam.INSTANCE_COORDER.distributeCoorder().restartNode(nodeId);
 			}
-			setResponse(RESPONSE_STATUS.Success,null, null);
+			setResponse(RESPONSE_STATUS.Success, null, null);
 		} else {
 			setResponse(RESPONSE_STATUS.ParameterErr, "parameters node_id not exists!", null);
-		} 
+		}
 	}
-	
+
 	/**
 	 * stop node
 	 * 
@@ -326,13 +345,13 @@ public final class NodeMonitor {
 	 */
 	public void stopNode(Request rq, EFRequest RR) {
 		if (RR.getStringParam("node_id") != null) {
-			int nodeId = Integer.parseInt(RR.getStringParam("node_id")); 
-			if(nodeId != GlobalParam.NODEID) 
-				GlobalParam.INSTANCE_COORDER.distributeCoorder().stopNode(nodeId); 
-			setResponse(RESPONSE_STATUS.Success,null, null);
+			int nodeId = Integer.parseInt(RR.getStringParam("node_id"));
+			if (nodeId != GlobalParam.NODEID)
+				GlobalParam.INSTANCE_COORDER.distributeCoorder().stopNode(nodeId);
+			setResponse(RESPONSE_STATUS.Success, null, null);
 		} else {
 			setResponse(RESPONSE_STATUS.ParameterErr, "parameters node_id not exists!", null);
-		} 
+		}
 	}
 
 	/**
@@ -342,13 +361,13 @@ public final class NodeMonitor {
 	 */
 	public void restartCluster(Request rq, EFRequest RR) {
 		if (GlobalParam.DISTRIBUTE_RUN) {
-			GlobalParam.INSTANCE_COORDER.distributeCoorder().restartCluster();			
+			GlobalParam.INSTANCE_COORDER.distributeCoorder().restartCluster();
 		} else {
 			EFMonitorUtil.restartSystem();
-		} 
-		setResponse(RESPONSE_STATUS.Success,null, null);
+		}
+		setResponse(RESPONSE_STATUS.Success, null, null);
 	}
-	
+
 	/**
 	 * stop Cluster
 	 * 
@@ -356,12 +375,12 @@ public final class NodeMonitor {
 	 */
 	public void stopCluster(Request rq, EFRequest RR) {
 		if (GlobalParam.DISTRIBUTE_RUN) {
-			GlobalParam.INSTANCE_COORDER.distributeCoorder().stopSlaves(true); 
-		} 
+			GlobalParam.INSTANCE_COORDER.distributeCoorder().stopSlaves(true);
+		}
 		Common.stopSystem(false);
-		setResponse(RESPONSE_STATUS.Success,null, null);
+		setResponse(RESPONSE_STATUS.Success, null, null);
 	}
-	
+
 	/**
 	 * Loading Java handler classes in real time only support no dependency handler
 	 * like org.elasticflow.writerUnit.handler org.elasticflow.reader.handler
@@ -444,47 +463,49 @@ public final class NodeMonitor {
 		}
 		setResponse(RESPONSE_STATUS.Success, "Start Searcher Service Successed!", null);
 	}
-	
+
 	/**
-	 * Cluster Global Statistics 
+	 * Cluster Global Statistics
+	 * 
 	 * @param rq
 	 * @param RR
 	 */
 	public void globalStatus(Request rq, EFRequest RR) {
 		JSONObject res = new JSONObject();
-		res.put("cluster_mode", GlobalParam.DISTRIBUTE_RUN?"集群模式":"单机模式");
+		res.put("cluster_mode", GlobalParam.DISTRIBUTE_RUN ? "集群模式" : "单机模式");
 		res.put("task_num", Resource.tasks.size());
 		res.put("resource_num", Resource.nodeConfig.getWarehouse().size());
 		if (GlobalParam.DISTRIBUTE_RUN) {
-			res.put("node_num", GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodes().size()+1);
+			res.put("node_num", GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodes().size() + 1);
 			HashMap<String, Object> nodeinfos = GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodeStatus();
 			double mem_use = SystemInfoUtil.getMemUsage();
 			double total_mem = SystemInfoUtil.getMemTotal();
 			double cpu_use = SystemInfoUtil.getCpuUsage();
-	        for (Map.Entry<String, Object> entry : nodeinfos.entrySet()) {
-	        	@SuppressWarnings("unchecked")
+			for (Map.Entry<String, Object> entry : nodeinfos.entrySet()) {
+				@SuppressWarnings("unchecked")
 				HashMap<String, Object> datas = (HashMap<String, Object>) entry.getValue();
-	        	mem_use += Double.parseDouble(datas.get("MEMORY_USAGE").toString());
-	        	cpu_use += Double.parseDouble(datas.get("CPU_USAGE").toString());
-	        	total_mem += Double.parseDouble(datas.get("MEMORY").toString());
-	        }
-	        res.put("memory_usage", mem_use/( GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodes().size()+1.));
-	        res.put("cpu_usage", cpu_use/( GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodes().size()+1.));
-	        res.put("total_memory", total_mem);
-		}else {
+				mem_use += Double.parseDouble(datas.get("MEMORY_USAGE").toString());
+				cpu_use += Double.parseDouble(datas.get("CPU_USAGE").toString());
+				total_mem += Double.parseDouble(datas.get("MEMORY").toString());
+			}
+			res.put("memory_usage",
+					mem_use / (GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodes().size() + 1.));
+			res.put("cpu_usage", cpu_use / (GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodes().size() + 1.));
+			res.put("total_memory", total_mem);
+		} else {
 			res.put("node_num", 1);
 			res.put("total_memory", SystemInfoUtil.getMemTotal());
 			res.put("memory_usage", SystemInfoUtil.getMemUsage());
 			res.put("cpu_usage", SystemInfoUtil.getCpuUsage());
-		} 
+		}
 		res.put("version", GlobalParam.VERSION);
 		boolean health = true;
 		for (Map.Entry<String, WarehouseParam> entry : Resource.nodeConfig.getWarehouse().entrySet()) {
-			WarehouseParam wp = entry.getValue(); 
-			String[] hosts = wp.getHost().split(","); 
-			if(!EFMonitorUtil.isPortOpen(hosts[0])) {
+			WarehouseParam wp = entry.getValue();
+			String[] hosts = wp.getHost().split(",");
+			if (!EFMonitorUtil.isPortOpen(hosts[0])) {
 				health = false;
-			} 
+			}
 		}
 		res.put("is_debug", GlobalParam.DEBUG);
 		res.put("lang", GlobalParam.LANG);
@@ -494,57 +515,62 @@ public final class NodeMonitor {
 		res.put("sys_config_path", GlobalParam.SYS_CONFIG_PATH);
 		res.put("datas_config_path", GlobalParam.DATAS_CONFIG_PATH);
 		res.put("plugin_path", GlobalParam.pluginPath);
-		res.put("health", health?"正常":"异常");
+		res.put("health", health ? "正常" : "异常");
 		res.put("system_start_time", Common.FormatTime(GlobalParam.SYS_START_TIME));
-		//reader computer writer data statistics 
-		try {  
+		// reader computer writer data statistics
+		try {
 			JSONObject reader = null;
 			JSONObject computer = null;
 			JSONObject writer = null;
-			for (Map.Entry<String, InstanceConfig> entry : Resource.nodeConfig.getInstanceConfigs().entrySet()) { 
+			for (Map.Entry<String, InstanceConfig> entry : Resource.nodeConfig.getInstanceConfigs().entrySet()) {
+				if (!entry.getValue().openTrans())
+					continue;
 				JSONObject JO = EFMonitorUtil.getInstanceInfo(entry.getKey(), 2);
-				if (!JO.isEmpty()) { 
-					if(reader == null && JO.getJSONObject("reader").containsKey("flow_state")) 
-						reader = JO.getJSONObject("reader").getJSONObject("flow_state").getJSONObject("historyProcess");
-					if(computer == null && JO.getJSONObject("computer").containsKey("flow_state")) 
-						computer = JO.getJSONObject("computer").getJSONObject("flow_state").getJSONObject("historyProcess");
-					if(writer == null && JO.getJSONObject("writer").containsKey("flow_state")) 
-						writer = JO.getJSONObject("writer").getJSONObject("flow_state").getJSONObject("historyProcess");
-					 
-					if(reader!=null && JO.getJSONObject("reader").containsKey("flow_state")) {
-						JSONObject _reader = JO.getJSONObject("reader").getJSONObject("flow_state").getJSONObject("historyProcess");
+				if (!JO.isEmpty()) {
+					if (reader == null && JO.getJSONObject("reader").containsKey("flow_state")) {
+						reader = (JSONObject) JO.getJSONObject("reader").getJSONObject("flow_state").getJSONObject("historyProcess").clone();
+					} else if (reader != null && JO.getJSONObject("reader").containsKey("flow_state")) {
+						JSONObject _reader = JO.getJSONObject("reader").getJSONObject("flow_state")
+								.getJSONObject("historyProcess");
 						for (String key : reader.keySet()) {
-							if(_reader.containsKey(key)) {
-								reader.put(key, reader.getIntValue(key)+_reader.getIntValue(key));
-							}else {
-								reader.put(key, _reader.getIntValue(key));
+							if (_reader.containsKey(key)) {
+								reader.put(key, reader.getLongValue(key) + _reader.getLongValue(key));
+							} else {
+								reader.put(key, _reader.getLongValue(key));
 							}
 						}
-					} 
-					
-					if(writer!=null && JO.getJSONObject("writer").containsKey("flow_state")) {
-						JSONObject _writer = JO.getJSONObject("writer").getJSONObject("flow_state").getJSONObject("historyProcess");
+					}
+
+					if (writer == null && JO.getJSONObject("writer").containsKey("flow_state"))
+						writer = (JSONObject) JO.getJSONObject("writer").getJSONObject("flow_state").getJSONObject("historyProcess").clone();
+					else if (writer != null && JO.getJSONObject("writer").containsKey("flow_state")) {
+						JSONObject _writer = JO.getJSONObject("writer").getJSONObject("flow_state")
+								.getJSONObject("historyProcess");
 						for (String key : writer.keySet()) {
-							if(_writer.containsKey(key)) {
-								writer.put(key, writer.getIntValue(key)+_writer.getIntValue(key));
-							}else {
-								writer.put(key, _writer.getIntValue(key));
+							if (_writer.containsKey(key)) {
+								writer.put(key, writer.getLongValue(key) + _writer.getLongValue(key));
+							} else {
+								writer.put(key, _writer.getLongValue(key));
 							}
 						}
-					} 
-					
-					if(computer!=null && JO.getJSONObject("computer").containsKey("flow_state")) {
-						JSONObject _computer = JO.getJSONObject("computer").getJSONObject("flow_state").getJSONObject("historyProcess");
+					}
+
+					if (computer == null && JO.getJSONObject("computer").containsKey("flow_state")) {
+						computer = (JSONObject) JO.getJSONObject("computer").getJSONObject("flow_state")
+								.getJSONObject("historyProcess").clone();
+					} else if (computer != null && JO.getJSONObject("computer").containsKey("flow_state")) {
+						JSONObject _computer = JO.getJSONObject("computer").getJSONObject("flow_state")
+								.getJSONObject("historyProcess");
 						for (String key : computer.keySet()) {
-							if(_computer.containsKey(key)) {
-								computer.put(key, computer.getIntValue(key)+_computer.getIntValue(key));
-							}else {
-								computer.put(key, _computer.getIntValue(key));
+							if (_computer.containsKey(key)) {
+								computer.put(key, computer.getLongValue(key) + _computer.getLongValue(key));
+							} else {
+								computer.put(key, _computer.getLongValue(key));
 							}
 						}
-					} 
-				}			 
-			}   
+					}
+				}
+			}
 			res.put("reader", reader);
 			res.put("writer", writer);
 			res.put("computer", computer);
@@ -553,9 +579,10 @@ public final class NodeMonitor {
 		}
 		setResponse(RESPONSE_STATUS.Success, null, res);
 	}
-	
+
 	/**
 	 * get node environmental state
+	 * 
 	 * @param rq
 	 * @param RR
 	 */
@@ -589,6 +616,7 @@ public final class NodeMonitor {
 
 	/**
 	 * Data source level delimited sequence
+	 * 
 	 * @param rq
 	 * @param RR
 	 */
@@ -619,15 +647,15 @@ public final class NodeMonitor {
 				if (RR.getParams().get("set_value") != null)
 					val = RR.getStringParam("set_value");
 				String[] L1seqs = EFMonitorUtil.getInstanceL1seqs(instance);
-				for (String L1seq : L1seqs) { 
+				for (String L1seq : L1seqs) {
 					GlobalParam.TASK_COORDER.batchUpdateSeqPos(instance, val, false);
 					GlobalParam.TASK_COORDER.saveTaskInfo(instance, L1seq,
 							GlobalParam.TASK_COORDER.getStoreIdFromSave(instance, L1seq, false, false), false);
-					if(GlobalParam.DISTRIBUTE_RUN) {						
-						GlobalParam.INSTANCE_COORDER.distributeCoorder().resetPipeEndStatus(instance, L1seq);						
-					} else {						
+					if (GlobalParam.DISTRIBUTE_RUN) {
+						GlobalParam.INSTANCE_COORDER.distributeCoorder().resetPipeEndStatus(instance, L1seq);
+					} else {
 						EFMonitorUtil.resetPipeEndStatus(instance, L1seq);
-					}  
+					}
 					// update flow status,Distributed environment synchronization status
 					if (GlobalParam.DISTRIBUTE_RUN) {
 						Resource.flowStates.get(instance).put(FlowStatistic.getStoreKey(L1seq),
@@ -638,7 +666,7 @@ public final class NodeMonitor {
 					}
 				}
 				EFFileUtil.createAndSave(Resource.flowStates.get(instance).toJSONString(),
-						EFFileUtil.getInstancePath(instance)[2]);	
+						EFFileUtil.getInstancePath(instance)[2]);
 				setResponse(RESPONSE_STATUS.Success, RR.getStringParam("instance") + " reset Success!", null);
 			} catch (Exception e) {
 				setResponse(RESPONSE_STATUS.DataErr, RR.getStringParam("instance") + " not exists!", null);
@@ -688,15 +716,16 @@ public final class NodeMonitor {
 			}
 		}
 	}
-	
+
 	/**
 	 * Obtain the correlation relationship diagram between instance data streams.
+	 * 
 	 * @param rq
 	 * @param RR
 	 */
 	public void instanceFlowGraph(Request rq, EFRequest RR) {
-		HashMap<String, Object> result = new HashMap<String, Object>(); 
-		Map<String, InstanceConfig> instances = Resource.nodeConfig.getInstanceConfigs();		
+		HashMap<String, Object> result = new HashMap<String, Object>();
+		Map<String, InstanceConfig> instances = Resource.nodeConfig.getInstanceConfigs();
 		HashMap<String, JSONObject> graphnodes = new HashMap<String, JSONObject>();
 		List<JSONObject> edges = new ArrayList<JSONObject>();
 		for (Map.Entry<String, InstanceConfig> entry : instances.entrySet()) {
@@ -714,98 +743,104 @@ public final class NodeMonitor {
 			}
 			instance.put("SearchFrom", config.getPipeParams().getSearchFrom());
 			instance.put("ReadFrom", config.getPipeParams().getReadFrom());
-			switch(Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getType()) {
-				case KAFKA:
-				case ROCKETMQ:
-					instance.put("ReadFrom", Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getHost()+"#"+
-				    Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getDefaultValue().getString("consumer.topic")); 
-					break;
-			default:
-				instance.put("ReadFrom", Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getHost()+"#"+
-					    Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getL1seq());
-				break;
-			} 
-			List<String> wt = Arrays.asList(config.getPipeParams().getWriteTo().split(",")); 
-			List<String> wt2 = new ArrayList<>();
-			switch(Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getWriteTo()).getType()) {
+			switch (Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getType()) {
 			case KAFKA:
-			case ROCKETMQ: 
-				for(String _wt:wt) {
-					wt2.add(Resource.nodeConfig.getWarehouse().get(_wt).getHost() +"#"+
-							config.getWriteFields().get("topic").getDefaultvalue());
-				}  
+			case ROCKETMQ:
+				instance.put("ReadFrom",
+						Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getHost() + "#"
+								+ Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom())
+										.getDefaultValue().getString("consumer.topic"));
 				break;
 			default:
-				for(String _wt:wt) {
-					wt2.add(Resource.nodeConfig.getWarehouse().get(_wt).getHost() +"#"+
-							Resource.nodeConfig.getWarehouse().get(_wt).getL1seq());
-				}  
+				instance.put("ReadFrom",
+						Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom()).getHost() + "#"
+								+ Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getReadFrom())
+										.getL1seq());
+				break;
+			}
+			List<String> wt = Arrays.asList(config.getPipeParams().getWriteTo().split(","));
+			List<String> wt2 = new ArrayList<>();
+			switch (Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getWriteTo()).getType()) {
+			case KAFKA:
+			case ROCKETMQ:
+				for (String _wt : wt) {
+					wt2.add(Resource.nodeConfig.getWarehouse().get(_wt).getHost() + "#"
+							+ config.getWriteFields().get("topic").getDefaultvalue());
+				}
+				break;
+			default:
+				for (String _wt : wt) {
+					wt2.add(Resource.nodeConfig.getWarehouse().get(_wt).getHost() + "#"
+							+ Resource.nodeConfig.getWarehouse().get(_wt).getL1seq());
+				}
 				break;
 			}
 			instance.put("WriteTo", wt2);
 			instance.put("OpenTrans", config.openTrans());
 			instance.put("IsVirtualPipe", config.getPipeParams().isVirtualPipe());
-			instance.put("InstanceType", EFMonitorUtil.getInstanceType(config.getInstanceType()));  
-			graphnodes.put(config.getAlias(), instance); 
+			instance.put("InstanceType", EFMonitorUtil.getInstanceType(config.getInstanceType()));
+			graphnodes.put(config.getAlias(), instance);
 			try {
-				if(!graphnodes.get(config.getAlias()).containsKey("instance_status")) {
-					JSONObject JO = EFMonitorUtil.getInstanceInfo(config.getAlias(), 8); 
+				if (!graphnodes.get(config.getAlias()).containsKey("instance_status")) {
+					JSONObject JO = EFMonitorUtil.getInstanceInfo(config.getAlias(), 8);
 					graphnodes.get(config.getAlias()).put("instance_status", JO.getInteger("instance_status"));
-				} 
-			} catch (Exception e) { 
-				Common.LOG.warn("getInstanceInfo exception",e);
-			} 
-		}
-				
-		//start map resource  
-		for (Entry<String, JSONObject> node : graphnodes.entrySet()) {  
-			String readfrom = node.getValue().getString("ReadFrom"); 
-			int weight = 0;
-			try { 
-				JSONObject JO = EFMonitorUtil.getInstanceInfo(node.getKey(), 2); 
-				JSONObject _datas = JO.getJSONObject("reader");  
-				for (String _key : _datas.keySet()) {  
-					if(_datas.getJSONObject(_key).containsKey("totalProcess"))
-						weight+=_datas.getJSONObject(_key).getInteger("totalProcess"); 
 				}
-			} catch (Exception e) { 
+			} catch (Exception e) {
+				Common.LOG.warn("getInstanceInfo exception", e);
+			}
+		}
+
+		// start map resource
+		for (Entry<String, JSONObject> node : graphnodes.entrySet()) {
+			String readfrom = node.getValue().getString("ReadFrom");
+			int weight = 0;
+			try {
+				JSONObject JO = EFMonitorUtil.getInstanceInfo(node.getKey(), 2);
+				JSONObject _datas = JO.getJSONObject("reader");
+				for (String _key : _datas.keySet()) {
+					if (_datas.getJSONObject(_key).containsKey("totalProcess"))
+						weight += _datas.getJSONObject(_key).getInteger("totalProcess");
+				}
+			} catch (Exception e) {
 				node.getValue().put("instance_status", INSTANCE_STATUS.Error.getVal());
 				e.printStackTrace();
-			}  
- 
+			}
+
 			for (Entry<String, JSONObject> _entry : graphnodes.entrySet()) {
-				if(!node.getKey().equals(_entry.getKey()) && _entry.getValue().getJSONArray("WriteTo").contains(readfrom)) {
+				if (!node.getKey().equals(_entry.getKey())
+						&& _entry.getValue().getJSONArray("WriteTo").contains(readfrom)) {
 					JSONObject edge = new JSONObject();
 					edge.put("from", _entry.getKey());
 					edge.put("weight", weight);
 					edge.put("to", node.getKey());
 					edge.put("isconnect", true);
-					if(node.getValue().getBoolean("OpenTrans")==false)
+					if (node.getValue().getBoolean("OpenTrans") == false)
 						edge.put("isconnect", false);
 					edges.add(edge);
-				} 
+				}
 			}
 		}
-		//Modify node attributes:Only egress E, only ingress B,both eg/in M, independent nodes S
+		// Modify node attributes:Only egress E, only ingress B,both eg/in M,
+		// independent nodes S
 		for (Entry<String, JSONObject> node : graphnodes.entrySet()) {
-			int egress=0;
-			int ingress=0;
-			for(JSONObject edge:edges) {
-				if(node.getKey().equals(edge.get("from")))
-					egress+=1;
-				if(node.getKey().equals(edge.get("to")))
-					ingress+=1;
+			int egress = 0;
+			int ingress = 0;
+			for (JSONObject edge : edges) {
+				if (node.getKey().equals(edge.get("from")))
+					egress += 1;
+				if (node.getKey().equals(edge.get("to")))
+					ingress += 1;
 			}
-			if(egress>0 && ingress>0) {
+			if (egress > 0 && ingress > 0) {
 				node.getValue().put("attribute", "M");
-			}else if(egress==0 && ingress>0) {
+			} else if (egress == 0 && ingress > 0) {
 				node.getValue().put("attribute", "E");
-			}else if(egress==0 && ingress==0) {
+			} else if (egress == 0 && ingress == 0) {
 				node.getValue().put("attribute", "S");
-			}else {
+			} else {
 				node.getValue().put("attribute", "B");
 			}
-			node.getValue().put("weight", egress+ingress);
+			node.getValue().put("weight", egress + ingress);
 		}
 		result.put("nodes", graphnodes);
 		result.put("edges", edges);
@@ -819,9 +854,10 @@ public final class NodeMonitor {
 			setResponse(RESPONSE_STATUS.Success, "", new String(datas));
 		}
 	}
-	
+
 	/**
 	 * Direct coverage, therefore the content must be complete
+	 * 
 	 * @param rq
 	 * @param RR
 	 */
@@ -831,9 +867,10 @@ public final class NodeMonitor {
 			EFDataStorer.setData(xmlPath, new String(decoder.decode(RR.getStringParam("content"))));
 		}
 	}
- 
+
 	/**
-	 * Modify task configure	
+	 * Modify task configure
+	 * 
 	 * @param rq
 	 * @param RR
 	 */
@@ -910,22 +947,22 @@ public final class NodeMonitor {
 			instance.put("ReadFrom", config.getPipeParams().getReadFrom());
 			instance.put("WriteTo", config.getPipeParams().getWriteTo().replace(",", ";"));
 			instance.put("OpenTrans", config.openTrans());
-			instance.put("RunState", true); 
+			instance.put("RunState", true);
 			try {
-				if(config.openTrans()) {
-					String[] L1seqs = TaskUtil.getL1seqs(config); 
+				if (config.openTrans()) {
+					String[] L1seqs = TaskUtil.getL1seqs(config);
 					for (String L1seq : L1seqs) {
 						JSONObject tmp = GlobalParam.INSTANCE_COORDER.distributeCoorder()
 								.getBreakerStatus(config.getInstanceID(), L1seq, "");
 						if (tmp.getBoolean("breaker_is_on"))
-							instance.put("RunState", false); 
+							instance.put("RunState", false);
 					}
-				}else {
-					instance.put("RunState", true); 
+				} else {
+					instance.put("RunState", true);
 				}
-			}catch(Exception e) {
-				Common.LOG.warn("TaskUtil.getL1seqs exception",e);
-			}  
+			} catch (Exception e) {
+				Common.LOG.warn("TaskUtil.getL1seqs exception", e);
+			}
 			instance.put("IsVirtualPipe", config.getPipeParams().isVirtualPipe());
 			instance.put("InstanceType", EFMonitorUtil.getInstanceType(config.getInstanceType()));
 
@@ -996,9 +1033,10 @@ public final class NodeMonitor {
 			}
 		}
 	}
-	
+
 	/**
 	 * Only delete tasks from the configuration file and keep data
+	 * 
 	 * @param rq
 	 * @param RR
 	 */
@@ -1039,9 +1077,9 @@ public final class NodeMonitor {
 	/**
 	 * reload instance configure rebuild instance in memory
 	 * 
-	 * @param rq instance=xx&reset=true|false&runtype=1 reset true will clear all instance settings.
-	 *           runType=-1 Use the original task run type
-	 *           
+	 * @param rq instance=xx&reset=true|false&runtype=1 reset true will clear all
+	 *           instance settings. runType=-1 Use the original task run type
+	 * 
 	 * @throws EFException
 	 * 
 	 */
@@ -1054,20 +1092,22 @@ public final class NodeMonitor {
 				setResponse(RESPONSE_STATUS.DataErr, instance + " not exists!", null);
 			} else {
 				try {
-					if(runType==null)
-						runType = String.valueOf(Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType());
+					if (runType == null)
+						runType = String
+								.valueOf(Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType());
 					EFMonitorUtil.reloadInstance(instance, reset, runType);
-					setResponse(RESPONSE_STATUS.Success, RR.getStringParam("instance") + " reload instance settings success!",
-							null);
+					setResponse(RESPONSE_STATUS.Success,
+							RR.getStringParam("instance") + " reload instance settings success!", null);
 				} catch (EFException e) {
 					setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
 				}
 			}
 		}
 	}
-	
+
 	/**
-	 * push instance to system	
+	 * push instance to system
+	 * 
 	 * @param rq
 	 * @param RR
 	 */
@@ -1098,9 +1138,10 @@ public final class NodeMonitor {
 			setResponse(RESPONSE_STATUS.Success, RR.getStringParam("new_instance_name") + " clone success!", null);
 		}
 	}
- 
+
 	/**
 	 * add instance setting into system and add it to configure file also.
+	 * 
 	 * @param rq
 	 * @param RR
 	 */
@@ -1118,9 +1159,10 @@ public final class NodeMonitor {
 	}
 
 	/**
-	 * delete Instance Data through alias or Instance data name
-	 * The time mechanism deletes the current time index 
-	 * The A/B mechanism deletes the currently used index
+	 * delete Instance Data through alias or Instance data name The time mechanism
+	 * deletes the current time index The A/B mechanism deletes the currently used
+	 * index
+	 * 
 	 * @param alias
 	 * @return
 	 */
@@ -1154,7 +1196,7 @@ public final class NodeMonitor {
 							}
 						} catch (EFException e) {
 							state = false;
-							Common.LOG.error("delete {} Instance Data",instance, e);
+							Common.LOG.error("delete {} Instance Data", instance, e);
 						}
 					}
 					EFMonitorUtil.controlInstanceState(instance, TASK_FLOW_SINGAL.Ready, true);
@@ -1167,9 +1209,10 @@ public final class NodeMonitor {
 			}
 		}
 	}
-	
+
 	/**
 	 * Update resource node information
+	 * 
 	 * @param resourceData
 	 * @param isDel
 	 * @return
@@ -1229,7 +1272,7 @@ public final class NodeMonitor {
 			}
 			EFDataStorer.setData(pondPath, Common.formatXml(doc));
 		} catch (Exception e) {
-			Common.LOG.error("update resource node information to {} exception",pondPath,e);
+			Common.LOG.error("update resource node information to {} exception", pondPath, e);
 			setResponse(RESPONSE_STATUS.CodeException, "save resource exception " + e.getMessage(), null);
 			return false;
 		}
@@ -1237,8 +1280,7 @@ public final class NodeMonitor {
 	}
 
 	/**
-	 * remove instance 
-	 * stop all jobs and remove from configure file.
+	 * remove instance stop all jobs and remove from configure file.
 	 * 
 	 * @param instance
 	 */

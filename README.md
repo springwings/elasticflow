@@ -109,7 +109,7 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
    ```java
         @Before
         public void setUp() {
-            System.setProperty("config", "file:/work/EF/config");
+            System.setProperty("config", "/work/EF/");
             System.setProperty("nodeid", "1");
         }
         
