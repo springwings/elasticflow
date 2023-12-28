@@ -27,7 +27,7 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
     - 其他系统间需要进行数据交换控制的场景。
     
 # Versions
-    - version 5.x
+    - version 6.x
     - Java>=11
 
 # 特性
@@ -94,7 +94,7 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
 
 
 # Changes
-5.0 版本对之前版本在架构上全新升级，不再通过Java原生支持深度学习，计算流通过调用外部推断服务rest接口实现数据计算服务。
+6.0 版本对之前版本在架构上全新升级，不再通过Java原生支持深度学习，计算流通过调用外部推断服务rest接口实现数据计算服务。
 
 # EF 插件开发
    1. pom入包：
@@ -102,7 +102,7 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
       <dependency>
         <groupId>org.elasticflow</groupId>
         <artifactId>elasticflow</artifactId>
-        <version>5.8.2</version>
+        <version>6.0.1</version>
       </dependency>
    ```
    2. plugin开发测试代码，例如：

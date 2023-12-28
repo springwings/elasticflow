@@ -8,13 +8,13 @@
 package org.elasticflow.instruction.sets;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.ELEVEL;
+import org.elasticflow.config.GlobalParam.ETYPE;
 import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.GlobalParam.TASK_FLOW_SINGAL;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ELEVEL;
-import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.util.instance.TaskUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

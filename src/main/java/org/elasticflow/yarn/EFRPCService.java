@@ -8,9 +8,9 @@ import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import org.elasticflow.config.GlobalParam.ELEVEL;
+import org.elasticflow.config.GlobalParam.ETYPE;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ELEVEL;
-import org.elasticflow.util.EFException.ETYPE;
 
 /**
  * RPC Remote Proxy object Service

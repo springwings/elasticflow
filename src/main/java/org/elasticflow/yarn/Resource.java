@@ -9,7 +9,9 @@ package org.elasticflow.yarn;
 
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.config.NodeConfig;
 import org.elasticflow.connection.EFConnectionSocket;
 import org.elasticflow.model.EFState;
@@ -57,6 +59,15 @@ public final class Resource {
 	/**flow process data position information*/
 	public final static ConcurrentHashMap<String, JSONObject> flowStates = new ConcurrentHashMap<>();
 	
+	private final static ConcurrentHashMap<String, AtomicInteger> nodeErrorStates = new ConcurrentHashMap<String, AtomicInteger>(){ 
+		private static final long serialVersionUID = 4065859783610995291L; 
+	{
+        put(ELEVEL.Ignore.name(), new AtomicInteger(0));
+        put(ELEVEL.Dispose.name(), new AtomicInteger(0));
+        put(ELEVEL.BreakOff.name(), new AtomicInteger(0));
+        put(ELEVEL.Termination.name(), new AtomicInteger(0));
+    }};	
+	
 	/**warehouse resource status ;instance->JSONObject*/
 	public final static HashMap<String, JSONObject> resourceStates = new HashMap<>();
 
@@ -69,5 +80,19 @@ public final class Resource {
 	public static SearcherService searcherService;
 
 	public static HttpReaderService httpReaderService;
-
+	
+	public static void incrementErrorStates(ELEVEL elevel) {
+		nodeErrorStates.get(elevel.name()).incrementAndGet();
+	}
+	
+	public static Integer getErrorStates(ELEVEL elevel) {
+		return nodeErrorStates.get(elevel.name()).get();
+	}
+	
+	public static void resetErrorStates() {
+		nodeErrorStates.get(ELEVEL.Ignore.name()).set(0);
+		nodeErrorStates.get(ELEVEL.Dispose.name()).set(0);
+		nodeErrorStates.get(ELEVEL.BreakOff.name()).set(0);
+		nodeErrorStates.get(ELEVEL.Termination.name()).set(0);
+	}
 }

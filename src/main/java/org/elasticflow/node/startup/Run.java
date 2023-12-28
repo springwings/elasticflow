@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.config.GlobalParam.NODE_TYPE;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.config.NodeConfig;
@@ -35,7 +36,6 @@ import org.elasticflow.task.job.TaskJobCenter;
 import org.elasticflow.task.mode.FlowTask;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFIoc;
 import org.elasticflow.util.EFNodeUtil;

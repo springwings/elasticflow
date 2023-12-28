@@ -7,6 +7,7 @@
  */
 package org.elasticflow.instruction.sets;
 
+import org.elasticflow.config.GlobalParam.ETYPE;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
 import org.elasticflow.model.reader.DataPage;
@@ -17,7 +18,6 @@ import org.elasticflow.reader.ReaderFlowSocket;
 import org.elasticflow.reader.model.DataSetReader;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.slf4j.Logger;

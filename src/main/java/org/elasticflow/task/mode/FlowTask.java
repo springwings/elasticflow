@@ -8,6 +8,8 @@
 package org.elasticflow.task.mode;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.ELEVEL;
+import org.elasticflow.config.GlobalParam.ETYPE;
 import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.MECHANISM;
 import org.elasticflow.config.GlobalParam.TASK_FLOW_SINGAL;
@@ -19,8 +21,6 @@ import org.elasticflow.piper.Breaker;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.piper.Valve;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ELEVEL;
-import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.util.instance.EFTuple;
 import org.elasticflow.util.instance.EFWriterUtil;
 import org.elasticflow.util.instance.TaskUtil;
@@ -120,7 +120,7 @@ public class FlowTask {
 				breaker.log();
 				log.error("instance {} run full job Exception",instanceID, e);
 				Resource.EfNotifier.send(Localization.format(LAG_TYPE.fullFail, instanceID), instanceID, e.getMessage(),
-						EFException.ETYPE.DATA_ERROR.name(), false);
+						ETYPE.DATA_ERROR.name(), false);
 			} finally {
 				GlobalParam.TASK_COORDER.setFlowSingal(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(),
 						TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
@@ -151,7 +151,7 @@ public class FlowTask {
 			} catch (Exception e) {
 				log.error("instance {} run Virtual Full Exception",instanceID, e);
 				Resource.EfNotifier.send(instanceID + " Virtual Full Exception", instanceID, e.getMessage(),
-						EFException.ETYPE.DATA_ERROR.name(), false);
+						ETYPE.DATA_ERROR.name(), false);
 			} finally {
 				GlobalParam.TASK_COORDER.setFlowSingal(instanceID, L1seq, GlobalParam.JOB_TYPE.FULL.name(),
 						TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());
@@ -181,7 +181,7 @@ public class FlowTask {
 			} catch (Exception e) {
 				log.error("instance {} Virtual Increment Exception",instanceID, e);
 				Resource.EfNotifier.send(instanceID + " Virtual Increment Exception", instanceID, e.getMessage(),
-						EFException.ETYPE.DATA_ERROR.name(), false);
+						ETYPE.DATA_ERROR.name(), false);
 			} finally {
 				GlobalParam.TASK_COORDER.setFlowSingal(instanceID, L1seq, GlobalParam.JOB_TYPE.INCREMENT.name(),
 						TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Ready, pipePump.getInstanceConfig().getPipeParams().showInfoLog());

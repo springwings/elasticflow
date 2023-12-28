@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.computer.flow.RestComputer;
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.field.EFField;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.model.EFHttpResponse;
@@ -27,7 +28,6 @@ import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.reader.model.DataSetReader;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.util.EFHttpClientUtil;
 import org.elasticflow.yarn.Resource;
 

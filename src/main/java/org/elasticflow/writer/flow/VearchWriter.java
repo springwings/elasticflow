@@ -4,7 +4,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.config.GlobalParam.ETYPE;
 import org.elasticflow.config.GlobalParam.RESOURCE_STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.VearchConnector;
@@ -12,8 +14,6 @@ import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ELEVEL;
-import org.elasticflow.util.EFException.ETYPE;
 import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.writer.WriterFlowSocket;
 import org.elasticflow.yarn.Resource;

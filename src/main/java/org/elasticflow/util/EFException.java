@@ -1,5 +1,9 @@
 package org.elasticflow.util;
 
+import org.elasticflow.config.GlobalParam.ELEVEL;
+import org.elasticflow.config.GlobalParam.ETYPE;
+import org.elasticflow.yarn.Resource;
+
 /**
  * System global error definition
  * 
@@ -18,13 +22,6 @@ public class EFException extends Exception {
 	 * Stop, will stop program;
 	 * BreakOff, open breaker
 	 */
-	public static enum ELEVEL {
-		Ignore, Dispose,BreakOff,Termination, Stop;
-	}
-
-	public static enum ETYPE {
-		RESOURCE_ERROR, PARAMETER_ERROR, DATA_ERROR, EXTINTERRUPT, UNKNOWN;
-	}
 
 	private ELEVEL e_level = ELEVEL.Ignore;
 
@@ -42,6 +39,7 @@ public class EFException extends Exception {
 	public EFException(Exception e, ELEVEL elevel) {
 		super(e);
 		e_level = elevel;
+		Resource.incrementErrorStates(elevel);
 	}
 
 	public EFException(String msg, ELEVEL elevel) {
@@ -57,6 +55,7 @@ public class EFException extends Exception {
 	
 	public EFException(Exception e,String message) { 
 		this(e,message,ELEVEL.Ignore,ETYPE.RESOURCE_ERROR);
+		Resource.incrementErrorStates(ELEVEL.Ignore);
 	}
 	
 	public EFException(Exception e,String message, ELEVEL elevel) { 
@@ -68,6 +67,7 @@ public class EFException extends Exception {
 		initCause(e);
 		e_level = elevel;
 		e_type = etype;
+		Resource.incrementErrorStates(e_level);
 	} 
  
 	@Override

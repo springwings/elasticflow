@@ -27,6 +27,7 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.config.GlobalParam.INSTANCE_STATUS;
 import org.elasticflow.config.GlobalParam.RESOURCE_TYPE;
 import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
@@ -516,6 +517,10 @@ public final class NodeMonitor {
 		res.put("datas_config_path", GlobalParam.DATAS_CONFIG_PATH);
 		res.put("plugin_path", GlobalParam.pluginPath);
 		res.put("health", health ? "正常" : "异常");
+		res.put("error_ignore", Resource.getErrorStates(ELEVEL.Ignore));
+		res.put("error_dispose", Resource.getErrorStates(ELEVEL.Dispose));
+		res.put("error_breakoff", Resource.getErrorStates(ELEVEL.BreakOff));
+		res.put("error_termination", Resource.getErrorStates(ELEVEL.Termination));
 		res.put("system_start_time", Common.FormatTime(GlobalParam.SYS_START_TIME));
 		// reader computer writer data statistics
 		try {

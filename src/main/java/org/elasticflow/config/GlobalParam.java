@@ -37,6 +37,14 @@ public final class GlobalParam {
 	
 	public static String LANG = "EN";
 	
+	public static enum ELEVEL {
+		Ignore, Dispose,BreakOff,Termination, Stop;
+	}
+
+	public static enum ETYPE {
+		RESOURCE_ERROR, PARAMETER_ERROR, DATA_ERROR, EXTINTERRUPT, UNKNOWN;
+	} 
+	
 	/** ----- flow settting -----*/
 	/**statistics storage maximum time period**/
 	public static int INSTANCE_STATISTICS_KEEP_PERIOD = 7;

@@ -10,8 +10,8 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
+import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ELEVEL;
 
 public class ImageUtil {
 

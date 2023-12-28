@@ -9,8 +9,8 @@ package org.elasticflow.service;
 
 import java.util.HashMap;
 
+import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ELEVEL;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.HandlerCollection;

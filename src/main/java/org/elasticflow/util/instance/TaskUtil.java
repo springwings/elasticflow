@@ -8,11 +8,11 @@
 package org.elasticflow.util.instance;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ELEVEL;
 import org.elasticflow.yarn.Resource;
 
 

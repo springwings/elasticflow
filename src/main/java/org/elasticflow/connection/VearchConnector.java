@@ -15,10 +15,10 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.model.EFHttpResponse;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFHttpClientUtil;
-import org.elasticflow.util.EFException.ELEVEL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

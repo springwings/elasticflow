@@ -13,10 +13,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.task.TaskThread;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
-import org.elasticflow.util.EFException.ELEVEL;
 
 /**
  * Running thread resources center

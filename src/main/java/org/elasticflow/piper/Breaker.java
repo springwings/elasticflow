@@ -9,11 +9,11 @@ package org.elasticflow.piper;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import org.elasticflow.config.GlobalParam.ETYPE;
 import org.elasticflow.model.FIFOQueue;
 import org.elasticflow.model.Localization;
 import org.elasticflow.model.Localization.LAG_TYPE;
 import org.elasticflow.util.Common;
-import org.elasticflow.util.EFException;
 import org.elasticflow.yarn.Resource;
 
 /**
@@ -107,7 +107,7 @@ public class Breaker {
 				breakerOnTime = Common.getNow();
 				Common.LOG.warn(Localization.formatEN(LAG_TYPE.flowBreaker, instanceID));
 				Resource.EfNotifier.send(Localization.format(LAG_TYPE.flowBreaker, instanceID), instanceID,
-						Localization.format(LAG_TYPE.flowDisconnect), EFException.ETYPE.RESOURCE_ERROR.name(), false);
+						Localization.format(LAG_TYPE.flowDisconnect), ETYPE.RESOURCE_ERROR.name(), false);
 			}
 			isFirstNotify = false;
 			return true;
