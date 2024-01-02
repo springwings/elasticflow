@@ -8,8 +8,7 @@ import java.util.Map.Entry;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
-import org.elasticflow.connection.VearchConnector;
-import org.elasticflow.connection.handler.ConnectionHandler;
+import org.elasticflow.connection.sockets.VearchConnector;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.searcher.ResponseDataUnit;
@@ -22,8 +21,6 @@ import org.elasticflow.searcher.parser.VearchQueryParser;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.instance.TaskUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -35,11 +32,7 @@ import com.alibaba.fastjson.JSONObject;
  * @version 2.0
  * @date 2022-10-26 09:23
  */
-public class VearchSearcher extends SearcherFlowSocket {
-
-	private ConnectionHandler handler;
-
-	private final static Logger log = LoggerFactory.getLogger(VearchSearcher.class);
+public class VearchSearcher extends SearcherFlowSocket {  
 
 	public static VearchSearcher getInstance(ConnectParams connectParams) {
 		VearchSearcher o = new VearchSearcher();
@@ -51,16 +44,7 @@ public class VearchSearcher extends SearcherFlowSocket {
 	public void initConn(ConnectParams connectParams) {
 		this.connectParams = connectParams;
 		this.poolName = connectParams.getWhp().getPoolName(connectParams.getL1Seq());
-		this.instanceConfig = connectParams.getInstanceConfig();
-		if (connectParams.getWhp().getHandler() != null) {
-			try {
-				this.handler = (ConnectionHandler) Class.forName(connectParams.getWhp().getHandler())
-						.getDeclaredConstructor().newInstance();
-				this.handler.init(connectParams);
-			} catch (Exception e) {
-				log.error("Init {} vearch searcher handler Exception", this.poolName,e);
-			}
-		}
+		this.instanceConfig = connectParams.getInstanceConfig(); 
 	}
 
 	@Override

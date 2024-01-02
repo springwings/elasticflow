@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
-import org.elasticflow.connection.EsConnector;
+import org.elasticflow.connection.sockets.EsConnector;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.searcher.ResponseDataUnit;

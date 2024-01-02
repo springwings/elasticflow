@@ -1,9 +1,10 @@
-package org.elasticflow.connection;
+package org.elasticflow.connection.sockets;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.connection.EFConnectionSocket;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.slf4j.Logger;
@@ -34,7 +35,7 @@ public class OracleConnection extends EFConnectionSocket<Connection> {
 	}
 
 	@Override
-	protected boolean connect(END_TYPE endType) {
+	public boolean connect(END_TYPE endType) {
 		try {
 			if (!status()) {
 				WarehouseParam wsp = this.connectParams.getWhp();

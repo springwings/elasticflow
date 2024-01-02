@@ -1,8 +1,9 @@
-package org.elasticflow.connection;
+package org.elasticflow.connection.sockets;
 
 import java.util.ArrayList;
 
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.connection.EFConnectionSocket;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.util.EFFileUtil;
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ public class FilesConnection extends EFConnectionSocket<ArrayList<String>> {
 	}
 	
 	@Override
-	protected boolean connect(END_TYPE endType) {
+	public boolean connect(END_TYPE endType) {
 		if (!status()) {
 			try { 
 				if(connectParams.getWhp().getCustomParams()!=null) {

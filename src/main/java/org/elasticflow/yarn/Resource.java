@@ -12,8 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.config.GlobalParam.ELEVEL;
-import org.elasticflow.config.NodeConfig;
 import org.elasticflow.connection.EFConnectionSocket;
+import org.elasticflow.config.NodeConfig;
 import org.elasticflow.model.EFState;
 import org.elasticflow.node.FlowCenter;
 import org.elasticflow.node.NodeMonitor;
@@ -66,6 +66,7 @@ public final class Resource {
         put(ELEVEL.Dispose.name(), new AtomicInteger(0));
         put(ELEVEL.BreakOff.name(), new AtomicInteger(0));
         put(ELEVEL.Termination.name(), new AtomicInteger(0));
+        put(ELEVEL.Stop.name(), new AtomicInteger(0));
     }};	
 	
 	/**warehouse resource status ;instance->JSONObject*/

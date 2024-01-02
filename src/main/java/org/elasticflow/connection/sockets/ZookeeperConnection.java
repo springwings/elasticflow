@@ -1,9 +1,10 @@
-package org.elasticflow.connection;
+package org.elasticflow.connection.sockets;
 
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.ZooKeeper.States;
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.connection.EFConnectionSocket;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ public class ZookeeperConnection extends EFConnectionSocket<ZooKeeper> {
 	} 
 
 	@Override
-	protected boolean connect(END_TYPE endType) {
+	public boolean connect(END_TYPE endType) {
 		if (!status()) {
 			try { 
 				this.conn = new ZooKeeper(

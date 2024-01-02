@@ -1,4 +1,4 @@
-package org.elasticflow.connection;
+package org.elasticflow.connection.sockets;
 
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -7,6 +7,7 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.connection.EFConnectionSocket;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -51,7 +52,7 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 	}
 
 	@Override
-	protected boolean connect(END_TYPE endType) {
+	public boolean connect(END_TYPE endType) {
 		WarehouseParam wnp = this.connectParams.getWhp();
 		if (wnp.getHost() != null) {
 			if (wnp.getPassword() != null) {

@@ -1,4 +1,4 @@
-package org.elasticflow.connection;
+package org.elasticflow.connection.sockets;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -7,6 +7,7 @@ import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Table;
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.connection.EFConnectionSocket;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,7 +92,7 @@ public class HbaseConnection extends EFConnectionSocket<Table>{
 	}
 
 	@Override
-	protected boolean connect(END_TYPE endType) {
+	public boolean connect(END_TYPE endType) {
 		if (!status()) {
 			try {
 				this.Hconn = ConnectionFactory.createConnection(this.hbaseConfig);

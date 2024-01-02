@@ -1,9 +1,10 @@
-package org.elasticflow.connection;
+package org.elasticflow.connection.sockets;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.connection.EFConnectionSocket;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,7 @@ public class Neo4jConnection extends EFConnectionSocket<Connection> {
 	}
 
 	@Override
-	protected boolean connect(END_TYPE endType) {
+	public boolean connect(END_TYPE endType) {
 		try {
 			if (!status()) {
 				this.conn = DriverManager.getConnection(this.getConnectionUrl());

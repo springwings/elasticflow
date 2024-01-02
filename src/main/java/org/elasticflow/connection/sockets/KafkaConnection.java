@@ -1,4 +1,4 @@
-package org.elasticflow.connection;
+package org.elasticflow.connection.sockets;
 
 import java.util.Arrays;
 import java.util.Properties;
@@ -11,6 +11,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
+import org.elasticflow.connection.EFConnectionSocket;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 	}
 
 	@Override
-	protected boolean connect(END_TYPE endType) {
+	public boolean connect(END_TYPE endType) {
 		WarehouseParam wnp = this.connectParams.getWhp();
 		if (wnp.getHost() != null) {
 			if (!status()) { 			

@@ -95,6 +95,7 @@ public final class EFConnectionPool {
 
 	/**
 	 * get connection from pool and waiting
+	 * Lazy loading mode
 	 */
 	private EFConnectionSocket<?> getConnection(ConnectParams params, String poolName, boolean acceptShareConn) {
 		if (this._GPOOLS.get(poolName) == null) {
@@ -259,7 +260,12 @@ public final class EFConnectionPool {
 		private EFConnectionSocket<?> newConnection() {
 			EFConnectionSocket<?> conn = null;
 			if (params != null) {
-				String _class_name = "org.elasticflow.connection."+Common.changeFirstCase(params.getWhp().getType().name().toLowerCase())+"Connection";
+				String _class_name;
+				if (params.getWhp().getHandler() != null) {
+					_class_name = params.getWhp().getHandler();
+				} else {
+					_class_name = "org.elasticflow.connection.sockets."+Common.changeFirstCase(params.getWhp().getType().name().toLowerCase())+"Connection";
+				}
 				try {					
 					Class<?> clz = Class.forName(_class_name); 
 					Method m = clz.getMethod("getInstance", ConnectParams.class);  

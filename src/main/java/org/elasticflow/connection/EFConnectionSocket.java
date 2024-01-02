@@ -31,7 +31,7 @@ public abstract class EFConnectionSocket<T> {
 
 	protected T conn;
 
-	protected abstract boolean connect(END_TYPE endType);
+	public abstract boolean connect(END_TYPE endType);
 
 	public abstract boolean status();
 

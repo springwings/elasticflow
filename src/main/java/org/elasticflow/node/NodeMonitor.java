@@ -870,6 +870,7 @@ public final class NodeMonitor {
 		if (EFMonitorUtil.checkParams(this, RR, "instance,content")) {
 			String xmlPath = GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instance") + "/task.xml";
 			EFDataStorer.setData(xmlPath, new String(decoder.decode(RR.getStringParam("content"))));
+			setResponse(RESPONSE_STATUS.Success, "update "+RR.getStringParam("instance")+" success", "");
 		}
 	}
 
