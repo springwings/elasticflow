@@ -104,7 +104,6 @@ public class TaskUtil {
 		if (null != wp) {
 			seqs = wp.getL1seq();
 		} else {
-			System.out.println(instanceConfig.getPipeParams().getReadFrom());
 			throw new EFException(instanceConfig.getPipeParams().getReadFrom()+" socket not exist in the file resource.xml.", ELEVEL.Termination);
 		}
 		return seqs;
