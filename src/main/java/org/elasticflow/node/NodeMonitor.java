@@ -118,7 +118,9 @@ public final class NodeMonitor {
 			put("instanceflowgraph", "instanceFlowGraph");
 			put("getinstancexml", "getInstanceXml");
 			put("updateinstancexml", "updateInstanceXml");
-			// other manage
+			put("searchinstancedata", "searchInstanceData");
+			// other manage 
+			put("getresource", "getResource");
 			put("getresources", "getResources");
 			put("getresourcexml", "getResourcexml");
 			put("updateresource", "updateResource");
@@ -207,7 +209,12 @@ public final class NodeMonitor {
 			updateResourceXml(jsonObject, true);
 		}
 	}
-
+	
+	/**
+	 * read Resources
+	 * @param rq
+	 * @param RR
+	 */
 	public void getResources(Request rq, EFRequest RR) {
 		JSONObject res = new JSONObject();
 		Map<String, WarehouseParam> resources = Resource.nodeConfig.getWarehouse();
@@ -231,6 +238,41 @@ public final class NodeMonitor {
 			}
 		}
 		setResponse(RESPONSE_STATUS.Success, "", res);
+	}
+	
+	public void getResource(Request rq, EFRequest RR) { 
+		if (EFMonitorUtil.checkParams(this, RR, "name")) {
+			JSONObject res = new JSONObject();
+			Map<String, WarehouseParam> resources = Resource.nodeConfig.getWarehouse();
+			for (Map.Entry<String, WarehouseParam> entry : resources.entrySet()) { 
+				if(RR.getStringParam("name").equals(entry.getKey())) {
+					WarehouseParam wp = entry.getValue(); 
+					res.put(entry.getKey(), new JSONObject());
+					res.getJSONObject(entry.getKey()).put("name", entry.getKey());
+					res.getJSONObject(entry.getKey()).put("hosts", wp.getHost());
+					res.getJSONObject(entry.getKey()).put("type", wp.getType());
+					res.getJSONObject(entry.getKey()).put("defaultValue", wp.getDefaultValue());
+					res.getJSONObject(entry.getKey()).put("user", wp.getUser());
+					res.getJSONObject(entry.getKey()).put("maxPoolSize", wp.getMaxPoolSize());
+					res.getJSONObject(entry.getKey()).put("customParams", wp.getCustomParams());
+					JSONObject pools = new JSONObject();
+					for (String seq : wp.getL1seq()) {
+						pools.put((seq == "" ? "DEFAULT" : seq), EFMonitorUtil.getConnectionStatus(wp.getPoolName(seq)));
+					}
+					res.getJSONObject(entry.getKey()).put("pools", pools);
+					String[] hosts = wp.getHost().split(",");
+					if (EFMonitorUtil.isPortOpen(hosts[0])) {
+						res.getJSONObject(entry.getKey()).put("status",
+								Resource.resourceStates.get(entry.getKey()).getString("status"));
+					} else {
+						res.getJSONObject(entry.getKey()).put("status", GlobalParam.RESOURCE_STATUS.Error.name());
+					}
+					break;
+				}
+				
+			}
+			setResponse(RESPONSE_STATUS.Success, "", res);
+		} 
 	}
 
 	public void getResourcexml(Request rq, EFRequest RR) {
@@ -721,6 +763,23 @@ public final class NodeMonitor {
 			}
 		}
 	}
+	/**
+	 * search instance datas.
+	 * 
+	 * @param rq
+	 * @throws EFException
+	 */
+	public void searchInstanceData(Request rq, EFRequest RR) { 
+		if (EFMonitorUtil.checkParams(this, RR, "instance")) {
+			EFResponse rps = EFResponse.getInstance(); 
+			String pipe = RR.getStringParam("instance"); 
+			Map<String, InstanceConfig> configMap = Resource.nodeConfig.getSearchConfigs();
+			EFRequest efRq = Common.getEFRequest(rq, rps);
+			if (configMap.containsKey(pipe))  
+				Resource.socketCenter.getSearcher(pipe,"","",false).startSearch(efRq,rps); 
+			setResponse(RESPONSE_STATUS.Success, null, rps);
+		} 
+	}
 
 	/**
 	 * Obtain the correlation relationship diagram between instance data streams.
@@ -954,6 +1013,7 @@ public final class NodeMonitor {
 			instance.put("WriteTo", config.getPipeParams().getWriteTo().replace(",", ";"));
 			instance.put("OpenTrans", config.openTrans());
 			instance.put("RunState", true);
+			instance.put("Remark", config.getPipeParams().getRemark());
 			try {
 				if (config.openTrans()) {
 					String[] L1seqs = TaskUtil.getL1seqs(config);
@@ -1098,7 +1158,7 @@ public final class NodeMonitor {
 				setResponse(RESPONSE_STATUS.DataErr, instance + " not exists!", null);
 			} else {
 				try {
-					if (runType == null)
+					if (runType.equals("-1"))
 						runType = String
 								.valueOf(Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType());
 					EFMonitorUtil.reloadInstance(instance, reset, runType);

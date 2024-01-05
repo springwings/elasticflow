@@ -122,7 +122,7 @@ public class Pipe extends Instruction {
 			try {
 				while (DSReader.nextLine()) { 
 					writer.write(context.getInstanceConfig(),
-							DSReader.getLineData().virtualWrite(context.getInstanceConfig().getWriteFields()),
+							DSReader.getLineData().virtualWrite(context.getInstanceConfig().getWriteFields()),//write field handler
 							instance, storeId, isUpdate);
 					num++;
 				}

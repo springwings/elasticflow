@@ -52,6 +52,9 @@ public class PipeParam {
 	/**Task priority control**/
 	private int priority = 9;
 	
+	private String remark = "";
+	
+	
 	public void reInit() {
 		if(referenceInstance!=null) {
 			this.deltaCron = null;
@@ -79,6 +82,10 @@ public class PipeParam {
 	
 	public int getPriority() {
 		return priority;
+	}
+	
+	public String getRemark() {
+		return remark;
 	}
 	
 	public int getLogLevel() {
@@ -160,6 +167,10 @@ public class PipeParam {
 	
 	public void setPriority(String priority) {
 		this.priority = Integer.valueOf(priority);
+	}
+	
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 	
 	public void setWriteTo(String writeTo) {
