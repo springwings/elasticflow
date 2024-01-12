@@ -25,6 +25,7 @@ public class DataSetReader{
 	private String READER_LAST_STAMP = "";
 	private String dataBoundary;
 	private ConcurrentLinkedQueue<PipeDataUnit> datas;
+	private int failProcessNums = 0;
 	private boolean status = true;
 	
 	public static DataSetReader getInstance(DataPage DP) {
@@ -47,6 +48,14 @@ public class DataSetReader{
  
 	public PipeDataUnit getLineData() {  
 		return this.datas.poll();
+	}
+	
+	public void incrementFailProcessNums(int delta) {
+		this.failProcessNums+=delta;
+	}
+	
+	public int getFailProcessNums() {
+		return this.failProcessNums;
 	}
 	
 	public int getDataNums() {

@@ -29,7 +29,7 @@ public interface InstanceCoord extends Coordination{
 	public void reloadResource();
 	
 	public int onlineTasksNum();
-		
+	/**send instance data to slave*/
 	public void sendInstanceData(String content0,String content1,String content2, String instance);
 	
 	public void loadInstance(String instanceSettting,boolean createSchedule,boolean reset);
@@ -42,10 +42,13 @@ public interface InstanceCoord extends Coordination{
 	
 	public void removeInstance(String instance,boolean waitComplete);
 	
+	/**get distributeCoorder controller*/
 	public DistributeCoorder distributeCoorder();
 	
+	/**Obtain circuit breaker status*/
 	public JSONObject getBreakerStatus(String instance,String L1seq,String appendPipe);
 	
+	/**reset breaker status*/
 	public void resetBreaker(String instance,String L1seq);
 	
 }

@@ -20,7 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 final public class FlowStatistic {
 	
 	/** FAIL processing data units statistics **/
-	private volatile AtomicInteger failProcess = new AtomicInteger(0);
+	private volatile AtomicInteger currentTimeFailProcess = new AtomicInteger(0);
 
 	/** Total processing blocking statistics **/
 	private volatile AtomicInteger BLOCKTIME = new AtomicInteger(0);
@@ -45,6 +45,9 @@ final public class FlowStatistic {
 
 	/** Amount of data processed history **/
 	private volatile JSONObject historyProcess;
+	
+	/** Amount of data fail processed history **/
+	private volatile JSONObject historyFailProcess;
 	
 	private long flowStartTime = Common.getNow();
 	
@@ -80,15 +83,19 @@ final public class FlowStatistic {
 				JSONObject _JO = JO.getJSONObject(endType.name());
 				this.totalProcess.set(_JO.getLong("totalProcess"));
 				this.flowStartTime = _JO.getLong("flowStartTime");
-				this.historyProcess = _JO.getJSONObject("historyProcess");					
+				this.historyProcess = _JO.getJSONObject("historyProcess");	
+				this.historyFailProcess = _JO.getJSONObject("historyFailProcess");
 			}							
 		}
-		if(this.historyProcess == null) 
+		if(this.historyProcess == null) {
 			this.historyProcess = new JSONObject();
+			this.historyFailProcess = new JSONObject();
+		} 
 		if(this.historyProcess.containsKey(todayZero)) {
-			this.currentTimeProcess.set(this.historyProcess.getLongValue(todayZero));			
+			this.currentTimeProcess.set(this.historyProcess.getLongValue(todayZero));	
 		}else {
 			this.historyProcess.put(String.valueOf(Common.getNowZero()), 0);
+			this.historyFailProcess.put(String.valueOf(Common.getNowZero()), 0);
 		}
 		this.flowEndStatus = toHashObject();
 	} 
@@ -100,11 +107,12 @@ final public class FlowStatistic {
 	public void reset() {
 		this.totalProcess.set(0);
 		this.currentTimeProcess.set(0);
+		this.currentTimeFailProcess.set(0);
 		this.flowStartTime = Common.getNow();
 		this.historyProcess  = new JSONObject();
+		this.historyFailProcess  = new JSONObject();
 		this.BLOCKTIME.set(0);
-		this.REAL_BLOCKTIME= 0;
-		this.failProcess.set(0);
+		this.REAL_BLOCKTIME= 0; 
 		this.LOAD = 0;
 		this.PERFORMANCE = -1;
 		this.flowEndStatus = toHashObject();
@@ -119,13 +127,14 @@ final public class FlowStatistic {
 	private void updateDatas(HashMap<String, Object> JO) {		
 		JO.put("totalProcess", this.totalProcess);
 		JO.put("currentTimeProcess", this.currentTimeProcess);
+		JO.put("currentTimeFailProcess", this.currentTimeFailProcess);
 		JO.put("flowStartTime", this.flowStartTime);
 		JO.put("historyProcess", this.historyProcess);
+		JO.put("historyFailProcess", this.historyFailProcess);
 		JO.put("performance", this.PERFORMANCE);
 		JO.put("avgload", this.LOAD);
 		JO.put("blockTime", this.BLOCKTIME);
-		JO.put("realBlockTime", this.REAL_BLOCKTIME);
-		JO.put("failProcess", this.failProcess);
+		JO.put("realBlockTime", this.REAL_BLOCKTIME); 
 	}
 	
 	
@@ -168,12 +177,23 @@ final public class FlowStatistic {
 	}
 	
 	public void incrementFailUnitTime() {
-		this.failProcess.incrementAndGet();
-	}
-	
-	public void incrementFailUnitTime(int val) {
-		this.failProcess.addAndGet(val);
+		this.currentTimeFailProcess.incrementAndGet();
 	} 
+ 
+	public void incrementCurrentTimeFailProcess(int delta) {
+		todayZero = String.valueOf(Common.getNowZero());
+		if(!this.historyFailProcess.containsKey(todayZero)) { 
+			if(this.historyFailProcess.size()>GlobalParam.INSTANCE_STATISTICS_KEEP_PERIOD) {
+				String minkey = (String) Common.getMinKey(this.historyFailProcess.keySet());
+				this.historyFailProcess.remove(minkey);
+			} 
+			this.currentTimeFailProcess.set(delta);
+		}else {
+			this.currentTimeFailProcess.addAndGet(delta);
+		}  
+		this.historyFailProcess.put(todayZero, this.currentTimeFailProcess.get());
+		this.updateDatas(this.flowEndStatus);
+	}
 	
 	public void incrementCurrentTimeProcess(int delta) {
 		todayZero = String.valueOf(Common.getNowZero());

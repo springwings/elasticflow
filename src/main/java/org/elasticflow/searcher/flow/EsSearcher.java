@@ -108,6 +108,7 @@ public final class EsSearcher extends SearcherFlowSocket {
 		for (SearchHit h : hits) {
 			Map<String, DocumentField> fieldMap = h.getFields();
 			ResponseDataUnit u = ResponseDataUnit.getInstance();
+			u.addObject(GlobalParam.RESPONSE_SCORE, h.getScore());
 			for (Map.Entry<String, DocumentField> e : fieldMap.entrySet()) {
 				String name = e.getKey();
 				EFField param = instanceConfig.getSearchFields().get(name);
@@ -118,8 +119,7 @@ public final class EsSearcher extends SearcherFlowSocket {
 					u.addObject(name, v.getValue());
 				}
 			}
-			if (searcherModel.isShowQueryInfo()) {
-				u.addObject(GlobalParam.RESPONSE_SCORE, h.getExplanation().getValue());
+			if (searcherModel.isShowQueryInfo()) { 
 				u.addObject(GlobalParam.RESPONSE_EXPLAINS, h.getExplanation().toString().replace("", ""));
 			}
 			res.getUnitSet().add(u);

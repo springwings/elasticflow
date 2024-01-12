@@ -14,7 +14,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.imageio.ImageIO;
 
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
@@ -42,9 +41,7 @@ import com.alibaba.fastjson.JSONObject;
  */
 
 @NotThreadSafe
-public class CameraReader extends ReaderFlowSocket {
-
-	ConsumerRecords<String, String> records;
+public class CameraReader extends ReaderFlowSocket { 
 
 	public static CameraReader getInstance(final ConnectParams connectParams) {
 		CameraReader o = new CameraReader();

@@ -253,7 +253,9 @@ public final class NodeMonitor {
 					res.getJSONObject(entry.getKey()).put("type", wp.getType());
 					res.getJSONObject(entry.getKey()).put("defaultValue", wp.getDefaultValue());
 					res.getJSONObject(entry.getKey()).put("user", wp.getUser());
-					res.getJSONObject(entry.getKey()).put("maxPoolSize", wp.getMaxPoolSize());
+					res.getJSONObject(entry.getKey()).put("port", wp.getPort());
+					res.getJSONObject(entry.getKey()).put("remarks", wp.getRemarks());
+					res.getJSONObject(entry.getKey()).put("L1seq", wp.getL1seq());
 					res.getJSONObject(entry.getKey()).put("customParams", wp.getCustomParams());
 					JSONObject pools = new JSONObject();
 					for (String seq : wp.getL1seq()) {
@@ -578,9 +580,9 @@ public final class NodeMonitor {
 						reader = (JSONObject) JO.getJSONObject("reader").getJSONObject("flow_state").getJSONObject("historyProcess").clone();
 					} else if (reader != null && JO.getJSONObject("reader").containsKey("flow_state")) {
 						JSONObject _reader = JO.getJSONObject("reader").getJSONObject("flow_state")
-								.getJSONObject("historyProcess");
-						for (String key : reader.keySet()) {
-							if (_reader.containsKey(key)) {
+								.getJSONObject("historyProcess"); 
+						for (String key : _reader.keySet()) {
+							if (reader.containsKey(key)) {
 								reader.put(key, reader.getLongValue(key) + _reader.getLongValue(key));
 							} else {
 								reader.put(key, _reader.getLongValue(key));
@@ -593,8 +595,8 @@ public final class NodeMonitor {
 					else if (writer != null && JO.getJSONObject("writer").containsKey("flow_state")) {
 						JSONObject _writer = JO.getJSONObject("writer").getJSONObject("flow_state")
 								.getJSONObject("historyProcess");
-						for (String key : writer.keySet()) {
-							if (_writer.containsKey(key)) {
+						for (String key : _writer.keySet()) {
+							if (writer.containsKey(key)) {
 								writer.put(key, writer.getLongValue(key) + _writer.getLongValue(key));
 							} else {
 								writer.put(key, _writer.getLongValue(key));
@@ -608,8 +610,8 @@ public final class NodeMonitor {
 					} else if (computer != null && JO.getJSONObject("computer").containsKey("flow_state")) {
 						JSONObject _computer = JO.getJSONObject("computer").getJSONObject("flow_state")
 								.getJSONObject("historyProcess");
-						for (String key : computer.keySet()) {
-							if (_computer.containsKey(key)) {
+						for (String key : _computer.keySet()) {
+							if (computer.containsKey(key)) {
 								computer.put(key, computer.getLongValue(key) + _computer.getLongValue(key));
 							} else {
 								computer.put(key, _computer.getLongValue(key));

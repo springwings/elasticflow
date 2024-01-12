@@ -15,6 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.computer.flow.RestComputer;
@@ -89,13 +90,13 @@ public class VLDetectionHandler extends ComputerHandler {
 		CountDownLatch taskSingal = new CountDownLatch(sourcePageNum);
 
 		// construct rest post data
-		int count = 0;
+		AtomicInteger count = new AtomicInteger(0);
 		ArrayList<PipeDataUnit> pdus = new ArrayList<>();
 		while (dataSetReader.nextLine()) {
 			PipeDataUnit pdu = dataSetReader.getLineData();
 			pdus.add(pdu);
-			count++;
-			if (count >= context.getInstanceConfig().getComputeParams().apiRequestMaxDatas()) {
+			count.incrementAndGet();
+			if (count.get() >= context.getInstanceConfig().getComputeParams().apiRequestMaxDatas()) {
 				ArrayList<PipeDataUnit> units = (ArrayList<PipeDataUnit>) pdus.clone();
 				try {
 					long startTime = System.currentTimeMillis();
@@ -118,7 +119,7 @@ public class VLDetectionHandler extends ComputerHandler {
 								}
 								apiBlockingQueue.put(api);
 								if (tmp.getInteger("status") != 0) {// response status check
-									RS.flowStatistic.incrementFailUnitTime(1);
+									RS.flowStatistic.incrementCurrentTimeFailProcess(1);
 									Common.LOG.warn(context.getInstanceConfig().getInstanceID() + " predict warn.");
 									Common.LOG.warn(jo.toJSONString());
 									Common.LOG.warn(tmp.toJSONString());
@@ -150,12 +151,12 @@ public class VLDetectionHandler extends ComputerHandler {
 					taskSingal.countDown();
 					Common.LOG.error("{} Api Blocking Queue Exception",apiBlockingQueue.element(), e);
 				} finally {
-					count = 0;
+					count.set(0);
 					pdus.clear();
 				}
 			}
 		}
-		if (count > 0) {
+		if (count.get() > 0) {
 			ArrayList<PipeDataUnit> units = pdus;
 			try {
 				long startTime = System.currentTimeMillis();
@@ -172,7 +173,7 @@ public class VLDetectionHandler extends ComputerHandler {
 							tmp = this.sentRequest(jo, api);
 							apiBlockingQueue.put(api);
 							if (tmp.getInteger("status") != 0) {// response status check
-								RS.flowStatistic.incrementFailUnitTime(1);
+								RS.flowStatistic.incrementCurrentTimeFailProcess(count.get());
 								Common.LOG.warn(context.getInstanceConfig().getInstanceID() + " predict warn.");
 								Common.LOG.warn(tmp.toJSONString());
 								Common.LOG.warn(((JSONObject) dts.get(0)).toJSONString());

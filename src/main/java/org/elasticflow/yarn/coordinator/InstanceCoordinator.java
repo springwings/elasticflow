@@ -168,13 +168,21 @@ public class InstanceCoordinator implements InstanceCoord {
 	@Override
 	public JSONObject getBreakerStatus(String instance,String L1seq,String appendPipe) {
 		JSONObject JO = new JSONObject(); 
-		JO.put(appendPipe + "breaker_is_on", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.isOn());
-		if(Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.isOn()) {
-			JO.put(appendPipe + "breaker_is_on_reason", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.getReason());
-		}
-		JO.put(appendPipe + "valve_turn_level", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).valve.getTurnLevel());
-		JO.put(appendPipe + "current_fail_interval", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.failInterval());
-		JO.put(appendPipe + "total_fail_times", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.getFailTimes());
+		String instanceId = TaskUtil.getInstanceProcessId(instance, L1seq);
+		if(Resource.tasks.containsKey(instanceId)) {
+			JO.put(appendPipe + "breaker_is_on", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.isOn());
+			if(Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.isOn()) {
+				JO.put(appendPipe + "breaker_is_on_reason", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.getReason());
+			}
+			JO.put(appendPipe + "valve_turn_level", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).valve.getTurnLevel());
+			JO.put(appendPipe + "current_fail_interval", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.failInterval());
+			JO.put(appendPipe + "total_fail_times", Resource.tasks.get(TaskUtil.getInstanceProcessId(instance, L1seq)).breaker.getFailTimes());
+		}else {
+			JO.put(appendPipe + "breaker_is_on",false);
+			JO.put(appendPipe + "valve_turn_level",9);
+			JO.put(appendPipe + "current_fail_interval",Integer.MAX_VALUE);
+			JO.put(appendPipe + "total_fail_times",0);
+		}		
 		return JO;
 	}	
 }
