@@ -223,6 +223,7 @@ public final class NodeMonitor {
 			res.put(entry.getKey(), new JSONObject());
 			res.getJSONObject(entry.getKey()).put("name", entry.getKey());
 			res.getJSONObject(entry.getKey()).put("hosts", wp.getHost());
+			res.getJSONObject(entry.getKey()).put("remark", wp.getRemarks());
 			res.getJSONObject(entry.getKey()).put("type", wp.getType());
 			JSONObject pools = new JSONObject();
 			for (String seq : wp.getL1seq()) {
