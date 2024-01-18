@@ -39,6 +39,7 @@ final public class FlowStatistic {
 
 	/** Total amount of historical real-time data processed **/
 	private volatile AtomicLong totalProcess = new AtomicLong(0);
+	private volatile AtomicLong failProcess = new AtomicLong(0);
 
 	/** Real time statistics of current time period **/
 	private volatile AtomicLong currentTimeProcess = new AtomicLong(0);
@@ -82,6 +83,7 @@ final public class FlowStatistic {
 			if(JO.containsKey(endType.name())) {
 				JSONObject _JO = JO.getJSONObject(endType.name());
 				this.totalProcess.set(_JO.getLong("totalProcess"));
+				this.failProcess.set(_JO.getLong("failProcess"));
 				this.flowStartTime = _JO.getLong("flowStartTime");
 				this.historyProcess = _JO.getJSONObject("historyProcess");	
 				this.historyFailProcess = _JO.getJSONObject("historyFailProcess");
@@ -106,6 +108,7 @@ final public class FlowStatistic {
 	
 	public void reset() {
 		this.totalProcess.set(0);
+		this.failProcess.set(0);
 		this.currentTimeProcess.set(0);
 		this.currentTimeFailProcess.set(0);
 		this.flowStartTime = Common.getNow();
@@ -126,6 +129,7 @@ final public class FlowStatistic {
 	
 	private void updateDatas(HashMap<String, Object> JO) {		
 		JO.put("totalProcess", this.totalProcess);
+		JO.put("failProcess", this.failProcess);
 		JO.put("currentTimeProcess", this.currentTimeProcess);
 		JO.put("currentTimeFailProcess", this.currentTimeFailProcess);
 		JO.put("flowStartTime", this.flowStartTime);
@@ -177,6 +181,7 @@ final public class FlowStatistic {
 	}
 	
 	public void incrementFailUnitTime() {
+		this.failProcess.incrementAndGet();
 		this.currentTimeFailProcess.incrementAndGet();
 	} 
  
@@ -191,6 +196,7 @@ final public class FlowStatistic {
 		}else {
 			this.currentTimeFailProcess.addAndGet(delta);
 		}  
+		this.failProcess.addAndGet(delta);
 		this.historyFailProcess.put(todayZero, this.currentTimeFailProcess.get());
 		this.updateDatas(this.flowEndStatus);
 	}
