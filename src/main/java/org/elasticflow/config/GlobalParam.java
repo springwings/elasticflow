@@ -186,7 +186,7 @@ public final class GlobalParam {
 	}
 	/**CUSTOM  ：User defined connection using this type*/
 	public static enum DATA_SOURCE_TYPE {
-		MYSQL, ORACLE, HIVE, ES, HBASE, H2, FILES, NEO4J, KAFKA, VEARCH, HDFS, FASTDFS,ROCKETMQ,VIRTUAL, UNKNOWN
+		MYSQL, ORACLE, HIVE, ES, HBASE, H2, FILES, NEO4J, KAFKA, VEARCH, HDFS, FASTDFS,ROCKETMQ,MINIO,VIRTUAL, UNKNOWN
 	}
 
 	public static enum FLOW_TAG {

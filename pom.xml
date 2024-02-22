@@ -6,7 +6,7 @@
 	<groupId>org.elasticflow</groupId>
 	<artifactId>elasticflow</artifactId>
 	<packaging>jar</packaging>
-	<version>6.0.2</version>
+	<version>6.0.3</version>
 	<name>elasticflow</name>
 	<description>ElasticFlow是一个开源数据流系统，支持在任意类型数据端之间以及数据与用户之间通过建立可计算流通道，进行可定时定量多渠道方式交换数据服务。可用于数据交换、通用搜索引擎、数据发布服务等项目。</description>
 	<url>https://github.com/springwings/elasticflow/tree/master</url>
@@ -71,6 +71,11 @@
 			<artifactId>elasticsearch-rest-high-level-client</artifactId>
 			<version>${elasticsearch.version}</version>
 		</dependency> 
+		<dependency>
+		    <groupId>io.minio</groupId>
+		    <artifactId>minio</artifactId>
+		    <version>${minio.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
@@ -442,12 +447,13 @@
 		<log4j.version>2.17.1</log4j.version>
 		<kafka.version>3.0.0</kafka.version>
 		<rocketmq.version>4.9.0</rocketmq.version>
-		<elasticsearch.version>7.15.2</elasticsearch.version>
+		<elasticsearch.version>7.13.4</elasticsearch.version>
+		<minio.version>8.5.8</minio.version>
 		<mysql.version>8.0.28</mysql.version>
 		<neo4j.version>3.5.1</neo4j.version>
 		<fastdfs.version>1.29-SNAPSHOT</fastdfs.version>
 		<hadoop.version>3.1.1</hadoop.version>
 		<commons-io.version>2.9.0</commons-io.version>
-		<fastjson.version>2.0.7.graal</fastjson.version> 
+		<fastjson.version>2.0.7.graal</fastjson.version>
 	</properties>
 </project>
