@@ -119,7 +119,7 @@ public final class NodeMonitor {
 			put("getinstancexml", "getInstanceXml");
 			put("updateinstancexml", "updateInstanceXml");
 			put("searchinstancedata", "searchInstanceData");
-			// other manage 
+			// other manage
 			put("getresource", "getResource");
 			put("getresources", "getResources");
 			put("getresourcexml", "getResourcexml");
@@ -209,9 +209,10 @@ public final class NodeMonitor {
 			updateResourceXml(jsonObject, true);
 		}
 	}
-	
+
 	/**
 	 * read Resources
+	 * 
 	 * @param rq
 	 * @param RR
 	 */
@@ -240,14 +241,14 @@ public final class NodeMonitor {
 		}
 		setResponse(RESPONSE_STATUS.Success, "", res);
 	}
-	
-	public void getResource(Request rq, EFRequest RR) { 
+
+	public void getResource(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "name")) {
 			JSONObject res = new JSONObject();
 			Map<String, WarehouseParam> resources = Resource.nodeConfig.getWarehouse();
-			for (Map.Entry<String, WarehouseParam> entry : resources.entrySet()) { 
-				if(RR.getStringParam("name").equals(entry.getKey())) {
-					WarehouseParam wp = entry.getValue(); 
+			for (Map.Entry<String, WarehouseParam> entry : resources.entrySet()) {
+				if (RR.getStringParam("name").equals(entry.getKey())) {
+					WarehouseParam wp = entry.getValue();
 					res.put(entry.getKey(), new JSONObject());
 					res.getJSONObject(entry.getKey()).put("name", entry.getKey());
 					res.getJSONObject(entry.getKey()).put("hosts", wp.getHost());
@@ -260,7 +261,8 @@ public final class NodeMonitor {
 					res.getJSONObject(entry.getKey()).put("customParams", wp.getCustomParams());
 					JSONObject pools = new JSONObject();
 					for (String seq : wp.getL1seq()) {
-						pools.put((seq == "" ? "DEFAULT" : seq), EFMonitorUtil.getConnectionStatus(wp.getPoolName(seq)));
+						pools.put((seq == "" ? "DEFAULT" : seq),
+								EFMonitorUtil.getConnectionStatus(wp.getPoolName(seq)));
 					}
 					res.getJSONObject(entry.getKey()).put("pools", pools);
 					String[] hosts = wp.getHost().split(",");
@@ -272,10 +274,10 @@ public final class NodeMonitor {
 					}
 					break;
 				}
-				
+
 			}
 			setResponse(RESPONSE_STATUS.Success, "", res);
-		} 
+		}
 	}
 
 	public void getResourcexml(Request rq, EFRequest RR) {
@@ -578,10 +580,11 @@ public final class NodeMonitor {
 				JSONObject JO = EFMonitorUtil.getInstanceInfo(entry.getKey(), 2);
 				if (!JO.isEmpty()) {
 					if (reader == null && JO.getJSONObject("reader").containsKey("flow_state")) {
-						reader = (JSONObject) JO.getJSONObject("reader").getJSONObject("flow_state").getJSONObject("historyProcess").clone();
+						reader = (JSONObject) JO.getJSONObject("reader").getJSONObject("flow_state")
+								.getJSONObject("historyProcess").clone();
 					} else if (reader != null && JO.getJSONObject("reader").containsKey("flow_state")) {
 						JSONObject _reader = JO.getJSONObject("reader").getJSONObject("flow_state")
-								.getJSONObject("historyProcess"); 
+								.getJSONObject("historyProcess");
 						for (String key : _reader.keySet()) {
 							if (reader.containsKey(key)) {
 								reader.put(key, reader.getLongValue(key) + _reader.getLongValue(key));
@@ -592,7 +595,8 @@ public final class NodeMonitor {
 					}
 
 					if (writer == null && JO.getJSONObject("writer").containsKey("flow_state"))
-						writer = (JSONObject) JO.getJSONObject("writer").getJSONObject("flow_state").getJSONObject("historyProcess").clone();
+						writer = (JSONObject) JO.getJSONObject("writer").getJSONObject("flow_state")
+								.getJSONObject("historyProcess").clone();
 					else if (writer != null && JO.getJSONObject("writer").containsKey("flow_state")) {
 						JSONObject _writer = JO.getJSONObject("writer").getJSONObject("flow_state")
 								.getJSONObject("historyProcess");
@@ -766,22 +770,23 @@ public final class NodeMonitor {
 			}
 		}
 	}
+
 	/**
 	 * search instance datas.
 	 * 
 	 * @param rq
 	 * @throws EFException
 	 */
-	public void searchInstanceData(Request rq, EFRequest RR) { 
+	public void searchInstanceData(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "instance")) {
-			EFResponse rps = EFResponse.getInstance(); 
-			String pipe = RR.getStringParam("instance"); 
+			EFResponse rps = EFResponse.getInstance();
+			String pipe = RR.getStringParam("instance");
 			Map<String, InstanceConfig> configMap = Resource.nodeConfig.getSearchConfigs();
 			EFRequest efRq = Common.getEFRequest(rq, rps);
-			if (configMap.containsKey(pipe))  
-				Resource.socketCenter.getSearcher(pipe,"","",false).startSearch(efRq,rps); 
+			if (configMap.containsKey(pipe))
+				Resource.socketCenter.getSearcher(pipe, "", "", false).startSearch(efRq, rps);
 			setResponse(RESPONSE_STATUS.Success, null, rps);
-		} 
+		}
 	}
 
 	/**
@@ -827,20 +832,23 @@ public final class NodeMonitor {
 			}
 			List<String> wt = Arrays.asList(config.getPipeParams().getWriteTo().split(","));
 			List<String> wt2 = new ArrayList<>();
-			switch (Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getWriteTo()).getType()) {
-			case KAFKA:
-			case ROCKETMQ:
-				for (String _wt : wt) {
-					wt2.add(Resource.nodeConfig.getWarehouse().get(_wt).getHost() + "#"
-							+ config.getWriteFields().get("topic").getDefaultvalue());
+			if (config.getPipeParams().getWriteTo() != null
+					&& Resource.nodeConfig.getWarehouse().containsKey(config.getPipeParams().getWriteTo())) {
+				switch (Resource.nodeConfig.getWarehouse().get(config.getPipeParams().getWriteTo()).getType()) {
+				case KAFKA:
+				case ROCKETMQ:
+					for (String _wt : wt) {
+						wt2.add(Resource.nodeConfig.getWarehouse().get(_wt).getHost() + "#"
+								+ config.getWriteFields().get("topic").getDefaultvalue());
+					}
+					break;
+				default:
+					for (String _wt : wt) {
+						wt2.add(Resource.nodeConfig.getWarehouse().get(_wt).getHost() + "#"
+								+ Resource.nodeConfig.getWarehouse().get(_wt).getL1seq());
+					}
+					break;
 				}
-				break;
-			default:
-				for (String _wt : wt) {
-					wt2.add(Resource.nodeConfig.getWarehouse().get(_wt).getHost() + "#"
-							+ Resource.nodeConfig.getWarehouse().get(_wt).getL1seq());
-				}
-				break;
 			}
 			instance.put("WriteTo", wt2);
 			instance.put("OpenTrans", config.openTrans());
@@ -932,7 +940,7 @@ public final class NodeMonitor {
 		if (EFMonitorUtil.checkParams(this, RR, "instance,content")) {
 			String xmlPath = GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instance") + "/task.xml";
 			EFDataStorer.setData(xmlPath, new String(decoder.decode(RR.getStringParam("content"))));
-			setResponse(RESPONSE_STATUS.Success, "update "+RR.getStringParam("instance")+" success", "");
+			setResponse(RESPONSE_STATUS.Success, "update " + RR.getStringParam("instance") + " success", "");
 		}
 	}
 

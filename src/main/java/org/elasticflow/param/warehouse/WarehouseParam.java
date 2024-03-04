@@ -34,9 +34,9 @@ public class WarehouseParam {
 	/**Maximum resource pool size*/
 	private int maxPoolSize = 0;
 	private int port;
-	private JSONObject defaultValue;
+	private JSONObject defaultValue = new JSONObject();
 	/**Custom parameters to expand the configurable fields of resources*/
-	private JSONObject customParams;
+	private JSONObject customParams = new JSONObject();
 	private String handler;
 	private String[] L1seq = {};
 	private String remarks= "";
