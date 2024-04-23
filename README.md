@@ -89,7 +89,7 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
 # 可视化管理界面
 - http://ip:8616
 <div align="center">
-  <img src="images/manage.jpg" width="900px">
+  <img src="images/manage.jpg" width="100%">
 </div>
 
 
