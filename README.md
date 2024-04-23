@@ -13,7 +13,7 @@
 ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任意类型数据端之间通过简单配置就可以建立可计算的弹性流管道，并进行定时、定量、高并发、多类型的交换数据服务。系统可应用于数据交换、通用搜索引擎、数据发布服务、数据仓库等项目。
 
 <div align="center">
-  <img src="images/flow.jpg" width="520px">
+  <img src="images/flow.jpg" width="650px">
 </div>
 
 # ElasticFlow用来解决什么?
