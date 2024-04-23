@@ -33,11 +33,12 @@ public class ReaderParam {
 	protected String pageField;
 	protected String pageScanDSL;
 	private String dataScanDSL;
+	/**use User defined plugins and parameter configurations**/
 	private String handler;
+	private JSONObject handlerDSL = null;
 	private boolean isNoSql = false;
 	/** defined series scan location */
-	protected List<String> L2seqs = Arrays.asList("");
-	
+	protected List<String> L2seqs = Arrays.asList("");	
 	/**User defined JSON parameters can be used to extend the plugin*/
 	private JSONObject customParams = new JSONObject();
 	
@@ -120,9 +121,18 @@ public class ReaderParam {
 		return handler;
 	}
 	
+	public JSONObject getHandlerDSL() {
+		return handlerDSL;
+	}
+	
 	public void setHandler(String handler) {
 		this.handler = handler;
 	}  
+	
+	public void setHandler(String handler,String handlerDSL) {
+		this.handler = handler;
+		this.handlerDSL = JSONObject.parseObject(handlerDSL);
+	}
 	
 	public boolean isNoSql() {
 		return isNoSql;

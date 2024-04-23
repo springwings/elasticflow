@@ -75,6 +75,16 @@ public abstract class ReaderFlowSocket extends Flow{
 	}
 	
 	/**
+	 * release reader flow
+	 */
+	@Override
+	public void release() {
+		if(this.readHandler!=null)
+			this.readHandler.release();
+		releaseConn(isConnMonopoly,isDiffEndType); 
+	}
+	
+	/**
 	 * release job page
 	 */
 	public void freeJobPage() {

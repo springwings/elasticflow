@@ -116,8 +116,7 @@ public final class Common {
 
 	public static void getXmlParam(Object Obj, Node param, Class<?> c) throws Exception {
 		Element element = (Element) param;
-		setConfigObj(Obj, c, element.getElementsByTagName("name").item(0).getTextContent(),
-				element.getElementsByTagName("value").item(0).getTextContent());
+		setConfigObj(Obj, c, element);
 	}
 
 	public static String formatXml(Object xmlContent) {
@@ -155,21 +154,36 @@ public final class Common {
 			if (param.getNodeName().equals(fieldName)) {
 				value = param.getTextContent();
 			}
-			setConfigObj(o, c, fieldName, value);
+			setConfigObj(o, c, fieldName, value,null);
 		}
 		return o;
 	}
+	
+	public static void setConfigObj(Object obj, Class<?> c, Element element) throws Exception {
+		String fieldName = element.getElementsByTagName("name").item(0).getTextContent();
+		String value = element.getElementsByTagName("value").item(0).getTextContent();
+		String dsl = null;
+		if (element.getElementsByTagName("dsl").item(0)!=null)
+		   dsl = element.getElementsByTagName("dsl").item(0).getTextContent();
+		setConfigObj(obj, c, fieldName, value,dsl);
+	}
 
 	@SuppressWarnings("unchecked")
-	public static void setConfigObj(Object Obj, Class<?> c, String fieldName, String value) throws Exception {
-		if (Obj instanceof HashMap) {
-			((HashMap<String, String>) Obj).put(fieldName, value);
+	public static void setConfigObj(Object obj, Class<?> c, String fieldName,String value,String dsl) throws Exception {
+		if (obj instanceof HashMap) {
+			((HashMap<String, String>) obj).put(fieldName, value);
 		} else {
 			if (value != null && value.length() > 0) {
 				String setMethodName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 				try {
-					Method setMethod = c.getMethod(setMethodName, new Class[] { String.class });
-					setMethod.invoke(Obj, new Object[] { value });
+					Method setMethod;
+					if(dsl!=null) {
+						setMethod = c.getMethod(setMethodName, String.class,String.class);
+						setMethod.invoke(obj, value,dsl);
+					}else {
+						setMethod = c.getMethod(setMethodName, new Class[] { String.class });
+						setMethod.invoke(obj, new Object[] { value });
+					}
 				} catch (Exception e) {
 					throw new EFException(e,
 							"field name " + fieldName + " value " + String.valueOf(value) + " parse exception");

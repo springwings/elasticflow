@@ -36,8 +36,9 @@ public class ComputerParam {
 	private String keyFieldType;
 	private String scanField;
 	private String pyPath;
-	 
+	/**use User defined plugins and parameter configurations**/
 	private String handler;
+	private JSONObject handlerDSL = null;
 	
 	/**User defined JSON parameters can be used to extend the plugin*/
 	private JSONObject customParams = new JSONObject();
@@ -147,8 +148,17 @@ public class ComputerParam {
 		return handler;
 	} 
 	
+	public JSONObject getHandlerDSL() {
+		return handlerDSL;
+	}
+	
 	public void setHandler(String handler) {
 		this.handler = handler;
 	} 
+	
+	public void setHandler(String handler,String handlerDSL) {
+		this.handler = handler;
+		this.handlerDSL = JSONObject.parseObject(handlerDSL);
+	}
 
 }

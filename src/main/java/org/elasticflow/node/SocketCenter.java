@@ -119,7 +119,7 @@ public final class SocketCenter {
 	 */
 	public synchronized void clearPipePump(String instance, String L1seq, String tag) {
 		String resourceTag = TaskUtil.getResourceTag(instance, L1seq, tag, false);
-		if (pipePumpMap.containsKey(resourceTag)) {
+		if (pipePumpMap.containsKey(resourceTag)) { 
 			pipePumpMap.remove(resourceTag);
 			boolean ignoreSeqUseAlias = false;
 			if (Resource.nodeConfig.getInstanceConfigs().get(instance) != null)
@@ -130,7 +130,9 @@ public final class SocketCenter {
 			if (ignoreSeqUseAlias)
 				tagInstance = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
 			resourceTag = TaskUtil.getResourceTag(tagInstance, L1seq, tag, ignoreSeqUseAlias);
+			readerSocketMap.get(resourceTag).release();
 			readerSocketMap.remove(resourceTag); 
+			writerSocketMap.get(resourceTag).release();
 			writerSocketMap.remove(resourceTag);
 		}
 	}

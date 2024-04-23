@@ -31,24 +31,24 @@ public final class GlobalParam {
 	public static long SYS_START_TIME = System.currentTimeMillis();
 
 	public static final String ENCODING = "utf-8";
-	
+
 	/** ------------system Runtime Environment------------ */
 	public static boolean DEBUG;
-	
+
 	public static String LANG = "EN";
-	
+
 	public static enum ELEVEL {
-		Ignore, Dispose,BreakOff,Termination, Stop;
+		Ignore, Dispose, BreakOff, Termination, Stop;
 	}
 
 	public static enum ETYPE {
 		RESOURCE_ERROR, PARAMETER_ERROR, DATA_ERROR, EXTINTERRUPT, UNKNOWN;
-	} 
-	
-	/** ----- flow settting -----*/
-	/**statistics storage maximum time period**/
+	}
+
+	/** ----- flow settting ----- */
+	/** statistics storage maximum time period **/
 	public static int INSTANCE_STATISTICS_KEEP_PERIOD = 7;
-	
+
 	/** error notify setting */
 	public static boolean SEND_EMAIL_ON = false;
 	public static String SEND_API_ON;
@@ -57,27 +57,33 @@ public final class GlobalParam {
 	public static String RUN_ENV;
 
 	public static String VERSION;
-	
-    /**Package and class prefix identification*/
+
+	/** Package and class prefix identification */
 	public static String GROUPID;
-	
-	/**The maximum number of connections that can be created by default for each source*/
+
+	/**
+	 * The maximum number of connections that can be created by default for each
+	 * source
+	 */
 	public static int CONNECTION_POOL_SIZE = 6;
-	
-	/**Whether to enable batch writing of identifiers depends on the type of writing end*/
+
+	/**
+	 * Whether to enable batch writing of identifiers depends on the type of writing
+	 * end
+	 */
 	public static boolean WRITE_BATCH = false;
 	/**
 	 * #1 searcher service 2 writer service 4 http reader service 8 instruction
 	 * service 16 compute service
 	 */
-	public static int SERVICE_LEVEL; 
-	
+	public static int SERVICE_LEVEL;
+
 	/** node ip **/
 	public static String IP = "127.0.0.1";
-	/**proxy ip **/
+	/** proxy ip **/
 	public static String PROXY_IP = "127.0.0.1";
-	
-	/**Computer parameters*/
+
+	/** Computer parameters */
 	public final static String MAIN_PY = "entrance";
 
 	/** CONNECT_EXPIRED is milliseconds time */
@@ -86,15 +92,15 @@ public final class GlobalParam {
 	public static Properties SystemConfig = new FormatProperties();
 
 	/** configure file local path */
-	public static String CONFIG_ROOT = System.getProperty("config"); 
-	
-	public static String SYS_CONFIG_PATH = CONFIG_ROOT+"/config";
+	public static String CONFIG_ROOT = System.getProperty("config");
 
-	public static String DATAS_CONFIG_PATH = CONFIG_ROOT+"/datas";
-	
-	public static String RESTART_SHELL_COMMAND = "nohup "+CONFIG_ROOT+"/restart.sh"+" > /dev/null 2&1";
+	public static String SYS_CONFIG_PATH = CONFIG_ROOT + "/config";
 
-	public static String INSTANCE_PATH = (DATAS_CONFIG_PATH+"/INSTANCES").intern();
+	public static String DATAS_CONFIG_PATH = CONFIG_ROOT + "/datas";
+
+	public static String RESTART_SHELL_COMMAND = "nohup " + CONFIG_ROOT + "/restart.sh" + " > /dev/null 2&1";
+
+	public static String INSTANCE_PATH = (DATAS_CONFIG_PATH + "/INSTANCES").intern();
 
 	/** configure plugin local path */
 	public static final String pluginPath = System.getProperty("plugin");
@@ -108,10 +114,10 @@ public final class GlobalParam {
 	public static final long NODE_LIVE_TIME = 6000;
 
 	public static int CLUSTER_MIN_NODES;
-	
-	/**Machine node identification*/
+
+	/** Machine node identification */
 	public final static int NODEID = Integer.valueOf(System.getProperty("nodeid"));
-	
+
 	public static int STS_THREADPOOL_SIZE = 100;
 
 	public static String MASTER_HOST = "";
@@ -134,8 +140,8 @@ public final class GlobalParam {
 	/** ------------instance parameters------------ */
 	public static enum END_TYPE {
 		reader, computer, writer, searcher
-	} 
-			
+	}
+
 	public static enum RESOURCE_TYPE {
 		WAREHOUSE, INSTRUCTION
 	}
@@ -154,8 +160,8 @@ public final class GlobalParam {
 			return v;
 		}
 	}
-	
-	/** resource status define**/
+
+	/** resource status define **/
 	public static enum RESOURCE_STATUS {
 		Normal(0), Warning(1), Error(2);
 
@@ -169,8 +175,8 @@ public final class GlobalParam {
 			return v;
 		}
 	}
-	
-	/** instance status define**/
+
+	/** instance status define **/
 	public static enum INSTANCE_STATUS {
 		Normal(0), Warning(1), Error(2);
 
@@ -184,10 +190,12 @@ public final class GlobalParam {
 			return v;
 		}
 	}
-	/**CUSTOM  ：User defined connection using this type*/
+
+	/** CUSTOM ：User defined connection using this type */
 	public static enum DATA_SOURCE_TYPE {
-		MYSQL, ORACLE, HIVE, ES, HBASE, H2, FILES, NEO4J, KAFKA, VEARCH, HDFS, FASTDFS,ROCKETMQ,MINIO,VIRTUAL, UNKNOWN
-	}
+		MYSQL, ORACLE, HIVE, ES, HBASE, H2, FILES, NEO4J, KAFKA, VEARCH, HDFS, FASTDFS, ROCKETMQ, MINIO, VIRTUAL,
+		UNKNOWN
+	} 
 
 	public static enum FLOW_TAG {
 		_DEFAULT, _MOP
@@ -270,7 +278,7 @@ public final class GlobalParam {
 
 	/** ------------computer parameters------------ */
 	public static enum COMPUTER_MODE {
-		REST,MODEL,PY,BLANK
+		REST, MODEL, PY, BLANK
 	}
 
 	/** ------------searcher parameters------------ */
@@ -307,11 +315,11 @@ public final class GlobalParam {
 	public static enum QUERY_TYPE {
 		BOOLEAN_QUERY, DISJUNCTION_QUERY
 	}
-	
-	/**searcher parameters of response*/
+
+	/** searcher parameters of response */
 	public final static String RESPONSE_SCORE = "__SCORE";
 	public final static String RESPONSE_EXPLAINS = "__EXPLAINS";
-	
+
 	/** ------------reader data scan parameters------------ */
 	public static final String _start = "#{page_start}";
 	public static final String _end = "#{page_end}";

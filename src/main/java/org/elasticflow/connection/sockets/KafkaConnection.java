@@ -3,10 +3,10 @@ package org.elasticflow.connection.sockets;
 import java.util.Arrays;
 import java.util.Properties;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.elasticflow.config.GlobalParam;
@@ -46,10 +46,10 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 	}
 
 	@Override
-	public boolean connect(END_TYPE endType) {
+	public boolean connect(END_TYPE endType) { 
 		WarehouseParam wnp = this.connectParams.getWhp();
 		if (wnp.getHost() != null) {
-			if (!status()) { 			
+			if (!status()) { 		 
 				if(endType==END_TYPE.reader)
 					this.genConsumer(wnp);
 				else if(endType==END_TYPE.writer)
@@ -122,6 +122,7 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 
 	@Override
 	public Object getConnection(END_TYPE endType) {
+		this.endType = endType;
 		int tryTime = 0;
 		try {
 			while (tryTime < 5 && !connect(endType)) {
@@ -140,7 +141,9 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 
 	@Override
 	public boolean status() {
-		if (this.cconn == null && this.pconn == null) {
+		if(this.endType==END_TYPE.reader && this.cconn == null)
+			return false;
+		if (this.endType==END_TYPE.writer && this.pconn == null) {
 			return false;
 		}
 		return true;
@@ -159,7 +162,7 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 			}
 			this.connectParams = null;
 		} catch (Exception e) {
-			log.warn("{} free kafka connection exception", this.connectParams.getWhp().getAlias(),e);
+			log.warn("{} free kafka connection exception", this.connectParams.getWhp().getAlias(),e.getMessage());
 			return false;
 		}
 		return true;

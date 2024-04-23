@@ -50,7 +50,7 @@ public class KafkaWriter extends WriterFlowSocket {
 	@Override
 	public void write(InstanceConfig instanceConfig,PipeDataUnit unit,String instance,
 			String storeId, boolean isUpdate) throws EFException {
-		if (!ISLINK())
+		if (!connStatus())
 			return; 
 		Map<String, EFField> transParams = instanceConfig.getWriteFields();
 		try { 
@@ -96,7 +96,7 @@ public class KafkaWriter extends WriterFlowSocket {
 	}
 
 	@Override
-	public void removeInstance(String instance, String storeId) { 
+	public void removeShard(String instance, String storeId) { 
         DeleteTopicsOptions options = new DeleteTopicsOptions();
         options.timeoutMs(5000);  
         Properties conf = new Properties();

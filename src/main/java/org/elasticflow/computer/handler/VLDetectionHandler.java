@@ -56,7 +56,12 @@ public class VLDetectionHandler extends ComputerHandler {
 	protected ConnectParams connectParams;
 	
 	//Blocking statistical judgment time length
-	protected final static int delayTime = 200;//ms  
+	protected final static int delayTime = 200;//ms 
+	
+	@Override
+	public void release() {
+		
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override

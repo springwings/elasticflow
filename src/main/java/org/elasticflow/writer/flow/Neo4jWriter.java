@@ -40,10 +40,10 @@ public class Neo4jWriter extends WriterFlowSocket {
 	@Override
 	public void write(InstanceConfig instanceConfig,PipeDataUnit unit, String instance,
 			String storeId, boolean isUpdate) throws EFException {
-		boolean releaseConn = false;
+		boolean clearConn = false;
 		try { 
 			PREPARE(false, false, false);
-			if (!ISLINK())
+			if (!connStatus())
 				return;
 			Map<String, EFField> transParams = instanceConfig.getWriteFields();
 			WriterParam writerParam = instanceConfig.getWriterParams();
@@ -57,7 +57,7 @@ public class Neo4jWriter extends WriterFlowSocket {
 		} catch (Exception e) {  
 			throw new EFException(e,instance+" neo4j error writing data",ELEVEL.Dispose);
 		} finally {
-			REALEASE(false, releaseConn);
+			releaseConn(false, clearConn);
 		}
 		
 	}
@@ -69,8 +69,8 @@ public class Neo4jWriter extends WriterFlowSocket {
 	}
 
 	@Override
-	public void removeInstance(String instance, String storeId) {
-		log.info("no need to remove Instance."); 
+	public void removeShard(String instance, String storeId) {
+		log.info("no need to remove Shard."); 
 	}
 
 	@Override

@@ -31,23 +31,35 @@ import org.slf4j.LoggerFactory;
  * @modify 2021-06-11 10:45
  */
 public abstract class Flow {
-
+	
+	/**EF abstract connection*/
 	protected volatile EFConnectionSocket<?> EFConn;
-
+	
+	/**database level */
 	protected String L1seq;
-
+	
 	protected String poolName;
 
 	protected InstanceConfig instanceConfig;
-
+	
+	/**EF abstract connection identification*/
 	private String EFConnKey;
+	
+	/**Exclusive, i.e. independently built connections*/
+	public boolean isConnMonopoly = false;
+	
+	/**Does the connection differentiate terminal usage? 
+	 * If yes, it will be released directly without returning to the resource pool.
+	 */
+	public boolean isDiffEndType = false;
 
 	public long lastGetPageTime = Common.getNow();
 
 	public FlowStatistic flowStatistic;
 
 	protected ConnectParams connectParams;
-
+	
+	/**Resource occupancy statistics lock*/
 	protected AtomicInteger retainer = new AtomicInteger(0);
 
 	private final static Logger log = LoggerFactory.getLogger("EF-Flow");
@@ -80,7 +92,15 @@ public abstract class Flow {
 		}
 		this.initFlow();
 	}
-
+	
+	
+	/**
+	 * release flow 
+	 */
+	public abstract void release();
+	
+	
+	
 	/**
 	 * Enable exclusive resolution if the link has a special resource binding
 	 * 
@@ -121,20 +141,21 @@ public abstract class Flow {
 	public InstanceConfig getInstanceConfig() {
 		return this.instanceConfig;
 	}
+
 	
 	/**
 	 * Release connection  resources
 	 * @param isMonopoly   Belongs to exclusive nature and does not require maintenance
 	 * @param releaseConn  forced release
 	 */
-	public void REALEASE(boolean isMonopoly, boolean releaseConn) {
-		if (isMonopoly == false || releaseConn) {
+	public void releaseConn(boolean isMonopoly, boolean clearConn) {
+		if (isMonopoly == false || clearConn) {
 			synchronized (this) {
-				if (releaseConn) {
+				if (clearConn) {
 					retainer.set(0);
 				}
 				if (retainer.decrementAndGet() <= 0) {
-					EFConnectionPool.freeConn(this.EFConn, this.poolName, releaseConn);
+					EFConnectionPool.freeConn(this.EFConn, this.poolName, clearConn);
 					this.EFConn = null;
 					Resource.EFConns.put(this.EFConnKey, null);
 					retainer.set(0);
@@ -144,19 +165,21 @@ public abstract class Flow {
 			}
 		}
 	}
+	
+	
 
 	public EFConnectionSocket<?> GETSOCKET() {
 		return this.EFConn;
 	}
 
-	public boolean ISLINK() {
+	public boolean connStatus() {
 		if (this.EFConn == null)
 			return false;
 		return true;
 	}
 
 	public void clearPool() {
-		REALEASE(false,true);
+		releaseConn(false,true);
 		EFConnectionPool.clearPool(this.poolName);
 	}
 }

@@ -93,7 +93,7 @@ public class HbaseWriter extends WriterFlowSocket {
 	}
 
 	@Override
-	public void removeInstance(String instanceName, String batchId) {
+	public void removeShard(String instanceName, String batchId) {
 		
 	}
 

@@ -5,30 +5,26 @@
  * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
  * Side Public License, v 1.
  */
-package org.elasticflow.writer.handler;
-
-import org.elasticflow.flow.FlowHandler;
-import org.elasticflow.instruction.Context;
-import org.elasticflow.model.reader.DataPage;
-import org.elasticflow.util.EFException;
+package org.elasticflow.flow;
 
 import com.alibaba.fastjson.JSONObject;
 
 /**
- * Write Handler interface
- * @author chengwen
- * @version 4.0
- * @date 2018-11-14 16:54
+ * user defined flow process function
  * 
+ * @author chengwen
+ * @version 2.0
+ * @date 2018-12-28 09:27
  */
-public abstract class WriterHandler extends FlowHandler{	
+
+public abstract class FlowHandler {
 	
 	public JSONObject handlerDSL = null;
+	
+	public abstract void release();
 	
 	public void init(JSONObject handlerDSL) {
 		this.handlerDSL = handlerDSL;
 	} 
-	
-	public abstract DataPage handleData(Context context,DataPage dataPage) throws EFException;
 	
 }

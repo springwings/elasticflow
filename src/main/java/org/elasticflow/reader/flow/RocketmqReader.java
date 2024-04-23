@@ -58,6 +58,7 @@ public class RocketmqReader extends ReaderFlowSocket {
 
 	@Override
 	public void initFlow() throws EFException {
+		this.isConnMonopoly = true;
 		PREPARE(true, false, true);
 		this.conn = (DefaultLitePullConsumer) GETSOCKET().getConnection(END_TYPE.reader);
 		try {
@@ -133,8 +134,7 @@ public class RocketmqReader extends ReaderFlowSocket {
 	}
 
 	@Override
-	public ConcurrentLinkedDeque<String> getDataPages(final TaskModel task, int pageSize) throws EFException {
-		boolean releaseConn = false;
+	public ConcurrentLinkedDeque<String> getDataPages(final TaskModel task, int pageSize) throws EFException { 
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
 		try {
 			this.records = this.conn.poll();
@@ -149,10 +149,9 @@ public class RocketmqReader extends ReaderFlowSocket {
 						break;
 				}
 			}
-		} catch (Exception e) {
-			releaseConn = true;
+		} catch (Exception e) { 
 			page.clear();
-			REALEASE(true, releaseConn);
+			releaseConn(true, true);
 			try {
 				initFlow();
 			} catch (EFException e1) {

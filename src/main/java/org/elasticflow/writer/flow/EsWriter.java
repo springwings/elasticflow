@@ -261,7 +261,7 @@ public class EsWriter extends WriterFlowSocket {
 	}
 
 	@Override
-	public void removeInstance(String instance, String storeId) {
+	public void removeShard(String instance, String storeId) {
 		if (storeId == null || storeId.length() == 0)
 			storeId = "a";
 		String iName = TaskUtil.getStoreName(instance, storeId);

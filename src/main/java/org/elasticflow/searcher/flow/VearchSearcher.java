@@ -52,8 +52,8 @@ public class VearchSearcher extends SearcherFlowSocket {
 			throws EFException {
 		SearcherResult res = new SearcherResult();
 		PREPARE(false, true, false);
-		boolean releaseConn = false;
-		if (ISLINK()) {
+		boolean clearConn = false;
+		if (connStatus()) {
 			try {
 				VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.searcher);
 				VearchQueryParser VQP = new VearchQueryParser(); 
@@ -111,10 +111,10 @@ public class VearchSearcher extends SearcherFlowSocket {
 				}
 				 
 			} catch (Exception e) {
-				releaseConn = true;
+				clearConn = true;
 				throw Common.convertException(e);
 			} finally {
-				REALEASE(false, releaseConn);
+				releaseConn(false, clearConn);
 			}
 		}  
 		this.formatResult(res, efResponse);

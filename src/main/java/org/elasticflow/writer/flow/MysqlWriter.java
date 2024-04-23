@@ -52,7 +52,7 @@ public class MysqlWriter extends WriterFlowSocket {
 		String table = TaskUtil.getStoreName(instance, storeId);
 		Map<String, EFField> transParams = instanceConfig.getWriteFields();
 		try {
-			if (!ISLINK())
+			if (!connStatus())
 				return;
 			if (this.isBatch) {
 				sqlData.add(PipeUtil.getWriteSqlTailData(table, unit, transParams));
@@ -79,7 +79,7 @@ public class MysqlWriter extends WriterFlowSocket {
 		String name = TaskUtil.getStoreName(mainName, storeId);
 		String type = mainName;
 		PREPARE(false, false, false);
-		if (!ISLINK())
+		if (!connStatus())
 			return false;
 		if (!this.storePositionExists(name)) {
 			Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
@@ -91,7 +91,7 @@ public class MysqlWriter extends WriterFlowSocket {
 				throw new EFException(e, "mysql create instance " + name + ":" + type + " exception",
 						ELEVEL.Termination, ETYPE.RESOURCE_ERROR);
 			} finally {
-				REALEASE(false, false);
+				releaseConn(false, false);
 			}
 		}
 		return true;
@@ -103,10 +103,10 @@ public class MysqlWriter extends WriterFlowSocket {
 	}
 
 	@Override
-	public void removeInstance(String instance, String storeId) throws EFException {
+	public void removeShard(String instance, String storeId) throws EFException {
 		String name = TaskUtil.getStoreName(instance, storeId);
 		PREPARE(false, false, false);
-		if (!ISLINK())
+		if (!connStatus())
 			return;
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
 		try (PreparedStatement statement = conn.prepareStatement("DROP table if exists " + name);) {
@@ -115,7 +115,7 @@ public class MysqlWriter extends WriterFlowSocket {
 		} catch (Exception e) {
 			log.error("remove mysql instance {}:{} exception!", name, instance, e);
 		} finally {
-			REALEASE(false, false);
+			releaseConn(false, false);
 		}
 	}
 
@@ -130,7 +130,7 @@ public class MysqlWriter extends WriterFlowSocket {
 		String name = TaskUtil.getStoreName(instance, storeId);
 		PREPARE(false, false, false);
 		try {
-			if (ISLINK() && this.storePositionExists(name)) {
+			if (connStatus() && this.storePositionExists(name)) {
 				Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
 				try (PreparedStatement statement = conn.prepareStatement(this.getTableSql(name, instanceConfig));) {
 					log.info("create mysql instance {}:{}", name, instance);
@@ -138,7 +138,7 @@ public class MysqlWriter extends WriterFlowSocket {
 				} catch (Exception e) {
 					throw new EFException(e, "mysql optimze table exception", ELEVEL.Termination, ETYPE.RESOURCE_ERROR);
 				} finally {
-					REALEASE(false, false);
+					releaseConn(false, false);
 				}
 			}
 		} catch (Exception e) {
@@ -165,9 +165,9 @@ public class MysqlWriter extends WriterFlowSocket {
 	protected String abMechanism(String mainName, boolean isIncrement, InstanceConfig instanceConfig)
 			throws EFException {
 		String select = "a";
-		boolean releaseConn = false;
+		boolean clearConn = false;
 		PREPARE(false, false, false);
-		if (!ISLINK())
+		if (!connStatus())
 			return select;
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
 		String checkSql = "show tables like \"" + TaskUtil.getStoreName(mainName, select) + "\";";
@@ -187,7 +187,7 @@ public class MysqlWriter extends WriterFlowSocket {
 		} catch (Exception e) {
 			log.error("instance {}, PreparedStatement exception", mainName, e);
 		} finally {
-			REALEASE(false, releaseConn);
+			releaseConn(false, clearConn);
 		}
 		if (!isIncrement) {
 			if (select == "a")

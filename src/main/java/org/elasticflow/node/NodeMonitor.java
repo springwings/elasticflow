@@ -305,7 +305,7 @@ public final class NodeMonitor {
 			try {
 				o = new WarehouseParam();
 				for (String key : iter) {
-					Common.setConfigObj(o, WarehouseParam.class, key, jsonObject.getString(key));
+					Common.setConfigObj(o, WarehouseParam.class, key, jsonObject.getString(key),null);
 				}
 //				o = new InstructionParam();
 //				for (String key : iter) {
@@ -978,7 +978,7 @@ public final class NodeMonitor {
 						obj = tmp.getWriterParams();
 						break;
 					}
-					Common.setConfigObj(obj, cls, params[1], RR.getStringParam("param.value"));
+					Common.setConfigObj(obj, cls, params[1], RR.getStringParam("param.value"),null);
 					if (GlobalParam.DISTRIBUTE_RUN)
 						GlobalParam.INSTANCE_COORDER.distributeCoorder().updateNodeConfigs(
 								RR.getStringParam("instance"), params[0], params[1], RR.getStringParam("param.value"));
@@ -1152,9 +1152,10 @@ public final class NodeMonitor {
 	}
 
 	/**
-	 * reload instance configure rebuild instance in memory
+	 * Rebuilding task instances through configuration
 	 * 
-	 * @param rq instance=xx&reset=true|false&runtype=1 reset true will clear all
+	 * @param rq instance=xx&reset=true|false&runtype=1 
+	 *           reset is true will clear all instances,
 	 *           instance settings. runType=-1 Use the original task run type
 	 * 
 	 * @throws EFException
@@ -1266,10 +1267,10 @@ public final class NodeMonitor {
 									Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getWriteTo(),
 									instance, L1seq, tags);
 							wfs.PREPARE(false, false, false);
-							if (wfs.ISLINK()) {
-								wfs.removeInstance(instance,
+							if (wfs.connStatus()) {
+								wfs.removeShard(instance,
 										GlobalParam.TASK_COORDER.getStoreIdFromSave(instance, L1seq, true, false));
-								wfs.REALEASE(false, false);
+								wfs.releaseConn(false, false);
 							}
 						} catch (EFException e) {
 							state = false;

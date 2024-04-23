@@ -51,9 +51,9 @@ public final class EsSearcher extends SearcherFlowSocket {
 	public void Search(SearcherModel<?> searcherModel, String instance, SearcherHandler handler, EFResponse efResponse)
 			throws EFException {
 		PREPARE(false, true, false);
-		boolean releaseConn = false;
+		boolean clearConn = false;
 		SearcherResult res = new SearcherResult();
-		if (ISLINK()) {
+		if (connStatus()) {
 			EsConnector ESC = null;
 			try {
 				ESC = (EsConnector) GETSOCKET().getConnection(END_TYPE.searcher);
@@ -86,14 +86,14 @@ public final class EsSearcher extends SearcherFlowSocket {
 					res.setStat(jo);
 				}
 			} catch (Exception e) {
-				releaseConn = true;
+				clearConn = true;
 				if (ESC != null) {
 					throw Common.convertException(e, this.poolName);
 				} else {
 					throw Common.convertException(e);
 				}
 			} finally {
-				REALEASE(false, releaseConn);
+				releaseConn(false, clearConn);
 			}
 		}
 		this.formatResult(res, efResponse);

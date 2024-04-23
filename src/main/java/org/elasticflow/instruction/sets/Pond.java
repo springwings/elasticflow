@@ -44,7 +44,7 @@ public class Pond extends Instruction {
 		}
 		context.getWriter().PREPARE(false, false, false);
 		boolean state = false;
-		if (context.getWriter().ISLINK()) {
+		if (context.getWriter().connStatus()) {
 			String instanceID = String.valueOf(args[0]);
 			try {
 				String storeId = String.valueOf(args[1]);
@@ -52,7 +52,7 @@ public class Pond extends Instruction {
 			} catch (Exception e) {
 				log.error("instruction.set.Pond.createStorePosition run instance {} exception",instanceID, e);
 			} finally {
-				context.getWriter().REALEASE(false, state ? false : true);
+				context.getWriter().releaseConn(false, state ? false : true);
 			}
 		}
 		return state;
@@ -70,7 +70,7 @@ public class Pond extends Instruction {
 			return;
 		}
 		context.getWriter().PREPARE(false, false, false);
-		if (context.getWriter().ISLINK()) {
+		if (context.getWriter().connStatus()) {
 			String storeId = String.valueOf(args[0]);
 			try {				
 				String keyColumn = String.valueOf(args[1]);
@@ -80,7 +80,7 @@ public class Pond extends Instruction {
 				log.error("instruction.set.Pond.deleteByKey store id {} exception",storeId, e);
 				freeConn = true;
 			} finally {
-				context.getWriter().REALEASE(false, freeConn);
+				context.getWriter().releaseConn(false, freeConn);
 			}
 		}
 	}
@@ -108,13 +108,13 @@ public class Pond extends Instruction {
 			return;
 		}
 		context.getWriter().PREPARE(false, false, false);
-		if (context.getWriter().ISLINK()) {
+		if (context.getWriter().connStatus()) {
 			try {
 				String mainName = String.valueOf(args[0]);
 				String storeId = String.valueOf(args[1]);
 				context.getWriter().optimize(mainName, storeId);
 			} finally {
-				context.getWriter().REALEASE(false, false);
+				context.getWriter().releaseConn(false, false);
 			}
 		}
 	}
@@ -153,7 +153,7 @@ public class Pond extends Instruction {
 		GlobalParam.TASK_COORDER.setFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(), TASK_FLOW_SINGAL.Blank,
 				TASK_FLOW_SINGAL.Termination, context.getInstanceConfig().getPipeParams().showInfoLog());
 		context.getWriter().PREPARE(false, false, false);
-		if (context.getWriter().ISLINK()) {
+		if (context.getWriter().connStatus()) {
 			try {
 				if (context.getInstanceConfig().getPipeParams().getWriteMechanism() == MECHANISM.AB) {
 					if (storeId.equals("a")) {
@@ -163,7 +163,7 @@ public class Pond extends Instruction {
 						context.getWriter().optimize(instanceProcessId, "b");
 						removeId = "a";
 					}
-					context.getWriter().removeInstance(instanceProcessId, removeId);
+					context.getWriter().removeShard(instanceProcessId, removeId);
 				}
 				context.getWriter().setAlias(instanceProcessId, storeId, context.getInstanceConfig().getAlias());
 				return true;
@@ -173,7 +173,7 @@ public class Pond extends Instruction {
 				GlobalParam.TASK_COORDER.saveTaskInfo(String.valueOf(args[0]), String.valueOf(args[1]), storeId, false);
 				GlobalParam.TASK_COORDER.setFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(),
 						TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Ready, context.getInstanceConfig().getPipeParams().showInfoLog());
-				context.getWriter().REALEASE(false, false);
+				context.getWriter().releaseConn(false, false);
 			}
 		}
 		return false;
@@ -194,7 +194,7 @@ public class Pond extends Instruction {
 			boolean isIncrement = (boolean) args[1];
 			context.getWriter().PREPARE(false, false, false);
 			boolean release = false;
-			if (context.getWriter().ISLINK()) {
+			if (context.getWriter().connStatus()) {
 				try {
 					storeId = context.getWriter().getNewStoreId(mainName, isIncrement, context.getInstanceConfig());
 				} catch (Exception e) {
@@ -204,7 +204,7 @@ public class Pond extends Instruction {
 									+ context.getInstanceConfig().getPipeParams().getWriteTo(),
 							ELEVEL.Termination, ETYPE.RESOURCE_ERROR);
 				} finally {
-					context.getWriter().REALEASE(false, release);
+					context.getWriter().releaseConn(false, release);
 				}
 			}
 		}

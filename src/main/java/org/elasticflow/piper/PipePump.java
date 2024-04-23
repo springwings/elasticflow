@@ -75,12 +75,13 @@ public final class PipePump extends Instruction implements Serializable {
 		CPU.prepare(contextID, instanceConfig, writer, reader, computer);
 		this.instanceID = instanceID;
 		fullTask = TaskModel.getInstance(instanceID, L1seq, JOB_TYPE.FULL, instanceConfig, null);
-		incrementTask = TaskModel.getInstance(instanceID, L1seq, JOB_TYPE.INCREMENT, instanceConfig, null);
+		incrementTask = TaskModel.getInstance(instanceID, L1seq, JOB_TYPE.INCREMENT, instanceConfig, null); 
 		try {
 			if (instanceConfig.getReaderParams().getHandler() != null) {
 				try {
 					reader.setReaderHandler((ReaderHandler) Class.forName(instanceConfig.getReaderParams().getHandler())
 							.getDeclaredConstructor().newInstance());
+					reader.getReaderHandler().init(instanceConfig.getReaderParams().getHandlerDSL());
 				} catch (Exception e) {
 					if (GlobalParam.PLUGIN_CLASS_LOADER != null) {
 						reader.setReaderHandler(
@@ -99,6 +100,7 @@ public final class PipePump extends Instruction implements Serializable {
 						computer.setComputerHandler(
 								(ComputerHandler) Class.forName(instanceConfig.getComputeParams().getHandler())
 										.getDeclaredConstructor().newInstance());
+						computer.getComputerHandler().init(instanceConfig.getComputeParams().getHandlerDSL());
 					} catch (Exception e) {
 						if (GlobalParam.PLUGIN_CLASS_LOADER != null) {
 							computer.setComputerHandler(
@@ -237,11 +239,11 @@ public final class PipePump extends Instruction implements Serializable {
 					//For similar rollback scenarios
 					for (int t = 0; t < 5; t++) {
 						getWriter().PREPARE(false, false,false);
-						if (getWriter().ISLINK()) {
+						if (getWriter().connStatus()) {
 							try {
-								getWriter().removeInstance(instanceID, storeId);
+								getWriter().removeShard(instanceID, storeId);
 							} finally {
-								getWriter().REALEASE(false, false);
+								getWriter().releaseConn(false, false);
 							}
 							break;
 						}
@@ -353,7 +355,7 @@ public final class PipePump extends Instruction implements Serializable {
 			}
 
 			this.breakCheck(task);
-
+			//Refresh every page
 			rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
 					destination, storeId, task, pagedata,
 					",progress:" + progressPos + "/" + pageNum, isupdate, false);
@@ -377,7 +379,12 @@ public final class PipePump extends Instruction implements Serializable {
 		} catch (Exception e) {
 			log.error("instance {} get page lists exception",task.getInstanceID(), e);
 		} finally {
-			getReader().lock.unlock();
+			try {
+				getReader().lock.unlock();
+			} catch (Exception e) {
+				pageList = new ConcurrentLinkedDeque<String>();
+				log.warn("instance {} get page lists not owning a lock!",task.getInstanceID());
+			}
 		}
 		return pageList;
 	}

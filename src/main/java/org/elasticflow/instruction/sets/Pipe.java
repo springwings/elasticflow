@@ -102,7 +102,7 @@ public class Pipe extends Instruction {
 		
 		WriterFlowSocket writer = context.getWriter();
 		writer.PREPARE(monopoly, false,true);
-		if (!writer.ISLINK()) {
+		if (!writer.connStatus()) {
 			rstate.setStatus(false);
 			return rstate;
 		}
@@ -110,7 +110,7 @@ public class Pipe extends Instruction {
 			//Prevent status from never being submitted
 			context.getReader().flush();
 			writer.flush(); 
-			writer.REALEASE(monopoly, freeConn); 
+			writer.releaseConn(monopoly, freeConn); 
 			return rstate;
 		}
 		if(writer.getWriteHandler()!=null)
@@ -145,10 +145,10 @@ public class Pipe extends Instruction {
 				throw e;
 			} finally { 
 				DSReader.close(); 
-				writer.REALEASE(monopoly, freeConn); 
+				writer.releaseConn(monopoly, freeConn); 
 			}
 		} else {
-			writer.REALEASE(monopoly, freeConn); 
+			writer.releaseConn(monopoly, freeConn); 
 			rstate.setStatus(false);
 		}
 		return rstate;

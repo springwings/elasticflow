@@ -52,6 +52,17 @@ public abstract class WriterFlowSocket extends Flow {
 	public void initFlow() {
 		// auto invoke in flow prepare
 	}
+	
+	
+	/**
+	 * release computer flow
+	 */
+	@Override
+	public void release() {
+		if(this.writeHandler!=null)
+			this.writeHandler.release();
+		releaseConn(isConnMonopoly,isDiffEndType); 
+	}
 
 	public void setWriteHandler(WriterHandler writeHandler) {
 		this.writeHandler = writeHandler;
@@ -108,7 +119,7 @@ public abstract class WriterFlowSocket extends Flow {
 			// destination
 			PipePump pipePump = Resource.socketCenter.getPipePump(mainName, this.connectParams.getL1Seq(), false,
 					GlobalParam.FLOW_TAG._DEFAULT.name());
-			pipePump.getWriter(dTuple.v2).removeInstance(mainName, String.valueOf(dTuple.v2));
+			pipePump.getWriter(dTuple.v2).removeShard(mainName, String.valueOf(dTuple.v2));
 		} catch (Exception e) {
 			Common.LOG.error("time-Mechanism try to remove instance {} exception", storeName,e);
 		}
@@ -137,8 +148,8 @@ public abstract class WriterFlowSocket extends Flow {
 	/** Delete a single record through the key id */
 	public abstract void delete(String instance, String storeId, String keyColumn, String keyVal) throws EFException;
 	
-	/**Delete entire instance data*/
-	public abstract void removeInstance(String instance, String storeId) throws EFException;
+	/**Delete shard data*/
+	public abstract void removeShard(String instance, String storeId) throws EFException;
 	
 	/**Set instance alias (used for naming across multiple instances)*/
 	public abstract void setAlias(String instance, String storeId, String aliasName) throws EFException;

@@ -53,21 +53,25 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 
 	@Override
 	public boolean connect(END_TYPE endType) {
-		WarehouseParam wnp = this.connectParams.getWhp();
-		if (wnp.getHost() != null) {
-			if (wnp.getPassword() != null) {
+		WarehouseParam wp = this.connectParams.getWhp();
+		if (wp.getHost() != null) {
+			if (wp.getPassword() != null) {
 				credentialsProvider = new BasicCredentialsProvider();
 				credentialsProvider.setCredentials(AuthScope.ANY,
-						new UsernamePasswordCredentials(wnp.getUser(), wnp.getPassword()));
+						new UsernamePasswordCredentials(wp.getUser(), wp.getPassword()));
 			}
 			if (!status()) {
-				String[] hosts = wnp.getHost().split(",");
+				String[] hosts = wp.getHost().split(",");
 				HttpHost[] httpHosts = new HttpHost[hosts.length];
+				int port = 9200;
+				if(wp.getPort()!=0) {
+					port = wp.getPort();
+				}
 				for (int i = 0; i < hosts.length; i++) {
 					try {
-						httpHosts[i] = new HttpHost(hosts[i], 9200, "http");
+						httpHosts[i] = new HttpHost(hosts[i], port, "http");
 					} catch (Exception e) {
-						log.error("{} es {} connect exception",wnp.getAlias() , endType.name(),e);
+						log.error("{} es {} connect exception",wp.getAlias() , endType.name(),e);
 					}
 				}
 				if(credentialsProvider!=null) {
@@ -82,7 +86,7 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 				}else {
 					this.conn = new RestHighLevelClient(RestClient.builder(httpHosts));
 				}
-				this.ESC.setClient(this.conn,wnp.getAlias());
+				this.ESC.setClient(this.conn,wp.getAlias());
 			}
 		} else {
 			return false;
@@ -92,6 +96,7 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 
 	@Override
 	public EsConnector getConnection(END_TYPE endType) {
+		this.endType = endType;
 		connect(endType);
 		if (endType != END_TYPE.searcher) {
 			if (this.bulkProcessor == null) {

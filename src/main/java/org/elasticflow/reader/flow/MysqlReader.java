@@ -39,9 +39,9 @@ public class MysqlReader extends ReaderFlowSocket{
  
 	@Override
 	public DataPage getPageData(final TaskCursor taskCursor,int pageSize) throws EFException {  
-		boolean releaseConn = false;
+		boolean clearConn = false;
 		PREPARE(false,false, false); 
-		if(!ISLINK())
+		if(!connStatus())
 			return this.dataPage; 
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.reader); 
 		this.dataPage.put(GlobalParam.READER_KEY, taskCursor.getReaderKey());
@@ -63,11 +63,11 @@ public class MysqlReader extends ReaderFlowSocket{
 			this.dataPage.put(GlobalParam.READER_STATUS,false); 
 			throw new EFException(e,taskCursor.getAdditional());
 		} catch (Exception e) { 
-			releaseConn = true;
+			clearConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS,false); 
 			throw new EFException(e,taskCursor.getInstanceConfig().getInstanceID()+ " mysql get dataPage exception");
 		}finally{
-			REALEASE(false,releaseConn);
+			releaseConn(false,clearConn);
 		} 
 		return this.dataPage;
 	} 
@@ -96,12 +96,12 @@ public class MysqlReader extends ReaderFlowSocket{
 		 
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
 		PREPARE(false,false, false); 
-		if(!ISLINK())
+		if(!connStatus())
 			return page;
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.reader); 
 		PreparedStatement statement = null;
 		ResultSet rs  = null;
-		boolean releaseConn = false;
+		boolean clearConn = false;
 		try {
 			boolean autoSelect = true; 
 			if(task.getScanParam().getKeyFieldType() != null){
@@ -134,7 +134,7 @@ public class MysqlReader extends ReaderFlowSocket{
 			page = null; 
 			throw new EFException(e,sql);
 		}catch (Exception e) {
-			releaseConn = true;
+			clearConn = true;
 			page = null; 
 			throw new EFException(e,task.getInstanceID()+ " mysql reader get page lists exception");
 		}finally{ 
@@ -144,10 +144,10 @@ public class MysqlReader extends ReaderFlowSocket{
 					rs.close();
 				}
 			} catch (Exception e) {
-				releaseConn = true;   
+				clearConn = true;   
 				throw new EFException(e,task.getInstanceID()+ " mysql close connection exception");
 			} 
-			REALEASE(false,releaseConn);  
+			releaseConn(false,clearConn);  
 		}  
 		return page;
 	} 

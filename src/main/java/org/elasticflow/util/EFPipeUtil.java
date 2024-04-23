@@ -17,7 +17,14 @@ import org.quartz.SchedulerException;
  * @modify 2019-01-15 11:07
  */
 public class EFPipeUtil {
-
+	
+	/**
+	 * remove instance
+	 * @param instanceID
+	 * @param removeTask
+	 * @param removePipe
+	 * @return
+	 */
 	public static boolean removeInstance(String instanceID, boolean removeTask, boolean removePipe) {
 		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 		boolean state = true;
@@ -28,7 +35,7 @@ public class EFPipeUtil {
 				for (String L1seq : L1seqs) {
 					if (L1seq == null)
 						continue;
-					if (removeTask && Resource.tasks.containsKey(TaskUtil.getInstanceProcessId(instanceID, L1seq))) {
+					if (removeTask && Resource.tasks.containsKey(TaskUtil.getInstanceProcessId(instanceID, L1seq))) {   
 						Resource.tasks.remove(TaskUtil.getInstanceProcessId(instanceID, L1seq));
 						state = removeFlowScheduleJob(TaskUtil.getInstanceProcessId(instanceID, L1seq), instanceConfig)
 								&& state;

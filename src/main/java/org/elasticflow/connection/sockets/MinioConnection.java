@@ -53,13 +53,13 @@ public class MinioConnection extends EFConnectionSocket<Object> {
 				Thread.sleep(1000+tryTime*500);
 			}
 		} catch (Exception e) {
-			log.error("{} get kafka {} connection exception",this.connectParams.getWhp().getAlias(),endType.name(), e);
+			log.error("{} get Minio {} connection exception",this.connectParams.getWhp().getAlias(),endType.name(), e);
 		}
 		return this.conn;
 	}
 
 	@Override
-	public boolean status() {
+	public boolean status() { 
 		if (this.conn == null) {
 			return false;
 		}
@@ -74,7 +74,7 @@ public class MinioConnection extends EFConnectionSocket<Object> {
 			} 
 			this.connectParams = null;
 		} catch (Exception e) {
-			log.warn("{} free minio connection exception", this.connectParams.getWhp().getAlias(),e);
+			log.warn("{} free Minio connection exception", this.connectParams.getWhp().getAlias(),e);
 			return false;
 		}
 		return true;

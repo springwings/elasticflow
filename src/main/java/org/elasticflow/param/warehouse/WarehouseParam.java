@@ -8,7 +8,7 @@
 package org.elasticflow.param.warehouse;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.config.GlobalParam.DATA_SOURCE_TYPE;
+import org.elasticflow.config.GlobalParam.DATA_SOURCE_TYPE; 
 import org.elasticflow.util.EFException;
 
 import com.alibaba.fastjson.JSONObject;
@@ -33,7 +33,8 @@ public class WarehouseParam {
 	private String password = "";
 	/**Maximum resource pool size*/
 	private int maxPoolSize = 0;
-	private int port;
+	/**port = 0 default not set*/
+	private int port = 0;
 	private JSONObject defaultValue = new JSONObject();
 	/**Custom parameters to expand the configurable fields of resources*/
 	private JSONObject customParams = new JSONObject();
@@ -155,7 +156,7 @@ public class WarehouseParam {
 			Lname = (L1seq != null) ? this.L1name.replace("#{seq}", L1seq) : this.L1name;
 		}else {
 			Lname = L1seq;
-		}
+		} 
 		return this.alias + "_" + this.type + "_" + this.host + "_" + Lname;
 	}	
 

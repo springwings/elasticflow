@@ -17,6 +17,8 @@ import org.elasticflow.util.EFException;
 public abstract class EFConnectionSocket<T> {
 
 	protected volatile ConnectParams connectParams;
+	
+	protected END_TYPE endType;
 
 	private boolean isShare = false;
 

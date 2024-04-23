@@ -40,9 +40,9 @@ public class OracleReader extends ReaderFlowSocket{
 
 	@Override
 	public DataPage getPageData(final TaskCursor taskCursor,int pageSize) throws EFException {
-		boolean releaseConn = false;
+		boolean clearConn = false;
 		PREPARE(false,false, false); 
-		if(!ISLINK())
+		if(!connStatus())
 			return this.dataPage; 
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.reader); 
 		try (PreparedStatement statement = conn.prepareStatement(taskCursor.getAdditional());){ 
@@ -63,10 +63,10 @@ public class OracleReader extends ReaderFlowSocket{
 		} catch (SQLException e){   
 			throw new EFException(e,taskCursor.getAdditional());
 		} catch (Exception e) { 
-			releaseConn = true; 
+			clearConn = true; 
 			throw new EFException(e,taskCursor.getInstanceConfig().getInstanceID()+ " Oracle get dataPage Exception!"); 
 		}finally{
-			REALEASE(false,releaseConn);
+			releaseConn(false,clearConn);
 		} 
 		return this.dataPage;
 	}
@@ -95,12 +95,12 @@ public class OracleReader extends ReaderFlowSocket{
 		 
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
 		PREPARE(false,false, false); 
-		if(!ISLINK())
+		if(!connStatus())
 			return page;
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.reader);
 		PreparedStatement statement = null;
 		ResultSet rs  = null;
-		boolean releaseConn = false;
+		boolean clearConn = false;
 		try {
 			boolean autoSelect = true;
 			if(task.getScanParam().getKeyFieldType() != null){
@@ -133,7 +133,7 @@ public class OracleReader extends ReaderFlowSocket{
 			page = null;
 			throw new EFException(e,sql);
 		}catch (Exception e) {
-			releaseConn = true;
+			clearConn = true;
 			page = null;
 			throw new EFException(e,task.getInstanceID()+ " Oracle Reader get page lists Exception!"); 
 		}finally{ 
@@ -143,10 +143,10 @@ public class OracleReader extends ReaderFlowSocket{
 					rs.close();
 				}
 			} catch (Exception e) {
-				releaseConn = true;  
+				clearConn = true;  
 				throw new EFException(e,task.getInstanceID()+ " Oracle close connection Exception!");
 			} 
-			REALEASE(false,releaseConn);  
+			releaseConn(false,clearConn);  
 		}  
 		return page;
 	} 

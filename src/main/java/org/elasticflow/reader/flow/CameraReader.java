@@ -109,7 +109,7 @@ public class CameraReader extends ReaderFlowSocket {
 			}
 		} catch (Exception e) { 
 			page.clear();
-			REALEASE(false, true);
+			releaseConn(false, true);
 			try {
 				this.initFlow();
 			} catch (EFException e1) {

@@ -36,6 +36,15 @@ public abstract class SearcherFlowSocket extends Flow {
 	public void initFlow() {
 		// auto invoke in flow prepare
 	}
+	
+	
+	/**
+	 * release searcher flow
+	 */
+	@Override
+	public void release() { 
+		releaseConn(isConnMonopoly,isDiffEndType); 
+	}
 
 	/**
 	 * Searcher main entrance

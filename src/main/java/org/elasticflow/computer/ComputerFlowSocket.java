@@ -41,6 +41,16 @@ public abstract class ComputerFlowSocket extends Flow{
 	@Override
 	public void initFlow() {
 		//auto invoke in flow prepare
+	} 
+	
+	/**
+	 * release computer flow
+	 */
+	@Override
+	public void release() {
+		if(this.computerHandler!=null)
+			this.computerHandler.release();
+		releaseConn(isConnMonopoly,isDiffEndType); 
 	}
 	
 	public DataPage getDataPage() {

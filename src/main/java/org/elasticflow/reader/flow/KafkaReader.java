@@ -73,6 +73,8 @@ public class KafkaReader extends ReaderFlowSocket {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initFlow() throws EFException {
+		this.isConnMonopoly = true;
+		this.isDiffEndType = true;
 		PREPARE(true, false, true);
 		this.conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader);
 	}
@@ -147,7 +149,7 @@ public class KafkaReader extends ReaderFlowSocket {
 	@Override
 	public ConcurrentLinkedDeque<String> getDataPages(final TaskModel task, int pageSize) throws EFException { 
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
-		try {
+		try {  
 			this.records = conn.poll(Duration.ofMillis(readms));
 			int totalNum = this.records.count();
 			if (totalNum > 0) {
@@ -162,12 +164,12 @@ public class KafkaReader extends ReaderFlowSocket {
 			}
 		} catch (Exception e) { 
 			page.clear();
-			REALEASE(false, true);
+			releaseConn(false, true);
 			try {
 				this.initFlow();
 			} catch (EFException e1) {
 				throw e1;
-			}  
+			}   
 			throw new EFException(e,task.getInstanceID()+ " Kafka Reader get page lists Exception!");
 		}
 		return page;

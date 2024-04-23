@@ -116,7 +116,7 @@ public final class EFConnectionPool {
 	 */
 	private void freeConnection(String poolName, EFConnectionSocket<?> conn, boolean clearConn) {
 		ConnectionPool pool = (ConnectionPool) this._GPOOLS.get(poolName);
-		if (pool != null) {
+		if (pool != null && conn!=null) {
 			pool.freeConnection(conn, clearConn);
 		}
 	}

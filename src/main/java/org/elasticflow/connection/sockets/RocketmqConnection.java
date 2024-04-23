@@ -103,6 +103,7 @@ public class RocketmqConnection extends EFConnectionSocket<Object> {
 
 	@Override
 	public Object getConnection(END_TYPE endType) {
+		this.endType = endType;
 		int tryTime = 0;
 		try {
 			while (tryTime < 5 && !connect(endType)) {
@@ -121,7 +122,9 @@ public class RocketmqConnection extends EFConnectionSocket<Object> {
 
 	@Override
 	public boolean status() {
-		if (this.cconn == null && this.pconn == null) {
+		if(this.endType==END_TYPE.reader && this.cconn == null)
+			return false;
+		if (this.endType==END_TYPE.writer && this.pconn == null) {
 			return false;
 		}
 		return true;

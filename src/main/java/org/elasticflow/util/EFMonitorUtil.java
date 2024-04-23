@@ -51,9 +51,11 @@ public class EFMonitorUtil {
 	 * @param runType
 	 * @throws EFException
 	 */
-	public static void reloadInstance(String instance, String reset, String runType) throws EFException {
-		EFMonitorUtil.controlInstanceState(instance, TASK_FLOW_SINGAL.Stop, true);
+	public static void reloadInstance(String instance, String reset, String runType) throws EFException {  
+		EFMonitorUtil.controlInstanceState(instance, TASK_FLOW_SINGAL.Stop, true); 
 		int type = Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType();
+		String alias = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
+		Resource.nodeConfig.getSearchConfigs().remove(alias); 
 		if (runType != null) {
 			type = Integer.parseInt(runType);
 		}
@@ -63,14 +65,14 @@ public class EFMonitorUtil {
 		}
 		Resource.flowProgress.remove(instance, JOB_TYPE.FULL.name());
 		Resource.flowProgress.remove(instance, JOB_TYPE.INCREMENT.name());
-
+		
 		// control slave node
 		if (GlobalParam.DISTRIBUTE_RUN) {
 			GlobalParam.INSTANCE_COORDER.distributeCoorder().removeInstanceFromCluster(instanceConfig, true);
 		}
-		String alias = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
-		Resource.nodeConfig.getSearchConfigs().remove(alias);
-		EFPipeUtil.removeInstance(instance, true, true);
+		// remove job and instance
+		EFPipeUtil.removeInstance(instance, true, true); 
+		Resource.nodeConfig.getSearchConfigs().remove(alias); 
 		if (reset != null && reset.equals("true")) {
 			Resource.nodeConfig.loadConfig(instanceConfig, true);
 		} else {

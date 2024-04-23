@@ -47,7 +47,7 @@ public class VearchWriter extends WriterFlowSocket {
 	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) throws EFException {
 		String name = TaskUtil.getStoreName(mainName, storeId);
 		PREPARE(false, false, false);
-		if (!ISLINK())
+		if (!connStatus())
 			return false;
 		if (!this.storePositionExists(name)) {
 			VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
@@ -60,7 +60,7 @@ public class VearchWriter extends WriterFlowSocket {
 						"create vearch instance store position " + name + ":" + mainName + " exception",
 						ELEVEL.Termination, ETYPE.RESOURCE_ERROR);
 			} finally {
-				REALEASE(false, false);
+				releaseConn(false, false);
 			}
 		}
 		return true;
@@ -76,7 +76,7 @@ public class VearchWriter extends WriterFlowSocket {
 	public void write(InstanceConfig instanceConfig, PipeDataUnit unit, String instance, String storeId,
 			boolean isUpdate) throws EFException {
 		String table = TaskUtil.getStoreName(instance, storeId);
-		if (!ISLINK())
+		if (!connStatus())
 			return;
 		Map<String, EFField> transParams = instanceConfig.getWriteFields();
 		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
@@ -133,10 +133,10 @@ public class VearchWriter extends WriterFlowSocket {
 	}
 
 	@Override
-	public void removeInstance(String instance, String storeId) throws EFException {
+	public void removeShard(String instance, String storeId) throws EFException {
 		String name = TaskUtil.getStoreName(instance, storeId);
 		PREPARE(false, false, false);
-		if (!ISLINK())
+		if (!connStatus())
 			return;
 		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 		try {
@@ -145,7 +145,7 @@ public class VearchWriter extends WriterFlowSocket {
 		} catch (Exception e) {
 			log.error("remove vearch instance {} exception!", name, e);
 		} finally {
-			REALEASE(false, false);
+			releaseConn(false, false);
 		}
 	}
 

@@ -172,7 +172,7 @@ public class FilesReader extends ReaderFlowSocket {
 	public DataPage getPageData(final TaskCursor taskCursor, int pageSize) throws EFException {
 		PREPARE(false, false, false);
 		try {
-			if (!ISLINK())
+			if (!connStatus())
 				return this.dataPage;
 			this.dataPage.put(GlobalParam.READER_KEY, taskCursor.getReaderKey());
 			this.dataPage.put(GlobalParam.READER_SCAN_KEY, taskCursor.getReaderScanKey());
@@ -196,7 +196,7 @@ public class FilesReader extends ReaderFlowSocket {
 		} catch (Exception e) {
 			throw new EFException(e);
 		} finally {
-			REALEASE(false, true);
+			releaseConn(false, true);
 		}
 		return this.dataPage;
 	}
@@ -204,9 +204,9 @@ public class FilesReader extends ReaderFlowSocket {
 	@Override
 	public ConcurrentLinkedDeque<String> getDataPages(final TaskModel task, int pageSize) throws EFException {
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
-		boolean releaseConn = false;
+		boolean clearConn = false;
 		PREPARE(false, false, false);
-		if (!ISLINK())
+		if (!connStatus())
 			return page;
 		try {
 			Long startTime = 0L;
@@ -248,11 +248,11 @@ public class FilesReader extends ReaderFlowSocket {
 			}
 
 		} catch (Exception e) {
-			releaseConn = true;
+			clearConn = true;
 			this.dataPage.put(GlobalParam.READER_STATUS, false); 
 			throw new EFException(e,task.getInstanceID()+ " Files Reader get dataPage Exception!");
 		} finally {
-			REALEASE(false, releaseConn);
+			releaseConn(false, clearConn);
 		}
 		return page;
 	}

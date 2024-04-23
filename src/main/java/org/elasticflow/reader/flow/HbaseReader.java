@@ -58,9 +58,9 @@ public class HbaseReader extends ReaderFlowSocket {
 	@Override
 	public DataPage getPageData(final TaskCursor taskCursor,int pageSize) throws EFException { 
 		PREPARE(false,false, false);
-		boolean releaseConn = false;
+		boolean clearConn = false;
 		try {
-			if(!ISLINK())
+			if(!connStatus())
 				return this.dataPage;
 			Table table = (Table) GETSOCKET().getConnection(END_TYPE.reader);
 			Scan scan = new Scan();
@@ -113,15 +113,15 @@ public class HbaseReader extends ReaderFlowSocket {
 				this.dataPage.putDataBoundary(dataBoundary);
 				this.dataPage.putData(this.dataUnit);
 			} catch (Exception e) {
-				releaseConn = true;
+				clearConn = true;
 				this.dataPage.put(GlobalParam.READER_LAST_STAMP, -1);
 				throw new EFException(e,taskCursor.getInstanceConfig().getInstanceID()+ " Hbase Reader get dataPage Exception!"); 
 			} 
 		} catch (Exception e) {
-			releaseConn = true; 
+			clearConn = true; 
 			throw new EFException(e,taskCursor.getInstanceConfig().getInstanceID()+ " Hbase Reader get dataPage Exception!");
 		}finally{
-			REALEASE(false,releaseConn);
+			releaseConn(false,clearConn);
 		} 
 		return this.dataPage;
 	}
@@ -131,9 +131,9 @@ public class HbaseReader extends ReaderFlowSocket {
 		int i = 0;
 		ConcurrentLinkedDeque<String> dt = new ConcurrentLinkedDeque<>(); 
 		PREPARE(false,false, false);
-		if(!ISLINK())
+		if(!connStatus())
 			return dt; 
-		boolean releaseConn = false;
+		boolean clearConn = false;
 		try {
 			Scan scan = new Scan();
 			Table table = (Table) GETSOCKET().getConnection(END_TYPE.reader);
@@ -158,10 +158,10 @@ public class HbaseReader extends ReaderFlowSocket {
 				i += r.size();
 			}
 		} catch (Exception e) {
-			releaseConn = true;
+			clearConn = true;
 			throw new EFException(e,task.getInstanceID()+ " Hbase Reader get page lists Exception!");  
 		}finally{ 
-			REALEASE(false,releaseConn);
+			releaseConn(false,clearConn);
 		}
 		return dt;
 	} 

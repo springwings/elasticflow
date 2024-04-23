@@ -7,6 +7,7 @@
  */
 package org.elasticflow.reader.handler;
 
+import org.elasticflow.flow.FlowHandler;
 import org.elasticflow.model.task.TaskCursor;
 import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.util.EFException;
@@ -18,12 +19,12 @@ import org.elasticflow.util.EFException;
  * @version 2.0
  * @date 2018-12-28 09:27
  */
-public abstract class ReaderHandler{
+public abstract class ReaderHandler extends FlowHandler{
 	
 	protected boolean supportHandlePage = false;
 	
 	protected boolean supportHandleData = false;
-	
+ 
 	public boolean supportHandlePage() {
 		return supportHandlePage;
 	}
