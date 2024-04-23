@@ -118,7 +118,7 @@ public final class GlobalParam {
 	/** Machine node identification */
 	public final static int NODEID = Integer.valueOf(System.getProperty("nodeid"));
 
-	public static int STS_THREADPOOL_SIZE = 100;
+	public static int SYS_THREADPOOL_SIZE = 100;
 
 	public static String MASTER_HOST = "";
 

@@ -657,7 +657,7 @@ public final class NodeMonitor {
 		dt.put("VERSION", GlobalParam.VERSION);
 		dt.put("TASKS", Resource.tasks.size());
 		dt.put("THREAD_POOL_SIZE", Resource.threadPools.getPoolSize());
-		dt.put("SYS_THREAD_POOL_SIZE", GlobalParam.STS_THREADPOOL_SIZE);
+		dt.put("SYS_THREAD_POOL_SIZE", GlobalParam.SYS_THREADPOOL_SIZE);
 		dt.put("THREAD_ACTIVE_COUNT", Resource.threadPools.getActiveCount());
 		dt.put("DISTRIBUTE_RUN", GlobalParam.DISTRIBUTE_RUN);
 		dt.put("CPU_USAGE", SystemInfoUtil.getCpuUsage());
@@ -852,6 +852,7 @@ public final class NodeMonitor {
 			}
 			instance.put("WriteTo", wt2);
 			instance.put("OpenTrans", config.openTrans());
+			instance.put("OpenCompute", config.openCompute());
 			instance.put("IsVirtualPipe", config.getPipeParams().isVirtualPipe());
 			instance.put("InstanceType", EFMonitorUtil.getInstanceType(config.getInstanceType()));
 			graphnodes.put(config.getAlias(), instance);
@@ -1023,6 +1024,7 @@ public final class NodeMonitor {
 			instance.put("ReadFrom", config.getPipeParams().getReadFrom());
 			instance.put("WriteTo", config.getPipeParams().getWriteTo().replace(",", ";"));
 			instance.put("OpenTrans", config.openTrans());
+			instance.put("OpenCompute", config.openCompute());
 			instance.put("RunState", true);
 			instance.put("Remark", config.getPipeParams().getRemark());
 			try {

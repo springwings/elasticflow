@@ -81,7 +81,7 @@ public final class Run {
 		Resource.socketCenter =  new SocketCenter();//data-flow builder 
 		Resource.flowCenter = new FlowCenter();//data-flow manager
 		Resource.nodeMonitor = new NodeMonitor(); 
-		Resource.threadPools = new ThreadPools(GlobalParam.STS_THREADPOOL_SIZE);
+		Resource.threadPools = new ThreadPools(GlobalParam.SYS_THREADPOOL_SIZE);
 		
 		if(!EFNodeUtil.isSlave()) {//for master
 			GlobalParam.TASK_COORDER = new TaskStateCoordinator();
@@ -131,7 +131,7 @@ public final class Run {
 		GlobalParam.DISTRIBUTE_RUN = GlobalParam.SystemConfig.getProperty("distribute_run").equals("false") ? false : true;
 		GlobalParam.MASTER_HOST = GlobalParam.SystemConfig.getProperty("master_host");
 		GlobalParam.SERVICE_LEVEL = Integer.parseInt(GlobalParam.SystemConfig.get("service_level").toString());		
-		GlobalParam.STS_THREADPOOL_SIZE = Integer.parseInt(GlobalParam.SystemConfig.getProperty("sys_threadpool_size"));
+		GlobalParam.SYS_THREADPOOL_SIZE = Integer.parseInt(GlobalParam.SystemConfig.getProperty("sys_threadpool_size"));
 		GlobalParam.CLUSTER_MIN_NODES = Integer.parseInt(GlobalParam.SystemConfig.getProperty("min_nodes"));
 		if(GlobalParam.SystemConfig.containsKey("node_ip"))
 			GlobalParam.IP = GlobalParam.SystemConfig.get("node_ip").toString();

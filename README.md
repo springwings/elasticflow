@@ -89,7 +89,7 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
 # 可视化管理界面
 - http://ip:8616
 <div align="center">
-  <img src="images/manage.png" width="520px">
+  <img src="images/manage.jpg" width="560px">
 </div>
 
 
@@ -102,7 +102,7 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
       <dependency>
         <groupId>org.elasticflow</groupId>
         <artifactId>elasticflow</artifactId>
-        <version>6.0.1</version>
+        <version>6.0.4</version>
       </dependency>
    ```
    2. plugin开发测试代码，例如：
