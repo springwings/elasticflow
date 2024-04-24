@@ -85,56 +85,60 @@ public class EFHttpClientUtil {
 	 * @return
 	 */
 	public static EFHttpResponse process(String uri, String data) {
-		return process(uri,data,HttpPost.METHOD_NAME, DEFAULT_CONTENT_TYPE, DEFAUL_TIME_OUT,true);
+		return process(uri, data, HttpPost.METHOD_NAME, DEFAULT_CONTENT_TYPE, DEFAUL_TIME_OUT, true);
 	}
-	public static EFHttpResponse process(String uri, String methodName,String contentType,String data) {
-		return process(uri,data,methodName,contentType, DEFAUL_TIME_OUT,true);
+
+	public static EFHttpResponse process(String uri, String methodName, String contentType, String data) {
+		return process(uri, data, methodName, contentType, DEFAUL_TIME_OUT, true);
 	}
-	public static EFHttpResponse process(String uri, String methodName,String contentType) {
-		return process(uri,null,methodName, contentType, DEFAUL_TIME_OUT,true);
+
+	public static EFHttpResponse process(String uri, String methodName, String contentType) {
+		return process(uri, null, methodName, contentType, DEFAUL_TIME_OUT, true);
 	}
-	public static EFHttpResponse process(String uri, String data,String methodName, String contentType, int timeout,boolean retry) {
+
+	public static EFHttpResponse process(String uri, String data, String methodName, String contentType, int timeout,
+			boolean retry) {
 		long startTime = System.currentTimeMillis();
 		HttpRequestBase method = null;
 		HttpEntity httpEntity = null;
 		EFHttpResponse response = EFHttpResponse.getInstance();
-		try {			
+		try {
 			CloseableHttpResponse rps;
 			method = getRequest(uri, methodName, contentType, timeout);
-			if(data!=null) {
+			if (data != null) {
 				HttpEntityEnclosingRequestBase rq = (HttpEntityEnclosingRequestBase) method;
 				rq.setEntity(new StringEntity(data, "UTF-8"));
 				HttpContext context = HttpClientContext.create();
 				rps = httpClient.execute(rq, context);
-			}else {				
+			} else {
 				rps = httpClient.execute(getRequest(uri, methodName, contentType, timeout));
-			}			
+			}
 			httpEntity = rps.getEntity();
 			if (httpEntity != null) {
-				response.setPayload( EntityUtils.toString(httpEntity, "UTF-8"));
+				response.setPayload(EntityUtils.toString(httpEntity, "UTF-8"));
 				response.setUsems(System.currentTimeMillis() - startTime);
 			}
 		} catch (Exception e) {
 			if (method != null) {
 				method.abort();
-			} 
+			}
 			if (e instanceof IOException && retry) {
-				 return EFHttpClientUtil.process(uri, data, methodName, contentType, timeout,false);
-			} 
+				return EFHttpClientUtil.process(uri, data, methodName, contentType, timeout, false);
+			}
 			response.setStatus(RESPONSE_STATUS.ExternErr);
 			response.setInfo(e.toString());
-		}finally {
+		} finally {
 			if (httpEntity != null) {
 				try {
 					EntityUtils.consumeQuietly(httpEntity);
-				} catch (Exception e2) { 
+				} catch (Exception e2) {
 					logger.error("close response exception, url:" + uri + ", exception:" + e2.toString()
 							+ ", cost time(ms):" + (System.currentTimeMillis() - startTime));
 				}
-			} 
+			}
 		}
 		return response;
-	} 
+	}
 
 	/**
 	 * Create request
@@ -153,20 +157,20 @@ public class EFHttpClientUtil {
 		RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeout * 1000)
 				.setConnectTimeout(timeout * 1000).setConnectionRequestTimeout(timeout * 1000)
 				.setExpectContinueEnabled(false).build();
-		switch(methodName) {
-			case HttpPut.METHOD_NAME:
-				method = new HttpPut(uri);
-				break;
-			case HttpDelete.METHOD_NAME:
-				method = new HttpDelete(uri);
-				break;
-			case HttpGet.METHOD_NAME:
-				method = new HttpGet(uri);
-				break;
-			default:
-				method = new HttpPost(uri);
-				break;
-		}		
+		switch (methodName) {
+		case HttpPut.METHOD_NAME:
+			method = new HttpPut(uri);
+			break;
+		case HttpDelete.METHOD_NAME:
+			method = new HttpDelete(uri);
+			break;
+		case HttpGet.METHOD_NAME:
+			method = new HttpGet(uri);
+			break;
+		default:
+			method = new HttpPost(uri);
+			break;
+		}
 		if (StringUtils.isBlank(contentType)) {
 			contentType = DEFAULT_CONTENT_TYPE;
 		}
@@ -174,4 +178,5 @@ public class EFHttpClientUtil {
 		method.setConfig(requestConfig);
 		return method;
 	}
+ 
 }

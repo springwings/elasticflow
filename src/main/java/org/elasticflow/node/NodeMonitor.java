@@ -119,6 +119,7 @@ public final class NodeMonitor {
 			put("getinstancexml", "getInstanceXml");
 			put("updateinstancexml", "updateInstanceXml");
 			put("searchinstancedata", "searchInstanceData");
+			put("analyzeinstance", "analyzeInstance");
 			// other manage
 			put("getresource", "getResource");
 			put("getresources", "getResources");
@@ -786,6 +787,13 @@ public final class NodeMonitor {
 			if (configMap.containsKey(pipe))
 				Resource.socketCenter.getSearcher(pipe, "", "", false).startSearch(efRq, rps);
 			setResponse(RESPONSE_STATUS.Success, null, rps);
+		}
+	}
+	
+	public void analyzeInstance(Request rq, EFRequest RR) {
+		if (EFMonitorUtil.checkParams(this, RR, "instance")) {
+			String res = EFMonitorUtil.analyzeInstance(RR.getStringParam("instance"));
+			setResponse(RESPONSE_STATUS.Success, null, res);
 		}
 	}
 

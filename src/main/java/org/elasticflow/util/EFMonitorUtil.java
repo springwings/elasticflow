@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.COMPUTER_MODE;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.config.GlobalParam.INSTANCE_STATUS;
 import org.elasticflow.config.GlobalParam.INSTANCE_TYPE;
@@ -526,6 +527,44 @@ public class EFMonitorUtil {
 			JO.put("node_info", nodeInfo);
 		}
 		return JO;
+	}
+	
+	public static String analyzeInstance(String instance) {
+		StringBuffer res = new StringBuffer();
+		if (Resource.nodeConfig.getInstanceConfigs().containsKey(instance)) {
+			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
+			//check not match 
+			res.append("<h1>1 实例配置检查</h1><ul>"); 
+			res.append("<li>· 实例配置加载: <b>"+(config.checkStatus()?"成功":"失败")+"</b></li>");
+			boolean checkpass = true;
+			if(config.getWriterParams().getWriteKey()!=null && config.getReaderParams().getKeyField()!=null) {
+				if(config.getComputeParams().getComputeMode()!=COMPUTER_MODE.BLANK) {
+					if(!config.openCompute() || !config.openTrans())
+						checkpass = false;					
+				}
+				if(checkpass) {
+					res.append("<li>· 实例配置与运行类型: <b>匹配</b></li>");
+				}else {
+					res.append("<li>· 实例配置与运行类型: <b>不匹配</b></li>");
+				}
+			}
+			res.append("<h1>2 实例运行检查</h1><ul>"); 
+			if(config.getPipeParams().getReadFrom()!=null)
+				res.append("<li>· 读端: <b>"+Resource.resourceStates.get(config.getPipeParams().getReadFrom()).getString("status")+"</b></li>");
+			if(config.openCompute()) {
+				if(config.getComputeParams().getComputeMode()==COMPUTER_MODE.REST) {  
+					res.append("<li>· 计算端: 模式"+COMPUTER_MODE.REST+", <b>"+(isPortOpen(config.getComputeParams().getApi().get(0))?"正常":"异常")+"</b></li>");
+				}else {
+					res.append("<li>· 计算端: 模式"+config.getComputeParams().getComputeMode()+", 未知</li>");
+				}
+			} 		
+			if(config.getPipeParams().getWriteTo()!=null)
+				res.append("<li>· 写端: <b>"+Resource.resourceStates.get(config.getPipeParams().getWriteTo()).getString("status")+"</b></li>");
+			res.append("</ul>"); 
+		}
+		
+		
+		return res.toString(); 
 	}
 	
 	public static void groupL1SeqData(JSONObject data,String appendPipe,String key,Object val) {
