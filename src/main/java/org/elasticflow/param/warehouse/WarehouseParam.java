@@ -46,12 +46,22 @@ public class WarehouseParam {
 		return type;
 	}
 	
-	public void setType(String type) throws EFException {
+	/**
+	 * Convert the string to the corresponding enumeration type value
+	 * @param type
+	 * @return
+	 */
+	public static DATA_SOURCE_TYPE getTypeFromString(String type) {
 		String _type = type.toUpperCase();
 		for (DATA_SOURCE_TYPE dtype : DATA_SOURCE_TYPE.values()) { 
 		    if(_type.equals(dtype.name()))
-		    	this.type = dtype;
+		    	return dtype;
 		} 
+		return DATA_SOURCE_TYPE.UNKNOWN;
+	}
+	
+	public void setType(String type) throws EFException {
+		this.type = getTypeFromString(type);
 		if(this.type==DATA_SOURCE_TYPE.UNKNOWN)
 			throw new EFException("Unrecognized data source type "+type);
 	}

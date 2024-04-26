@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FastdfsConnection extends EFConnectionSocket<StorageClient> { 
 	
-	private final static Logger log = LoggerFactory.getLogger(EsConnection.class);
+	private final static Logger log = LoggerFactory.getLogger(ElasticsearchConnection.class);
 	
 	public static EFConnectionSocket<?> getInstance(ConnectParams connectParams){
 		EFConnectionSocket<?> o = new FastdfsConnection();

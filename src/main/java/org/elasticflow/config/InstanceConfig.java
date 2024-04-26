@@ -230,7 +230,6 @@ public class InstanceConfig {
 			if (!dataflow.getAttribute("alias").equals("")) {
 				this.alias = dataflow.getAttribute("alias");
 			}
-
 			params = (Element) dataflow.getElementsByTagName("TransParam").item(0);
 			if (params != null) {
 				parseNode(params.getElementsByTagName("param"), "pipeParam", PipeParam.class);

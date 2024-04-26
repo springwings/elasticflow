@@ -15,7 +15,7 @@ import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.config.GlobalParam.ETYPE;
 import org.elasticflow.config.GlobalParam.RESOURCE_STATUS;
-import org.elasticflow.connection.sockets.EsConnector;
+import org.elasticflow.connection.sockets.ElasticsearchConnector;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
@@ -60,16 +60,16 @@ import com.alibaba.fastjson.JSONObject;
  * @date 2018-10-30 14:02
  */
 @NotThreadSafe
-public class EsWriter extends WriterFlowSocket {
+public class ElasticsearchWriter extends WriterFlowSocket {
 
-	protected EsConnector CONNS;
+	protected ElasticsearchConnector CONNS;
 
 	private boolean reconn = false;
 
-	private final static Logger log = LoggerFactory.getLogger(EsWriter.class);
+	private final static Logger log = LoggerFactory.getLogger(ElasticsearchWriter.class);
 
-	public static EsWriter getInstance(ConnectParams connectParams) {
-		EsWriter o = new EsWriter();
+	public static ElasticsearchWriter getInstance(ConnectParams connectParams) {
+		ElasticsearchWriter o = new ElasticsearchWriter();
 		o.initConn(connectParams);
 		return o;
 	}
@@ -444,10 +444,10 @@ public class EsWriter extends WriterFlowSocket {
 		return exists;
 	}
 	
-	private synchronized EsConnector getESC() throws EFException {
+	private synchronized ElasticsearchConnector getESC() throws EFException {
 		if (this.CONNS == null || reconn) {
 			reconn = false;
-			this.CONNS = (EsConnector) GETSOCKET().getConnection(END_TYPE.writer);
+			this.CONNS = (ElasticsearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 		}
 		return this.CONNS;
 	}

@@ -162,10 +162,12 @@ public final class Common {
 	public static void setConfigObj(Object obj, Class<?> c, Element element) throws Exception {
 		String fieldName = element.getElementsByTagName("name").item(0).getTextContent();
 		String value = element.getElementsByTagName("value").item(0).getTextContent();
-		String dsl = null;
+		String extval = null;
 		if (element.getElementsByTagName("dsl").item(0)!=null)
-		   dsl = element.getElementsByTagName("dsl").item(0).getTextContent();
-		setConfigObj(obj, c, fieldName, value,dsl);
+			extval = element.getElementsByTagName("dsl").item(0).getTextContent();
+		if (element.getElementsByTagName("type").item(0)!=null)
+			extval = element.getElementsByTagName("type").item(0).getTextContent(); 
+		setConfigObj(obj, c, fieldName, value,extval);
 	}
 
 	@SuppressWarnings("unchecked")

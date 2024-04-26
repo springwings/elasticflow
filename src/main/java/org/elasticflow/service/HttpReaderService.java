@@ -25,7 +25,7 @@ import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.reader.DataPage;
 import org.elasticflow.model.reader.PipeDataUnit;
-import org.elasticflow.model.searcher.SearcherESModel;
+import org.elasticflow.model.searcher.SearcherElasticsearchModel;
 import org.elasticflow.model.searcher.SearcherKafkaModel;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherVearchModel;
@@ -217,8 +217,8 @@ public class HttpReaderService {
 							WarehouseParam param = Resource.socketCenter
 									.getWHP(transFlow.getInstanceConfig().getPipeParams().getWriteTo());
 							switch (param.getType()) {
-							case ES:
-								SModel = SearcherESModel.getInstance(Common.getRequest(rq),
+							case ELASTICSEARCH:
+								SModel = SearcherElasticsearchModel.getInstance(Common.getRequest(rq),
 										transFlow.getInstanceConfig()); 
 								break;
 							case VEARCH:

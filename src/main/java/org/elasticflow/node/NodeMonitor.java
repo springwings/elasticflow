@@ -53,6 +53,7 @@ import org.elasticflow.yarn.Resource;
 import org.mortbay.jetty.Request;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 /**
@@ -123,6 +124,8 @@ public final class NodeMonitor {
 			// other manage
 			put("getresource", "getResource");
 			put("getresources", "getResources");
+			put("getmodules", "getModules");
+			put("startmodule", "startModule");
 			put("getresourcexml", "getResourcexml");
 			put("updateresource", "updateResource");
 			put("addresource", "addResource");
@@ -210,7 +213,53 @@ public final class NodeMonitor {
 			updateResourceXml(jsonObject, true);
 		}
 	}
-
+	/**
+	 * scan all modules
+	 * @param rq
+	 * @param RR
+	 */
+	public void getModules(Request rq, EFRequest RR){
+		JSONArray res = PipeXMLUtil.getModules();
+		setResponse(RESPONSE_STATUS.Success, "", res);
+	}
+	
+	/**
+	 * start Module to instance
+	 * @param rq
+	 * @param RR
+	 */
+	public void startModule(Request rq, EFRequest RR) {
+		if (EFMonitorUtil.checkParams(this, RR, "instancename,module,readfrom,writeto")) {
+			if(!RR.getStringParam("instancename").equals(RR.getStringParam("module"))) {
+				EFFileUtil.copyFolder(GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("module"), GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instancename"));
+			}
+			String xmlPath = GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instancename") + "/task.xml";
+			try {
+				int level = 1;
+				PipeXMLUtil.ModifyNode(xmlPath,"TransParam.param", "readfrom",
+						RR.getStringParam("readfrom"));
+				PipeXMLUtil.ModifyNode(xmlPath,"TransParam.param", "writeto",
+						RR.getStringParam("writeto"));
+				if(RR.getStringParam("compute")!="") {
+					PipeXMLUtil.ModifyNode(xmlPath,"ComputerParam.param", "api",
+							RR.getStringParam("compute"));
+					level+=2;
+				}
+				EFMonitorUtil.addInstanceToSystem(RR.getStringParam("instancename"),String.valueOf(level));
+				try {
+					EFMonitorUtil.saveNodeConfig();
+					setResponse(RESPONSE_STATUS.Success,
+							RR.getStringParam("instancename") + " add to node " + GlobalParam.IP + " success!", null);
+				} catch (Exception e) {
+					setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
+				}
+			} catch (EFException e) {
+				setResponse(RESPONSE_STATUS.DataErr, RR.getStringParam("instance") + e.getMessage(), null);
+			}
+			setResponse(RESPONSE_STATUS.Success, "", null);
+		}
+	}
+	
 	/**
 	 * read Resources
 	 * 

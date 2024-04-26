@@ -11,7 +11,7 @@ import org.elasticsearch.client.RestHighLevelClient;
  * @version 1.0
  * @date 2018-10-26 09:25
  */
-public final class EsConnector {
+public final class ElasticsearchConnector {
 	
 	private volatile RestHighLevelClient client;
 	private volatile BulkProcessor bulkProcessor;

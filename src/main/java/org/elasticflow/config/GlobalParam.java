@@ -91,7 +91,7 @@ public final class GlobalParam {
 
 	public static Properties SystemConfig = new FormatProperties();
 
-	/** configure file local path */
+	/** configure local directory */
 	public static String CONFIG_ROOT = System.getProperty("config");
 
 	public static String SYS_CONFIG_PATH = CONFIG_ROOT + "/config";
@@ -193,7 +193,7 @@ public final class GlobalParam {
 
 	/** CUSTOM ：User defined connection using this type */
 	public static enum DATA_SOURCE_TYPE {
-		MYSQL, ORACLE, HIVE, ES, HBASE, H2, FILES, NEO4J, KAFKA, VEARCH, HDFS, FASTDFS, ROCKETMQ, MINIO, VIRTUAL,
+		MYSQL, ORACLE, HIVE, ELASTICSEARCH, HBASE, H2, FILES, NEO4J, KAFKA, VEARCH, HDFS, FASTDFS, ROCKETMQ, MINIO, VIRTUAL,
 		UNKNOWN
 	} 
 

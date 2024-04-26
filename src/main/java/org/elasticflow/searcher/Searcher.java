@@ -4,7 +4,7 @@ import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.EFResponse;
-import org.elasticflow.model.searcher.SearcherESModel;
+import org.elasticflow.model.searcher.SearcherElasticsearchModel;
 import org.elasticflow.model.searcher.SearcherModel;
 import org.elasticflow.model.searcher.SearcherVearchModel;
 import org.elasticflow.searcher.handler.SearcherHandler;
@@ -59,8 +59,8 @@ public class Searcher {
 		}
 		SearcherModel<?> searcherModel = null;
 		switch (this.searcherFlowSocket.getType()) {
-		case ES:
-			searcherModel = SearcherESModel.getInstance(efrq, instanceConfig);
+		case ELASTICSEARCH:
+			searcherModel = SearcherElasticsearchModel.getInstance(efrq, instanceConfig);
 			break;
 		case VEARCH:
 			searcherModel = SearcherVearchModel.getInstance(efrq, instanceConfig);

@@ -35,7 +35,7 @@ public class ReaderParam {
 	private String dataScanDSL;
 	/**use User defined plugins and parameter configurations**/
 	private String handler;
-	private JSONObject handlerDSL = null;
+	private JSONObject handlerDSL;
 	private boolean isNoSql = false;
 	/** defined series scan location */
 	protected List<String> L2seqs = Arrays.asList("");	

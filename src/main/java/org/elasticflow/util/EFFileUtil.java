@@ -154,6 +154,26 @@ public class EFFileUtil {
 		}
 		return res;
 	}
+	
+	/**
+	 * get folder lists
+	 * @param path 
+	 * @return
+	 */
+	public static ArrayList<File> scanFolders(String directoryPath) {
+		ArrayList<File> res = new ArrayList<>(); 
+        File directory = new File(directoryPath);
+        if (directory.exists() && directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            for (File file : files) {
+                if (file.isDirectory()) {
+                	res.add(file);
+                }
+            }
+        }
+		return res;
+	}
+
 
 	public static boolean copyFolder(String sourceFolder, String destFolder) {
 		File in = new File(sourceFolder);

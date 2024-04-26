@@ -9,11 +9,15 @@ package org.elasticflow.util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -23,9 +27,17 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.util.instance.EFDataStorer;
+import org.elasticflow.yarn.Resource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * Pipe XML configure file operation
@@ -37,10 +49,10 @@ import org.w3c.dom.NodeList;
 public class PipeXMLUtil {
 
 	/**
-	 * 
+	 * modify xml file node
 	 * @param xmlPath
-	 * @param tag,     TransParam.param
-	 * @param tagName
+	 * @param taglevel    example: TransParam.param
+	 * @param tagName     example: remark
 	 * @param tagValue
 	 * @throws EFException
 	 */
@@ -95,5 +107,57 @@ public class PipeXMLUtil {
 		} catch (Exception e) {
 			throw new EFException(e);
 		}
+	}
+	
+	/**
+	 * scan all modules
+	 * @param rq
+	 * @param RR
+	 */
+	public static JSONArray getModules(){
+		JSONArray res = new JSONArray();
+		ArrayList<File> modules = EFFileUtil.scanFolders(GlobalParam.INSTANCE_PATH);
+		Map<String, InstanceConfig> configs = Resource.nodeConfig.getInstanceConfigs();
+		for(File f : modules) {
+			JSONObject row = new JSONObject();
+			row.put("name", f.getName());
+			row.put("path", f.getPath());
+			row.put("enable", configs.containsKey(f.getName()));
+			row.put("opencompute",false);
+			row.put("readtype",new String[]{});
+			row.put("writetype",new String[]{});
+			row.put("computetype","");
+			byte[] bt = EFDataStorer.getData(f.getPath()+"/task.xml", false);  
+			try {
+				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+				DocumentBuilder db = dbf.newDocumentBuilder();
+				Document doc = db.parse(new ByteArrayInputStream(bt, 0, bt.length));
+				Element dataflow = (Element) doc.getElementsByTagName("dataflow").item(0); 
+				if (dataflow.getElementsByTagName("ComputerParam").item(0) != null) 
+					row.put("opencompute",true);  
+				Element TransParam = (Element) dataflow.getElementsByTagName("TransParam").item(0);  
+				row.put("desc",getXmlNodeInfo(TransParam.getElementsByTagName("param"),"remark","value")); 
+				row.put("readtype",getXmlNodeInfo(TransParam.getElementsByTagName("param"),"readFrom","type").split(",")); 
+				row.put("writetype",getXmlNodeInfo(TransParam.getElementsByTagName("param"),"writeTo","type").split(",")); 
+				Element ComputerParam = (Element) dataflow.getElementsByTagName("ComputerParam").item(0);  
+				row.put("computetype",getXmlNodeInfo(ComputerParam.getElementsByTagName("param"),"computeMode","value"));
+			} catch (Exception e) {
+				Common.LOG.warn(e.getMessage());
+			}			
+			res.add(row);
+		}
+		return res;
+	}
+	
+	private static String getXmlNodeInfo(NodeList paramlist,String name,String key) { 
+		for (int i = 0; i < paramlist.getLength(); i++) {
+			Node param = paramlist.item(i); 
+			if(param.getNodeType() == Node.ELEMENT_NODE) {
+				Element element = (Element) param; 
+				if(element.getElementsByTagName("name").item(0).getTextContent().equals(name))  
+					return element.getElementsByTagName(key).item(0).getTextContent();
+			}
+		}
+		return "";
 	}
 }

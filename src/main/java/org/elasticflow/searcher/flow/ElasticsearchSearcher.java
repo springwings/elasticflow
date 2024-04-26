@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
-import org.elasticflow.connection.sockets.EsConnector;
+import org.elasticflow.connection.sockets.ElasticsearchConnector;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.searcher.ResponseDataUnit;
@@ -39,10 +39,10 @@ import com.alibaba.fastjson.JSONObject;
  * @date 2018-10-26 09:23
  * @modify 2023-05-26 09:23
  */
-public final class EsSearcher extends SearcherFlowSocket {
+public final class ElasticsearchSearcher extends SearcherFlowSocket {
 
-	public static EsSearcher getInstance(ConnectParams connectParams) {
-		EsSearcher o = new EsSearcher();
+	public static ElasticsearchSearcher getInstance(ConnectParams connectParams) {
+		ElasticsearchSearcher o = new ElasticsearchSearcher();
 		o.initConn(connectParams);
 		return o;
 	}
@@ -54,9 +54,9 @@ public final class EsSearcher extends SearcherFlowSocket {
 		boolean clearConn = false;
 		SearcherResult res = new SearcherResult();
 		if (connStatus()) {
-			EsConnector ESC = null;
+			ElasticsearchConnector ESC = null;
 			try {
-				ESC = (EsConnector) GETSOCKET().getConnection(END_TYPE.searcher);
+				ESC = (ElasticsearchConnector) GETSOCKET().getConnection(END_TYPE.searcher);
 				RestHighLevelClient conn = ESC.getClient();
 				List<String> returnFields = new ArrayList<String>();
 				if (searcherModel.getFl() != null) {

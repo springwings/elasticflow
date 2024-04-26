@@ -30,11 +30,11 @@ import org.slf4j.LoggerFactory;
  * @date 2018-10-26 09:25
  * @see https://www.elastic.co/ 
  */
-public class EsConnection extends EFConnectionSocket<EsConnector> {
+public class ElasticsearchConnection extends EFConnectionSocket<ElasticsearchConnector> {
 
 	private RestHighLevelClient conn;
 	private BulkProcessor bulkProcessor;
-	private EsConnector ESC = new EsConnector();
+	private ElasticsearchConnector ESC = new ElasticsearchConnector();
 
 	private final static int BULK_BUFFER = 1000;
 	private final static int BULK_SIZE = 30;
@@ -43,10 +43,10 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 
 	private CredentialsProvider credentialsProvider;
 
-	private final static Logger log = LoggerFactory.getLogger(EsConnection.class);
+	private final static Logger log = LoggerFactory.getLogger(ElasticsearchConnection.class);
 
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
-		EFConnectionSocket<?> o = new EsConnection();
+		EFConnectionSocket<?> o = new ElasticsearchConnection();
 		o.init(ConnectParams);
 		return o;
 	}
@@ -71,7 +71,7 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 					try {
 						httpHosts[i] = new HttpHost(hosts[i], port, "http");
 					} catch (Exception e) {
-						log.error("{} es {} connect exception",wp.getAlias() , endType.name(),e);
+						log.error("{} elasticsearch {} connect exception",wp.getAlias() , endType.name(),e);
 					}
 				}
 				if(credentialsProvider!=null) {
@@ -95,7 +95,7 @@ public class EsConnection extends EFConnectionSocket<EsConnector> {
 	}
 
 	@Override
-	public EsConnector getConnection(END_TYPE endType) {
+	public ElasticsearchConnector getConnection(END_TYPE endType) {
 		this.endType = endType;
 		connect(endType);
 		if (endType != END_TYPE.searcher) {

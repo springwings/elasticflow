@@ -13,12 +13,12 @@ import org.elasticsearch.search.sort.SortBuilder;
  * @version 5.0
  * @date 2023-02-22 09:08
  */
-public class SearcherESModel extends SearcherModel<SortBuilder<?>> {
+public class SearcherElasticsearchModel extends SearcherModel<SortBuilder<?>> {
 	 
 	private List<SortBuilder<?>> sortinfo;  
 	 
-	public static SearcherESModel getInstance(EFRequest request, InstanceConfig instanceConfig) {
-		SearcherESModel SM = new SearcherESModel(); 
+	public static SearcherElasticsearchModel getInstance(EFRequest request, InstanceConfig instanceConfig) {
+		SearcherElasticsearchModel SM = new SearcherElasticsearchModel(); 
 		SM.setRequestHandler("");
 		SM.setSorts(SearchParamUtil.getSortField(request, instanceConfig));
 		SM.setEfRequest(request);
