@@ -28,6 +28,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.yarn.Resource;
@@ -136,27 +137,37 @@ public class PipeXMLUtil {
 				if (dataflow.getElementsByTagName("ComputerParam").item(0) != null) 
 					row.put("opencompute",true);  
 				Element TransParam = (Element) dataflow.getElementsByTagName("TransParam").item(0);  
-				row.put("desc",getXmlNodeInfo(TransParam.getElementsByTagName("param"),"remark","value")); 
-				row.put("readtype",getXmlNodeInfo(TransParam.getElementsByTagName("param"),"readFrom","type").split(",")); 
-				row.put("writetype",getXmlNodeInfo(TransParam.getElementsByTagName("param"),"writeTo","type").split(",")); 
+				row.put("desc",getXmlNodeInfo(TransParam.getElementsByTagName("param"),"remark","value"));  
+				row.put("readfrom",getXmlNodeInfo(TransParam.getElementsByTagName("param"),"readFrom","value")); 
+				row.put("writeto",getXmlNodeInfo(TransParam.getElementsByTagName("param"),"writeTo","value")); 
 				Element ComputerParam = (Element) dataflow.getElementsByTagName("ComputerParam").item(0);  
-				row.put("computetype",getXmlNodeInfo(ComputerParam.getElementsByTagName("param"),"computeMode","value"));
-			} catch (Exception e) {
-				Common.LOG.warn(e.getMessage());
+				if(ComputerParam!=null) {
+					row.put("computetype",getXmlNodeInfo(ComputerParam.getElementsByTagName("param"),"computeMode","value"));
+				}else {
+					row.put("computetype","");
+				}	
+				row.put("readtype",getXmlNodeInfo(TransParam.getElementsByTagName("param"),"readFrom","type").split(","));  
+				row.put("writetype",getXmlNodeInfo(TransParam.getElementsByTagName("param"),"writeTo","type").split(","));   
+			} catch (Exception e) {  
+				Common.LOG.warn("instance {} exception {}",f.getName(),e.getMessage());
 			}			
 			res.add(row);
 		}
 		return res;
 	}
 	
-	private static String getXmlNodeInfo(NodeList paramlist,String name,String key) { 
-		for (int i = 0; i < paramlist.getLength(); i++) {
-			Node param = paramlist.item(i); 
-			if(param.getNodeType() == Node.ELEMENT_NODE) {
-				Element element = (Element) param; 
-				if(element.getElementsByTagName("name").item(0).getTextContent().equals(name))  
-					return element.getElementsByTagName(key).item(0).getTextContent();
+	private static String getXmlNodeInfo(NodeList paramlist,String name,String key) throws EFException { 
+		try {
+			for (int i = 0; i < paramlist.getLength(); i++) {
+				Node param = paramlist.item(i); 
+				if(param.getNodeType() == Node.ELEMENT_NODE) {
+					Element element = (Element) param; 
+					if(element.getElementsByTagName("name").item(0).getTextContent().equals(name))  
+						return element.getElementsByTagName(key).item(0).getTextContent();
+				}
 			}
+		} catch (Exception e) {
+			throw new EFException(e,"get xml tag "+name+" params "+key+" value exception.",ELEVEL.Dispose); 
 		}
 		return "";
 	}
