@@ -225,7 +225,7 @@ public class EFMonitorUtil {
 			return;
 		}
 		JOB_TYPE controlType;
-		if (isIncrement) {
+		if (isIncrement) { 
 			if (instanceConfig.getPipeParams().getDeltaCron() == null)
 				return;
 			controlType = GlobalParam.JOB_TYPE.INCREMENT;
@@ -233,8 +233,7 @@ public class EFMonitorUtil {
 			if (instanceConfig.getPipeParams().getFullCron() == null)
 				return;
 			controlType = GlobalParam.JOB_TYPE.FULL;
-		}
-
+		} 
 		for (String inst : instance.split(",")) {
 			int waittime = 0;
 			String[] seqs = EFMonitorUtil.getInstanceL1seqs(instance);

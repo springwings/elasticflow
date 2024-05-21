@@ -142,6 +142,7 @@ public class PipeXMLUtil {
 				row.put("writeto",getXmlNodeInfo(TransParam.getElementsByTagName("param"),"writeTo","value")); 
 				Element ComputerParam = (Element) dataflow.getElementsByTagName("ComputerParam").item(0);  
 				if(ComputerParam!=null) {
+					row.put("computeurl",getXmlNodeInfo(ComputerParam.getElementsByTagName("param"),"api","value"));
 					row.put("computetype",getXmlNodeInfo(ComputerParam.getElementsByTagName("param"),"computeMode","value"));
 				}else {
 					row.put("computetype","");
