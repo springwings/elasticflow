@@ -44,9 +44,7 @@ public class Breaker {
 
 	private FIFOQueue<Long> queue = new FIFOQueue<>(6);
 
-	private String instanceID;
-	
-	private long breakerOnTime = -1;
+	private String instanceID; 
 
 	public void init(String instanceID, int failFreq, int maxFailTime) {
 		this.instanceID = instanceID;
@@ -58,8 +56,7 @@ public class Breaker {
 	public void reset() {
 		this.failTimes = 0;
 		this.earlyFailTime = 0;
-		this.isFirstNotify = true;
-		this.breakerOnTime = -1;
+		this.isFirstNotify = true; 
 		this.queue.clear();
 		this.closeBreaker();
 	}
@@ -89,7 +86,7 @@ public class Breaker {
 		sb.append(",fail times:" + String.valueOf(this.failTimes));
 		sb.append(",fail interval:" + String.valueOf(failInterval()));
 		sb.append(",fail times > " + String.valueOf(maxFailTime) + " OR fail Interval < " + String.valueOf(perFailTime));
-		sb.append(",opening time of breaker "+Common.FormatTime(this.breakerOnTime));
+		sb.append(",opening time of breaker "+Common.FormatTime(this.queue.getLast()));
 		return sb.toString();
 	}
 
@@ -103,8 +100,7 @@ public class Breaker {
 
 	public boolean isOn() {
 		if (this.openBreaker || this.failTimes >= maxFailTime || failInterval() <= perFailTime) {
-			if (isFirstNotify) {
-				breakerOnTime = Common.getNow();
+			if (isFirstNotify) { 
 				Common.LOG.warn(Localization.formatEN(LAG_TYPE.flowBreaker, instanceID));
 				Resource.EfNotifier.send(Localization.format(LAG_TYPE.flowBreaker, instanceID), instanceID,
 						Localization.format(LAG_TYPE.flowDisconnect), ETYPE.RESOURCE_ERROR.name(), false);
