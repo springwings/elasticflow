@@ -187,7 +187,7 @@ public final class Run {
 	 * @param pluginPath	Jar package path 
 	 */
 	private void loadPlugins(String pluginPath) {
-		if(pluginPath!=null && pluginPath.length()>1) {
+		if(pluginPath!=null && EFFileUtil.checkResourceExists(pluginPath)) {
 			List<File> jars = Arrays.asList(new File(pluginPath).listFiles(new FilenameFilter() {
 	            @Override
 	            public boolean accept(File dir, String name) {
@@ -205,6 +205,8 @@ public final class Run {
 			}
 			GlobalParam.PLUGIN_CLASS_LOADER = new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
 			Thread.currentThread().setContextClassLoader(GlobalParam.PLUGIN_CLASS_LOADER);  
+		}else {
+			Common.LOG.warn("No plugins loaded!");
 		}
 	} 
 	private void start() {
