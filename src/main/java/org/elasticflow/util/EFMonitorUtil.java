@@ -1,10 +1,13 @@
 package org.elasticflow.util;
 
+import java.io.BufferedReader;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.elasticflow.config.GlobalParam;
@@ -52,11 +55,11 @@ public class EFMonitorUtil {
 	 * @param runType
 	 * @throws EFException
 	 */
-	public static void reloadInstance(String instance, String reset, String runType) throws EFException {  
-		EFMonitorUtil.controlInstanceState(instance, TASK_FLOW_SINGAL.Stop, true); 
+	public static void reloadInstance(String instance, String reset, String runType) throws EFException {
+		EFMonitorUtil.controlInstanceState(instance, TASK_FLOW_SINGAL.Stop, true);
 		int type = Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType();
 		String alias = Resource.nodeConfig.getInstanceConfigs().get(instance).getAlias();
-		Resource.nodeConfig.getSearchConfigs().remove(alias); 
+		Resource.nodeConfig.getSearchConfigs().remove(alias);
 		if (runType != null) {
 			type = Integer.parseInt(runType);
 		}
@@ -66,14 +69,14 @@ public class EFMonitorUtil {
 		}
 		Resource.flowProgress.remove(instance, JOB_TYPE.FULL.name());
 		Resource.flowProgress.remove(instance, JOB_TYPE.INCREMENT.name());
-		
+
 		// control slave node
 		if (GlobalParam.DISTRIBUTE_RUN) {
 			GlobalParam.INSTANCE_COORDER.distributeCoorder().removeInstanceFromCluster(instanceConfig, true);
 		}
 		// remove job and instance
-		EFPipeUtil.removeInstance(instance, true, true); 
-		Resource.nodeConfig.getSearchConfigs().remove(alias); 
+		EFPipeUtil.removeInstance(instance, true, true);
+		Resource.nodeConfig.getSearchConfigs().remove(alias);
 		if (reset != null && reset.equals("true")) {
 			Resource.nodeConfig.loadConfig(instanceConfig, true);
 		} else {
@@ -225,7 +228,7 @@ public class EFMonitorUtil {
 			return;
 		}
 		JOB_TYPE controlType;
-		if (isIncrement) { 
+		if (isIncrement) {
 			if (instanceConfig.getPipeParams().getDeltaCron() == null)
 				return;
 			controlType = GlobalParam.JOB_TYPE.INCREMENT;
@@ -233,7 +236,7 @@ public class EFMonitorUtil {
 			if (instanceConfig.getPipeParams().getFullCron() == null)
 				return;
 			controlType = GlobalParam.JOB_TYPE.FULL;
-		} 
+		}
 		for (String inst : instance.split(",")) {
 			int waittime = 0;
 			String[] seqs = EFMonitorUtil.getInstanceL1seqs(instance);
@@ -243,7 +246,8 @@ public class EFMonitorUtil {
 				if (GlobalParam.TASK_COORDER.checkFlowSingal(inst, L1seq, controlType, TASK_FLOW_SINGAL.Running)) {
 					GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(), TASK_FLOW_SINGAL.Blank,
 							TASK_FLOW_SINGAL.Termination, true);
-					while (!GlobalParam.TASK_COORDER.checkFlowSingal(inst, L1seq, controlType, TASK_FLOW_SINGAL.Ready)) {
+					while (!GlobalParam.TASK_COORDER.checkFlowSingal(inst, L1seq, controlType,
+							TASK_FLOW_SINGAL.Ready)) {
 						try {
 							waittime++;
 							Thread.sleep(100);
@@ -254,8 +258,8 @@ public class EFMonitorUtil {
 							Common.LOG.error("control instance state thread sleep is interrupted exception", e);
 						}
 					}
-					if (GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(), TASK_FLOW_SINGAL.Termination,
-							state, true)) {
+					if (GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(),
+							TASK_FLOW_SINGAL.Termination, state, true)) {
 						Common.LOG.info("Instance {} L1seq {},job type {} success set state {}.", inst,
 								(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
 					} else {
@@ -283,15 +287,13 @@ public class EFMonitorUtil {
 			return EFConnectionPool.getStatus(poolName);
 		}
 	}
-	
-	public static JSONObject getConnectionStatus(String poolName) { 
+
+	public static JSONObject getConnectionStatus(String poolName) {
 		if (GlobalParam.DISTRIBUTE_RUN) {
 			return GlobalParam.INSTANCE_COORDER.distributeCoorder().getConnectionStatus(poolName);
 		} else {
-			return new JSONObject(Map.of(
-               GlobalParam.IP, EFConnectionPool.getStatus(poolName)
-            ));
-		} 
+			return new JSONObject(Map.of(GlobalParam.IP, EFConnectionPool.getStatus(poolName)));
+		}
 	}
 
 	public static void resetPipeEndStatus(String instance, String L1seq) {
@@ -311,15 +313,16 @@ public class EFMonitorUtil {
 			}
 		}
 	}
-	
+
 	/**
 	 * warehouse resource status
+	 * 
 	 * @return
 	 */
 	public static HashMap<String, JSONObject> getResourceStates() {
 		return Resource.resourceStates;
 	}
-	
+
 	/**
 	 * get Pipe End Status
 	 * 
@@ -393,7 +396,7 @@ public class EFMonitorUtil {
 	 */
 	public static JSONObject getInstanceInfo(String instance, int type) throws EFException {
 		JSONObject JO = new JSONObject();
-	 
+
 		if (Resource.nodeConfig.getInstanceConfigs().containsKey(instance)) {
 			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
 			JSONObject Reader = new JSONObject();
@@ -452,24 +455,26 @@ public class EFMonitorUtil {
 					if (L1seq != "")
 						appendPipe = "L1seq(" + L1seq + ")_";
 					JSONObject tmp;
-					if (GlobalParam.DISTRIBUTE_RUN && GlobalParam.INSTANCE_COORDER.distributeCoorder().getClusterStatus()==0) {
+					if (GlobalParam.DISTRIBUTE_RUN
+							&& GlobalParam.INSTANCE_COORDER.distributeCoorder().getClusterStatus() == 0) {
 						tmp = GlobalParam.INSTANCE_COORDER.distributeCoorder().getPipeEndStatus(config.getInstanceID(),
 								L1seq);
 					} else {
 						tmp = getPipeEndStatus(config.getInstanceID(), L1seq);
 					}
-					groupL1SeqData(Searcher,appendPipe,"flow_state",tmp.getJSONObject(END_TYPE.searcher.name()));
-					groupL1SeqData(Reader,appendPipe,"flow_state",tmp.getJSONObject(END_TYPE.reader.name()));  
-					if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0) 
-						groupL1SeqData(Computer,appendPipe,"flow_state",tmp.get(END_TYPE.computer.name()));
-					
-					if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0) 
-						groupL1SeqData(Writer,appendPipe,"flow_state",tmp.get(END_TYPE.writer.name()));
-					
-					groupL1SeqData(nodeInfo,appendPipe,"node_ip",tmp.get("nodeIP"));
-					groupL1SeqData(nodeInfo,appendPipe,"node_id",tmp.get("nodeID"));
-					groupL1SeqData(nodeInfo,appendPipe,"status",tmp.get("status"));
-					groupL1SeqData(nodeInfo,appendPipe,"pipe_size",Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadPageSize());
+					groupL1SeqData(Searcher, appendPipe, "flow_state", tmp.getJSONObject(END_TYPE.searcher.name()));
+					groupL1SeqData(Reader, appendPipe, "flow_state", tmp.getJSONObject(END_TYPE.reader.name()));
+					if ((config.getInstanceType() & INSTANCE_TYPE.WithCompute.getVal()) > 0)
+						groupL1SeqData(Computer, appendPipe, "flow_state", tmp.get(END_TYPE.computer.name()));
+
+					if ((config.getInstanceType() & INSTANCE_TYPE.Trans.getVal()) > 0)
+						groupL1SeqData(Writer, appendPipe, "flow_state", tmp.get(END_TYPE.writer.name()));
+
+					groupL1SeqData(nodeInfo, appendPipe, "node_ip", tmp.get("nodeIP"));
+					groupL1SeqData(nodeInfo, appendPipe, "node_id", tmp.get("nodeID"));
+					groupL1SeqData(nodeInfo, appendPipe, "status", tmp.get("status"));
+					groupL1SeqData(nodeInfo, appendPipe, "pipe_size",
+							Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams().getReadPageSize());
 				}
 			}
 
@@ -485,7 +490,7 @@ public class EFMonitorUtil {
 					}
 					Task.put("incremental_storage_status",
 							GlobalParam.TASK_COORDER.getInstanceScanDatas(instance, false));
-					Task.put("full_storage_status", GlobalParam.TASK_COORDER.getInstanceScanDatas(instance, true));   
+					Task.put("full_storage_status", GlobalParam.TASK_COORDER.getInstanceScanDatas(instance, true));
 					Task.put("full_thread_status", EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.FULL));
 					Task.put("incremental_thread_status",
 							EFMonitorUtil.threadStateInfo(instance, GlobalParam.JOB_TYPE.INCREMENT));
@@ -526,88 +531,129 @@ public class EFMonitorUtil {
 			JO.put("node_info", nodeInfo);
 		}
 		return JO;
-	}
-	
+	} 
+
 	public static String analyzeInstance(String instance) {
 		StringBuffer res = new StringBuffer();
 		if (Resource.nodeConfig.getInstanceConfigs().containsKey(instance)) {
 			InstanceConfig config = Resource.nodeConfig.getInstanceConfigs().get(instance);
-			//check not match 
-			res.append("<h1>1 实例配置检查</h1><ul>"); 
-			res.append("<li>· 实例配置加载: <b>"+(config.checkStatus()?"成功":"失败")+"</b></li>");
+			// check not match
+			res.append("<h1>1 实例配置检查</h1><ul>");
+			res.append("<li>· 实例配置加载: <b>" + (config.checkStatus() ? "成功" : "<i>失败</i>") + "</b></li>");
 			boolean checkpass = true;
-			if(config.getWriterParams().getWriteKey()!=null && config.getReaderParams().getKeyField()!=null) {
-				if(config.getComputeParams().getComputeMode()!=COMPUTER_MODE.BLANK) {
-					if(!config.openCompute() || !config.openTrans())
-						checkpass = false;					
+			if (config.getWriterParams().getWriteKey() != null && config.getReaderParams().getKeyField() != null) {
+				if (config.getComputeParams().getComputeMode() != COMPUTER_MODE.BLANK) {
+					if (!config.openCompute() || !config.openTrans())
+						checkpass = false;
 				}
-				if(checkpass) {
+				if (checkpass) {
 					res.append("<li>· 实例配置与运行类型: <b>匹配</b></li>");
-				}else {
-					res.append("<li>· 实例配置与运行类型: <b>不匹配</b></li>");
+				} else {
+					res.append("<li>· 实例配置与运行类型: <i>不匹配</i></li>");
 				}
 			}
-			res.append("<h1>2 实例运行检查</h1><ul>"); 
-			if(config.getPipeParams().getReadFrom()!=null)
-				res.append("<li>· 读端: <b>"+Resource.resourceStates.get(config.getPipeParams().getReadFrom()).getString("status")+"</b></li>");
-			if(config.openCompute()) {
-				if(config.getComputeParams().getComputeMode()==COMPUTER_MODE.REST) {  
-					res.append("<li>· 计算端: 模式"+COMPUTER_MODE.REST+", <b>"+(isPortOpen(config.getComputeParams().getApi().get(0))?"正常":"异常")+"</b></li>");
-				}else {
-					res.append("<li>· 计算端: 模式"+config.getComputeParams().getComputeMode()+", 未知</li>");
+			res.append("<h1>2 实例运行检查</h1><ul>");
+			if (config.getPipeParams().getReadFrom() != null)
+				res.append("<li>· 读端: <b>"
+						+ Resource.resourceStates.get(config.getPipeParams().getReadFrom()).getString("status")
+						+ "</b></li>");
+			if (config.openCompute()) {
+				if (config.getComputeParams().getComputeMode() == COMPUTER_MODE.REST) {
+					String urlscheck = isPortOpen(config.getComputeParams().getApi());
+					res.append("<li>· 计算端: 运行模式-" + COMPUTER_MODE.REST + ", 接口状态 <b>"
+							+ (urlscheck.length()<1 ? "正常" : "<i>异常</i>") + "</b> "+urlscheck+" </li>"); 
+				} else {
+					res.append("<li>· 计算端: 模式" + config.getComputeParams().getComputeMode() + ", 未知</li>");
 				}
-			} 		
-			if(config.getPipeParams().getWriteTo()!=null)
-				res.append("<li>· 写端: <b>"+Resource.resourceStates.get(config.getPipeParams().getWriteTo()).getString("status")+"</b></li>");
-			res.append("</ul>"); 
+			}
+			if (config.getPipeParams().getWriteTo() != null)
+				res.append("<li>· 写端: <b>"
+						+ Resource.resourceStates.get(config.getPipeParams().getWriteTo()).getString("status")
+						+ "</b></li>"); 
+			res.append("</ul>");
+			res.append("<h1>3 错误日志跟踪</h1><pre class='track_error'>");
+			int buffernum = 0;
+			try (BufferedReader br = new BufferedReader(new FileReader(GlobalParam.lOG_STORE_PATH))) {
+				String line;
+				while ((line = br.readLine()) != null) {
+					if ((line.contains("ERROR") && line.contains(instance)) || buffernum > 0) {
+						if (line.contains("ERROR") && line.contains(instance)) {
+							if (buffernum < 3)
+								res.append("<hr/>");
+							buffernum = 8;
+						} else {
+							if (line.contains("at ") || line.contains("Cause ") || line.contains("ERROR")
+									|| line.contains(" more")) {
+								buffernum = 2;
+							} else {
+								buffernum -= 1;
+							}
+						}
+						res.append(line);
+						res.append("\n");
+					}
+				}
+				res.append("</pre>");
+			} catch (Exception e) {
+				Common.LOG.warn("read log error {}", e);
+			}
 		}
-		
-		
-		return res.toString(); 
+		return res.toString();
 	}
-	
-	public static void groupL1SeqData(JSONObject data,String appendPipe,String key,Object val) {
-		if(appendPipe=="") {
+
+	public static void groupL1SeqData(JSONObject data, String appendPipe, String key, Object val) {
+		if (appendPipe == "") {
 			data.put(key, val);
-		}else {
-			if(!data.containsKey(appendPipe))
+		} else {
+			if (!data.containsKey(appendPipe))
 				data.put(appendPipe, new JSONObject());
 			data.getJSONObject(appendPipe).put(key, val);
-		}			
+		}
 	}
 	
+	public static String isPortOpen(List<String> hosts) {
+		StringBuffer sb = new StringBuffer();
+		for(String host:hosts) {
+			if(isPortOpen(host)==false) {
+				sb.append("<br>"); 
+				sb.append(host); 
+			} 
+		}
+		return sb.toString();
+	}
+
 	/**
 	 * 
-	 * @param host  http://xx.xx.xx.xx:8191/
+	 * @param host http://xx.xx.xx.xx:8191/
 	 * @return
 	 */
 	public static boolean isPortOpen(String host) {
 		try {
-			URL url = new URL(host); 
-			int port = url.getPort(); 
-	        if (port == -1) {
-	            if ("http".equalsIgnoreCase(url.getProtocol())) {
-	            	port = 80; 
-	            } else if ("https".equalsIgnoreCase(url.getProtocol())) {
-	            	port = 443;  
-	            }
-	        } 
-	        try (Socket socket = new Socket(url.getHost(), port)) {
+			URL url = new URL(host);
+			int port = url.getPort();
+			if (port == -1) {
+				if ("http".equalsIgnoreCase(url.getProtocol())) {
+					port = 80;
+				} else if ("https".equalsIgnoreCase(url.getProtocol())) {
+					port = 443;
+				}
+			}
+			try (Socket socket = new Socket(url.getHost(), port)) {
 				return true;
 			} catch (Exception e) {
 				return false;
 			}
-		}catch (Exception e) {
-	        return true;
-	    }  
-	} 
+		} catch (Exception e) {
+			return true;
+		}
+	}
 
 	public static void restartSystem() {
 		Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				Common.LOG.info("system restart...");  
-				EFNodeUtil.runShell(new String[] {"bash","-c",GlobalParam.RESTART_SHELL_COMMAND});
+				Common.LOG.info("system restart...");
+				EFNodeUtil.runShell(new String[] { "bash", "-c", GlobalParam.RESTART_SHELL_COMMAND });
 			}
 		});
 		thread.start();
