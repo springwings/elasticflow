@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.util.HashMap;
@@ -583,8 +584,8 @@ public class EFMonitorUtil {
 							buffernum = 8;
 						} else {
 							if (line.contains("at ") || line.contains("Cause ") || line.contains("ERROR")
-									|| line.contains(" more")) {
-								buffernum = 2;
+									|| line.contains(" more") || line.contains("Exception")) {
+								buffernum = 1;
 							} else {
 								buffernum -= 1;
 							}
@@ -638,11 +639,12 @@ public class EFMonitorUtil {
 					port = 443;
 				}
 			}
-			try (Socket socket = new Socket(url.getHost(), port)) {
-				return true;
-			} catch (Exception e) {
-				return false;
-			}
+			try (Socket socket = new Socket()) {
+	            socket.connect(new InetSocketAddress(url.getHost(), port), 800);
+	            return true;
+	        } catch (Exception e) {
+	            return false;
+	        } 
 		} catch (Exception e) {
 			return true;
 		}
