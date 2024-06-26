@@ -10,8 +10,8 @@ package org.elasticflow.instruction.sets;
 import org.elasticflow.config.GlobalParam.ETYPE;
 import org.elasticflow.instruction.Context;
 import org.elasticflow.instruction.Instruction;
+import org.elasticflow.model.PipererState;
 import org.elasticflow.model.reader.DataPage;
-import org.elasticflow.model.reader.ReaderState;
 import org.elasticflow.model.task.TaskCursor;
 import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.reader.ReaderFlowSocket;
@@ -83,11 +83,11 @@ public class Pipe extends Instruction {
 	 *            boolean monopoly
 	 * @throws Exception
 	 */
-	public static ReaderState writeDataSet(Context context, Object[] args) throws EFException {
-		ReaderState rstate = new ReaderState();
+	public static PipererState writeDataSet(Context context, Object[] args) throws EFException {
+		PipererState pstate = new PipererState();
 		if (!isValid(8, args)) {
 			log.error("instruction.set.Pipe.writeDataSet parameter not match!");
-			return rstate;
+			return pstate;
 		}
 		String jobType = String.valueOf(args[0]);
 		String instance = String.valueOf(args[1]);
@@ -102,16 +102,17 @@ public class Pipe extends Instruction {
 		
 		WriterFlowSocket writer = context.getWriter();
 		writer.PREPARE(monopoly, false,true);
-		if (!writer.connStatus()) {
-			rstate.setStatus(false);
-			return rstate;
+		if (!writer.connStatus()) { 
+			pstate.setInfo(instance+" writer connection is closed!");
+			pstate.setStatus(false);
+			return pstate;
 		}
 		if (dataPage.getData().size()==0) {
 			//Prevent status from never being submitted
 			context.getReader().flush();
 			writer.flush(); 
 			writer.releaseConn(monopoly, freeConn); 
-			return rstate;
+			return pstate;
 		}
 		if(writer.getWriteHandler()!=null)
 			dataPage = writer.getWriteHandler().handleData(context, dataPage);		
@@ -126,8 +127,8 @@ public class Pipe extends Instruction {
 							instance, storeId, isUpdate);
 					num++;
 				}
-				rstate.setReaderScanStamp(DSReader.getScanStamp());
-				rstate.setCount(num);				
+				pstate.setReaderScanStamp(DSReader.getScanStamp());
+				pstate.setCount(num);				
 				writer.flowStatistic.setLoad((long)((num*1000)/(start-writer.lastGetPageTime+1e-3)));		
 				writer.lastGetPageTime = start;
 				if(num>0)
@@ -149,8 +150,9 @@ public class Pipe extends Instruction {
 			}
 		} else {
 			writer.releaseConn(monopoly, freeConn); 
-			rstate.setStatus(false);
+			pstate.setInfo(instance+" DSReader status is false!");
+			pstate.setStatus(false);
 		}
-		return rstate;
+		return pstate;
 	}
 }

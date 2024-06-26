@@ -125,7 +125,7 @@ public class KafkaReader extends ReaderFlowSocket {
 
 		} catch (Exception e) { 
 			this.dataPage.put(GlobalParam.READER_STATUS, false);  
-			throw  new EFException(e,taskCursor.getInstanceConfig().getInstanceID()+ " Kafka Reader get dataPage Exception");
+			throw new EFException(e,taskCursor.getInstanceConfig().getInstanceID()+ " Kafka Reader get dataPage Exception");
 		}
 		return this.dataPage;
 	}

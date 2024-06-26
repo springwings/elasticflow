@@ -5,7 +5,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.elasticflow.util.instance.TaskUtil;
 
 /**
- * 
+ * abstract state
+ * implement by task state / flow progress state
  * @author chengwen
  * @version 1.0
  * @date 2018-10-22 09:08

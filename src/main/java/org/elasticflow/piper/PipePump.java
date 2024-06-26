@@ -23,8 +23,8 @@ import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.TASK_FLOW_SINGAL;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.instruction.Instruction;
+import org.elasticflow.model.PipererState;
 import org.elasticflow.model.reader.DataPage;
-import org.elasticflow.model.reader.ReaderState;
 import org.elasticflow.model.task.TaskCursor;
 import org.elasticflow.model.task.TaskModel;
 import org.elasticflow.node.CPU;
@@ -320,7 +320,7 @@ public final class PipePump extends Instruction implements Serializable {
 	 */
 	private void currentThreadRun(TaskModel task, String storeId, ConcurrentLinkedDeque<String> pageList, String destination,
 			AtomicInteger total) throws EFException {
-		ReaderState rState = null;
+		PipererState pstate = null;
 		int progressPos = 0;
 		String startId = "0";
 
@@ -356,16 +356,16 @@ public final class PipePump extends Instruction implements Serializable {
 
 			this.breakCheck(task);
 			//Refresh every page
-			rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
+			pstate = (PipererState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
 					destination, storeId, task, pagedata,
 					",progress:" + progressPos + "/" + pageNum, isupdate, false);
-			if (rState.isStatus() == false)
-				throw new EFException("writeDataSet data exception!");
-			total.getAndAdd(rState.getCount());
+			if (pstate.isStatus() == false)
+				throw new EFException("single thread writeDataSet exception!"+pstate.getInfo());
+			total.getAndAdd(pstate.getCount());
 			startId = dataBoundary;
  
 			GlobalParam.TASK_COORDER.setScanPosition(task.getInstanceID(), task.getL1seq(), task.getL2seq(),
-					rState.getReaderScanStamp(),false,task.isfull());
+					pstate.getReaderScanStamp(),false,task.isfull());
 			GlobalParam.TASK_COORDER.saveTaskInfo(task.getInstanceID(), task.getL1seq(), storeId,task.isfull());
 		}
 	}
@@ -423,7 +423,7 @@ public final class PipePump extends Instruction implements Serializable {
 
 		TaskModel task;
 		CountDownLatch taskSingal;
-		ReaderState rState = null;
+		PipererState pstate = null;
 		AtomicInteger progressPos = new AtomicInteger(0);
 		String startId = "0";
 		ConcurrentLinkedDeque<String> pageList;
@@ -492,7 +492,7 @@ public final class PipePump extends Instruction implements Serializable {
 						Common.LOG.warn("{} {} job has been Terminated!",task.getInstanceID(),task.getJobType().name());
 						break;
 					}
-					rState = (ReaderState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
+					pstate = (PipererState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
 							task.getInstanceProcessId(), storeId, task, pagedata,
 							",progress:" + progressPos + "/" + pageNum, this.isUpdate,
 							false);
@@ -500,18 +500,18 @@ public final class PipePump extends Instruction implements Serializable {
 					log.error("instance {} process page data exception", this.instanceConfig.getInstanceID(),e);
 					task.taskState.setEfException(e);
 				} finally {
-					if (rState == null || rState.isStatus() == false) {
-						Common.LOG.warn("instance {} read data exception!",instanceConfig.getInstanceID());
+					if (pstate == null || pstate.isStatus() == false) {
+						Common.LOG.warn("instance {} read data exception! {}",instanceConfig.getInstanceID(),pstate.getInfo());
 						return;
 					}
 					GlobalParam.TASK_COORDER.setFlowSingal(task.getInstanceID(), task.getL1seq(),
 							GlobalParam.JOB_TYPE.FULL.name(), TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Ready,
 							getInstanceConfig().getPipeParams().showInfoLog());
 				}
-				total.addAndGet(rState.getCount());
+				total.addAndGet(pstate.getCount());
 				startId = dataBoundary; 
 				GlobalParam.TASK_COORDER.setScanPosition(task.getInstanceID(), task.getL1seq(), task.getL2seq(),
-						rState.getReaderScanStamp(),false,task.isfull());
+						pstate.getReaderScanStamp(),false,task.isfull());
 				GlobalParam.TASK_COORDER.saveTaskInfo(task.getInstanceID(), task.getL1seq(), storeId,task.isfull());
 			}
 			taskSingal.countDown();
