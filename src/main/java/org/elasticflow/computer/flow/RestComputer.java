@@ -12,6 +12,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticflow.computer.ComputerFlowSocket;
 import org.elasticflow.config.GlobalParam;
@@ -61,7 +62,7 @@ public class RestComputer extends ComputerFlowSocket {
 					context.getInstanceConfig().getComputeParams().getScanField());
 			JSONObject requstParams = context.getInstanceConfig().getComputeParams().getApiRequest();
 			JSONObject responseParams = context.getInstanceConfig().getComputeParams().getApiResponse();
-
+			AtomicInteger failtimes = new AtomicInteger(0);
 			CountDownLatch taskSingal = new CountDownLatch((int) Math.ceil(
 					(DSR.getDataNums() + 0.) / context.getInstanceConfig().getComputeParams().apiRequestMaxDatas()));
 
@@ -112,6 +113,7 @@ public class RestComputer extends ComputerFlowSocket {
 								this.write(context, tmp, responseParams, _keepdt);
 							} catch (Exception e) {
 								this.successRunAll = false;
+								failtimes.incrementAndGet();
 								log.error("rest post data process error,api {}", api, e);
 							} finally {
 								taskSingal.countDown();
@@ -119,6 +121,7 @@ public class RestComputer extends ComputerFlowSocket {
 						});
 					} catch (Exception e) {
 						this.successRunAll = false;
+						failtimes.incrementAndGet();
 						log.error("rest post data process error,api {}", apis.get(0), e);
 					} finally {
 						count = 0;
@@ -145,6 +148,7 @@ public class RestComputer extends ComputerFlowSocket {
 							this.write(context, tmp, responseParams, _keepdt);
 						} catch (Exception e) {
 							this.successRunAll = false;
+							failtimes.incrementAndGet();
 							log.error("rest post data process error,api {}", api, e);
 						} finally {
 							taskSingal.countDown();
@@ -152,6 +156,7 @@ public class RestComputer extends ComputerFlowSocket {
 					});
 				} catch (Exception e) {
 					this.successRunAll = false;
+					failtimes.incrementAndGet();
 					log.error("rest post data process error,api [}", apis.get(0), e);
 				}
 				post_data.clear();
@@ -166,7 +171,7 @@ public class RestComputer extends ComputerFlowSocket {
 			}
 
 			if (this.successRunAll == false)
-				throw new EFException("job executorService exception", ELEVEL.BreakOff);
+				throw new EFException("job exception,fail times "+failtimes.get(), ELEVEL.BreakOff);
 
 			this.dataPage.put(GlobalParam.READER_LAST_STAMP, DSR.getScanStamp());
 			this.dataPage.putData(this.dataUnit);
