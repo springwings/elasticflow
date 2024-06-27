@@ -59,7 +59,7 @@ public class PipeParam {
 	/** data write into type,full create new record,increment update part of data */
 	private boolean writeType = false;
 	private MECHANISM writeMechanism = MECHANISM.NORM;
-	/** if MECHANISM.Time,keepNums is used for keep max store data instances */
+	/** if MECHANISM.Time,keepNums is used for keep max store data instances,d(day)/w(week)/m(month) */
 	private String keepNums = "30d";
 	private boolean multiThread = false;
 	/** Task priority control **/
@@ -220,15 +220,17 @@ public class PipeParam {
 	/**
 	 * get keep type and data
 	 * 
-	 * @return int[],0 store type (0 day 1 month),1 store data
+	 * @return int[],0 store type (0 day 1 week :first day of each week 2 month :first day of each month),1 store data
 	 */
 	public int[] getKeepNums() {
 		int[] dt = new int[2];
 		dt[1] = Integer.parseInt(this.keepNums.toLowerCase().substring(0, this.keepNums.length() - 1));
 		if (this.keepNums.toLowerCase().endsWith("d")) {
 			dt[0] = 0;
-		} else {
+		}else if (this.keepNums.toLowerCase().endsWith("w")) {
 			dt[0] = 1;
+		} else {
+			dt[0] = 2;
 		}
 		return dt;
 	}

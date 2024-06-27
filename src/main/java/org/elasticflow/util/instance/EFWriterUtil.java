@@ -7,9 +7,13 @@
  */
 package org.elasticflow.util.instance;
 
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.TimeZone;
 
 import org.elasticflow.config.GlobalParam.MECHANISM;
@@ -58,10 +62,16 @@ public class EFWriterUtil {
 		long foward;
 		long current = System.currentTimeMillis();
 		LocalDate lnow = LocalDate.now();
-		if (timeSpan[0] == 0) {
+		if (timeSpan[0] == 0) {//day
 			foward = lnow.minusDays(timeSpan[1]).atStartOfDay().toInstant(ZoneOffset.of("+8")).toEpochMilli();
 			storeId = (current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset()) / 1000;
-		} else {
+		} else if (timeSpan[0] == 1) { //week
+			 LocalDate now = LocalDate.now();
+			 LocalDate monday = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+			 ZonedDateTime zonedDateTime = monday.atStartOfDay(ZoneId.systemDefault());
+			 storeId = zonedDateTime.toEpochSecond();
+			 foward = storeId - 3600 * 24 * timeSpan[1]*7;
+		}else{ //month
 			Long startDay = Common.getMonthStartTime(current, "GMT+8:00");
 			storeId = startDay / 1000;
 			LocalDate ldate = LocalDate.of(lnow.getYear(), lnow.getMonth(), 1);
@@ -70,5 +80,4 @@ public class EFWriterUtil {
 		Long keepLastTime = foward / 1000;
 		return new EFTuple<Long, Long>(storeId, keepLastTime);
 	} 
-
 }
