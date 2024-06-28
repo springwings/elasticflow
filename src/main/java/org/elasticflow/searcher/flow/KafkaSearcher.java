@@ -111,11 +111,15 @@ public final class KafkaSearcher extends SearcherFlowSocket {
 				});
 			}
 			consumer.subscribe(Arrays.asList(topic));
-			res.setTotalHit(count);
+			int nums = count;
+			boolean check = false;
 			while (true) {
 				ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(2000));
 				for (ConsumerRecord<String, String> record : records) {
-					if ((content.length() > 0 && record.value().contains(content)) || content.length() == 0) {
+					if(!check)
+						nums--;
+					check = (content.length() > 0 && record.value().contains(content));
+					if (check || content.length() == 0) {
 						ResponseDataUnit u = ResponseDataUnit.getInstance();
 						u.addObject(record.key(), record.value());
 						res.getUnitSet().add(u);
@@ -127,6 +131,7 @@ public final class KafkaSearcher extends SearcherFlowSocket {
 				if (count <= 0)
 					break;
 			}
+		 res.setTotalHit(nums);
 		} catch (Exception e) {
 			throw Common.convertException(e);
 		} finally {

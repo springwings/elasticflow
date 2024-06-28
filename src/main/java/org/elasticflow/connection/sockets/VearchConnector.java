@@ -227,13 +227,26 @@ public class VearchConnector {
 	}
 	
 
-	public JSONObject search(String table,String query) throws Exception { 
-		EFHttpResponse response = EFHttpClientUtil.process(this.method + this.ROOTER + "/" + this.dbName + "/" + table + "/_search",
+	public JSONObject search(String table,String query,boolean feature_search) throws Exception { 
+		String search_method = "/_search";
+		if(feature_search==false)  
+			search_method = "/_query_byids"; 
+		EFHttpResponse response = EFHttpClientUtil.process(this.method + this.ROOTER + "/" + this.dbName + "/" + table + search_method,
 				HttpPost.METHOD_NAME,
 				EFHttpClientUtil.DEFAULT_CONTENT_TYPE,
 				query);
 		if(response.isSuccess()) {
-			return JSONObject.parseObject(response.getPayload());	 
+			if(feature_search) {
+				return JSONObject.parseObject(response.getPayload());
+			}else {
+				JSONArray JA = JSONObject.parseArray(response.getPayload());
+				JSONObject res = new JSONObject();
+				res.put("total", JA.size());
+				res.put("hits", JA);
+				JSONObject tmp = new JSONObject();
+				tmp.put("hits", res);
+				return tmp;
+			} 
 		}else {
 			throw new EFException(response.getInfo(),ELEVEL.Dispose);
 		}		

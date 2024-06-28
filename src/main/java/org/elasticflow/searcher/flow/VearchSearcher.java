@@ -64,7 +64,7 @@ public class VearchSearcher extends SearcherFlowSocket {
 				VQP.getSearchObj().put("size", searcherModel.getCount());
 				if(searcherModel.getSortinfo().size()>0)
 					VQP.getSearchObj().put("sort", searcherModel.getSortinfo());
-				JSONObject JO = conn.search(table, VQP.getSearchObj().toJSONString());
+				JSONObject JO = conn.search(table, VQP.getSearchObj().toJSONString(),VQP.feature_search);
 				efResponse.setInstance(table);
 				if (searcherModel.isShowQueryInfo()) {
 					res.setQueryDetail(VQP.getSearchObj());

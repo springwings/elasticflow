@@ -28,6 +28,8 @@ public class VearchQueryParser implements QueryParser{
 	
 	JSONObject searchObj;
 	
+	public boolean feature_search = false;
+	
 	public VearchQueryParser() {
 		searchObj = new JSONObject();
 	}
@@ -79,6 +81,9 @@ public class VearchQueryParser implements QueryParser{
 					case "boost":
 						_feature.put("boost",Float.parseFloat(String.valueOf(v))); 
 						break;  
+					case "ids":
+						query.put("ids", String.valueOf(v).split(","));
+						break;
 					} 
 				}
 			}
@@ -87,7 +92,7 @@ public class VearchQueryParser implements QueryParser{
 		if(model.storeId==null && instanceConfig.getPipeParams().getWriteMechanism().equals(MECHANISM.Time)) {
 			model.storeId = String.valueOf(Common.getNowZero());
 		}
-		if(_feature.size()==0) {
+		if(!_feature.containsKey("feature") && query.size()==0) {
 			Iterator<Map.Entry<String,EFField>> iter_tmp =  instanceConfig.getSearchFields().entrySet().iterator();
 			while (iter_tmp.hasNext()) {
 				Entry<String, EFField> entry = iter_tmp.next();
@@ -104,8 +109,11 @@ public class VearchQueryParser implements QueryParser{
 				}				
 			}
 		}
-		_jarr.add(_feature);
-		query.put("sum",_jarr);	
+		if (_feature.size()>0) {
+			_jarr.add(_feature);
+			query.put("sum",_jarr);	
+			feature_search = true;
+		} 
 		if(filters.size()>0)
 			query.put("filter", filters);
 		searchObj.put("size", model.getSortinfo());
