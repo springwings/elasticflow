@@ -213,39 +213,40 @@ public final class NodeMonitor {
 			updateResourceXml(jsonObject, true);
 		}
 	}
+
 	/**
 	 * scan all modules
+	 * 
 	 * @param rq
 	 * @param RR
 	 */
-	public void getModules(Request rq, EFRequest RR){
+	public void getModules(Request rq, EFRequest RR) {
 		JSONArray res = PipeXMLUtil.getModules();
 		setResponse(RESPONSE_STATUS.Success, "", res);
 	}
-	
+
 	/**
 	 * start Module to instance
+	 * 
 	 * @param rq
 	 * @param RR
 	 */
 	public void startModule(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "instancename,module,readfrom,writeto")) {
-			if(!RR.getStringParam("instancename").equals(RR.getStringParam("module"))) {
-				EFFileUtil.copyFolder(GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("module"), GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instancename"));
+			if (!RR.getStringParam("instancename").equals(RR.getStringParam("module"))) {
+				EFFileUtil.copyFolder(GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("module"),
+						GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instancename"));
 			}
 			String xmlPath = GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instancename") + "/task.xml";
 			try {
 				int level = 1;
-				PipeXMLUtil.ModifyNode(xmlPath,"TransParam.param", "readfrom",
-						RR.getStringParam("readfrom"));
-				PipeXMLUtil.ModifyNode(xmlPath,"TransParam.param", "writeto",
-						RR.getStringParam("writeto"));
-				if(RR.getStringParam("compute")!="") {
-					PipeXMLUtil.ModifyNode(xmlPath,"ComputerParam.param", "api",
-							RR.getStringParam("compute"));
-					level+=2;
+				PipeXMLUtil.ModifyNode(xmlPath, "TransParam.param", "readfrom", RR.getStringParam("readfrom"));
+				PipeXMLUtil.ModifyNode(xmlPath, "TransParam.param", "writeto", RR.getStringParam("writeto"));
+				if (RR.getStringParam("compute") != "") {
+					PipeXMLUtil.ModifyNode(xmlPath, "ComputerParam.param", "api", RR.getStringParam("compute"));
+					level += 2;
 				}
-				EFMonitorUtil.addInstanceToSystem(RR.getStringParam("instancename"),String.valueOf(level));
+				EFMonitorUtil.addInstanceToSystem(RR.getStringParam("instancename"), String.valueOf(level));
 				try {
 					EFMonitorUtil.saveNodeConfig();
 					setResponse(RESPONSE_STATUS.Success,
@@ -259,7 +260,7 @@ public final class NodeMonitor {
 			setResponse(RESPONSE_STATUS.Success, "", null);
 		}
 	}
-	
+
 	/**
 	 * read Resources
 	 * 
@@ -355,7 +356,7 @@ public final class NodeMonitor {
 			try {
 				o = new WarehouseParam();
 				for (String key : iter) {
-					Common.setConfigObj(o, WarehouseParam.class, key, jsonObject.getString(key),null);
+					Common.setConfigObj(o, WarehouseParam.class, key, jsonObject.getString(key), null);
 				}
 //				o = new InstructionParam();
 //				for (String key : iter) {
@@ -838,7 +839,7 @@ public final class NodeMonitor {
 			setResponse(RESPONSE_STATUS.Success, null, rps);
 		}
 	}
-	
+
 	public void analyzeInstance(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "instance")) {
 			String res = EFMonitorUtil.analyzeInstance(RR.getStringParam("instance"));
@@ -1036,7 +1037,7 @@ public final class NodeMonitor {
 						obj = tmp.getWriterParams();
 						break;
 					}
-					Common.setConfigObj(obj, cls, params[1], RR.getStringParam("param.value"),null);
+					Common.setConfigObj(obj, cls, params[1], RR.getStringParam("param.value"), null);
 					if (GlobalParam.DISTRIBUTE_RUN)
 						GlobalParam.INSTANCE_COORDER.distributeCoorder().updateNodeConfigs(
 								RR.getStringParam("instance"), params[0], params[1], RR.getStringParam("param.value"));
@@ -1068,6 +1069,8 @@ public final class NodeMonitor {
 			InstanceConfig config = entry.getValue();
 			JSONObject instance = new JSONObject();
 			instance.put("Instance", entry.getKey());
+			instance.put("QueryApi", "//" + GlobalParam.IP + ":" + GlobalParam.SystemConfig.get("searcher_service_port")
+					+ "/" + entry.getKey());
 			instance.put("Alias", config.getAlias());
 			instance.put("OptimizeCron", config.getPipeParams().getOptimizeCron());
 			instance.put("DeltaCron", config.getPipeParams().getDeltaCron());
@@ -1213,9 +1216,9 @@ public final class NodeMonitor {
 	/**
 	 * Rebuilding task instances through configuration
 	 * 
-	 * @param rq instance=xx&reset=true|false&runtype=1 
-	 *           reset is true will clear all instances,
-	 *           instance settings. runType=-1 Use the original task run type
+	 * @param rq instance=xx&reset=true|false&runtype=1 reset is true will clear all
+	 *           instances, instance settings. runType=-1 Use the original task run
+	 *           type
 	 * 
 	 * @throws EFException
 	 * 

@@ -116,7 +116,7 @@ public final class KafkaSearcher extends SearcherFlowSocket {
 			while (true) {
 				ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(2000));
 				for (ConsumerRecord<String, String> record : records) {
-					if(!check)
+					if (!check)
 						nums--;
 					check = (content.length() > 0 && record.value().contains(content));
 					if (check || content.length() == 0) {
@@ -131,7 +131,7 @@ public final class KafkaSearcher extends SearcherFlowSocket {
 				if (count <= 0)
 					break;
 			}
-		 res.setTotalHit(nums);
+			res.setTotalHit(nums);
 		} catch (Exception e) {
 			throw Common.convertException(e);
 		} finally {
@@ -139,5 +139,4 @@ public final class KafkaSearcher extends SearcherFlowSocket {
 		}
 		this.formatResult(res, efResponse);
 	}
-
 }
