@@ -3,22 +3,14 @@ package org.elasticflow.searcher.flow;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
-import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.apache.kafka.clients.admin.DescribeTopicsResult;
-import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.consumer.OffsetAndMetadata;
-import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.TopicPartitionInfo;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.model.EFResponse;
@@ -41,8 +33,7 @@ import org.elasticflow.util.EFException;
 public final class KafkaSearcher extends SearcherFlowSocket {
 
 	private int count = 5;
-	private Properties consumerConf;
-	private Properties adminConf;
+	private Properties consumerConf; 
 
 	public static KafkaSearcher getInstance(ConnectParams connectParams) {
 		KafkaSearcher o = new KafkaSearcher();
@@ -54,15 +45,14 @@ public final class KafkaSearcher extends SearcherFlowSocket {
 		props.put("value.deserializer", StringDeserializer.class);
 		props.put("max.poll.records", GlobalParam.READ_PAGE_SIZE);
 		props.put("max.partition.fetch.bytes", 1048576 * 10);
-		props.put("enable.auto.commit", "false");
+		props.put("enable.auto.commit", "false"); // 设置为false，手动提交偏移量
 		props.put("session.timeout.ms", "30000");
 		props.put("heartbeat.interval.ms", "3000");
 		props.put("auto.offset.reset", "latest");
 		o.consumerConf = props;
 		Properties conf = new Properties();
 		conf.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, o.connectParams.getWhp().getHost());
-		conf.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, "5000");
-		o.adminConf = conf;
+		conf.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, "5000"); 
 		return o;
 	}
 
@@ -71,68 +61,42 @@ public final class KafkaSearcher extends SearcherFlowSocket {
 			throws EFException {
 		SearcherResult res = new SearcherResult();
 		String content = searcherModel.efRequest.getStringParam("content");
+		String id = searcherModel.efRequest.getStringParam("id");
 		count = searcherModel.getCount();
 		String topic = this.connectParams.getWhp().getDefaultValue().getString("consumer.topic");
 		KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerConf);
 		try {
-			AdminClient adminClient = AdminClient.create(adminConf);
-			DescribeTopicsResult topicResult = adminClient.describeTopics(Arrays
-					.asList(this.connectParams.getWhp().getDefaultValue().getString("consumer.topic").split(",")));
-
-			Map<String, KafkaFuture<TopicDescription>> descMap = topicResult.values();
-			Iterator<Map.Entry<String, KafkaFuture<TopicDescription>>> itr = descMap.entrySet().iterator();
-			while (itr.hasNext()) {
-				Map.Entry<String, KafkaFuture<TopicDescription>> entry = itr.next();
-				List<TopicPartitionInfo> topicPartitionInfoList = entry.getValue().get().partitions();
-				topicPartitionInfoList.forEach((e) -> {
-					int partitionId = e.partition();
-					TopicPartition topicPartition = new TopicPartition(topic, partitionId);
-//                    Map<TopicPartition, Long> mapBeginning = consumer.beginningOffsets(Arrays.asList(topicPartition));
-//                    Iterator<Map.Entry<TopicPartition, Long>> itr2 = mapBeginning.entrySet().iterator();
-//                    long beginOffset = 0; 
-//                    while(itr2.hasNext()) {
-//                        Map.Entry<TopicPartition, Long> tmpEntry = itr2.next();
-//                        beginOffset =  tmpEntry.getValue();
-//                    }
-					Map<TopicPartition, Long> mapEnd = consumer.endOffsets(Arrays.asList(topicPartition));
-					Iterator<Map.Entry<TopicPartition, Long>> itr3 = mapEnd.entrySet().iterator();
-					long lastOffset = 0;
-					while (itr3.hasNext()) {
-						Map.Entry<TopicPartition, Long> tmpEntry2 = itr3.next();
-						lastOffset = tmpEntry2.getValue();
-					}
-					long expectedOffSet = lastOffset - count;
-					if (expectedOffSet <= 0) {
-						expectedOffSet = 1;
-						count = 1;
-					}
-					consumer.commitSync(
-							Collections.singletonMap(topicPartition, new OffsetAndMetadata(expectedOffSet - 1)));
-				});
+			consumer.subscribe(Arrays.asList(topic)); 
+			while (consumer.assignment().isEmpty()) {
+				consumer.poll(Duration.ofMillis(100));
 			}
-			consumer.subscribe(Arrays.asList(topic));
+ 			Set<TopicPartition> partitions = consumer.assignment();
+			for (TopicPartition partition : partitions) {
+				long lastOffset = consumer.endOffsets(Collections.singleton(partition)).get(partition);
+				long expectedOffSet = Math.max(lastOffset - count, 0);
+				consumer.seek(partition, expectedOffSet);
+			}
+
 			int nums = count;
 			boolean check = false;
 			while (true) {
 				ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(2000));
 				for (ConsumerRecord<String, String> record : records) {
-					if (!check)
-						nums--;
-					check = (content.length() > 0 && record.value().contains(content));
-					if (check || content.length() == 0) {
+					if (!check) nums--;
+					check = (content.length() > 0 && record.value().contains(content)) || (id.length()>0 && record.key().equals(id));
+					if (check || (content.length() == 0 && id.length()==0)) {
 						ResponseDataUnit u = ResponseDataUnit.getInstance();
 						u.addObject(record.key(), record.value());
 						res.getUnitSet().add(u);
 					}
 					count--;
-					if (count <= 0)
-						break;
+					if (count <= 0) break;
 				}
-				if (count <= 0)
-					break;
+				if (count <= 0) break;
 			}
 			res.setTotalHit(nums);
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw Common.convertException(e);
 		} finally {
 			consumer.close();

@@ -91,6 +91,12 @@ public class EFRequest{
 			return String.valueOf(this.params.get(key));
 		return ""; 
 	}
+	
+	public boolean getBooleanParam(String key) {
+		if(this.params.containsKey(key))
+			return Boolean.valueOf(String.valueOf(this.params.get(key)));
+		return false; 
+	}
 
 	public Map<String, Object> getParams() {
 		return this.params;

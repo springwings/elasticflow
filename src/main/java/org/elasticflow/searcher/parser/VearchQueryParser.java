@@ -84,6 +84,9 @@ public class VearchQueryParser implements QueryParser{
 					case "ids":
 						query.put("ids", String.valueOf(v).split(","));
 						break;
+					default:
+						query.put(k, v);
+						break;
 					} 
 				}
 			}

@@ -793,7 +793,7 @@ public final class NodeMonitor {
 				if (state) {
 					setResponse(RESPONSE_STATUS.Success, null, "");
 				} else {
-					setResponse(RESPONSE_STATUS.DataErr, "instance not exits!", null);
+					setResponse(RESPONSE_STATUS.DataErr, RR.getStringParam("instance")+" instance not exits!", null);
 				}
 			} catch (EFException e) {
 				setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
@@ -812,7 +812,7 @@ public final class NodeMonitor {
 			try {
 				JSONObject JO = EFMonitorUtil.getInstanceInfo(RR.getStringParam("instance"), 7);
 				if (JO.isEmpty()) {
-					setResponse(RESPONSE_STATUS.DataErr, "instance not exits!", null);
+					setResponse(RESPONSE_STATUS.DataErr, RR.getStringParam("instance")+" instance not exits!", null);
 				} else {
 					setResponse(RESPONSE_STATUS.Success, null, JO);
 				}
@@ -947,9 +947,16 @@ public final class NodeMonitor {
 					edge.put("from", _entry.getKey());
 					edge.put("weight", weight);
 					edge.put("to", node.getKey());
-					edge.put("isconnect", true);
-					if (node.getValue().getBoolean("OpenTrans") == false)
-						edge.put("isconnect", false);
+					if(RR.getBooleanParam("track")) {
+						edge.put("isconnect", false); 
+						String key = RR.getStringParam("track_field");
+						String val = RR.getStringParam("track_value");
+						edge.put("isconnect", EFMonitorUtil.containCheck(node.getKey(), key, val)); 
+					}else {
+						edge.put("isconnect", true);
+						if (node.getValue().getBoolean("OpenTrans") == false)
+							edge.put("isconnect", false);
+					} 
 					edges.add(edge);
 				}
 			}

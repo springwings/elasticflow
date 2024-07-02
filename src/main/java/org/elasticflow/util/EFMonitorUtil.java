@@ -22,6 +22,7 @@ import org.elasticflow.config.GlobalParam.TASK_FLOW_SINGAL;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.model.EFRequest;
+import org.elasticflow.model.EFResponse;
 import org.elasticflow.node.NodeMonitor;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.piper.PipePump;
@@ -533,6 +534,32 @@ public class EFMonitorUtil {
 		}
 		return JO;
 	} 
+	
+	@SuppressWarnings("unchecked")
+	public static boolean containCheck(String pipe,String key,String value) {
+		EFResponse rps = EFResponse.getInstance(); 
+		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getSearchConfigs();
+		EFRequest efRq = EFRequest.getInstance();  
+		if (configMap.containsKey(pipe)) { 
+			efRq.setPipe(pipe);
+			switch (Resource.nodeConfig.getWarehouse().get(configMap.get(pipe).getPipeParams().getWriteTo()).getType()) {
+			case KAFKA:
+			case ROCKETMQ:
+				efRq.addParam("content", value);
+				efRq.addParam("count", 200);
+				break;
+			default:
+				efRq.addParam(key, value);
+				break;
+			}
+			Resource.socketCenter.getSearcher(pipe, "", "", false).startSearch(efRq, rps);
+		} 
+		Map<String, Object> Payload = (Map<String, Object>)rps.getPayload();
+		if(Payload!=null && Payload.containsKey("total") && Integer.parseInt(Payload.get("total").toString())>0) {
+			return true;
+		}
+		return false;
+	}
 
 	public static String analyzeInstance(String instance) {
 		StringBuffer res = new StringBuffer();
