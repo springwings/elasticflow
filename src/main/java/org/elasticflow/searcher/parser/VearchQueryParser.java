@@ -82,11 +82,9 @@ public class VearchQueryParser implements QueryParser{
 						_feature.put("boost",Float.parseFloat(String.valueOf(v))); 
 						break;  
 					case "ids":
+					case "id":
 						query.put("ids", String.valueOf(v).split(","));
-						break;
-					default:
-						query.put(k, v);
-						break;
+						break; 
 					} 
 				}
 			}
@@ -119,7 +117,7 @@ public class VearchQueryParser implements QueryParser{
 		} 
 		if(filters.size()>0)
 			query.put("filter", filters);
-		searchObj.put("size", model.getSortinfo());
+		searchObj.put("size", model.getCount());
 		searchObj.put("query", query);		
 	}
  
