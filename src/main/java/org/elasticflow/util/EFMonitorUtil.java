@@ -612,7 +612,7 @@ public class EFMonitorUtil {
 						} else {
 							if (line.contains("at ") || line.contains("Cause ") || line.contains("ERROR")
 									|| line.contains(" more") || line.contains("Exception")) {
-								buffernum = 1;
+								buffernum = 2;
 							} else {
 								buffernum -= 1;
 							}

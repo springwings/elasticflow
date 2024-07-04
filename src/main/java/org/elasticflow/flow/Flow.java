@@ -116,7 +116,7 @@ public abstract class Flow {
 	public synchronized EFConnectionSocket<?> PREPARE(boolean isMonopoly, boolean acceptShareConn,boolean crossSubtasks) {
 		if (isMonopoly) {
 			if (this.EFConn == null) {
-				if(!crossSubtasks) {
+				if(crossSubtasks==false) {
 					if(!this.EFConnKey.endsWith("_CROSS_RANDOM")) {
 						this.EFConnKey = this.EFConnKey+Common.getNow()+"_CROSS_RANDOM";
 						Resource.EFConns.put(this.EFConnKey, null);
