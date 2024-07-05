@@ -1,5 +1,6 @@
 package org.elasticflow.writer.flow;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -9,6 +10,7 @@ import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.config.GlobalParam.ETYPE;
 import org.elasticflow.config.GlobalParam.RESOURCE_STATUS;
 import org.elasticflow.connection.sockets.VearchConnector;
+import org.elasticflow.computer.algorithm.MathFunction;
 import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
@@ -24,6 +26,8 @@ import com.alibaba.fastjson.JSONObject;
 
 /**
  * Vearch Flow Writer Manager
+ * feature field open vector normalization
+ * customParams="{'normal':'true'}"
  * 
  * @author chengwen
  * @version 1.0
@@ -92,7 +96,14 @@ public class VearchWriter extends WriterFlowSocket {
 					continue;
 				if (transParam.getIndextype().equals("vector")) {
 					JSONObject _feature = new JSONObject();
-					_feature.put("feature", value);
+					if(transParam.getCustomParams().containsKey("normal")) {
+					    double[] doubleArray = Arrays.stream((Object[]) value)
+                               .mapToDouble(o -> ((Number) o).doubleValue())
+                               .toArray(); 
+						_feature.put("feature", MathFunction.normalizeVector(doubleArray));
+					}else {
+						_feature.put("feature", value);
+					} 
 					row.put(transParam.getAlias(), _feature);
 				} else {
 					row.put(transParam.getAlias(), value);
