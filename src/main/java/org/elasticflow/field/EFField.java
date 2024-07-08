@@ -38,7 +38,7 @@ public class EFField {
 	/** user define extension field configuration **/
 	private String dsl;
 	/** User defined JSON parameters can be used to extend the plugin */
-	private JSONObject customParams;
+	private JSONObject customParams = new JSONObject();
 
 	public boolean isValid(String value) {
 		return true;
