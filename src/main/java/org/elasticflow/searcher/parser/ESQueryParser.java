@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,13 +154,21 @@ public class ESQueryParser implements QueryParser {
 				if (occur == Occur.MUST_NOT && query != null) {
 					bquery.mustNot(query);
 					continue;
-				}
-
+				} 
 				if (query != null)
-					bquery.must(query);
+					bquery.must(query); 
 			}
 		} catch (Exception e) {
 			log.error("build es Boolean Query Exception", e);
+		}
+		if(searcherModel.getHighlightFields()!=null) {
+			HighlightBuilder HLB = new HighlightBuilder();
+			for(String field:searcherModel.getHighlightFields()) {
+				HighlightBuilder.Field _hField = new HighlightBuilder.Field(field); 
+				_hField.preTags("<"+searcherModel.getHighlightTag()+">").postTags("</"+searcherModel.getHighlightTag()+">");
+				HLB.field(_hField);  
+			} 
+			SSB.highlighter(HLB); 
 		}
 		SSB.query(bquery);
 	}

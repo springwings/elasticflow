@@ -57,8 +57,14 @@ public class SearchParamUtil {
 			SM.setShowQueryInfo(true);
 		if (request.getParams().containsKey(GlobalParam.INSATANCE_STAT))
 			SM.setShowStats(true);
+	 
+		if (request.getParams().containsKey(GlobalParam.HIGHLIGHT_FIELDS)){ 
+			SM.setHighlightFields(request.getParam(GlobalParam.HIGHLIGHT_FIELDS));
+			if (request.getParams().containsKey(GlobalParam.HIGHLIGHT_TAG))
+				SM.setHighlightTag(request.getParam(GlobalParam.HIGHLIGHT_TAG));
+		} 
 		if (request.getParams().containsKey(GlobalParam.PARAM_FL))
-			SM.setFl((String) request.getParam(GlobalParam.PARAM_FL));
+			SM.setFl((String) request.getParam(GlobalParam.PARAM_FL)); 
 		if (request.getParams().containsKey(GlobalParam.PARAM_REQUEST_HANDLER))
 			SM.setRequestHandler((String) request.getParam(GlobalParam.PARAM_REQUEST_HANDLER));
 	}

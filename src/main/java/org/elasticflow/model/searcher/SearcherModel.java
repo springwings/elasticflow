@@ -30,6 +30,13 @@ public abstract class SearcherModel<T1> {
 	private boolean showStats = false;
 	
 	/**
+	 * Do you want to enable highlighting of results,check highlightfields
+	 */  
+	private String[] highlightfields = null;
+	
+	private String highLightTag = "em";
+	
+	/**
 	 * User query parameters
 	 */
 	public EFRequest efRequest; 
@@ -94,8 +101,9 @@ public abstract class SearcherModel<T1> {
 		return this.storeId;
 	}
 
-	public void setFl(String fl) {
-		this.fl = fl;
+	public void setFl(Object fl) {
+		if(fl!=null)
+			this.fl = String.valueOf(fl);
 	}
 	  
 	public int getStart() {
@@ -104,6 +112,24 @@ public abstract class SearcherModel<T1> {
 
 	public void setStart(int start) {
 		this.start = start;
+	} 
+	
+	public String[] getHighlightFields() {
+		return highlightfields;
+	}
+
+	public void setHighlightFields(Object highlightFields) {
+		if(highlightFields!=null)
+			this.highlightfields = String.valueOf(highlightFields).split(",");
+	}
+	
+	public String getHighlightTag() {
+		return highLightTag;
+	}
+
+	public void setHighlightTag(Object highLightTag) {
+		if(highLightTag!=null)
+			this.highLightTag = String.valueOf(highLightTag);
 	}
 	
 	public boolean isShowStats() {

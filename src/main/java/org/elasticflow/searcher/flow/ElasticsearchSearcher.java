@@ -24,8 +24,10 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.common.document.DocumentField;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortBuilder;
 
 import com.alibaba.fastjson.JSON;
@@ -105,22 +107,32 @@ public final class ElasticsearchSearcher extends SearcherFlowSocket {
 		res.setTotalHit(searchHits.getTotalHits().value);
 		SearchHit[] hits = searchHits.getHits();
 
-		for (SearchHit h : hits) {
-			Map<String, DocumentField> fieldMap = h.getFields();
+		for (SearchHit SH : hits) {
+			Map<String, DocumentField> fieldMap = SH.getFields();
 			ResponseDataUnit u = ResponseDataUnit.getInstance();
-			u.addObject(GlobalParam.RESPONSE_SCORE, h.getScore());
+			u.addObject(GlobalParam.RESPONSE_SCORE, SH.getScore());
+			Map<String, HighlightField> HfieldMap = SH.getHighlightFields();
 			for (Map.Entry<String, DocumentField> e : fieldMap.entrySet()) {
 				String name = e.getKey();
 				EFField param = instanceConfig.getSearchFields().get(name);
-				DocumentField v = e.getValue();
-				if (param != null && param.getSeparator() != null) {
-					u.addObject(name, v.getValues());
-				} else if (returnFields.contains(name)) {
-					u.addObject(name, v.getValue());
+				if (HfieldMap.containsKey(name)) {
+					HighlightField v = HfieldMap.get(name);
+					StringBuffer _sb = new StringBuffer();
+					for (Text text : v.getFragments()) {
+						_sb.append(text.string());
+					}
+					u.addObject(name, _sb.toString());
+				} else {
+					DocumentField v = e.getValue();
+					if (param != null && param.getSeparator() != null) {
+						u.addObject(name, v.getValues());
+					} else if (returnFields.contains(name)) {
+						u.addObject(name, v.getValue());
+					}
 				}
 			}
-			if (searcherModel.isShowQueryInfo()) { 
-				u.addObject(GlobalParam.RESPONSE_EXPLAINS, h.getExplanation().toString().replace("", ""));
+			if (searcherModel.isShowQueryInfo()) {
+				u.addObject(GlobalParam.RESPONSE_EXPLAINS, SH.getExplanation().toString().replace("", ""));
 			}
 			res.getUnitSet().add(u);
 		}

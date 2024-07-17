@@ -287,6 +287,9 @@ public final class GlobalParam {
 	public final static String INSATANCE_STAT = "__stats";
 	public final static String CUSTOM_QUERY = "custom_query";
 	public final static String CLOSE_REQUEST_RESPONSE = "__request_not_return";
+	public final static String HIGHLIGHT_RESPONSE = "__highlight";
+	public final static String HIGHLIGHT_FIELDS = "__highlightfields";
+	public final static String HIGHLIGHT_TAG = "__highlighttag";
 	public final static int SEARCH_MAX_WINDOW = 20000;
 	public final static int SEARCH_MAX_PAGE = 2000;
 	public final static float DISJUNCTION_QUERY_WEIGHT = 0.1f;
