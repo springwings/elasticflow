@@ -69,8 +69,7 @@ public abstract class SearcherFlowSocket extends Flow {
 		for (ResponseDataUnit unit : data.getUnitSet()) {
 			objList.add(unit.getContent());
 		}
-		if (objList.size() > 0)
-			contentMap.put("lists", objList); 
+		contentMap.put("lists", objList); 			
 		if (data.getFacetInfo()!=null)
 			contentMap.put("facet", data.getFacetInfo());  
 		if (data.getQueryDetail() != null)
@@ -79,9 +78,8 @@ public abstract class SearcherFlowSocket extends Flow {
 			contentMap.put("explain", data.getExplainInfo()); 
 		if (data.getStat() != null)
 			contentMap.put("__STATS", data.getStat()); 
-		if(data.isSuccess()==false) {
-			response.setStatus(data.getErrorInfo(), RESPONSE_STATUS.ParameterErr);
-		}
+		if(data.isSuccess()==false) 
+			response.setStatus(data.getErrorInfo(), RESPONSE_STATUS.ParameterErr); 
 		response.setPayload(contentMap);
 	}
 }
