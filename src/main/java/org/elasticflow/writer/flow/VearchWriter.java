@@ -253,6 +253,8 @@ public class VearchWriter extends WriterFlowSocket {
 				fields.put("type", entry.getValue().getIndextype());
 				if (entry.getValue().getIndexed().equals("true")) {
 					fields.put("index", true);
+				}else {
+					fields.put("index", false);
 				}
 				properties.put(entry.getValue().getAlias(), fields);
 			}
