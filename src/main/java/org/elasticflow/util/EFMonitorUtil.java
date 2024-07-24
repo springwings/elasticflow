@@ -226,56 +226,57 @@ public class EFMonitorUtil {
 	 */
 	public static void controlInstanceState(String instance, TASK_FLOW_SINGAL state, boolean isIncrement) {
 		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instance);
-		if ((GlobalParam.SERVICE_LEVEL & 6) == 0) {
-			return;
-		}
-		JOB_TYPE controlType;
-		if (isIncrement) {
-			if (instanceConfig.getPipeParams().getDeltaCron() == null)
-				return;
-			controlType = GlobalParam.JOB_TYPE.INCREMENT;
-		} else {
-			if (instanceConfig.getPipeParams().getFullCron() == null)
-				return;
-			controlType = GlobalParam.JOB_TYPE.FULL;
-		}
-		for (String inst : instance.split(",")) {
-			int waittime = 0;
-			String[] seqs = EFMonitorUtil.getInstanceL1seqs(instance);
-			Common.LOG.info("Instance {} seq nums {},job type {},waitting set state {} ...", inst, seqs.length,
-					controlType.name(), state);
-			for (String L1seq : seqs) {
-				if (GlobalParam.TASK_COORDER.checkFlowSingal(inst, L1seq, controlType, TASK_FLOW_SINGAL.Running)) {
-					GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(), TASK_FLOW_SINGAL.Blank,
-							TASK_FLOW_SINGAL.Termination, true);
-					while (!GlobalParam.TASK_COORDER.checkFlowSingal(inst, L1seq, controlType,
-							TASK_FLOW_SINGAL.Ready)) {
-						try {
-							waittime++;
-							Thread.sleep(100);
-							if (waittime > 200) {
-								break;
+		if ((GlobalParam.SERVICE_LEVEL & 6) == 0) 
+			return; 
+		if (instanceConfig != null) {
+			JOB_TYPE controlType;
+			if (isIncrement) {
+				if (instanceConfig.getPipeParams().getDeltaCron() == null)
+					return;
+				controlType = GlobalParam.JOB_TYPE.INCREMENT;
+			} else {
+				if (instanceConfig.getPipeParams().getFullCron() == null)
+					return;
+				controlType = GlobalParam.JOB_TYPE.FULL;
+			}
+			for (String inst : instance.split(",")) {
+				int waittime = 0;
+				String[] seqs = EFMonitorUtil.getInstanceL1seqs(instance);
+				Common.LOG.info("Instance {} seq nums {},job type {},waitting set state {} ...", inst, seqs.length,
+						controlType.name(), state);
+				for (String L1seq : seqs) {
+					if (GlobalParam.TASK_COORDER.checkFlowSingal(inst, L1seq, controlType, TASK_FLOW_SINGAL.Running)) {
+						GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(), TASK_FLOW_SINGAL.Blank,
+								TASK_FLOW_SINGAL.Termination, true);
+						while (!GlobalParam.TASK_COORDER.checkFlowSingal(inst, L1seq, controlType,
+								TASK_FLOW_SINGAL.Ready)) {
+							try {
+								waittime++;
+								Thread.sleep(100);
+								if (waittime > 200) {
+									break;
+								}
+							} catch (InterruptedException e) {
+								Common.LOG.error("control instance state thread sleep is interrupted exception", e);
 							}
-						} catch (InterruptedException e) {
-							Common.LOG.error("control instance state thread sleep is interrupted exception", e);
 						}
-					}
-					if (GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(),
-							TASK_FLOW_SINGAL.Termination, state, true)) {
-						Common.LOG.info("Instance {} L1seq {},job type {} success set state {}.", inst,
-								(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
+						if (GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(),
+								TASK_FLOW_SINGAL.Termination, state, true)) {
+							Common.LOG.info("Instance {} L1seq {},job type {} success set state {}.", inst,
+									(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
+						} else {
+							Common.LOG.info("Instance {} L1seq {},job type {} fail set state {}.", inst,
+									(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
+						}
 					} else {
-						Common.LOG.info("Instance {} L1seq {},job type {} fail set state {}.", inst,
-								(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
-					}
-				} else {
-					if (GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(), TASK_FLOW_SINGAL.Blank,
-							state, true)) {
-						Common.LOG.info("Instance {} L1seq {},job type {} success set state {}.", inst,
-								(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
-					} else {
-						Common.LOG.info("Instance {} L1seq {},job type {} fail set state {}.", inst,
-								(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
+						if (GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(),
+								TASK_FLOW_SINGAL.Blank, state, true)) {
+							Common.LOG.info("Instance {} L1seq {},job type {} success set state {}.", inst,
+									(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
+						} else {
+							Common.LOG.info("Instance {} L1seq {},job type {} fail set state {}.", inst,
+									(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
+						}
 					}
 				}
 			}
@@ -533,16 +534,17 @@ public class EFMonitorUtil {
 			JO.put("node_info", nodeInfo);
 		}
 		return JO;
-	} 
-	
+	}
+
 	@SuppressWarnings("unchecked")
-	public static boolean containCheck(String pipe,String key,String value) {
-		EFResponse rps = EFResponse.getInstance(); 
+	public static boolean containCheck(String pipe, String key, String value) {
+		EFResponse rps = EFResponse.getInstance();
 		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getSearchConfigs();
-		EFRequest efRq = EFRequest.getInstance();  
-		if (configMap.containsKey(pipe)) { 
+		EFRequest efRq = EFRequest.getInstance();
+		if (configMap.containsKey(pipe)) {
 			efRq.setPipe(pipe);
-			switch (Resource.nodeConfig.getWarehouse().get(configMap.get(pipe).getPipeParams().getWriteTo()).getType()) {
+			switch (Resource.nodeConfig.getWarehouse().get(configMap.get(pipe).getPipeParams().getWriteTo())
+					.getType()) {
 			case KAFKA:
 			case ROCKETMQ:
 				efRq.addParam("content", value);
@@ -553,9 +555,9 @@ public class EFMonitorUtil {
 				break;
 			}
 			Resource.socketCenter.getSearcher(pipe, "", "", false).startSearch(efRq, rps);
-		} 
-		Map<String, Object> Payload = (Map<String, Object>)rps.getPayload();
-		if(Payload!=null && Payload.containsKey("total") && Integer.parseInt(Payload.get("total").toString())>0) {
+		}
+		Map<String, Object> Payload = (Map<String, Object>) rps.getPayload();
+		if (Payload != null && Payload.containsKey("total") && Integer.parseInt(Payload.get("total").toString()) > 0) {
 			return true;
 		}
 		return false;
@@ -589,7 +591,7 @@ public class EFMonitorUtil {
 				if (config.getComputeParams().getComputeMode() == COMPUTER_MODE.REST) {
 					String urlscheck = isPortOpen(config.getComputeParams().getApi());
 					res.append("<li>· 计算端: 运行模式-" + COMPUTER_MODE.REST + ", 接口状态 <b>"
-							+ (urlscheck.length()<1 ? "正常" : "<i>异常</i>") + "</b> "+urlscheck+" </li>"); 
+							+ (urlscheck.length() < 1 ? "正常" : "<i>异常</i>") + "</b> " + urlscheck + " </li>");
 				} else {
 					res.append("<li>· 计算端: 模式" + config.getComputeParams().getComputeMode() + ", 未知</li>");
 				}
@@ -597,7 +599,7 @@ public class EFMonitorUtil {
 			if (config.getPipeParams().getWriteTo() != null)
 				res.append("<li>· 写端: <b>"
 						+ Resource.resourceStates.get(config.getPipeParams().getWriteTo()).getString("status")
-						+ "</b></li>"); 
+						+ "</b></li>");
 			res.append("</ul>");
 			res.append("<h1>3 错误日志跟踪</h1><pre class='track_error'>");
 			int buffernum = 0;
@@ -638,14 +640,14 @@ public class EFMonitorUtil {
 			data.getJSONObject(appendPipe).put(key, val);
 		}
 	}
-	
+
 	public static String isPortOpen(List<String> hosts) {
 		StringBuffer sb = new StringBuffer();
-		for(String host:hosts) {
-			if(isPortOpen(host)==false) {
-				sb.append("<br>"); 
-				sb.append(host); 
-			} 
+		for (String host : hosts) {
+			if (isPortOpen(host) == false) {
+				sb.append("<br>");
+				sb.append(host);
+			}
 		}
 		return sb.toString();
 	}
@@ -667,11 +669,11 @@ public class EFMonitorUtil {
 				}
 			}
 			try (Socket socket = new Socket()) {
-	            socket.connect(new InetSocketAddress(url.getHost(), port), 800);
-	            return true;
-	        } catch (Exception e) {
-	            return false;
-	        } 
+				socket.connect(new InetSocketAddress(url.getHost(), port), 800);
+				return true;
+			} catch (Exception e) {
+				return false;
+			}
 		} catch (Exception e) {
 			return true;
 		}

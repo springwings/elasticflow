@@ -125,6 +125,7 @@ public final class NodeMonitor {
 			put("getresource", "getResource");
 			put("getresources", "getResources");
 			put("getmodules", "getModules");
+			put("unloadmodule", "unloadModule");
 			put("startmodule", "startModule");
 			put("getresourcexml", "getResourcexml");
 			put("updateresource", "updateResource");
@@ -223,6 +224,14 @@ public final class NodeMonitor {
 	public void getModules(Request rq, EFRequest RR) {
 		JSONArray res = PipeXMLUtil.getModules();
 		setResponse(RESPONSE_STATUS.Success, "", res);
+	}
+	
+	public void unloadModule(Request rq, EFRequest RR) {
+		if (EFMonitorUtil.checkParams(this, RR, "module")) {
+			boolean res = PipeXMLUtil.unloadModule(RR.getStringParam("module"));
+			setResponse(RESPONSE_STATUS.Success, "", res);
+		}
+		
 	}
 
 	/**

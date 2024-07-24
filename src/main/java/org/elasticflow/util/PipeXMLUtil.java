@@ -110,6 +110,15 @@ public class PipeXMLUtil {
 		}
 	}
 	
+	public static boolean unloadModule(String instance){
+		ArrayList<File> modules = EFFileUtil.scanFolders(GlobalParam.INSTANCE_PATH);
+		for(File f : modules) { 
+			if(f.getName().equals(instance))
+				return EFFileUtil.deleteDir(GlobalParam.INSTANCE_PATH+"/"+instance);
+		}
+		return true;
+	}
+	
 	/**
 	 * scan all modules
 	 * @param rq

@@ -256,4 +256,26 @@ public class EFFileUtil {
 			return "/opt/EF";
 		} 
 	}
+	
+	/**
+	 * Delete files one by one and then delete directories
+	 * @param path
+	 * @return boolean
+	 */
+    public static boolean deleteDir(String path) {
+    	File dir = new File(path);
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                boolean success = deleteDir(dir+"/"+ children[i]);
+                if (!success)
+                    return false; 
+            }
+        }
+        if(dir.delete()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

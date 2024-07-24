@@ -70,9 +70,8 @@ public class WriterParam {
 			}	
 			break;
 		case "storagestructure":
-			if(v!=null) {
-				wp.storageStructure = JSONObject.parseObject(v);
-			}	
+			if(v!=null) 
+				wp.storageStructure = JSONObject.parseObject(v.strip()); 
 			break;
 		case "dslparse":
 			wp.dslParse = v;
