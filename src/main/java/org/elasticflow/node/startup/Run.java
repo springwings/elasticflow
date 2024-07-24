@@ -78,8 +78,8 @@ public final class Run {
 		Resource.EfNotifier = new EFNotifier();
 		Resource.tasks = new ConcurrentHashMap<String, FlowTask>();		
 		Resource.taskJobCenter = new TaskJobCenter();//shedule job manager 
-		Resource.socketCenter =  new SocketCenter();//data-flow builder 
-		Resource.flowCenter = new FlowCenter();//data-flow manager
+		Resource.socketCenter =  new SocketCenter(); 
+		Resource.flowCenter = new FlowCenter();
 		Resource.nodeMonitor = new NodeMonitor(); 
 		Resource.threadPools = new ThreadPools(GlobalParam.SYS_THREADPOOL_SIZE);
 		

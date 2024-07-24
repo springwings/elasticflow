@@ -334,7 +334,7 @@ public final class PipePump extends Instruction implements Serializable {
 			dataBoundary = pageList.poll();
 			progressPos++;
 			GlobalParam.TASK_COORDER.setFlowProgressInfo(task.getInstanceID(), task.getJobType().name(),
-					task.getInstanceProcessId(task.getL2seq()), progressPos + "/" + pageList.size());
+					task.getInstanceProcessId(task.getL2seq()), progressPos + "/" + pageNum);
 			String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(), PipeUtil.getScanParam(
 					task.getL2seq(), startId, dataBoundary, task.getStartTime(), task.getEndTime(), scanField));
 

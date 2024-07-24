@@ -8,11 +8,13 @@
 			<param>
 				<name>writeTo</name>
 				<value>kges</value>
+				<name>elasticsearch</name>
 			</param>
 			<!--- pipe start parameters -->
 			<param>
 				<name>readFrom</name>
 				<value>csv_folder</value>
+				<name>files</name>
 			</param>
 			<param>
 				<name>writeMechanism</name>

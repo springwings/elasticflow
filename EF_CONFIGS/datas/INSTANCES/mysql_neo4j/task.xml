@@ -11,6 +11,7 @@
 			</param>
 			<param>
 				<name>writeTo</name>
+				<type>neo4j</type>
 				<value>neo4j_db</value>
 			</param>
 
@@ -19,6 +20,7 @@
 			<param>
 				<name>readFrom</name>
 				<value>mysql_db</value>
+				<type>mysql</type>
 			</param>
 
 			<param>

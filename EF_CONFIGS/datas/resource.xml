@@ -19,13 +19,13 @@
 		<!--- bolt -->
 	</socket>
 	<socket>
-		<name>elasticsarch_position</name>
-		<type>es</type>
+		<name>vearch_position</name>
+		<type>vearch</type>
 		<host>192.168.6.188</host>
 	</socket>
 	<socket>
-		<name>elasticsarch_position</name>
-		<type>es</type>
+		<name>elasticsearch_position</name>
+		<type>elasticsarch</type>
 		<host>192.168.6.188</host>
 	</socket>
 	<socket>
@@ -33,5 +33,11 @@
 		<type>files</type>
 		<host>/opt/train.data/ef</host>
 		<defaultValue>{"extension":".csv"}</defaultValue>
+	</socket>
+	<socket>
+		<name>person_event</name>
+		<type>kafka</type>
+		<host>192.168.6.188:9092</host>
+		<defaultValue>{"consumer.topic":"test","group.id":"test"}</defaultValue>
 	</socket>
 </config>

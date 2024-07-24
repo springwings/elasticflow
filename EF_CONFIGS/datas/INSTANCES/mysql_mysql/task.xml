@@ -13,9 +13,8 @@
 			</param>
 			<param>
 				<name>writeTo</name>
-				<value>
-					mysql_db
-				</value>
+				<value>mysql_db</value>
+				<type>mysql</type>
 			</param>
 
 			<!--- pipe start parameters -->
@@ -23,6 +22,7 @@
 			<param>
 				<name>readFrom</name>
 				<value>mysql_db</value>
+				<type>mysql</type>
 			</param>
 
 			<param>

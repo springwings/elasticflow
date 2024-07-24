@@ -12,7 +12,8 @@
 			</param>
 			<param>
 				<name>writeTo</name>
-				<value>elasticsarch_position</value>
+				<value>elasticsearch_position</value>
+				<type>elasticsearch</type>
 			</param>
 
 			<!--- pipe start parameters -->
@@ -20,6 +21,7 @@
 			<param>
 				<name>readFrom</name>
 				<value>mysql_db</value>
+				<type>mysql</type>
 			</param>
 
 			<param>

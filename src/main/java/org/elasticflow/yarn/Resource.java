@@ -36,9 +36,10 @@ import com.alibaba.fastjson.JSONObject;
  * @date 2018-11-13 10:53
  */
 public final class Resource {
-
-	public static SocketCenter socketCenter;
-
+	
+	/**Data Flow Pipeline Management Center*/
+	public static SocketCenter socketCenter; 
+	/**Data flow overall start stop management center*/
 	public static FlowCenter flowCenter;
 
 	public static NodeMonitor nodeMonitor;
@@ -59,6 +60,7 @@ public final class Resource {
 	/**flow process data position information*/
 	public final static ConcurrentHashMap<String, JSONObject> flowStates = new ConcurrentHashMap<>();
 	
+	/**Statistics of global error status*/
 	private final static ConcurrentHashMap<String, AtomicInteger> nodeErrorStates = new ConcurrentHashMap<String, AtomicInteger>(){ 
 		private static final long serialVersionUID = 4065859783610995291L; 
 	{

@@ -622,9 +622,9 @@ public final class NodeMonitor {
 		res.put("system_start_time", Common.FormatTime(GlobalParam.SYS_START_TIME));
 		// reader computer writer data statistics
 		try {
-			JSONObject reader = null;
-			JSONObject computer = null;
-			JSONObject writer = null;
+			JSONObject reader = new JSONObject();
+			JSONObject computer = new JSONObject();
+			JSONObject writer = new JSONObject();
 			for (Map.Entry<String, InstanceConfig> entry : Resource.nodeConfig.getInstanceConfigs().entrySet()) {
 				if (!entry.getValue().openTrans())
 					continue;
