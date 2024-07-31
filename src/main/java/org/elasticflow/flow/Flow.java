@@ -67,7 +67,19 @@ public abstract class Flow {
 	public abstract void initConn(ConnectParams connectParams);
 
 	public abstract void initFlow() throws EFException;
-
+	
+	/**if true,This instance task shares a connection with all subtasks under the same end, 
+	 * 					mainly used to connect to scenarios with accompanying states, example: ES writer*/
+	public static boolean crossSubtasks = false;
+	
+	/**
+	 * 
+	 * @param instanceConfig
+	 * @param endType
+	 * @param L1seq
+	 * @param crossSubtasks 
+	 * @throws EFException
+	 */
 	public void prepareFlow(InstanceConfig instanceConfig, END_TYPE endType, String L1seq) throws EFException {
 		this.instanceConfig = instanceConfig;
 		this.L1seq = L1seq;
@@ -85,9 +97,15 @@ public abstract class Flow {
 			this.EFConnKey = TaskUtil.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",
 					this.instanceConfig.getPipeParams().isSearcherShareAlias())+"_other";
 			break;
-		}
+		} 
 		//When splitting an instance into multiple parallel subtasks, it can share connection resources with each other
 		synchronized (Resource.EFConns) {
+			if(crossSubtasks==false) {
+				if(!this.EFConnKey.endsWith("_CROSS_RANDOM")) {
+					this.EFConnKey = this.EFConnKey+Common.getNow()+"_CROSS_RANDOM";
+					Resource.EFConns.put(this.EFConnKey, null);
+				}
+			}
 			Resource.EFConns.put(this.EFConnKey, null);
 		}
 		this.initFlow();
@@ -97,9 +115,7 @@ public abstract class Flow {
 	/**
 	 * release flow 
 	 */
-	public abstract void release();
-	
-	
+	public abstract void release(); 
 	
 	/**
 	 * Enable exclusive resolution if the link has a special resource binding
@@ -108,20 +124,12 @@ public abstract class Flow {
 	 *                        connection and will not release it
 	 * 						  Used in scenarios where connections cannot be mixed between different ends                       
 	 * @param acceptShareConn if true, Use global shared connections
-	 * 						  Share this connection globally
-	 * @param crossSubtasks  if true,This instance task shares a connection with all subtasks under the same end, 
-	 * 					mainly used to connect to scenarios with accompanying states
+	 * 						  Share this connection globally 
 	 * @return
 	 */
-	public synchronized EFConnectionSocket<?> PREPARE(boolean isMonopoly, boolean acceptShareConn,boolean crossSubtasks) {
+	public synchronized EFConnectionSocket<?> PREPARE(boolean isMonopoly, boolean acceptShareConn) {
 		if (isMonopoly) {
-			if (this.EFConn == null) {
-				if(crossSubtasks==false) {
-					if(!this.EFConnKey.endsWith("_CROSS_RANDOM")) {
-						this.EFConnKey = this.EFConnKey+Common.getNow()+"_CROSS_RANDOM";
-						Resource.EFConns.put(this.EFConnKey, null);
-					}
-				}
+			if (this.EFConn == null) { 
 				if (Resource.EFConns.get(this.EFConnKey) == null) {
 					Resource.EFConns.put(this.EFConnKey,
 							EFConnectionPool.getConn(this.connectParams, this.poolName, acceptShareConn));

@@ -238,7 +238,7 @@ public final class PipePump extends Instruction implements Serializable {
 				if (task.getJobType().equals(JOB_TYPE.FULL) && !isReferenceInstance) {
 					//For similar rollback scenarios
 					for (int t = 0; t < 5; t++) {
-						getWriter().PREPARE(false, false,false);
+						getWriter().PREPARE(false, false);
 						if (getWriter().connStatus()) {
 							try {
 								getWriter().removeShard(instanceID, storeId);
@@ -358,7 +358,7 @@ public final class PipePump extends Instruction implements Serializable {
 			//Refresh every page
 			pstate = (PipererState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
 					destination, storeId, task, pagedata,
-					",progress:" + progressPos + "/" + pageNum, isupdate, false);
+					",progress:" + progressPos + "/" + pageNum, isupdate,false);
 			if (pstate.isStatus() == false)
 				throw new EFException("single thread writeDataSet exception!"+pstate.getInfo());
 			total.getAndAdd(pstate.getCount());
@@ -494,8 +494,7 @@ public final class PipePump extends Instruction implements Serializable {
 					}
 					pstate = (PipererState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),
 							task.getInstanceProcessId(), storeId, task, pagedata,
-							",progress:" + progressPos + "/" + pageNum, this.isUpdate,
-							false);
+							",progress:" + progressPos + "/" + pageNum, this.isUpdate,false);
 				} catch (EFException e) {
 					log.error("instance {} process page data exception", this.instanceConfig.getInstanceID(),e);
 					task.taskState.setEfException(e);

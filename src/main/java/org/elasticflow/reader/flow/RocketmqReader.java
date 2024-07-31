@@ -44,6 +44,8 @@ public class RocketmqReader extends ReaderFlowSocket {
 	private DefaultLitePullConsumer conn = null;
 
 	private List<MessageExt> records;
+	
+	public static boolean crossSubtasks = true;
 
 	public static RocketmqReader getInstance(final ConnectParams connectParams) {
 		RocketmqReader o = new RocketmqReader();
@@ -59,7 +61,7 @@ public class RocketmqReader extends ReaderFlowSocket {
 	@Override
 	public void initFlow() throws EFException {
 		this.isConnMonopoly = true;
-		PREPARE(true, false, true);
+		PREPARE(true, false);
 		this.conn = (DefaultLitePullConsumer) GETSOCKET().getConnection(END_TYPE.reader);
 		try {
 			this.conn.start();

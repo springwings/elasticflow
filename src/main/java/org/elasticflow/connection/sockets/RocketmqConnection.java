@@ -35,6 +35,8 @@ public class RocketmqConnection extends EFConnectionSocket<Object> {
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
 		EFConnectionSocket<?> o = new RocketmqConnection();
 		o.init(ConnectParams);
+		o.setWriteShare(false);
+		o.setReadShare(false);
 		return o;
 	}
 

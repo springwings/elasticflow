@@ -34,6 +34,8 @@ public final class KafkaSearcher extends SearcherFlowSocket {
 
 	private int count = 5;
 	private Properties consumerConf; 
+	
+	public static boolean crossSubtasks = true;
 
 	public static KafkaSearcher getInstance(ConnectParams connectParams) {
 		KafkaSearcher o = new KafkaSearcher();

@@ -101,7 +101,7 @@ public class Pipe extends Instruction {
 		boolean freeConn = false;
 		
 		WriterFlowSocket writer = context.getWriter();
-		writer.PREPARE(monopoly, false,true);
+		writer.PREPARE(monopoly, false);
 		if (!writer.connStatus()) { 
 			pstate.setInfo(instance+" writer connection is closed!");
 			pstate.setStatus(false);

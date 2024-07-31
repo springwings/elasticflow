@@ -42,6 +42,8 @@ import com.alibaba.fastjson.JSONObject;
  * @modify 2023-05-26 09:23
  */
 public final class ElasticsearchSearcher extends SearcherFlowSocket {
+	
+	public static boolean crossSubtasks = true;
 
 	public static ElasticsearchSearcher getInstance(ConnectParams connectParams) {
 		ElasticsearchSearcher o = new ElasticsearchSearcher();
@@ -52,7 +54,7 @@ public final class ElasticsearchSearcher extends SearcherFlowSocket {
 	@Override
 	public void Search(SearcherModel<?> searcherModel, String instance, SearcherHandler handler, EFResponse efResponse)
 			throws EFException {
-		PREPARE(false, true, false);
+		PREPARE(false, true);
 		boolean clearConn = false;
 		SearcherResult res = new SearcherResult();
 		if (connStatus()) {

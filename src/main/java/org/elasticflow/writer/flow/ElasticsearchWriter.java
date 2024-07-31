@@ -65,6 +65,8 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 	protected ElasticsearchConnector CONNS;
 
 	private boolean reconn = false;
+	
+	public static boolean crossSubtasks = true;
 
 	private final static Logger log = LoggerFactory.getLogger(ElasticsearchWriter.class);
 

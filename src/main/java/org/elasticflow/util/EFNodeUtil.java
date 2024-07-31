@@ -89,7 +89,7 @@ public final class EFNodeUtil {
 	
 	/**
 	 * init slave Coorder
-	 * Communication from slave node to master node
+	 * Construct a coordinator that reports from the node to the master node
 	 */
 	public static void initSlaveCoorder() {
 		Resource.threadPools.execute(() -> {
@@ -104,6 +104,7 @@ public final class EFNodeUtil {
 				} catch (Exception e) { 
 					GlobalParam.TASK_COORDER = null;
 					GlobalParam.DISCOVERY_COORDER = null;
+					Common.LOG.error("init Slave Coorder exception",e);
 				}
 			}
 		});

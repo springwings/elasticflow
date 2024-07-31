@@ -33,7 +33,9 @@ import com.alibaba.fastjson.JSONObject;
  * @date 2022-10-26 09:23
  */
 public class VearchSearcher extends SearcherFlowSocket {  
-
+	
+	public static boolean crossSubtasks = true;
+	
 	public static VearchSearcher getInstance(ConnectParams connectParams) {
 		VearchSearcher o = new VearchSearcher();
 		o.initConn(connectParams);
@@ -51,7 +53,7 @@ public class VearchSearcher extends SearcherFlowSocket {
 	public void Search(SearcherModel<?> searcherModel, String instance, SearcherHandler handler, EFResponse efResponse)
 			throws EFException {
 		SearcherResult res = new SearcherResult();
-		PREPARE(false, true, false);
+		PREPARE(false, true);
 		boolean clearConn = false;
 		if (connStatus()) {
 			try {

@@ -84,9 +84,9 @@ public final class Run {
 		Resource.threadPools = new ThreadPools(GlobalParam.SYS_THREADPOOL_SIZE);
 		
 		if(!EFNodeUtil.isSlave()) {//for master
-			GlobalParam.TASK_COORDER = new TaskStateCoordinator();
-			GlobalParam.INSTANCE_COORDER = new InstanceCoordinator();
+			GlobalParam.TASK_COORDER = new TaskStateCoordinator(); 
 		}
+		GlobalParam.INSTANCE_COORDER = new InstanceCoordinator();
 		
 		int openThreadPools = 0;
 		if (initInstance) {
@@ -110,9 +110,8 @@ public final class Run {
 			Resource.threadPools.start();
 		}
 		
-		if(EFNodeUtil.isSlave()) {
-			EFNodeUtil.initSlaveCoorder();
-		}		
+		if(EFNodeUtil.isSlave()) 
+			EFNodeUtil.initSlaveCoorder(); 
 	}
 	
 	/**

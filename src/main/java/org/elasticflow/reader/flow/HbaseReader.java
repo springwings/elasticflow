@@ -57,7 +57,7 @@ public class HbaseReader extends ReaderFlowSocket {
  
 	@Override
 	public DataPage getPageData(final TaskCursor taskCursor,int pageSize) throws EFException { 
-		PREPARE(false,false, false);
+		PREPARE(false,false);
 		boolean clearConn = false;
 		try {
 			if(!connStatus())
@@ -130,7 +130,7 @@ public class HbaseReader extends ReaderFlowSocket {
 	public ConcurrentLinkedDeque<String> getDataPages(final TaskModel task,int pageSize) throws EFException {
 		int i = 0;
 		ConcurrentLinkedDeque<String> dt = new ConcurrentLinkedDeque<>(); 
-		PREPARE(false,false, false);
+		PREPARE(false,false);
 		if(!connStatus())
 			return dt; 
 		boolean clearConn = false;

@@ -52,6 +52,8 @@ public class KafkaReader extends ReaderFlowSocket {
 	ConsumerRecords<String, String> records;
 
 	private KafkaConsumer<String, String> conn = null;
+	
+	public static boolean crossSubtasks = true;
 
 	/**
 	 * @param connectParams enable.auto.commit=false message is confirmed manually
@@ -75,7 +77,7 @@ public class KafkaReader extends ReaderFlowSocket {
 	public void initFlow() throws EFException {
 		this.isConnMonopoly = true;
 		this.isDiffEndType = true;
-		PREPARE(true, false, true);
+		PREPARE(true, false);
 		this.conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader);
 	}
 

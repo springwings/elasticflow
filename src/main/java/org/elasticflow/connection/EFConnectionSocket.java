@@ -19,8 +19,15 @@ public abstract class EFConnectionSocket<T> {
 	protected volatile ConnectParams connectParams;
 	
 	protected END_TYPE endType;
-
+	
+	/**Identify whether the connection is in global sharing mode, usually for search side services*/
 	private boolean isShare = false;
+	
+	/**Used to identify whether this type of resource can be shared concurrently during writing*/
+	private boolean writeShare = true;
+	
+	/**Used to identify whether this type of resource can be shared concurrently during reading*/
+	private boolean readShare = true;
 
 	/**
 	 * Store special error information in the connection for feedback to the upper
@@ -43,6 +50,22 @@ public abstract class EFConnectionSocket<T> {
 		this.connectParams = ConnectParams;
 	}
 
+	public boolean isReadShare() {
+		return this.readShare;
+	}
+
+	public void setReadShare(boolean readShare) {
+		this.readShare = readShare;
+	}
+	
+	public boolean isWriteShare() {
+		return this.writeShare;
+	}
+
+	public void setWriteShare(boolean writeShare) {
+		this.writeShare = writeShare;
+	}
+	
 	public boolean isShare() {
 		return this.isShare;
 	}

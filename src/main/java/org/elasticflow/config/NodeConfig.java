@@ -48,8 +48,8 @@ public class NodeConfig {
 	private final Map<String, InstanceConfig> searchConfigMap = new HashMap<>();
 	private final Map<String, WarehouseParam> warehouse = new HashMap<>();
 	private final Map<String, InstructionParam> instructions = new HashMap<>();
-	private String pondFile = null;
-	private String instructionsFile = null;
+	private String pondFile = "";
+	private String instructionsFile = "";
 
 	/**
 	 * 

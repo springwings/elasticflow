@@ -50,7 +50,7 @@ public class VearchWriter extends WriterFlowSocket {
 	@Override
 	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) throws EFException {
 		String name = TaskUtil.getStoreName(mainName, storeId);
-		PREPARE(false, false, false);
+		PREPARE(false, false);
 		if (!connStatus())
 			return false;
 		if (!this.storePositionExists(name)) {
@@ -146,7 +146,7 @@ public class VearchWriter extends WriterFlowSocket {
 	@Override
 	public void removeShard(String instance, String storeId) throws EFException {
 		String name = TaskUtil.getStoreName(instance, storeId);
-		PREPARE(false, false, false);
+		PREPARE(false, false);
 		if (!connStatus())
 			return;
 		VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);

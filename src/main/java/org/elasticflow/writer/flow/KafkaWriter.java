@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 public class KafkaWriter extends WriterFlowSocket {
 	
-	private final static Logger log = LoggerFactory.getLogger(KafkaWriter.class);
+	private final static Logger log = LoggerFactory.getLogger(KafkaWriter.class); 
 	
 	public static KafkaWriter getInstance(ConnectParams connectParams) {
 		KafkaWriter o = new KafkaWriter();

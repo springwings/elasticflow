@@ -29,7 +29,14 @@ import org.elasticflow.config.InstanceConfig;
  * @modify 2021-01-10 09:45
  */
 public class EFWriterUtil {
-
+	
+	/**
+	 * Obtain connection based on time
+	 * @param instanceConfig
+	 * @param socketNum
+	 * @param outTime
+	 * @return
+	 */
 	public static int getWriterSocketIndex(InstanceConfig instanceConfig, int socketNum, long outTime) {
 		if (instanceConfig.getPipeParams().getWriteMechanism() == MECHANISM.AB) {
 			return 0;

@@ -78,7 +78,7 @@ public class MysqlWriter extends WriterFlowSocket {
 	public boolean create(String mainName, String storeId, InstanceConfig instanceConfig) throws EFException {
 		String name = TaskUtil.getStoreName(mainName, storeId);
 		String type = mainName;
-		PREPARE(false, false, false);
+		PREPARE(false, false);
 		if (!connStatus())
 			return false;
 		if (!this.storePositionExists(name)) {
@@ -105,7 +105,7 @@ public class MysqlWriter extends WriterFlowSocket {
 	@Override
 	public void removeShard(String instance, String storeId) throws EFException {
 		String name = TaskUtil.getStoreName(instance, storeId);
-		PREPARE(false, false, false);
+		PREPARE(false, false);
 		if (!connStatus())
 			return;
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
@@ -128,7 +128,7 @@ public class MysqlWriter extends WriterFlowSocket {
 	@Override
 	public void optimize(String instance, String storeId) {
 		String name = TaskUtil.getStoreName(instance, storeId);
-		PREPARE(false, false, false);
+		PREPARE(false, false);
 		try {
 			if (connStatus() && this.storePositionExists(name)) {
 				Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);
@@ -166,7 +166,7 @@ public class MysqlWriter extends WriterFlowSocket {
 			throws EFException {
 		String select = "a";
 		boolean clearConn = false;
-		PREPARE(false, false, false);
+		PREPARE(false, false);
 		if (!connStatus())
 			return select;
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.writer);

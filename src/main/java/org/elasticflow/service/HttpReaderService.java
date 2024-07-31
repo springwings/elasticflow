@@ -150,7 +150,7 @@ public class HttpReaderService {
 											pipePump.getID(), "add", writeTo, pagedata);
 								}
 								CPU.RUN(pipePump.getID(), "Pipe", "writeDataSet", false, "HTTP PUT", writeTo, storeid,
-										"", pagedata, "", isUpdate, monopoly);
+										"", pagedata, "", isUpdate,monopoly);
 							} catch (Exception e) {
 								Common.LOG.error("http reader service exception", e);
 								rps.setStatus("write failure data error!", RESPONSE_STATUS.DataErr);

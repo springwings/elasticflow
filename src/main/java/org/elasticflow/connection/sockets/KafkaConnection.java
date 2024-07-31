@@ -38,10 +38,13 @@ public class KafkaConnection extends EFConnectionSocket<Object> {
 	private final int MAX_FETCH_BYTES = 1048576 * 4; //1M * n
 	
 	private final int MAX_REQUEST_SIZE = 1048576; //1M * n
+	
+	boolean writeShare = false;
 
 	public static EFConnectionSocket<?> getInstance(ConnectParams ConnectParams) {
 		EFConnectionSocket<?> o = new KafkaConnection();
-		o.init(ConnectParams);
+		o.init(ConnectParams); 
+		o.setReadShare(false);
 		return o;
 	}
 

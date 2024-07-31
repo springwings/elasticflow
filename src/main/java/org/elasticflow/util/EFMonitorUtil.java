@@ -163,8 +163,8 @@ public class EFMonitorUtil {
 	}
 
 	public static void cleanAllInstance(boolean waitComplete) {
-		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
-		for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {
+		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs(); 
+		for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {  
 			GlobalParam.INSTANCE_COORDER.removeInstance(entry.getKey(), waitComplete);
 		}
 	}
@@ -225,58 +225,56 @@ public class EFMonitorUtil {
 	 * @param isIncrement control thread type
 	 */
 	public static void controlInstanceState(String instance, TASK_FLOW_SINGAL state, boolean isIncrement) {
-		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instance);
-		if ((GlobalParam.SERVICE_LEVEL & 6) == 0) 
-			return; 
-		if (instanceConfig != null) {
-			JOB_TYPE controlType;
-			if (isIncrement) {
-				if (instanceConfig.getPipeParams().getDeltaCron() == null)
-					return;
-				controlType = GlobalParam.JOB_TYPE.INCREMENT;
-			} else {
-				if (instanceConfig.getPipeParams().getFullCron() == null)
-					return;
-				controlType = GlobalParam.JOB_TYPE.FULL;
-			}
-			for (String inst : instance.split(",")) {
-				int waittime = 0;
-				String[] seqs = EFMonitorUtil.getInstanceL1seqs(instance);
-				Common.LOG.info("Instance {} seq nums {},job type {},waitting set state {} ...", inst, seqs.length,
-						controlType.name(), state);
-				for (String L1seq : seqs) {
-					if (GlobalParam.TASK_COORDER.checkFlowSingal(inst, L1seq, controlType, TASK_FLOW_SINGAL.Running)) {
-						GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(), TASK_FLOW_SINGAL.Blank,
-								TASK_FLOW_SINGAL.Termination, true);
-						while (!GlobalParam.TASK_COORDER.checkFlowSingal(inst, L1seq, controlType,
-								TASK_FLOW_SINGAL.Ready)) {
-							try {
-								waittime++;
-								Thread.sleep(100);
-								if (waittime > 200) {
-									break;
-								}
-							} catch (InterruptedException e) {
-								Common.LOG.error("control instance state thread sleep is interrupted exception", e);
+		if(!Resource.nodeConfig.getInstanceConfigs().containsKey(instance) || ((GlobalParam.SERVICE_LEVEL & 6) == 0) )
+			return;
+		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instance); 
+		JOB_TYPE controlType;
+		if (isIncrement) {
+			if (instanceConfig.getPipeParams().getDeltaCron() == null)
+				return;
+			controlType = GlobalParam.JOB_TYPE.INCREMENT;
+		} else {
+			if (instanceConfig.getPipeParams().getFullCron() == null)
+				return;
+			controlType = GlobalParam.JOB_TYPE.FULL;
+		}
+		for (String inst : instance.split(",")) {
+			int waittime = 0;
+			String[] seqs = EFMonitorUtil.getInstanceL1seqs(instance);
+			Common.LOG.info("Instance {} seq nums {},job type {},waitting set state {} ...", inst, seqs.length,
+					controlType.name(), state);
+			for (String L1seq : seqs) {
+				if (GlobalParam.TASK_COORDER.checkFlowSingal(inst, L1seq, controlType, TASK_FLOW_SINGAL.Running)) {
+					GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(), TASK_FLOW_SINGAL.Blank,
+							TASK_FLOW_SINGAL.Termination, true);
+					while (!GlobalParam.TASK_COORDER.checkFlowSingal(inst, L1seq, controlType,
+							TASK_FLOW_SINGAL.Ready)) {
+						try {
+							waittime++;
+							Thread.sleep(100);
+							if (waittime > 200) {
+								break;
 							}
+						} catch (InterruptedException e) {
+							Common.LOG.error("control instance state thread sleep is interrupted exception", e);
 						}
-						if (GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(),
-								TASK_FLOW_SINGAL.Termination, state, true)) {
-							Common.LOG.info("Instance {} L1seq {},job type {} success set state {}.", inst,
-									(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
-						} else {
-							Common.LOG.info("Instance {} L1seq {},job type {} fail set state {}.", inst,
-									(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
-						}
+					}
+					if (GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(),
+							TASK_FLOW_SINGAL.Termination, state, true)) {
+						Common.LOG.info("Instance {} L1seq {},job type {} success set state {}.", inst,
+								(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
 					} else {
-						if (GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(),
-								TASK_FLOW_SINGAL.Blank, state, true)) {
-							Common.LOG.info("Instance {} L1seq {},job type {} success set state {}.", inst,
-									(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
-						} else {
-							Common.LOG.info("Instance {} L1seq {},job type {} fail set state {}.", inst,
-									(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
-						}
+						Common.LOG.info("Instance {} L1seq {},job type {} fail set state {}.", inst,
+								(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
+					}
+				} else {
+					if (GlobalParam.TASK_COORDER.setFlowSingal(inst, L1seq, controlType.name(),
+							TASK_FLOW_SINGAL.Blank, state, true)) {
+						Common.LOG.info("Instance {} L1seq {},job type {} success set state {}.", inst,
+								(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
+					} else {
+						Common.LOG.info("Instance {} L1seq {},job type {} fail set state {}.", inst,
+								(L1seq.length() == 0 ? GlobalParam.DEFAULT_SEQ : L1seq), controlType.name(), state);
 					}
 				}
 			}

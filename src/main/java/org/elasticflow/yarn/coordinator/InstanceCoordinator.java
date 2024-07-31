@@ -25,14 +25,15 @@ import com.alibaba.fastjson.JSONObject;
 
 /**
  * Run task instance cluster coordination operation 
- * The code runs on the slave/master,local running method 
+ * DistributeCorder is exclusively used by the master node to control other machines, 
+ * while other methods are used to control its own instances
  * @author chengwen
  * @version 0.1
  * @create_time 2019-07-30
  */
 public class InstanceCoordinator implements InstanceCoord { 
 	
-	//master control
+	/**master control，Control remote slave node machines*/
 	private DistributeCoorder distributeCoorder;
 	
 	public InstanceCoordinator() {
@@ -144,15 +145,17 @@ public class InstanceCoordinator implements InstanceCoord {
 	}
 
 	@Override
-	public void removeInstance(String instance,boolean waitComplete) {
+	public void removeInstance(String instance,boolean waitComplete) { 
 		if(waitComplete)
 			EFMonitorUtil.controlInstanceState(instance, TASK_FLOW_SINGAL.Stop, true);
-		if (Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType() > 0) {
-			Resource.flowProgress.remove(instance, JOB_TYPE.FULL.name());
-			Resource.flowProgress.remove(instance, JOB_TYPE.INCREMENT.name());
-		}		
+		if (Resource.nodeConfig.getInstanceConfigs().containsKey(instance) &&
+				Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType() > 0) {
+			if(Resource.flowProgress.containsKey(instance)) { 
+				Resource.flowProgress.remove(instance, JOB_TYPE.FULL.name());
+				Resource.flowProgress.remove(instance, JOB_TYPE.INCREMENT.name()); 
+			}
+		} 
 		EFPipeUtil.removeInstance(instance, true, true);
-		EFMonitorUtil.removeConfigInstance(instance);
 	} 
 	
 	@Override

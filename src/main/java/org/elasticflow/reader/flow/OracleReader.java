@@ -41,7 +41,7 @@ public class OracleReader extends ReaderFlowSocket{
 	@Override
 	public DataPage getPageData(final TaskCursor taskCursor,int pageSize) throws EFException {
 		boolean clearConn = false;
-		PREPARE(false,false, false); 
+		PREPARE(false,false); 
 		if(!connStatus())
 			return this.dataPage; 
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.reader); 
@@ -94,7 +94,7 @@ public class OracleReader extends ReaderFlowSocket{
 			sql = sql.replace(GlobalParam._seq, task.getL2seq()); 
 		 
 		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
-		PREPARE(false,false, false); 
+		PREPARE(false,false); 
 		if(!connStatus())
 			return page;
 		Connection conn = (Connection) GETSOCKET().getConnection(END_TYPE.reader);
