@@ -23,7 +23,7 @@ import org.elasticflow.config.InstanceConfig;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.EFResponse;
-import org.elasticflow.node.NodeMonitor;
+import org.elasticflow.node.monitor.NodeMonitor;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.util.instance.TaskUtil;

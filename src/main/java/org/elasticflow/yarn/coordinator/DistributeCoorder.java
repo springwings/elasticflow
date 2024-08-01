@@ -64,13 +64,13 @@ public class DistributeCoorder {
 	public DistributeCoorder() { 
 		if(GlobalParam.SystemConfig.getProperty("instances")!=null) {
 			String[] instances = GlobalParam.SystemConfig.getProperty("instances").split(",");
-			for (int i = 0; i < instances.length; i++) {
-				String[] strs = instances[i].strip().split(":");
+			for(String instance:instances) {
+				String[] strs = instance.strip().split(":");
 				if (strs.length > 1 && Integer.parseInt(strs[1]) > 0) {
 					totalInstanceNum++; // summary run instance
-					this.idleInstances.add(instances[i]);
+					this.idleInstances.add(instance);
 				}
-			}
+			} 
 		}else {
 			Common.LOG.warn("config.properties instances parameter not configured");
 		}
@@ -199,6 +199,28 @@ public class DistributeCoorder {
 				node.getEFMonitorCoord().resetPipeEndStatus(instance, L1seq); 
 			}
 		}
+	}
+	
+	/**
+	 * Retrieve the mapping table between instances and running nodes
+	 * @return
+	 */
+	public JSONObject getInstanceNode() {
+		JSONObject jo = new JSONObject();
+		String[] instances = GlobalParam.SystemConfig.getProperty("instances").split(",");
+		for(String instance:instances) {
+			String[] strs = instance.strip().split(":");
+			jo.put(strs[0], new JSONArray()); 
+		} 
+		for (EFNode node : nodes) {
+			if (node.isLive()) { 
+				for (String instanceSetting : node.getBindInstances()) {
+					String instance = instanceSetting.split(":")[0]; 
+					jo.getJSONArray(instance).add(node.getIp());
+				}
+			}
+		} 
+		return jo;
 	}
 
 	public JSONObject getPipeEndStatus(String instance, String L1seq) {

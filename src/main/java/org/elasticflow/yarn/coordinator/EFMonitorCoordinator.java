@@ -3,6 +3,7 @@ package org.elasticflow.yarn.coordinator;
 import java.util.HashMap;
 
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.SystemInfoUtil;
@@ -55,6 +56,10 @@ public class EFMonitorCoordinator implements EFMonitorCoord {
 		dt.put("MEMORY", SystemInfoUtil.getMemTotal());
 		dt.put("MEMORY_USAGE", SystemInfoUtil.getMemUsage());
 		dt.put("CPU_USAGE", SystemInfoUtil.getCpuUsage());
+		dt.put("ERROR_IGNORE", Resource.getErrorStates(ELEVEL.Ignore));
+		dt.put("ERROR_DISPOSE", Resource.getErrorStates(ELEVEL.Dispose));
+		dt.put("ERROR_BREAKOFF", Resource.getErrorStates(ELEVEL.BreakOff));
+		dt.put("ERROR_TERMINATION", Resource.getErrorStates(ELEVEL.Termination));
 		return dt;
 	}
 
