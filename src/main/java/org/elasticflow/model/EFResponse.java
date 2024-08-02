@@ -16,6 +16,7 @@ import org.elasticflow.config.GlobalParam.RESPONSE_STATUS;
 import org.elasticflow.util.Common;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
 /**
  * ElasticFlow response model
@@ -98,7 +99,7 @@ public class EFResponse {
 
 	public String getResponse(boolean isJson) {
 		if (isJson) {
-			return JSON.toJSONString(formatData());
+			return JSON.toJSONString(formatData(),SerializerFeature.DisableCircularReferenceDetect);
 		} else {
 			return formatData().toString();
 		}

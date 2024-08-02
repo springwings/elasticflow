@@ -34,7 +34,7 @@ import com.alibaba.fastjson.JSONObject;
 
 /**
  * master control center Control and acquisition sub node
- * 
+ * Instance monitoring, node management, cluster maintenance
  * @author chengwen
  * @version 0.1
  * @create_time 2021-07-30
@@ -91,7 +91,11 @@ public class DistributeCoorder {
 		GlobalParam.INSTANCE_COORDER.stopInstance(instance, GlobalParam.JOB_TYPE.INCREMENT.name());
 		GlobalParam.INSTANCE_COORDER.stopInstance(instance, GlobalParam.JOB_TYPE.FULL.name());
 	}
-
+	
+	/**
+	 * Get cluster status
+	 * @return
+	 */
 	public String getClusterState() {
 		switch (clusterStatus.get()) {
 		case 0:
@@ -108,8 +112,16 @@ public class DistributeCoorder {
 	public int getClusterStatus() {
 		return clusterStatus.get();
 	}
-
-	public void updateNodeConfigs(String instance, String end, String fieldName, String value) {
+	
+	/**
+	 * Traverse the cluster, find the node hosting the instance, 
+	 * and update its instance configuration
+	 * @param instance
+	 * @param end
+	 * @param fieldName
+	 * @param value
+	 */
+	public void updateInstanceConfig(String instance, String end, String fieldName, String value) {
 		nodes.forEach(n -> {
 			if (n.containInstace(instance)) {
 				n.getInstanceCoord().updateInstanceConfig(instance, end, fieldName, value);
@@ -148,7 +160,13 @@ public class DistributeCoorder {
 		}
 		return res;
 	}
-
+	
+	/**
+	 * Traverse the cluster, find the node that resides in the instance, 
+	 * and update its instance circuit breaker status
+	 * @param instance
+	 * @param L1seq
+	 */
 	public void resetBreaker(String instance, String L1seq) {
 		for (EFNode node : nodes) {
 			if (node.containInstace(instance))
@@ -193,6 +211,12 @@ public class DistributeCoorder {
 		return JO;
 	}
 	
+	/**
+	 * Traverse the cluster, find the node hosting the instance, 
+	 * and update its instance pipeline status
+	 * @param instance
+	 * @param L1seq
+	 */
 	public void resetPipeEndStatus(String instance, String L1seq) {
 		for (EFNode node : nodes) {
 			if (node.containInstace(instance) && node.isLive()) {
@@ -213,16 +237,16 @@ public class DistributeCoorder {
 			jo.put(strs[0], new JSONArray()); 
 		} 
 		for (EFNode node : nodes) {
-			if (node.isLive()) { 
+			if (node.isLive()) {  
 				for (String instanceSetting : node.getBindInstances()) {
-					String instance = instanceSetting.split(":")[0]; 
+					String instance = instanceSetting.split(":")[0];  
 					jo.getJSONArray(instance).add(node.getIp());
 				}
 			}
 		} 
 		return jo;
-	}
-
+	} 
+	
 	public JSONObject getPipeEndStatus(String instance, String L1seq) {
 		for (EFNode node : nodes) {
 			if (node.containInstace(instance) && node.isLive()) {
@@ -295,6 +319,15 @@ public class DistributeCoorder {
 			return false;
 		}
 		return true;
+	} 
+	
+	public String analyzeInstance(String instance) {
+		for (EFNode node : nodes) {
+			if (node.containInstace(instance) && node.isLive()) { 
+				return node.getEFMonitorCoord().analyzeInstance(instance);
+			}
+		}
+		return "";
 	}
 	
 	/**

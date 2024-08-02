@@ -33,6 +33,11 @@ public class EFMonitorCoordinator implements EFMonitorCoord {
 	}
 	
 	@Override
+	public String analyzeInstance(String instance) { 
+		return EFMonitorUtil.analyzeInstance(instance);
+	}
+	
+	@Override
 	public HashMap<String, JSONObject> getResourceStates() {
 		return EFMonitorUtil.getResourceStates();
 	}

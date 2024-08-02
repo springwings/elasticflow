@@ -765,7 +765,7 @@ public final class NodeMonitor {
 					}
 					Common.setConfigObj(obj, cls, params[1], RR.getStringParam("param.value"), null);
 					if (GlobalParam.DISTRIBUTE_RUN)
-						GlobalParam.INSTANCE_COORDER.distributeCoorder().updateNodeConfigs(
+						GlobalParam.INSTANCE_COORDER.distributeCoorder().updateInstanceConfig(
 								RR.getStringParam("instance"), params[0], params[1], RR.getStringParam("param.value"));
 					String xmlPath = GlobalParam.INSTANCE_PATH + "/" + RR.getStringParam("instance") + "/task.xml";
 					try {

@@ -305,7 +305,12 @@ public class InstanceManage {
 
 	public void analyzeInstance(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this.NM, RR, "instance")) {
-			String res = EFMonitorUtil.analyzeInstance(RR.getStringParam("instance"));
+			String res = "";
+			if (GlobalParam.DISTRIBUTE_RUN) {
+				res = GlobalParam.INSTANCE_COORDER.distributeCoorder().analyzeInstance(RR.getStringParam("instance"));
+			}else {
+				res = EFMonitorUtil.analyzeInstance(RR.getStringParam("instance"));
+			}  
 			this.NM.setResponse(RESPONSE_STATUS.Success, null, res);
 		}
 	}
@@ -337,9 +342,9 @@ public class InstanceManage {
 				instance.put("FullCron", config.getPipeParams().getFullCron());
 			}
 			if (GlobalParam.DISTRIBUTE_RUN) {
-				instance.put("nodes", instance_node.getJSONArray(entry.getKey()));
+				instance.put("Nodes", instance_node.getJSONArray(entry.getKey()));
 			} else {
-				instance.put("nodes", Arrays.asList(GlobalParam.IP));
+				instance.put("Nodes", Arrays.asList(GlobalParam.IP));
 			}
 			instance.put("SearchFrom", config.getPipeParams().getSearchFrom());
 			instance.put("ReadFrom", config.getPipeParams().getReadFrom());

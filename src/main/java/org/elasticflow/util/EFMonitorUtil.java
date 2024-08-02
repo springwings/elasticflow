@@ -161,9 +161,13 @@ public class EFMonitorUtil {
 					createSchedule);
 		}
 	}
-
-	public static void cleanAllInstance(boolean waitComplete) {
-		Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs(); 
+	
+	/**
+	 * Reallocation requires removing unallocated resident instances
+	 * @param waitComplete
+	 */
+	public static void cleanAllInstance(boolean waitComplete) { 
+		Map<String, InstanceConfig> configMap = new HashMap<>(Resource.nodeConfig.getInstanceConfigs());
 		for (Map.Entry<String, InstanceConfig> entry : configMap.entrySet()) {  
 			GlobalParam.INSTANCE_COORDER.removeInstance(entry.getKey(), waitComplete);
 		}
@@ -177,8 +181,7 @@ public class EFMonitorUtil {
 			seqs = new String[] {};
 		} else {
 			seqs = dataMap.getL1seq();
-		}
-
+		} 
 		if (seqs.length == 0) {
 			seqs = new String[1];
 			seqs[0] = GlobalParam.DEFAULT_RESOURCE_SEQ;
