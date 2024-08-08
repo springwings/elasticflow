@@ -143,6 +143,12 @@ public class KafkaReader extends ReaderFlowSocket {
 			try {
 				conn.commitSync();
 			} catch (Exception e) {
+				releaseConn(false, true);
+				try {
+					this.initFlow();
+				} catch (EFException e1) {
+					throw e1;
+				}   
 				throw new EFException(e,"kafka data flush exception!");
 			}
 		}
