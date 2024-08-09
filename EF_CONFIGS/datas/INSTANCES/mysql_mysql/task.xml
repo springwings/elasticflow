@@ -63,8 +63,9 @@
 			</param>
 			<param>
 				<name>dataScanDSL</name>
+				<!--- >= '#{start_time}' 防止在某个时间点有多条时，扫描某一页时丢失数据 -->
 				<value><![CDATA[  
-SELECT * from cms_table WHERE id>'#{page_start}' AND id <='#{page_end}' AND UNIX_TIMESTAMP(update_time) > '#{start_time}' 
+SELECT * from cms_table WHERE id>'#{page_start}' AND id <='#{page_end}' AND UNIX_TIMESTAMP(update_time) >= '#{start_time}' 
 ]]></value>
 			</param>
 			<param>

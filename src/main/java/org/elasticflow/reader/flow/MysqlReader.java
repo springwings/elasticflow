@@ -47,7 +47,7 @@ public class MysqlReader extends ReaderFlowSocket{
 		this.dataPage.put(GlobalParam.READER_KEY, taskCursor.getReaderKey());
 		this.dataPage.put(GlobalParam.READER_SCAN_KEY, taskCursor.getReaderScanKey());
 		try (PreparedStatement statement = conn.prepareStatement(taskCursor.getAdditional());){ 
-			statement.setFetchSize(pageSize); 
+			statement.setFetchSize(pageSize);  
 			try(ResultSet rs = statement.executeQuery();){		 
 				if(this.readHandler!=null && this.readHandler.supportHandleData()){
 					//handler reference getAllData function 

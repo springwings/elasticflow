@@ -142,12 +142,10 @@ public final class PipePump extends Instruction implements Serializable {
 
 	/**
 	 * Job running entry
-	 * 
-	 * @param instance
-	 * @param storeId
-	 * @param L1seq
-	 * @param isFull
-	 * @param writeInSamePosition
+	 * @param storeId				Storage identification
+	 * @param L1seq					L1 to database level
+	 * @param isFull				Is it a full type task
+	 * @param isReferenceInstance	Is it a virtual task
 	 * @throws EFException
 	 */
 	public void run(String storeId, String L1seq, boolean isFull, boolean isReferenceInstance) throws EFException {
@@ -167,8 +165,11 @@ public final class PipePump extends Instruction implements Serializable {
 		if(L2seqs.size()>0)
 			GlobalParam.TASK_COORDER.setFlowProgressInfo(instanceID, job_type.name(), instanceProcessId + "_L2seqs_nums",
 					L2seqs.size());
+		//Core code for stream processing
 		processFlow(task, storeId, L2seqs, destination, isReferenceInstance);
+		//Running status tracking
 		GlobalParam.TASK_COORDER.resetFlowProgressInfo(instanceID, job_type.name());
+		
 		//if is full,start to switch instance
 		if (isFull) {
 			if (isReferenceInstance) {
@@ -214,7 +215,7 @@ public final class PipePump extends Instruction implements Serializable {
 	 * process resource data Flow
 	 * @param task
 	 * @param storeId
-	 * @param L2seqs       example,L1 to database level,L2 to table level
+	 * @param L2seqs				example,L1 to database level,L2 to table level
 	 * @param destination
 	 * @param isReferenceInstance
 	 * @throws EFException
@@ -337,10 +338,9 @@ public final class PipePump extends Instruction implements Serializable {
 			GlobalParam.TASK_COORDER.setFlowProgressInfo(task.getInstanceID(), task.getJobType().name(),
 					task.getInstanceProcessId(task.getL2seq()), progressPos + "/" + pageNum);
 			String dataScanDSL = PipeUtil.fillParam(task.getScanParam().getDataScanDSL(), PipeUtil.getScanParam(
-					task.getL2seq(), startId, dataBoundary, task.getStartTime(), task.getEndTime(), scanField)); 
-
+					task.getL2seq(), startId, dataBoundary, task.getStartTime(), task.getEndTime(), scanField));  
 			DataPage pagedata = this.getPageData(
-					TaskCursor.getInstance(keyField, scanField, startId, dataBoundary, getInstanceConfig(), dataScanDSL));
+					TaskCursor.getInstance(keyField, scanField, startId, dataBoundary, getInstanceConfig(), dataScanDSL)); 
 			if (getInstanceConfig().openCompute()) {
 				long start = Common.getNow();
 				int dataSize = pagedata.getData().size();
