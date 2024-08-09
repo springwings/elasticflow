@@ -137,7 +137,7 @@ public abstract class Flow {
 				this.EFConn = Resource.EFConns.get(this.EFConnKey);
 			}
 		} else {
-			if (this.retainer.getAndIncrement() == 0) {
+			if (this.retainer.getAndIncrement() == 0 || this.EFConn==null) {
 				Resource.EFConns.put(this.EFConnKey,
 						EFConnectionPool.getConn(this.connectParams, this.poolName, acceptShareConn));
 				this.EFConn = Resource.EFConns.get(this.EFConnKey);
