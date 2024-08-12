@@ -27,6 +27,8 @@ public final class ReportStatus {
 	
 	private static boolean openHeartBeat = true;
 	
+	private static boolean successConnect = false;
+	
 	public static void closeHeartBeat() {
 		openHeartBeat = false;
 	}
@@ -42,10 +44,15 @@ public final class ReportStatus {
 				while (openHeartBeat) {
 					try {
 						Thread.sleep(GlobalParam.NODE_LIVE_TIME/2);
-						if(openHeartBeat)
-							GlobalParam.DISCOVERY_COORDER.reportStatus(GlobalParam.IP, GlobalParam.NODEID);						
+						if(openHeartBeat) {
+							GlobalParam.DISCOVERY_COORDER.reportStatus(GlobalParam.IP, GlobalParam.NODEID);	
+							if(successConnect==false)
+								Common.LOG.info("master node successfully connected！");
+							successConnect = true;
+						} 				
 					} catch (Exception e) {
-						Common.LOG.warn("master node cannot connect.");
+						successConnect = false;
+						Common.LOG.warn("master node connection failed！");
 						Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 						if(configMap.size()>0) {
 							closeHeartBeat();
