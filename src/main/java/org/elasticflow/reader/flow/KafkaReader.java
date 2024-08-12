@@ -54,6 +54,8 @@ public class KafkaReader extends ReaderFlowSocket {
 	private KafkaConsumer<String, String> conn = null;
 	
 	public static boolean crossSubtasks = true;
+	
+	public boolean isDiffEndType = true;
 
 	/**
 	 * @param connectParams enable.auto.commit=false message is confirmed manually

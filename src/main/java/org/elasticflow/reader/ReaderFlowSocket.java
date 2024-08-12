@@ -81,7 +81,7 @@ public abstract class ReaderFlowSocket extends Flow{
 	public void release() {
 		if(this.readHandler!=null)
 			this.readHandler.release();
-		releaseConn(isConnMonopoly,isDiffEndType); 
+		releaseConn(isConnMonopoly,isDiffEndType,crossSubtasks); 
 	}
 	
 	/**

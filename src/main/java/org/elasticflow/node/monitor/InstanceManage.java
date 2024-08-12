@@ -528,7 +528,7 @@ public class InstanceManage {
 							if (wfs.connStatus()) {
 								wfs.removeShard(instance,
 										GlobalParam.TASK_COORDER.getStoreIdFromSave(instance, L1seq, true, false));
-								wfs.releaseConn(false, false);
+								wfs.releaseConn(false, true);
 							}
 						} catch (EFException e) {
 							state = false;

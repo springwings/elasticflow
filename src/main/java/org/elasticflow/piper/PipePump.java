@@ -245,7 +245,7 @@ public final class PipePump extends Instruction implements Serializable {
 							try {
 								getWriter().removeShard(instanceID, storeId);
 							} finally {
-								getWriter().releaseConn(false, false);
+								getWriter().releaseConn(false, true);
 							}
 							break;
 						}

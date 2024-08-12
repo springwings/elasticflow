@@ -50,7 +50,7 @@ public abstract class ComputerFlowSocket extends Flow{
 	public void release() {
 		if(this.computerHandler!=null)
 			this.computerHandler.release();
-		releaseConn(isConnMonopoly,isDiffEndType); 
+		releaseConn(isConnMonopoly,isDiffEndType,crossSubtasks); 
 	}
 	
 	public DataPage getDataPage() {

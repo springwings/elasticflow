@@ -173,7 +173,7 @@ public class Pond extends Instruction {
 				GlobalParam.TASK_COORDER.saveTaskInfo(String.valueOf(args[0]), String.valueOf(args[1]), storeId, false);
 				GlobalParam.TASK_COORDER.setFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(),
 						TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Ready, context.getInstanceConfig().getPipeParams().showInfoLog());
-				context.getWriter().releaseConn(false, false);
+				context.getWriter().releaseConn(false, true);
 			}
 		}
 		return false;

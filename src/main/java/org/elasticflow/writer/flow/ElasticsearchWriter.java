@@ -247,7 +247,7 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 		String name = TaskUtil.getStoreName(instance, storeId);
 		try {
 			ForceMergeRequest request = new ForceMergeRequest(name);
-			request.maxNumSegments(2);
+			request.maxNumSegments(5);
 			request.flush(true);
 			ForceMergeResponse response = getESC().getClient().indices().forcemerge(request, RequestOptions.DEFAULT);
 

@@ -46,6 +46,8 @@ public class RocketmqReader extends ReaderFlowSocket {
 	private List<MessageExt> records;
 	
 	public static boolean crossSubtasks = true;
+	
+	public boolean isDiffEndType = false;
 
 	public static RocketmqReader getInstance(final ConnectParams connectParams) {
 		RocketmqReader o = new RocketmqReader();

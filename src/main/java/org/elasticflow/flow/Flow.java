@@ -98,9 +98,11 @@ public abstract class Flow {
 					this.instanceConfig.getPipeParams().isSearcherShareAlias())+"_other";
 			break;
 		} 
-		//When splitting an instance into multiple parallel subtasks, it can share connection resources with each other
+		
 		synchronized (Resource.EFConns) {
 			if(crossSubtasks==false) {
+				/**When splitting an instance into multiple parallel subtasks, 
+				 * it can share connection resources with each other*/
 				if(!this.EFConnKey.endsWith("_CROSS_RANDOM")) {
 					this.EFConnKey = this.EFConnKey+Common.getNow()+"_CROSS_RANDOM";
 					Resource.EFConns.put(this.EFConnKey, null);
@@ -149,7 +151,17 @@ public abstract class Flow {
 	public InstanceConfig getInstanceConfig() {
 		return this.instanceConfig;
 	}
-
+	
+	/**
+	 * Release connection  resources
+	 * @param isMonopoly
+	 * @param isDiffEndType
+	 * @param crossSubtasks
+	 */
+	public void releaseConn(boolean isMonopoly, boolean isDiffEndType, boolean crossSubtasks) {
+		boolean clearConn = isDiffEndType || !crossSubtasks;
+		releaseConn(isMonopoly,clearConn);		
+	}
 	
 	/**
 	 * Release connection  resources
@@ -159,13 +171,13 @@ public abstract class Flow {
 	public void releaseConn(boolean isMonopoly, boolean clearConn) {
 		if (isMonopoly == false || clearConn) {
 			synchronized (this) {
-				if (clearConn) {
-					retainer.set(0);
-				}
+				if (clearConn)  
+					retainer.set(0); 
+				
 				if (retainer.decrementAndGet() <= 0) {
-					EFConnectionPool.freeConn(this.EFConn, this.poolName, clearConn);
-					this.EFConn = null;
+					EFConnectionPool.freeConn(this.EFConn, this.poolName, clearConn); 
 					Resource.EFConns.put(this.EFConnKey, null);
+					this.EFConn = null;
 					retainer.set(0);
 				} else {
 					log.info("connection {} retainer:{}",this.EFConn,retainer.get());

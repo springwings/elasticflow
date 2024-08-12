@@ -61,7 +61,7 @@ public abstract class WriterFlowSocket extends Flow {
 	public void release() {
 		if(this.writeHandler!=null)
 			this.writeHandler.release();
-		releaseConn(isConnMonopoly,isDiffEndType); 
+		releaseConn(isConnMonopoly,isDiffEndType,crossSubtasks); 
 	}
 
 	public void setWriteHandler(WriterHandler writeHandler) {
