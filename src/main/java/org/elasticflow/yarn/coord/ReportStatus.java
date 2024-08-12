@@ -52,7 +52,7 @@ public final class ReportStatus {
 						} 				
 					} catch (Exception e) {
 						successConnect = false;
-						Common.LOG.warn("master node connection failed！");
+						Common.LOG.warn("master node connect failed！");
 						Map<String, InstanceConfig> configMap = Resource.nodeConfig.getInstanceConfigs();
 						if(configMap.size()>0) {
 							closeHeartBeat();
