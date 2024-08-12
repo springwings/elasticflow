@@ -334,10 +334,13 @@ public class InstanceManage {
 					+ "/" + entry.getKey());
 			instance.put("Alias", config.getAlias());
 			instance.put("OptimizeCron", config.getPipeParams().getOptimizeCron());
-			instance.put("DeltaCron", config.getPipeParams().getDeltaCron());
-			if (config.getPipeParams().getFullCron() == null && config.getPipeParams().getReadFrom() != null
-					&& config.getPipeParams().getWriteTo() != null) {
-				instance.put("FullCron", "0 0 0 1 1 ? 2099");
+			if (config.getPipeParams().getDeltaCron() == null) {
+				instance.put("DeltaCron", "未配置");
+			}else {
+				instance.put("DeltaCron", config.getPipeParams().getDeltaCron());
+			} 
+			if (config.getPipeParams().getFullCron() == null) {
+				instance.put("FullCron", "未配置");
 			} else {
 				instance.put("FullCron", config.getPipeParams().getFullCron());
 			}
