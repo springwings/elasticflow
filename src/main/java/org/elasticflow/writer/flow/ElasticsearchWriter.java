@@ -66,6 +66,8 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 
 	private boolean reconn = false;
 	
+	private int maxNumSegments = 5;
+	
 	public static boolean crossSubtasks = true;
 
 	private final static Logger log = LoggerFactory.getLogger(ElasticsearchWriter.class);
@@ -247,7 +249,7 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 		String name = TaskUtil.getStoreName(instance, storeId);
 		try {
 			ForceMergeRequest request = new ForceMergeRequest(name);
-			request.maxNumSegments(5);
+			request.maxNumSegments(maxNumSegments);
 			request.flush(true);
 			ForceMergeResponse response = getESC().getClient().indices().forcemerge(request, RequestOptions.DEFAULT);
 
