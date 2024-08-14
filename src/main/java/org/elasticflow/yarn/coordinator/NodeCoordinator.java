@@ -4,7 +4,7 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.SystemInfoUtil;
-import org.elasticflow.yarn.coord.NodeCoord;
+import org.elasticflow.yarn.coord.master.NodeCoord;
 import org.elasticflow.yarn.monitor.ResourceMonitor;
 
 /**

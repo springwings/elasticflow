@@ -44,7 +44,7 @@ public class SearcherSocketFactory implements Socket<SearcherFlowSocket> {
 			Method m = clz.getMethod("getInstance", ConnectParams.class);
 			return (SearcherFlowSocket) m.invoke(null, connectParams);
 		} catch (Exception e) {
-			Common.LOG.error("The searcher flow socket type {} configured by {} does not exist!",
+			Common.systemLog("The searcher flow socket type {} configured by {} does not exist!",
 					connectParams.getWhp().getType(), connectParams.getInstanceConfig().getInstanceID(), e);
 		}
 		return null;

@@ -135,7 +135,7 @@ public final class PipePump extends Instruction implements Serializable {
 			}
 
 		} catch (Exception e) {
-			log.error("instance {} PipePump init exception",instanceID, e);
+			Common.systemLog("instance {} PipePump init exception",instanceID, e);
 			Common.stopSystem(false);
 		}
 	}
@@ -373,7 +373,7 @@ public final class PipePump extends Instruction implements Serializable {
 		try {
 			pageList = getReader().getDataPages(task, getInstanceConfig().getPipeParams().getReadPageSize());
 		} catch (Exception e) {
-			log.error("instance {} get page lists exception",task.getInstanceID(), e);
+			Common.systemLog("instance {} get page lists exception",task.getInstanceID(), e);
 		} finally {
 			try {
 				getReader().lock.unlock();
@@ -492,7 +492,7 @@ public final class PipePump extends Instruction implements Serializable {
 							task.getInstanceProcessId(), storeId, task, pagedata,
 							",progress:" + progressPos + "/" + pageNum, this.isUpdate,false);
 				} catch (EFException e) {
-					log.error("instance {} process page data exception", this.instanceConfig.getInstanceID(),e);
+					Common.systemLog("instance {} process page data exception", this.instanceConfig.getInstanceID(),e);
 					task.taskState.setEfException(e);
 				} finally {
 					if (pstate == null || pstate.isStatus() == false) {

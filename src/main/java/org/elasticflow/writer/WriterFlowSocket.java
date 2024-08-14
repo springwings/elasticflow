@@ -121,7 +121,7 @@ public abstract class WriterFlowSocket extends Flow {
 					GlobalParam.FLOW_TAG._DEFAULT.name());
 			pipePump.getWriter(dTuple.v2).removeShard(mainName, String.valueOf(dTuple.v2));
 		} catch (Exception e) {
-			Common.LOG.error("time-Mechanism try to remove instance {} exception", storeName,e);
+			Common.systemLog("time-Mechanism try to remove instance {} exception", storeName,e);
 		}
 		if (this.storePositionExists(TaskUtil.getStoreName(mainName, String.valueOf(dTuple.v1))) == false) {
 			this.create(mainName, String.valueOf(dTuple.v1), instanceConfig);

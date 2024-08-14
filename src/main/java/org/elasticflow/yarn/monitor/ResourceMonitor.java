@@ -11,7 +11,7 @@ import org.elasticflow.config.GlobalParam;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.instance.EFDataStorer;
-import org.elasticflow.yarn.coord.ReportStatus;
+import org.elasticflow.yarn.coord.slave.ReportStatus;
 import org.elasticflow.yarn.coordinator.node.DistributeService;
 
 import com.alibaba.fastjson.JSON;

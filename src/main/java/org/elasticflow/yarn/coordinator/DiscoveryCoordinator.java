@@ -8,23 +8,39 @@
 package org.elasticflow.yarn.coordinator;
 
 import org.elasticflow.config.GlobalParam;
-import org.elasticflow.yarn.coord.DiscoveryCoord;
+import org.elasticflow.yarn.coord.slave.DiscoveryCoord;
 
 /**
- * Node discovery Coordinator
+ * Master slave node discovery and reporting coordinator
  * 
  * @author chengwen
  * @version 0.1
  * @create_time 2021-07-30
  */
 public class DiscoveryCoordinator implements DiscoveryCoord {
-
+	
+	/**
+	 * Report your own status to the main node
+	 */
+	@Override
 	public void reportStatus(String ip, int nodeId) {
 		GlobalParam.INSTANCE_COORDER.distributeCoorder().updateCluster(ip, nodeId);
 	}
-
+	
+	/**
+	 * Notify the master node to leave the cluster
+	 */
+	@Override
 	public void leaveCluster(String ip, int nodeId) {
 		GlobalParam.INSTANCE_COORDER.distributeCoorder().removeNode(ip, nodeId, true);
+	}
+	
+	/**
+	 * Record critical logs to the primary node
+	 */
+	@Override
+	public void systemLog(String message, Object... args) {
+		GlobalParam.INSTANCE_COORDER.distributeCoorder().systemLog(message, args);
 	}
 
 	@Override

@@ -13,12 +13,13 @@ import org.elasticflow.config.GlobalParam.JOB_TYPE;
 import org.elasticflow.config.GlobalParam.TASK_FLOW_SINGAL;
 import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.util.EFException;
+import org.elasticflow.yarn.coord.master.Coordination;
 
 import com.alibaba.fastjson.JSONObject;
 
 /**
  * Running task status cluster coordination interface
- * 
+ * Both master and slave nodes need to be started
  * @author chengwen
  * @version 0.1
  * @create_time 2021-07-30

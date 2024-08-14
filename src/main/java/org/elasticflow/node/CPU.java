@@ -60,7 +60,7 @@ public class CPU {
 			}else if(Contexts.containsKey(runId)) {
 				rs = m.invoke(null,Contexts.get(runId),args);
 			}else {
-				Common.LOG.error("{} run context not exists!",runId);
+				Common.systemLog("{} run context not exists!",runId);
 			}
 		}catch (Exception e) {
 			throw Common.convertException(e);

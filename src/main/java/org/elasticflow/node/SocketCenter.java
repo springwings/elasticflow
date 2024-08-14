@@ -78,7 +78,7 @@ public final class SocketCenter {
 			String[] writeDests = Resource.nodeConfig.getInstanceConfigs().get(instance).getPipeParams()
 					.getWriteTo().split(",");
 			if (writeDests.length < 1)
-				Common.LOG.error("instance {} build write pipe socket error,misconfiguration writer destination!",instance);
+				Common.systemLog("instance {} build write pipe socket error,misconfiguration writer destination!",instance);
 			for (String dest : writeDests) {
 				wfs.add(getWriterSocket(dest, instance, L1seq, tag));
 			}
@@ -98,7 +98,7 @@ public final class SocketCenter {
 	public synchronized Searcher getSearcher(String instance, String L1seq, String tag, boolean reload) {
 		if (reload || !searcherMap.containsKey(instance)) {
 			if (!Resource.nodeConfig.getSearchConfigs().containsKey(instance)) {
-				Common.LOG.error("instance {} get searcher exception,instance not exist",instance);
+				Common.systemLog("instance {} get searcher exception,instance not exist",instance);
 				return null;
 			}
 			InstanceConfig instanceConfig = Resource.nodeConfig.getSearchConfigs().get(instance);
@@ -150,7 +150,7 @@ public final class SocketCenter {
 		if (!readerSocketMap.containsKey(tags)) {
 			WarehouseParam whp = getWHP(resourceName);
 			if (whp == null) {
-				Common.LOG.error("instance {} get reader socket exception,resource {} not exist!",instance,resourceName);
+				Common.systemLog("instance {} get reader socket exception,resource {} not exist!",instance,resourceName);
 				Common.stopSystem(false);
 			}
 			readerSocketMap.put(tags, ReaderFlowSocketFactory.getInstance(
@@ -178,7 +178,7 @@ public final class SocketCenter {
 		if (!writerSocketMap.containsKey(tags)) {
 			WarehouseParam whp = getWHP(resourceName);
 			if (whp == null) {
-				Common.LOG.error("instance {} get writer socket exception,resource {} not exist!",instance,resourceName);
+				Common.systemLog("instance {} get writer socket exception,resource {} not exist!",instance,resourceName);
 				Common.stopSystem(false);
 			}
 			writerSocketMap.put(tags, WriterSocketFactory.getInstance(
@@ -205,7 +205,7 @@ public final class SocketCenter {
 		if (reload || !searcherSocketMap.containsKey(tags)) {
 			WarehouseParam whp = getWHP(resourceName);
 			if (whp == null) {
-				Common.LOG.error("instance {} get searcher socket exception,resource {} not exist!",instance,resourceName);
+				Common.systemLog("instance {} get searcher socket exception,resource {} not exist!",instance,resourceName);
 				Common.stopSystem(false);
 			} 
 			SearcherFlowSocket searcher = SearcherSocketFactory

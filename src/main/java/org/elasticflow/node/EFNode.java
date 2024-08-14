@@ -10,9 +10,9 @@ import org.elasticflow.util.Common;
 import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.yarn.EFRPCService;
 import org.elasticflow.yarn.Resource;
-import org.elasticflow.yarn.coord.EFMonitorCoord;
-import org.elasticflow.yarn.coord.InstanceCoord;
-import org.elasticflow.yarn.coord.NodeCoord;
+import org.elasticflow.yarn.coord.master.EFMonitorCoord;
+import org.elasticflow.yarn.coord.master.InstanceCoord;
+import org.elasticflow.yarn.coord.master.NodeCoord;
 import org.elasticflow.yarn.coordinator.DistributeCoorder;
 
 import com.alibaba.fastjson.JSONObject;

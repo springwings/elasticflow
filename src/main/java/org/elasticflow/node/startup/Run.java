@@ -83,9 +83,10 @@ public final class Run {
 		Resource.nodeMonitor = new NodeMonitor(); 
 		Resource.threadPools = new ThreadPools(GlobalParam.SYS_THREADPOOL_SIZE);
 		
-		if(!EFNodeUtil.isSlave()) {//for master
+		if(!EFNodeUtil.isSlave()) {//for master TASK_COORDER
 			GlobalParam.TASK_COORDER = new TaskStateCoordinator(); 
 		}
+		//for local process
 		GlobalParam.INSTANCE_COORDER = new InstanceCoordinator();
 		
 		int openThreadPools = 0;
@@ -110,7 +111,7 @@ public final class Run {
 			Resource.threadPools.start();
 		}
 		
-		if(EFNodeUtil.isSlave()) 
+		if(EFNodeUtil.isSlave()) //slave TASK_COORDER、DISCOVERY_COORDER
 			EFNodeUtil.initSlaveCoorder(); 
 	}
 	
@@ -199,7 +200,7 @@ public final class Run {
 			        urls[i] = jars.get(i).toURI().toURL();
 			        Common.LOG.info("load plugin from {}",jars.get(i).toURI().toURL());
 			    } catch (Exception e) {
-			    	Common.LOG.error("load plugins from {} exception",pluginPath, e);
+			    	Common.systemLog("load plugins from {} exception",pluginPath, e);
 			    }
 			}
 			GlobalParam.PLUGIN_CLASS_LOADER = new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
@@ -235,7 +236,7 @@ public final class Run {
 						GlobalParam.NODEID,GlobalParam.IP);
 			}
 		} catch (Exception e) {
-	    	Common.LOG.error("Init System Exception", e);
+	    	Common.systemLog("Init System Exception", e);
 	    	Common.stopSystem(false);
 	    } 
 	} 

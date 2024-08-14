@@ -5,7 +5,7 @@
  * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
  * Side Public License, v 1.
  */
-package org.elasticflow.yarn.coord;
+package org.elasticflow.yarn.coord.slave;
 
 import java.util.Map;
 
@@ -35,6 +35,10 @@ public final class ReportStatus {
 	
 	public static boolean heartBeatIsOn() {
 		return openHeartBeat;
+	}
+	
+	public static void systemLog(String message, Object... args) {
+		GlobalParam.DISCOVERY_COORDER.systemLog(message, args);
 	}
 
 	public static void openHeartBeat() {

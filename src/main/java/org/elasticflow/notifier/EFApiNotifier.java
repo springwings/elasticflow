@@ -53,7 +53,7 @@ public class EFApiNotifier implements EFNotify{
 				return false;
 			}
 		}else {
-			Common.LOG.error("send message to {} exception, {}",GlobalParam.IP,response.getInfo());
+			Common.systemLog("send message to {} exception, {}",GlobalParam.IP,response.getInfo());
 			return false;
 		}		
 		return true;

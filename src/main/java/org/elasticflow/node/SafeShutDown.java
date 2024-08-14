@@ -10,7 +10,7 @@ package org.elasticflow.node;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFNodeUtil;
-import org.elasticflow.yarn.coord.ReportStatus;
+import org.elasticflow.yarn.coord.slave.ReportStatus;
 import org.elasticflow.yarn.monitor.ResourceMonitor;
 
 /**

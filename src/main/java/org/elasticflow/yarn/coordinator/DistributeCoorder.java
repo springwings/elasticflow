@@ -75,6 +75,10 @@ public class DistributeCoorder {
 			Common.LOG.warn("config.properties instances parameter not configured");
 		}
 	}
+	/**Call the master node systemLog method to write the log*/
+	public void systemLog(String message, Object... args) {
+		Common.systemLog(message,args);
+	}
 	
 	public CopyOnWriteArrayList<EFNode> getNodes(){
 		return this.nodes;

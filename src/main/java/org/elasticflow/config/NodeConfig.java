@@ -187,14 +187,14 @@ public class NodeConfig {
 			parseNode(paramlist, InstructionParam.class);
 
 		} catch (Exception e) {
-			Common.LOG.error("parse instructions file {} exception",fpath,e);
+			Common.systemLog("parse instructions file {} exception",fpath,e);
 		} finally {
 			try {
 				if (null != in) {
 					in.close();
 				}
 			} catch (Exception e) {
-				Common.LOG.error("instructions file {} close exception",fpath,e);
+				Common.systemLog("instructions file {} close exception",fpath,e);
 			}
 		}
 	}
@@ -215,14 +215,14 @@ public class NodeConfig {
 			paramlist = doc.getElementsByTagName("socket");
 			parseNode(paramlist, WarehouseParam.class);
 		} catch (Exception e) {
-			Common.LOG.error("parse pond file {} exception", fpath,e);
+			Common.systemLog("parse pond file {} exception", fpath,e);
 		} finally {
 			try {
 				if (null != in) {
 					in.close();
 				}
 			} catch (Exception e) {
-				Common.LOG.error("close pond file {} exception",fpath, e);
+				Common.systemLog("close pond file {} exception",fpath, e);
 			}
 		}
 	}

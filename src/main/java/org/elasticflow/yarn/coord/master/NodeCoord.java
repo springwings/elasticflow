@@ -1,4 +1,4 @@
-package org.elasticflow.yarn.coord;
+package org.elasticflow.yarn.coord.master;
 
 /**
  * Cluster node operation control

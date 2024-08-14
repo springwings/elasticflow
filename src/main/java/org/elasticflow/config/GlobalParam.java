@@ -12,9 +12,9 @@ import java.util.HashMap;
 import java.util.Properties;
 
 import org.elasticflow.model.FormatProperties;
-import org.elasticflow.yarn.coord.DiscoveryCoord;
-import org.elasticflow.yarn.coord.InstanceCoord;
 import org.elasticflow.yarn.coord.TaskStateCoord;
+import org.elasticflow.yarn.coord.master.InstanceCoord;
+import org.elasticflow.yarn.coord.slave.DiscoveryCoord;
 
 /**
  * global node data store position
@@ -97,6 +97,8 @@ public final class GlobalParam {
 	public static String SYS_CONFIG_PATH = CONFIG_ROOT + "/config";
 	
 	public static String lOG_STORE_PATH = "";
+	
+	public static String ERROR_lOG_STORE_PATH = "";
 
 	public static String DATAS_CONFIG_PATH = CONFIG_ROOT + "/datas";
 

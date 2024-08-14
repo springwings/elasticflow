@@ -17,8 +17,8 @@ import org.elasticflow.model.reader.ScanPosition;
 import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.yarn.EFRPCService;
 import org.elasticflow.yarn.Resource;
-import org.elasticflow.yarn.coord.DiscoveryCoord;
 import org.elasticflow.yarn.coord.TaskStateCoord;
+import org.elasticflow.yarn.coord.slave.DiscoveryCoord;
 
 /**
  * system running control

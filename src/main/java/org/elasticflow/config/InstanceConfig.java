@@ -199,7 +199,7 @@ public class InstanceConfig {
 			byte[] bt = EFDataStorer.getData(this.configPath, false);
 			if (bt.length <= 0) {
 				setStatus(false);
-				Common.LOG.error("load instance failed, task configuration file {} not exists!", this.configPath);
+				Common.systemLog("load instance failed, task configuration file {} not exists!", this.configPath);
 				return;
 			}				
 			in = new ByteArrayInputStream(bt, 0, bt.length);
@@ -209,7 +209,7 @@ public class InstanceConfig {
 		} catch (Exception e) {
 			in = null;
 			setStatus(false);
-			Common.LOG.error("load instance configuration from {} exception",this.configPath, e);
+			Common.systemLog("load instance configuration from {} exception",this.configPath, e);
 		}
 	}
 
@@ -234,7 +234,7 @@ public class InstanceConfig {
 			if (params != null) {
 				parseNode(params.getElementsByTagName("param"), "pipeParam", PipeParam.class);
 			} else {
-				Common.LOG.error("{} TransParam not set",this.configPath);
+				Common.systemLog("{} TransParam not set",this.configPath);
 				return;
 			}
 

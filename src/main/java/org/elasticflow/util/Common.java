@@ -41,6 +41,7 @@ import org.elasticflow.model.InstructionTree;
 import org.elasticflow.model.NMRequest;
 import org.elasticflow.node.SafeShutDown;
 import org.elasticflow.yarn.Resource;
+import org.elasticflow.yarn.coord.slave.ReportStatus;
 import org.mortbay.jetty.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,8 +76,18 @@ public final class Common {
 			add(KEY_PARAM.facet_count.toString());
 			add(KEY_PARAM.detail.toString());
 		}
-	};
-
+	}; 
+	
+	/**
+	 * Logger Wrapper
+	 * @param message
+	 * @param args
+	 */
+	public static void systemLog(String message, Object... args) {		
+		Common.LOG.error(message,args);
+		if(EFNodeUtil.isSlave())//slave node write log to master
+			ReportStatus.systemLog("["+GlobalParam.IP+"] "+message, args);
+	}
 	/**
 	 * Convert the first letter to uppercase or lowercase
 	 * 
@@ -109,7 +120,7 @@ public final class Common {
 			fp = new FormatProperties();
 			fp.load(in);
 		} catch (Exception e) {
-			Common.LOG.error("load configuration from {} exception", configPath, e);
+			systemLog("load configuration from {} exception", configPath, e);
 		}
 		return fp;
 	}
@@ -467,11 +478,11 @@ public final class Common {
 			if (GlobalParam.SystemConfig != null) {
 				Common.LOG.info("load system configuration from {} success!", path);
 			} else {
-				Common.LOG.error("load system configuration from {} exception", path);
+				systemLog("load system configuration from {} exception", path);
 				Common.stopSystem(false);
 			}
 		} catch (Exception e) {
-			Common.LOG.error("load system configuration from {} exception", path, e);
+			systemLog("load system configuration from {} exception", path, e);
 			Common.stopSystem(false);
 		}
 	}

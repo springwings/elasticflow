@@ -20,6 +20,7 @@ import org.elasticflow.node.CPU;
 import org.elasticflow.piper.Breaker;
 import org.elasticflow.piper.PipePump;
 import org.elasticflow.piper.Valve;
+import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
 import org.elasticflow.util.instance.EFTuple;
 import org.elasticflow.util.instance.EFWriterUtil;
@@ -118,7 +119,7 @@ public class FlowTask {
 				runNextJobs(JOB_TYPE.FULL);
 			} catch (Exception e) {
 				breaker.log();
-				log.error("instance {} run full job Exception",instanceID, e);
+				Common.systemLog("instance {} run full job Exception",instanceID, e); 
 				Resource.EfNotifier.send(Localization.format(LAG_TYPE.fullFail, instanceID), instanceID, e.getMessage(),
 						ETYPE.DATA_ERROR.name(), false);
 			} finally {
@@ -149,7 +150,7 @@ public class FlowTask {
 						getNextJobs(pipePump.getInstanceConfig().getPipeParams().getNextJob()));
 				runNextJobs(JOB_TYPE.FULL);
 			} catch (Exception e) {
-				log.error("instance {} run Virtual Full Exception",instanceID, e);
+				Common.systemLog("instance {} run Virtual Full Exception",instanceID, e);
 				Resource.EfNotifier.send(instanceID + " Virtual Full Exception", instanceID, e.getMessage(),
 						ETYPE.DATA_ERROR.name(), false);
 			} finally {
@@ -179,7 +180,7 @@ public class FlowTask {
 						GlobalParam.FLOWINFO.INCRE_STOREID.name(), storeId);
 				runNextJobs(JOB_TYPE.INCREMENT);
 			} catch (Exception e) {
-				log.error("instance {} Virtual Increment Exception",instanceID, e);
+				Common.systemLog("instance {} Virtual Increment Exception",instanceID, e);
 				Resource.EfNotifier.send(instanceID + " Virtual Increment Exception", instanceID, e.getMessage(),
 						ETYPE.DATA_ERROR.name(), false);
 			} finally {
@@ -217,14 +218,14 @@ public class FlowTask {
 			} catch (EFException e) {
 				breaker.log();
 				if (!isReferenceInstance && e.getErrorType() == ETYPE.RESOURCE_ERROR) {
-					log.error("{}_{} increment job exception!",instanceID,L1seq, e);
+					Common.systemLog("{}_{} increment job exception!",instanceID,L1seq, e);
 					breaker.openBreaker();
 					Resource.EfNotifier.send(Localization.format(LAG_TYPE.FailPosition, destination), instanceID,
 							e.getMessage(), e.getErrorType().name(), false);
 				} else if (e.getErrorType() == ETYPE.EXTINTERRUPT) {
 					log.warn("{}_{} increment external interrupt!",instanceID,L1seq);
 				} else {
-					log.error("{}_{} increment job exception",instanceID,L1seq, e);
+					Common.systemLog("{}_{} increment job exception",instanceID,L1seq, e);
 				} 
 			} finally {
 				recompute = this.checkReCompute(storeId);

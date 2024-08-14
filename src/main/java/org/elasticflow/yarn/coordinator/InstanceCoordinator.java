@@ -19,7 +19,7 @@ import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.EFPipeUtil;
 import org.elasticflow.util.instance.TaskUtil;
 import org.elasticflow.yarn.Resource;
-import org.elasticflow.yarn.coord.InstanceCoord;
+import org.elasticflow.yarn.coord.master.InstanceCoord;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -78,7 +78,7 @@ public class InstanceCoordinator implements InstanceCoord {
 			}  
 			Common.setConfigObj(obj, cls, fieldName,value,null);
 		} catch (Exception e) {
-			Common.LOG.error("update instance {} task config exception",instance,e);
+			Common.systemLog("update instance {} task config exception",instance,e);
 		}	
 	}
 	

@@ -23,7 +23,7 @@ public class TaskJobCenter {
 
 	public boolean addJob(TaskJobModel taskjob) throws SchedulerException {
 		if (taskjob == null) {
-			Common.LOG.error("task is null!");
+			Common.systemLog("task is null!");
 			return false;
 		}
 
@@ -52,7 +52,7 @@ public class TaskJobCenter {
 		try {
 			Resource.scheduler.pauseJob(jobKey);
 		} catch (Exception e) {
-			Common.LOG.error("stop task {} exception", taskName,e);
+			Common.systemLog("stop task {} exception", taskName,e);
 			return false;
 		}
 		return true;
@@ -63,7 +63,7 @@ public class TaskJobCenter {
 		try {
 			Resource.scheduler.triggerJob(jobKey);
 		} catch (Exception e) {
-			Common.LOG.error("start task {} exception",taskName, e);
+			Common.systemLog("start task {} exception",taskName, e);
 			return false;
 		}
 		return true;
@@ -74,7 +74,7 @@ public class TaskJobCenter {
 		try {
 			Resource.scheduler.resumeJob(jobKey);
 		} catch (Exception e) {
-			Common.LOG.error("restart task {} exception", taskName,e);
+			Common.systemLog("restart task {} exception", taskName,e);
 			return false;
 		}
 		return true;
@@ -85,7 +85,7 @@ public class TaskJobCenter {
 		try {
 			Resource.scheduler.deleteJob(taskKey);
 		} catch (Exception e) {
-			Common.LOG.error("delete task {} exception",taskName, e);
+			Common.systemLog("delete task {} exception",taskName, e);
 			return false;
 		}
 		return true;

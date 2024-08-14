@@ -8,7 +8,7 @@ import org.elasticflow.connection.EFConnectionPool;
 import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.SystemInfoUtil;
 import org.elasticflow.yarn.Resource;
-import org.elasticflow.yarn.coord.EFMonitorCoord;
+import org.elasticflow.yarn.coord.master.EFMonitorCoord;
 
 import com.alibaba.fastjson.JSONObject;
 

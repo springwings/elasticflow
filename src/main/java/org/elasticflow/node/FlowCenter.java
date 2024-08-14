@@ -88,7 +88,7 @@ public class FlowCenter{
 				}				
 			}
 		} catch (Exception e) {
-			Common.LOG.error("run instance {} exception",instance, e);
+			Common.systemLog("run instance {} exception",instance, e);
 			return false;
 		}
 
@@ -130,7 +130,7 @@ public class FlowCenter{
 						instanceConfig,needClear);
 			}
 		} catch (Exception e) {
-			Common.LOG.error("add instance {} Flow Govern exception",instanceID, e);
+			Common.systemLog("add instance {} Flow Govern exception",instanceID, e);
 		} 
 	}
 
@@ -142,7 +142,7 @@ public class FlowCenter{
 		try {
 			Resource.taskJobCenter.addJob(_sj); 
 		}catch (Exception e) {
-			Common.LOG.error("create instruction job {} exception", param.getId(),e);
+			Common.systemLog("create instruction job {} exception", param.getId(),e);
 		} 
 	}
 

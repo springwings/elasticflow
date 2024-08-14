@@ -11,6 +11,7 @@ import java.io.File;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.elasticflow.config.GlobalParam;
+import org.elasticflow.model.FormatProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -26,8 +27,12 @@ public final class EFIoc {
 	private static ApplicationContext ACT;
 
 	static {  
-		GlobalParam.lOG_STORE_PATH = (String) Common.loadProperties(GlobalParam.SYS_CONFIG_PATH + "/log4j.properties").get("log4j.appender.EF.file");
-		PropertyConfigurator.configure(GlobalParam.SYS_CONFIG_PATH + "/log4j.properties");
+		FormatProperties proerties = Common.loadProperties(GlobalParam.SYS_CONFIG_PATH + "/log4j.properties");
+		GlobalParam.lOG_STORE_PATH = GlobalParam.CONFIG_ROOT+"/logs/ef.log";
+		GlobalParam.ERROR_lOG_STORE_PATH = GlobalParam.CONFIG_ROOT+"/logs/ef.error.log";
+		proerties.setProperty("log4j.appender.EF.file", GlobalParam.lOG_STORE_PATH); 
+		proerties.setProperty("log4j.appender.EFE.file", GlobalParam.ERROR_lOG_STORE_PATH); 
+		PropertyConfigurator.configure(proerties);
 		File test_write = new File(GlobalParam.lOG_STORE_PATH);
 		if(test_write.canWrite()) {
 			ACT = new ClassPathXmlApplicationContext("spring.xml");

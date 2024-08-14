@@ -604,7 +604,7 @@ public class EFMonitorUtil {
 			res.append("</ul>");
 			res.append("<h1>3 错误日志跟踪</h1><pre class='track_error'>");
 			int buffernum = 0;
-			try (BufferedReader br = new BufferedReader(new FileReader(GlobalParam.lOG_STORE_PATH))) {
+			try (BufferedReader br = new BufferedReader(new FileReader(GlobalParam.ERROR_lOG_STORE_PATH))) {
 				String line;
 				while ((line = br.readLine()) != null) {
 					if ((line.contains("ERROR") && line.contains(instance)) || buffernum > 0) {
