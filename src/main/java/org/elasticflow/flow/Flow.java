@@ -31,25 +31,32 @@ import org.slf4j.LoggerFactory;
  * @modify 2021-06-11 10:45
  */
 public abstract class Flow {
-	
-	/**EF abstract connection*/
+
+	/** EF abstract connection */
 	protected volatile EFConnectionSocket<?> EFConn;
-	
-	/**database level */
+
+	/** database level */
 	protected String L1seq;
-	
+
 	protected String poolName;
 
 	protected InstanceConfig instanceConfig;
-	
-	/**EF abstract connection identification*/
+
+	/** EF abstract connection identification */
 	private String EFConnKey;
-	
-	/**Exclusive, i.e. independently built connections*/
+
+	/** Exclusive, i.e. independently built connections */
 	public boolean isConnMonopoly = false;
-	
-	/**Does the connection differentiate terminal usage? 
-	 * If yes, it will be released directly without returning to the resource pool.
+
+	/**
+	 * Is there data cached in the pipeline? For Kafka, Elasticsearch, and other
+	 * scenarios where manual data submission is enabled, data caching is required.*
+	 */
+	private boolean isCached = false;
+
+	/**
+	 * Does the connection differentiate terminal usage? If yes, it will be released
+	 * directly without returning to the resource pool.
 	 */
 	public boolean isDiffEndType = false;
 
@@ -58,8 +65,8 @@ public abstract class Flow {
 	public FlowStatistic flowStatistic;
 
 	protected ConnectParams connectParams;
-	
-	/**Resource occupancy statistics lock*/
+
+	/** Resource occupancy statistics lock */
 	protected AtomicInteger retainer = new AtomicInteger(0);
 
 	private final static Logger log = LoggerFactory.getLogger("EF-Flow");
@@ -67,17 +74,20 @@ public abstract class Flow {
 	public abstract void initConn(ConnectParams connectParams);
 
 	public abstract void initFlow() throws EFException;
-	
-	/**if true,This instance task shares a connection with all subtasks under the same end, 
-	 * 					mainly used to connect to scenarios with accompanying states, example: ES writer*/
+
+	/**
+	 * if true,This instance task shares a connection with all subtasks under the
+	 * same end, mainly used to connect to scenarios with accompanying states,
+	 * example: ES writer
+	 */
 	public static boolean crossSubtasks = false;
-	
+
 	/**
 	 * 
 	 * @param instanceConfig
 	 * @param endType
 	 * @param L1seq
-	 * @param crossSubtasks 
+	 * @param crossSubtasks
 	 * @throws EFException
 	 */
 	public void prepareFlow(InstanceConfig instanceConfig, END_TYPE endType, String L1seq) throws EFException {
@@ -87,24 +97,26 @@ public abstract class Flow {
 		switch (endType) {
 		case writer:
 			this.EFConnKey = TaskUtil.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",
-					this.instanceConfig.getPipeParams().isWriterPoolShareAlias())+"_writer";
+					this.instanceConfig.getPipeParams().isWriterPoolShareAlias()) + "_writer";
 			break;
 		case reader:
 			this.EFConnKey = TaskUtil.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",
-					this.instanceConfig.getPipeParams().isReaderPoolShareAlias())+"_reader";
+					this.instanceConfig.getPipeParams().isReaderPoolShareAlias()) + "_reader";
 			break;
 		default:
 			this.EFConnKey = TaskUtil.getResourceTag(instanceConfig.getInstanceID(), L1seq, "",
-					this.instanceConfig.getPipeParams().isSearcherShareAlias())+"_other";
+					this.instanceConfig.getPipeParams().isSearcherShareAlias()) + "_other";
 			break;
-		} 
-		
+		}
+
 		synchronized (Resource.EFConns) {
-			if(crossSubtasks==false) {
-				/**When splitting an instance into multiple parallel subtasks, 
-				 * it can share connection resources with each other*/
-				if(!this.EFConnKey.endsWith("_CROSS_RANDOM")) {
-					this.EFConnKey = this.EFConnKey+Common.getNow()+"_CROSS_RANDOM";
+			if (crossSubtasks == false) {
+				/**
+				 * When splitting an instance into multiple parallel subtasks, it can share
+				 * connection resources with each other
+				 */
+				if (!this.EFConnKey.endsWith("_CROSS_RANDOM")) {
+					this.EFConnKey = this.EFConnKey + Common.getNow() + "_CROSS_RANDOM";
 					Resource.EFConns.put(this.EFConnKey, null);
 				}
 			}
@@ -112,26 +124,26 @@ public abstract class Flow {
 		}
 		this.initFlow();
 	}
-	
-	
+
 	/**
-	 * release flow 
+	 * release flow
 	 */
-	public abstract void release(); 
-	
+	public abstract void release();
+
 	/**
 	 * Enable exclusive resolution if the link has a special resource binding
 	 * 
 	 * @param isMonopoly      if true, the task will monopolize a specific
-	 *                        connection and will not release it
-	 * 						  Used in scenarios where connections cannot be mixed between different ends                       
-	 * @param acceptShareConn if true, Use global shared connections
-	 * 						  Share this connection globally 
+	 *                        connection and will not release it Used in scenarios
+	 *                        where connections cannot be mixed between different
+	 *                        ends
+	 * @param acceptShareConn if true, Use global shared connections Share this
+	 *                        connection globally
 	 * @return
 	 */
 	public synchronized EFConnectionSocket<?> PREPARE(boolean isMonopoly, boolean acceptShareConn) {
 		if (isMonopoly) {
-			if (this.EFConn == null) { 
+			if (this.EFConn == null) {
 				if (Resource.EFConns.get(this.EFConnKey) == null) {
 					Resource.EFConns.put(this.EFConnKey,
 							EFConnectionPool.getConn(this.connectParams, this.poolName, acceptShareConn));
@@ -139,7 +151,7 @@ public abstract class Flow {
 				this.EFConn = Resource.EFConns.get(this.EFConnKey);
 			}
 		} else {
-			if (this.retainer.getAndIncrement() == 0 || this.EFConn==null) {
+			if (this.retainer.getAndIncrement() == 0 || this.EFConn == null) {
 				Resource.EFConns.put(this.EFConnKey,
 						EFConnectionPool.getConn(this.connectParams, this.poolName, acceptShareConn));
 				this.EFConn = Resource.EFConns.get(this.EFConnKey);
@@ -151,42 +163,44 @@ public abstract class Flow {
 	public InstanceConfig getInstanceConfig() {
 		return this.instanceConfig;
 	}
-	
+
 	/**
-	 * Release connection  resources
+	 * Release connection resources
+	 * 
 	 * @param isMonopoly
 	 * @param isDiffEndType
 	 * @param crossSubtasks
 	 */
 	public void releaseConn(boolean isMonopoly, boolean isDiffEndType, boolean crossSubtasks) {
 		boolean clearConn = isDiffEndType || !crossSubtasks;
-		releaseConn(isMonopoly,clearConn);		
+		releaseConn(isMonopoly, clearConn);
 	}
-	
+
 	/**
-	 * Release connection  resources
-	 * @param isMonopoly   Belongs to exclusive nature and does not require maintenance
-	 * @param releaseConn  forced release
+	 * Release connection resources
+	 * 
+	 * @param isMonopoly  Belongs to exclusive nature and does not require
+	 *                    maintenance
+	 * @param releaseConn forced release
 	 */
 	public void releaseConn(boolean isMonopoly, boolean clearConn) {
 		if (isMonopoly == false || clearConn) {
 			synchronized (this) {
-				if (clearConn)  
-					retainer.set(0); 
-				
+				if (clearConn)
+					retainer.set(0);
+
 				if (retainer.decrementAndGet() <= 0) {
-					EFConnectionPool.freeConn(this.EFConn, this.poolName, clearConn); 
+					EFConnectionPool.freeConn(this.EFConn, this.poolName, clearConn);
 					Resource.EFConns.put(this.EFConnKey, null);
 					this.EFConn = null;
 					retainer.set(0);
 				} else {
-					log.info("connection {} retainer:{}",this.EFConn,retainer.get());
+					log.info("instance {} connection {} retainer:{}", this.instanceConfig.getInstanceID(), this.EFConn,
+							retainer.get());
 				}
 			}
 		}
 	}
-	
-	
 
 	public EFConnectionSocket<?> GETSOCKET() {
 		return this.EFConn;
@@ -198,8 +212,20 @@ public abstract class Flow {
 		return true;
 	}
 
+	/**
+	 * Usually, it is only called when the system encounters an error to clean up
+	 * the connection pool
+	 */
 	public void clearPool() {
-		releaseConn(false,true);
+		releaseConn(false, true);
 		EFConnectionPool.clearPool(this.poolName);
+	}
+
+	public synchronized void setCached(boolean isCached) {
+		this.isCached = isCached;
+	}
+
+	public boolean isCached() {
+		return this.isCached;
 	}
 }

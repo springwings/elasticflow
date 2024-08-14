@@ -98,61 +98,64 @@ public class Pipe extends Instruction {
 		boolean isUpdate = (boolean) args[6];
 		boolean monopoly = (boolean) args[7];
 		//Control the release of problematic connections
-		boolean freeConn = false;
-		
+		boolean freeConn = false; 
 		WriterFlowSocket writer = context.getWriter();
-		writer.PREPARE(monopoly, false);
-		if (!writer.connStatus()) { 
-			pstate.setInfo(instance+" writer connection is closed!");
-			pstate.setStatus(false);
-			return pstate;
-		}
-		if (dataPage.getData().size()==0) {
+		if(dataPage.getData().size()>0) {
+			writer.PREPARE(monopoly, false);
+			if (!writer.connStatus()) { 
+				pstate.setInfo(instance+" writer connection is closed!");
+				pstate.setStatus(false);
+				writer.releaseConn(monopoly,true); 
+				return pstate;
+			}
+			if(writer.getWriteHandler()!=null)
+				dataPage = writer.getWriteHandler().handleData(context, dataPage);		
+			DataSetReader DSReader = DataSetReader.getInstance(dataPage);
+			long start = System.currentTimeMillis();
+			int num = 0;
+			if (DSReader.status()) {	
+				try {
+					while (DSReader.nextLine()) { 
+						writer.write(context.getInstanceConfig(),
+								DSReader.getLineData().virtualWrite(context.getInstanceConfig().getWriteFields()),//write field handler
+								instance, storeId, isUpdate);
+						num++;
+					}
+					pstate.setReaderScanStamp(DSReader.getScanStamp());
+					pstate.setCount(num);				
+					writer.flowStatistic.setLoad((long)((num*1000)/(start-writer.lastGetPageTime+1e-3)));		
+					writer.lastGetPageTime = start;
+					if(num>0)
+						writer.flowStatistic.setPerformance((long) ((num*1000)/(System.currentTimeMillis()-start+1e-3)));
+					writer.flowStatistic.incrementCurrentTimeProcess(num);
+					context.getReader().flush();
+					writer.flush(); 
+					log.info(TaskUtil.formatLog("onepage",jobType + " Write", task.getInstanceProcessId(), 
+							storeId, task.getL2seq(), num,
+							DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));
+				} catch (EFException e) {
+					if (e.getErrorType()==ETYPE.RESOURCE_ERROR) { 
+						freeConn = true;
+					}
+					throw e;
+				} finally { 
+					DSReader.close(); 
+					writer.releaseConn(monopoly, freeConn); 
+				}
+			} else {
+				writer.releaseConn(monopoly, freeConn); 
+				pstate.setInfo(instance+" DSReader status is false!");
+				pstate.setStatus(false);
+			}
+		}else if (dataPage.getData().size()==0 && writer.isCached()) {
 			//Prevent status from never being submitted
+			writer.setCached(false);
+			writer.PREPARE(monopoly, false);
 			context.getReader().flush();
 			writer.flush(); 
-			writer.releaseConn(monopoly, freeConn); 
+			writer.releaseConn(monopoly, freeConn);  
 			return pstate;
-		}
-		if(writer.getWriteHandler()!=null)
-			dataPage = writer.getWriteHandler().handleData(context, dataPage);		
-		DataSetReader DSReader = DataSetReader.getInstance(dataPage);
-		long start = System.currentTimeMillis();
-		int num = 0;
-		if (DSReader.status()) {	
-			try {
-				while (DSReader.nextLine()) { 
-					writer.write(context.getInstanceConfig(),
-							DSReader.getLineData().virtualWrite(context.getInstanceConfig().getWriteFields()),//write field handler
-							instance, storeId, isUpdate);
-					num++;
-				}
-				pstate.setReaderScanStamp(DSReader.getScanStamp());
-				pstate.setCount(num);				
-				writer.flowStatistic.setLoad((long)((num*1000)/(start-writer.lastGetPageTime+1e-3)));		
-				writer.lastGetPageTime = start;
-				if(num>0)
-					writer.flowStatistic.setPerformance((long) ((num*1000)/(System.currentTimeMillis()-start+1e-3)));
-				writer.flowStatistic.incrementCurrentTimeProcess(num);
-				context.getReader().flush();
-				writer.flush(); 
-				log.info(TaskUtil.formatLog("onepage",jobType + " Write", task.getInstanceProcessId(), 
-						storeId, task.getL2seq(), num,
-						DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));
-			} catch (EFException e) {
-				if (e.getErrorType()==ETYPE.RESOURCE_ERROR) { 
-					freeConn = true;
-				}
-				throw e;
-			} finally { 
-				DSReader.close(); 
-				writer.releaseConn(monopoly, freeConn); 
-			}
-		} else {
-			writer.releaseConn(monopoly, freeConn); 
-			pstate.setInfo(instance+" DSReader status is false!");
-			pstate.setStatus(false);
-		}
+		} 
 		return pstate;
 	}
 }

@@ -94,6 +94,8 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 		} else {
 			this.updateByKey(unit, transParams, name, type, storeId, isUpdate);
 		}
+		if (this.isBatch) 
+			this.setCached(true);
 	}
 
 	private void updateByScan(WriterParam writerParam, PipeDataUnit unit, Map<String, EFField> transParams,
@@ -200,6 +202,7 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 	@Override
 	public void flush() throws EFException {
 		if (this.isBatch) {
+			this.setCached(false);
 			try {
 				getESC().getBulkProcessor().flush();
 				Resource.resourceStates.get(getESC().getAlias()).put("status",RESOURCE_STATUS.Normal.name());

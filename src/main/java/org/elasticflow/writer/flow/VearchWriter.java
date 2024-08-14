@@ -112,7 +112,8 @@ public class VearchWriter extends WriterFlowSocket {
 			if (this.isBatch) {
 				this.curTable = table;
 				this.DATAS.add("{\"index\": {\"_id\": \"" + unit.getReaderKeyVal() + "\"}}");
-				this.DATAS.add(row);
+				this.DATAS.add(row); 
+				this.setCached(true);
 			} else {
 				conn.writeSingle(table, row);
 			}
@@ -190,8 +191,9 @@ public class VearchWriter extends WriterFlowSocket {
 
 	@Override
 	public void flush() throws EFException {
-		if (this.isBatch) {
+		if (this.isBatch) { 
 			synchronized (this) {
+				this.setCached(false);
 				if (this.DATAS.size() > 0) {
 					VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 					try {

@@ -52,10 +52,8 @@ public class RocketmqReader extends ReaderFlowSocket {
 	public static RocketmqReader getInstance(final ConnectParams connectParams) {
 		RocketmqReader o = new RocketmqReader();
 		o.initConn(connectParams);
-		if (connectParams.getWhp().getCustomParams() != null) {
-			if (connectParams.getWhp().getCustomParams().containsKey("AutoCommit")) {
-				o.autoCommit = connectParams.getWhp().getCustomParams().getBooleanValue("AutoCommit");
-			}
+		if (connectParams.getWhp().getCustomParams() != null && connectParams.getWhp().getCustomParams().containsKey("AutoCommit")) {
+			o.autoCommit = connectParams.getWhp().getCustomParams().getBooleanValue("AutoCommit"); 
 		}
 		return o;
 	}
@@ -129,6 +127,7 @@ public class RocketmqReader extends ReaderFlowSocket {
 	@Override
 	public void flush() throws EFException {
 		if (!this.autoCommit) {
+			this.setCached(false);
 			try {
 				conn.commitSync();
 			} catch (Exception e) {
@@ -152,6 +151,8 @@ public class RocketmqReader extends ReaderFlowSocket {
 					if (curentpage >= pagenum)
 						break;
 				}
+				if(this.autoCommit==false)
+					this.setCached(true);
 			}
 		} catch (Exception e) { 
 			page.clear();

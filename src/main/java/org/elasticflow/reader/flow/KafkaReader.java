@@ -56,6 +56,8 @@ public class KafkaReader extends ReaderFlowSocket {
 	public static boolean crossSubtasks = true;
 	
 	public boolean isDiffEndType = true;
+	
+	ConcurrentLinkedDeque<String> pages = new ConcurrentLinkedDeque<>();
 
 	/**
 	 * @param connectParams enable.auto.commit=false message is confirmed manually
@@ -142,6 +144,7 @@ public class KafkaReader extends ReaderFlowSocket {
 	@Override
 	public void flush() throws EFException {
 		if (!this.autoCommit) {
+			this.setCached(false);
 			try {
 				conn.commitSync();
 			} catch (Exception e) {
@@ -157,8 +160,7 @@ public class KafkaReader extends ReaderFlowSocket {
 	}
 
 	@Override
-	public ConcurrentLinkedDeque<String> getDataPages(final TaskModel task, int pageSize) throws EFException { 
-		ConcurrentLinkedDeque<String> page = new ConcurrentLinkedDeque<>();
+	public ConcurrentLinkedDeque<String> getDataPages(final TaskModel task, int pageSize) throws EFException {  
 		try {  
 			this.records = conn.poll(Duration.ofMillis(readms));
 			int totalNum = this.records.count();
@@ -167,13 +169,15 @@ public class KafkaReader extends ReaderFlowSocket {
 				int curentpage = 0;
 				while (true) {
 					curentpage++;
-					page.add(String.valueOf(curentpage * pageSize));
+					pages.add(String.valueOf(curentpage * pageSize));
 					if (curentpage >= pagenum)
 						break;
 				}
+				if(this.autoCommit==false)
+					this.setCached(true);
 			}
 		} catch (Exception e) { 
-			page.clear();
+			pages.clear();
 			releaseConn(false, true);
 			try {
 				this.initFlow();
@@ -182,7 +186,7 @@ public class KafkaReader extends ReaderFlowSocket {
 			}   
 			throw new EFException(e,task.getInstanceID()+ " Kafka Reader get page lists Exception!");
 		}
-		return page;
+		return pages;
 	}
 
 }
