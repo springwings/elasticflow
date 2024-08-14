@@ -98,12 +98,14 @@ ElasticFlow（伊塔）是一个开源弹性流数据交换系统，支持在任
 
 # EF 插件开发
    1. pom入包：
-   ```xml
-      <dependency>
-        <groupId>org.elasticflow</groupId>
-        <artifactId>elasticflow</artifactId>
-        <version>6.0.6</version>
-      </dependency>
+   ```xml 
+      	<dependency>
+			<groupId>org.elasticflow</groupId>
+			<artifactId>elasticflow</artifactId>
+			<version>6.0.8</version> 
+			<scope>system</scope>
+			<systemPath>./target/elasticflow.jar</systemPath> 
+		</dependency> 
    ```
    2. plugin开发测试代码，例如：
    ```java
