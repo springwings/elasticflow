@@ -86,6 +86,10 @@ public class EFRequest{
 		return null;
 	}
 	
+	public int getIntParam(String key) {
+		return Integer.valueOf(getStringParam(key));
+	}
+	
 	public String getStringParam(String key) {
 		if(this.params.containsKey(key))
 			return String.valueOf(this.params.get(key));

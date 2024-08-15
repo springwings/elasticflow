@@ -33,6 +33,7 @@ import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.EFResponse;
 import org.elasticflow.model.InstructionTree;
 import org.elasticflow.node.CPU;
+import org.elasticflow.node.EFNode;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFException;
@@ -88,6 +89,7 @@ public final class NodeMonitor {
 			put("updatenodeconfigcontent", "updateNodeConfigContent");
 			put("globalstatus", "globalStatus");
 			put("getstatus", "getStatus");
+			put("gethosts", "getHosts");
 			put("startsearcherservice", "startSearcherService");
 			put("stopsearcherservice", "stopSearcherService");
 			put("starthttpreaderserviceservice", "startHttpReaderServiceService");
@@ -109,6 +111,8 @@ public final class NodeMonitor {
 			put("addresource", "addResource");
 			put("removeresource", "removeResource");
 			put("setinstancepipeconfig", "setInstancePipeConfig");
+			put("geterrorlog", "getErrorLog");
+			put("getsystemlog", "getSystemLog");
 		}
 	};
 
@@ -153,7 +157,7 @@ public final class NodeMonitor {
 			Common.LOG.error("Management Operations {} exception", RR.getParams().get("ac"), e);
 		}
 	}
- 
+
 	/**
 	 * Be care full,this will remove all relative instance
 	 * 
@@ -627,6 +631,7 @@ public final class NodeMonitor {
 		res.put("write_batch", GlobalParam.WRITE_BATCH);
 		res.put("proxy_ip", GlobalParam.PROXY_IP);
 		res.put("sys_config_path", GlobalParam.SYS_CONFIG_PATH);
+		res.put("log_store_path", GlobalParam.lOG_STORE_PATH);
 		res.put("datas_config_path", GlobalParam.DATAS_CONFIG_PATH);
 		res.put("plugin_path", GlobalParam.pluginPath);
 		res.put("health", health ? "正常" : "异常");
@@ -693,6 +698,17 @@ public final class NodeMonitor {
 			setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
 		}
 		setResponse(RESPONSE_STATUS.Success, null, res);
+	}
+
+	public void getHosts(Request rq, EFRequest RR) {
+		JSONArray dt = new JSONArray();
+		dt.add(GlobalParam.IP);
+		if (GlobalParam.DISTRIBUTE_RUN) {
+			for (EFNode node : GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodes()) {
+				dt.add(node.getIp());
+			}
+		}
+		setResponse(RESPONSE_STATUS.Success, null, dt);
 	}
 
 	/**
@@ -803,6 +819,23 @@ public final class NodeMonitor {
 			}
 		} else {
 			setResponse(RESPONSE_STATUS.DataErr, "script not set or script grammer is not correct!", null);
+		}
+	}
+
+	public void getErrorLog(Request rq, EFRequest RR) {
+		setResponse(RESPONSE_STATUS.Success, "", EFFileUtil.readText(GlobalParam.ERROR_lOG_STORE_PATH, "utf-8", false));
+	}
+
+	public void getSystemLog(Request rq, EFRequest RR) {
+		if (EFMonitorUtil.checkParams(this, RR, "lines")) {
+			String ip = RR.getStringParam("ip");
+			if (ip != "" && !ip.equals(GlobalParam.IP)) {
+				setResponse(RESPONSE_STATUS.Success, "",
+						GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodeLogs(ip, RR.getIntParam("lines")));
+			} else {
+				setResponse(RESPONSE_STATUS.Success, "",
+						EFFileUtil.readLastNLines(GlobalParam.lOG_STORE_PATH, RR.getIntParam("lines")));
+			}
 		}
 	}
 

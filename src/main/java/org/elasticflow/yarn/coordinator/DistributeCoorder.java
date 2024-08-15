@@ -157,6 +157,20 @@ public class DistributeCoorder {
 		return "";
 	}
 	
+	/**
+	 * 
+	 * @param ip     node ip
+	 * @param lines  return line nums
+	 * @return
+	 */
+	public String getNodeLogs(String ip,int lines) {
+		for (EFNode node : nodes) {
+			if (node.getIp().equals(ip))
+				return node.getEFMonitorCoord().getLogs(lines);
+		}
+		return "";
+	}
+	
 	public JSONObject getConnectionStatus(String poolName) {
 		JSONObject res = new JSONObject();
 		for (EFNode node : nodes) {

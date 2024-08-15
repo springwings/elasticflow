@@ -5,6 +5,7 @@ import java.util.HashMap;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.connection.EFConnectionPool;
+import org.elasticflow.util.EFFileUtil;
 import org.elasticflow.util.EFMonitorUtil;
 import org.elasticflow.util.SystemInfoUtil;
 import org.elasticflow.yarn.Resource;
@@ -40,6 +41,11 @@ public class EFMonitorCoordinator implements EFMonitorCoord {
 	@Override
 	public HashMap<String, JSONObject> getResourceStates() {
 		return EFMonitorUtil.getResourceStates();
+	}
+	
+	@Override
+	public String getLogs(int lines) {
+		return EFFileUtil.readLastNLines(GlobalParam.lOG_STORE_PATH, lines);
 	}
 	
 	@Override

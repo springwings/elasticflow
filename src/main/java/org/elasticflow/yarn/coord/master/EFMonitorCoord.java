@@ -25,4 +25,6 @@ public interface EFMonitorCoord extends Coordination{
 	/**warehouse resource status */
 	public HashMap<String, JSONObject> getResourceStates();
 	
+	public String getLogs(int lines);
+	
 }
