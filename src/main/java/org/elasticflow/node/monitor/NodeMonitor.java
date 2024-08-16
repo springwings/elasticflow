@@ -746,7 +746,7 @@ public final class NodeMonitor {
 		if (GlobalParam.DISTRIBUTE_RUN) {
 			dt.put("STATUS", GlobalParam.INSTANCE_COORDER.distributeCoorder().getClusterState());
 		} else {
-			dt.put("STATUS", "running");
+			dt.put("STATUS", "normal");
 		}
 		dt.put("VERSION", GlobalParam.VERSION);
 		dt.put("TASKS", Resource.tasks.size());
