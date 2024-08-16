@@ -263,8 +263,7 @@ public final class NodeMonitor {
 				}
 			} catch (EFException e) {
 				setResponse(RESPONSE_STATUS.DataErr, RR.getStringParam("instance") + e.getMessage(), null);
-			}
-			setResponse(RESPONSE_STATUS.Success, "", null);
+			} 
 		}
 	}
 
