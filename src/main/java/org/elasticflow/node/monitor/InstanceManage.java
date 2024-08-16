@@ -446,6 +446,7 @@ public class InstanceManage {
 			GlobalParam.INSTANCE_COORDER.removeInstance(instance, true);
 		}
 		try {
+			EFMonitorUtil.removeConfigInstance(instance);
 			EFMonitorUtil.saveNodeConfig();
 		} catch (Exception e) {
 			this.NM.setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
