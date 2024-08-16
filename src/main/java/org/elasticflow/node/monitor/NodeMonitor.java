@@ -345,7 +345,7 @@ public final class NodeMonitor {
 	public void updatePropertyFile(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "fname,content")) {
 			String fPath = GlobalParam.SYS_CONFIG_PATH + "/" + RR.getStringParam("fname");
-			EFDataStorer.setData(fPath, RR.getStringParam("content"));
+			EFDataStorer.setData(fPath, new String(decoder.decode(RR.getStringParam("content"))));
 		}
 	}
 
