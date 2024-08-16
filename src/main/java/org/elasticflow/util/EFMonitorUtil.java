@@ -125,15 +125,18 @@ public class EFMonitorUtil {
 		GlobalParam.SystemConfig.setProperty("instances", tmp);
 	}
 
-	public static void addInstanceToSystem(String instance, String level) {
+	public static boolean addInstanceToSystem(String instance, String level) {
 		String instanceString = instance + ":" + level;
+		boolean successload = false;
 		if (GlobalParam.DISTRIBUTE_RUN) {
-			GlobalParam.INSTANCE_COORDER.loadInstance(instanceString, false, false);
+			successload = GlobalParam.INSTANCE_COORDER.loadInstance(instanceString, false, false);
 			GlobalParam.INSTANCE_COORDER.distributeCoorder().pushInstanceToCluster(instanceString);
 		} else {
-			GlobalParam.INSTANCE_COORDER.loadInstance(instanceString, true, false);
+			successload = GlobalParam.INSTANCE_COORDER.loadInstance(instanceString, true, false);
 		}
-		addInstanceToConfig(instanceString);
+		if(successload)
+			addInstanceToConfig(instanceString);
+		return successload;
 	}
 
 	/**

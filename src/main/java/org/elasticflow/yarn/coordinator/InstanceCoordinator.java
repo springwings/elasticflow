@@ -111,9 +111,8 @@ public class InstanceCoordinator implements InstanceCoord {
 	}
 	
 	@Override
-	public void loadInstance(String instanceSettting,boolean createSchedule,boolean reset) {
+	public boolean loadInstance(String instanceSettting,boolean createSchedule,boolean reset) {
 		Resource.nodeConfig.loadConfig(instanceSettting, reset);
-		Resource.nodeConfig.loadInstanceConfig(instanceSettting);
 		String tmp[] = instanceSettting.split(":");
 		String instanceName = tmp[0];
 		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instanceName);		
@@ -121,9 +120,12 @@ public class InstanceCoordinator implements InstanceCoord {
 			if (instanceConfig.checkStatus())
 				EFNodeUtil.loadInstanceDatas(instanceConfig);
 			EFMonitorUtil.rebuildFlowGovern(instanceSettting, createSchedule);
+			return true;
 		} catch (EFException e) {
+			Resource.nodeConfig.unloadInstanceConfig(instanceSettting);
 			Common.LOG.error("load instance {} exception",instanceName,e);
 		}
+		return false;
 	}
 
 	@Override

@@ -487,11 +487,15 @@ public class InstanceManage {
 	 */
 	public void addInstanceToSystem(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this.NM, RR, "instance,level")) {
-			EFMonitorUtil.addInstanceToSystem(RR.getStringParam("instance"), RR.getStringParam("level"));
+			boolean successLoad = EFMonitorUtil.addInstanceToSystem(RR.getStringParam("instance"), RR.getStringParam("level"));
 			try {
-				EFMonitorUtil.saveNodeConfig();
-				this.NM.setResponse(RESPONSE_STATUS.Success,
-						RR.getStringParam("instance") + " add to node " + GlobalParam.IP + " success!", null);
+				if(successLoad) {
+					EFMonitorUtil.saveNodeConfig();
+					this.NM.setResponse(RESPONSE_STATUS.Success,
+							RR.getStringParam("instance") + " add to node " + GlobalParam.IP + " success!", null);
+				}else {
+					this.NM.setResponse(RESPONSE_STATUS.CodeException, "failed add instance!", null);
+				}				
 			} catch (Exception e) {
 				this.NM.setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
 			}

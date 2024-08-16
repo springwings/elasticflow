@@ -11,7 +11,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import com.alibaba.fastjson.JSONObject;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -23,13 +22,14 @@ import org.elasticflow.param.pipe.InstructionParam;
 import org.elasticflow.param.warehouse.WarehouseParam;
 import org.elasticflow.util.Common;
 import org.elasticflow.util.EFFileUtil;
-import org.elasticflow.util.EFNodeUtil;
 import org.elasticflow.util.instance.EFDataStorer;
 import org.elasticflow.yarn.Resource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * The EF node configuration control center.
@@ -77,16 +77,15 @@ public class NodeConfig {
 				this.instancesLocation.put(name, Integer.parseInt(strs[1]));
 			}
 		}	
-	}
+	} 
 
 	public void loadConfig(String instanceSettings, boolean reset) {
 		if (reset) {
 			this.reset();
 			parsePondFile(GlobalParam.DATAS_CONFIG_PATH + "/" + this.pondFile);
 			parseInstructionsFile(GlobalParam.DATAS_CONFIG_PATH + "/" + this.instructionsFile);
-		}
-		if (EFNodeUtil.isMaster())
-			loadInstanceConfig(instanceSettings);
+		} 
+		loadInstanceConfig(instanceSettings);
 	}
 
 	public void reset() {
@@ -95,6 +94,18 @@ public class NodeConfig {
 		this.searchConfigMap.clear();
 		this.warehouse.clear();
 		this.instructions.clear();
+	}
+	
+	public void unloadInstanceConfig(String instanceSettings) {
+		if (instanceSettings.trim().length() < 1)
+			return;
+		for (String inst : instanceSettings.split(",")) {
+			String[] strs = inst.split(":");
+			if (strs.length < 1)
+				continue; 
+			String name = strs[0].trim();
+			this.instanceConfigs.remove(name);
+		}
 	}
 
 	public void loadInstanceConfig(String instanceSettings) {
