@@ -254,9 +254,9 @@ public final class NodeMonitor {
 					if(successLoad) {
 						EFMonitorUtil.saveNodeConfig();
 						setResponse(RESPONSE_STATUS.Success,
-								RR.getStringParam("instancename") + " add to node " + GlobalParam.IP + " success!", null);
+								RR.getStringParam("instancename") + " push to system success!", null);
 					}else {
-						setResponse(RESPONSE_STATUS.CodeException, RR.getStringParam("instancename") + " add to node " + GlobalParam.IP + " failed!", null);
+						setResponse(RESPONSE_STATUS.CodeException, RR.getStringParam("instancename") + " push to system failed!", null);
 					}  
 				} catch (Exception e) { 
 					setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
