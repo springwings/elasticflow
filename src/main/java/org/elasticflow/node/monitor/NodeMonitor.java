@@ -248,13 +248,14 @@ public final class NodeMonitor {
 				if (RR.getStringParam("compute") != "") {
 					PipeXMLUtil.ModifyNode(xmlPath, "ComputerParam.param", "api", RR.getStringParam("compute"));
 					level += 2;
-				}
-				EFMonitorUtil.addInstanceToSystem(RR.getStringParam("instancename"), String.valueOf(level));
+				} 
 				try {
+					EFMonitorUtil.addInstanceToSystem(RR.getStringParam("instancename"), String.valueOf(level));
 					EFMonitorUtil.saveNodeConfig();
 					setResponse(RESPONSE_STATUS.Success,
 							RR.getStringParam("instancename") + " add to node " + GlobalParam.IP + " success!", null);
 				} catch (Exception e) {
+					EFMonitorUtil.removeConfigInstance(RR.getStringParam("instancename"));
 					setResponse(RESPONSE_STATUS.CodeException, e.getMessage(), null);
 				}
 			} catch (EFException e) {
