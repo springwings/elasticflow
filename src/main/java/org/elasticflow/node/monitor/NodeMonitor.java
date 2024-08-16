@@ -113,6 +113,8 @@ public final class NodeMonitor {
 			put("setinstancepipeconfig", "setInstancePipeConfig");
 			put("geterrorlog", "getErrorLog");
 			put("getsystemlog", "getSystemLog");
+			put("getpropertyfile", "getPropertyFile");
+			put("updatepropertyfile", "updatePropertyFile");
 		}
 	};
 
@@ -329,6 +331,21 @@ public final class NodeMonitor {
 
 			}
 			setResponse(RESPONSE_STATUS.Success, "", res);
+		}
+	}
+	
+	public void getPropertyFile(Request rq, EFRequest RR) {
+		if (EFMonitorUtil.checkParams(this, RR, "fname")) {
+			String fPath = GlobalParam.SYS_CONFIG_PATH + "/" + RR.getStringParam("fname");
+			byte[] content = EFDataStorer.getData(fPath, false);
+			setResponse(RESPONSE_STATUS.Success, "", new String(content));
+		}
+	}
+	
+	public void updatePropertyFile(Request rq, EFRequest RR) {
+		if (EFMonitorUtil.checkParams(this, RR, "fname,content")) {
+			String fPath = GlobalParam.SYS_CONFIG_PATH + "/" + RR.getStringParam("fname");
+			EFDataStorer.setData(fPath, RR.getStringParam("content"));
 		}
 	}
 
