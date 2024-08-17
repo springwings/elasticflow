@@ -27,4 +27,6 @@ public interface EFMonitorCoord extends Coordination{
 	
 	public String getLogs(int lines);
 	
+	public void resetErrorStates();
+	
 }

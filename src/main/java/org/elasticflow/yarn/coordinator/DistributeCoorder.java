@@ -138,13 +138,18 @@ public class DistributeCoorder {
 			n.pushResource();
 		});
 	}
-
+	
+	public void resetErrorStates() { 
+		nodes.stream()
+	     .filter(EFNode::isLive)
+	     .forEach(node -> node.getEFMonitorCoord().resetErrorStates());
+	}
+	
 	public HashMap<String, Object> getNodeStatus() {
 		HashMap<String, Object> res = new HashMap<>();
 		for (EFNode node : nodes) {
-			if(node.isLive()) {
+			if(node.isLive()) 
 				res.put(node.getIp(), node.getEFMonitorCoord().getNodeStatus());
-			}			
 		}
 		return res;
 	}

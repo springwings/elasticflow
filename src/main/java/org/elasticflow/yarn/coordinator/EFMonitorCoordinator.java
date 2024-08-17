@@ -52,6 +52,11 @@ public class EFMonitorCoordinator implements EFMonitorCoord {
 	public void resetPipeEndStatus(String instance, String L1seq) {
 		EFMonitorUtil.resetPipeEndStatus(instance, L1seq);
 	}
+	
+	@Override
+	public void resetErrorStates() {
+		Resource.resetErrorStates();
+	}
 
 	@Override
 	public HashMap<String, Object> getNodeStatus() {

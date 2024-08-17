@@ -115,6 +115,7 @@ public final class NodeMonitor {
 			put("getsystemlog", "getSystemLog");
 			put("getpropertyfile", "getPropertyFile");
 			put("updatepropertyfile", "updatePropertyFile");
+			put("clearsystemwarning", "clearSystemWarning");
 		}
 	};
 
@@ -298,7 +299,15 @@ public final class NodeMonitor {
 		}
 		setResponse(RESPONSE_STATUS.Success, "", res);
 	}
-
+	
+	public void clearSystemWarning(Request rq, EFRequest RR) {
+		if (GlobalParam.DISTRIBUTE_RUN) { 
+			GlobalParam.INSTANCE_COORDER.distributeCoorder().resetErrorStates(); 
+		} else { 
+			Resource.resetErrorStates(); 
+		}
+	}
+	
 	public void getResource(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "name")) {
 			JSONObject res = new JSONObject();
