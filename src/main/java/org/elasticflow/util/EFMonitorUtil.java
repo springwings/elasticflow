@@ -607,30 +607,37 @@ public class EFMonitorUtil {
 			res.append("</ul>");
 			res.append("<h1>3 错误日志跟踪</h1><pre class='track_error'>");
 			int buffernum = 0;
+			StringBuffer tmp = new StringBuffer();
 			try (BufferedReader br = new BufferedReader(new FileReader(GlobalParam.ERROR_lOG_STORE_PATH))) {
 				String line;
 				while ((line = br.readLine()) != null) {
 					if ((line.contains("ERROR") && line.contains(instance)) || buffernum > 0) {
 						if (line.contains("ERROR") && line.contains(instance)) {
-							if (buffernum < 3)
-								res.append("<hr/>");
+							if (buffernum < 3) {
+								tmp.setLength(0);
+								tmp.append("<hr/>");
+							} 
 							buffernum = 8;
 						} else {
 							if (line.contains("at ") || line.contains("Cause ") || line.contains("ERROR")
-									|| line.contains(" more") || line.contains("Exception")) {
+									|| line.contains("Exception")) {
 								buffernum = 2;
 							} else {
 								buffernum -= 1;
 							}
+							if(line.contains(" more") || (buffernum>0 && line.contains("[ERROR]")))
+								buffernum = 0;
 						}
-						res.append(line);
-						res.append("\n");
+						tmp.append(line);
+						tmp.append("\n");
 					}
 				}
-				res.append("</pre>");
+				
 			} catch (Exception e) {
 				Common.LOG.warn("read log error {}", e);
 			}
+			res.append(tmp);
+			res.append("</pre>");
 		}
 		return res.toString();
 	}
