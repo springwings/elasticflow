@@ -151,10 +151,10 @@ public abstract class Flow {
 				this.EFConn = Resource.EFConns.get(this.EFConnKey);
 			}
 		} else {
-			if (this.retainer.getAndIncrement() == 0 || this.EFConn == null) {
+			if (this.retainer.getAndIncrement() == 0 || this.EFConn == null || this.EFConn.status()==false) {
 				Resource.EFConns.put(this.EFConnKey,
 						EFConnectionPool.getConn(this.connectParams, this.poolName, acceptShareConn));
-				this.EFConn = Resource.EFConns.get(this.EFConnKey);
+				this.EFConn = Resource.EFConns.get(this.EFConnKey); 
 			}
 		}
 		return this.EFConn;
@@ -188,12 +188,12 @@ public abstract class Flow {
 			synchronized (this) {
 				if (clearConn)
 					retainer.set(0);
-
 				if (retainer.decrementAndGet() <= 0) {
 					EFConnectionPool.freeConn(this.EFConn, this.poolName, clearConn);
 					Resource.EFConns.put(this.EFConnKey, null);
 					this.EFConn = null;
 					retainer.set(0);
+					this.releaseCall();//Callback
 				} else {
 					log.info("instance {} connection {} retainer:{}", this.instanceConfig.getInstanceID(), this.EFConn,
 							retainer.get());
@@ -201,6 +201,9 @@ public abstract class Flow {
 			}
 		}
 	}
+	
+	/**Callback processing releases related resources*/
+	public abstract void releaseCall();
 
 	public EFConnectionSocket<?> GETSOCKET() {
 		return this.EFConn;

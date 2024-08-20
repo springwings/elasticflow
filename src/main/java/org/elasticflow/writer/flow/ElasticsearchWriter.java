@@ -206,7 +206,7 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 			try {
 				getESC().getBulkProcessor().flush();
 				Resource.resourceStates.get(getESC().getAlias()).put("status",RESOURCE_STATUS.Normal.name());
-			} catch (Exception e) {
+			} catch (Exception e) { 
 				Resource.resourceStates.get(getESC().getAlias()).put("status",RESOURCE_STATUS.Warning.name());
 				getESC().setBulkProcessor(null);
 				throw new EFException(e,Resource.nodeConfig.getWarehouse().get(getESC().getAlias()).getHost(),ELEVEL.Dispose);
@@ -241,7 +241,7 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 						,indexName,createIndexResponse.isAcknowledged());
 			}
 			return true;
-		} catch (Exception e) {
+		} catch (Exception e) { 
 			reconn = true;
 			throw new EFException(e,"es create index exception!",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);			
 		}
@@ -262,7 +262,7 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 			} else {
 				log.info("instance {} optimize success!",instance);
 			}
-		} catch (Exception e) {
+		} catch (Exception e) { 
 			log.error("es instance {} try to optimize exception",instance, e);
 		}
 	}
@@ -285,7 +285,7 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 					log.info("es instance {} remove index {} success!",instance,iName);
 				}
 			}
-		} catch (Exception e) {
+		} catch (Exception e) { 
 			log.error("es instance {} remove index {} exception",instance,iName, e);
 		}
 	}
@@ -294,7 +294,7 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 	public void setAlias(String instanceName, String storeId, String aliasName) {
 		String iName = TaskUtil.getStoreName(instanceName, storeId);
 		try {
-			log.info("trying to set Alias{} to index {}",aliasName,iName);
+			log.info("trying to set Alias {} to index {}",aliasName,iName);
 			IndicesAliasesRequest _IAR = new IndicesAliasesRequest();
 			AliasActions aliasAction = new AliasActions(AliasActions.Type.ADD).index(iName).alias(aliasName);
 			_IAR.addAliasAction(aliasAction);
@@ -302,7 +302,7 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 			if (response.isAcknowledged()) {
 				log.info("es instance {} success set alias {} to index {}.",instanceName,aliasName,iName);
 			}
-		} catch (Exception e) {
+		} catch (Exception e) { 
 			log.error("es instance {} set alias {} to index {} Exception.",instanceName,aliasName,iName, e);
 		}
 	}
@@ -419,7 +419,7 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 					}
 				}
 			}
-		} catch (Exception e) { 
+		} catch (Exception e) {  
 			throw new EFException(e,mainName+" abMechanism exception",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);	
 		}
 		return select;
@@ -458,5 +458,8 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 		}
 		return this.CONNS;
 	}
-
+	
+	public void releaseConn() {
+		this.CONNS = null;
+	} 
 }

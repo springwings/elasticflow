@@ -110,7 +110,12 @@ public class ElasticsearchConnection extends EFConnectionSocket<ElasticsearchCon
 
 	@Override
 	public boolean status() {
-		if (this.conn == null) {
+		if (this.conn == null) 
+			return false; 
+		try {
+		    if(this.conn.ping(RequestOptions.DEFAULT))
+		    	return true;
+		} catch (Exception e) { 
 			return false;
 		}
 		return true;

@@ -159,6 +159,9 @@ public abstract class WriterFlowSocket extends Flow {
 	 */
 	public void flush() throws EFException {}
 	
+	@Override
+	public void releaseCall() {}
+	
 	/**Optimize instance storage or index class information*/
 	public abstract void optimize(String instance, String storeId);
 }

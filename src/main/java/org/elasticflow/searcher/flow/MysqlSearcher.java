@@ -24,6 +24,5 @@ public class MysqlSearcher extends SearcherFlowSocket{
 			throws EFException {
 		// TODO Auto-generated method stub
 		
-	}
- 
+	} 
 }

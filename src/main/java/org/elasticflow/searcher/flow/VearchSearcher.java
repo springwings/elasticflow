@@ -121,5 +121,5 @@ public class VearchSearcher extends SearcherFlowSocket {
 		}  
 		this.formatResult(res, efResponse);
 	}
-
+ 
 }

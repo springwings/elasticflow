@@ -135,5 +135,5 @@ public class HbaseWriter extends WriterFlowSocket {
 	private Table getTable() throws EFException { 
 		return (Table) GETSOCKET().getConnection(END_TYPE.writer);
 	}
- 
+
 }

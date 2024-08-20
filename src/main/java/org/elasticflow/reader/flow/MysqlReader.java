@@ -186,5 +186,5 @@ public class MysqlReader extends ReaderFlowSocket{
 		}
 		this.dataPage.putDataBoundary(dataBoundary);
 		this.dataPage.putData(this.dataUnit);
-	} 
+	}
 }

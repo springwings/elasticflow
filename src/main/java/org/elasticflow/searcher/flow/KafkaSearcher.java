@@ -104,5 +104,5 @@ public final class KafkaSearcher extends SearcherFlowSocket {
 			consumer.close();
 		}
 		this.formatResult(res, efResponse);
-	}
+	} 
 }

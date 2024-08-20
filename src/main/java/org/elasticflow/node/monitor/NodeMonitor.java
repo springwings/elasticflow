@@ -627,7 +627,7 @@ public final class NodeMonitor {
 			}
 			res.put("memory_usage",
 					mem_use / (GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodes().size() + 1.));
-			res.put("cpu_usage", cpu_use / (GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodes().size() + 1.));
+			res.put("cpu_usage",Math.round(cpu_use / (GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodes().size() + 1.0)));
 			res.put("total_memory", total_mem);
 			res.put("error_ignore", error_ignore);
 			res.put("error_dispose", error_dispose);

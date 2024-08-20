@@ -70,9 +70,10 @@ public abstract class ReaderFlowSocket extends Flow{
 	/**
 	 * Transaction confirmation
 	 */
-	public void flush() throws EFException{
-		
-	}
+	public void flush() throws EFException{}
+	
+	@Override
+	public void releaseCall() {}
 	
 	/**
 	 * release reader flow

@@ -37,36 +37,33 @@ public class EFFileUtil {
 				return "";
 			fileHandler = new RandomAccessFile(file, "r");
 			long fileLength = fileHandler.length();
-			long filePointer = fileLength - 1;
-			fileHandler.seek(filePointer);
-
+			long filePointer = fileLength - 1; 
 			int lineCount = 0;
 			StringBuilder sb = new StringBuilder();
 			LinkedList<String> lines = new LinkedList<>();
 			while (filePointer >= 0) {
+				fileHandler.seek(filePointer);
 				char c = (char) fileHandler.read();
 				if (c == '\n') {
 					lineCount++;
 					if (sb.length() > 0) {
 						lines.addFirst(new String(sb.reverse().toString().getBytes("ISO-8859-1"), "utf-8"));
-						sb = new StringBuilder();
+						sb.setLength(0);
 					}
 					if (lineCount == n) 
 						break;
 				} else {
 					sb.append(c);
 				}
-				filePointer--;
-				fileHandler.seek(filePointer);
+				filePointer--; 
 				if (filePointer < 0 && sb.length() > 0) {
 					lines.addFirst(new String(sb.reverse().toString().getBytes("ISO-8859-1"), "utf-8"));
 				}
 			}
-			for (String line : lines) {
+			for (String line : lines) 
 				result.append(line).append("\n");
-			}
 		} catch (Exception e) {
-			return "";
+			Common.LOG.warn("read log failed!");
 		} finally {
 			if (fileHandler != null) {
 				try {

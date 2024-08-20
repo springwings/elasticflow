@@ -164,6 +164,6 @@ public class HbaseReader extends ReaderFlowSocket {
 			releaseConn(false,clearConn);
 		}
 		return dt;
-	} 
+	}
 
 }

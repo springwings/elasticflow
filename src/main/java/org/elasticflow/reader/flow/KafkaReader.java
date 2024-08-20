@@ -57,6 +57,8 @@ public class KafkaReader extends ReaderFlowSocket {
 	
 	public boolean isDiffEndType = true;
 	
+	public boolean isConnMonopoly = true; 
+	
 	ConcurrentLinkedDeque<String> pages = new ConcurrentLinkedDeque<>();
 
 	/**
@@ -74,16 +76,7 @@ public class KafkaReader extends ReaderFlowSocket {
 			}
 		}
 		return o;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public void initFlow() throws EFException {
-		this.isConnMonopoly = true;
-		this.isDiffEndType = true;
-		PREPARE(true, false);
-		this.conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader);
-	}
+	} 
 
 	@Override
 	public DataPage getPageData(final TaskCursor taskCursor, int pageSize) throws EFException {
@@ -146,14 +139,9 @@ public class KafkaReader extends ReaderFlowSocket {
 		if (!this.autoCommit) {
 			this.setCached(false);
 			try { 
-				conn.commitSync();
+				getESC().commitSync();
 			} catch (Exception e) {
-				releaseConn(false, true);
-				try {
-					this.initFlow();
-				} catch (EFException e1) {
-					throw e1;
-				}   
+				releaseConn(false, true); 
 				throw new EFException(e,"kafka data flush exception!");
 			}
 		}
@@ -162,7 +150,7 @@ public class KafkaReader extends ReaderFlowSocket {
 	@Override
 	public ConcurrentLinkedDeque<String> getDataPages(final TaskModel task, int pageSize) throws EFException {  
 		try {  
-			this.records = conn.poll(Duration.ofMillis(readms));
+			this.records = getESC().poll(Duration.ofMillis(readms));
 			int totalNum = this.records.count();
 			if (totalNum > 0) {
 				int pagenum = (int) Math.ceil((totalNum + 0.) / pageSize);
@@ -178,15 +166,23 @@ public class KafkaReader extends ReaderFlowSocket {
 			}
 		} catch (Exception e) { 
 			pages.clear();
-			releaseConn(false, true);
-			try {
-				this.initFlow();
-			} catch (EFException e1) {
-				throw e1;
-			}   
+			releaseConn(false, true); 
 			throw new EFException(e,task.getInstanceID()+ " Kafka Reader get page lists Exception!");
 		}
 		return pages;
 	}
+	
+	@SuppressWarnings("unchecked")
+	private synchronized KafkaConsumer<String, String> getESC() throws EFException{
+		if (this.conn == null) {
+			PREPARE(true, false);
+			this.conn = (KafkaConsumer<String, String>) GETSOCKET().getConnection(END_TYPE.reader);
+		} 
+		return this.conn;
+	}
 
+	@Override
+	public void releaseCall() {
+		this.conn = null;
+	}
 }

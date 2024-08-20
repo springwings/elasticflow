@@ -113,7 +113,7 @@ public class Pipe extends Instruction {
 			DataSetReader DSReader = DataSetReader.getInstance(dataPage);
 			long start = System.currentTimeMillis();
 			int num = 0;
-			if (DSReader.status()) {	
+			if (DSReader.status()) {
 				try {
 					while (DSReader.nextLine()) { 
 						writer.write(context.getInstanceConfig(),
@@ -143,16 +143,21 @@ public class Pipe extends Instruction {
 					writer.releaseConn(monopoly, freeConn); 
 				}
 			} else {
+				if(writer.isCached()) { 
+					context.getReader().flush();
+					writer.flush(); 
+					writer.setCached(false);
+				} 
 				writer.releaseConn(monopoly, freeConn); 
 				pstate.setInfo(instance+" DSReader status is false!");
-				pstate.setStatus(false);
+				pstate.setStatus(false); 
 			}
 		}else if (dataPage.getData().size()==0 && writer.isCached()) {
-			//Prevent status from never being submitted
-			writer.setCached(false);
-			writer.PREPARE(monopoly, false);
+			//Prevent status from never being submitted 
 			context.getReader().flush();
+			writer.PREPARE(monopoly, false); 
 			writer.flush(); 
+			writer.setCached(false);
 			writer.releaseConn(monopoly, freeConn);  
 			return pstate;
 		} 

@@ -186,5 +186,6 @@ public class OracleReader extends ReaderFlowSocket{
 		}
 		this.dataPage.putDataBoundary(dataBoundary);
 		this.dataPage.putData(this.dataUnit);
-	} 
+	}
+
 }

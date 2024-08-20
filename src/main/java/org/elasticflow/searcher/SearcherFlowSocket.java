@@ -33,9 +33,10 @@ public abstract class SearcherFlowSocket extends Flow {
 	}
 
 	@Override
-	public void initFlow() {
-		// auto invoke in flow prepare
-	}
+	public void initFlow() {}
+	
+	@Override
+	public void releaseCall() {}
 	
 	
 	/**

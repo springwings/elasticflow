@@ -139,6 +139,5 @@ public class KafkaWriter extends WriterFlowSocket {
 	@Override
 	public boolean storePositionExists(String storeName) {
 		return true;
-	}
-
+	}  
 }
