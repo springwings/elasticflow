@@ -192,8 +192,7 @@ public class VearchWriter extends WriterFlowSocket {
 	@Override
 	public void flush() throws EFException {
 		if (this.isBatch) { 
-			synchronized (this) {
-				this.setCached(false);
+			synchronized (this) { 
 				if (this.DATAS.size() > 0) {
 					VearchConnector conn = (VearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 					try {

@@ -136,8 +136,7 @@ public class KafkaReader extends ReaderFlowSocket {
 	 */
 	@Override
 	public void flush() throws EFException {
-		if (!this.autoCommit) {
-			this.setCached(false);
+		if (!this.autoCommit) { 
 			try { 
 				getESC().commitSync();
 			} catch (Exception e) {

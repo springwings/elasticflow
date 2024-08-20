@@ -143,8 +143,11 @@ public class Pipe extends Instruction {
 					writer.releaseConn(monopoly, freeConn); 
 				}
 			} else {
-				if(writer.isCached()) { 
+				if(context.getReader().isCached()) {
 					context.getReader().flush();
+					context.getReader().setCached(false); 
+				} 
+				if(writer.isCached()) {
 					writer.flush(); 
 					writer.setCached(false);
 				} 
@@ -152,13 +155,18 @@ public class Pipe extends Instruction {
 				pstate.setInfo(instance+" DSReader status is false!");
 				pstate.setStatus(false); 
 			}
-		}else if (dataPage.getData().size()==0 && writer.isCached()) {
+		}else if (dataPage.getData().size()==0) {
 			//Prevent status from never being submitted 
-			context.getReader().flush();
-			writer.PREPARE(monopoly, false); 
-			writer.flush(); 
-			writer.setCached(false);
-			writer.releaseConn(monopoly, freeConn);  
+			if(context.getReader().isCached()) {
+				context.getReader().flush();
+				context.getReader().setCached(false);
+			} 
+			if(writer.isCached()) {
+				writer.PREPARE(monopoly, false); 
+				writer.flush(); 
+				writer.setCached(false);
+				writer.releaseConn(monopoly, freeConn);  
+			} 
 			return pstate;
 		} 
 		return pstate;

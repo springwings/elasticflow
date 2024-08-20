@@ -201,8 +201,7 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 
 	@Override
 	public void flush() throws EFException {
-		if (this.isBatch) {
-			this.setCached(false);
+		if (this.isBatch) { 
 			try {
 				getESC().getBulkProcessor().flush();
 				Resource.resourceStates.get(getESC().getAlias()).put("status",RESOURCE_STATUS.Normal.name());

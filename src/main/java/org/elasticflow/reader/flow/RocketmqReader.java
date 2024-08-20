@@ -126,8 +126,7 @@ public class RocketmqReader extends ReaderFlowSocket {
 	 */
 	@Override
 	public void flush() throws EFException {
-		if (!this.autoCommit) {
-			this.setCached(false);
+		if (!this.autoCommit) { 
 			try {
 				conn.commitSync();
 			} catch (Exception e) {
