@@ -74,6 +74,19 @@ public class EFFileUtil {
 		}
 		return result.toString().trim();
 	}
+	
+	/**
+	 * clear file content
+	 * @param filePath
+	 * @return
+	 */
+	public static boolean clearFile(String filePath) {
+		try (FileOutputStream fos = new FileOutputStream(filePath)) { 
+			return true;
+        } catch (Exception e) {
+            return false;
+        }
+	}
 
 	public static String readText(String filePath, String encoding, boolean create) {
 		File file = new File(filePath);

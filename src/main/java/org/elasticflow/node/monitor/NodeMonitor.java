@@ -112,6 +112,7 @@ public final class NodeMonitor {
 			put("removeresource", "removeResource");
 			put("setinstancepipeconfig", "setInstancePipeConfig");
 			put("geterrorlog", "getErrorLog");
+			put("clearlog", "clearLog");
 			put("getsystemlog", "getSystemLog");
 			put("getpropertyfile", "getPropertyFile");
 			put("updatepropertyfile", "updatePropertyFile");
@@ -853,6 +854,27 @@ public final class NodeMonitor {
 
 	public void getErrorLog(Request rq, EFRequest RR) {
 		setResponse(RESPONSE_STATUS.Success, "", EFFileUtil.readText(GlobalParam.ERROR_lOG_STORE_PATH, "utf-8", false));
+	}
+	
+	public void clearLog(Request rq, EFRequest RR) {
+		if (EFMonitorUtil.checkParams(this, RR, "errorlogfile")) { 
+			String ip = RR.getStringParam("ip");
+			boolean state = true;
+			if (ip != "" && !ip.equals(GlobalParam.IP)) {
+				state = GlobalParam.INSTANCE_COORDER.distributeCoorder().clearNodeLogs(ip, RR.getBooleanParam("errorLogFile"));
+			}else {
+				if(RR.getBooleanParam("errorlogfile")) {
+					state = EFFileUtil.clearFile(GlobalParam.ERROR_lOG_STORE_PATH);
+				}else {
+					state = EFFileUtil.clearFile(GlobalParam.lOG_STORE_PATH);
+				}
+			} 
+			if(state) {
+				setResponse(RESPONSE_STATUS.Success, "", "");
+			}else {
+				setResponse(RESPONSE_STATUS.CodeException, "", "");
+			}
+		}  
 	}
 
 	public void getSystemLog(Request rq, EFRequest RR) {

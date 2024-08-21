@@ -176,6 +176,14 @@ public class DistributeCoorder {
 		return "";
 	}
 	
+	public boolean clearNodeLogs(String ip,boolean errorLogFile) {
+		for (EFNode node : nodes) {
+			if (node.getIp().equals(ip))
+				return node.getEFMonitorCoord().clearLogs(errorLogFile);
+		}
+		return true;
+	}
+	
 	public JSONObject getConnectionStatus(String poolName) {
 		JSONObject res = new JSONObject();
 		for (EFNode node : nodes) {

@@ -49,6 +49,15 @@ public class EFMonitorCoordinator implements EFMonitorCoord {
 	}
 	
 	@Override
+	public boolean clearLogs(boolean errorLogFile) {
+		if(errorLogFile) {
+			return EFFileUtil.clearFile(GlobalParam.ERROR_lOG_STORE_PATH);
+		}else {
+			return EFFileUtil.clearFile(GlobalParam.lOG_STORE_PATH);
+		}
+	}
+	
+	@Override
 	public void resetPipeEndStatus(String instance, String L1seq) {
 		EFMonitorUtil.resetPipeEndStatus(instance, L1seq);
 	}
