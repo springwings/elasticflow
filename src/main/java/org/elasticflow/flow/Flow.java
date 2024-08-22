@@ -32,7 +32,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Flow {
 
-	/** EF abstract connection */
+	/** EF abstract connection,
+	 * Connection class object instance */
 	protected volatile EFConnectionSocket<?> EFConn;
 
 	/** database level */
@@ -157,7 +158,7 @@ public abstract class Flow {
 				this.EFConn = Resource.EFConns.get(this.EFConnKey); 
 			}
 		}
-		return this.EFConn;
+		return this.EFConn; //
 	}
 
 	public InstanceConfig getInstanceConfig() {

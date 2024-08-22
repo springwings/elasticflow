@@ -20,8 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Pond operation Instruction sets 
- * It is an instruction code,Can only interpret
+ * Pond operation Instruction sets It is an instruction code,Can only interpret
  * Maintenance of Management Data Pools
  * 
  * @author chengwen
@@ -34,6 +33,7 @@ public class Pond extends Instruction {
 
 	/**
 	 * Create service instance storage location
+	 * 
 	 * @param context: context object
 	 * @param args     : [String mainName,String storeId]
 	 */
@@ -50,7 +50,7 @@ public class Pond extends Instruction {
 				String storeId = String.valueOf(args[1]);
 				state = context.getWriter().create(instanceID, storeId, context.getInstanceConfig());
 			} catch (Exception e) {
-				log.error("instruction.set.Pond.createStorePosition run instance {} exception",instanceID, e);
+				log.error("instruction.set.Pond.createStorePosition run instance {} exception", instanceID, e);
 			} finally {
 				context.getWriter().releaseConn(false, state ? false : true);
 			}
@@ -60,6 +60,7 @@ public class Pond extends Instruction {
 
 	/**
 	 * Select and delete service instance content based on ID
+	 * 
 	 * @param context: context object
 	 * @param args     : [String storeId,String keyColumn,String keyVal]
 	 */
@@ -72,12 +73,12 @@ public class Pond extends Instruction {
 		context.getWriter().PREPARE(false, false);
 		if (context.getWriter().connStatus()) {
 			String storeId = String.valueOf(args[0]);
-			try {				
+			try {
 				String keyColumn = String.valueOf(args[1]);
 				String keyVal = String.valueOf(args[2]);
 				context.getWriter().delete(context.getInstanceConfig().getInstanceID(), storeId, keyColumn, keyVal);
 			} catch (Exception e) {
-				log.error("instruction.set.Pond.deleteByKey store id {} exception",storeId, e);
+				log.error("instruction.set.Pond.deleteByKey store id {} exception", storeId, e);
 				freeConn = true;
 			} finally {
 				context.getWriter().releaseConn(false, freeConn);
@@ -86,8 +87,7 @@ public class Pond extends Instruction {
 	}
 
 	/**
-	 * Batch service instance content through query
-	 * is a empty method
+	 * Batch service instance content through query is a empty method
 	 */
 	public static void deleteByQuery(Context context, Object[] args) {
 		if (!isValid(1, args)) {
@@ -99,6 +99,7 @@ public class Pond extends Instruction {
 
 	/**
 	 * Optimize service instances
+	 * 
 	 * @param context: context object
 	 * @param args     : [String mainName, String storeId]
 	 */
@@ -121,6 +122,7 @@ public class Pond extends Instruction {
 
 	/**
 	 * Switching service instances
+	 * 
 	 * @param context: context object
 	 * @param args:    [String instance, String seq, String storeId]
 	 */
@@ -134,9 +136,11 @@ public class Pond extends Instruction {
 		instanceProcessId = TaskUtil.getInstanceProcessId(String.valueOf(args[0]), String.valueOf(args[1]));
 		storeId = String.valueOf(args[2]);
 		int waittime = 0;
-		if (GlobalParam.TASK_COORDER.checkFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT, TASK_FLOW_SINGAL.Running)) {
-			GlobalParam.TASK_COORDER.setFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(), TASK_FLOW_SINGAL.Blank,
-					TASK_FLOW_SINGAL.Termination, context.getInstanceConfig().getPipeParams().showInfoLog());
+		if (GlobalParam.TASK_COORDER.checkFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT,
+				TASK_FLOW_SINGAL.Running)) {
+			GlobalParam.TASK_COORDER.setFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(),
+					TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Termination,
+					context.getInstanceConfig().getPipeParams().showInfoLog());
 			while (!GlobalParam.TASK_COORDER.checkFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT,
 					TASK_FLOW_SINGAL.Ready)) {
 				try {
@@ -150,31 +154,31 @@ public class Pond extends Instruction {
 				}
 			}
 		}
-		GlobalParam.TASK_COORDER.setFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(), TASK_FLOW_SINGAL.Blank,
-				TASK_FLOW_SINGAL.Termination, context.getInstanceConfig().getPipeParams().showInfoLog());
-		context.getWriter().PREPARE(false, false);
-		if (context.getWriter().connStatus()) {
-			try {
-				if (context.getInstanceConfig().getPipeParams().getWriteMechanism() == MECHANISM.AB) {
-					if (storeId.equals("a")) {
-						context.getWriter().optimize(instanceProcessId, "a");
-						removeId = "b";
-					} else {
-						context.getWriter().optimize(instanceProcessId, "b");
-						removeId = "a";
-					}
-					context.getWriter().removeShard(instanceProcessId, removeId);
+		GlobalParam.TASK_COORDER.setFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(),
+				TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Termination,
+				context.getInstanceConfig().getPipeParams().showInfoLog()); 
+		try {
+			context.getWriter().PREPARE(false, false);
+			if (context.getInstanceConfig().getPipeParams().getWriteMechanism() == MECHANISM.AB) {
+				if (storeId.equals("a")) {
+					context.getWriter().optimize(instanceProcessId, "a");
+					removeId = "b";
+				} else {
+					context.getWriter().optimize(instanceProcessId, "b");
+					removeId = "a";
 				}
-				context.getWriter().setAlias(instanceProcessId, storeId, context.getInstanceConfig().getAlias());
-				return true;
-			} catch (Exception e) {
-				log.error("instruction.set.Pond.switchInstance instance {} exception",instanceProcessId, e);
-			} finally {
-				GlobalParam.TASK_COORDER.saveTaskInfo(String.valueOf(args[0]), String.valueOf(args[1]), storeId, false);
-				GlobalParam.TASK_COORDER.setFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(),
-						TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Ready, context.getInstanceConfig().getPipeParams().showInfoLog());
-				context.getWriter().releaseConn(false, true);
+				context.getWriter().removeShard(instanceProcessId, removeId);
 			}
+			context.getWriter().setAlias(instanceProcessId, storeId, context.getInstanceConfig().getAlias());
+			return true;
+		} catch (Exception e) {
+			log.error("instruction.set.Pond.switchInstance instance {} exception", instanceProcessId, e);
+		} finally {
+			GlobalParam.TASK_COORDER.saveTaskInfo(String.valueOf(args[0]), String.valueOf(args[1]), storeId, false);
+			GlobalParam.TASK_COORDER.setFlowSingal(instanceProcessId, "", GlobalParam.JOB_TYPE.INCREMENT.name(),
+					TASK_FLOW_SINGAL.Blank, TASK_FLOW_SINGAL.Ready,
+					context.getInstanceConfig().getPipeParams().showInfoLog());
+			context.getWriter().releaseConn(false, true);
 		}
 		return false;
 	}
@@ -192,20 +196,18 @@ public class Pond extends Instruction {
 		} else {
 			String mainName = String.valueOf(args[0]);
 			boolean isIncrement = (boolean) args[1];
-			context.getWriter().PREPARE(false, false);
 			boolean release = false;
-			if (context.getWriter().connStatus()) {
-				try {
-					storeId = context.getWriter().getNewStoreId(mainName, isIncrement, context.getInstanceConfig());
-				} catch (Exception e) {
-					release = true;
-					throw new EFException(e,
-							"instance " + mainName + " failed to obtain storage location from "
-									+ context.getInstanceConfig().getPipeParams().getWriteTo(),
-							ELEVEL.Termination, ETYPE.RESOURCE_ERROR);
-				} finally {
-					context.getWriter().releaseConn(false, release);
-				}
+			context.getWriter().PREPARE(false, false);
+			try {
+				storeId = context.getWriter().getNewStoreId(mainName, isIncrement, context.getInstanceConfig());
+			} catch (Exception e) {
+				release = true;
+				throw new EFException(e,
+						"instance " + mainName + " failed to obtain storage location from "
+								+ context.getInstanceConfig().getPipeParams().getWriteTo(),
+						ELEVEL.Termination, ETYPE.RESOURCE_ERROR);
+			} finally {
+				context.getWriter().releaseConn(false, release);
 			}
 		}
 		return storeId;

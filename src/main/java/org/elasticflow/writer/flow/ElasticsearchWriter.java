@@ -64,7 +64,7 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 
 	protected ElasticsearchConnector CONNS;
 
-	private boolean reconn = false;
+	private boolean reconn = true;
 	
 	private int maxNumSegments = 5;
 	
@@ -451,14 +451,15 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 	}
 	
 	private synchronized ElasticsearchConnector getESC() throws EFException {
-		if (this.CONNS == null || reconn) {
+		if (GETSOCKET() == null || this.CONNS==null || reconn) {
 			reconn = false;
 			this.CONNS = (ElasticsearchConnector) GETSOCKET().getConnection(END_TYPE.writer);
 		}
 		return this.CONNS;
-	}
-	
-	public void releaseConn() {
-		this.CONNS = null;
 	} 
+	
+	@Override
+	public void releaseCall() {
+		this.CONNS = null;
+	}
 }
