@@ -38,8 +38,8 @@ public class ElasticsearchConnection extends EFConnectionSocket<ElasticsearchCon
 
 	private final static int BULK_BUFFER = 1000;
 	private final static int BULK_SIZE = 30;
-	private final static int BULK_FLUSH_SECONDS = 3;
-	private final static int BULK_CONCURRENT = 1;
+	private final static int BULK_FLUSH_SECONDS = 30;
+	private final static int BULK_CONCURRENT = 2;
 
 	private CredentialsProvider credentialsProvider;
 
