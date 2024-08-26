@@ -236,13 +236,13 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 				_CIR.mapping(this.getSettingMap(instanceConfig));
 				CreateIndexResponse createIndexResponse = getESC().getClient().indices().create(_CIR,
 						RequestOptions.DEFAULT);
-				log.info("create new instance store position {} response isAcknowledged:{}"
+				log.info("ElasticSearch create new instance store position {} response isAcknowledged:{}"
 						,indexName,createIndexResponse.isAcknowledged());
 			}
 			return true;
 		} catch (Exception e) { 
 			reconn = true;
-			throw new EFException(e,"es create index exception!",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);			
+			throw new EFException(e,"ElasticSearch create index exception!",ELEVEL.Termination,ETYPE.RESOURCE_ERROR);			
 		}
 	}
 
@@ -257,12 +257,12 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 
 			int failed_cnt = response.getFailedShards();
 			if (failed_cnt > 0) {
-				log.warn("instance {} optimize failed,Failed Shards:",instance,failed_cnt);
+				log.warn("ElasticSearch instance {} optimize failed,Failed Shards:",instance,failed_cnt);
 			} else {
-				log.info("instance {} optimize success!",instance);
+				log.info("ElasticSearch instance {} optimize success!",instance);
 			}
 		} catch (Exception e) { 
-			log.error("es instance {} try to optimize exception",instance, e);
+			log.error("ElasticSearch instance {} try to optimize exception",instance, e);
 		}
 	}
 
@@ -275,17 +275,17 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 			GetIndexRequest _GIR = new GetIndexRequest(iName);
 			boolean exists = getESC().getClient().indices().exists(_GIR, RequestOptions.DEFAULT);
 			if (!exists) {
-				log.info("es instance {} index {} not exist.",instance,iName);
+				log.info("ElasticSearch instance {} index {} not exist.",instance,iName);
 			} else {
 				DeleteIndexRequest _DIR = new DeleteIndexRequest(iName);
 				AcknowledgedResponse deleteResponse = getESC().getClient().indices().delete(_DIR,
 						RequestOptions.DEFAULT);
 				if (deleteResponse.isAcknowledged()) {
-					log.info("es instance {} remove index {} success!",instance,iName);
+					log.info("ElasticSearch instance {} remove index {} success!",instance,iName);
 				}
 			}
 		} catch (Exception e) { 
-			log.error("es instance {} remove index {} exception",instance,iName, e);
+			log.error("ElasticSearch instance {} remove index {} exception",instance,iName, e);
 		}
 	}
 
@@ -299,10 +299,10 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 			_IAR.addAliasAction(aliasAction);
 			AcknowledgedResponse response = getESC().getClient().indices().updateAliases(_IAR, RequestOptions.DEFAULT);
 			if (response.isAcknowledged()) {
-				log.info("es instance {} success set alias {} to index {}.",instanceName,aliasName,iName);
+				log.info("ElasticSearch instance {} success set alias {} to index {}.",instanceName,aliasName,iName);
 			}
 		} catch (Exception e) { 
-			log.error("es instance {} set alias {} to index {} Exception.",instanceName,aliasName,iName, e);
+			log.error("ElasticSearch instance {} set alias {} to index {} Exception.",instanceName,aliasName,iName, e);
 		}
 	}
 

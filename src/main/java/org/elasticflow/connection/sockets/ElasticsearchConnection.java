@@ -10,6 +10,7 @@ import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.connection.EFConnectionSocket;
 import org.elasticflow.param.pipe.ConnectParams;
 import org.elasticflow.param.warehouse.WarehouseParam;
+import org.elasticsearch.action.bulk.BackoffPolicy;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -37,9 +38,9 @@ public class ElasticsearchConnection extends EFConnectionSocket<ElasticsearchCon
 	private ElasticsearchConnector ESC = new ElasticsearchConnector();
 
 	private final static int BULK_BUFFER = 1000;
-	private final static int BULK_SIZE = 30;
-	private final static int BULK_FLUSH_SECONDS = 30;
-	private final static int BULK_CONCURRENT = 2;
+	private final static int BULK_SIZE = 8;
+	private final static int BULK_FLUSH_SECONDS = 10;
+	private final static int BULK_CONCURRENT = 3;
 
 	private CredentialsProvider credentialsProvider;
 
@@ -82,9 +83,17 @@ public class ElasticsearchConnection extends EFConnectionSocket<ElasticsearchCon
 									httpClientBuilder.disableAuthCaching();
 									return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 								}
-							}));
+							}).setRequestConfigCallback(requestConfigBuilder -> 
+				            requestConfigBuilder
+			                .setConnectTimeout(6000)  
+			                .setSocketTimeout(90000)  
+			                .setConnectionRequestTimeout(60000)));
 				}else {
-					this.conn = new RestHighLevelClient(RestClient.builder(httpHosts));
+					this.conn = new RestHighLevelClient(RestClient.builder(httpHosts).setRequestConfigCallback(requestConfigBuilder -> 
+		            requestConfigBuilder
+	                .setConnectTimeout(6000)  
+	                .setSocketTimeout(90000)  
+	                .setConnectionRequestTimeout(60000)));
 				}
 				this.ESC.setClient(this.conn,wp.getAlias());
 			}
@@ -164,6 +173,7 @@ public class ElasticsearchConnection extends EFConnectionSocket<ElasticsearchCon
 						})
 				.setBulkActions(BULK_BUFFER).setBulkSize(new ByteSizeValue(BULK_SIZE, ByteSizeUnit.MB))
 				.setFlushInterval(TimeValue.timeValueSeconds(BULK_FLUSH_SECONDS)).setConcurrentRequests(BULK_CONCURRENT)
+				.setBackoffPolicy(BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(200), 2)) 
 				.build();
 
 	}
