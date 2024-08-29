@@ -287,7 +287,15 @@ public class InstanceConfig {
 
 		}
 	}
-
+	
+	private void addField(String name,EFField field,Map<String, EFField> container) {
+		if(container.containsKey(name)) {
+			Common.LOG.warn("{} duplicate field {} definitions",this.instanceID,name);
+		}else {
+			container.put(name, field);
+		}
+	}
+	
 	private void parseNode(NodeList paramlist, String type, Class<?> c) throws Exception {
 		if (paramlist != null && paramlist.getLength() > 0) {
 			for (int i = 0; i < paramlist.getLength(); i++) {
@@ -296,7 +304,7 @@ public class InstanceConfig {
 					switch (type) {
 					case "writeFields":
 						EFField wf = (EFField) Common.getXmlObj(param, c);
-						writeFields.put(wf.getName(), wf);
+						addField(wf.getName(),wf,writeFields);
 						break;
 					case "searchFields":
 						EFField sf = (EFField) Common.getXmlObj(param, c);
@@ -307,8 +315,8 @@ public class InstanceConfig {
 						readFields.put(rf.getName(), rf);
 						break;
 					case "computeFields":
-						EFField cf = (EFField) Common.getXmlObj(param, c);
-						computeFields.put(cf.getName(), cf);
+						EFField cf = (EFField) Common.getXmlObj(param, c); 
+						addField(cf.getName(),cf,computeFields);
 						break;
 					case "computerParam":
 						Common.getXmlParam(computerParams, param, c);

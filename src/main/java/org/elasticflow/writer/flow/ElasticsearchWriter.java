@@ -15,8 +15,8 @@ import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.config.GlobalParam.END_TYPE;
 import org.elasticflow.config.GlobalParam.ETYPE;
 import org.elasticflow.config.GlobalParam.RESOURCE_STATUS;
-import org.elasticflow.connection.sockets.ElasticsearchConnector;
 import org.elasticflow.config.InstanceConfig;
+import org.elasticflow.connection.sockets.ElasticsearchConnector;
 import org.elasticflow.field.EFField;
 import org.elasticflow.model.reader.PipeDataUnit;
 import org.elasticflow.param.end.WriterParam;
@@ -41,7 +41,6 @@ import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -52,6 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * ElasticSearch Writer Manager
  * 
@@ -222,18 +222,17 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 		String indexName = TaskUtil.getStoreName(instance, storeId);
 		try {		 
 			if (!this.storePositionExists(indexName)) {
-				CreateIndexRequest _CIR = new CreateIndexRequest(indexName); 
-				if(instanceConfig.getWriterParams().getStorageStructure() != null && 
-						instanceConfig.getWriterParams().getStorageStructure().size()>0) {
-					_CIR.source(instanceConfig.getWriterParams().getStorageStructure().toJSONString(), XContentType.JSON);
-				}else if(instanceConfig.getWriterParams().getStorageStructure().containsKey("number_of_shards")) {
-					_CIR.settings(Settings.builder()
-							.put("index.number_of_shards",
-									instanceConfig.getWriterParams().getStorageStructure().getInteger("number_of_shards"))
-							.put("index.number_of_replicas",
-									instanceConfig.getWriterParams().getStorageStructure().getInteger("number_of_replicas"))); 
-				}		 
-				_CIR.mapping(this.getSettingMap(instanceConfig));
+				CreateIndexRequest _CIR = new CreateIndexRequest(indexName);  
+				ObjectMapper objectMapper = new ObjectMapper();
+				String mappingJson = objectMapper.writeValueAsString(this.getSettingMap(instanceConfig));
+				if(instanceConfig.getWriterParams().getStorageStructure().size()>0) {
+					JSONObject jo = instanceConfig.getWriterParams().getStorageStructure();
+					JSONObject defineObject = JSONObject.parseObject(mappingJson).getJSONObject("properties");
+					defineObject.putAll(jo.getJSONObject("mappings").getJSONObject("properties"));
+					jo.getJSONObject("mappings").put("properties", defineObject);
+					mappingJson = jo.toJSONString();
+				} 
+				_CIR.source(mappingJson, XContentType.JSON);	 
 				CreateIndexResponse createIndexResponse = getESC().getClient().indices().create(_CIR,
 						RequestOptions.DEFAULT);
 				log.info("ElasticSearch create new instance store position {} response isAcknowledged:{}"

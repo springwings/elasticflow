@@ -37,8 +37,8 @@ public class PipeDataUnit implements Cloneable{
 	
 	/**
 	 * Virtual pre-write to process data fields using the write side definition format
-	 * @param transParams
-	 * @return
+	 * @param transParams	Field processing definition
+	 * @return	PipeDataUnit
 	 * @throws EFException
 	 */
 	public PipeDataUnit virtualWrite(Map<String, EFField> transParams) throws EFException {
@@ -55,14 +55,35 @@ public class PipeDataUnit implements Cloneable{
 		return u;		
 	}
 	
+	public static void addFieldValue(String k,Object v,Map<String, EFField> transParams,PipeDataUnit pdu,boolean trans) throws EFException{
+		if(trans) {
+			EFField param = transParams.get(k);
+			if (param != null){			
+				if (param.getHandler()!=null) {
+					param.getHandler().handle(pdu,param,v,transParams); 	
+					pdu.data.put(param.getAlias(),
+							Common.parseFieldValue(pdu.data.get(param.getName()),param,FIELD_PARSE_TYPE.valueOf));
+				}else {
+					pdu.data.put(param.getAlias(),Common.parseFieldValue(v,param,FIELD_PARSE_TYPE.valueOf));
+				}
+			}else{ 
+				if(transParams.size()==0)
+					pdu.data.put(k,v);
+			}
+		}else {
+			addFieldValue(k, v, transParams, pdu);
+		}
+	}
+	
 	/**
 	 * If handler exists, cross domain processing is first used by handler; 
 	 * Finally, use paramtype process data
-	 * @param k
-	 * @param v
-	 * @param transParams
-	 * @param pdu
+	 * @param k		field name
+	 * @param v		field value
+	 * @param transParams	Field processing definition
+	 * @param pdu	Storage object of data
 	 * @throws EFException
+	 * @return void
 	 */
 	public static void addFieldValue(String k,Object v,Map<String, EFField> transParams,PipeDataUnit pdu) throws EFException{
 		EFField param = transParams.get(k);  

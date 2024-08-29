@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -76,18 +77,20 @@ public final class Common {
 			add(KEY_PARAM.facet_count.toString());
 			add(KEY_PARAM.detail.toString());
 		}
-	}; 
-	
+	};
+
 	/**
 	 * Logger Wrapper
+	 * 
 	 * @param message
 	 * @param args
 	 */
-	public static void systemLog(String message, Object... args) {		
-		Common.LOG.error(message,args);
-		if(EFNodeUtil.isSlave())//slave node write log to master
-			ReportStatus.systemLog("["+GlobalParam.IP+"] "+message, args);
+	public static void systemLog(String message, Object... args) {
+		Common.LOG.error(message, args);
+		if (EFNodeUtil.isSlave())// slave node write log to master
+			ReportStatus.systemLog("[" + GlobalParam.IP + "] " + message, args);
 	}
+
 	/**
 	 * Convert the first letter to uppercase or lowercase
 	 * 
@@ -165,24 +168,25 @@ public final class Common {
 			if (param.getNodeName().equals(fieldName)) {
 				value = param.getTextContent();
 			}
-			setConfigObj(o, c, fieldName, value,null);
+			setConfigObj(o, c, fieldName, value, null);
 		}
 		return o;
 	}
-	
+
 	public static void setConfigObj(Object obj, Class<?> c, Element element) throws Exception {
 		String fieldName = element.getElementsByTagName("name").item(0).getTextContent();
 		String value = element.getElementsByTagName("value").item(0).getTextContent();
 		String extval = null;
-		if (element.getElementsByTagName("dsl").item(0)!=null)
+		if (element.getElementsByTagName("dsl").item(0) != null)
 			extval = element.getElementsByTagName("dsl").item(0).getTextContent();
-		if (element.getElementsByTagName("type").item(0)!=null)
-			extval = element.getElementsByTagName("type").item(0).getTextContent(); 
-		setConfigObj(obj, c, fieldName, value,extval);
+		if (element.getElementsByTagName("type").item(0) != null)
+			extval = element.getElementsByTagName("type").item(0).getTextContent();
+		setConfigObj(obj, c, fieldName, value, extval);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void setConfigObj(Object obj, Class<?> c, String fieldName,String value,String dsl) throws Exception {
+	public static void setConfigObj(Object obj, Class<?> c, String fieldName, String value, String dsl)
+			throws Exception {
 		if (obj instanceof HashMap) {
 			((HashMap<String, String>) obj).put(fieldName, value);
 		} else {
@@ -190,10 +194,10 @@ public final class Common {
 				String setMethodName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 				try {
 					Method setMethod;
-					if(dsl!=null) {
-						setMethod = c.getMethod(setMethodName, String.class,String.class);
-						setMethod.invoke(obj, value,dsl);
-					}else {
+					if (dsl != null) {
+						setMethod = c.getMethod(setMethodName, String.class, String.class);
+						setMethod.invoke(obj, value, dsl);
+					} else {
 						setMethod = c.getMethod(setMethodName, new Class[] { String.class });
 						setMethod.invoke(obj, new Object[] { value });
 					}
@@ -518,6 +522,14 @@ public final class Common {
 		Resource.threadPools.execute(() -> {
 			System.exit(0);
 		});
+	}
+	
+	/**
+	 * Generate a globally unique ID
+	 * @return
+	 */
+	public static synchronized String genUid() {
+		return String.valueOf(GlobalParam.NODEID) + String.valueOf(getNow()) + String.valueOf(new Random().nextInt());
 	}
 
 }
