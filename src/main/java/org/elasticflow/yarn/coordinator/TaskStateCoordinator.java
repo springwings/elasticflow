@@ -119,7 +119,7 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 						EFMonitorUtil.getPipeEndStatus(instance, L1seq));
 			}
 			EFFileUtil.createAndSave(Resource.flowStates.get(instance).toJSONString(),
-					EFFileUtil.getInstancePath(instance)[2]);
+					EFFileUtil.getInstancePath(instance)[3]);
 		}
 	}
 

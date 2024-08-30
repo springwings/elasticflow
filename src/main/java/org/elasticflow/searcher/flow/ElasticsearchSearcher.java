@@ -109,7 +109,7 @@ public final class ElasticsearchSearcher extends SearcherFlowSocket {
 		res.setTotalHit(searchHits.getTotalHits().value);
 		SearchHit[] hits = searchHits.getHits();
 
-		for (SearchHit SH : hits) {
+		for (SearchHit SH : hits) { 
 			Map<String, DocumentField> fieldMap = SH.getFields();
 			ResponseDataUnit u = ResponseDataUnit.getInstance();
 			u.addObject(GlobalParam.RESPONSE_SCORE, SH.getScore());
@@ -135,7 +135,7 @@ public final class ElasticsearchSearcher extends SearcherFlowSocket {
 			}
 			if (searcherModel.isShowQueryInfo()) {
 				u.addObject(GlobalParam.RESPONSE_EXPLAINS, SH.getExplanation().toString().replace("", ""));
-			}
+			} 
 			res.getUnitSet().add(u);
 		}
 
@@ -165,7 +165,12 @@ public final class ElasticsearchSearcher extends SearcherFlowSocket {
 			List<String> returnFields, String instance, SearcherResult res) throws Exception {
 		SearchRequest searchRequest = new SearchRequest(instance);
 		ESQueryParser ESP = new ESQueryParser();
-		ESP.parseQuery(instanceConfig, searcherModel);
+		if(searcherModel.getCustomQuery()!=null) {
+			ESP.getSSB().query(org.elasticsearch.index.query.QueryBuilders.wrapperQuery(searcherModel.getCustomQuery().toJSONString()));
+		}else {
+			ESP.parseQuery(instanceConfig, searcherModel);
+		}
+		
 		ESP.parseFilter(instanceConfig, searcherModel);
 		ESP.customQueryParse(instanceConfig, searcherModel);
 		ESP.getSSB().size(searcherModel.getCount());

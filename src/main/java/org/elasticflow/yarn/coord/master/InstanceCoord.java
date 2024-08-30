@@ -28,8 +28,14 @@ public interface InstanceCoord extends Coordination{
 	
 	public void reloadResource();
 	
-	public int onlineTasksNum();
-	/**send instance data to slave*/
+	public int onlineTasksNum(); 
+	/**
+	 * send instance data to slave
+	 * @param content0	increment job info
+	 * @param content1	task.xml info
+	 * @param content2	stat info
+	 * @param instance
+	 */
 	public void sendInstanceData(String content0,String content1,String content2, String instance);
 	
 	public boolean loadInstance(String instanceSettting,boolean createSchedule,boolean reset);

@@ -111,7 +111,7 @@ public class FlowCenter{
 		try {
 			String[] L1seqs = TaskUtil.getL1seqs(instanceConfig);  
 			if(!Resource.flowStates.containsKey(instanceID)) {
-				String content = EFFileUtil.readText(EFFileUtil.getInstancePath(instanceID)[2], GlobalParam.ENCODING, true);
+				String content = EFFileUtil.readText(EFFileUtil.getInstancePath(instanceID)[3], GlobalParam.ENCODING, true);
 				if (content!=null && content.length()>0) {
 					Resource.flowStates.put(instanceID, JSONObject.parseObject(content));
 				}else {

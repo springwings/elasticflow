@@ -124,7 +124,7 @@ public class NodeConfig {
 			if (this.instanceConfigs.containsKey(name)) {
 				nconfig = this.instanceConfigs.get(name);
 			} else {
-				nconfig = new InstanceConfig(EFFileUtil.getInstancePath(name)[1], instanceType);
+				nconfig = new InstanceConfig(EFFileUtil.getInstancePath(name)[2], instanceType);
 				this.instanceConfigs.put(name, nconfig);
 			}
 			nconfig.init();

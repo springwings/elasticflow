@@ -19,12 +19,18 @@ import org.elasticflow.config.GlobalParam;
  * @date 2018-11-07 14:12
  */
 public class EFFileUtil {
-
+	
+	/**
+	 * get instance data path
+	 * @param instance	instance id
+	 * @return	list: [0 increment info path, 1 full info path, 2 task.xml path, 3 stat path]
+	 */
 	public static String[] getInstancePath(String instance) {
-		String[] dt = new String[3];
+		String[] dt = new String[4];
 		dt[0] = GlobalParam.INSTANCE_PATH + "/" + instance + "/" + GlobalParam.JOB_INCREMENTINFO_PATH;
-		dt[1] = GlobalParam.INSTANCE_PATH + "/" + instance + "/task.xml";
-		dt[2] = GlobalParam.INSTANCE_PATH + "/" + instance + "/stat";
+		dt[1] = GlobalParam.INSTANCE_PATH + "/" + instance + "/" + GlobalParam.JOB_FULLINFO_PATH;
+		dt[2] = GlobalParam.INSTANCE_PATH + "/" + instance + "/task.xml";
+		dt[3] = GlobalParam.INSTANCE_PATH + "/" + instance + "/stat";
 		return dt;
 	}
 
@@ -340,6 +346,15 @@ public class EFFileUtil {
 			}
 		}
 		if (dir.delete()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public static boolean deleteFile(String fpath) {
+		File _f = new File(fpath); 
+		if (_f.delete()) {
 			return true;
 		} else {
 			return false;

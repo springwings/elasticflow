@@ -177,8 +177,8 @@ public class EFNode {
 		String[] paths = EFFileUtil.getInstancePath(strs[0]);
 		this.masterInstanceCoorder.stopInstance(strs[0]);
 		this.instanceCoord.sendInstanceData(EFFileUtil.readText(paths[0], GlobalParam.ENCODING, true),
-				EFFileUtil.readText(paths[1], GlobalParam.ENCODING, true),
-				EFFileUtil.readText(paths[2], GlobalParam.ENCODING, true), strs[0]);
+				EFFileUtil.readText(paths[2], GlobalParam.ENCODING, true),
+				EFFileUtil.readText(paths[3], GlobalParam.ENCODING, true), strs[0]);
 		this.masterInstanceCoorder.resumeInstance(strs[0]);
 		this.instanceCoord.loadInstance(instanceSetting, true,false);
 	}

@@ -106,8 +106,8 @@ public class InstanceCoordinator implements InstanceCoord {
 	public void sendInstanceData(String content0, String content1,String content2,String instance) {
 		String[] paths = EFFileUtil.getInstancePath(instance);
 		sendData(content0, paths[0],false);
-		sendData(content1, paths[1],false);
-		sendData(content2, paths[2],false);
+		sendData(content1, paths[2],false);
+		sendData(content2, paths[3],false);
 	}
 	
 	@Override

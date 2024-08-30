@@ -576,6 +576,9 @@ public class InstanceManage {
 					if (runType.equals("-1"))
 						runType = String
 								.valueOf(Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType());
+					EFFileUtil.deleteFile(EFFileUtil.getInstancePath(instance)[0]);
+					EFFileUtil.deleteFile(EFFileUtil.getInstancePath(instance)[1]);
+					EFFileUtil.deleteFile(EFFileUtil.getInstancePath(instance)[3]);
 					EFMonitorUtil.reloadInstance(instance, reset, runType);
 					this.NM.setResponse(RESPONSE_STATUS.Success,
 							RR.getStringParam("instance") + " reload instance settings success!", null);
@@ -618,7 +621,7 @@ public class InstanceManage {
 					}
 				}
 				EFFileUtil.createAndSave(Resource.flowStates.get(instance).toJSONString(),
-						EFFileUtil.getInstancePath(instance)[2]);
+						EFFileUtil.getInstancePath(instance)[3]);
 				this.NM.setResponse(RESPONSE_STATUS.Success, RR.getStringParam("instance") + " reset Success!", null);
 			} catch (Exception e) {
 				this.NM.setResponse(RESPONSE_STATUS.DataErr, RR.getStringParam("instance") + " not exists!", null);
