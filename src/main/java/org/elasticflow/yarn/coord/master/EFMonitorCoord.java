@@ -24,8 +24,8 @@ public interface EFMonitorCoord extends Coordination{
 	public void resetPipeEndStatus(String instance, String L1seq);
 	/**warehouse resource status */
 	public HashMap<String, JSONObject> getResourceStates();
-	
-	public String getLogs(int lines);
+	/**lines:return line nums,kw:Filter keywords*/
+	public String getLogs(int lines,String kw);
 	
 	public boolean clearLogs(boolean errorLogFile);
 	

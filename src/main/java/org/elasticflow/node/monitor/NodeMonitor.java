@@ -880,12 +880,13 @@ public final class NodeMonitor {
 	public void getSystemLog(Request rq, EFRequest RR) {
 		if (EFMonitorUtil.checkParams(this, RR, "lines")) {
 			String ip = RR.getStringParam("ip");
+			String kw = RR.getStringParam("kw");
 			if (ip != "" && !ip.equals(GlobalParam.IP)) {
 				setResponse(RESPONSE_STATUS.Success, "",
-						GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodeLogs(ip, RR.getIntParam("lines")));
+						GlobalParam.INSTANCE_COORDER.distributeCoorder().getNodeLogs(ip, RR.getIntParam("lines"),kw));
 			} else {
 				setResponse(RESPONSE_STATUS.Success, "",
-						EFFileUtil.readLastNLines(GlobalParam.lOG_STORE_PATH, RR.getIntParam("lines")));
+						EFFileUtil.readLastNLines(GlobalParam.lOG_STORE_PATH, RR.getIntParam("lines"),kw));
 			}
 		}
 	}

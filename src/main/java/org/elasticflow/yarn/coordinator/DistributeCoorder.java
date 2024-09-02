@@ -166,12 +166,13 @@ public class DistributeCoorder {
 	 * 
 	 * @param ip     node ip
 	 * @param lines  return line nums
+	 * @param kw	 Filter keywords, if KW is empty, do not filter
 	 * @return
 	 */
-	public String getNodeLogs(String ip,int lines) {
+	public String getNodeLogs(String ip,int lines,String kw) {
 		for (EFNode node : nodes) {
 			if (node.getIp().equals(ip))
-				return node.getEFMonitorCoord().getLogs(lines);
+				return node.getEFMonitorCoord().getLogs(lines,kw);
 		}
 		return "";
 	}

@@ -44,8 +44,8 @@ public class EFMonitorCoordinator implements EFMonitorCoord {
 	}
 	
 	@Override
-	public String getLogs(int lines) {
-		return EFFileUtil.readLastNLines(GlobalParam.lOG_STORE_PATH, lines);
+	public String getLogs(int lines,String kw) {
+		return EFFileUtil.readLastNLines(GlobalParam.lOG_STORE_PATH, lines,kw);
 	}
 	
 	@Override

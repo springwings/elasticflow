@@ -34,7 +34,7 @@ public class EFFileUtil {
 		return dt;
 	}
 
-	public static String readLastNLines(String filePath, int n) {
+	public static String readLastNLines(String filePath, int n,String kw) {
 		StringBuilder result = new StringBuilder();
 		RandomAccessFile fileHandler = null;
 		try {
@@ -66,8 +66,11 @@ public class EFFileUtil {
 					lines.addFirst(new String(sb.reverse().toString().getBytes("ISO-8859-1"), "utf-8"));
 				}
 			}
-			for (String line : lines) 
-				result.append(line).append("\n");
+			for (String line : lines) {
+				if(kw=="" || (kw!="" && line.contains(kw)))
+					result.append(line).append("\n");
+			}
+				
 		} catch (Exception e) {
 			Common.LOG.warn("read log failed!");
 		} finally {
