@@ -226,11 +226,13 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 				ObjectMapper objectMapper = new ObjectMapper();
 				String mappingJson = objectMapper.writeValueAsString(this.getSettingMap(instanceConfig));
 				if(instanceConfig.getWriterParams().getStorageStructure().size()>0) {
-					JSONObject jo = instanceConfig.getWriterParams().getStorageStructure();
-					JSONObject defineObject = JSONObject.parseObject(mappingJson).getJSONObject("properties");
-					defineObject.putAll(jo.getJSONObject("mappings").getJSONObject("properties"));
-					jo.getJSONObject("mappings").put("properties", defineObject);
-					mappingJson = jo.toJSONString();
+					JSONObject jo = instanceConfig.getWriterParams().getStorageStructure(); 
+					if(jo.containsKey("mappings")) {
+						JSONObject defineObject = JSONObject.parseObject(mappingJson).getJSONObject("properties");
+						defineObject.putAll(jo.getJSONObject("mappings").getJSONObject("properties"));  
+						jo.getJSONObject("mappings").put("properties", defineObject);
+						mappingJson = jo.toJSONString();
+					} 
 				} 
 				_CIR.source(mappingJson, XContentType.JSON);	 
 				CreateIndexResponse createIndexResponse = getESC().getClient().indices().create(_CIR,
