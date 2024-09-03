@@ -19,36 +19,38 @@ import com.alibaba.fastjson.JSONObject;
 
 /**
  * Convert query to vearch search statement
+ * 
  * @author chengwen
  * @version 5.x
  * @date 2022-10-26 09:23
  * @modify 2023-05-28 09:19
  */
-public class VearchQueryParser implements QueryParser{
-	
+public class VearchQueryParser implements QueryParser {
+
 	JSONObject searchObj;
-	
+
 	public boolean feature_search = false;
-	
+
 	public VearchQueryParser() {
 		searchObj = new JSONObject();
 	}
-	
+
 	public JSONObject getSearchObj() {
 		return this.searchObj;
 	}
- 
+
 	/**
-	 * Parameter parsing as query parser 
+	 * Parameter parsing as query parser
+	 * 
 	 * @param instanceConfig
-	 * @param model 
-	 */ 
+	 * @param model
+	 */
 	@Override
-	public void parseQuery(InstanceConfig instanceConfig,SearcherModel<?> model) {
+	public void parseQuery(InstanceConfig instanceConfig, SearcherModel<?> model) {
 		Map<String, Object> paramMap = model.efRequest.getParams();
 		Set<Entry<String, Object>> entries = paramMap.entrySet();
 		Iterator<Entry<String, Object>> iter = entries.iterator();
-		JSONObject query = new JSONObject(); 
+		JSONObject query = new JSONObject();
 		JSONArray _jarr = new JSONArray();
 		JSONArray filters = new JSONArray();
 		JSONObject _feature = new JSONObject();
@@ -59,77 +61,87 @@ public class VearchQueryParser implements QueryParser{
 			if (k.equals(GlobalParam.KEY_PARAM.__storeid.name())) {
 				model.storeId = String.valueOf(v);
 			} else {
-				if (instanceConfig.getSearchFields().containsKey(k)) { 
-					if(instanceConfig.getSearchFields().get(k).getIndextype().toLowerCase().equals("vector")) {
-						_feature.put("field",instanceConfig.getSearchFields().get(k).getAlias());
-						_feature.put("feature",v); 
-					}else {
+				if (instanceConfig.getSearchFields().containsKey(k) || instanceConfig.getWriteFields().containsKey(k)) {
+					if (instanceConfig.getSearchFields().get(k).getIndextype().toLowerCase().equals("vector")
+							|| instanceConfig.getWriteFields().get(k).getIndextype().toLowerCase().equals("vector")) {
+						if (instanceConfig.getSearchFields().containsKey(k)) {
+							_feature.put("field", instanceConfig.getWriteFields().get(k).getAlias());
+						} else {
+
+						}
+						_feature.put("feature", v);
+					} else {
 						JSONObject filter = new JSONObject();
-						filter.put(instanceConfig.getSearchFields().get(k).getAlias(),v);
+						if (instanceConfig.getSearchFields().containsKey(k)) {
+							filter.put(instanceConfig.getSearchFields().get(k).getAlias(), v);
+						} else {
+							filter.put(instanceConfig.getWriteFields().get(k).getAlias(), v);
+						}
 						JSONObject row = new JSONObject();
 						row.put("term", filter);
 						filters.add(row);
 					}
 				} else {
-					switch(k.toLowerCase()) {
+					switch (k.toLowerCase()) {
 					case "max_score":
-						_feature.put("max_score",Float.parseFloat(String.valueOf(v))); 
-						break; 
+						_feature.put("max_score", Float.parseFloat(String.valueOf(v)));
+						break;
 					case "min_score":
-						_feature.put("min_score",Float.parseFloat(String.valueOf(v))); 
-						break; 
+						_feature.put("min_score", Float.parseFloat(String.valueOf(v)));
+						break;
 					case "boost":
-						_feature.put("boost",Float.parseFloat(String.valueOf(v))); 
-						break;  
+						_feature.put("boost", Float.parseFloat(String.valueOf(v)));
+						break;
 					case "ids":
 					case "id":
 						query.put("ids", String.valueOf(v).split(","));
-						break; 
-					} 
+						break;
+					}
 				}
 			}
 		}
-		
-		if(model.storeId==null && instanceConfig.getPipeParams().getWriteMechanism().equals(MECHANISM.Time)) {
+
+		if (model.storeId == null && instanceConfig.getPipeParams().getWriteMechanism().equals(MECHANISM.Time)) {
 			model.storeId = String.valueOf(Common.getNowZero());
 		}
-		if(!_feature.containsKey("feature") && query.size()==0) {
-			Iterator<Map.Entry<String,EFField>> iter_tmp =  instanceConfig.getSearchFields().entrySet().iterator();
+		if (!_feature.containsKey("feature") && query.size() == 0) {
+			Iterator<Map.Entry<String, EFField>> iter_tmp = instanceConfig.getSearchFields().entrySet().iterator();
 			while (iter_tmp.hasNext()) {
 				Entry<String, EFField> entry = iter_tmp.next();
-				if(entry.getValue().getIndextype().toLowerCase().equals("vector")) {					
-					_feature.put("field",entry.getValue().getAlias());
+				if (entry.getValue().getIndextype().toLowerCase().equals("vector")) {
+					_feature.put("field", entry.getValue().getAlias());
 					int size = (JSON.parseObject(entry.getValue().getDsl())).getIntValue("dimension");
 					float[] vec = new float[size];
 					for (int i = 0; i < size; i++) {
 						vec[i] = 0.F;
-			        }
-					_feature.put("feature",vec); 
-					_feature.put("max_score",Float.MAX_VALUE); 
+					}
+					_feature.put("feature", vec);
+					_feature.put("max_score", Float.MAX_VALUE);
 					break;
-				}				
+				}
 			}
 		}
-		if (_feature.size()>0) {
+		if (_feature.size() > 0) {
 			_jarr.add(_feature);
-			query.put("sum",_jarr);	
+			query.put("sum", _jarr);
 			feature_search = true;
-		} 
-		if(filters.size()>0)
+		}
+		if (filters.size() > 0)
 			query.put("filter", filters);
 		searchObj.put("size", model.getCount());
-		searchObj.put("query", query);		
+		searchObj.put("query", query);
 	}
- 
+
 	/**
-	 * Parameter parsing as filter parser  
+	 * Parameter parsing as filter parser
+	 * 
 	 * @param instanceConfig
-	 * @param model  
+	 * @param model
 	 * @throws EFException
 	 */
 	@Override
-	public void parseFilter(InstanceConfig instanceConfig,SearcherModel<?> model) throws EFException {
-		 
+	public void parseFilter(InstanceConfig instanceConfig, SearcherModel<?> model) throws EFException {
+
 	}
-	 
+
 }

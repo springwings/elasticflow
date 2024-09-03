@@ -284,10 +284,10 @@ public class VearchConnector {
 		
 		for (int j = 0; j < ja.size(); j++) {
 			JSONObject jo = JSONObject.parseObject(ja.getString(j));
-			if (Integer.valueOf(String.valueOf(jo.get("status"))) != 200) {
+			if (jo.containsKey("status")==false || Integer.valueOf(String.valueOf(jo.get("status"))) != 200) {
 				if(GlobalParam.DEBUG)
 					log.warn("vearch {} write data:{}",table,dt.toString());
-				throw new EFException("Vearch write data to "+ table +" exception," + jo.get("error"));
+				throw new EFException("Vearch write data to "+ table +" exception," + jo.toString());
 			}				
 		}
 	}
