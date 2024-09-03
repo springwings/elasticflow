@@ -25,7 +25,7 @@ import org.elasticsearch.index.query.DisMaxQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.QueryStringQueryBuilder;
+import org.elasticsearch.index.query.WrapperQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
@@ -122,8 +122,9 @@ public class ESQueryParser implements QueryParser {
 							bquery.must(bbtmp);
 						}
 					} else {
-						QueryStringQueryBuilder _q = QueryBuilders.queryStringQuery(String.valueOf(value));
-						bquery.must(_q);
+						WrapperQueryBuilder _q = QueryBuilders.wrapperQuery(String.valueOf(value));
+						SSB.query(_q);
+//						bquery.must(_q);
 					}
 					continue;
 				}
@@ -170,7 +171,7 @@ public class ESQueryParser implements QueryParser {
 			} 
 			SSB.highlighter(HLB); 
 		}
-		SSB.query(bquery);
+//		SSB.query(bquery);
 	}
 
 	/**

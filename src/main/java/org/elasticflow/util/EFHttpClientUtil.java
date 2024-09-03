@@ -1,3 +1,10 @@
+/*
+ * Copyright ElasticFlow B.V. and/or licensed to ElasticFlow B.V. under one
+ * or more contributor license agreements. Licensed under the ElasticFlow License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
+ * Side Public License, v 1.
+ */
 package org.elasticflow.util;
 
 import java.io.IOException;
@@ -43,10 +50,10 @@ public class EFHttpClientUtil {
 	public static PoolingHttpClientConnectionManager connectionPools;
 	public static CloseableHttpClient httpClient;
 	public static final String DEFAULT_CONTENT_TYPE = "application/json;charset=UTF-8";
-	private static final int DEFAUL_TIME_OUT = 30000;
+	private static final int DEFAUL_TIME_OUT = 90; //second
 	private static final int count = 10;
 	private static final int totalCount = 1200;
-	private static final int Http_Default_Keep_Time = 30000;
+	private static final int Http_Default_Keep_Time = 180; //second
 	private static Logger logger = LoggerFactory.getLogger(EFHttpClientUtil.class);
 
 	static {
@@ -56,8 +63,7 @@ public class EFHttpClientUtil {
 		httpClient = HttpClients.custom().setKeepAliveStrategy(new ConnectionKeepAliveStrategy() {
 			public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
 				HeaderElementIterator it = new BasicHeaderElementIterator(
-						response.headerIterator(HTTP.CONN_KEEP_ALIVE));
-				int keepTime = Http_Default_Keep_Time;
+						response.headerIterator(HTTP.CONN_KEEP_ALIVE)); 
 				while (it.hasNext()) {
 					HeaderElement he = it.nextElement();
 					String param = he.getName();
@@ -71,7 +77,7 @@ public class EFHttpClientUtil {
 						}
 					}
 				}
-				return keepTime * 1000L;
+				return Http_Default_Keep_Time * 1000L;
 			}
 		}).setConnectionManager(connectionPools).build();
 	}
@@ -80,10 +86,15 @@ public class EFHttpClientUtil {
 	 * Content-Type：application/json，Accept：application/json is used by default when
 	 * executing HTTP post requests
 	 * 
-	 * @param uri  Request-URI
-	 * @param data request data
+	 * @param uri		Request-URI
+	 * @param data		request data
+	 * @param timeout	second
 	 * @return
 	 */
+	public static EFHttpResponse process(String uri, String data,int timeout) {
+		return process(uri, data, HttpPost.METHOD_NAME, DEFAULT_CONTENT_TYPE, timeout, true);
+	}
+	
 	public static EFHttpResponse process(String uri, String data) {
 		return process(uri, data, HttpPost.METHOD_NAME, DEFAULT_CONTENT_TYPE, DEFAUL_TIME_OUT, true);
 	}
@@ -146,14 +157,13 @@ public class EFHttpClientUtil {
 	 * @param uri
 	 * @param methodName
 	 * @param contentType
-	 * @param timeout
+	 * @param timeout second
 	 * @return
 	 */
 	private static HttpRequestBase getRequest(String uri, String methodName, String contentType, int timeout) {
 		HttpRequestBase method = null;
-		if (timeout <= 0) {
+		if (timeout <= 0) 
 			timeout = DEFAUL_TIME_OUT;
-		}
 		RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeout * 1000)
 				.setConnectTimeout(timeout * 1000).setConnectionRequestTimeout(timeout * 1000)
 				.setExpectContinueEnabled(false).build();
