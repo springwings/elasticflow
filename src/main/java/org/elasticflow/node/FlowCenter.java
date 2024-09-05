@@ -57,6 +57,7 @@ public class FlowCenter{
 	 * @return
 	 */
 	public boolean runInstanceNow(String instance,String type,boolean asyn){ 
+
 		InstanceConfig instanceConfig = Resource.nodeConfig.getInstanceConfigs().get(instance); 
 		boolean state = true; 
 		try {
@@ -80,7 +81,7 @@ public class FlowCenter{
 				}else {
 					if (GlobalParam.TASK_COORDER.checkFlowSingal(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,TASK_FLOW_SINGAL.Ready))
 						state = EFPipeUtil.jobAction(TaskUtil.getInstanceProcessId(instance, L1seq), GlobalParam.JOB_TYPE.INCREMENT.name(), "start") && state;
-						if(state && asyn) {
+						if(state && !asyn) {
 							Thread.sleep(500);//waiting to start job
 							while(GlobalParam.TASK_COORDER.checkFlowSingal(instance, L1seq,GlobalParam.JOB_TYPE.INCREMENT,TASK_FLOW_SINGAL.Ready)==false)
 								Thread.sleep(500);

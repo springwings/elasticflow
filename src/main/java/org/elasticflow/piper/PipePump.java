@@ -350,7 +350,7 @@ public final class PipePump extends Instruction implements Serializable {
 						destination, pagedata);
 				log.info(TaskUtil.formatLog("onepage", task.getJobType().name() + " Compute", task.getInstanceProcessId(), storeId,
 						task.getL2seq(), dataSize, datab, scanStamp, Common.getNow() - start,
-						",progress:" + progressPos + "/" + pageNum));
+						", output Docs:"+pagedata.getData().size()+", progress:" + progressPos + "/" + pageNum));
 			} 
 			//Refresh every page
 			pstate = (PipererState) CPU.RUN(getID(), "Pipe", "writeDataSet", false, task.getJobType().name(),

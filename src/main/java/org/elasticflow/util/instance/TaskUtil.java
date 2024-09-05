@@ -153,7 +153,7 @@ public class TaskUtil {
 	 * @param instanceName
 	 * @param storeId
 	 * @param L2seq    table seq
-	 * @param total
+	 * @param processTotal
 	 * @param dataBoundary
 	 * @param lastUpdateTime
 	 * @param useTime
@@ -161,7 +161,7 @@ public class TaskUtil {
 	 * @return
 	 */
 	public static String formatLog(String types, String heads, String instanceName, String storeId, String L2seq,
-			int total, String dataBoundary, String lastUpdateTime, long useTime, String moreinfo) {
+			int processTotal, String dataBoundary, String lastUpdateTime, long useTime, String moreinfo) {
 		String useTimeFormat = Common.seconds2time(useTime);
 		if (L2seq.length() < 1)
 			L2seq = "None";
@@ -176,7 +176,7 @@ public class TaskUtil {
 		switch (types) {
 		case "complete":
 			sb.append("[Complete " + heads + " " + instanceName + "_" + storeId + "] " + (" L2seq:" + L2seq));
-			sb.append(" Docs:" + total);
+			sb.append(" Docs:" + processTotal);
 			sb.append(" scanAt:" + update);
 			sb.append(" useTime:" + useTimeFormat);
 			break;
@@ -187,7 +187,7 @@ public class TaskUtil {
 		default:
 			sb.append("[ -- " + heads + " " + instanceName + "_" + storeId + "] " + (" L2seq:" + L2seq));
 			sb.append(
-					" Docs:" + total + (total == 0 || dataBoundary.length() < 1 ? "" : " dataBoundary:" + dataBoundary)
+					" Docs:" + processTotal + (processTotal == 0 || dataBoundary.length() < 1 ? "" : " dataBoundary:" + dataBoundary)
 							+ " scanAt:" + update + " useTime:" + useTimeFormat);
 			break;
 		}

@@ -232,7 +232,10 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 						defineObject.putAll(jo.getJSONObject("mappings").getJSONObject("properties"));  
 						jo.getJSONObject("mappings").put("properties", defineObject);
 						mappingJson = jo.toJSONString();
-					} 
+					} else if(jo.containsKey("settings")) { 
+						jo.put("mappings", JSONObject.parseObject(mappingJson));
+						mappingJson = jo.toJSONString();
+					}
 				} 
 				_CIR.source(mappingJson, XContentType.JSON);	 
 				CreateIndexResponse createIndexResponse = getESC().getClient().indices().create(_CIR,

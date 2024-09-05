@@ -75,18 +75,16 @@ public class TaskStateCoordinator implements TaskStateCoord, Serializable {
 	 * @param removeState
 	 * @return boolean,lock status
 	 */
-	public boolean setFlowSingal(String instance, String L1seq, String type, TASK_FLOW_SINGAL needState,
+	public synchronized boolean setFlowSingal(String instance, String L1seq, String type, TASK_FLOW_SINGAL needState,
 			TASK_FLOW_SINGAL setState, boolean showLog) {
-		synchronized (FLOW_CONTROL_SINGAL.get(instance, L1seq, type)) {
-			if (needState.equals(TASK_FLOW_SINGAL.Blank)
-					|| (FLOW_CONTROL_SINGAL.get(instance, L1seq, type).get() == needState.getVal())) {
-				FLOW_CONTROL_SINGAL.get(instance, L1seq, type).set(setState.getVal());
-				return true;
-			} else {
-				if (showLog)
-					Common.LOG.info("{} {} flow can not set to {} state!", instance, type, needState.name());
-				return false;
-			}
+		if (needState.equals(TASK_FLOW_SINGAL.Blank)
+				|| (FLOW_CONTROL_SINGAL.get(instance, L1seq, type).get() == needState.getVal())) {
+			FLOW_CONTROL_SINGAL.get(instance, L1seq, type).set(setState.getVal());
+			return true;
+		} else {
+			if (showLog)
+				Common.LOG.info("{} {} flow can not set to {} state!", instance, type, needState.name());
+			return false;
 		}
 	}
 

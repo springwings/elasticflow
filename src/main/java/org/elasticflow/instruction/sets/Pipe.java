@@ -24,8 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Pipe operation Instruction sets
- * It is an instruction code,Can only interpret calls
+ * Pipe operation Instruction sets It is an instruction code,Can only interpret
+ * calls
+ * 
  * @author chengwen
  * @version 1.0
  * @date 2018-10-26 09:25
@@ -35,8 +36,7 @@ public class Pipe extends Instruction {
 	private final static Logger log = LoggerFactory.getLogger("Pipe----");
 
 	/**
-	 * @param args
-	 *            parameter order is: String instanceId, String storeId
+	 * @param args parameter order is: String instanceId, String storeId
 	 */
 	public static void create(Context context, Object[] args) {
 		if (!isValid(2, args)) {
@@ -53,34 +53,33 @@ public class Pipe extends Instruction {
 		}
 
 	}
-	
+
 	/**
-	 * @param args
-	 *            parameter order is: Page page,ReaderFlowSocket RFS
-	 * @throws EFException 
+	 * @param args parameter order is: Page page,ReaderFlowSocket RFS
+	 * @throws EFException
 	 */
-	public static DataPage fetchPage(Context context, Object[] args) throws EFException { 
+	public static DataPage fetchPage(Context context, Object[] args) throws EFException {
 		if (!isValid(2, args)) {
 			log.error("instruction.set.Pipe.fetchPage parameter not match!");
 			return null;
 		}
-		TaskCursor page = (TaskCursor) args[0]; 
-		ReaderFlowSocket RFS = (ReaderFlowSocket) args[1]; 
+		TaskCursor page = (TaskCursor) args[0];
+		ReaderFlowSocket RFS = (ReaderFlowSocket) args[1];
 		long start = System.currentTimeMillis();
-		DataPage tmp = (DataPage) RFS.getPageData(page,context.getInstanceConfig().getPipeParams().getReadPageSize());	
-		RFS.flowStatistic.setLoad((long)((tmp.getData().size()*1000)/(start-RFS.lastGetPageTime)));		
+		DataPage tmp = (DataPage) RFS.getPageData(page, context.getInstanceConfig().getPipeParams().getReadPageSize());
+		RFS.flowStatistic.setLoad((long) ((tmp.getData().size() * 1000) / (start - RFS.lastGetPageTime)));
 		RFS.lastGetPageTime = start;
-		if(tmp.getData().size()>0)
-			RFS.flowStatistic.setPerformance((long) ((tmp.getData().size()*1000)/(System.currentTimeMillis()-start+1e-3)));
+		if (tmp.getData().size() > 0)
+			RFS.flowStatistic.setPerformance(
+					(long) ((tmp.getData().size() * 1000) / (System.currentTimeMillis() - start + 1e-3)));
 		RFS.flowStatistic.incrementCurrentTimeProcess(tmp.getData().size());
 		return (DataPage) tmp.clone();
-	} 
+	}
 
 	/**
-	 * @param args
-	 *            parameter order is: String jobType, String instance, String storeId,
-	 *            String L2seq, DataPage pageData, String info, boolean isUpdate,
-	 *            boolean monopoly
+	 * @param args parameter order is: String jobType, String instance, String
+	 *             storeId, String L2seq, DataPage pageData, String info, boolean
+	 *             isUpdate, boolean monopoly
 	 * @throws Exception
 	 */
 	public static PipererState writeDataSet(Context context, Object[] args) throws EFException {
@@ -97,78 +96,83 @@ public class Pipe extends Instruction {
 		String info = String.valueOf(args[5]);
 		boolean isUpdate = (boolean) args[6];
 		boolean monopoly = (boolean) args[7];
-		//Control the release of problematic connections
-		boolean freeConn = false; 
+		// Control the release of problematic connections
+		boolean freeConn = false;
 		WriterFlowSocket writer = context.getWriter();
-		if(dataPage.getData().size()>0) {
+		if (dataPage.getData().size() > 0) {
 			writer.PREPARE(monopoly, false);
-			if (!writer.connStatus()) { 
-				pstate.setInfo(instance+" writer connection is closed!");
+			if (!writer.connStatus()) {
+				pstate.setInfo(instance + " writer connection is closed!");
 				pstate.setStatus(false);
-				writer.releaseConn(monopoly,true); 
+				writer.releaseConn(monopoly, true);
 				return pstate;
 			}
-			if(writer.getWriteHandler()!=null)
-				dataPage = writer.getWriteHandler().handleData(context, dataPage);		
+			if (writer.getWriteHandler() != null)
+				dataPage = writer.getWriteHandler().handleData(context, dataPage);
 			DataSetReader DSReader = DataSetReader.getInstance(dataPage);
 			long start = System.currentTimeMillis();
 			int num = 0;
 			if (DSReader.status()) {
 				try {
-					while (DSReader.nextLine()) { 
+					while (DSReader.nextLine()) {
+						//virtualWrite write handler
 						writer.write(context.getInstanceConfig(),
-								DSReader.getLineData().virtualWrite(context.getInstanceConfig().getWriteFields()),//write field handler
+								DSReader.getLineData().virtualWrite(context.getInstanceConfig().getWriteFields()), 
 								instance, storeId, isUpdate);
 						num++;
 					}
 					pstate.setReaderScanStamp(DSReader.getScanStamp());
-					pstate.setCount(num);				
-					writer.flowStatistic.setLoad((long)((num*1000)/(start-writer.lastGetPageTime+1e-3)));		
+					pstate.setCount(num);
+					writer.flowStatistic.setLoad((long) ((num * 1000) / (start - writer.lastGetPageTime + 1e-3)));
 					writer.lastGetPageTime = start;
-					if(num>0)
-						writer.flowStatistic.setPerformance((long) ((num*1000)/(System.currentTimeMillis()-start+1e-3)));
+					if (num > 0)
+						writer.flowStatistic
+								.setPerformance((long) ((num * 1000) / (System.currentTimeMillis() - start + 1e-3)));
 					writer.flowStatistic.incrementCurrentTimeProcess(num);
 					context.getReader().flush();
-					writer.flush(); 
-					log.info(TaskUtil.formatLog("onepage",jobType + " Write", task.getInstanceProcessId(), 
-							storeId, task.getL2seq(), num,
-							DSReader.getDataBoundary(), DSReader.getScanStamp(), Common.getNow() - start, info));
+					writer.flush();
+					log.info(TaskUtil.formatLog("onepage", jobType + " Write", task.getInstanceProcessId(), storeId,
+							task.getL2seq(), num, DSReader.getDataBoundary(), DSReader.getScanStamp(),
+							Common.getNow() - start, info));
 				} catch (EFException e) {
-					if (e.getErrorType()==ETYPE.RESOURCE_ERROR) { 
+					if (e.getErrorType() == ETYPE.RESOURCE_ERROR) 
 						freeConn = true;
-					}
 					throw e;
-				} finally { 
-					DSReader.close(); 
-					writer.releaseConn(monopoly, freeConn); 
+				} finally {
+					DSReader.close();
+					writer.releaseConn(monopoly, freeConn);
 				}
 			} else {
-				if(context.getReader().isCached()) {
+				if (context.getReader().isCached()) {
 					context.getReader().flush();
-					context.getReader().setCached(false); 
-				} 
-				if(writer.isCached()) {
-					writer.flush(); 
+					context.getReader().setCached(false);
+				}
+				if (writer.isCached()) {
+					writer.flush();
 					writer.setCached(false);
-				} 
-				writer.releaseConn(monopoly, freeConn); 
-				pstate.setInfo(instance+" DSReader status is false!");
-				pstate.setStatus(false); 
+				}
+				writer.releaseConn(monopoly, freeConn);
+				pstate.setInfo(instance + " DSReader status is false!");
+				pstate.setStatus(false);
 			}
-		}else if (dataPage.getData().size()==0) {
-			//Prevent status from never being submitted 
-			if(context.getReader().isCached()) {
+		} else {
+			if (context.getInstanceConfig().getPipeParams().getLogLevel() == 0)
+				log.info(TaskUtil.formatLog("onepage", jobType + " Write", task.getInstanceProcessId(), storeId,
+						task.getL2seq(), 0, "", "", 0, info));
+
+			// Prevent status from never being submitted
+			if (context.getReader().isCached()) {
 				context.getReader().flush();
 				context.getReader().setCached(false);
-			} 
-			if(writer.isCached()) {
-				writer.PREPARE(monopoly, false); 
-				writer.flush(); 
+			}
+			if (writer.isCached()) {
+				writer.PREPARE(monopoly, false);
+				writer.flush();
 				writer.setCached(false);
-				writer.releaseConn(monopoly, freeConn);  
-			} 
+				writer.releaseConn(monopoly, freeConn);
+			}
 			return pstate;
-		} 
+		}
 		return pstate;
 	}
 }
