@@ -7,7 +7,6 @@
  */
 package org.elasticflow.param.end;
 
-
 /**
  * 
  * @author chengwen
@@ -15,47 +14,52 @@ package org.elasticflow.param.end;
  * @date 2018-01-22 09:08
  */
 public class SearcherParam {
-	
+
 	private String name = null;
 	private boolean includeLower = true;
 	private boolean includeUpper = true;
 	private String analyzer = "";
 	private float boost = 1.0f;
 	private String defaultValue = null;
+	/** Can integrate multiple fields for retrieval */
 	private String fields = null;
-	
+	/** Parameter type, used to determine the processing method for values */
+	private String paramtype;
+	/** Methods for handling parameters */
+	private String processtype = "";
+
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public String getAnalyzer() {
 		return analyzer;
 	}
-	
+
 	public void setAnalyzer(String analyzer) {
 		this.analyzer = analyzer;
 	}
-	
+
 	public float getBoost() {
 		return boost;
 	}
 
 	public void setBoost(String boost) {
 		this.boost = Float.valueOf(boost);
-	} 
-	
+	}
+
 	public String getDefaultValue() {
 		return this.defaultValue;
-	} 
+	}
 
 	public void setDefaultValue(String value) {
 		this.defaultValue = value;
-	} 
-	
+	}
+
 	public String getFields() {
 		return fields;
 	}
@@ -80,5 +84,24 @@ public class SearcherParam {
 	public void setIncludeUpper(String includeUpper) {
 		if (includeUpper.toLowerCase().equals("false"))
 			this.includeUpper = false;
+	}
+
+	public String getParamtype() {
+		if (this.paramtype == null) {
+			this.paramtype = "java.lang.String";
+		}
+		return this.paramtype;
+	}
+
+	public void setParamtype(String paramtype) {
+		this.paramtype = paramtype;
+	}
+
+	public String getProcesstype() {
+		return this.processtype;
+	}
+
+	public void setProcesstype(String processtype) {
+		this.processtype = processtype;
 	}
 }

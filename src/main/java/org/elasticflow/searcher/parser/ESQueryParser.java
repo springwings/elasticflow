@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.FIELD_PARSE_TYPE;
 import org.elasticflow.config.GlobalParam.QUERY_TYPE;
@@ -23,6 +24,7 @@ import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.DisMaxQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
+import org.elasticsearch.index.query.InnerHitBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
@@ -48,6 +50,8 @@ public class ESQueryParser implements QueryParser {
 	private final static Logger log = LoggerFactory.getLogger(ESQueryParser.class);
 
 	SearchSourceBuilder SSB;
+	
+	HighlightBuilder HLB;
 
 	public ESQueryParser() {
 		SSB = new SearchSourceBuilder();
@@ -70,6 +74,16 @@ public class ESQueryParser implements QueryParser {
 	@Override
 	public void parseQuery(InstanceConfig instanceConfig, SearcherModel<?> searcherModel) {
 		BoolQueryBuilder bquery = QueryBuilders.boolQuery();
+		if (searcherModel.getHighlightFields() != null) { 
+			HLB = new HighlightBuilder();
+			for (String field : searcherModel.getHighlightFields()) {
+				HighlightBuilder.Field _hField = new HighlightBuilder.Field(field);
+				_hField.preTags("<" + searcherModel.getHighlightTag() + ">")
+						.postTags("</" + searcherModel.getHighlightTag() + ">");
+				HLB.field(_hField);
+			}
+			SSB.highlighter(HLB);
+		}
 		try {
 			Map<String, Object> paramMap = searcherModel.efRequest.getParams();
 			Set<Entry<String, Object>> entries = paramMap.entrySet();
@@ -127,49 +141,56 @@ public class ESQueryParser implements QueryParser {
 					}
 					continue;
 				}
+
 				if (key.endsWith(GlobalParam.NOT_SUFFIX)) {
 					key = key.substring(0, key.length() - GlobalParam.NOT_SUFFIX.length());
 					occur = Occur.MUST_NOT;
 				}
-
+				// not special type key
 				EFField tp = instanceConfig.getWriteField(key);
 				SearcherParam sp = instanceConfig.getSearcherParam(key);
 				if ((tp == null && sp == null) || Common.isDefaultParam(key)) {
 					continue;
 				}
 				QueryBuilder query = null;
-				if (sp != null && sp.getFields() != null && sp.getFields().length() > 0)
-					query = buildMultiQuery(sp.getFields(), String.valueOf(value), instanceConfig,
-							searcherModel.efRequest, key, fuzzy);
-				else if (tp.getIndextype().contentEquals("dense_vector")) {
-					Map<String, Object> _params = new HashMap<>();
-					_params.put("query_vector", value);
-					Script script = new Script(ScriptType.INLINE, "painless",
-							"(cosineSimilarity(params.query_vector, doc['" + key + "']) + 1.0)", _params);
-					bquery.must(QueryBuilders.scriptScoreQuery(QueryBuilders.matchAllQuery(), script));
-				} else {
-					query = buildSingleQuery(tp.getAlias(), String.valueOf(value), tp, sp, searcherModel.efRequest, key,
-							fuzzy);
+				if (sp != null) {
+					if (sp.getFields() != null && sp.getFields().length() > 0)
+						query = buildMultiQuery(sp.getFields(), String.valueOf(value), instanceConfig,
+								searcherModel.efRequest, key, fuzzy);
+					if (sp.getProcesstype().equals("nested")) {  
+						int innersize = 5;
+						if(sp.getDefaultValue()!=null) 
+							innersize = Integer.parseInt(sp.getDefaultValue());
+						InnerHitBuilder innerHits = new InnerHitBuilder().setSize(innersize);  
+						if (searcherModel.getHighlightFields() != null)  
+							innerHits.setHighlightBuilder(HLB); 
+						BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
+								.must(QueryBuilders.matchQuery(sp.getName(), value));
+						query = QueryBuilders.nestedQuery(sp.getName().split("\\.")[0], boolQuery, ScoreMode.Max).innerHit(innerHits); 
+					}
+				} else if (tp != null) {
+					if (tp.getIndextype().contentEquals("dense_vector")) {
+						Map<String, Object> _params = new HashMap<>();
+						_params.put("query_vector", value);
+						Script script = new Script(ScriptType.INLINE, "painless",
+								"(cosineSimilarity(params.query_vector, doc['" + key + "']) + 1.0)", _params);
+						bquery.must(QueryBuilders.scriptScoreQuery(QueryBuilders.matchAllQuery(), script));
+					} else {
+						query = buildSingleQuery(tp.getAlias(), String.valueOf(value), tp, sp, searcherModel.efRequest,
+								key, fuzzy);
+					}
 				}
-				if (occur == Occur.MUST_NOT && query != null) {
-					bquery.mustNot(query);
-					continue;
-				} 
-				if (query != null)
-					bquery.must(query); 
+				if (query != null) {
+					if (occur == Occur.MUST_NOT) {
+						bquery.mustNot(query);
+					} else {
+						bquery.must(query);
+					}
+				}
 			}
 		} catch (Exception e) {
 			log.error("build es Boolean Query Exception", e);
-		}
-		if(searcherModel.getHighlightFields()!=null) {
-			HighlightBuilder HLB = new HighlightBuilder();
-			for(String field:searcherModel.getHighlightFields()) {
-				HighlightBuilder.Field _hField = new HighlightBuilder.Field(field); 
-				_hField.preTags("<"+searcherModel.getHighlightTag()+">").postTags("</"+searcherModel.getHighlightTag()+">");
-				HLB.field(_hField);  
-			} 
-			SSB.highlighter(HLB); 
-		}
+		} 
 		SSB.query(bquery);
 	}
 
@@ -198,11 +219,11 @@ public class ESQueryParser implements QueryParser {
 		if (bquery.hasClauses())
 			SSB.postFilter(bquery);
 	}
-	
+
 	public void customQueryParse(InstanceConfig instanceConfig, SearcherModel<?> searcherModel) {
-		if(searcherModel.getCustomQuery()!=null) {
+		if (searcherModel.getCustomQuery() != null) {
 			SSB.query(QueryBuilders.wrapperQuery(searcherModel.getCustomQuery().toJSONString()));
-		} 
+		}
 	}
 
 	static private void QueryBoost(QueryBuilder query, EFField tp, EFRequest request) throws Exception {
@@ -218,16 +239,16 @@ public class ESQueryParser implements QueryParser {
 			EFRequest request, String paramKey, int fuzzy) throws Exception {
 		if (value == null || (tp.getDefaultvalue() == null && value.length() <= 0) || tp == null)
 			return null;
-		boolean not_analyzed = tp.getAnalyzer().length() > 0 ? false : true;
+		boolean analyzed = tp.getAnalyzer().length() > 0 ? true : false;
 
-		if (!not_analyzed)
+		if (analyzed)
 			value = value.toLowerCase().trim();
 
 		BoolQueryBuilder bquery = QueryBuilders.boolQuery();
 		String[] values = value.split(",");
 		for (String v : values) {
 			QueryBuilder query = null;
-			if (!not_analyzed || fuzzy > 0) {
+			if (analyzed || fuzzy > 0) {
 				query = fieldParserQuery(key, String.valueOf(v), fuzzy);
 			} else if (tp.getParamtype().equals("org.elasticflow.field.handler.LongRangeType")) {
 				Long[] _v = (Long[]) Common.parseFieldValue(v, tp, FIELD_PARSE_TYPE.parse);
@@ -268,7 +289,7 @@ public class ESQueryParser implements QueryParser {
 		}
 		return ESSimpleQuery.getQuery();
 	}
-	 
+
 	static private QueryBuilder buildMultiQuery(String multifield, String value, InstanceConfig instanceConfig,
 			EFRequest request, String paramKey, int fuzzy) throws Exception {
 		DisMaxQueryBuilder bquery = null;

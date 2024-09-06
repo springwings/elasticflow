@@ -1,8 +1,17 @@
+/*
+ * Copyright ElasticFlow B.V. and/or licensed to ElasticFlow B.V. under one
+ * or more contributor license agreements. Licensed under the ElasticFlow License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the ElasticFlow License 2.0 or the Server
+ * Side Public License, v 1.
+ */
 package org.elasticflow.searcher.flow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.END_TYPE;
@@ -31,6 +40,7 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortBuilder;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 /**
@@ -42,7 +52,7 @@ import com.alibaba.fastjson.JSONObject;
  * @modify 2023-05-26 09:23
  */
 public final class ElasticsearchSearcher extends SearcherFlowSocket {
-	
+
 	public static boolean crossSubtasks = true;
 
 	public static ElasticsearchSearcher getInstance(ConnectParams connectParams) {
@@ -109,10 +119,30 @@ public final class ElasticsearchSearcher extends SearcherFlowSocket {
 		res.setTotalHit(searchHits.getTotalHits().value);
 		SearchHit[] hits = searchHits.getHits();
 
-		for (SearchHit SH : hits) { 
+		for (SearchHit SH : hits) {
+			Map<String, SearchHits> innerhits = SH.getInnerHits();
 			Map<String, DocumentField> fieldMap = SH.getFields();
 			ResponseDataUnit u = ResponseDataUnit.getInstance();
 			u.addObject(GlobalParam.RESPONSE_SCORE, SH.getScore());
+			if (innerhits != null) {
+				JSONObject _innerhits = new JSONObject();
+				for (Map.Entry<String, SearchHits> inner : innerhits.entrySet()) {
+					JSONArray innerdocs = new JSONArray();
+					for (SearchHit _ish : inner.getValue().getHits()) {
+						Map<String, HighlightField> _HfieldMap = _ish.getHighlightFields();
+						JSONObject row = new JSONObject();
+						row.put("_score", _ish.getScore());
+						Map<String, Object> _source = _ish.getSourceAsMap();
+						for (Map.Entry<String, HighlightField> entry : _HfieldMap.entrySet())
+							_source.put(entry.getKey(), Arrays.stream(entry.getValue().getFragments()).map(Text::string)
+									.collect(Collectors.joining()));
+						row.put("_source", _source);
+						innerdocs.add(row);
+					}
+					_innerhits.put(inner.getKey(), innerdocs);
+				}
+				u.addObject("innerhits", _innerhits);
+			}
 			Map<String, HighlightField> HfieldMap = SH.getHighlightFields();
 			for (Map.Entry<String, DocumentField> e : fieldMap.entrySet()) {
 				String name = e.getKey();
@@ -135,7 +165,7 @@ public final class ElasticsearchSearcher extends SearcherFlowSocket {
 			}
 			if (searcherModel.isShowQueryInfo()) {
 				u.addObject(GlobalParam.RESPONSE_EXPLAINS, SH.getExplanation().toString().replace("", ""));
-			} 
+			}
 			res.getUnitSet().add(u);
 		}
 
@@ -165,12 +195,13 @@ public final class ElasticsearchSearcher extends SearcherFlowSocket {
 			List<String> returnFields, String instance, SearcherResult res) throws Exception {
 		SearchRequest searchRequest = new SearchRequest(instance);
 		ESQueryParser ESP = new ESQueryParser();
-		if(searcherModel.getCustomQuery()!=null) {
-			ESP.getSSB().query(org.elasticsearch.index.query.QueryBuilders.wrapperQuery(searcherModel.getCustomQuery().toJSONString()));
-		}else {
+		if (searcherModel.getCustomQuery() != null) {
+			ESP.getSSB().query(org.elasticsearch.index.query.QueryBuilders
+					.wrapperQuery(searcherModel.getCustomQuery().toJSONString()));
+		} else {
 			ESP.parseQuery(instanceConfig, searcherModel);
 		}
-		
+
 		ESP.parseFilter(instanceConfig, searcherModel);
 		ESP.customQueryParse(instanceConfig, searcherModel);
 		ESP.getSSB().size(searcherModel.getCount());

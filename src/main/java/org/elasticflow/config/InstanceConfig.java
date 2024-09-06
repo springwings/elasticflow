@@ -282,7 +282,7 @@ public class InstanceConfig {
 			params = (Element) dataflow.getElementsByTagName("SearcherParam").item(0);
 			if (params != null) {
 				paramlist = params.getElementsByTagName("param");
-				parseNode(paramlist, "SearchParam", SearcherParam.class);
+				parseNode(paramlist, "searcherParam", SearcherParam.class);
 			}
 
 		}
@@ -290,7 +290,7 @@ public class InstanceConfig {
 	
 	private void addField(String name,EFField field,Map<String, EFField> container) {
 		if(container.containsKey(name)) {
-			Common.LOG.warn("{} duplicate field {} definitions",this.instanceID,name);
+			Common.LOG.warn("{} duplicate field {} definitions!",this.configPath,name);
 		}else {
 			container.put(name, field);
 		}
@@ -332,7 +332,7 @@ public class InstanceConfig {
 					case "readerParam":
 						Common.getXmlParam(readerParams, param, c);
 						break;
-					case "SearcherParam":
+					case "searcherParam":
 						SearcherParam v = (SearcherParam) Common.getXmlObj(param, c);
 						searcherParams.put(v.getName(), v);
 						break;
