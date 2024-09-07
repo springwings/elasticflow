@@ -335,7 +335,7 @@ public class ParagraphSummaryHandler extends ComputerHandler {
 	 * @throws EFException
 	 */
 	private JSONObject sentRequest(JSONObject post_data, String api) throws EFException {
-		EFHttpResponse response = EFHttpClientUtil.process(api, post_data.toString(),600);
+		EFHttpResponse response = EFHttpClientUtil.process(api, post_data.toString(),900);
 		try {
 			if (response.isSuccess()) {
 				return JSONObject.parseObject(response.getPayload());
