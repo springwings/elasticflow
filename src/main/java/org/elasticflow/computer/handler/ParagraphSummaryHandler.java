@@ -14,9 +14,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -160,19 +160,21 @@ public class ParagraphSummaryHandler extends ComputerHandler {
 					long start = 0, start2 = 0;
 					if (GlobalParam.DEBUG)
 						start = Common.getNow();
-					tmp = this.sentRequest(postObjects, api);
+					tmp = this.sentRequest(postObjects, api); 
 					if (GlobalParam.DEBUG)
 						start2 = Common.getNow();
 					apiBlockingQueue.put(api);
-					if (tmp.getInteger("status") != 0) {// response status check
-						RS.flowStatistic.incrementCurrentTimeFailProcess(count.get());
-						log.warn(context.getInstanceConfig().getInstanceID() + " predict warn.");
-						log.warn(postObjects.toJSONString());
-						log.warn(tmp.toJSONString());
-					} else {
-						this.write(context, tmp, (JSONObject) dts.get(1), responseParams,
-								(ArrayList<JSONObject>) dts.get(2), RS);
-					}
+					if (tmp != null) {
+						if (tmp.getInteger("status") != 0) {// response status check
+							RS.flowStatistic.incrementCurrentTimeFailProcess(count.get());
+							log.warn(context.getInstanceConfig().getInstanceID() + " predict warn.");
+							log.warn(postObjects.toJSONString());
+							log.warn(tmp.toJSONString());
+						} else {
+							this.write(context, tmp, (JSONObject) dts.get(1), responseParams,
+									(ArrayList<JSONObject>) dts.get(2), RS);
+						}
+					}  
 					if (GlobalParam.DEBUG)
 						log.info("{} use {}s, process {}s", api, start2 - start, Common.getNow() - start2);
 				} else {
@@ -222,10 +224,10 @@ public class ParagraphSummaryHandler extends ComputerHandler {
 			JSONObject row = keepDatas.get(i);
 			JSONArray sums = new JSONArray();
 			if (summarys.size() > 0) {				
-				for(int j=0;j<summarys.size();j++) {
+				for(int j=0;j<summarys.size();j++) { 
 					JSONObject _row = new JSONObject();
-					_row.put("id", row.getIntValue("id")*1000+j);
-					_row.put("clue", summarys.get(j));
+					_row.put("id", summarys.getJSONArray(i).get(0));
+					_row.put("clue", summarys.getJSONArray(i).get(1));
 					sums.add(_row);
 				}
 			}
@@ -340,7 +342,8 @@ public class ParagraphSummaryHandler extends ComputerHandler {
 			if (response.isSuccess()) {
 				return JSONObject.parseObject(response.getPayload());
 			} else {
-				throw new EFException(response.getInfo(), ELEVEL.Dispose);
+				log.warn(response.getInfo());
+				return null;
 			}
 		} catch (Exception e) {
 			log.error("send request exception",e);

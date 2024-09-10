@@ -66,7 +66,7 @@ public class OracleConnection extends EFConnectionSocket<Connection> {
 	@Override
 	public boolean status() {
 		try {
-			if (this.conn != null && !this.conn.isClosed()) {
+			if (this.conn != null && !this.conn.isClosed() && this.conn.isValid(2)) {
 				return true;
 			}
 		} catch (Exception e) {

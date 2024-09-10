@@ -129,7 +129,7 @@ public class MysqlReader extends ReaderFlowSocket{
 				while (rs.next()) {
 					page.push(rs.getString("id"));
 				}
-			} 
+			}  
 		}catch(SQLException e){
 			page = null; 
 			throw new EFException(e,sql);
