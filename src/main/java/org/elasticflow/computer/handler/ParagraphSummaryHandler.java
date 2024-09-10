@@ -226,8 +226,8 @@ public class ParagraphSummaryHandler extends ComputerHandler {
 			if (summarys.size() > 0) {				
 				for(int j=0;j<summarys.size();j++) { 
 					JSONObject _row = new JSONObject();
-					_row.put("id", summarys.getJSONArray(i).get(0));
-					_row.put("clue", summarys.getJSONArray(i).get(1));
+					_row.put("id", summarys.getJSONArray(j).get(0));
+					_row.put("clue", summarys.getJSONArray(j).get(1));
 					sums.add(_row);
 				}
 			}
