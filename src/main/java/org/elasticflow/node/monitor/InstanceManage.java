@@ -575,10 +575,7 @@ public class InstanceManage {
 				try {
 					if (runType.equals("-1"))
 						runType = String
-								.valueOf(Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType());
-					EFFileUtil.deleteFile(EFFileUtil.getInstancePath(instance)[0]);
-					EFFileUtil.deleteFile(EFFileUtil.getInstancePath(instance)[1]);
-					EFFileUtil.deleteFile(EFFileUtil.getInstancePath(instance)[3]);
+								.valueOf(Resource.nodeConfig.getInstanceConfigs().get(instance).getInstanceType()); 
 					EFMonitorUtil.reloadInstance(instance, reset, runType);
 					this.NM.setResponse(RESPONSE_STATUS.Success,
 							RR.getStringParam("instance") + " reload instance settings success!", null);
@@ -601,7 +598,10 @@ public class InstanceManage {
 				String val = "0";
 				if (RR.getParams().get("set_value") != null)
 					val = RR.getStringParam("set_value");
-				String[] L1seqs = EFMonitorUtil.getInstanceL1seqs(instance);
+				String[] L1seqs = EFMonitorUtil.getInstanceL1seqs(instance);  
+				EFFileUtil.deleteFile(EFFileUtil.getInstancePath(instance)[0]);
+				EFFileUtil.deleteFile(EFFileUtil.getInstancePath(instance)[1]);
+				EFFileUtil.deleteFile(EFFileUtil.getInstancePath(instance)[3]);
 				for (String L1seq : L1seqs) {
 					GlobalParam.TASK_COORDER.batchUpdateSeqPos(instance, val, false);
 					GlobalParam.TASK_COORDER.saveTaskInfo(instance, L1seq,
@@ -619,7 +619,7 @@ public class InstanceManage {
 						Resource.flowStates.get(instance).put(FlowStatistic.getStoreKey(L1seq),
 								EFMonitorUtil.getPipeEndStatus(instance, L1seq));
 					}
-				}
+				} 
 				EFFileUtil.createAndSave(Resource.flowStates.get(instance).toJSONString(),
 						EFFileUtil.getInstancePath(instance)[3]);
 				this.NM.setResponse(RESPONSE_STATUS.Success, RR.getStringParam("instance") + " reset Success!", null);
