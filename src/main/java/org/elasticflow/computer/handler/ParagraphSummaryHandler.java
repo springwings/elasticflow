@@ -343,6 +343,10 @@ public class ParagraphSummaryHandler extends ComputerHandler {
 				return JSONObject.parseObject(response.getPayload());
 			} else {
 				log.warn(response.getInfo());
+				if(response.getInfo().contains("timed out")) {
+					log.warn("system try to sleep 20s!");
+					Thread.sleep(1000*20);
+				}
 				return null;
 			}
 		} catch (Exception e) {
