@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import org.apache.http.client.config.RequestConfig;
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.ELEVEL;
 import org.elasticflow.config.GlobalParam.END_TYPE;
@@ -256,9 +257,14 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 		try {
 			ForceMergeRequest request = new ForceMergeRequest(name);
 			request.maxNumSegments(maxNumSegments);
-			request.flush(true);
-			ForceMergeResponse response = getESC().getClient().indices().forcemerge(request, RequestOptions.DEFAULT);
-
+			request.flush(true); 
+			RequestOptions options = RequestOptions.DEFAULT.toBuilder()
+				    .setRequestConfig(RequestConfig.custom()
+				        .setSocketTimeout(120000)  
+				        .setConnectTimeout(120000)  
+				        .build())
+				    .build();
+			ForceMergeResponse response = getESC().getClient().indices().forcemerge(request, options); 
 			int failed_cnt = response.getFailedShards();
 			if (failed_cnt > 0) {
 				log.warn("ElasticSearch instance {} optimize failed,Failed Shards:",instance,failed_cnt);
