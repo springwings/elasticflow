@@ -226,8 +226,8 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 				CreateIndexRequest _CIR = new CreateIndexRequest(indexName);  
 				ObjectMapper objectMapper = new ObjectMapper();
 				String mappingJson = objectMapper.writeValueAsString(this.getSettingMap(instanceConfig));
-				if(instanceConfig.getWriterParams().getStorageStructure().size()>0) {
-					JSONObject jo = instanceConfig.getWriterParams().getStorageStructure(); 
+				JSONObject jo = instanceConfig.getWriterParams().getStorageStructure(); 
+				if(jo.size()>0) { 
 					if(jo.containsKey("mappings")) {
 						JSONObject defineObject = JSONObject.parseObject(mappingJson).getJSONObject("properties");
 						defineObject.putAll(jo.getJSONObject("mappings").getJSONObject("properties"));  
@@ -236,8 +236,19 @@ public class ElasticsearchWriter extends WriterFlowSocket {
 					} else if(jo.containsKey("settings")) { 
 						jo.put("mappings", JSONObject.parseObject(mappingJson));
 						mappingJson = jo.toJSONString();
+					}else {
+						JSONObject jsonObject = new JSONObject();
+						jsonObject.put("settings", jo);
+						jsonObject.put("mappings", JSONObject.parseObject(mappingJson));
+						mappingJson = jsonObject.toJSONString();
 					}
-				} 
+				}else {
+					JSONObject settingJsonObject = new JSONObject();
+					settingJsonObject.put("number_of_replicas", "0");
+					jo.put("settings", settingJsonObject);
+					jo.put("mappings", JSONObject.parseObject(mappingJson));
+					mappingJson = jo.toJSONString();
+				}
 				_CIR.source(mappingJson, XContentType.JSON);	 
 				CreateIndexResponse createIndexResponse = getESC().getClient().indices().create(_CIR,
 						RequestOptions.DEFAULT);
