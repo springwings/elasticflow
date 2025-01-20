@@ -36,6 +36,8 @@ import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortBuilder;
 
@@ -100,6 +102,7 @@ public final class ElasticsearchSearcher extends SearcherFlowSocket {
 					res.setStat(jo);
 				}
 			} catch (Exception e) {
+				e.printStackTrace();
 				clearConn = true;
 				if (ESC != null) {
 					throw Common.convertException(e, this.poolName);
@@ -211,6 +214,16 @@ public final class ElasticsearchSearcher extends SearcherFlowSocket {
 			for (SortBuilder<?> s : sortFields) {
 				ESP.getSSB().sort(s);
 			}
+		Map<String, String[]> facetFields = searcherModel.getFacetParams();
+		if (facetFields.size()>0){
+			if(facetFields.containsKey("term")){
+				TermsAggregationBuilder aggregation = AggregationBuilders
+						.terms(facetFields.get("term")[0])
+						.field(facetFields.get("term")[1])
+						.size(Integer.parseInt(searcherModel.getFacetExtParams().get("size")));
+				ESP.getSSB().aggregation(aggregation);
+			}
+		}
 		ESP.getSSB().storedFields(returnFields);
 		if (searcherModel.isShowQueryInfo()) {
 			res.setQueryDetail(JSON.parse(ESP.getSSB().toString()));

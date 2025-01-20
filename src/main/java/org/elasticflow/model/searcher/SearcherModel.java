@@ -1,6 +1,8 @@
 package org.elasticflow.model.searcher;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.elasticflow.model.EFRequest;
 
@@ -61,7 +63,27 @@ public abstract class SearcherModel<T1> {
 	 * search processor
 	 */
 	private String requesthandler;
-	
+
+	private Map<String, String[]> FacetParams = new HashMap<>();
+
+	private Map<String, String> FacetExtParams = new HashMap<>();
+
+	public Map<String, String[]> getFacetParams() {
+		return FacetParams;
+	}
+
+	public Map<String, String> getFacetExtParams() {
+		return FacetExtParams;
+	}
+
+	public void setFacetParams(Map<String, String[]> facetParams) {
+		this.FacetParams = facetParams;
+	}
+
+	public void setFacetExtParams(Map<String, String> facetExtParams) {
+		FacetExtParams = facetExtParams;
+	}
+
 	/**
 	 * Aggregate search parameters
 	 */

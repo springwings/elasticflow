@@ -1,23 +1,12 @@
 package org.elasticflow.util.instance;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.elasticflow.config.GlobalParam;
 import org.elasticflow.config.GlobalParam.KEY_PARAM;
 import org.elasticflow.config.InstanceConfig;
-import org.elasticflow.field.EFField;
 import org.elasticflow.model.EFRequest;
 import org.elasticflow.model.searcher.SearcherModel;
-import org.elasticflow.param.end.SearcherParam;
-import org.elasticsearch.common.geo.GeoPoint;
-import org.elasticsearch.script.Script;
-import org.elasticsearch.search.sort.ScriptSortBuilder.ScriptSortType;
-import org.elasticsearch.search.sort.SortBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
 
 /**
  * User search parameter processing auxiliary tool
@@ -67,108 +56,36 @@ public class SearchParamUtil {
 			SM.setFl((String) request.getParam(GlobalParam.PARAM_FL)); 
 		if (request.getParams().containsKey(GlobalParam.PARAM_REQUEST_HANDLER))
 			SM.setRequestHandler((String) request.getParam(GlobalParam.PARAM_REQUEST_HANDLER));
-	}
+		if (request.getParams().containsKey(GlobalParam.PARAM_FACET)){
+			SM.setFacetParams(getFacetParams(request,instanceConfig));
+			HashMap<String, String> FacetExtParams = new HashMap<String, String>(){ 
+				private static final long serialVersionUID = -2451479900949006503L;
 
-	public static List<SortBuilder<?>> getSortField(EFRequest request, InstanceConfig instanceConfig) {
-		String sortstrs = (String) request.getParam(KEY_PARAM.sort.name());
-		List<SortBuilder<?>> sortList = new ArrayList<SortBuilder<?>>();
-		boolean useScore = false;
-		if (sortstrs != null && sortstrs.length() > 0) {
-			boolean reverse = false;
-			String[] sortArr = sortstrs.split(",");
-			String fieldname = "";
-			for (String str : sortArr) {
-				str = str.trim();
-				if (str.endsWith(GlobalParam.SORT_DESC)) {
-					reverse = true;
-					fieldname = str.substring(0, str.indexOf(GlobalParam.SORT_DESC));
-				} else if (str.endsWith(GlobalParam.SORT_ASC)) {
-					reverse = false;
-					fieldname = str.substring(0, str.indexOf(GlobalParam.SORT_ASC));
-				} else {
-					reverse = false;
-					fieldname = str;
-				}
-
-				switch (fieldname) {
-				case GlobalParam.PARAM_FIELD_SCORE:
-					sortList.add(SortBuilders.scoreSort().order(reverse ? SortOrder.DESC : SortOrder.ASC));
-					useScore = true;
-					break;
-				case GlobalParam.PARAM_FIELD_RANDOM:
-					sortList.add(SortBuilders.scriptSort(new Script("random()"), ScriptSortType.NUMBER));
-					break;
-				default:
-					EFField checked;
-					SearcherParam sp;
-					if (instanceConfig.getWriteField(fieldname) != null
-							&& instanceConfig.getWriteField(fieldname).getIndextype().equals("geo_point")) {
-						String _tmp = (String) request.getParam(fieldname);
-						String[] _geo = _tmp.split(":");
-						sortList.add(SortBuilders
-								.geoDistanceSort(fieldname,
-										new GeoPoint(Double.parseDouble(_geo[0]), Double.parseDouble(_geo[0])))
-								.order(reverse ? SortOrder.DESC : SortOrder.ASC));
-						break;
-					}
-					if ((checked = instanceConfig.getWriteField(fieldname)) != null) {
-						sortList.add(SortBuilders.fieldSort(checked.getAlias())
-								.order(reverse ? SortOrder.DESC : SortOrder.ASC));
-					} else if ((sp = instanceConfig.getSearcherParam(fieldname)) != null) {
-						String fields = sp.getFields();
-						if (fields != null) {
-							for (String k : fields.split(",")) {
-								sortList.add(SortBuilders.fieldSort(k).order(reverse ? SortOrder.DESC : SortOrder.ASC));
-							}
-						}
-					} else if (fieldname.equals(GlobalParam.DEFAULT_FIELD)) {
-						sortList.add(SortBuilders.fieldSort(fieldname).order(reverse ? SortOrder.DESC : SortOrder.ASC));
-					}
-					break;
-				}
+			{
+				put("size","10");
+			}};
+			SM.setFacetExtParams(FacetExtParams);
+			if (request.getParams().containsKey(GlobalParam.PARAM_FACET_EXT)){
+				String[] tmp = request.getStringParam(GlobalParam.PARAM_FACET_EXT).split(",");
+				FacetExtParams.put("size",tmp[0].split(":")[1]);
+				FacetExtParams.put("order",tmp[1].split(":")[1]);
 			}
 		}
-		if (!useScore)
-			sortList.add(SortBuilders.scoreSort().order(SortOrder.DESC));
-		return sortList;
 	}
 
 	/**
-	 * main:funciton:field,son:function:field#new_main:funciton:field
+	 * facet=函数:返回名称:字段名,函数:返回名称:字段名
 	 * 
 	 * @param rq
-	 * @param prs
+	 * @param instanceConfig
 	 * @return
 	 */
-	public static Map<String, List<String[]>> getFacetParams(EFRequest rq, InstanceConfig prs) {
-		Map<String, List<String[]>> res = new LinkedHashMap<String, List<String[]>>();
-		if (rq.getParam("facet") != null) {
-			for (String pair : ((String) rq.getParams().get("facet")).split("#")) {
-				String[] tmp = pair.split(",");
-				List<String[]> son = new ArrayList<>();
-				for (String str : tmp) {
-					String[] tp = str.split(":");
-					if (tp.length > 3) {
-						String[] tp2 = { "", "", "" };
-						for (int i = 0; i < tp.length; i++) {
-							if (i < 2) {
-								tp2[i] = tp[i];
-							} else {
-								if (tp2[2].length() > 0) {
-									tp2[2] = tp2[2] + ":" + tp[i];
-								} else {
-									tp2[2] = tp[i];
-								}
-
-							}
-						}
-						son.add(tp2);
-					} else {
-						son.add(tp);
-					}
-
-				}
-				res.put(tmp[0].split(":")[0], son);
+	private static Map<String, String[]> getFacetParams(EFRequest request, InstanceConfig instanceConfig) {
+		Map<String, String[]> res = new HashMap<String, String[]>();
+		if (request.getParam("facet") != null) {
+			for (String pair : ((String) request.getParams().get("facet")).split(",")) { 
+				String[] tp = pair.split(":"); 
+				res.put(tp[0], tp);
 			}
 		}
 		return res;
