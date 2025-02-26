@@ -445,15 +445,15 @@
 		<spring.version>5.3.20</spring.version>
 		<quartz.version>2.3.2</quartz.version>
 		<log4j.version>2.17.1</log4j.version>
-		<kafka.version>3.0.0</kafka.version>
+		<kafka.version>3.7.1</kafka.version>
 		<rocketmq.version>4.9.0</rocketmq.version>
 		<elasticsearch.version>7.13.4</elasticsearch.version>
 		<minio.version>8.5.8</minio.version>
-		<mysql.version>8.0.28</mysql.version>
+		<mysql.version>8.0.33</mysql.version>
 		<neo4j.version>3.5.1</neo4j.version>
 		<fastdfs.version>1.29-SNAPSHOT</fastdfs.version>
 		<hadoop.version>3.1.1</hadoop.version>
-		<commons-io.version>2.9.0</commons-io.version>
+		<commons-io.version>2.14.0</commons-io.version>
 		<fastjson.version>2.0.7.graal</fastjson.version>
 	</properties>
 </project>
